@@ -1,0 +1,1757 @@
+{
+  "1": {
+    "Id": 1,
+    "NameId": 2836,
+    "DescriptionId": 2837,
+    "Type": 1,
+    "Icon": 1334,
+    "BadgeImageSet": 19,
+    "ButtonImageSet": 21,
+    "AbilityBgImageSet": 4,
+    "Hint": 0,
+    "MembersOnly": false,
+    "Trial": false,
+    "Unknown12": 0,
+    "Unknown13": 0,
+    "ProfileItemClasses": {
+      "1": {
+        "Class": 1,
+        "Unknown": 3
+      },
+      "69": {
+        "Class": 69,
+        "Unknown": 1
+      },
+      "72": {
+        "Class": 72,
+        "Unknown": 5
+      },
+      "143": {
+        "Class": 143,
+        "Unknown": 3
+      },
+      "144": {
+        "Class": 144,
+        "Unknown": 1
+      },
+      "145": {
+        "Class": 145,
+        "Unknown": 0
+      },
+      "146": {
+        "Class": 146,
+        "Unknown": 0
+      },
+      "147": {
+        "Class": 147,
+        "Unknown": 0
+      },
+      "148": {
+        "Class": 148,
+        "Unknown": 0
+      },
+      "149": {
+        "Class": 149,
+        "Unknown": 0
+      },
+      "150": {
+        "Class": 150,
+        "Unknown": 0
+      },
+      "153": {
+        "Class": 153,
+        "Unknown": 0
+      },
+      "154": {
+        "Class": 154,
+        "Unknown": 0
+      },
+      "155": {
+        "Class": 155,
+        "Unknown": 0
+      },
+      "156": {
+        "Class": 156,
+        "Unknown": 0
+      },
+      "157": {
+        "Class": 157,
+        "Unknown": 0
+      },
+      "158": {
+        "Class": 158,
+        "Unknown": 0
+      },
+      "160": {
+        "Class": 160,
+        "Unknown": 0
+      },
+      "161": {
+        "Class": 161,
+        "Unknown": 0
+      },
+      "162": {
+        "Class": 162,
+        "Unknown": 3
+      },
+      "168": {
+        "Class": 168,
+        "Unknown": 0
+      },
+      "173": {
+        "Class": 173,
+        "Unknown": 0
+      },
+      "179": {
+        "Class": 179,
+        "Unknown": 3
+      },
+      "180": {
+        "Class": 180,
+        "Unknown": 0
+      },
+      "181": {
+        "Class": 181,
+        "Unknown": 3
+      },
+      "182": {
+        "Class": 182,
+        "Unknown": 3
+      },
+      "999": {
+        "Class": 999,
+        "Unknown": 0
+      }
+    },
+    "DefaultItems": []
+  },
+  "2": {
+    "Id": 2,
+    "NameId": 3100,
+    "DescriptionId": 3101,
+    "Type": 2,
+    "Icon": 1342,
+    "BadgeImageSet": 10,
+    "ButtonImageSet": 1,
+    "AbilityBgImageSet": 3,
+    "Hint": 384179,
+    "MembersOnly": false,
+    "Trial": true,
+    "Unknown12": 4,
+    "Unknown13": 0,
+    "ProfileItemClasses": {
+      "2": {
+        "Class": 2,
+        "Unknown": 5
+      },
+      "6": {
+        "Class": 6,
+        "Unknown": 5
+      },
+      "29": {
+        "Class": 29,
+        "Unknown": 5
+      },
+      "30": {
+        "Class": 30,
+        "Unknown": 5
+      },
+      "44": {
+        "Class": 44,
+        "Unknown": 5
+      },
+      "50": {
+        "Class": 50,
+        "Unknown": 3
+      },
+      "54": {
+        "Class": 54,
+        "Unknown": 5
+      },
+      "69": {
+        "Class": 69,
+        "Unknown": 1
+      },
+      "144": {
+        "Class": 144,
+        "Unknown": 0
+      },
+      "145": {
+        "Class": 145,
+        "Unknown": 0
+      },
+      "146": {
+        "Class": 146,
+        "Unknown": 0
+      },
+      "150": {
+        "Class": 150,
+        "Unknown": 0
+      },
+      "151": {
+        "Class": 151,
+        "Unknown": 0
+      },
+      "153": {
+        "Class": 153,
+        "Unknown": 0
+      },
+      "154": {
+        "Class": 154,
+        "Unknown": 0
+      },
+      "155": {
+        "Class": 155,
+        "Unknown": 0
+      },
+      "156": {
+        "Class": 156,
+        "Unknown": 0
+      },
+      "158": {
+        "Class": 158,
+        "Unknown": 0
+      },
+      "161": {
+        "Class": 161,
+        "Unknown": 0
+      },
+      "162": {
+        "Class": 162,
+        "Unknown": 0
+      },
+      "168": {
+        "Class": 168,
+        "Unknown": 0
+      },
+      "173": {
+        "Class": 173,
+        "Unknown": 0
+      },
+      "179": {
+        "Class": 179,
+        "Unknown": 1
+      },
+      "999": {
+        "Class": 999,
+        "Unknown": 0
+      }
+    },
+    "DefaultItems": [
+      19522,
+      19431,
+      19197,
+      19787,
+      19253,
+      75091
+    ]
+  },
+  "4": {
+    "Id": 4,
+    "NameId": 3237,
+    "DescriptionId": 3238,
+    "Type": 3,
+    "Icon": 1339,
+    "BadgeImageSet": 11,
+    "ButtonImageSet": 2,
+    "AbilityBgImageSet": 4,
+    "Hint": 384184,
+    "MembersOnly": false,
+    "Trial": true,
+    "Unknown12": 4,
+    "Unknown13": 0,
+    "ProfileItemClasses": {
+      "3": {
+        "Class": 3,
+        "Unknown": 5
+      },
+      "48": {
+        "Class": 48,
+        "Unknown": 5
+      },
+      "60": {
+        "Class": 60,
+        "Unknown": 3
+      },
+      "65": {
+        "Class": 65,
+        "Unknown": 5
+      },
+      "66": {
+        "Class": 66,
+        "Unknown": 5
+      },
+      "67": {
+        "Class": 67,
+        "Unknown": 3
+      },
+      "69": {
+        "Class": 69,
+        "Unknown": 1
+      },
+      "144": {
+        "Class": 144,
+        "Unknown": 0
+      },
+      "145": {
+        "Class": 145,
+        "Unknown": 0
+      },
+      "146": {
+        "Class": 146,
+        "Unknown": 0
+      },
+      "150": {
+        "Class": 150,
+        "Unknown": 0
+      },
+      "153": {
+        "Class": 153,
+        "Unknown": 0
+      },
+      "154": {
+        "Class": 154,
+        "Unknown": 0
+      },
+      "155": {
+        "Class": 155,
+        "Unknown": 0
+      },
+      "156": {
+        "Class": 156,
+        "Unknown": 0
+      },
+      "158": {
+        "Class": 158,
+        "Unknown": 0
+      },
+      "161": {
+        "Class": 161,
+        "Unknown": 0
+      },
+      "162": {
+        "Class": 162,
+        "Unknown": 0
+      },
+      "168": {
+        "Class": 168,
+        "Unknown": 0
+      },
+      "173": {
+        "Class": 173,
+        "Unknown": 0
+      },
+      "999": {
+        "Class": 999,
+        "Unknown": 0
+      }
+    },
+    "DefaultItems": [
+      13137,
+      12827,
+      13197,
+      13317,
+      12957
+    ]
+  },
+  "11": {
+    "Id": 11,
+    "NameId": 2278,
+    "DescriptionId": 2279,
+    "Type": 2,
+    "Icon": 1340,
+    "BadgeImageSet": 13,
+    "ButtonImageSet": 9,
+    "AbilityBgImageSet": 15,
+    "Hint": 384185,
+    "MembersOnly": false,
+    "Trial": false,
+    "Unknown12": 0,
+    "Unknown13": 0,
+    "ProfileItemClasses": {
+      "7": {
+        "Class": 7,
+        "Unknown": 5
+      },
+      "20": {
+        "Class": 20,
+        "Unknown": 5
+      },
+      "27": {
+        "Class": 27,
+        "Unknown": 5
+      },
+      "28": {
+        "Class": 28,
+        "Unknown": 5
+      },
+      "43": {
+        "Class": 43,
+        "Unknown": 1
+      },
+      "50": {
+        "Class": 50,
+        "Unknown": 3
+      },
+      "53": {
+        "Class": 53,
+        "Unknown": 5
+      },
+      "69": {
+        "Class": 69,
+        "Unknown": 1
+      },
+      "144": {
+        "Class": 144,
+        "Unknown": 0
+      },
+      "145": {
+        "Class": 145,
+        "Unknown": 0
+      },
+      "146": {
+        "Class": 146,
+        "Unknown": 0
+      },
+      "150": {
+        "Class": 150,
+        "Unknown": 0
+      },
+      "152": {
+        "Class": 152,
+        "Unknown": 0
+      },
+      "153": {
+        "Class": 153,
+        "Unknown": 0
+      },
+      "154": {
+        "Class": 154,
+        "Unknown": 0
+      },
+      "155": {
+        "Class": 155,
+        "Unknown": 0
+      },
+      "156": {
+        "Class": 156,
+        "Unknown": 0
+      },
+      "158": {
+        "Class": 158,
+        "Unknown": 0
+      },
+      "161": {
+        "Class": 161,
+        "Unknown": 0
+      },
+      "162": {
+        "Class": 162,
+        "Unknown": 0
+      },
+      "168": {
+        "Class": 168,
+        "Unknown": 0
+      },
+      "173": {
+        "Class": 173,
+        "Unknown": 0
+      },
+      "999": {
+        "Class": 999,
+        "Unknown": 0
+      }
+    },
+    "DefaultItems": [
+      18783,
+      18695,
+      510,
+      18882,
+      18482,
+      4622
+    ]
+  },
+  "12": {
+    "Id": 12,
+    "NameId": 2280,
+    "DescriptionId": 2281,
+    "Type": 2,
+    "Icon": 1343,
+    "BadgeImageSet": 12,
+    "ButtonImageSet": 8,
+    "AbilityBgImageSet": 14,
+    "Hint": 384188,
+    "MembersOnly": false,
+    "Trial": true,
+    "Unknown12": 4,
+    "Unknown13": 0,
+    "ProfileItemClasses": {
+      "8": {
+        "Class": 8,
+        "Unknown": 5
+      },
+      "10": {
+        "Class": 10,
+        "Unknown": 5
+      },
+      "46": {
+        "Class": 46,
+        "Unknown": 5
+      },
+      "50": {
+        "Class": 50,
+        "Unknown": 3
+      },
+      "56": {
+        "Class": 56,
+        "Unknown": 5
+      },
+      "69": {
+        "Class": 69,
+        "Unknown": 1
+      },
+      "144": {
+        "Class": 144,
+        "Unknown": 0
+      },
+      "145": {
+        "Class": 145,
+        "Unknown": 0
+      },
+      "146": {
+        "Class": 146,
+        "Unknown": 0
+      },
+      "150": {
+        "Class": 150,
+        "Unknown": 0
+      },
+      "151": {
+        "Class": 151,
+        "Unknown": 0
+      },
+      "153": {
+        "Class": 153,
+        "Unknown": 0
+      },
+      "154": {
+        "Class": 154,
+        "Unknown": 0
+      },
+      "155": {
+        "Class": 155,
+        "Unknown": 0
+      },
+      "156": {
+        "Class": 156,
+        "Unknown": 0
+      },
+      "158": {
+        "Class": 158,
+        "Unknown": 0
+      },
+      "161": {
+        "Class": 161,
+        "Unknown": 0
+      },
+      "162": {
+        "Class": 162,
+        "Unknown": 0
+      },
+      "168": {
+        "Class": 168,
+        "Unknown": 0
+      },
+      "173": {
+        "Class": 173,
+        "Unknown": 0
+      },
+      "999": {
+        "Class": 999,
+        "Unknown": 0
+      }
+    },
+    "DefaultItems": [
+      12178,
+      12060,
+      12709,
+      12416,
+      12574,
+      12252,
+      4914
+    ]
+  },
+  "14": {
+    "Id": 14,
+    "NameId": 2470,
+    "DescriptionId": 2471,
+    "Type": 9,
+    "Icon": 1341,
+    "BadgeImageSet": 11,
+    "ButtonImageSet": 2,
+    "AbilityBgImageSet": 4,
+    "Hint": 384190,
+    "MembersOnly": false,
+    "Trial": false,
+    "Unknown12": 0,
+    "Unknown13": 0,
+    "ProfileItemClasses": {
+      "12": {
+        "Class": 12,
+        "Unknown": 5
+      },
+      "37": {
+        "Class": 37,
+        "Unknown": 5
+      },
+      "48": {
+        "Class": 48,
+        "Unknown": 5
+      },
+      "57": {
+        "Class": 57,
+        "Unknown": 5
+      },
+      "60": {
+        "Class": 60,
+        "Unknown": 3
+      },
+      "67": {
+        "Class": 67,
+        "Unknown": 3
+      },
+      "68": {
+        "Class": 68,
+        "Unknown": 0
+      },
+      "69": {
+        "Class": 69,
+        "Unknown": 1
+      },
+      "144": {
+        "Class": 144,
+        "Unknown": 0
+      },
+      "145": {
+        "Class": 145,
+        "Unknown": 0
+      },
+      "146": {
+        "Class": 146,
+        "Unknown": 0
+      },
+      "150": {
+        "Class": 150,
+        "Unknown": 0
+      },
+      "153": {
+        "Class": 153,
+        "Unknown": 0
+      },
+      "154": {
+        "Class": 154,
+        "Unknown": 0
+      },
+      "155": {
+        "Class": 155,
+        "Unknown": 0
+      },
+      "156": {
+        "Class": 156,
+        "Unknown": 0
+      },
+      "158": {
+        "Class": 158,
+        "Unknown": 0
+      },
+      "161": {
+        "Class": 161,
+        "Unknown": 0
+      },
+      "162": {
+        "Class": 162,
+        "Unknown": 0
+      },
+      "168": {
+        "Class": 168,
+        "Unknown": 0
+      },
+      "173": {
+        "Class": 173,
+        "Unknown": 0
+      },
+      "999": {
+        "Class": 999,
+        "Unknown": 0
+      }
+    },
+    "DefaultItems": [
+      21665,
+      21060,
+      21784,
+      21219,
+      6561
+    ]
+  },
+  "16": {
+    "Id": 16,
+    "NameId": 2614,
+    "DescriptionId": 2615,
+    "Type": 12,
+    "Icon": 1336,
+    "BadgeImageSet": 11,
+    "ButtonImageSet": 2,
+    "AbilityBgImageSet": 4,
+    "Hint": 384189,
+    "MembersOnly": false,
+    "Trial": false,
+    "Unknown12": 0,
+    "Unknown13": 0,
+    "ProfileItemClasses": {
+      "14": {
+        "Class": 14,
+        "Unknown": 5
+      },
+      "34": {
+        "Class": 34,
+        "Unknown": 5
+      },
+      "48": {
+        "Class": 48,
+        "Unknown": 5
+      },
+      "49": {
+        "Class": 49,
+        "Unknown": 5
+      },
+      "58": {
+        "Class": 58,
+        "Unknown": 5
+      },
+      "60": {
+        "Class": 60,
+        "Unknown": 3
+      },
+      "67": {
+        "Class": 67,
+        "Unknown": 3
+      },
+      "69": {
+        "Class": 69,
+        "Unknown": 1
+      },
+      "144": {
+        "Class": 144,
+        "Unknown": 0
+      },
+      "145": {
+        "Class": 145,
+        "Unknown": 0
+      },
+      "146": {
+        "Class": 146,
+        "Unknown": 0
+      },
+      "150": {
+        "Class": 150,
+        "Unknown": 0
+      },
+      "153": {
+        "Class": 153,
+        "Unknown": 0
+      },
+      "154": {
+        "Class": 154,
+        "Unknown": 0
+      },
+      "155": {
+        "Class": 155,
+        "Unknown": 0
+      },
+      "156": {
+        "Class": 156,
+        "Unknown": 0
+      },
+      "158": {
+        "Class": 158,
+        "Unknown": 0
+      },
+      "161": {
+        "Class": 161,
+        "Unknown": 0
+      },
+      "162": {
+        "Class": 162,
+        "Unknown": 0
+      },
+      "168": {
+        "Class": 168,
+        "Unknown": 0
+      },
+      "173": {
+        "Class": 173,
+        "Unknown": 0
+      },
+      "999": {
+        "Class": 999,
+        "Unknown": 0
+      }
+    },
+    "DefaultItems": [
+      21496,
+      21324,
+      21012,
+      21683,
+      21149,
+      6459
+    ]
+  },
+  "32": {
+    "Id": 32,
+    "NameId": 4664,
+    "DescriptionId": 4665,
+    "Type": 2,
+    "Icon": 21594,
+    "BadgeImageSet": 10,
+    "ButtonImageSet": 1,
+    "AbilityBgImageSet": 31,
+    "Hint": 384191,
+    "MembersOnly": false,
+    "Trial": true,
+    "Unknown12": 4,
+    "Unknown13": 0,
+    "ProfileItemClasses": {
+      "15": {
+        "Class": 15,
+        "Unknown": 5
+      },
+      "17": {
+        "Class": 17,
+        "Unknown": 5
+      },
+      "45": {
+        "Class": 45,
+        "Unknown": 5
+      },
+      "50": {
+        "Class": 50,
+        "Unknown": 3
+      },
+      "55": {
+        "Class": 55,
+        "Unknown": 5
+      },
+      "69": {
+        "Class": 69,
+        "Unknown": 1
+      },
+      "144": {
+        "Class": 144,
+        "Unknown": 0
+      },
+      "145": {
+        "Class": 145,
+        "Unknown": 0
+      },
+      "146": {
+        "Class": 146,
+        "Unknown": 0
+      },
+      "150": {
+        "Class": 150,
+        "Unknown": 0
+      },
+      "151": {
+        "Class": 151,
+        "Unknown": 0
+      },
+      "153": {
+        "Class": 153,
+        "Unknown": 0
+      },
+      "154": {
+        "Class": 154,
+        "Unknown": 0
+      },
+      "155": {
+        "Class": 155,
+        "Unknown": 0
+      },
+      "156": {
+        "Class": 156,
+        "Unknown": 0
+      },
+      "158": {
+        "Class": 158,
+        "Unknown": 0
+      },
+      "161": {
+        "Class": 161,
+        "Unknown": 0
+      },
+      "162": {
+        "Class": 162,
+        "Unknown": 0
+      },
+      "168": {
+        "Class": 168,
+        "Unknown": 0
+      },
+      "173": {
+        "Class": 173,
+        "Unknown": 0
+      },
+      "183": {
+        "Class": 183,
+        "Unknown": 0
+      },
+      "999": {
+        "Class": 999,
+        "Unknown": 0
+      }
+    },
+    "DefaultItems": [
+      46644,
+      46389,
+      46137,
+      46732,
+      46224,
+      47019,
+      29963
+    ]
+  },
+  "35": {
+    "Id": 35,
+    "NameId": 4822,
+    "DescriptionId": 4823,
+    "Type": 2,
+    "Icon": 1335,
+    "BadgeImageSet": 32,
+    "ButtonImageSet": 33,
+    "AbilityBgImageSet": 7,
+    "Hint": 384193,
+    "MembersOnly": false,
+    "Trial": false,
+    "Unknown12": 0,
+    "Unknown13": 0,
+    "ProfileItemClasses": {
+      "16": {
+        "Class": 16,
+        "Unknown": 5
+      },
+      "18": {
+        "Class": 18,
+        "Unknown": 5
+      },
+      "41": {
+        "Class": 41,
+        "Unknown": 5
+      },
+      "50": {
+        "Class": 50,
+        "Unknown": 3
+      },
+      "51": {
+        "Class": 51,
+        "Unknown": 5
+      },
+      "69": {
+        "Class": 69,
+        "Unknown": 1
+      },
+      "144": {
+        "Class": 144,
+        "Unknown": 0
+      },
+      "145": {
+        "Class": 145,
+        "Unknown": 0
+      },
+      "146": {
+        "Class": 146,
+        "Unknown": 0
+      },
+      "150": {
+        "Class": 150,
+        "Unknown": 0
+      },
+      "152": {
+        "Class": 152,
+        "Unknown": 0
+      },
+      "153": {
+        "Class": 153,
+        "Unknown": 0
+      },
+      "154": {
+        "Class": 154,
+        "Unknown": 0
+      },
+      "155": {
+        "Class": 155,
+        "Unknown": 0
+      },
+      "156": {
+        "Class": 156,
+        "Unknown": 0
+      },
+      "158": {
+        "Class": 158,
+        "Unknown": 0
+      },
+      "161": {
+        "Class": 161,
+        "Unknown": 0
+      },
+      "162": {
+        "Class": 162,
+        "Unknown": 0
+      },
+      "168": {
+        "Class": 168,
+        "Unknown": 0
+      },
+      "173": {
+        "Class": 173,
+        "Unknown": 0
+      },
+      "999": {
+        "Class": 999,
+        "Unknown": 0
+      }
+    },
+    "DefaultItems": [
+      1238,
+      11530,
+      353,
+      11709,
+      354,
+      11828,
+      4266
+    ]
+  },
+  "43": {
+    "Id": 43,
+    "NameId": 2873,
+    "DescriptionId": 3234,
+    "Type": 2,
+    "Icon": 1337,
+    "BadgeImageSet": 10,
+    "ButtonImageSet": 1,
+    "AbilityBgImageSet": 4,
+    "Hint": 384195,
+    "MembersOnly": false,
+    "Trial": false,
+    "Unknown12": 0,
+    "Unknown13": 0,
+    "ProfileItemClasses": {
+      "5": {
+        "Class": 5,
+        "Unknown": 5
+      },
+      "25": {
+        "Class": 25,
+        "Unknown": 5
+      },
+      "42": {
+        "Class": 42,
+        "Unknown": 5
+      },
+      "50": {
+        "Class": 50,
+        "Unknown": 3
+      },
+      "52": {
+        "Class": 52,
+        "Unknown": 5
+      },
+      "69": {
+        "Class": 69,
+        "Unknown": 1
+      },
+      "71": {
+        "Class": 71,
+        "Unknown": 5
+      },
+      "144": {
+        "Class": 144,
+        "Unknown": 0
+      },
+      "145": {
+        "Class": 145,
+        "Unknown": 0
+      },
+      "146": {
+        "Class": 146,
+        "Unknown": 0
+      },
+      "150": {
+        "Class": 150,
+        "Unknown": 0
+      },
+      "152": {
+        "Class": 152,
+        "Unknown": 0
+      },
+      "153": {
+        "Class": 153,
+        "Unknown": 0
+      },
+      "154": {
+        "Class": 154,
+        "Unknown": 0
+      },
+      "155": {
+        "Class": 155,
+        "Unknown": 0
+      },
+      "156": {
+        "Class": 156,
+        "Unknown": 0
+      },
+      "158": {
+        "Class": 158,
+        "Unknown": 0
+      },
+      "161": {
+        "Class": 161,
+        "Unknown": 0
+      },
+      "162": {
+        "Class": 162,
+        "Unknown": 0
+      },
+      "168": {
+        "Class": 168,
+        "Unknown": 0
+      },
+      "173": {
+        "Class": 173,
+        "Unknown": 0
+      },
+      "181": {
+        "Class": 181,
+        "Unknown": 1
+      },
+      "182": {
+        "Class": 182,
+        "Unknown": 1
+      },
+      "183": {
+        "Class": 183,
+        "Unknown": 0
+      },
+      "999": {
+        "Class": 999,
+        "Unknown": 0
+      }
+    },
+    "DefaultItems": [
+      7676,
+      7536,
+      7495,
+      7939,
+      7571,
+      7781,
+      75030
+    ]
+  },
+  "45": {
+    "Id": 45,
+    "NameId": 2856,
+    "DescriptionId": 2857,
+    "Type": 10,
+    "Icon": 156,
+    "BadgeImageSet": 11,
+    "ButtonImageSet": 2,
+    "AbilityBgImageSet": 4,
+    "Hint": 384200,
+    "MembersOnly": false,
+    "Trial": true,
+    "Unknown12": 4,
+    "Unknown13": 0,
+    "ProfileItemClasses": {
+      "21": {
+        "Class": 21,
+        "Unknown": 5
+      },
+      "38": {
+        "Class": 38,
+        "Unknown": 5
+      },
+      "59": {
+        "Class": 59,
+        "Unknown": 5
+      },
+      "60": {
+        "Class": 60,
+        "Unknown": 3
+      },
+      "64": {
+        "Class": 64,
+        "Unknown": 5
+      },
+      "67": {
+        "Class": 67,
+        "Unknown": 5
+      },
+      "68": {
+        "Class": 68,
+        "Unknown": 3
+      },
+      "69": {
+        "Class": 69,
+        "Unknown": 1
+      },
+      "144": {
+        "Class": 144,
+        "Unknown": 0
+      },
+      "145": {
+        "Class": 145,
+        "Unknown": 0
+      },
+      "146": {
+        "Class": 146,
+        "Unknown": 0
+      },
+      "150": {
+        "Class": 150,
+        "Unknown": 0
+      },
+      "153": {
+        "Class": 153,
+        "Unknown": 0
+      },
+      "154": {
+        "Class": 154,
+        "Unknown": 0
+      },
+      "155": {
+        "Class": 155,
+        "Unknown": 0
+      },
+      "156": {
+        "Class": 156,
+        "Unknown": 0
+      },
+      "158": {
+        "Class": 158,
+        "Unknown": 0
+      },
+      "161": {
+        "Class": 161,
+        "Unknown": 0
+      },
+      "162": {
+        "Class": 162,
+        "Unknown": 0
+      },
+      "168": {
+        "Class": 168,
+        "Unknown": 0
+      },
+      "173": {
+        "Class": 173,
+        "Unknown": 0
+      },
+      "999": {
+        "Class": 999,
+        "Unknown": 0
+      }
+    },
+    "DefaultItems": [
+      14794,
+      13597,
+      14826,
+      13821
+    ]
+  },
+  "48": {
+    "Id": 48,
+    "NameId": 2917,
+    "DescriptionId": 2918,
+    "Type": 5,
+    "Icon": 20725,
+    "BadgeImageSet": 46,
+    "ButtonImageSet": 7494,
+    "AbilityBgImageSet": 4,
+    "Hint": 384196,
+    "MembersOnly": false,
+    "Trial": true,
+    "Unknown12": 4,
+    "Unknown13": 0,
+    "ProfileItemClasses": {
+      "24": {
+        "Class": 24,
+        "Unknown": 5
+      },
+      "69": {
+        "Class": 69,
+        "Unknown": 1
+      },
+      "144": {
+        "Class": 144,
+        "Unknown": 0
+      },
+      "145": {
+        "Class": 145,
+        "Unknown": 0
+      },
+      "146": {
+        "Class": 146,
+        "Unknown": 0
+      },
+      "150": {
+        "Class": 150,
+        "Unknown": 0
+      },
+      "153": {
+        "Class": 153,
+        "Unknown": 0
+      },
+      "154": {
+        "Class": 154,
+        "Unknown": 0
+      },
+      "155": {
+        "Class": 155,
+        "Unknown": 0
+      },
+      "156": {
+        "Class": 156,
+        "Unknown": 0
+      },
+      "158": {
+        "Class": 158,
+        "Unknown": 0
+      },
+      "161": {
+        "Class": 161,
+        "Unknown": 0
+      },
+      "162": {
+        "Class": 162,
+        "Unknown": 0
+      },
+      "168": {
+        "Class": 168,
+        "Unknown": 0
+      },
+      "173": {
+        "Class": 173,
+        "Unknown": 0
+      },
+      "999": {
+        "Class": 999,
+        "Unknown": 0
+      }
+    },
+    "DefaultItems": [
+      14599,
+      13419,
+      15017,
+      14105
+    ]
+  },
+  "49": {
+    "Id": 49,
+    "NameId": 2919,
+    "DescriptionId": 2920,
+    "Type": 7,
+    "Icon": 8059,
+    "BadgeImageSet": 46,
+    "ButtonImageSet": 7494,
+    "AbilityBgImageSet": 4,
+    "Hint": 384201,
+    "MembersOnly": false,
+    "Trial": true,
+    "Unknown12": 4,
+    "Unknown13": 0,
+    "ProfileItemClasses": {
+      "22": {
+        "Class": 22,
+        "Unknown": 5
+      },
+      "69": {
+        "Class": 69,
+        "Unknown": 1
+      },
+      "144": {
+        "Class": 144,
+        "Unknown": 0
+      },
+      "145": {
+        "Class": 145,
+        "Unknown": 0
+      },
+      "146": {
+        "Class": 146,
+        "Unknown": 0
+      },
+      "150": {
+        "Class": 150,
+        "Unknown": 0
+      },
+      "153": {
+        "Class": 153,
+        "Unknown": 0
+      },
+      "154": {
+        "Class": 154,
+        "Unknown": 0
+      },
+      "155": {
+        "Class": 155,
+        "Unknown": 0
+      },
+      "156": {
+        "Class": 156,
+        "Unknown": 0
+      },
+      "158": {
+        "Class": 158,
+        "Unknown": 0
+      },
+      "161": {
+        "Class": 161,
+        "Unknown": 0
+      },
+      "162": {
+        "Class": 162,
+        "Unknown": 0
+      },
+      "168": {
+        "Class": 168,
+        "Unknown": 0
+      },
+      "173": {
+        "Class": 173,
+        "Unknown": 0
+      },
+      "999": {
+        "Class": 999,
+        "Unknown": 0
+      }
+    },
+    "DefaultItems": [
+      14481,
+      616,
+      623,
+      13998
+    ]
+  },
+  "52": {
+    "Id": 52,
+    "NameId": 4650,
+    "DescriptionId": 2920,
+    "Type": 8,
+    "Icon": 20743,
+    "BadgeImageSet": 4842,
+    "ButtonImageSet": 21,
+    "AbilityBgImageSet": 4,
+    "Hint": 416471,
+    "MembersOnly": false,
+    "Trial": true,
+    "Unknown12": 4,
+    "Unknown13": 0,
+    "ProfileItemClasses": {
+      "69": {
+        "Class": 69,
+        "Unknown": 1
+      },
+      "134": {
+        "Class": 134,
+        "Unknown": 5
+      },
+      "135": {
+        "Class": 135,
+        "Unknown": 5
+      },
+      "136": {
+        "Class": 136,
+        "Unknown": 5
+      },
+      "143": {
+        "Class": 143,
+        "Unknown": 3
+      },
+      "144": {
+        "Class": 144,
+        "Unknown": 0
+      },
+      "145": {
+        "Class": 145,
+        "Unknown": 0
+      },
+      "146": {
+        "Class": 146,
+        "Unknown": 0
+      },
+      "150": {
+        "Class": 150,
+        "Unknown": 0
+      },
+      "153": {
+        "Class": 153,
+        "Unknown": 0
+      },
+      "154": {
+        "Class": 154,
+        "Unknown": 0
+      },
+      "155": {
+        "Class": 155,
+        "Unknown": 0
+      },
+      "156": {
+        "Class": 156,
+        "Unknown": 0
+      },
+      "158": {
+        "Class": 158,
+        "Unknown": 0
+      },
+      "161": {
+        "Class": 161,
+        "Unknown": 0
+      },
+      "162": {
+        "Class": 162,
+        "Unknown": 0
+      },
+      "168": {
+        "Class": 168,
+        "Unknown": 0
+      },
+      "173": {
+        "Class": 173,
+        "Unknown": 0
+      },
+      "999": {
+        "Class": 999,
+        "Unknown": 0
+      }
+    },
+    "DefaultItems": [
+      61907,
+      61353,
+      62169,
+      61609,
+      62473
+    ]
+  },
+  "120": {
+    "Id": 120,
+    "NameId": 2410,
+    "DescriptionId": 2411,
+    "Type": 17,
+    "Icon": 396,
+    "BadgeImageSet": 1783,
+    "ButtonImageSet": 1782,
+    "AbilityBgImageSet": 4,
+    "Hint": 384207,
+    "MembersOnly": false,
+    "Trial": false,
+    "Unknown12": 0,
+    "Unknown13": 0,
+    "ProfileItemClasses": {
+      "1": {
+        "Class": 1,
+        "Unknown": 3
+      },
+      "62": {
+        "Class": 62,
+        "Unknown": 5
+      },
+      "69": {
+        "Class": 69,
+        "Unknown": 1
+      },
+      "144": {
+        "Class": 144,
+        "Unknown": 0
+      },
+      "145": {
+        "Class": 145,
+        "Unknown": 0
+      },
+      "146": {
+        "Class": 146,
+        "Unknown": 0
+      },
+      "147": {
+        "Class": 147,
+        "Unknown": 0
+      },
+      "148": {
+        "Class": 148,
+        "Unknown": 0
+      },
+      "149": {
+        "Class": 149,
+        "Unknown": 0
+      },
+      "150": {
+        "Class": 150,
+        "Unknown": 0
+      },
+      "153": {
+        "Class": 153,
+        "Unknown": 0
+      },
+      "154": {
+        "Class": 154,
+        "Unknown": 0
+      },
+      "155": {
+        "Class": 155,
+        "Unknown": 0
+      },
+      "156": {
+        "Class": 156,
+        "Unknown": 0
+      },
+      "157": {
+        "Class": 157,
+        "Unknown": 0
+      },
+      "158": {
+        "Class": 158,
+        "Unknown": 0
+      },
+      "160": {
+        "Class": 160,
+        "Unknown": 0
+      },
+      "161": {
+        "Class": 161,
+        "Unknown": 0
+      },
+      "162": {
+        "Class": 162,
+        "Unknown": 3
+      },
+      "168": {
+        "Class": 168,
+        "Unknown": 0
+      },
+      "173": {
+        "Class": 173,
+        "Unknown": 0
+      },
+      "179": {
+        "Class": 179,
+        "Unknown": 3
+      },
+      "181": {
+        "Class": 181,
+        "Unknown": 3
+      },
+      "182": {
+        "Class": 182,
+        "Unknown": 3
+      },
+      "999": {
+        "Class": 999,
+        "Unknown": 0
+      }
+    },
+    "DefaultItems": []
+  },
+  "137": {
+    "Id": 137,
+    "NameId": 20178,
+    "DescriptionId": 407842,
+    "Type": 21,
+    "Icon": 20740,
+    "BadgeImageSet": 4843,
+    "ButtonImageSet": 5885,
+    "AbilityBgImageSet": 4,
+    "Hint": 418996,
+    "MembersOnly": false,
+    "Trial": true,
+    "Unknown12": 4,
+    "Unknown13": 0,
+    "ProfileItemClasses": {
+      "69": {
+        "Class": 69,
+        "Unknown": 1
+      },
+      "137": {
+        "Class": 137,
+        "Unknown": 5
+      },
+      "138": {
+        "Class": 138,
+        "Unknown": 5
+      },
+      "139": {
+        "Class": 139,
+        "Unknown": 5
+      },
+      "144": {
+        "Class": 144,
+        "Unknown": 0
+      },
+      "145": {
+        "Class": 145,
+        "Unknown": 0
+      },
+      "146": {
+        "Class": 146,
+        "Unknown": 0
+      },
+      "150": {
+        "Class": 150,
+        "Unknown": 0
+      },
+      "153": {
+        "Class": 153,
+        "Unknown": 0
+      },
+      "154": {
+        "Class": 154,
+        "Unknown": 0
+      },
+      "155": {
+        "Class": 155,
+        "Unknown": 0
+      },
+      "156": {
+        "Class": 156,
+        "Unknown": 0
+      },
+      "158": {
+        "Class": 158,
+        "Unknown": 0
+      },
+      "161": {
+        "Class": 161,
+        "Unknown": 0
+      },
+      "162": {
+        "Class": 162,
+        "Unknown": 0
+      },
+      "168": {
+        "Class": 168,
+        "Unknown": 0
+      },
+      "173": {
+        "Class": 173,
+        "Unknown": 0
+      },
+      "999": {
+        "Class": 999,
+        "Unknown": 0
+      }
+    },
+    "DefaultItems": [
+      68430,
+      68360,
+      68465,
+      68395
+    ]
+  }
+}

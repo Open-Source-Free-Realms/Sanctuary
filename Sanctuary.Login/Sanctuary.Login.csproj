@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <UserSecretsId>5e8f08a4-8f06-49c6-a685-3e1cb2a8a9ea</UserSecretsId>
+    <BaseOutputPath>$(SolutionDir)bin</BaseOutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NLog" Version="5.2.8" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="5.3.8" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sanctuary.Core\Sanctuary.Core.csproj" />
+    <ProjectReference Include="..\Sanctuary.Database\Sanctuary.Database.csproj" />
+    <ProjectReference Include="..\Sanctuary.Game\Sanctuary.Game.csproj" />
+    <ProjectReference Include="..\Sanctuary.Packet\Sanctuary.Packet.csproj" />
+    <ProjectReference Include="..\Sanctuary.UdpLibrary\Sanctuary.UdpLibrary.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="login.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="NLog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <Target Name="CopyResources" AfterTargets="PostBuildEvent">
+    <ItemGroup>
+      <ResourceFiles Include="$(SolutionDir)Resources\**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(ResourceFiles)" DestinationFolder="$(OutputPath)Resources\%(RecursiveDir)" SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>

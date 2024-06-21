@@ -1,0 +1,204 @@
+﻿using System;
+using System.IO;
+using System.Net;
+using System.IO.Compression;
+
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+
+using Sanctuary.Packet;
+using Sanctuary.Core.IO;
+using Sanctuary.UdpLibrary;
+using Sanctuary.Login.Handlers;
+using Sanctuary.Core.Cryptography;
+using Sanctuary.Core.Configuration;
+using Sanctuary.UdpLibrary.Enumerations;
+using Sanctuary.Packet.Common;
+
+namespace Sanctuary.Login;
+
+public class LoginConnection : UdpConnection
+{
+    private readonly ILogger _logger;
+    private readonly LoginServer _loginServer;
+
+    private RC4? _recvRC4, _sendRC4;
+    private LoginServerOptions _options;
+
+    public ulong Guid { get; set; }
+
+    public LoginConnection(ILogger<LoginConnection> logger, IOptionsMonitor<LoginServerOptions> options, LoginServer loginServer, SocketAddress socketAddress, int connectCode) : base(loginServer, socketAddress, connectCode)
+    {
+        _logger = logger;
+        _loginServer = loginServer;
+
+        _options = options.CurrentValue;
+        options.OnChange(o => _options = o);
+
+        if (!string.IsNullOrEmpty(_options.CryptKey))
+        {
+            _recvRC4 = new RC4(_options.CryptKey);
+            _sendRC4 = new RC4(_options.CryptKey);
+        }
+    }
+
+    public override void OnTerminated()
+    {
+        var reason = DisconnectReason == DisconnectReason.OtherSideTerminated
+            ? OtherSideDisconnectReason
+            : DisconnectReason;
+
+        _logger.LogInformation("{connection} disconnected. {reason}", this, reason);
+    }
+
+    public override void OnRoutePacket(Span<byte> data)
+    {
+        _recvRC4?.Apply(data);
+
+        var reader = new PacketReader(data);
+
+        if (!reader.TryRead(out byte opCode))
+        {
+            _logger.LogError("Failed to read opcode from packet. ( Data: {data} )", Convert.ToHexString(data));
+            return;
+        }
+
+        var handled = opCode switch
+        {
+            LoginRequest.OpCode => LoginRequestHandler.HandlePacket(this, data),
+            CharacterCreateRequest.OpCode => CharacterCreateRequestHandler.HandlePacket(this, data),
+            CharacterLoginRequest.OpCode => CharacterLoginRequestHandler.HandlePacket(this, data),
+            CharacterDeleteRequest.OpCode => CharacterDeleteRequestHandler.HandlePacket(this, data),
+            CharacterSelectInfoRequest.OpCode => CharacterSelectInfoRequestHandler.HandlePacket(this),
+            ServerListRequest.OpCode => ServerListRequestHandler.HandlePacket(this),
+            TunnelAppPacketClientToServer.OpCode => TunnelAppPacketClientToServerHandler.HandlePacket(this, data),
+            _ => false
+        };
+
+        if (!handled)
+        {
+#if DEBUG
+            reader.Reset();
+            System.Diagnostics.Debug.WriteLine(reader.ReadExternalLoginPacketName());
+#endif
+
+            _logger.LogWarning("{connection} received an unhandled packet. ( OpCode: {opcode}, Data: {data} )", this, opCode, Convert.ToHexString(data));
+        }
+    }
+
+    public void Send(ISerializablePacket packet)
+    {
+        var data = packet.Serialize();
+
+        _sendRC4?.Apply(data);
+
+        Send(UdpChannel.Reliable1, data);
+    }
+
+    public void SendTunneled(ISerializablePacket packet)
+    {
+        var packetTunneledClientPacket = new TunnelAppPacketServerToClient
+        {
+            Payload = packet.Serialize()
+        };
+
+        Send(packetTunneledClientPacket);
+    }
+
+    public void ForceDisconnect(int reason)
+    {
+        var packet = new ForceDisconnect
+        {
+            Reason = reason
+        };
+
+        Send(packet);
+
+        Disconnect();
+    }
+
+    #region Packet Compression
+
+    protected override unsafe int DecryptUserSupplied(Span<byte> destData, Span<byte> sourceData)
+    {
+        if (!_options.UseCompression)
+            return base.DecryptUserSupplied(destData, sourceData);
+
+        if (sourceData[0] == 1)
+        {
+            // I don't like the fact we have to use unsafe code here but I couldn't
+            // find another way to create a stream without copying the data.
+            fixed (byte* pDestData = &destData[0])
+            {
+                fixed (byte* pSourceData = &sourceData[1])
+                {
+                    using var destStream = new UnmanagedMemoryStream(pDestData, destData.Length);
+                    using var sourceStream = new UnmanagedMemoryStream(pSourceData, sourceData.Length);
+
+                    using var zLibStream = new ZLibStream(sourceStream, CompressionMode.Decompress);
+
+                    if (zLibStream.BaseStream.Length < 0)
+                        return -1;
+
+                    zLibStream.CopyTo(destStream);
+
+                    return (int)destStream.Position;
+                }
+            }
+        }
+        else
+        {
+            sourceData.Slice(1).CopyTo(destData);
+
+            return sourceData.Length - 1;
+        }
+    }
+
+    protected override unsafe int EncryptUserSupplied(Span<byte> destData, Span<byte> sourceData)
+    {
+        if (!_options.UseCompression)
+            return base.EncryptUserSupplied(destData, sourceData);
+
+        // Don't bother compressing
+        if (sourceData.Length < 24)
+        {
+            destData[0] = 0;
+
+            sourceData.CopyTo(destData.Slice(1));
+
+            return sourceData.Length + 1;
+        }
+
+        // I don't like the fact we have to use unsafe code here but I couldn't
+        // find another way to create a stream without copying the data.
+        fixed (byte* pDestData = &destData[1])
+        {
+            fixed (byte* pSourceData = &sourceData[0])
+            {
+                using var destStream = new UnmanagedMemoryStream(pDestData, destData.Length);
+                using var sourceStream = new UnmanagedMemoryStream(pSourceData, sourceData.Length);
+
+                using (var zLibStream = new ZLibStream(destStream, CompressionMode.Compress, true))
+                {
+                    destData[0] = 1;
+
+                    sourceStream.CopyTo(zLibStream);
+                }
+
+                // Compressing ended up being worse
+                if (destStream.Position > sourceData.Length)
+                {
+                    destData[0] = 0;
+
+                    sourceData.CopyTo(destData.Slice(1));
+
+                    return sourceData.Length + 1;
+                }
+
+                return (int)destStream.Position + 1;
+            }
+        }
+    }
+
+    #endregion
+}

@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sanctuary.Core\Sanctuary.Core.csproj" />
+    <ProjectReference Include="..\Sanctuary.Packet.Common\Sanctuary.Packet.Common.csproj" />
+  </ItemGroup>
+
+</Project>

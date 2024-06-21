@@ -1,0 +1,102 @@
+﻿using System;
+
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+using NLog.Extensions.Logging;
+
+using Sanctuary.Game;
+using Sanctuary.Login;
+using Sanctuary.Database;
+using Sanctuary.Core.Configuration;
+using Sanctuary.UdpLibrary.Enumerations;
+using Sanctuary.Packet.Common.Extensions;
+using Sanctuary.UdpLibrary.Configuration;
+
+var builder = new HostBuilder();
+
+builder.ConfigureAppConfiguration((hostBuilderContext, configurationBuilder) =>
+{
+    if (hostBuilderContext.HostingEnvironment.IsDevelopment())
+        configurationBuilder.AddUserSecrets<Program>();
+    else
+        configurationBuilder.AddJsonFile("database.json");
+
+    configurationBuilder.AddJsonFile("login.json", optional: false, reloadOnChange: true);
+});
+
+builder.ConfigureServices((hostBuilderContext, serviceCollection) =>
+{
+    // Options
+    serviceCollection.AddOptions<DatabaseOptions>()
+        .BindConfiguration(DatabaseOptions.Section)
+        .ValidateOnStart();
+
+    serviceCollection.AddOptions<LoginServerOptions>()
+        .BindConfiguration(ServerOptions.Section)
+        .ValidateOnStart();
+
+    // Database
+    serviceCollection.AddDatabase(hostBuilderContext.Configuration);
+
+    // Server Options
+    var serverOptions = hostBuilderContext.Configuration.GetSection(ServerOptions.Section).Get<LoginServerOptions>();
+
+    ArgumentNullException.ThrowIfNull(serverOptions);
+
+    // LoginGateway UDP Server
+    serviceCollection.AddSingleton(serviceProvider =>
+    {
+        var udpParams = new UdpParams(ManagerRole.ExternalServer)
+        {
+            NoDataTimeout = 5000,
+            KeepAliveDelay = 2000,
+            ProtocolName = "LoginGateway",
+            Port = serverOptions.LoginGatewayPort,
+        };
+
+        return ActivatorUtilities.CreateInstance<GatewayServer>(serviceProvider, udpParams);
+    });
+
+    // Login UDP Server
+    serviceCollection.AddSingleton(serviceProvider =>
+    {
+        var udpParams = new UdpParams
+        {
+            ProtocolName = serverOptions.ProtocolName,
+            Port = serverOptions.Port,
+            KeepAliveDelay = 29000,
+            CrcBytes = 2
+        };
+
+        if (serverOptions.UseCompression)
+        {
+            udpParams.EncryptMethod[0] = EncryptMethod.UserSupplied;
+            udpParams.UserSuppliedEncryptExpansionBytes = 1;
+        }
+
+        return ActivatorUtilities.CreateInstance<LoginServer>(serviceProvider, udpParams);
+    });
+
+    serviceCollection.AddHostedService<LoginService>();
+
+    // Managers
+    serviceCollection.AddSingleton<IResourceManager, ResourceManager>();
+});
+
+builder.ConfigureLogging(loggingBuilder =>
+{
+    loggingBuilder.ClearProviders();
+    loggingBuilder.SetMinimumLevel(LogLevel.Debug);
+
+    loggingBuilder.AddNLog();
+});
+
+var host = builder.Build();
+
+// Packet Handlers
+host.Services.ConfigurePacketHandlers();
+
+await host.RunAsync();

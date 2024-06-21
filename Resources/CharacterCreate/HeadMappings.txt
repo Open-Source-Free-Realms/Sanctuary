@@ -1,0 +1,4 @@
+#ID^FILENAME^
+1^<race>_<gender>_head_caucasian.adr^
+2^<race>_<gender>_head_african.adr^
+3^<race>_<gender>_head_asian.adr^

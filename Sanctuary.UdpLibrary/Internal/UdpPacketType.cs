@@ -1,0 +1,38 @@
+﻿namespace Sanctuary.UdpLibrary.Internal;
+
+internal enum UdpPacketType : byte
+{
+    ZeroEscape,
+    Connect,
+    Confirm,
+    Multi,
+    Big,
+    Terminate,
+    KeepAlive,
+    ClockSync,
+    ClockReflect,
+    Reliable1,
+    Reliable2,
+    Reliable3,
+    Reliable4,
+    Fragment1,
+    Fragment2,
+    Fragment3,
+    Fragment4,
+    Ack1,
+    Ack2,
+    Ack3,
+    Ack4,
+    AckAll1,
+    AckAll2,
+    AckAll3,
+    AckAll4,
+    Group,
+    Ordered,
+    Ordered2,
+    PortAlive,
+    UnreachableConnection,
+    RequestRemap,
+    Unknown,
+    ServerStatus
+}

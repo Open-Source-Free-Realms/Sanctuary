@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "Servers": {
+      "commandName": "Project",
+      "serviceActions": {
+        "sanctuary.login": "StartDebugging",
+        "sanctuary.gateway": "StartDebugging"
+      }
+    }
+  }
+}
