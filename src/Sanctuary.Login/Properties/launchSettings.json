@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Sanctuary.Login": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

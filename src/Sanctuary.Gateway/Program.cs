@@ -16,6 +16,11 @@ using Sanctuary.UdpLibrary.Configuration;
 
 var builder = new HostBuilder();
 
+builder.ConfigureHostConfiguration((configurationBuilder) =>
+{
+    configurationBuilder.AddEnvironmentVariables("DOTNET_");
+});
+
 builder.ConfigureAppConfiguration((hostBuilderContext, configurationBuilder) =>
 {
     if (hostBuilderContext.HostingEnvironment.IsDevelopment())
