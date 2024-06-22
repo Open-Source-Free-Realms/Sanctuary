@@ -20,4 +20,8 @@
     <ProjectReference Include="..\Sanctuary.Database.Entities\Sanctuary.Database.Entities.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>

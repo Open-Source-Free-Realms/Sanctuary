@@ -4,8 +4,6 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace Sanctuary.Database.MySql.Migrations
 {
     /// <inheritdoc />
@@ -167,8 +165,7 @@ namespace Sanctuary.Database.MySql.Migrations
                 name: "Titles",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<int>(type: "int", nullable: false),
                     CharacterGuid = table.Column<ulong>(type: "bigint unsigned", nullable: false)
                 },
                 constraints: table =>
@@ -209,22 +206,6 @@ namespace Sanctuary.Database.MySql.Migrations
                         onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.InsertData(
-                table: "Users",
-                columns: new[] { "Guid", "Created", "IsAdmin", "IsLocked", "IsMember", "LastLogin", "MaxCharacters", "Password", "Session", "Username" },
-                values: new object[,]
-                {
-                    { 1ul, new DateTimeOffset(new DateTime(2024, 5, 6, 20, 0, 51, 494, DateTimeKind.Unspecified).AddTicks(7874), new TimeSpan(0, 1, 0, 0, 0)), true, false, true, null, 10, "admin", "EXmdPd5dbAcs58vZ0iCcPRtJkGdMePL2", "admin" },
-                    { 2ul, new DateTimeOffset(new DateTime(2024, 5, 6, 20, 0, 51, 494, DateTimeKind.Unspecified).AddTicks(7928), new TimeSpan(0, 1, 0, 0, 0)), true, false, true, null, 10, "killerbee", "1APJmw1VTumGsYpnZXoa33hNCHu9Px8E", "killerbee" },
-                    { 3ul, new DateTimeOffset(new DateTime(2024, 5, 6, 20, 0, 51, 494, DateTimeKind.Unspecified).AddTicks(7930), new TimeSpan(0, 1, 0, 0, 0)), true, false, true, null, 10, "stimpy", "NsHCzRqxuswiG4rklc7jqTSFn3RTP2o3", "stimpy" },
-                    { 4ul, new DateTimeOffset(new DateTime(2024, 5, 6, 20, 0, 51, 494, DateTimeKind.Unspecified).AddTicks(7932), new TimeSpan(0, 1, 0, 0, 0)), true, false, true, null, 10, "groaxy", "h5E6K7JFIvgRiY8Biz8BIolMNAw0Yd8O", "groaxy" },
-                    { 5ul, new DateTimeOffset(new DateTime(2024, 5, 6, 20, 0, 51, 494, DateTimeKind.Unspecified).AddTicks(7934), new TimeSpan(0, 1, 0, 0, 0)), true, false, true, null, 10, "edenfps", "bq4uUvkpFG0w$ho292*m$dsh*ODJWBn5", "edenfps" },
-                    { 6ul, new DateTimeOffset(new DateTime(2024, 5, 6, 20, 0, 51, 494, DateTimeKind.Unspecified).AddTicks(7936), new TimeSpan(0, 1, 0, 0, 0)), true, false, true, null, 10, "iratenebrarum", "1K3Rd2SGZTv5PmNOjubxEYU0E9bSNO", "iratenebrarum" },
-                    { 7ul, new DateTimeOffset(new DateTime(2024, 5, 6, 20, 0, 51, 494, DateTimeKind.Unspecified).AddTicks(7938), new TimeSpan(0, 1, 0, 0, 0)), true, false, true, null, 10, "deerlinq", "QiC30YBhBZYUwpSqrN4HXKKihbGfAd", "deerlinq" },
-                    { 8ul, new DateTimeOffset(new DateTime(2024, 5, 6, 20, 0, 51, 494, DateTimeKind.Unspecified).AddTicks(7939), new TimeSpan(0, 1, 0, 0, 0)), true, false, true, null, 10, "blaine", "lMXZNk3OxGeWQcGim15mbRgng59UMu", "blaine" },
-                    { 9ul, new DateTimeOffset(new DateTime(2024, 5, 6, 20, 0, 51, 494, DateTimeKind.Unspecified).AddTicks(7941), new TimeSpan(0, 1, 0, 0, 0)), true, false, true, null, 10, "petwal", "KkQ464KGpMozsHq2RTyKYqw77pN4dP", "petwal" }
-                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Characters_UserGuid",
