@@ -1,0 +1,34 @@
+version: '3'
+volumes:
+  data:
+services:
+  db:
+    container_name: db
+    image: mariadb:11.4.2-noble
+    environment:
+      MYSQL_DATABASE: sanctuary
+      MYSQL_USER: root
+      MYSQL_ROOT_PASSWORD: development
+    volumes:
+      - data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  sanctuary.gateway:
+    container_name: sanctuary.gateway
+    image: gateway
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: src/Sanctuary.Gateway/Dockerfile
+    ports:
+      - "20260:20260/udp"
+    volumes:
+      - data:/app/Logs
+      - ./src/Resources:/app/Resources
+    environment:
+      - Database__Provider=0 # MySql
+      - Database__VersionString=11.4.2-mariadb
+      - Database__ConnectionString=Server=db;Database=sanctuary;Uid=root;Pwd=development;
+    depends_on:
+      - db
