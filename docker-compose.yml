@@ -43,9 +43,7 @@ services:
       dockerfile: src/Sanctuary.Login/Dockerfile
     ports:
       - "20041:20041/udp"
-      - "20041:20041"
       - "20042:20042/udp"
-      - "20042:20042"
     volumes:
       - data:/app/Logs
       - ./src/Resources:/app/Resources
