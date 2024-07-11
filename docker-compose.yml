@@ -30,5 +30,29 @@ services:
       - Database__Provider=0 # MySql
       - Database__VersionString=11.4.2-mariadb
       - Database__ConnectionString=Server=db;Database=sanctuary;Uid=root;Pwd=development;
+      - Server__LoginGatewayAddress=sanctuary.login:20041
+    depends_on:
+      - db
+
+  sanctuary.login:
+    container_name: sanctuary.login
+    image: login
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: src/Sanctuary.Login/Dockerfile
+    ports:
+      - "20041:20041/udp"
+      - "20041:20041"
+      - "20042:20042/udp"
+      - "20042:20042"
+    volumes:
+      - data:/app/Logs
+      - ./src/Resources:/app/Resources
+    environment:
+      - Database__Provider=0 # MySql
+      - Database__VersionString=11.4.2-mariadb
+      - Database__ConnectionString=Server=db;Database=sanctuary;Uid=root;Pwd=development;
+      - Server__LoginGatewayAddress=sanctuary.login:20041
     depends_on:
       - db
