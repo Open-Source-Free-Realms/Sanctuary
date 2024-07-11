@@ -29,9 +29,9 @@ builder.ConfigureAppConfiguration((hostBuilderContext, configurationBuilder) =>
     else
         configurationBuilder.AddJsonFile("database.json", optional: true);
 
-    configurationBuilder.AddEnvironmentVariables();
-
     configurationBuilder.AddJsonFile("login.json", optional: false, reloadOnChange: true);
+    
+    configurationBuilder.AddEnvironmentVariables();
 });
 
 builder.ConfigureServices((hostBuilderContext, serviceCollection) =>
