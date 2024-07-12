@@ -1,17 +1,28 @@
 version: '3.4'
 
+# note: you must have a file called "sanctuary.db" in src/.local_data
+# it can be completely blank initially
 services:
-  db:
-    container_name: db
-    image: mariadb:11.4.2-noble
-    environment:
-      MYSQL_DATABASE: sanctuary
-      MYSQL_USER: root
-      MYSQL_ROOT_PASSWORD: development
-    volumes:
-      - data:/var/lib/mysql
+  sanctuary.gateway:
+    image: ${DOCKER_REGISTRY-}sanctuarygateway
+    build:
+      context: .
+      dockerfile: Sanctuary.Gateway/Dockerfile
+    restart: unless-stopped
     ports:
-      - "3306:3306"
+      - "20260:20260/udp"
+    volumes: &common-volumes
+      - logs:/app/Logs
+      - ./Resources:/app/Resources
+      - ./.local_data/sanctuary.db:/data/sanctuary.db
+    environment: &common-env
+      Database__Provider: 1 # SQLite
+      Database__VersionString: 3.0.0-sqlite
+      Database__ConnectionString: Data Source=/data/sanctuary.db;
+      Server__LoginGatewayAddress: sanctuary.login:20041
+    depends_on:
+      sanctuary.login:
+        condition: service_started
 
   sanctuary.login:
     image: ${DOCKER_REGISTRY-}sanctuarylogin
@@ -22,33 +33,10 @@ services:
     ports:
       - "20041:20041/udp"
       - "20042:20042/udp"
-    volumes:
-      - logs:/app/Logs
-      - ./Resources:/app/Resources
-    environment: &common-env
-      - Database__Provider=0 # MySql
-      - Database__VersionString=11.4.2-mariadb
-      - Database__ConnectionString=Server=db;Database=sanctuary;Uid=root;Pwd=development;
-      - Server__LoginGatewayAddress=sanctuary.login:20041
-    depends_on:
-      - db
-
-  sanctuary.gateway:
-    image: ${DOCKER_REGISTRY-}sanctuarygateway
-    build:
-      context: .
-      dockerfile: Sanctuary.Gateway/Dockerfile
-    restart: unless-stopped
-    ports:
-      - "20260:20260/udp"
-    volumes:
-      - logs:/app/Logs
-      - ./Resources:/app/Resources
-    environment: *common-env
-    depends_on:
-      - db
-      - sanctuary.login
+    volumes: *common-volumes
+    environment:
+      <<: *common-env
+      Server__AutomaticallyMigrateDb: true
 
 volumes:
-  data:
   logs:
