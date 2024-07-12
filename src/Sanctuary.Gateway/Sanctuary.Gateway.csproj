@@ -9,6 +9,7 @@
     <BaseOutputPath>$(SolutionDir)bin</BaseOutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+	<ContainerDevelopmentMode>Regular</ContainerDevelopmentMode>  
   </PropertyGroup>
 
   <ItemGroup>
