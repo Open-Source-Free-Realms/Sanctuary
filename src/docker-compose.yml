@@ -1,0 +1,54 @@
+version: '3.4'
+
+services:
+  db:
+    container_name: db
+    image: mariadb:11.4.2-noble
+    environment:
+      MYSQL_DATABASE: sanctuary
+      MYSQL_USER: root
+      MYSQL_ROOT_PASSWORD: development
+    volumes:
+      - data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  sanctuary.login:
+    image: ${DOCKER_REGISTRY-}sanctuarylogin
+    build:
+      context: .
+      dockerfile: Sanctuary.Login/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "20041:20041/udp"
+      - "20042:20042/udp"
+    volumes:
+      - logs:/app/Logs
+      - ./Resources:/app/Resources
+    environment: &common-env
+      - Database__Provider=0 # MySql
+      - Database__VersionString=11.4.2-mariadb
+      - Database__ConnectionString=Server=db;Database=sanctuary;Uid=root;Pwd=development;
+      - Server__LoginGatewayAddress=sanctuary.login:20041
+    depends_on:
+      - db
+
+  sanctuary.gateway:
+    image: ${DOCKER_REGISTRY-}sanctuarygateway
+    build:
+      context: .
+      dockerfile: Sanctuary.Gateway/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "20260:20260/udp"
+    volumes:
+      - logs:/app/Logs
+      - ./Resources:/app/Resources
+    environment: *common-env
+    depends_on:
+      - db
+      - sanctuary.login
+
+volumes:
+  data:
+  logs:

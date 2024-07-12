@@ -8,9 +8,11 @@
     <UserSecretsId>a8566dff-3d15-47ef-b515-7d41d8e1abee</UserSecretsId>
     <BaseOutputPath>$(SolutionDir)bin</BaseOutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.20.1" />
     <PackageReference Include="NLog" Version="5.3.2" />
     <PackageReference Include="NLog.Extensions.Logging" Version="5.3.11" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
