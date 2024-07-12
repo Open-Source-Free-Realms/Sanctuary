@@ -50,6 +50,10 @@ public class LoginService : BackgroundService
 
             return Task.CompletedTask;
         }
+        else if (_options.AutomaticallyMigrateDb)
+        {
+            dbContext.Database.Migrate();
+        }
 
         // Load resources.
         if (!_resourceManager.Load())

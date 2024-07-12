@@ -32,4 +32,6 @@ public sealed class LoginServerOptions : ServerOptions
     public bool UnlockAllTitles { get; set; }
     public bool UnlockAllMounts { get; set; }
     public bool UnlockAllProfiles { get; set; }
+
+    public bool AutomaticallyMigrateDb { get; set; }
 }
