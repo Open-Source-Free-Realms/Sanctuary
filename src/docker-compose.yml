@@ -14,7 +14,7 @@ services:
     volumes: &common-volumes
       - logs:/app/Logs
       - ./Resources:/app/Resources
-      - ./.local_data/sanctuary.db:/data/sanctuary.db
+      - ./.local_data:/data
     environment: &common-env
       - Database__Provider=1 # SQLite
       - Database__VersionString=3.0.0-sqlite
