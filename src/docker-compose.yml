@@ -16,10 +16,10 @@ services:
       - ./Resources:/app/Resources
       - ./.local_data/sanctuary.db:/data/sanctuary.db
     environment: &common-env
-      Database__Provider: 1 # SQLite
-      Database__VersionString: 3.0.0-sqlite
-      Database__ConnectionString: Data Source=/data/sanctuary.db;
-      Server__LoginGatewayAddress: sanctuary.login:20041
+      - Database__Provider=1 # SQLite
+      - Database__VersionString=3.0.0-sqlite
+      - Database__ConnectionString=Data Source=/data/sanctuary.db;
+      - Server__LoginGatewayAddress=sanctuary.login:20041
     depends_on:
       sanctuary.login:
         condition: service_started
@@ -34,9 +34,7 @@ services:
       - "20041:20041/udp"
       - "20042:20042/udp"
     volumes: *common-volumes
-    environment:
-      <<: *common-env
-      Server__AutomaticallyMigrateDb: true
+    environment: *common-env
 
 volumes:
   logs:
