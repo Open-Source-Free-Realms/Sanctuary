@@ -1,7 +1,7 @@
 ﻿using System.IO;
 
 using Microsoft.Extensions.Logging;
-
+using Sanctuary.Core.Helpers;
 using Sanctuary.Game.Resources;
 
 namespace Sanctuary.Game;
@@ -13,26 +13,26 @@ public class ResourceManager : IResourceManager
 
     public const string BaseDirectory = "Resources";
 
-    public const string HairMappingsFile = @$"{BaseDirectory}\CharacterCreate\HairMappings.txt";
-    public const string HeadMappingsFile = @$"{BaseDirectory}\CharacterCreate\HeadMappings.txt";
-    public const string SkinToneMappingsFile = @$"{BaseDirectory}\CharacterCreate\SkinToneMappings.txt";
-    public const string FacePaintMappingsFile = @$"{BaseDirectory}\CharacterCreate\FacePaintMappings.txt";
-    public const string ModelCustomizationMappingsFile = @$"{BaseDirectory}\CharacterCreate\ModelCustomizationMappings.txt";
+    public readonly string HairMappingsFile = Path.Combine(BaseDirectory, "CharacterCreate", "HairMappings.txt");
+    public readonly string HeadMappingsFile = Path.Combine(BaseDirectory, "CharacterCreate", "HeadMappings.txt");
+    public readonly string SkinToneMappingsFile = Path.Combine(BaseDirectory, "CharacterCreate", "SkinToneMappings.txt");
+    public readonly string FacePaintMappingsFile = Path.Combine(BaseDirectory, "CharacterCreate", "FacePaintMappings.txt");
+    public readonly string ModelCustomizationMappingsFile = Path.Combine(BaseDirectory, "CharacterCreate", "ModelCustomizationMappings.txt");
 
-    public const string ModelsFile = @$"{BaseDirectory}\Models.txt";
+    public readonly string ModelsFile = Path.Combine(BaseDirectory, "Models.txt");
 
-    public const string ItemDefinitionsFile = @$"{BaseDirectory}\ItemDefinitions.txt";
-    public const string ItemClassesFile = @$"{BaseDirectory}\ItemClasses.txt";
-    public const string ItemCategoriesFile = @$"{BaseDirectory}\ItemCategories.txt";
-    public const string ItemCategoryGroupsFile = @$"{BaseDirectory}\ItemCategoryGroups.txt";
+    public readonly string ItemDefinitionsFile = Path.Combine(BaseDirectory, "ItemDefinitions.txt");
+    public readonly string ItemClassesFile = Path.Combine(BaseDirectory, "ItemClasses.txt");
+    public readonly string ItemCategoriesFile = Path.Combine(BaseDirectory, "ItemCategories.txt");
+    public readonly string ItemCategoryGroupsFile = Path.Combine(BaseDirectory, "ItemCategoryGroups.txt");
 
-    public const string ZonesFile = @$"{BaseDirectory}\Zones.json";
-    public const string ZonesDirectory = @$"{BaseDirectory}\Zones";
-    public const string MountsFile = @$"{BaseDirectory}\Mounts.json";
-    public const string ProfilesFile = @$"{BaseDirectory}\Profiles.json";
-    public const string QuickChatsFile = @$"{BaseDirectory}\QuickChats.json";
-    public const string PlayerTitlesFile = @$"{BaseDirectory}\PlayerTitles.json";
-    public const string PointOfInterestsFile = @$"{BaseDirectory}\PointOfInterests.json";
+    public readonly string ZonesFile = Path.Combine(BaseDirectory, "Zones.json");
+    public readonly string ZonesDirectory = Path.Combine(BaseDirectory, "Zones");
+    public readonly string MountsFile = Path.Combine(BaseDirectory, "Mounts.json");
+    public readonly string ProfilesFile = Path.Combine(BaseDirectory, "Profiles.json");
+    public readonly string QuickChatsFile = Path.Combine(BaseDirectory, "QuickChats.json");
+    public readonly string PlayerTitlesFile = Path.Combine(BaseDirectory, "PlayerTitles.json");
+    public readonly string PointOfInterestsFile = Path.Combine(BaseDirectory, "PointOfInterests.json");
 
     public IdToStringLookup HairMappings { get; }
     public IdToStringLookup HeadMappings { get; }
@@ -142,32 +142,34 @@ public class ResourceManager : IResourceManager
         {
             _fileSystemWatcher.EnableRaisingEvents = false;
 
-            switch (e.FullPath)
+            var filePath = e.FullPath;
+            new Switch()
             {
-                case HairMappingsFile: HairMappings.Load(HairMappingsFile); break;
-                case HeadMappingsFile: HeadMappings.Load(HeadMappingsFile); break;
-                case SkinToneMappingsFile: SkinToneMappings.Load(SkinToneMappingsFile); break;
-                case FacePaintMappingsFile: FacePaintMappings.Load(FacePaintMappingsFile); break;
-                case ModelCustomizationMappingsFile: ModelCustomizationMappings.Load(ModelCustomizationMappingsFile); break;
+                { () => filePath == HairMappingsFile, () => HairMappings.Load(HairMappingsFile) },
+                { () => filePath == HeadMappingsFile, () => HeadMappings.Load(HeadMappingsFile) },
+                { () => filePath == SkinToneMappingsFile, () => SkinToneMappings.Load(SkinToneMappingsFile) },
+                { () => filePath == FacePaintMappingsFile, () => FacePaintMappings.Load(FacePaintMappingsFile) },
+                { () => filePath == ModelCustomizationMappingsFile, () => ModelCustomizationMappings.Load(ModelCustomizationMappingsFile) },
+                
+                { () => filePath == ModelsFile, () => Models.Load(ModelsFile) },
 
-                case ModelsFile: Models.Load(ModelsFile); break;
+                { () => filePath == ItemDefinitionsFile, () => ItemDefinitions.Load(ItemDefinitionsFile) },
+                { () => filePath == ItemClassesFile, () => ItemClasses.Load(ItemClassesFile) },
+                { () => filePath == ItemCategoriesFile, () => ItemCategories.Load(ItemCategoriesFile) },
+                { () => filePath == ItemCategoryGroupsFile, () => ItemCategoryGroups.Load(ItemCategoryGroupsFile) },
 
-                case ItemDefinitionsFile: ItemDefinitions.Load(ItemDefinitionsFile); break;
-                case ItemClassesFile: ItemClasses.Load(ItemClassesFile); break;
-                case ItemCategoriesFile: ItemCategories.Load(ItemCategoriesFile); break;
-                case ItemCategoryGroupsFile: ItemCategoryGroups.Load(ItemCategoryGroupsFile); break;
+                { () => filePath == ZonesFile, () => Zones.Load(ZonesFile, ZonesDirectory) },
+                { () => filePath == MountsFile, () => Mounts.Load(MountsFile) },
+                { () => filePath == ProfilesFile, () => Profiles.Load(ProfilesFile) },
+                { () => filePath == QuickChatsFile, () => QuickChats.Load(QuickChatsFile) },
+                { () => filePath == PlayerTitlesFile, () => PlayerTitles.Load(PlayerTitlesFile) },
+                { () => filePath == PointOfInterestsFile, () => PointOfInterests.Load(PointOfInterestsFile) },
 
-                case ZonesFile: Zones.Load(ZonesFile, ZonesDirectory); break;
-                case MountsFile: Mounts.Load(MountsFile); break;
-                case ProfilesFile: Profiles.Load(ProfilesFile); break;
-                case QuickChatsFile: QuickChats.Load(QuickChatsFile); break;
-                case PlayerTitlesFile: PlayerTitles.Load(PlayerTitlesFile); break;
-                case PointOfInterestsFile: PointOfInterests.Load(PointOfInterestsFile); break;
-
-                default:
-                    _logger.LogWarning("Unknown file changed. File: {filepath}", e.FullPath);
-                    break;
-            }
+                {
+                    () => true /* fallback case */,
+                    () => _logger.LogWarning("Unknown file changed. File: {filepath}", e.FullPath)
+                }
+            }.Execute();
         }
         finally
         {

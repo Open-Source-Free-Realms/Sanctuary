@@ -26,9 +26,11 @@ builder.ConfigureAppConfiguration((hostBuilderContext, configurationBuilder) =>
     if (hostBuilderContext.HostingEnvironment.IsDevelopment())
         configurationBuilder.AddUserSecrets<Program>();
     else
-        configurationBuilder.AddJsonFile("database.json");
+        configurationBuilder.AddJsonFile("database.json", optional: true);
 
     configurationBuilder.AddJsonFile("gateway.json", optional: false, reloadOnChange: true);
+    
+    configurationBuilder.AddEnvironmentVariables();
 });
 
 builder.ConfigureServices((hostBuilderContext, serviceCollection) =>

@@ -1,0 +1,40 @@
+version: '3.4'
+
+# note: you must have a file called "sanctuary.db" in src/.local_data
+# it can be completely blank initially
+services:
+  sanctuary.gateway:
+    image: ${DOCKER_REGISTRY-}sanctuarygateway
+    build:
+      context: .
+      dockerfile: Sanctuary.Gateway/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "20260:20260/udp"
+    volumes: &common-volumes
+      - logs:/app/Logs
+      - ./Resources:/app/Resources
+      - ./.local_data:/data
+    environment: &common-env
+      - Database__Provider=1 # SQLite
+      - Database__VersionString=3.0.0-sqlite
+      - Database__ConnectionString=Data Source=/data/sanctuary.db;
+      - Server__LoginGatewayAddress=sanctuary.login:20041
+    depends_on:
+      sanctuary.login:
+        condition: service_started
+
+  sanctuary.login:
+    image: ${DOCKER_REGISTRY-}sanctuarylogin
+    build:
+      context: .
+      dockerfile: Sanctuary.Login/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "20041:20041/udp"
+      - "20042:20042/udp"
+    volumes: *common-volumes
+    environment: *common-env
+
+volumes:
+  logs:

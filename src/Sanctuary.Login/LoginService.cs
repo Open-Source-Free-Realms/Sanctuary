@@ -42,9 +42,13 @@ public class LoginService : BackgroundService
         // Test we can connect to the database.
         using var dbContext = _dbContextFactory.CreateDbContext();
 
-        if (!dbContext.Database.CanConnect())
+        try
         {
-            _logger.LogCritical("Cannot start {server}. Failed to reach database.", nameof(LoginService));
+            dbContext.Database.Migrate();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogCritical(ex, "Cannot start {server}. Failed to reach database.", nameof(LoginService));
 
             _hostApplicationLifetime.StopApplication();
 

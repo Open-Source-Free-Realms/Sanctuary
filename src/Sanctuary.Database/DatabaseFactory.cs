@@ -34,15 +34,18 @@ internal class DatabaseFactory : IDesignTimeDbContextFactory<DatabaseContext>
         switch (databaseOptions.Provider)
         {
             case DatabaseProvider.MySql:
-                builder.UseMySql(databaseOptions.ConnectionString, ServerVersion.Parse(databaseOptions.VersionString), x => x.MigrationsAssembly(providerAssembly));
+                builder.UseMySql(databaseOptions.ConnectionString, ServerVersion.Parse(databaseOptions.VersionString),
+                    x => x.EnableRetryOnFailure().MigrationsAssembly(providerAssembly));
                 break;
 
             case DatabaseProvider.Sqlite:
-                builder.UseSqlite(databaseOptions.ConnectionString, x => x.MigrationsAssembly(providerAssembly));
+                builder.UseSqlite(databaseOptions.ConnectionString,
+                    x => x.MigrationsAssembly(providerAssembly));
                 break;
 
             case DatabaseProvider.SqlServer:
-                builder.UseSqlServer(databaseOptions.ConnectionString, x => x.MigrationsAssembly(providerAssembly));
+                builder.UseSqlServer(databaseOptions.ConnectionString,
+                    x => x.EnableRetryOnFailure().MigrationsAssembly(providerAssembly));
                 break;
 
             default:
