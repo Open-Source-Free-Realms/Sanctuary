@@ -29,16 +29,14 @@ public static class CommandPacketInteractionSelectHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(CommandPacketInteractionSelect), packet);
 
-        // TODO
-
-        // TEST: Remove Entity Event
-        /* if (packet.EventId == 999999)
+        // Remove Entity Event
+        if (packet.EventId == 999999)
         {
             if (!connection.Player.VisibleEntities.TryGetValue(packet.Guid, out var entity))
                 return true;
 
             connection.Player.Zone.RemoveEntity(entity);
-        } */
+        }
 
         return true;
     }
