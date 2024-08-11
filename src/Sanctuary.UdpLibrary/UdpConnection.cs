@@ -11,6 +11,7 @@ using Sanctuary.UdpLibrary.Abstractions;
 using Sanctuary.UdpLibrary.Enumerations;
 using Sanctuary.UdpLibrary.Packets;
 using Sanctuary.UdpLibrary.Statistics;
+using System.Threading;
 
 namespace Sanctuary.UdpLibrary;
 
@@ -19,9 +20,8 @@ namespace Sanctuary.UdpLibrary;
 /// </summary>
 public class UdpConnection : PriorityQueueMember
 {
-    // Switch to `System.Threading.Lock` in .NET 9
-    private readonly object _guard = new();
-    private readonly object _handlerGuard = new();
+    private readonly Lock _guard = new();
+    private readonly Lock _handlerGuard = new();
 
     public IPEndPoint EndPoint { get; internal set; }
     public SocketAddress SocketAddress { get; internal set; }
