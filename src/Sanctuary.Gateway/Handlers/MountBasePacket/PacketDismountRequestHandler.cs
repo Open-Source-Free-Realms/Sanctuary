@@ -47,7 +47,7 @@ public static class PacketDismountRequestHandler
             visibleEntity.Value.OnEntityRemove(connection.Player.Mount);
         }
 
-        connection.Player.Mount = null;
+        connection.Player.Mount.Dispose();
 
         connection.Player.UpdateCharacterStats(
             CharacterStats.MaxMovementSpeed.Set(8f),
