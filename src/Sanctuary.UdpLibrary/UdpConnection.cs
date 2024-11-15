@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Diagnostics;
 using System.Buffers.Binary;
 using System.Runtime.InteropServices;
@@ -19,9 +20,8 @@ namespace Sanctuary.UdpLibrary;
 /// </summary>
 public class UdpConnection : PriorityQueueMember
 {
-    // Switch to `System.Threading.Lock` in .NET 9
-    private readonly object _guard = new();
-    private readonly object _handlerGuard = new();
+    private readonly Lock _guard = new();
+    private readonly Lock _handlerGuard = new();
 
     public IPEndPoint EndPoint { get; internal set; }
     public SocketAddress SocketAddress { get; internal set; }

@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Net;
-using System.Linq;
 using System.Threading;
 using System.Net.Sockets;
+using System.Collections.Frozen;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -17,9 +18,6 @@ using Sanctuary.UdpLibrary.Enumerations;
 using Sanctuary.UdpLibrary.Packets;
 using Sanctuary.UdpLibrary.Statistics;
 using Sanctuary.UdpLibrary.Configuration;
-using System.Diagnostics;
-using System.Collections.Frozen;
-using System.Collections.Concurrent;
 
 namespace Sanctuary.UdpLibrary;
 
@@ -37,17 +35,16 @@ namespace Sanctuary.UdpLibrary;
 /// </summary>
 public class UdpManager<TConnection> : IUdpManager, IDisposable where TConnection : UdpConnection
 {
-    // TODO: Switch to `System.Threading.Lock` in .NET 9
-    private readonly object _clockGuard = new();
-    // private readonly object _poolGuard = new();
-    private readonly object _eventListGuard = new();
-    private readonly object _availableEventGuard = new();
-    private readonly object _statsGuard = new();
-    private readonly object _disconnectPendingGuard = new();
-    // private readonly object _simulateGuard = new();
-    private readonly object _giveTimeGuard = new();
-    private readonly object _connectionGuard = new();
-    private readonly object _handlerGuard = new();
+    private readonly Lock _clockGuard = new();
+    // private readonly Lock _poolGuard = new();
+    private readonly Lock _eventListGuard = new();
+    private readonly Lock _availableEventGuard = new();
+    private readonly Lock _statsGuard = new();
+    private readonly Lock _disconnectPendingGuard = new();
+    // private readonly Lock _simulateGuard = new();
+    private readonly Lock _giveTimeGuard = new();
+    private readonly Lock _connectionGuard = new();
+    private readonly Lock _handlerGuard = new();
 
     public UdpClockStamp CachedClock { get; private set; }
 
