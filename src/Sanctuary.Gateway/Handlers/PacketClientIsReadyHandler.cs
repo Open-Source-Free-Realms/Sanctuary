@@ -61,7 +61,7 @@ public static class PacketClientIsReadyHandler
     {
         var quickChatSendDataPacket = new QuickChatSendDataPacket();
 
-        quickChatSendDataPacket.QuickChats = quickChatSendDataPacket.QuickChats.ToDictionary();
+        quickChatSendDataPacket.QuickChats = _resourceManager.QuickChats.ToDictionary();
 
         connection.SendTunneled(quickChatSendDataPacket);
     }
