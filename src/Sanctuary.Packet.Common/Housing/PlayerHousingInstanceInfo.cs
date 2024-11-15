@@ -45,8 +45,8 @@ public class PlayerHousingInstanceInfo : ISerializableType
 
         writer.Write(NameId);
 
-        writer.Write(OwnerName);
         writer.Write(HouseName);
+        writer.Write(OwnerName);
 
         writer.Write(IconId);
         writer.Write(FixtureCount);
