@@ -76,7 +76,7 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.Property<DateTimeOffset>("Created")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasDefaultValueSql("CURDATE()");
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<int>("EyeColor")
                         .HasColumnType("int");
@@ -86,7 +86,8 @@ namespace Sanctuary.Database.MySql.Migrations
 
                     b.Property<string>("FirstName")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(16)
+                        .HasColumnType("varchar(16)");
 
                     b.Property<int>("Gender")
                         .HasColumnType("int");
@@ -106,7 +107,8 @@ namespace Sanctuary.Database.MySql.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("LastName")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(16)
+                        .HasColumnType("varchar(16)");
 
                     b.Property<int>("MembershipStatus")
                         .HasColumnType("int");
@@ -183,7 +185,7 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.Property<DateTimeOffset>("Created")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasDefaultValueSql("CURDATE()");
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<int>("Definition")
                         .HasColumnType("int");
@@ -209,7 +211,7 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.Property<DateTimeOffset>("Created")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasDefaultValueSql("CURDATE()");
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<bool>("IsUpgraded")
                         .HasColumnType("tinyint(1)");
@@ -268,16 +270,22 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.Property<DateTimeOffset>("Created")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
-                        .HasDefaultValueSql("CURDATE()");
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<bool>("IsAdmin")
-                        .HasColumnType("tinyint(1)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
 
                     b.Property<bool>("IsLocked")
-                        .HasColumnType("tinyint(1)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
 
                     b.Property<bool>("IsMember")
-                        .HasColumnType("tinyint(1)");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
 
                     b.Property<DateTimeOffset?>("LastLogin")
                         .HasColumnType("datetime(6)");
@@ -289,14 +297,20 @@ namespace Sanctuary.Database.MySql.Migrations
 
                     b.Property<string>("Password")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(254)
+                        .HasColumnType("varchar(254)");
 
                     b.Property<string>("Session")
-                        .HasColumnType("longtext");
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)");
+
+                    b.Property<DateTimeOffset?>("SessionCreated")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(254)
+                        .HasColumnType("varchar(254)");
 
                     b.HasKey("Guid");
 

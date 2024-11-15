@@ -3,34 +3,42 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Sanctuary.Database;
 
 #nullable disable
 
-namespace Sanctuary.Database.Sqlite.Migrations
+namespace Sanctuary.Database.MySql.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20240804204226_Initial")]
+    partial class Initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.6");
+            modelBuilder
+                .HasAnnotation("ProductVersion", "8.0.6")
+                .HasAnnotation("Relational:MaxIdentifierLength", 64);
+
+            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
             modelBuilder.Entity("DbItemDbProfile", b =>
                 {
                     b.Property<int>("ItemsId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<ulong>("ItemsCharacterGuid")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bigint unsigned");
 
                     b.Property<int>("ProfilesId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<ulong>("ProfilesCharacterGuid")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bigint unsigned");
 
                     b.HasKey("ItemsId", "ItemsCharacterGuid", "ProfilesId", "ProfilesCharacterGuid");
 
@@ -43,114 +51,118 @@ namespace Sanctuary.Database.Sqlite.Migrations
                 {
                     b.Property<ulong>("Guid")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bigint unsigned");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<ulong>("Guid"));
 
                     b.Property<int>("ActiveProfileId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int?>("ActiveTitleId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("ChatBubbleBackgroundColor")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("int")
                         .HasDefaultValue(13951728);
 
                     b.Property<int>("ChatBubbleForegroundColor")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("int")
                         .HasDefaultValue(408679);
 
                     b.Property<int>("ChatBubbleSize")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("int")
                         .HasDefaultValue(1);
 
                     b.Property<DateTimeOffset>("Created")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValueSql("DATE()");
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<int>("EyeColor")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<string>("FacePaint")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasMaxLength(16)
+                        .HasColumnType("varchar(16)");
 
                     b.Property<int>("Gender")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<string>("Hair")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("longtext");
 
                     b.Property<int>("HairColor")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<string>("Head")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("longtext");
 
                     b.Property<DateTimeOffset?>("LastLogin")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("LastName")
-                        .HasColumnType("TEXT");
+                        .HasMaxLength(16)
+                        .HasColumnType("varchar(16)");
 
                     b.Property<int>("MembershipStatus")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("Model")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<string>("ModelCustomization")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("longtext");
 
                     b.Property<string>("SkinTone")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("longtext");
 
                     b.Property<Guid?>("Ticket")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("char(36)");
 
                     b.Property<ulong>("UserGuid")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bigint unsigned");
 
                     b.Property<float>("VipRank")
-                        .HasColumnType("REAL");
+                        .HasColumnType("float");
 
                     b.ComplexProperty<Dictionary<string, object>>("Position", "Sanctuary.Database.Entities.DbCharacter.Position#Vector4", b1 =>
                         {
                             b1.Property<float>("W")
-                                .HasColumnType("REAL");
+                                .HasColumnType("float");
 
                             b1.Property<float>("X")
-                                .HasColumnType("REAL");
+                                .HasColumnType("float");
 
                             b1.Property<float>("Y")
-                                .HasColumnType("REAL");
+                                .HasColumnType("float");
 
                             b1.Property<float>("Z")
-                                .HasColumnType("REAL");
+                                .HasColumnType("float");
                         });
 
                     b.ComplexProperty<Dictionary<string, object>>("Rotation", "Sanctuary.Database.Entities.DbCharacter.Rotation#Quaternion", b1 =>
                         {
                             b1.Property<float>("W")
-                                .HasColumnType("REAL");
+                                .HasColumnType("float");
 
                             b1.Property<float>("X")
-                                .HasColumnType("REAL");
+                                .HasColumnType("float");
 
                             b1.Property<float>("Y")
-                                .HasColumnType("REAL");
+                                .HasColumnType("float");
 
                             b1.Property<float>("Z")
-                                .HasColumnType("REAL");
+                                .HasColumnType("float");
                         });
 
                     b.HasKey("Guid");
@@ -163,26 +175,26 @@ namespace Sanctuary.Database.Sqlite.Migrations
             modelBuilder.Entity("Sanctuary.Database.Entities.DbItem", b =>
                 {
                     b.Property<int>("Id")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<ulong>("CharacterGuid")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bigint unsigned");
 
                     b.Property<int>("Count")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("int")
                         .HasDefaultValue(1);
 
                     b.Property<DateTimeOffset>("Created")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValueSql("DATE()");
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<int>("Definition")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("Tint")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("Id", "CharacterGuid");
 
@@ -194,18 +206,18 @@ namespace Sanctuary.Database.Sqlite.Migrations
             modelBuilder.Entity("Sanctuary.Database.Entities.DbMount", b =>
                 {
                     b.Property<int>("Id")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<ulong>("CharacterGuid")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bigint unsigned");
 
                     b.Property<DateTimeOffset>("Created")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValueSql("DATE()");
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<bool>("IsUpgraded")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("tinyint(1)");
 
                     b.HasKey("Id", "CharacterGuid");
 
@@ -217,16 +229,16 @@ namespace Sanctuary.Database.Sqlite.Migrations
             modelBuilder.Entity("Sanctuary.Database.Entities.DbProfile", b =>
                 {
                     b.Property<int>("Id")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<ulong>("CharacterGuid")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bigint unsigned");
 
                     b.Property<int>("Level")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("LevelXP")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("Id", "CharacterGuid");
 
@@ -238,10 +250,10 @@ namespace Sanctuary.Database.Sqlite.Migrations
             modelBuilder.Entity("Sanctuary.Database.Entities.DbTitle", b =>
                 {
                     b.Property<int>("Id")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<ulong>("CharacterGuid")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bigint unsigned");
 
                     b.HasKey("Id", "CharacterGuid");
 
@@ -254,58 +266,58 @@ namespace Sanctuary.Database.Sqlite.Migrations
                 {
                     b.Property<ulong>("Guid")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bigint unsigned");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<ulong>("Guid"));
 
                     b.Property<DateTimeOffset>("Created")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValueSql("DATE()");
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("NOW()");
 
                     b.Property<bool>("IsAdmin")
-                        .HasColumnType("INTEGER");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
 
                     b.Property<bool>("IsLocked")
-                        .HasColumnType("INTEGER");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
 
                     b.Property<bool>("IsMember")
-                        .HasColumnType("INTEGER");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
 
                     b.Property<DateTimeOffset?>("LastLogin")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<int>("MaxCharacters")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
+                        .HasColumnType("int")
                         .HasDefaultValue(10);
 
                     b.Property<string>("Password")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasMaxLength(254)
+                        .HasColumnType("varchar(254)");
 
                     b.Property<string>("Session")
-                        .HasColumnType("TEXT");
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)");
+
+                    b.Property<DateTimeOffset?>("SessionCreated")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasMaxLength(254)
+                        .HasColumnType("varchar(254)");
 
                     b.HasKey("Guid");
 
                     b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            Guid = 1ul,
-                            Created = new DateTimeOffset(new DateTime(2024, 6, 22, 13, 51, 13, 273, DateTimeKind.Unspecified).AddTicks(6902), new TimeSpan(0, 1, 0, 0, 0)),
-                            IsAdmin = true,
-                            IsLocked = false,
-                            IsMember = true,
-                            MaxCharacters = 10,
-                            Password = "admin",
-                            Session = "EXmdPd5dbAcs58vZ0iCcPRtJkGdMePL2",
-                            Username = "admin"
-                        });
                 });
 
             modelBuilder.Entity("DbItemDbProfile", b =>

@@ -14,8 +14,8 @@ public sealed class DbCharacterConfiguration : IEntityTypeConfiguration<DbCharac
 
         builder.Property(c => c.Ticket).IsRequired(false);
 
-        builder.Property(c => c.FirstName).IsRequired();
-        builder.Property(c => c.LastName).IsRequired(false);
+        builder.Property(c => c.FirstName).IsRequired().HasMaxLength(16);
+        builder.Property(c => c.LastName).IsRequired(false).HasMaxLength(16);
 
         builder.Property(c => c.Model).IsRequired();
         builder.Property(c => c.Head).IsRequired();
@@ -44,7 +44,7 @@ public sealed class DbCharacterConfiguration : IEntityTypeConfiguration<DbCharac
         builder.Property(c => c.ChatBubbleBackgroundColor).IsRequired().HasDefaultValue(0xD4E2F0);
         builder.Property(c => c.ChatBubbleSize).IsRequired().HasDefaultValue(1);
 
-        builder.Property(c => c.Created).IsRequired().HasDefaultValueSql("CURDATE()");
+        builder.Property(c => c.Created).IsRequired().HasDefaultValueSql("NOW()");
         builder.Property(c => c.LastLogin).IsRequired(false);
 
         builder.HasMany(c => c.Items)

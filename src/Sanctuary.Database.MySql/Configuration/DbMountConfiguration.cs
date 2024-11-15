@@ -14,6 +14,6 @@ public sealed class DbMountConfiguration : IEntityTypeConfiguration<DbMount>
 
         builder.Property(p => p.IsUpgraded).IsRequired();
 
-        builder.Property(i => i.Created).IsRequired().HasDefaultValueSql("CURDATE()");
+        builder.Property(i => i.Created).IsRequired().HasDefaultValueSql("NOW()");
     }
 }

@@ -16,6 +16,6 @@ public sealed class DbItemConfiguration : IEntityTypeConfiguration<DbItem>
         builder.Property(i => i.Count).IsRequired().HasDefaultValue(1);
         builder.Property(i => i.Definition).IsRequired();
 
-        builder.Property(i => i.Created).IsRequired().HasDefaultValueSql("CURDATE()");
+        builder.Property(i => i.Created).IsRequired().HasDefaultValueSql("NOW()");
     }
 }
