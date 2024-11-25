@@ -10,5 +10,7 @@
   <ItemGroup>
     <None Include=".dockerignore" />
     <None Include="docker-compose.yml" />
+    <None Include="Sanctuary.Login.dockerfile" />
+    <None Include="Sanctuary.Gateway.dockerfile" />
   </ItemGroup>
 </Project>

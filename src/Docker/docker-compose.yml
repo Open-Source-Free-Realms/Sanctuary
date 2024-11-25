@@ -1,13 +1,9 @@
-version: '3.4'
-
-# note: you must have a file called "sanctuary.db" in src/.local_data
-# it can be completely blank initially
 services:
   sanctuary.gateway:
-    image: ${DOCKER_REGISTRY-}sanctuarygateway
+    image: ${DOCKER_REGISTRY-}sanctuary-gateway
     build:
-      context: .
-      dockerfile: Sanctuary.Gateway/Dockerfile
+      context: ../
+      dockerfile: Docker/Sanctuary.Gateway.dockerfile
     restart: unless-stopped
     ports:
       - "20260:20260/udp"
@@ -25,10 +21,10 @@ services:
         condition: service_started
 
   sanctuary.login:
-    image: ${DOCKER_REGISTRY-}sanctuarylogin
+    image: ${DOCKER_REGISTRY-}sanctuary-login
     build:
-      context: .
-      dockerfile: Sanctuary.Login/Dockerfile
+      context: ../
+      dockerfile: Docker/Sanctuary.Login.dockerfile
     restart: unless-stopped
     ports:
       - "20041:20041/udp"
