@@ -41,7 +41,7 @@ public class FixtureDefinition : ISerializableType
         }
     }
 
-    public int Unknown13;
+    public int CompositeEffectId;
     public float Unknown14;
     public float Unknown15;
 
@@ -70,7 +70,7 @@ public class FixtureDefinition : ISerializableType
 
         writer.Write(Actions);
 
-        writer.Write(Unknown13);
+        writer.Write(CompositeEffectId);
         writer.Write(Unknown14);
         writer.Write(Unknown15);
 

@@ -10,8 +10,8 @@ public class Ability : ISerializableType
     // 3 - AbilityDefinition
     public int Type;
     public int Unknown2;
-    public int Unknown3;
-    public int Unknown4;
+    public int ManaCost;
+    public int ItemDefinitionId;
     public int IconId;
     public int NameId;
     public int Unknown7;
@@ -31,11 +31,11 @@ public class Ability : ISerializableType
         if (Type == 1 || Type == 3)
         {
             writer.Write(Unknown2);
-            writer.Write(Unknown3);
+            writer.Write(ManaCost);
         }
         else if (Type == 2)
         {
-            writer.Write(Unknown4);
+            writer.Write(ItemDefinitionId);
         }
 
         writer.Write(IconId);

@@ -20,7 +20,7 @@ public class PacketSendZoneDetails : ISerializablePacket
 
     public string? Sky;
 
-    public bool InCombatZone;
+    public bool IsInArena;
 
     public int Id;
 
@@ -43,7 +43,7 @@ public class PacketSendZoneDetails : ISerializablePacket
 
         writer.Write(Sky);
 
-        writer.Write(InCombatZone);
+        writer.Write(IsInArena);
 
         writer.Write(Id);
 
