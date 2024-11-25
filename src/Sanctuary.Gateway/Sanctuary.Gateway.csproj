@@ -4,12 +4,11 @@
     <Nullable>enable</Nullable>
     <OutputType>Exe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <UserSecretsId>a8566dff-3d15-47ef-b515-7d41d8e1abee</UserSecretsId>
     <BaseOutputPath>$(SolutionDir)bin</BaseOutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <ContainerDevelopmentMode>Regular</ContainerDevelopmentMode>  
+    <ContainerDevelopmentMode>Regular</ContainerDevelopmentMode>
   </PropertyGroup>
 
   <ItemGroup>

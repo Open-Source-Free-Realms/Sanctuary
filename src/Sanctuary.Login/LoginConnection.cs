@@ -1,7 +1,5 @@
 ﻿using System;
-using System.IO;
 using System.Net;
-using System.IO.Compression;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -119,32 +117,14 @@ public class LoginConnection : UdpConnection
 
     #region Packet Compression
 
-    protected override unsafe int DecryptUserSupplied(Span<byte> destData, Span<byte> sourceData)
+    protected override int DecryptUserSupplied(Span<byte> destData, Span<byte> sourceData)
     {
         if (!_options.UseCompression)
             return base.DecryptUserSupplied(destData, sourceData);
 
         if (sourceData[0] == 1)
         {
-            // I don't like the fact we have to use unsafe code here but I couldn't
-            // find another way to create a stream without copying the data.
-            fixed (byte* pDestData = &destData[0])
-            {
-                fixed (byte* pSourceData = &sourceData[1])
-                {
-                    using var destStream = new UnmanagedMemoryStream(pDestData, destData.Length);
-                    using var sourceStream = new UnmanagedMemoryStream(pSourceData, sourceData.Length);
-
-                    using var zLibStream = new ZLibStream(sourceStream, CompressionMode.Decompress);
-
-                    if (zLibStream.BaseStream.Length < 0)
-                        return -1;
-
-                    zLibStream.CopyTo(destStream);
-
-                    return (int)destStream.Position;
-                }
-            }
+            return ZLib.Decompress(sourceData.Slice(1), destData);
         }
         else
         {
@@ -154,50 +134,28 @@ public class LoginConnection : UdpConnection
         }
     }
 
-    protected override unsafe int EncryptUserSupplied(Span<byte> destData, Span<byte> sourceData)
+    protected override int EncryptUserSupplied(Span<byte> destData, Span<byte> sourceData)
     {
         if (!_options.UseCompression)
             return base.EncryptUserSupplied(destData, sourceData);
 
-        // Don't bother compressing
-        if (sourceData.Length < 24)
+        if (sourceData.Length >= 24)
         {
-            destData[0] = 0;
+            var compressedLength = ZLib.Compress(sourceData, destData.Slice(1));
 
-            sourceData.CopyTo(destData.Slice(1));
-
-            return sourceData.Length + 1;
-        }
-
-        // I don't like the fact we have to use unsafe code here but I couldn't
-        // find another way to create a stream without copying the data.
-        fixed (byte* pDestData = &destData[1])
-        {
-            fixed (byte* pSourceData = &sourceData[0])
+            if (compressedLength > 0 && compressedLength < sourceData.Length)
             {
-                using var destStream = new UnmanagedMemoryStream(pDestData, destData.Length);
-                using var sourceStream = new UnmanagedMemoryStream(pSourceData, sourceData.Length);
+                destData[0] = 1;
 
-                using (var zLibStream = new ZLibStream(destStream, CompressionMode.Compress, true))
-                {
-                    destData[0] = 1;
-
-                    sourceStream.CopyTo(zLibStream);
-                }
-
-                // Compressing ended up being worse
-                if (destStream.Position > sourceData.Length)
-                {
-                    destData[0] = 0;
-
-                    sourceData.CopyTo(destData.Slice(1));
-
-                    return sourceData.Length + 1;
-                }
-
-                return (int)destStream.Position + 1;
+                return compressedLength + 1;
             }
         }
+
+        destData[0] = 0;
+
+        sourceData.CopyTo(destData.Slice(1));
+
+        return sourceData.Length + 1;
     }
 
     #endregion

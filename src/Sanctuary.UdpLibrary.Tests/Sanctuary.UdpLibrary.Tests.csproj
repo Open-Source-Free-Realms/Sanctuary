@@ -4,7 +4,6 @@
     <Nullable>enable</Nullable>
     <OutputType>Exe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>

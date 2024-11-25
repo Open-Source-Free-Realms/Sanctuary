@@ -4,7 +4,6 @@
     <Nullable>enable</Nullable>
     <OutputType>Exe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <UserSecretsId>5e8f08a4-8f06-49c6-a685-3e1cb2a8a9ea</UserSecretsId>
     <BaseOutputPath>$(SolutionDir)bin</BaseOutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
