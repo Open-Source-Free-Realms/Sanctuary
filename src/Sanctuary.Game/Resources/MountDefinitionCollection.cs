@@ -40,7 +40,7 @@ public class MountDefinitionCollection : ObservableConcurrentDictionary<int, Mou
             using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             using var streamReader = new StreamReader(fileStream);
 
-            var list = JsonSerializer.Deserialize<Dictionary<int, MountDefinition>>(streamReader.ReadToEnd());
+            var list = JsonSerializer.Deserialize<List<MountDefinition>>(streamReader.ReadToEnd());
 
             if (list is null)
             {
@@ -50,9 +50,9 @@ public class MountDefinitionCollection : ObservableConcurrentDictionary<int, Mou
 
             foreach (var entry in list)
             {
-                if (!TryAdd(entry.Key, entry.Value))
+                if (!TryAdd(entry.Id, entry))
                 {
-                    _logger.LogWarning("Failed to add entry to dictionary. \"{entryId}\".", entry.Key);
+                    _logger.LogWarning("Failed to add entry. {id} \"{file}\"", entry.Id, filePath);
                     return false;
                 }
             }

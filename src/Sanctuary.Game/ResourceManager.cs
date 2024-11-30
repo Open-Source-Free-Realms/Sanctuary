@@ -1,7 +1,7 @@
 ﻿using System.IO;
 
 using Microsoft.Extensions.Logging;
-using Sanctuary.Core.Helpers;
+
 using Sanctuary.Game.Resources;
 
 namespace Sanctuary.Game;
@@ -11,28 +11,29 @@ public class ResourceManager : IResourceManager
     private ILogger _logger;
     private FileSystemWatcher _fileSystemWatcher;
 
-    public const string BaseDirectory = "Resources";
+    public static readonly string BaseDirectory = "Resources";
 
-    public readonly string HairMappingsFile = Path.Combine(BaseDirectory, "CharacterCreate", "HairMappings.txt");
-    public readonly string HeadMappingsFile = Path.Combine(BaseDirectory, "CharacterCreate", "HeadMappings.txt");
-    public readonly string SkinToneMappingsFile = Path.Combine(BaseDirectory, "CharacterCreate", "SkinToneMappings.txt");
-    public readonly string FacePaintMappingsFile = Path.Combine(BaseDirectory, "CharacterCreate", "FacePaintMappings.txt");
-    public readonly string ModelCustomizationMappingsFile = Path.Combine(BaseDirectory, "CharacterCreate", "ModelCustomizationMappings.txt");
+    public static readonly string HairMappingsFile = Path.Combine(BaseDirectory, "CharacterCreate", "HairMappings.txt");
+    public static readonly string HeadMappingsFile = Path.Combine(BaseDirectory, "CharacterCreate", "HeadMappings.txt");
+    public static readonly string SkinToneMappingsFile = Path.Combine(BaseDirectory, "CharacterCreate", "SkinToneMappings.txt");
+    public static readonly string FacePaintMappingsFile = Path.Combine(BaseDirectory, "CharacterCreate", "FacePaintMappings.txt");
+    public static readonly string ModelCustomizationMappingsFile = Path.Combine(BaseDirectory, "CharacterCreate", "ModelCustomizationMappings.txt");
 
-    public readonly string ModelsFile = Path.Combine(BaseDirectory, "Models.txt");
+    public static readonly string ModelsFile = Path.Combine(BaseDirectory, "Models.txt");
 
-    public readonly string ItemDefinitionsFile = Path.Combine(BaseDirectory, "ItemDefinitions.txt");
-    public readonly string ItemClassesFile = Path.Combine(BaseDirectory, "ItemClasses.txt");
-    public readonly string ItemCategoriesFile = Path.Combine(BaseDirectory, "ItemCategories.txt");
-    public readonly string ItemCategoryGroupsFile = Path.Combine(BaseDirectory, "ItemCategoryGroups.txt");
+    public static readonly string ItemDefinitionsFile = Path.Combine(BaseDirectory, "ItemDefinitions.txt");
+    public static readonly string ItemClassesFile = Path.Combine(BaseDirectory, "ItemClasses.txt");
+    public static readonly string ItemCategoriesFile = Path.Combine(BaseDirectory, "ItemCategories.txt");
+    public static readonly string ItemCategoryGroupsFile = Path.Combine(BaseDirectory, "ItemCategoryGroups.txt");
 
-    public readonly string ZonesFile = Path.Combine(BaseDirectory, "Zones.json");
-    public readonly string ZonesDirectory = Path.Combine(BaseDirectory, "Zones");
-    public readonly string MountsFile = Path.Combine(BaseDirectory, "Mounts.json");
-    public readonly string ProfilesFile = Path.Combine(BaseDirectory, "Profiles.json");
-    public readonly string QuickChatsFile = Path.Combine(BaseDirectory, "QuickChats.json");
-    public readonly string PlayerTitlesFile = Path.Combine(BaseDirectory, "PlayerTitles.json");
-    public readonly string PointOfInterestsFile = Path.Combine(BaseDirectory, "PointOfInterests.json");
+    public static readonly string ZonesFile = Path.Combine(BaseDirectory, "Zones.json");
+    public static readonly string ZonesDirectory = Path.Combine(BaseDirectory, "Zones");
+    public static readonly string HousesFile = Path.Combine(BaseDirectory, "Houses.json");
+    public static readonly string MountsFile = Path.Combine(BaseDirectory, "Mounts.json");
+    public static readonly string ProfilesFile = Path.Combine(BaseDirectory, "Profiles.json");
+    public static readonly string QuickChatsFile = Path.Combine(BaseDirectory, "QuickChats.json");
+    public static readonly string PlayerTitlesFile = Path.Combine(BaseDirectory, "PlayerTitles.json");
+    public static readonly string PointOfInterestsFile = Path.Combine(BaseDirectory, "PointOfInterests.json");
 
     public IdToStringLookup HairMappings { get; }
     public IdToStringLookup HeadMappings { get; }
@@ -48,6 +49,7 @@ public class ResourceManager : IResourceManager
     public ItemCategoryGroupDefinitionCollection ItemCategoryGroups { get; }
 
     public ZoneDefinitionCollection Zones { get; }
+    public HouseDefinitionCollection Houses { get; }
     public MountDefinitionCollection Mounts { get; }
     public PlayerTitleCollection PlayerTitles { get; }
     public ProfileDefinitionCollection Profiles { get; }
@@ -76,6 +78,7 @@ public class ResourceManager : IResourceManager
         ItemCategoryGroups = new(_logger);
 
         Zones = new(_logger);
+        Houses = new(_logger);
         Mounts = new(_logger);
         Profiles = new(_logger);
         QuickChats = new(_logger);
@@ -118,6 +121,9 @@ public class ResourceManager : IResourceManager
         if (!Zones.Load(ZonesFile, ZonesDirectory))
             return false;
 
+        if (!Houses.Load(HousesFile))
+            return false;
+
         if (!Mounts.Load(MountsFile))
             return false;
 
@@ -142,34 +148,47 @@ public class ResourceManager : IResourceManager
         {
             _fileSystemWatcher.EnableRaisingEvents = false;
 
-            var filePath = e.FullPath;
-            new Switch()
-            {
-                { () => filePath == HairMappingsFile, () => HairMappings.Load(HairMappingsFile) },
-                { () => filePath == HeadMappingsFile, () => HeadMappings.Load(HeadMappingsFile) },
-                { () => filePath == SkinToneMappingsFile, () => SkinToneMappings.Load(SkinToneMappingsFile) },
-                { () => filePath == FacePaintMappingsFile, () => FacePaintMappings.Load(FacePaintMappingsFile) },
-                { () => filePath == ModelCustomizationMappingsFile, () => ModelCustomizationMappings.Load(ModelCustomizationMappingsFile) },
+            var loaded = false;
                 
-                { () => filePath == ModelsFile, () => Models.Load(ModelsFile) },
+            if (e.FullPath == HairMappingsFile)
+                loaded = HairMappings.Load(HairMappingsFile);
+            else if (e.FullPath == HeadMappingsFile)
+                loaded = HeadMappings.Load(HeadMappingsFile);
+            else if (e.FullPath == SkinToneMappingsFile)
+                loaded = SkinToneMappings.Load(SkinToneMappingsFile);
+            else if (e.FullPath == FacePaintMappingsFile)
+                loaded = FacePaintMappings.Load(FacePaintMappingsFile);
+            else if (e.FullPath == ModelCustomizationMappingsFile)
+                loaded = ModelCustomizationMappings.Load(ModelCustomizationMappingsFile);
+            else if (e.FullPath == ModelsFile)
+                loaded = Models.Load(ModelsFile);
+            else if (e.FullPath == ItemDefinitionsFile)
+                loaded = ItemDefinitions.Load(ItemDefinitionsFile);
+            else if (e.FullPath == ItemClassesFile)
+                loaded = ItemClasses.Load(ItemClassesFile);
+            else if (e.FullPath == ItemCategoriesFile)
+                loaded = ItemCategories.Load(ItemCategoriesFile);
+            else if (e.FullPath == ItemCategoryGroupsFile)
+                loaded = ItemCategoryGroups.Load(ItemCategoryGroupsFile);
+            else if (e.FullPath == ZonesFile)
+                loaded = Zones.Load(ZonesFile, ZonesDirectory);
+            else if (e.FullPath == HousesFile)
+                loaded = Houses.Load(HousesFile);
+            else if (e.FullPath == MountsFile)
+                loaded = Mounts.Load(MountsFile);
+            else if (e.FullPath == ProfilesFile)
+                loaded = Profiles.Load(ProfilesFile);
+            else if (e.FullPath == QuickChatsFile)
+                loaded = QuickChats.Load(QuickChatsFile);
+            else if (e.FullPath == PlayerTitlesFile)
+                loaded = PlayerTitles.Load(PlayerTitlesFile);
+            else if (e.FullPath == PointOfInterestsFile)
+                loaded = PointOfInterests.Load(PointOfInterestsFile);
+            else
+                _logger.LogWarning("Unknown file changed. File: {filepath}", e.FullPath);
 
-                { () => filePath == ItemDefinitionsFile, () => ItemDefinitions.Load(ItemDefinitionsFile) },
-                { () => filePath == ItemClassesFile, () => ItemClasses.Load(ItemClassesFile) },
-                { () => filePath == ItemCategoriesFile, () => ItemCategories.Load(ItemCategoriesFile) },
-                { () => filePath == ItemCategoryGroupsFile, () => ItemCategoryGroups.Load(ItemCategoryGroupsFile) },
-
-                { () => filePath == ZonesFile, () => Zones.Load(ZonesFile, ZonesDirectory) },
-                { () => filePath == MountsFile, () => Mounts.Load(MountsFile) },
-                { () => filePath == ProfilesFile, () => Profiles.Load(ProfilesFile) },
-                { () => filePath == QuickChatsFile, () => QuickChats.Load(QuickChatsFile) },
-                { () => filePath == PlayerTitlesFile, () => PlayerTitles.Load(PlayerTitlesFile) },
-                { () => filePath == PointOfInterestsFile, () => PointOfInterests.Load(PointOfInterestsFile) },
-
-                {
-                    () => true /* fallback case */,
-                    () => _logger.LogWarning("Unknown file changed. File: {filepath}", e.FullPath)
-                }
-            }.Execute();
+            if (!loaded)
+                _logger.LogError("Error loading modified file. File: {filepath}", e.FullPath);
         }
         finally
         {

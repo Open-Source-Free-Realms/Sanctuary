@@ -1,5 +1,5 @@
-{
-  "1": {
+[
+  {
     "Id": 1,
     "Name": "FabledRealms",
     "StartingZone": true,
@@ -72,4 +72,4 @@
       }
     ]
   }
-}
+]

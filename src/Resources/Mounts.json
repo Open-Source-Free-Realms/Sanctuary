@@ -1,5 +1,5 @@
-{
-  "1000": {
+[
+  {
     "Id": 1000,
     "NameId": 5570,
     "ImageSetId": 6074,
@@ -14,7 +14,7 @@
       "MaxMovementSpeed": 12.5
     }
   },
-  "1001": {
+  {
     "Id": 1001,
     "NameId": 4893,
     "ImageSetId": 6075,
@@ -29,7 +29,7 @@
       "MaxMovementSpeed": 12.5
     }
   },
-  "1002": {
+  {
     "Id": 1002,
     "NameId": 4897,
     "ImageSetId": 6294,
@@ -44,7 +44,7 @@
       "MaxMovementSpeed": 12.5
     }
   },
-  "1003": {
+  {
     "Id": 1003,
     "NameId": 4831,
     "ImageSetId": 6355,
@@ -59,7 +59,7 @@
       "MaxMovementSpeed": 12.5
     }
   },
-  "1004": {
+  {
     "Id": 1004,
     "NameId": 5219,
     "ImageSetId": 6456,
@@ -74,7 +74,7 @@
       "MaxMovementSpeed": 12.5
     }
   },
-  "1005": {
+  {
     "Id": 1005,
     "NameId": 5218,
     "ImageSetId": 6457,
@@ -89,7 +89,7 @@
       "MaxMovementSpeed": 12.5
     }
   },
-  "1006": {
+  {
     "Id": 1006,
     "NameId": 6847,
     "ImageSetId": 6459,
@@ -104,7 +104,7 @@
       "MaxMovementSpeed": 12.5
     }
   },
-  "1007": {
+  {
     "Id": 1007,
     "NameId": 6182,
     "ImageSetId": 6703,
@@ -119,7 +119,7 @@
       "MaxMovementSpeed": 12.5
     }
   },
-  "1008": {
+  {
     "Id": 1008,
     "NameId": 5635,
     "ImageSetId": 6658,
@@ -134,7 +134,7 @@
       "MaxMovementSpeed": 12.5
     }
   },
-  "1009": {
+  {
     "Id": 1009,
     "NameId": 6231,
     "ImageSetId": 6802,
@@ -149,7 +149,7 @@
       "MaxMovementSpeed": 12.5
     }
   },
-  "1010": {
+  {
     "Id": 1010,
     "NameId": 6369,
     "ImageSetId": 6825,
@@ -164,7 +164,7 @@
       "MaxMovementSpeed": 12.5
     }
   },
-  "1011": {
+  {
     "Id": 1011,
     "NameId": 6305,
     "ImageSetId": 6821,
@@ -179,7 +179,7 @@
       "MaxMovementSpeed": 12.5
     }
   },
-  "1012": {
+  {
     "Id": 1012,
     "NameId": 6408,
     "ImageSetId": 6854,
@@ -194,7 +194,7 @@
       "MaxMovementSpeed": 12.5
     }
   },
-  "1013": {
+  {
     "Id": 1013,
     "NameId": 6230,
     "ImageSetId": 6820,
@@ -209,7 +209,7 @@
       "MaxMovementSpeed": 12.5
     }
   },
-  "1014": {
+  {
     "Id": 1014,
     "NameId": 6403,
     "ImageSetId": 6838,
@@ -224,7 +224,7 @@
       "MaxMovementSpeed": 12.5
     }
   },
-  "1015": {
+  {
     "Id": 1015,
     "NameId": 6605,
     "ImageSetId": 6922,
@@ -239,7 +239,7 @@
       "MaxMovementSpeed": 12.5
     }
   },
-  "1016": {
+  {
     "Id": 1016,
     "NameId": 22959,
     "ImageSetId": 6978,
@@ -254,7 +254,7 @@
       "MaxMovementSpeed": 12.5
     }
   },
-  "1017": {
+  {
     "Id": 1017,
     "NameId": 4897,
     "ImageSetId": 6294,
@@ -269,7 +269,7 @@
       "MaxMovementSpeed": 12.5
     }
   },
-  "1018": {
+  {
     "Id": 1018,
     "NameId": 6806,
     "ImageSetId": 7015,
@@ -284,7 +284,7 @@
       "MaxMovementSpeed": 12.5
     }
   },
-  "1019": {
+  {
     "Id": 1019,
     "NameId": 434170,
     "ImageSetId": 7056,
@@ -299,7 +299,7 @@
       "MaxMovementSpeed": 12.5
     }
   },
-  "1020": {
+  {
     "Id": 1020,
     "NameId": 6966,
     "ImageSetId": 7296,
@@ -314,7 +314,7 @@
       "MaxMovementSpeed": 12.5
     }
   },
-  "1021": {
+  {
     "Id": 1021,
     "NameId": 6764,
     "ImageSetId": 6977,
@@ -329,7 +329,7 @@
       "MaxMovementSpeed": 12.5
     }
   },
-  "1022": {
+  {
     "Id": 1022,
     "NameId": 435431,
     "ImageSetId": 7401,
@@ -344,7 +344,7 @@
       "MaxMovementSpeed": 12.5
     }
   },
-  "1023": {
+  {
     "Id": 1023,
     "NameId": 442689,
     "ImageSetId": 8456,
@@ -359,7 +359,7 @@
       "MaxMovementSpeed": 0
     }
   },
-  "1024": {
+  {
     "Id": 1024,
     "NameId": 435557,
     "ImageSetId": 7484,
@@ -374,7 +374,7 @@
       "MaxMovementSpeed": 12.5
     }
   },
-  "1025": {
+  {
     "Id": 1025,
     "NameId": 372,
     "ImageSetId": 6937,
@@ -389,7 +389,7 @@
       "MaxMovementSpeed": 12.5
     }
   },
-  "1026": {
+  {
     "Id": 1026,
     "NameId": 374,
     "ImageSetId": 6873,
@@ -404,7 +404,7 @@
       "MaxMovementSpeed": 12.5
     }
   },
-  "1027": {
+  {
     "Id": 1027,
     "NameId": 378,
     "ImageSetId": 7665,
@@ -419,7 +419,7 @@
       "MaxMovementSpeed": 12.5
     }
   },
-  "1028": {
+  {
     "Id": 1028,
     "NameId": 852,
     "ImageSetId": 7928,
@@ -434,7 +434,7 @@
       "MaxMovementSpeed": 12.5
     }
   },
-  "1029": {
+  {
     "Id": 1029,
     "NameId": 385,
     "ImageSetId": 7700,
@@ -449,7 +449,7 @@
       "MaxMovementSpeed": 12.5
     }
   },
-  "1030": {
+  {
     "Id": 1030,
     "NameId": 442674,
     "ImageSetId": 8556,
@@ -472,4 +472,4 @@
       "JumpHeight": 5
     }
   }
-}
+]

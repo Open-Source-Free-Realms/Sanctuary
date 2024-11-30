@@ -40,7 +40,7 @@ public class ProfileDefinitionCollection : ObservableConcurrentDictionary<int, C
             using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             using var streamReader = new StreamReader(fileStream);
 
-            var entries = JsonSerializer.Deserialize<Dictionary<int, ClientProfileData>>(streamReader.ReadToEnd());
+            var entries = JsonSerializer.Deserialize<List<ClientProfileData>>(streamReader.ReadToEnd());
 
             if (entries is null)
             {
@@ -50,9 +50,9 @@ public class ProfileDefinitionCollection : ObservableConcurrentDictionary<int, C
 
             foreach (var entry in entries)
             {
-                if (!TryAdd(entry.Key, entry.Value))
+                if (!TryAdd(entry.Id, entry))
                 {
-                    _logger.LogWarning("Failed to add entry. \"{entryId}\".", entry.Key);
+                    _logger.LogWarning("Failed to add entry. {id} \"{file}\"", entry.Id, filePath);
                     return false;
                 }
             }

@@ -6,15 +6,15 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Collections;
-using Sanctuary.Packet.Common.Chat;
+using Sanctuary.Game.Resources.Definitions;
 
 namespace Sanctuary.Game.Resources;
 
-public class QuickChatDefinitionCollection : ObservableConcurrentDictionary<int, QuickChatDefinition>
+public class HouseDefinitionCollection : ObservableConcurrentDictionary<int, HouseDefinition>
 {
     private readonly ILogger _logger;
 
-    public QuickChatDefinitionCollection(ILogger logger)
+    public HouseDefinitionCollection(ILogger logger)
     {
         _logger = logger;
     }
@@ -29,23 +29,23 @@ public class QuickChatDefinitionCollection : ObservableConcurrentDictionary<int,
 
         try
         {
-            using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
             using var streamReader = new StreamReader(fileStream);
 
-            var list = JsonSerializer.Deserialize<List<QuickChatDefinition>>(streamReader.ReadToEnd());
+            var entries = JsonSerializer.Deserialize<List<HouseDefinition>>(streamReader.ReadToEnd());
 
-            if (list is null)
+            if (entries is null)
             {
                 _logger.LogError("No entries found in file \"{file}\".", filePath);
                 return false;
             }
 
-            foreach (var entry in list)
+            foreach (var entry in entries)
             {
                 if (!TryAdd(entry.Id, entry))
                 {
                     _logger.LogWarning("Failed to add entry. {id} \"{file}\"", entry.Id, filePath);
-                    return false;
+                    continue;
                 }
             }
         }
