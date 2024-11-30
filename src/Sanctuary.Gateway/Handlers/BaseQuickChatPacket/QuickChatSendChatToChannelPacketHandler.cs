@@ -37,8 +37,6 @@ public static class QuickChatSendChatToChannelPacketHandler
 
         connection.Player.SendTunneledToVisible(packet, true);
 
-        Debug.WriteLine("QuickChatSendChatToChannelPacket");
-
         return true;
     }
 }

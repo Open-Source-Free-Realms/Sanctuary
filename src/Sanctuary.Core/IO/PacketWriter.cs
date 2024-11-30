@@ -3,7 +3,6 @@ using System.IO;
 using System.Text;
 using System.Numerics;
 using System.Collections.Generic;
-using System.Xml;
 
 namespace Sanctuary.Core.IO;
 
