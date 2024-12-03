@@ -107,7 +107,7 @@ Before you can use this software, ensure you have the following installed:
 2. Build the solution for `Sanctuary.Core` for `Release`
 3. Create a file named `database.json` in the `Release` folder located within the new `bin` folder
 4. Paste the following
-   ```sh
+   ```json
     {
     "Database": {
         "Provider": "Sqlite",
@@ -129,12 +129,17 @@ Before you can use this software, ensure you have the following installed:
 
 ### Debug
 
-1. Right-Click **'Manage User Secrets'** for the following projects:
+1. Clone the repo
+   ```sh
+   git clone https://github.com/Open-Source-Free-Realms/Sanctuary.git
+   ```
+2. Build the solution for `Sanctuary.Core` for `Debug`
+3. Right-Click **'Manage User Secrets'** for the following projects:
    - `Sanctuary.Gateway`
    - `Sanctuary.Login`
    - `Sanctuary.Database`
 
-2. Copy and paste the following configuration for **SQLite** into the secrets editor:
+4. Copy and paste the following configuration for **SQLite** into the secrets editor:
 
    ```json
    {
@@ -143,14 +148,23 @@ Before you can use this software, ensure you have the following installed:
        "ConnectionString": "Data Source=D:\\Games\\Free Realms\\sanctuary.db;"
      }
    }
-3. Launch `Sanctuary.Login`, `Sanctuary.Gateway`
-4. Connect to the client
+5. Launch `Sanctuary.Login`, `Sanctuary.Gateway`
+6. Connect to the client
 
 **_IMPORTANT:_** Update the Data Source file path (D:\\Games\\Free Realms\\sanctuary.db) to match the location where your database files are stored.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+### Docker Compose
 
+1. Clone the repo
+   ```sh
+   git clone https://github.com/Open-Source-Free-Realms/Sanctuary.git
+   ```
+2. Launch `Docker Compose`
+3. Connect to the client
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- USAGE EXAMPLES -->
 ## Usage
