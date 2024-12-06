@@ -61,13 +61,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sanctuary.Database.Entities
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{0C5CAF70-0729-49B2-B0EA-E00E20906211}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0E888BDA-A9CD-47EC-B221-6629D85629D8}"
-	ProjectSection(SolutionItems) = preProject
-		..\images\logo.png = ..\images\logo.png
-		..\README.md = ..\README.md
-		..\images\screenshot.jpg = ..\images\screenshot.jpg
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

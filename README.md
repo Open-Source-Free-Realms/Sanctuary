@@ -20,7 +20,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/Open-Source-Free-Realms/Sanctuary">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
+    <img src="images/logo.png" alt="Logo" width="137" height="80">
   </a>
 
 <h3 align="center">Sanctuary</h3>
@@ -260,6 +260,6 @@ Project Link: [https://github.com/Open-Source-Free-Realms/Sanctuary](https://git
 [license-url]: https://github.com/Open-Source-Free-Realms/Sanctuary/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/linkedin_username
-[product-screenshot]: images/screenshot.png
+[product-screenshot]: images/screenshot.jpg
 [CSharp]: https://img.shields.io/badge/csharp-000000?style=for-the-badge&logo=csharp&logoColor=white
 [CSharp-url]: https://dotnet.microsoft.com/en-us/languages/csharp
