@@ -89,7 +89,7 @@
 <!-- GETTING STARTED -->
 ## Getting Started
 
-This repository only contains the **server emulator** for Free Realms. To play the game, you must also have a **Free Realms client**. You can download the client using the **OSFR Launcher** available here: [OSFR Launcher](https://github.com/Open-Source-Free-Realms/OSFR-Launcher).
+This repository only contains the **server emulator** for Free Realms. To play the game, you must also have a **Free Realms client**. You can download the client using the **OSFR Launcher** available here: [OSFR Launcher](https://github.com/Open-Source-Free-Realms/Launcher).
 
 ### Prerequisites
 
