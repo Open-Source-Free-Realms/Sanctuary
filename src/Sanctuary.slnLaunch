@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "Servers",
+    "Projects": [
+      {
+        "Path": "Sanctuary.Login\\Sanctuary.Login.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Sanctuary.Gateway\\Sanctuary.Gateway.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
