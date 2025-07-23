@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <TargetFramework>$(TargetFramework)</TargetFramework>
+    <UserSecretsId>aed3c099-1a23-4fa7-9463-6be2285f3e79</UserSecretsId>
+    <BaseOutputPath>$(SolutionDir)bin</BaseOutputPath>
+    <RunWorkingDirectory>$(SolutionDir)bin\$(Configuration)</RunWorkingDirectory>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" />
+
+    <PackageReference Include="BitArmory.ReCaptcha" />
+    <PackageReference Include="BitArmory.Turnstile" />
+
+    <PackageReference Include="SixLabors.ImageSharp" />
+
+    <PackageReference Include="NLog" />
+    <PackageReference Include="NLog.Extensions.Logging" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sanctuary.Core\Sanctuary.Core.csproj" />
+    <ProjectReference Include="..\Sanctuary.Database\Sanctuary.Database.csproj" />
+  </ItemGroup>
+
+</Project>
