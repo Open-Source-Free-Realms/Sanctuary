@@ -2,12 +2,12 @@
 
   <PropertyGroup>
     <Nullable>enable</Nullable>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>$(TargetFramework)</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ZLibDotNet" Version="0.1.1" />
+    <PackageReference Include="ZLibDotNet" />
   </ItemGroup>
 
 </Project>
