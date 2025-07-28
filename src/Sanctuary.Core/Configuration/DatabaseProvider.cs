@@ -3,6 +3,5 @@
 public enum DatabaseProvider
 {
     MySql,
-    Sqlite,
-    SqlServer
+    Sqlite
 }

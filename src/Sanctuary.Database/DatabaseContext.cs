@@ -51,8 +51,6 @@ public sealed class DatabaseContext : DbContext
             providerAssembly = $"{typeof(DatabaseFactory).Namespace}.MySql";
         else if (Database.IsSqlite())
             providerAssembly = $"{typeof(DatabaseFactory).Namespace}.Sqlite";
-        else if (Database.IsSqlServer())
-            providerAssembly = $"{typeof(DatabaseFactory).Namespace}.SqlServer";
 
         ArgumentException.ThrowIfNullOrEmpty(providerAssembly);
 

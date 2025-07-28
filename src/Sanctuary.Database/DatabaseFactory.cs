@@ -43,11 +43,6 @@ internal class DatabaseFactory : IDesignTimeDbContextFactory<DatabaseContext>
                     x => x.MigrationsAssembly(providerAssembly));
                 break;
 
-            case DatabaseProvider.SqlServer:
-                builder.UseSqlServer(databaseOptions.ConnectionString,
-                    x => x.EnableRetryOnFailure().MigrationsAssembly(providerAssembly));
-                break;
-
             default:
                 throw new NotImplementedException($"Database provider \"{databaseOptions.Provider}\" isn't implemented.");
         }
