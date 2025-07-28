@@ -11,5 +11,22 @@
         "Action": "Start"
       }
     ]
+  },
+  {
+    "Name": "Servers + WebAPI",
+    "Projects": [
+      {
+        "Path": "Sanctuary.WebAPI\\Sanctuary.WebAPI.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Sanctuary.Login\\Sanctuary.Login.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Sanctuary.Gateway\\Sanctuary.Gateway.csproj",
+        "Action": "Start"
+      }
+    ]
   }
 ]
