@@ -73,7 +73,7 @@ builder.ConfigureServices((hostBuilderContext, serviceCollection) =>
             NoDataTimeout = 30000,
             KeepAliveDelay = 29000,
             Port = serverOptions.Port,
-            ProtocolName = serverOptions.ProtocolName,
+            ProtocolName = "CGAPI_527",
         };
 
         if (serverOptions.UseCompression)

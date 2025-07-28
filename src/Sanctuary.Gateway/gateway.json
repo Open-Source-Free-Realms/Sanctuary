@@ -2,7 +2,6 @@
   "Server": {
     "Port": 20260,
     "UseCompression": true,
-    "ProtocolName": "CGAPI_527",
 
     "Environment": "live",
     "ClientVersion": "1.910.1.530630",

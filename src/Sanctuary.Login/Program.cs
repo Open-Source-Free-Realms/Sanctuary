@@ -72,7 +72,7 @@ builder.ConfigureServices((hostBuilderContext, serviceCollection) =>
     {
         var udpParams = new UdpParams
         {
-            ProtocolName = serverOptions.ProtocolName,
+            ProtocolName = "LoginUdp_6",
             Port = serverOptions.Port,
             KeepAliveDelay = 29000,
             CrcBytes = 2

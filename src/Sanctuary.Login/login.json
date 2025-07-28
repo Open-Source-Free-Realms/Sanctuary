@@ -1,7 +1,6 @@
 {
   "Server": {
     "Port": 20042,
-    "ProtocolName": "LoginUdp_6",
 
     "CryptKey": "F70IaxuU8C/w7FPXY1ibXw==",
 
