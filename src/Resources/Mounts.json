@@ -1,13 +1,10 @@
 [
   {
+    "Comment": "Striped T-Rex",
     "Id": 1000,
     "NameId": 5570,
     "ImageSetId": 6074,
-    "TintId": 0,
     "TintAlias": "trexbasic-blue",
-    "MembersOnly": false,
-    "IsUpgradable": false,
-    "IsUpgraded": false,
     "ModelId": 2040,
     "ItemDefinitionId": 7942,
     "Stats": {
@@ -15,14 +12,12 @@
     }
   },
   {
+    "Comment": "Gold-Tipped Dragon",
     "Id": 1001,
     "NameId": 4893,
     "ImageSetId": 6075,
-    "TintId": 0,
     "TintAlias": "goldtips-black",
-    "MembersOnly": false,
     "IsUpgradable": true,
-    "IsUpgraded": false,
     "ModelId": 2064,
     "ItemDefinitionId": 7954,
     "Stats": {
@@ -30,13 +25,11 @@
     }
   },
   {
+    "Comment": "Scaled Dragon",
     "Id": 1002,
     "NameId": 4897,
     "ImageSetId": 6294,
-    "TintId": 0,
     "TintAlias": "scales-blue",
-    "MembersOnly": false,
-    "IsUpgradable": false,
     "IsUpgraded": true,
     "ModelId": 2064,
     "ItemDefinitionId": 11038,
@@ -45,14 +38,11 @@
     }
   },
   {
+    "Comment": "Nightmare",
     "Id": 1003,
     "NameId": 4831,
     "ImageSetId": 6355,
-    "TintId": 0,
     "TintAlias": "deepred",
-    "MembersOnly": false,
-    "IsUpgradable": false,
-    "IsUpgraded": false,
     "ModelId": 2108,
     "ItemDefinitionId": 16167,
     "Stats": {
@@ -60,14 +50,10 @@
     }
   },
   {
+    "Comment": "Molten Precursor Hoverboard",
     "Id": 1004,
     "NameId": 5219,
     "ImageSetId": 6456,
-    "TintId": 0,
-    "TintAlias": "",
-    "MembersOnly": false,
-    "IsUpgradable": false,
-    "IsUpgraded": false,
     "ModelId": 523,
     "ItemDefinitionId": 7976,
     "Stats": {
@@ -75,14 +61,10 @@
     }
   },
   {
+    "Comment": "Precursor Hoverboard",
     "Id": 1005,
     "NameId": 5218,
     "ImageSetId": 6457,
-    "TintId": 0,
-    "TintAlias": "",
-    "MembersOnly": false,
-    "IsUpgradable": false,
-    "IsUpgraded": false,
     "ModelId": 522,
     "ItemDefinitionId": 7975,
     "Stats": {
@@ -90,14 +72,11 @@
     }
   },
   {
+    "Comment": "Clockwork Hoverboard",
     "Id": 1006,
     "NameId": 6847,
     "ImageSetId": 6459,
-    "TintId": 0,
     "TintAlias": "skyblue",
-    "MembersOnly": false,
-    "IsUpgradable": false,
-    "IsUpgraded": false,
     "ModelId": 503,
     "ItemDefinitionId": 10549,
     "Stats": {
@@ -105,14 +84,11 @@
     }
   },
   {
+    "Comment": "Tiger",
     "Id": 1007,
     "NameId": 6182,
     "ImageSetId": 6703,
-    "TintId": 0,
     "TintAlias": "pumpkin",
-    "MembersOnly": false,
-    "IsUpgradable": false,
-    "IsUpgraded": false,
     "ModelId": 3026,
     "ItemDefinitionId": 15902,
     "Stats": {
@@ -120,14 +96,11 @@
     }
   },
   {
+    "Comment": "Surfboard",
     "Id": 1008,
     "NameId": 5635,
     "ImageSetId": 6658,
-    "TintId": 0,
     "TintAlias": "skyblue",
-    "MembersOnly": false,
-    "IsUpgradable": false,
-    "IsUpgraded": false,
     "ModelId": 3033,
     "ItemDefinitionId": 15738,
     "Stats": {
@@ -135,14 +108,10 @@
     }
   },
   {
+    "Comment": "Fiery Hoverboard",
     "Id": 1009,
     "NameId": 6231,
     "ImageSetId": 6802,
-    "TintId": 0,
-    "TintAlias": "",
-    "MembersOnly": false,
-    "IsUpgradable": false,
-    "IsUpgraded": false,
     "ModelId": 3163,
     "ItemDefinitionId": 10382,
     "Stats": {
@@ -150,14 +119,11 @@
     }
   },
   {
+    "Comment": "Lava Tiger",
     "Id": 1010,
     "NameId": 6369,
     "ImageSetId": 6825,
-    "TintId": 0,
     "TintAlias": "blizzard",
-    "MembersOnly": false,
-    "IsUpgradable": false,
-    "IsUpgraded": false,
     "ModelId": 3199,
     "ItemDefinitionId": 76906,
     "Stats": {
@@ -165,14 +131,11 @@
     }
   },
   {
+    "Comment": "Stone Saber-Tooth Tiger",
     "Id": 1011,
     "NameId": 6305,
     "ImageSetId": 6821,
-    "TintId": 0,
     "TintAlias": "snow",
-    "MembersOnly": false,
-    "IsUpgradable": false,
-    "IsUpgraded": false,
     "ModelId": 3208,
     "ItemDefinitionId": 16376,
     "Stats": {
@@ -180,14 +143,11 @@
     }
   },
   {
+    "Comment": "Beach Ball",
     "Id": 1012,
     "NameId": 6408,
     "ImageSetId": 6854,
-    "TintId": 0,
     "TintAlias": "skyblue",
-    "MembersOnly": false,
-    "IsUpgradable": false,
-    "IsUpgraded": false,
     "ModelId": 3210,
     "ItemDefinitionId": 14316,
     "Stats": {
@@ -195,14 +155,10 @@
     }
   },
   {
+    "Comment": "Stormy Hoverboard",
     "Id": 1013,
     "NameId": 6230,
     "ImageSetId": 6820,
-    "TintId": 0,
-    "TintAlias": "",
-    "MembersOnly": false,
-    "IsUpgradable": false,
-    "IsUpgraded": false,
     "ModelId": 3162,
     "ItemDefinitionId": 10381,
     "Stats": {
@@ -210,14 +166,11 @@
     }
   },
   {
+    "Comment": "Armored T-Rex",
     "Id": 1014,
     "NameId": 6403,
     "ImageSetId": 6838,
-    "TintId": 0,
     "TintAlias": "sapphire",
-    "MembersOnly": false,
-    "IsUpgradable": false,
-    "IsUpgraded": false,
     "ModelId": 3209,
     "ItemDefinitionId": 13686,
     "Stats": {
@@ -225,14 +178,10 @@
     }
   },
   {
+    "Comment": "Haunted Hoverboard",
     "Id": 1015,
     "NameId": 6605,
     "ImageSetId": 6922,
-    "TintId": 0,
-    "TintAlias": "",
-    "MembersOnly": false,
-    "IsUpgradable": false,
-    "IsUpgraded": false,
     "ModelId": 3314,
     "ItemDefinitionId": 10424,
     "Stats": {
@@ -240,14 +189,12 @@
     }
   },
   {
+    "Comment": "Snowball",
     "Id": 1016,
     "NameId": 22959,
     "ImageSetId": 6978,
     "TintId": 117,
     "TintAlias": "snow",
-    "MembersOnly": false,
-    "IsUpgradable": false,
-    "IsUpgraded": false,
     "ModelId": 3376,
     "ItemDefinitionId": 17179,
     "Stats": {
@@ -255,6 +202,7 @@
     }
   },
   {
+    "Comment": "Scaled Dragon",
     "Id": 1017,
     "NameId": 4897,
     "ImageSetId": 6294,
@@ -262,7 +210,6 @@
     "TintAlias": "dyetint",
     "MembersOnly": true,
     "IsUpgradable": true,
-    "IsUpgraded": false,
     "ModelId": 2064,
     "ItemDefinitionId": 11038,
     "Stats": {
@@ -270,14 +217,11 @@
     }
   },
   {
+    "Comment": "Air T-Rex",
     "Id": 1018,
     "NameId": 6806,
     "ImageSetId": 7015,
-    "TintId": 0,
     "TintAlias": "dyetint",
-    "MembersOnly": false,
-    "IsUpgradable": false,
-    "IsUpgraded": false,
     "ModelId": 3409,
     "ItemDefinitionId": 11317,
     "Stats": {
@@ -285,14 +229,12 @@
     }
   },
   {
+    "Comment": "Poison Dragon",
     "Id": 1019,
     "NameId": 434170,
     "ImageSetId": 7056,
-    "TintId": 0,
     "TintAlias": "dyetint",
-    "MembersOnly": false,
     "IsUpgradable": true,
-    "IsUpgraded": false,
     "ModelId": 3480,
     "ItemDefinitionId": 76905,
     "Stats": {
@@ -300,14 +242,12 @@
     }
   },
   {
+    "Comment": "Bicycle",
     "Id": 1020,
     "NameId": 6966,
     "ImageSetId": 7296,
     "TintId": 249,
     "TintAlias": "dyetint",
-    "MembersOnly": false,
-    "IsUpgradable": false,
-    "IsUpgraded": false,
     "ModelId": 3478,
     "ItemDefinitionId": 76903,
     "Stats": {
@@ -315,14 +255,12 @@
     }
   },
   {
+    "Comment": "Hydra Ride",
     "Id": 1021,
     "NameId": 6764,
     "ImageSetId": 6977,
     "TintId": 249,
     "TintAlias": "dyetint",
-    "MembersOnly": false,
-    "IsUpgradable": false,
-    "IsUpgraded": false,
     "ModelId": 3384,
     "ItemDefinitionId": 76759,
     "Stats": {
@@ -330,14 +268,10 @@
     }
   },
   {
+    "Comment": "Tractor",
     "Id": 1022,
     "NameId": 435431,
     "ImageSetId": 7401,
-    "TintId": 0,
-    "TintAlias": "",
-    "MembersOnly": false,
-    "IsUpgradable": false,
-    "IsUpgraded": false,
     "ModelId": 3776,
     "ItemDefinitionId": 78036,
     "Stats": {
@@ -345,14 +279,12 @@
     }
   },
   {
+    "Comment": "Lawn Chair",
     "Id": 1023,
     "NameId": 442689,
     "ImageSetId": 8456,
     "TintId": 541,
     "TintAlias": "dyetint",
-    "MembersOnly": false,
-    "IsUpgradable": false,
-    "IsUpgraded": false,
     "ModelId": 4439,
     "ItemDefinitionId": 6346231,
     "Stats": {
@@ -360,13 +292,11 @@
     }
   },
   {
+    "Comment": "Fire Pegasus",
     "Id": 1024,
     "NameId": 435557,
     "ImageSetId": 7484,
-    "TintId": 0,
     "TintAlias": "dyetint",
-    "MembersOnly": false,
-    "IsUpgradable": false,
     "IsUpgraded": true,
     "ModelId": 3782,
     "ItemDefinitionId": 78070,
@@ -375,13 +305,12 @@
     }
   },
   {
+    "Comment": "Bat",
     "Id": 1025,
     "NameId": 372,
     "ImageSetId": 6937,
     "TintId": 249,
     "TintAlias": "dyetint",
-    "MembersOnly": false,
-    "IsUpgradable": false,
     "IsUpgraded": true,
     "ModelId": 3848,
     "ItemDefinitionId": 14288,
@@ -390,14 +319,12 @@
     }
   },
   {
+    "Comment": "Wolf",
     "Id": 1026,
     "NameId": 374,
     "ImageSetId": 6873,
     "TintId": 249,
     "TintAlias": "dyetint",
-    "MembersOnly": false,
-    "IsUpgradable": false,
-    "IsUpgraded": false,
     "ModelId": 3849,
     "ItemDefinitionId": 14289,
     "Stats": {
@@ -405,14 +332,12 @@
     }
   },
   {
+    "Comment": "Kangaroo",
     "Id": 1027,
     "NameId": 378,
     "ImageSetId": 7665,
     "TintId": 553,
     "TintAlias": "dyetint",
-    "MembersOnly": false,
-    "IsUpgradable": false,
-    "IsUpgraded": false,
     "ModelId": 3870,
     "ItemDefinitionId": 11584,
     "Stats": {
@@ -420,14 +345,12 @@
     }
   },
   {
+    "Comment": "Robgoblin Mech",
     "Id": 1028,
     "NameId": 852,
     "ImageSetId": 7928,
     "TintId": 249,
     "TintAlias": "dyetint",
-    "MembersOnly": false,
-    "IsUpgradable": false,
-    "IsUpgraded": false,
     "ModelId": 3989,
     "ItemDefinitionId": 17598,
     "Stats": {
@@ -435,14 +358,10 @@
     }
   },
   {
+    "Comment": "Glacierator 5000",
     "Id": 1029,
     "NameId": 385,
     "ImageSetId": 7700,
-    "TintId": 0,
-    "TintAlias": "",
-    "MembersOnly": false,
-    "IsUpgradable": false,
-    "IsUpgraded": false,
     "ModelId": 3882,
     "ItemDefinitionId": 11763,
     "Stats": {
@@ -450,13 +369,10 @@
     }
   },
   {
+    "Comment": "The Fire Hawk",
     "Id": 1030,
     "NameId": 442674,
     "ImageSetId": 8556,
-    "TintId": 0,
-    "TintAlias": "",
-    "MembersOnly": false,
-    "IsUpgradable": false,
     "IsUpgraded": true,
     "ModelId": 4590,
     "ItemDefinitionId": 78397,
