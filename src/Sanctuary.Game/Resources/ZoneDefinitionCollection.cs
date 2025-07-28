@@ -32,7 +32,7 @@ public class ZoneDefinitionCollection : ObservableConcurrentDictionary<int, Zone
             using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
             using var streamReader = new StreamReader(fileStream);
 
-            var entries = JsonSerializer.Deserialize<Dictionary<int, ZoneDefinition>>(streamReader.ReadToEnd());
+            var entries = JsonSerializer.Deserialize<List<ZoneDefinition>>(streamReader.ReadToEnd());
 
             if (entries is null)
             {
@@ -42,21 +42,21 @@ public class ZoneDefinitionCollection : ObservableConcurrentDictionary<int, Zone
 
             foreach (var entry in entries)
             {
-                var gzneFilePath = Path.Combine(zoneFilePath, $"{entry.Value.Name}.gzne");
+                var gzneFilePath = Path.Combine(zoneFilePath, $"{entry.Name}.gzne");
 
                 var gzne = LoadGzneDefinition(gzneFilePath);
 
                 if (gzne is null)
                 {
-                    _logger.LogError("Failed to load gzne for zone \"{name}\".", entry.Value.Name);
+                    _logger.LogError("Failed to load gzne for zone \"{name}\".", entry.Name);
                     continue;
                 }
 
-                entry.Value.Gzne = gzne;
+                entry.Gzne = gzne;
 
-                if (!TryAdd(entry.Key, entry.Value))
+                if (!TryAdd(entry.Id, entry))
                 {
-                    _logger.LogWarning("Failed to add entry. {id} \"{file}\"", entry.Key, filePath);
+                    _logger.LogWarning("Failed to add entry. {id} \"{file}\"", entry.Id, filePath);
                     continue;
                 }
             }
