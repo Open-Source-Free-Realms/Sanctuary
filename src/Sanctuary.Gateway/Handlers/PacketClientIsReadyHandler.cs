@@ -175,7 +175,7 @@ public static class PacketClientIsReadyHandler
                 DescriptionId = 5100031,
                 TabImageId = 35449,
                 ChapterMapImageId = 0,
-                Unknown = 244,
+                GeometryId = 244,
                 CompletedStringId = 5101408
             },
             new()
@@ -185,7 +185,7 @@ public static class PacketClientIsReadyHandler
                 DescriptionId = 5100032,
                 TabImageId = 9532,
                 ChapterMapImageId = 0,
-                Unknown = 5,
+                GeometryId = 5,
                 CompletedStringId = 442681,
             },
             new()
@@ -195,7 +195,7 @@ public static class PacketClientIsReadyHandler
                 DescriptionId = 2129,
                 TabImageId = 9538,
                 ChapterMapImageId = 0,
-                Unknown = 8,
+                GeometryId = 8,
                 CompletedStringId = 5101409,
             },
             new()
@@ -205,7 +205,7 @@ public static class PacketClientIsReadyHandler
                 DescriptionId = 442685,
                 TabImageId = 9529,
                 ChapterMapImageId = 0,
-                Unknown = 1,
+                GeometryId = 1,
                 CompletedStringId = 442686,
             }
         ];

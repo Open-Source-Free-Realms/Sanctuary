@@ -12,7 +12,7 @@ public class AdventurersJournalRegionDefinition : ISerializableType
     public int TabImageId;
     public int ChapterMapImageId;
 
-    public int Unknown;
+    public int GeometryId;
 
     public int CompletedStringId;
 
@@ -23,7 +23,7 @@ public class AdventurersJournalRegionDefinition : ISerializableType
         writer.Write(DescriptionId);
         writer.Write(TabImageId);
         writer.Write(ChapterMapImageId);
-        writer.Write(Unknown);
+        writer.Write(GeometryId);
         writer.Write(CompletedStringId);
     }
 }
