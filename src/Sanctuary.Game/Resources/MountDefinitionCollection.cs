@@ -63,6 +63,12 @@ public class MountDefinitionCollection : ObservableConcurrentDictionary<int, Mou
             return false;
         }
 
+        if (Count == 0)
+        {
+            _logger.LogError("No data was loaded. \"{file}\"", filePath);
+            return false;
+        }
+
         return true;
     }
 }
