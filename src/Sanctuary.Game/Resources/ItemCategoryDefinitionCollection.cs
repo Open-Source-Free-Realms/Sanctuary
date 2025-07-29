@@ -61,7 +61,7 @@ public class ItemCategoryDefinitionCollection : ObservableConcurrentDictionary<i
 
                 itemCategoryDefinition.Unknown2 = unknown2 != 0;
 
-                if (!int.TryParse(row[column++].Span, out itemCategoryDefinition.Unknown3))
+                if (!int.TryParse(row[column++].Span, out itemCategoryDefinition.Display))
                     continue;
 
                 if (!TryAdd(itemCategoryDefinition.Id, itemCategoryDefinition))

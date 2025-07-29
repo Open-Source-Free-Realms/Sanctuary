@@ -9,7 +9,12 @@ public class ItemCategoryDefinition : ISerializableType
     public int IconId;
     public int Unknown;
     public bool Unknown2;
-    public int Unknown3;
+
+    /// <summary>
+    /// 0 - Hidden
+    /// X - Visible
+    /// </summary>
+    public int Display;
 
     public void Serialize(PacketWriter writer)
     {
@@ -18,6 +23,6 @@ public class ItemCategoryDefinition : ISerializableType
         writer.Write(IconId);
         writer.Write(Unknown);
         writer.Write(Unknown2);
-        writer.Write(Unknown3);
+        writer.Write(Display);
     }
 }
