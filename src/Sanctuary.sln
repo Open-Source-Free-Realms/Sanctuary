@@ -27,10 +27,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sanctuary.UdpLibrary.Tests"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Resources", "Resources", "{154489CF-2C20-41FD-96F0-7B5ABEBF3677}"
 	ProjectSection(SolutionItems) = preProject
+		Resources\ClientItemDefinitions.json = Resources\ClientItemDefinitions.json
 		Resources\ItemCategories.txt = Resources\ItemCategories.txt
 		Resources\ItemCategoryGroups.txt = Resources\ItemCategoryGroups.txt
 		Resources\ItemClasses.txt = Resources\ItemClasses.txt
-		Resources\ItemDefinitions.txt = Resources\ItemDefinitions.txt
 		Resources\Models.txt = Resources\Models.txt
 		Resources\Mounts.json = Resources\Mounts.json
 		Resources\PlayerTitles.json = Resources\PlayerTitles.json

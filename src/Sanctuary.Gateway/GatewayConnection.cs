@@ -169,30 +169,30 @@ public class GatewayConnection : UdpConnection
 
             foreach (var dbItem in dbProfile.Items)
             {
-                if (!_resourceManager.ItemDefinitions.TryGetValue(dbItem.Definition, out var itemDefinition))
+                if (!_resourceManager.ClientItemDefinitions.TryGetValue(dbItem.Definition, out var clientItemDefinition))
                     continue;
 
-                if (!clientPcProfile.ItemClassData.ContainsKey(itemDefinition.Class))
+                if (!clientPcProfile.ItemClassData.ContainsKey(clientItemDefinition.Class))
                 {
                     var profileItemClassData = new ProfileItemClassData
                     {
-                        Id = itemDefinition.Class
+                        Id = clientItemDefinition.Class
                     };
 
-                    clientPcProfile.ItemClassData.Add(itemDefinition.Class, profileItemClassData);
+                    clientPcProfile.ItemClassData.Add(clientItemDefinition.Class, profileItemClassData);
                 }
 
-                if (clientPcProfile.Items.TryGetValue(itemDefinition.Slot, out var profileItem))
+                if (clientPcProfile.Items.TryGetValue(clientItemDefinition.Slot, out var profileItem))
                     profileItem.Id = dbItem.Id;
                 else
                 {
                     profileItem = new ProfileItem
                     {
                         Id = dbItem.Id,
-                        Slot = itemDefinition.Slot
+                        Slot = clientItemDefinition.Slot
                     };
 
-                    clientPcProfile.Items.Add(itemDefinition.Slot, profileItem);
+                    clientPcProfile.Items.Add(clientItemDefinition.Slot, profileItem);
                 }
             }
 
@@ -346,10 +346,10 @@ public class GatewayConnection : UdpConnection
 
         foreach (var item in Player.Items)
         {
-            if (!_resourceManager.ItemDefinitions.TryGetValue(item.Definition, out var itemDefinition))
+            if (!_resourceManager.ClientItemDefinitions.TryGetValue(item.Definition, out var clientItemDefinition))
                 continue;
 
-            clientItemDefinitions.Add(new ClientItemDefinition(itemDefinition));
+            clientItemDefinitions.Add(clientItemDefinition);
         }
 
         using var writer = new PacketWriter();

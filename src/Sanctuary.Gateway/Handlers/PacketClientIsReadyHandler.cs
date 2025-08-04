@@ -146,14 +146,14 @@ public static class PacketClientIsReadyHandler
     {
         var coinStoreItemListPacket = new CoinStoreItemListPacket();
 
-        var itemDefinitions = _resourceManager.ItemDefinitions.Values.Where(x => x.Cost > 0 && x.GenderUsage == 0 || x.GenderUsage == connection.Player.Gender);
+        var clientItemDefinitions = _resourceManager.ClientItemDefinitions.Values.Where(x => x.Cost > 0 && x.GenderUsage == 0 || x.GenderUsage == connection.Player.Gender);
 
-        foreach (var itemDefinition in itemDefinitions)
+        foreach (var clientItemDefinition in clientItemDefinitions)
         {
-            coinStoreItemListPacket.StaticItems.Add(itemDefinition.Id, new ItemDefinitionMetaData
+            coinStoreItemListPacket.StaticItems.Add(clientItemDefinition.Id, new ItemDefinitionMetaData
             {
-                Id = itemDefinition.Id,
-                CategoryId = itemDefinition.CategoryId
+                Id = clientItemDefinition.Id,
+                CategoryId = clientItemDefinition.CategoryId
             });
         }
 

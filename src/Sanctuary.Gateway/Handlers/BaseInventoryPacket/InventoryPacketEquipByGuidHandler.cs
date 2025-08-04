@@ -43,7 +43,7 @@ public static class InventoryPacketEquipByGuidHandler
             return true;
         }
 
-        if (!_resourceManager.ItemDefinitions.TryGetValue(clientItem.Definition, out var itemDefinition))
+        if (!_resourceManager.ClientItemDefinitions.TryGetValue(clientItem.Definition, out var clientItemDefinition))
         {
             _logger.LogWarning("User tried to equip unknown item definition. {guid} {definition}", packet.Guid, clientItem.Definition);
             return true;
@@ -57,7 +57,7 @@ public static class InventoryPacketEquipByGuidHandler
             return true;
         }
 
-        if (!profile.Items.TryGetValue(itemDefinition.Slot, out var profileItem))
+        if (!profile.Items.TryGetValue(clientItemDefinition.Slot, out var profileItem))
             return true;
 
         if (profileItem is null)
@@ -65,25 +65,25 @@ public static class InventoryPacketEquipByGuidHandler
             profileItem = new ProfileItem();
 
             profileItem.Id = clientItem.Id;
-            profileItem.Slot = itemDefinition.Slot;
+            profileItem.Slot = clientItemDefinition.Slot;
 
             profile.Items.Add(profileItem.Slot, profileItem);
         }
         else
         {
             profileItem.Id = clientItem.Id;
-            profileItem.Slot = itemDefinition.Slot;
+            profileItem.Slot = clientItemDefinition.Slot;
         }
 
         var clientUpdatePacketEquipItem = new ClientUpdatePacketEquipItem();
 
         clientUpdatePacketEquipItem.Guid = packet.Guid;
 
-        clientUpdatePacketEquipItem.Attachment.ModelName = itemDefinition.ModelName;
-        clientUpdatePacketEquipItem.Attachment.TextureAlias = itemDefinition.TextureAlias;
-        clientUpdatePacketEquipItem.Attachment.TintAlias = itemDefinition.TintAlias;
-        clientUpdatePacketEquipItem.Attachment.TintId = clientItem.Tint == 0 ? itemDefinition.Icon.TintId : clientItem.Tint;
-        clientUpdatePacketEquipItem.Attachment.CompositeEffectId = itemDefinition.CompositeEffectId;
+        clientUpdatePacketEquipItem.Attachment.ModelName = clientItemDefinition.ModelName;
+        clientUpdatePacketEquipItem.Attachment.TextureAlias = clientItemDefinition.TextureAlias;
+        clientUpdatePacketEquipItem.Attachment.TintAlias = clientItemDefinition.TintAlias;
+        clientUpdatePacketEquipItem.Attachment.TintId = clientItem.Tint == 0 ? clientItemDefinition.Icon.TintId : clientItem.Tint;
+        clientUpdatePacketEquipItem.Attachment.CompositeEffectId = clientItemDefinition.CompositeEffectId;
         clientUpdatePacketEquipItem.Attachment.Slot = packet.Slot;
 
         clientUpdatePacketEquipItem.ProfileId = packet.ProfileId;
@@ -102,9 +102,9 @@ public static class InventoryPacketEquipByGuidHandler
 
         playerUpdatePacketEquipItemChange.ProfileId = connection.Player.ActiveProfile;
 
-        if (!_resourceManager.ItemClasses.TryGetValue(itemDefinition.Class, out var itemClass))
+        if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out var itemClass))
         {
-            _logger.LogWarning("User tried to equip unknown item class. {guid} {definition}", packet.Guid, itemDefinition.Class);
+            _logger.LogWarning("User tried to equip unknown item class. {guid} {definition}", packet.Guid, clientItemDefinition.Class);
             return true;
         }
 

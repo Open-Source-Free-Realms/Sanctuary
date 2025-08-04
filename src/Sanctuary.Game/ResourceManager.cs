@@ -21,7 +21,8 @@ public class ResourceManager : IResourceManager
 
     public static readonly string ModelsFile = Path.Combine(BaseDirectory, "Models.txt");
 
-    public static readonly string ItemDefinitionsFile = Path.Combine(BaseDirectory, "ItemDefinitions.txt");
+    public static readonly string ClientItemDefinitionsFile = Path.Combine(BaseDirectory, "ClientItemDefinitions.json");
+
     public static readonly string ItemClassesFile = Path.Combine(BaseDirectory, "ItemClasses.txt");
     public static readonly string ItemCategoriesFile = Path.Combine(BaseDirectory, "ItemCategories.txt");
     public static readonly string ItemCategoryGroupsFile = Path.Combine(BaseDirectory, "ItemCategoryGroups.txt");
@@ -43,7 +44,8 @@ public class ResourceManager : IResourceManager
 
     public ModelDefinitionCollection Models { get; }
 
-    public ItemDefinitionCollection ItemDefinitions { get; }
+    public ClientItemDefinitionCollection ClientItemDefinitions { get; }
+
     public ItemClassDefinitionCollection ItemClasses { get; }
     public ItemCategoryDefinitionCollection ItemCategories { get; }
     public ItemCategoryGroupDefinitionCollection ItemCategoryGroups { get; }
@@ -72,7 +74,8 @@ public class ResourceManager : IResourceManager
 
         Models = new(_logger);
 
-        ItemDefinitions = new(_logger);
+        ClientItemDefinitions = new(_logger);
+
         ItemClasses = new(_logger);
         ItemCategories = new(_logger);
         ItemCategoryGroups = new(_logger);
@@ -106,7 +109,7 @@ public class ResourceManager : IResourceManager
         if (!Models.Load(ModelsFile))
             return false;
 
-        if (!ItemDefinitions.Load(ItemDefinitionsFile))
+        if (!ClientItemDefinitions.Load(ClientItemDefinitionsFile))
             return false;
 
         if (!ItemClasses.Load(ItemClassesFile))
@@ -162,8 +165,8 @@ public class ResourceManager : IResourceManager
                 loaded = ModelCustomizationMappings.Load(ModelCustomizationMappingsFile);
             else if (e.FullPath == ModelsFile)
                 loaded = Models.Load(ModelsFile);
-            else if (e.FullPath == ItemDefinitionsFile)
-                loaded = ItemDefinitions.Load(ItemDefinitionsFile);
+            else if (e.FullPath == ClientItemDefinitionsFile)
+                loaded = ClientItemDefinitions.Load(ClientItemDefinitionsFile);
             else if (e.FullPath == ItemClassesFile)
                 loaded = ItemClasses.Load(ItemClassesFile);
             else if (e.FullPath == ItemCategoriesFile)

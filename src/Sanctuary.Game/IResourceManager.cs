@@ -12,7 +12,8 @@ public interface IResourceManager
 
     ModelDefinitionCollection Models { get; }
 
-    ItemDefinitionCollection ItemDefinitions { get; }
+    ClientItemDefinitionCollection ClientItemDefinitions { get; }
+
     ItemClassDefinitionCollection ItemClasses { get; }
     ItemCategoryDefinitionCollection ItemCategories { get; }
     ItemCategoryGroupDefinitionCollection ItemCategoryGroups { get; }

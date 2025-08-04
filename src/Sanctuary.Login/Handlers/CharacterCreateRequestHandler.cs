@@ -145,7 +145,7 @@ public static class CharacterCreateRequestHandler
             return true;
         }
 
-        if (!_resourceManager.ItemDefinitions.TryGetValue(characterData.ItemFeet, out var itemFeet))
+        if (!_resourceManager.ClientItemDefinitions.TryGetValue(characterData.ItemFeet, out var itemFeet))
         {
             _logger.LogError("Failed to create character, invalid character item feet. {id}", characterData.ItemFeet);
 
@@ -156,7 +156,7 @@ public static class CharacterCreateRequestHandler
             return true;
         }
 
-        if (!_resourceManager.ItemDefinitions.TryGetValue(characterData.ItemLegs, out var itemLegs))
+        if (!_resourceManager.ClientItemDefinitions.TryGetValue(characterData.ItemLegs, out var itemLegs))
         {
             _logger.LogError("Failed to create character, invalid character item legs. {id}", characterData.ItemLegs);
 
@@ -167,7 +167,7 @@ public static class CharacterCreateRequestHandler
             return true;
         }
 
-        if (!_resourceManager.ItemDefinitions.TryGetValue(characterData.ItemChest, out var itemChest))
+        if (!_resourceManager.ClientItemDefinitions.TryGetValue(characterData.ItemChest, out var itemChest))
         {
             _logger.LogError("Failed to create character, invalid character item chest. {id}", characterData.ItemChest);
 
@@ -324,25 +324,25 @@ public static class CharacterCreateRequestHandler
     {
         var items = new List<DbItem>();
 
-        foreach (var itemDefinition in _resourceManager.ItemDefinitions.Values)
+        foreach (var clientItemDefinition in _resourceManager.ClientItemDefinitions.Values)
         {
-            if (itemDefinition.Type != 1 && itemDefinition.Type != 12)
+            if (clientItemDefinition.Type != 1 && clientItemDefinition.Type != 12)
                 continue;
 
-            if (itemDefinition.GenderUsage != 0 && itemDefinition.GenderUsage != dbCharacter.Gender)
+            if (clientItemDefinition.GenderUsage != 0 && clientItemDefinition.GenderUsage != dbCharacter.Gender)
                 continue;
 
-            if (string.IsNullOrEmpty(itemDefinition.ModelName))
+            if (string.IsNullOrEmpty(clientItemDefinition.ModelName))
                 continue;
 
-            if (dbCharacter.Items.Any(x => x.Definition == itemDefinition.Id))
+            if (dbCharacter.Items.Any(x => x.Definition == clientItemDefinition.Id))
                 continue;
 
             var dbItem = new DbItem
             {
                 Id = dbCharacter.Items.Count + 1,
-                Definition = itemDefinition.Id,
-                Tint = itemDefinition.Icon.TintId
+                Definition = clientItemDefinition.Id,
+                Tint = clientItemDefinition.Icon.TintId
             };
 
             dbCharacter.Items.Add(dbItem);
@@ -403,10 +403,10 @@ public static class CharacterCreateRequestHandler
             {
                 foreach (var defaultItemId in profileData.DefaultItems)
                 {
-                    if (!_resourceManager.ItemDefinitions.TryGetValue(defaultItemId, out var defaultItemDefinition))
+                    if (!_resourceManager.ClientItemDefinitions.TryGetValue(defaultItemId, out var defaultClientItemDefinition))
                         continue;
 
-                    if (defaultItemDefinition.GenderUsage != 0 && defaultItemDefinition.GenderUsage != dbCharacter.Gender)
+                    if (defaultClientItemDefinition.GenderUsage != 0 && defaultClientItemDefinition.GenderUsage != dbCharacter.Gender)
                         continue;
 
                     var dbItem = dbCharacter.Items.SingleOrDefault(x => x.Definition == defaultItemId);
@@ -416,8 +416,8 @@ public static class CharacterCreateRequestHandler
                         dbItem = new DbItem
                         {
                             Id = dbCharacter.Items.Count + 1,
-                            Definition = defaultItemDefinition.Id,
-                            Tint = defaultItemDefinition.Icon.TintId
+                            Definition = defaultClientItemDefinition.Id,
+                            Tint = defaultClientItemDefinition.Icon.TintId
                         };
 
                         dbCharacter.Items.Add(dbItem);

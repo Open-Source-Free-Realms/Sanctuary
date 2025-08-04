@@ -253,17 +253,17 @@ public sealed class Player : ClientPcData, IEntity, IEntitySession, IEntityInter
             if (clientItem is null)
                 continue;
 
-            if (!_resourceManager.ItemDefinitions.TryGetValue(clientItem.Definition, out var itemDefinition))
+            if (!_resourceManager.ClientItemDefinitions.TryGetValue(clientItem.Definition, out var clientItemDefinition))
                 continue;
 
             list.Add(new CharacterAttachmentData
             {
-                ModelName = itemDefinition.ModelName,
-                TextureAlias = itemDefinition.TextureAlias,
-                TintAlias = itemDefinition.TintAlias,
+                ModelName = clientItemDefinition.ModelName,
+                TextureAlias = clientItemDefinition.TextureAlias,
+                TintAlias = clientItemDefinition.TintAlias,
                 TintId = clientItem.Tint,
-                CompositeEffectId = itemDefinition.CompositeEffectId,
-                Slot = itemDefinition.Slot
+                CompositeEffectId = clientItemDefinition.CompositeEffectId,
+                Slot = clientItemDefinition.Slot
             });
         }
 

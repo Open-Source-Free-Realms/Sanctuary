@@ -4,8 +4,8 @@ namespace Sanctuary.Packet.Common;
 
 public class IconData
 {
-    public int Id;
-    public int TintId;
+    public int Id { get; set; }
+    public int TintId { get; set; }
 
     public void Serialize(PacketWriter writer)
     {

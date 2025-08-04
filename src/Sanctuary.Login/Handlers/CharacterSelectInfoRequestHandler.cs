@@ -83,17 +83,17 @@ public static class CharacterSelectInfoRequestHandler
             {
                 foreach (var item in firstProfile.Items)
                 {
-                    if (!_resourceManager.ItemDefinitions.TryGetValue(item.Definition, out var itemDefinition))
+                    if (!_resourceManager.ClientItemDefinitions.TryGetValue(item.Definition, out var clientItemDefinition))
                         continue;
 
                     accountInfoCharacterDetails.Data.CharacterAttachments.Add(new CharacterAttachmentData
                     {
-                        ModelName = itemDefinition.ModelName,
-                        TextureAlias = itemDefinition.TextureAlias,
-                        TintAlias = itemDefinition.TintAlias,
+                        ModelName = clientItemDefinition.ModelName,
+                        TextureAlias = clientItemDefinition.TextureAlias,
+                        TintAlias = clientItemDefinition.TintAlias,
                         TintId = item.Tint,
-                        CompositeEffectId = itemDefinition.CompositeEffectId,
-                        Slot = itemDefinition.Slot,
+                        CompositeEffectId = clientItemDefinition.CompositeEffectId,
+                        Slot = clientItemDefinition.Slot,
                     });
                 }
             }

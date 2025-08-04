@@ -35,15 +35,13 @@ public static class PlayerUpdatePacketItemDefinitionRequestHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(PlayerUpdatePacketItemDefinitionRequest), packet);
 
-        if (!_resourceManager.ItemDefinitions.TryGetValue(packet.Id, out var itemDefinition))
+        if (!_resourceManager.ClientItemDefinitions.TryGetValue(packet.Id, out var clientItemDefinition))
         {
             _logger.LogWarning("Received request for unknown item definition. Id: {id}", packet.Id);
             return true;
         }
 
         using var writer = new PacketWriter();
-
-        var clientItemDefinition = new ClientItemDefinition(itemDefinition);
 
         clientItemDefinition.Serialize(writer);
 
