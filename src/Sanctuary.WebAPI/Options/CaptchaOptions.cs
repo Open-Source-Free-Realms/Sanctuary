@@ -1,4 +1,6 @@
-﻿namespace Sanctuary.WebAPI.Options;
+﻿using System;
+
+namespace Sanctuary.WebAPI.Options;
 
 public class CaptchaOptions
 {
@@ -6,4 +8,6 @@ public class CaptchaOptions
 
     public required string Secret { get; set; }
     public required CaptchaProvider Provider { get; set; }
+
+    public bool IsConfigured => !string.IsNullOrEmpty(Secret) && Enum.IsDefined(Provider);
 }

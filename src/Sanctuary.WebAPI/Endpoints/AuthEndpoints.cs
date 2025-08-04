@@ -39,7 +39,10 @@ public static class AuthEndpoints
         _turnstileService = app.Services.GetService<TurnstileService>();
         _reCaptchaService = app.Services.GetService<ReCaptchaService>();
 
-        _captchaOptions = app.Services.GetService<IOptions<CaptchaOptions>>()?.Value;
+        var captchaOptions = app.Services.GetService<IOptions<CaptchaOptions>>();
+
+        if (captchaOptions is { Value.IsConfigured: true })
+            _captchaOptions = captchaOptions.Value;
 
         app.MapPost("/login", LoginHandlerAsync);
         app.MapPost("/register", RegisterHandlerAsync).DisableAntiforgery();
@@ -91,45 +94,10 @@ public static class AuthEndpoints
         DatabaseContext databaseContext,
         CancellationToken cancellationToken)
     {
-        switch (_captchaOptions?.Provider)
-        {
-            case CaptchaProvider.Turnstile:
-                {
-                    if (_turnstileService is null)
-                        return Results.InternalServerError();
+        var captchaResult = await VerifyCaptchaAsync(context, cancellationToken);
 
-                    if (!context.Request.Form.TryGetValue("cf-turnstile-response", out var token))
-                        return Results.Unauthorized();
-
-                    var remoteIp = context.Connection.RemoteIpAddress;
-
-                    var result = await _turnstileService.VerifyAsync(token, _captchaOptions.Secret, remoteIp?.ToString(), null, cancellationToken);
-
-                    if (!result.IsSuccess)
-                        return Results.Unauthorized();
-                }
-                break;
-
-            case CaptchaProvider.ReCaptcha:
-                {
-                    if (_reCaptchaService is null)
-                        return Results.InternalServerError();
-
-                    if (!context.Request.Form.TryGetValue("recaptcha_token", out var token))
-                        return Results.Unauthorized();
-
-                    var remoteIp = context.Connection.RemoteIpAddress;
-
-                    var result = await _reCaptchaService.Verify3Async(token, _captchaOptions.Secret, remoteIp?.ToString(), cancellationToken);
-
-                    if (!result.IsSuccess)
-                        return Results.Unauthorized();
-                }
-                break;
-
-            default:
-                throw new NotImplementedException($"Captcha provider not implemented. {_captchaOptions?.Provider}");
-        }
+        if (captchaResult is not null)
+            return captchaResult;
 
         var usernameTaken = await databaseContext.Users.AnyAsync(x => x.Username == username, cancellationToken);
 
@@ -166,5 +134,53 @@ public static class AuthEndpoints
         {
             Success = true
         });
+    }
+
+    private static async Task<IResult?> VerifyCaptchaAsync(HttpContext context, CancellationToken cancellationToken)
+    {
+        if (_captchaOptions is null || !_captchaOptions.IsConfigured)
+            return null;
+
+        var remoteIp = context.Connection.RemoteIpAddress?.ToString();
+
+        switch (_captchaOptions.Provider)
+        {
+            case CaptchaProvider.Turnstile:
+                {
+                    if (_turnstileService is null)
+                        return Results.InternalServerError();
+
+                    if (!context.Request.Form.TryGetValue("cf-turnstile-response", out var turnstileToken))
+                        return Results.Unauthorized();
+
+                    var turnstileResult = await _turnstileService.VerifyAsync(
+                        turnstileToken, _captchaOptions.Secret, remoteIp, null, cancellationToken);
+
+                    if (!turnstileResult.IsSuccess)
+                        return Results.Unauthorized();
+                }
+                break;
+
+            case CaptchaProvider.ReCaptcha:
+                {
+                    if (_reCaptchaService is null)
+                        return Results.InternalServerError();
+
+                    if (!context.Request.Form.TryGetValue("recaptcha_token", out var recaptchaToken))
+                        return Results.Unauthorized();
+
+                    var recaptchaResult = await _reCaptchaService.Verify3Async(
+                        recaptchaToken, _captchaOptions.Secret, remoteIp, cancellationToken);
+
+                    if (!recaptchaResult.IsSuccess)
+                        return Results.Unauthorized();
+                }
+                break;
+
+            default:
+                throw new NotImplementedException($"Captcha provider not implemented: {_captchaOptions.Provider}");
+        }
+
+        return null;
     }
 }

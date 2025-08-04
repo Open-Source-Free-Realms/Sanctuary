@@ -2,6 +2,6 @@
 
 public enum CaptchaProvider
 {
-    Turnstile,
+    Turnstile = 1,
     ReCaptcha
 }

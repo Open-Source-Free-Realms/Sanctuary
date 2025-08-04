@@ -22,27 +22,26 @@ var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseUrls();
 
 // Options
-builder.Services.AddOptions<DatabaseOptions>()
-    .BindConfiguration(DatabaseOptions.Section)
-    .ValidateOnStart();
+builder.Services.AddOptionsWithValidateOnStart<DatabaseOptions>()
+    .BindConfiguration(DatabaseOptions.Section);
 
-builder.Services.AddOptions<WebAPIOptions>()
-    .BindConfiguration(WebAPIOptions.Section)
-    .ValidateOnStart();
-
-builder.Services.AddOptions<CaptchaOptions>()
-    .BindConfiguration(CaptchaOptions.Section)
-    .ValidateOnStart();
+builder.Services.AddOptionsWithValidateOnStart<WebAPIOptions>()
+    .BindConfiguration(WebAPIOptions.Section);
 
 // Database
 builder.Services.AddDatabase(builder.Configuration);
 
 // CAPTCHA
-var captchaOptions = builder.Configuration.GetSection(CaptchaOptions.Section).Get<CaptchaOptions>();
+var captchaOptionsSection = builder.Configuration.GetSection(CaptchaOptions.Section);
 
-if (captchaOptions is not null)
+if (captchaOptionsSection.Exists())
 {
-    ArgumentException.ThrowIfNullOrEmpty(captchaOptions.Secret);
+    var captchaOptions = captchaOptionsSection.Get<CaptchaOptions>();
+
+    ArgumentNullException.ThrowIfNull(captchaOptions);
+
+    if (!captchaOptions.IsConfigured)
+        throw new InvalidOperationException("Invalid captcha options.");
 
     switch (captchaOptions.Provider)
     {
@@ -57,6 +56,8 @@ if (captchaOptions is not null)
         default:
             throw new NotImplementedException($"Captcha provider not implemented. {captchaOptions.Provider}");
     }
+
+    builder.Services.Configure<CaptchaOptions>(captchaOptionsSection);
 }
 
 builder.Logging.ClearProviders();
