@@ -17,8 +17,7 @@ public class ClientUpdatePacketActivateProfile : BaseClientUpdatePacket, ISerial
     public int Animation;
     public int CompositeEffect;
 
-    /// <summary>Unused</summary>
-    private int Unknown = default;
+    private int Unused = default;
 
     public ClientUpdatePacketActivateProfile() : base(OpCode)
     {
@@ -37,7 +36,7 @@ public class ClientUpdatePacketActivateProfile : BaseClientUpdatePacket, ISerial
         writer.Write(Animation);
         writer.Write(CompositeEffect);
 
-        writer.Write(Unknown);
+        writer.Write(Unused);
 
         return writer.Buffer;
     }

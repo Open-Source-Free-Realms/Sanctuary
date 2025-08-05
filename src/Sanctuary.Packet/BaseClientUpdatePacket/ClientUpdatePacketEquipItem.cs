@@ -13,8 +13,7 @@ public class ClientUpdatePacketEquipItem : BaseClientUpdatePacket, ISerializable
 
     public int ProfileId;
 
-    /// <summary>Unused</summary>
-    private int Unknown = default;
+    private int Unused = default;
 
     public bool Equip = true;
 
@@ -34,7 +33,7 @@ public class ClientUpdatePacketEquipItem : BaseClientUpdatePacket, ISerializable
 
         writer.Write(ProfileId);
 
-        writer.Write(Unknown);
+        writer.Write(Unused);
 
         writer.Write(Equip);
 

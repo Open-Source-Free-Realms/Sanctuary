@@ -8,7 +8,9 @@ public class HousingPacketZoneData : BaseHousingPacket, ISerializablePacket
     public new const short OpCode = 45;
 
     public bool IsPreview;
-    public bool Unknown2;
+
+    private bool Unused = default;
+
     public int HeadSize;
 
     public PlayerHousingInstanceInfo InstanceInfo = new();
@@ -24,7 +26,7 @@ public class HousingPacketZoneData : BaseHousingPacket, ISerializablePacket
         Write(writer);
 
         writer.Write(IsPreview);
-        writer.Write(Unknown2);
+        writer.Write(Unused);
         writer.Write(HeadSize);
 
         InstanceInfo.Serialize(writer);
