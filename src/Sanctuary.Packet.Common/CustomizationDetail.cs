@@ -4,24 +4,47 @@ namespace Sanctuary.Packet;
 
 public class CustomizationDetail : ISerializableType
 {
+    // 1 - TextureAlias + TintAlias + TintId
+    // 2 - TextureAlias + TintAlias + TintId + TextureOverride
+    // 3 - TextureOverride
     public int Type;
 
-    public string? Unknown2;
-    public string? Unknown3;
+    public string? TextureAlias;
 
-    public int Unknown4;
+    public string? TintAlias;
+    public int TintId;
 
-    public string? Unknown5;
+    public string? TextureOverride;
 
     public void Serialize(PacketWriter writer)
     {
         writer.Write(Type);
 
-        writer.Write(Unknown2);
-        writer.Write(Unknown3);
+        writer.Write(TextureAlias);
+        writer.Write(TintAlias);
 
-        writer.Write(Unknown4);
+        writer.Write(TintId);
 
-        writer.Write(Unknown5);
+        writer.Write(TextureOverride);
+    }
+
+    public bool TryRead(ref PacketReader reader)
+    {
+        if (!reader.TryRead(out Type))
+            return false;
+
+        if (!reader.TryRead(out TextureAlias))
+            return false;
+
+        if (!reader.TryRead(out TintAlias))
+            return false;
+
+        if (!reader.TryRead(out TintId))
+            return false;
+
+        if (!reader.TryRead(out TextureOverride))
+            return false;
+
+        return true;
     }
 }
