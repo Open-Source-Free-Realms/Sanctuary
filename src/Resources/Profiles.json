@@ -1,5 +1,6 @@
 [
   {
+    "Comment": "Adventurer",
     "Id": 1,
     "NameId": 2836,
     "DescriptionId": 2837,
@@ -126,6 +127,7 @@
     "DefaultItems": []
   },
   {
+    "Comment": "Ninja",
     "Id": 2,
     "NameId": 3100,
     "DescriptionId": 3101,
@@ -247,6 +249,7 @@
     ]
   },
   {
+    "Comment": "Postman",
     "Id": 4,
     "NameId": 3237,
     "DescriptionId": 3238,
@@ -355,6 +358,7 @@
     ]
   },
   {
+    "Comment": "Medic",
     "Id": 11,
     "NameId": 2278,
     "DescriptionId": 2279,
@@ -472,6 +476,7 @@
     ]
   },
   {
+    "Comment": "Wizard",
     "Id": 12,
     "NameId": 2280,
     "DescriptionId": 2281,
@@ -582,6 +587,7 @@
     ]
   },
   {
+    "Comment": "Miner",
     "Id": 14,
     "NameId": 2470,
     "DescriptionId": 2471,
@@ -694,6 +700,7 @@
     ]
   },
   {
+    "Comment": "Blacksmith",
     "Id": 16,
     "NameId": 2614,
     "DescriptionId": 2615,
@@ -807,6 +814,7 @@
     ]
   },
   {
+    "Comment": "Warrior",
     "Id": 32,
     "NameId": 4664,
     "DescriptionId": 4665,
@@ -921,6 +929,7 @@
     ]
   },
   {
+    "Comment": "Archer",
     "Id": 35,
     "NameId": 4822,
     "DescriptionId": 4823,
@@ -1031,6 +1040,7 @@
     ]
   },
   {
+    "Comment": "Brawler",
     "Id": 43,
     "NameId": 2873,
     "DescriptionId": 3234,
@@ -1157,6 +1167,7 @@
     ]
   },
   {
+    "Comment": "Chef",
     "Id": 45,
     "NameId": 2856,
     "DescriptionId": 2857,
@@ -1268,6 +1279,7 @@
     ]
   },
   {
+    "Comment": "Kart Driver",
     "Id": 48,
     "NameId": 2917,
     "DescriptionId": 2918,
@@ -1355,6 +1367,7 @@
     ]
   },
   {
+    "Comment": "Demo Derby Driver",
     "Id": 49,
     "NameId": 2919,
     "DescriptionId": 2920,
@@ -1442,6 +1455,7 @@
     ]
   },
   {
+    "Comment": "Soccer Star",
     "Id": 52,
     "NameId": 4650,
     "DescriptionId": 2920,
@@ -1542,6 +1556,7 @@
     ]
   },
   {
+    "Comment": "Card Duelist",
     "Id": 120,
     "NameId": 2410,
     "DescriptionId": 2411,
@@ -1660,6 +1675,7 @@
     "DefaultItems": []
   },
   {
+    "Comment": "Fisherman",
     "Id": 137,
     "NameId": 20178,
     "DescriptionId": 407842,
