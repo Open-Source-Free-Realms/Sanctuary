@@ -20,15 +20,9 @@ public static class PacketDismountRequestHandler
         _logger = loggerFactory.CreateLogger(nameof(PacketDismountRequestHandler));
     }
 
-    public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
+    public static bool HandlePacket(GatewayConnection connection)
     {
-        if (!PacketDismountRequest.TryDeserialize(data, out var packet))
-        {
-            _logger.LogError("Failed to deserialize {packet}.", nameof(PacketDismountRequest));
-            return false;
-        }
-
-        _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(PacketDismountRequest), packet);
+        _logger.LogTrace("Received {name} packet.", nameof(PacketDismountRequest));
 
         if (connection.Player.Mount is null)
             return true;
