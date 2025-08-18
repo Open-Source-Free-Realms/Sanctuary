@@ -6,7 +6,7 @@ public class ClientUpdatePacketDoneSendingPreloadCharacters : BaseClientUpdatePa
 {
     public new const short OpCode = 26;
 
-    public bool UnloadAllPlayers;
+    public bool Preload;
 
     public ClientUpdatePacketDoneSendingPreloadCharacters() : base(OpCode)
     {
@@ -18,7 +18,7 @@ public class ClientUpdatePacketDoneSendingPreloadCharacters : BaseClientUpdatePa
 
         Write(writer);
 
-        writer.Write(UnloadAllPlayers);
+        writer.Write(Preload);
 
         return writer.Buffer;
     }
