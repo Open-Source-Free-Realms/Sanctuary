@@ -58,8 +58,10 @@ builder.ConfigureServices((hostBuilderContext, serviceCollection) =>
     {
         var udpParams = new UdpParams(ManagerRole.ExternalServer)
         {
-            NoDataTimeout = 5000,
-            KeepAliveDelay = 2000,
+#if DEBUG
+            NoDataTimeout = 0,
+#endif
+            KeepAliveDelay = 10000,
             ProtocolName = "LoginGateway",
             Port = serverOptions.LoginGatewayPort,
         };
@@ -72,10 +74,11 @@ builder.ConfigureServices((hostBuilderContext, serviceCollection) =>
     {
         var udpParams = new UdpParams
         {
-            ProtocolName = "LoginUdp_6",
-            Port = serverOptions.Port,
+            CrcBytes = 2,
+            MaxConnections = 2000,
             KeepAliveDelay = 29000,
-            CrcBytes = 2
+            Port = serverOptions.Port,
+            ProtocolName = "LoginUdp_6"
         };
 
         if (serverOptions.UseCompression)
@@ -96,7 +99,10 @@ builder.ConfigureServices((hostBuilderContext, serviceCollection) =>
 builder.ConfigureLogging(loggingBuilder =>
 {
     loggingBuilder.ClearProviders();
+
+#if DEBUG
     loggingBuilder.SetMinimumLevel(LogLevel.Debug);
+#endif
 
     loggingBuilder.AddNLog();
 });

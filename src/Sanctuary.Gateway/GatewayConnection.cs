@@ -86,6 +86,16 @@ public class GatewayConnection : UdpConnection
         }
     }
 
+    public override void OnCrcReject(Span<byte> data)
+    {
+        _logger.LogError("[CrcReject] Guid: {guid}, Data: {data}", Player?.Guid, Convert.ToHexString(data));
+    }
+
+    public override void OnPacketCorrupt(Span<byte> data, UdpCorruptionReason reason)
+    {
+        _logger.LogError("[PacketCorrupt] Guid: {guid}, Reason: {reason}, Data: {data}", Player?.Guid, reason, Convert.ToHexString(data));
+    }
+
     public void Send(ISerializablePacket packet)
     {
         var data = packet.Serialize();

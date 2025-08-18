@@ -57,7 +57,7 @@ builder.ConfigureServices((hostBuilderContext, serviceCollection) =>
     {
         var udpParams = new UdpParams(ManagerRole.ExternalClient)
         {
-            KeepAliveDelay = 2000,
+            KeepAliveDelay = 10000,
             ProtocolName = "LoginGateway"
         };
 
@@ -71,9 +71,10 @@ builder.ConfigureServices((hostBuilderContext, serviceCollection) =>
         {
             CrcBytes = 2,
             NoDataTimeout = 30000,
+            MaxConnections = 2000,
             KeepAliveDelay = 29000,
             Port = serverOptions.Port,
-            ProtocolName = "CGAPI_527",
+            ProtocolName = "CGAPI_527"
         };
 
         if (serverOptions.UseCompression)
@@ -95,7 +96,10 @@ builder.ConfigureServices((hostBuilderContext, serviceCollection) =>
 builder.ConfigureLogging(loggingBuilder =>
 {
     loggingBuilder.ClearProviders();
+
+#if DEBUG
     loggingBuilder.SetMinimumLevel(LogLevel.Debug);
+#endif
 
     loggingBuilder.AddNLog();
 });
