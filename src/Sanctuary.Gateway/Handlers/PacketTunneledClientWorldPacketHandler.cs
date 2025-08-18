@@ -23,9 +23,9 @@ public static class PacketTunneledClientWorldPacketHandler
 
     public static bool HandlePacket(GatewayConnection connection, Span<byte> data)
     {
-        if (!PacketTunneledClientPacket.TryDeserialize(data, out var packet))
+        if (!PacketTunneledClientWorldPacket.TryDeserialize(data, out var packet))
         {
-            _logger.LogError("Failed to deserialize {packet}.", nameof(PacketTunneledClientPacket));
+            _logger.LogError("Failed to deserialize {packet}.", nameof(PacketTunneledClientWorldPacket));
             return false;
         }
 
