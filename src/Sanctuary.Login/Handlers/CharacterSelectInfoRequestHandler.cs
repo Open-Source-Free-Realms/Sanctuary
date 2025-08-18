@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Linq;
 
-using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
-using Sanctuary.Game;
-using Sanctuary.Packet;
 using Sanctuary.Database;
-using Sanctuary.Packet.Common;
+using Sanctuary.Game;
 using Sanctuary.Game.Packet.Common;
+using Sanctuary.Packet;
+using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
 
 namespace Sanctuary.Login.Handlers;

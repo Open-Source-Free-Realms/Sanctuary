@@ -1,12 +1,12 @@
 ﻿using System;
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.DependencyInjection;
 
+using Sanctuary.Core.Configuration;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
-using Sanctuary.Core.Configuration;
 using Sanctuary.Packet.Common.Attributes;
 
 namespace Sanctuary.Login.Handlers;

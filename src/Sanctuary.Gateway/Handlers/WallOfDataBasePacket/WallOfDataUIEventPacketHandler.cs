@@ -1,11 +1,11 @@
 ﻿using System;
 
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 using Sanctuary.Game;
-using Sanctuary.Packet;
 using Sanctuary.Game.Entities;
+using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
 namespace Sanctuary.Gateway.Handlers;
@@ -2315,13 +2315,13 @@ public static class WallOfDataUIEventPacketHandler
                         for (var z = 0; z < 61; z++)
                         {
                             // if (test > 70)
-                                // return;
+                            // return;
 
                             if (!_resourceManager.Models.TryGetValue(modelId++, out var model))
                                 continue;
 
                             // if (!model.ModelFileName.Contains("human"))
-                                // continue;
+                            // continue;
 
                             if (connection.Player.Zone.TryCreateNpc(out var npc))
                             {

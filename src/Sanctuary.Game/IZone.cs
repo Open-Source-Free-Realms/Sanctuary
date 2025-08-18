@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-using Sanctuary.UdpLibrary;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Resources.Definitions;
+using Sanctuary.UdpLibrary;
 
 namespace Sanctuary.Game;
 

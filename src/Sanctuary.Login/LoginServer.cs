@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Net;
-using System.Linq;
 using System.Buffers.Binary;
+using System.Linq;
+using System.Net;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using Sanctuary.UdpLibrary;
 using Sanctuary.Core.Configuration;
+using Sanctuary.UdpLibrary;
 using Sanctuary.UdpLibrary.Configuration;
 
 namespace Sanctuary.Login;

@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Numerics;
 using System.Collections.Concurrent;
+using System.Numerics;
 
 namespace Sanctuary.Game.Entities;
 

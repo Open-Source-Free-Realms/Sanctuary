@@ -2,16 +2,16 @@
 using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.EntityFrameworkCore;
 
-using Sanctuary.Game;
-using Sanctuary.Database;
 using Sanctuary.Core.Configuration;
-using Sanctuary.UdpLibrary.Enumerations;
+using Sanctuary.Database;
+using Sanctuary.Game;
 using Sanctuary.Packet.Common.Extensions;
+using Sanctuary.UdpLibrary.Enumerations;
 
 namespace Sanctuary.Gateway;
 

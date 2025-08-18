@@ -1,23 +1,23 @@
 ﻿using System;
-using System.Net;
-using System.Threading;
-using System.Net.Sockets;
+using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
+using System.Net;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
-
-using Microsoft.Extensions.DependencyInjection;
+using System.Threading;
 
 using Collections.Pooled;
 
+using Microsoft.Extensions.DependencyInjection;
+
 using Sanctuary.Core.IO;
-using Sanctuary.UdpLibrary.Internal;
 using Sanctuary.UdpLibrary.Abstractions;
+using Sanctuary.UdpLibrary.Configuration;
 using Sanctuary.UdpLibrary.Enumerations;
+using Sanctuary.UdpLibrary.Internal;
 using Sanctuary.UdpLibrary.Packets;
 using Sanctuary.UdpLibrary.Statistics;
-using Sanctuary.UdpLibrary.Configuration;
 
 namespace Sanctuary.UdpLibrary;
 

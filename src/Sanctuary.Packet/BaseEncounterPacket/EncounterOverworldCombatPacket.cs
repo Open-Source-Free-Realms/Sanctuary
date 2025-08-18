@@ -1,6 +1,4 @@
-﻿using System;
-
-using Sanctuary.Core.IO;
+﻿using Sanctuary.Core.IO;
 
 namespace Sanctuary.Packet;
 

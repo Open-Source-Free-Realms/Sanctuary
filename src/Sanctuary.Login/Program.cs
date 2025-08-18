@@ -1,19 +1,19 @@
 ﻿using System;
 
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 using NLog.Extensions.Logging;
 
+using Sanctuary.Core.Configuration;
+using Sanctuary.Database;
 using Sanctuary.Game;
 using Sanctuary.Login;
-using Sanctuary.Database;
-using Sanctuary.Core.Configuration;
-using Sanctuary.UdpLibrary.Enumerations;
 using Sanctuary.Packet.Common.Extensions;
 using Sanctuary.UdpLibrary.Configuration;
+using Sanctuary.UdpLibrary.Enumerations;
 
 var builder = new HostBuilder();
 
@@ -30,7 +30,7 @@ builder.ConfigureAppConfiguration((hostBuilderContext, configurationBuilder) =>
         configurationBuilder.AddJsonFile("database.json", optional: true);
 
     configurationBuilder.AddJsonFile("login.json", optional: false, reloadOnChange: true);
-    
+
     configurationBuilder.AddEnvironmentVariables();
 });
 

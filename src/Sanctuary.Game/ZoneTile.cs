@@ -1,5 +1,5 @@
-﻿using System.Diagnostics;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 
 using Sanctuary.Game.Entities;
 

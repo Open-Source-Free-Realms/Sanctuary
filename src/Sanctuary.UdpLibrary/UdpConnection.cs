@@ -1,15 +1,15 @@
 ﻿using System;
+using System.Buffers.Binary;
+using System.Diagnostics;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
-using System.Diagnostics;
-using System.Buffers.Binary;
-using System.Runtime.InteropServices;
 
 using Sanctuary.Core.IO;
-using Sanctuary.UdpLibrary.Internal;
 using Sanctuary.UdpLibrary.Abstractions;
 using Sanctuary.UdpLibrary.Enumerations;
+using Sanctuary.UdpLibrary.Internal;
 using Sanctuary.UdpLibrary.Packets;
 using Sanctuary.UdpLibrary.Statistics;
 

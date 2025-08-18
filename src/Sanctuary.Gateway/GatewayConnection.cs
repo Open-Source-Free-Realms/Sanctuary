@@ -1,24 +1,23 @@
 ﻿using System;
-using System.Net;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.EntityFrameworkCore;
 
-using Sanctuary.Game;
-using Sanctuary.Packet;
+using Sanctuary.Core.Configuration;
 using Sanctuary.Core.IO;
 using Sanctuary.Database;
-using Sanctuary.UdpLibrary;
-using Sanctuary.Packet.Common;
+using Sanctuary.Database.Entities;
+using Sanctuary.Game;
 using Sanctuary.Game.Entities;
 using Sanctuary.Gateway.Handlers;
-using Sanctuary.Database.Entities;
-using Sanctuary.Core.Configuration;
+using Sanctuary.Packet;
+using Sanctuary.Packet.Common;
+using Sanctuary.UdpLibrary;
 using Sanctuary.UdpLibrary.Enumerations;
-using Sanctuary.Game.Resources.Definitions;
 
 namespace Sanctuary.Gateway;
 

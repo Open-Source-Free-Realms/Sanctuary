@@ -1,5 +1,5 @@
-﻿using System.Numerics;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Numerics;
 
 using Sanctuary.Core.IO;
 using Sanctuary.Packet.Common;

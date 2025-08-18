@@ -1,19 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Collections.Generic;
 
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
+using Sanctuary.Core.Configuration;
+using Sanctuary.Database;
+using Sanctuary.Database.Entities;
 using Sanctuary.Game;
 using Sanctuary.Packet;
-using Sanctuary.Database;
 using Sanctuary.Packet.Common;
-using Sanctuary.Database.Entities;
-using Sanctuary.Core.Configuration;
 using Sanctuary.Packet.Common.Attributes;
 
 namespace Sanctuary.Login.Handlers;

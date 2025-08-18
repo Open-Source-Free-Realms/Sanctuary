@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Net;
 
-using Sanctuary.UdpLibrary.Packets;
-using Sanctuary.UdpLibrary.Enumerations;
 using Sanctuary.UdpLibrary.Configuration;
+using Sanctuary.UdpLibrary.Enumerations;
+using Sanctuary.UdpLibrary.Packets;
 
 namespace Sanctuary.UdpLibrary.Abstractions;
 
@@ -12,7 +12,7 @@ public interface IUdpManager
     long CachedClock { get; }
     UdpParams Params { get; set; }
 
-    UdpClockStamp ProcessingInducedLag {  get; }
+    UdpClockStamp ProcessingInducedLag { get; }
 
     uint LocalSyncStampLong();
     ushort LocalSyncStampShort();

@@ -2,14 +2,14 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
-using Sanctuary.Game;
-using Sanctuary.Database;
 using Sanctuary.Core.Configuration;
+using Sanctuary.Database;
+using Sanctuary.Game;
 using Sanctuary.Packet.Common.Extensions;
 
 namespace Sanctuary.Login;

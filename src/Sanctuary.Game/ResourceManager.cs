@@ -152,7 +152,7 @@ public class ResourceManager : IResourceManager
             _fileSystemWatcher.EnableRaisingEvents = false;
 
             var loaded = false;
-                
+
             if (e.FullPath == HairMappingsFile)
                 loaded = HairMappings.Load(HairMappingsFile);
             else if (e.FullPath == HeadMappingsFile)

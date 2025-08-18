@@ -1,11 +1,11 @@
 ﻿using System;
-using System.IO;
-using System.Text;
-using System.Numerics;
 using System.Buffers.Binary;
-using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Sanctuary.Core.IO;
 

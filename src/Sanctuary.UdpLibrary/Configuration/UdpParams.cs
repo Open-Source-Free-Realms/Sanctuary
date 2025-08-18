@@ -1,6 +1,6 @@
-﻿using Sanctuary.UdpLibrary.Internal;
-using Sanctuary.UdpLibrary.Abstractions;
+﻿using Sanctuary.UdpLibrary.Abstractions;
 using Sanctuary.UdpLibrary.Enumerations;
+using Sanctuary.UdpLibrary.Internal;
 
 namespace Sanctuary.UdpLibrary.Configuration;
 

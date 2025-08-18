@@ -1,9 +1,8 @@
-﻿using System.Numerics;
+﻿using System.Collections.Concurrent;
+using System.Numerics;
 
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
-
-using System.Collections.Concurrent;
 
 namespace Sanctuary.Game.Entities;
 

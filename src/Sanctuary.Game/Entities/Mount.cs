@@ -1,5 +1,5 @@
-﻿using Sanctuary.Packet;
-using Sanctuary.Game.Resources.Definitions;
+﻿using Sanctuary.Game.Resources.Definitions;
+using Sanctuary.Packet;
 
 namespace Sanctuary.Game.Entities;
 

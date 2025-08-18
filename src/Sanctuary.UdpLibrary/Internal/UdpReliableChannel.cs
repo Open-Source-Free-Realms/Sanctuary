@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Buffers.Binary;
+using System.Diagnostics;
 
 using Collections.Pooled;
 
 using Sanctuary.Core.IO;
+using Sanctuary.UdpLibrary.Configuration;
 using Sanctuary.UdpLibrary.Enumerations;
 using Sanctuary.UdpLibrary.Packets;
-using Sanctuary.UdpLibrary.Configuration;
 
 namespace Sanctuary.UdpLibrary.Internal;
 

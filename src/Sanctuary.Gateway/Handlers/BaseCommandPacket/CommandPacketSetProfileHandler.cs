@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Linq;
-using Sanctuary.Core.IO;
 
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
+using Sanctuary.Core.IO;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 

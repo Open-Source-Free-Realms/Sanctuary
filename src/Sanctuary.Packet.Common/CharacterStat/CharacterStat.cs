@@ -16,7 +16,7 @@ public class CharacterStat : ISerializableType
     public int Int
     {
         get { return (int)_value; }
-        set {  _value = value; }
+        set { _value = value; }
     }
 
     public float Float

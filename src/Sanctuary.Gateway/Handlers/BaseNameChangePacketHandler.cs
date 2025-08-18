@@ -1,10 +1,10 @@
 ﻿using System;
 
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
-using Sanctuary.Packet;
 using Sanctuary.Core.IO;
+using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
 namespace Sanctuary.Gateway.Handlers;

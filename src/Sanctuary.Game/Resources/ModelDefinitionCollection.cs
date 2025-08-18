@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
-using Sanctuary.Core.Collections;
 
 using Microsoft.Extensions.Logging;
 
 using nietras.SeparatedValues;
 
+using Sanctuary.Core.Collections;
 using Sanctuary.Game.Resources.Definitions;
 
 namespace Sanctuary.Game.Resources;

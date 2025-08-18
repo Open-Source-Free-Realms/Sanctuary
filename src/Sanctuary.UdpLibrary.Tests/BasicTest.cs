@@ -1,11 +1,11 @@
-using System.Threading;
 using System.Diagnostics;
+using System.Threading;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using Sanctuary.UdpLibrary.Enumerations;
 using Sanctuary.UdpLibrary.Configuration;
+using Sanctuary.UdpLibrary.Enumerations;
 
 namespace Sanctuary.UdpLibrary.Tests;
 

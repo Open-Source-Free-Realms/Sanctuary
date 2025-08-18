@@ -8,7 +8,7 @@ namespace Sanctuary.Packet.Common;
 public class BoundingBox : ISerializableType
 {
     [JsonConverter(typeof(Vector4JsonConverter))]
-    public Vector4 Min { get;set; }
+    public Vector4 Min { get; set; }
 
     [JsonConverter(typeof(Vector4JsonConverter))]
     public Vector4 Max { get; set; }

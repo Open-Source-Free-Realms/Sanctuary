@@ -19,7 +19,7 @@ public class ClientItemStatDefinition : BaseItemStatDefinition
 
         if (Type == 0)
             writer.Write(Convert.ToInt32(Value));
-        else if(Type == 1)
+        else if (Type == 1)
             writer.Write(Convert.ToSingle(Value));
 
         writer.Write(Unknown);

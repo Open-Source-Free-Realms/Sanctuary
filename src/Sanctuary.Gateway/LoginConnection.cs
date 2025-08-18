@@ -4,11 +4,11 @@ using System.Net;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using Sanctuary.Packet;
-using Sanctuary.Core.IO;
-using Sanctuary.UdpLibrary;
-using Sanctuary.Gateway.Handlers;
 using Sanctuary.Core.Configuration;
+using Sanctuary.Core.IO;
+using Sanctuary.Gateway.Handlers;
+using Sanctuary.Packet;
+using Sanctuary.UdpLibrary;
 using Sanctuary.UdpLibrary.Enumerations;
 
 namespace Sanctuary.Gateway;

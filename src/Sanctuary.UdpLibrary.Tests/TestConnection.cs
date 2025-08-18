@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Net;
 using System.Diagnostics;
+using System.Net;
 
 using Sanctuary.Core.IO;
 using Sanctuary.UdpLibrary.Enumerations;

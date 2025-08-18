@@ -5,8 +5,8 @@ using Microsoft.Extensions.Logging;
 
 using nietras.SeparatedValues;
 
-using Sanctuary.Packet.Common;
 using Sanctuary.Core.Collections;
+using Sanctuary.Packet.Common;
 
 namespace Sanctuary.Game.Resources;
 

@@ -1,17 +1,16 @@
 ﻿using System;
-using System.Linq;
-using System.Numerics;
+using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
+using System.Linq;
+using System.Numerics;
 
-using Sanctuary.Packet;
-using Sanctuary.Core.IO;
-using Sanctuary.UdpLibrary;
-using Sanctuary.Packet.Common;
 using Sanctuary.Core.Extensions;
+using Sanctuary.Core.IO;
+using Sanctuary.Packet;
+using Sanctuary.Packet.Common;
+using Sanctuary.UdpLibrary;
 using Sanctuary.UdpLibrary.Enumerations;
-using System.Diagnostics;
 
 namespace Sanctuary.Game.Entities;
 
@@ -68,7 +67,7 @@ public sealed class Player : ClientPcData, IEntity, IEntitySession, IEntityInter
         {
             Payload = packet.Serialize()
         };
-        
+
         Send(packetTunneled);
     }
 

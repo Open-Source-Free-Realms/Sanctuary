@@ -1,16 +1,16 @@
 ﻿using System;
-using System.Net;
 using System.Collections.Generic;
+using System.Net;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using Sanctuary.Packet;
-using Sanctuary.Core.IO;
-using Sanctuary.UdpLibrary;
-using Sanctuary.Packet.Common;
-using Sanctuary.Login.Handlers;
 using Sanctuary.Core.Configuration;
+using Sanctuary.Core.IO;
+using Sanctuary.Login.Handlers;
+using Sanctuary.Packet;
+using Sanctuary.Packet.Common;
+using Sanctuary.UdpLibrary;
 using Sanctuary.UdpLibrary.Enumerations;
 
 namespace Sanctuary.Login;

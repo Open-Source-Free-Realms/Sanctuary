@@ -1,8 +1,8 @@
 ﻿using System;
 
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;

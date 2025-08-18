@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
 
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 using Sanctuary.Game;
 using Sanctuary.Packet;

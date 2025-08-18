@@ -16,5 +16,5 @@ public sealed class GatewayServerOptions : ServerOptions
     public required string LoginGatewayAddress { get; set; }
     public required string LoginGatewayChallenge { get; set; }
 
-    public bool ShowMemberNagScreen {  get; set; }
+    public bool ShowMemberNagScreen { get; set; }
 }

@@ -1,12 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
-using System.Collections.Generic;
 
 using Microsoft.Extensions.Logging;
 
-using Sanctuary.Packet.Common;
 using Sanctuary.Core.Collections;
+using Sanctuary.Packet.Common;
 
 namespace Sanctuary.Game.Resources;
 
