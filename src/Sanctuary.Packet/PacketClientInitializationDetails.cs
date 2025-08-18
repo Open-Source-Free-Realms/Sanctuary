@@ -8,7 +8,7 @@ public class PacketClientInitializationDetails : IDeserializable<PacketClientIni
 {
     public const short OpCode = 169;
 
-    public int LaunchTimestamp;
+    public int TimezoneOffset;
 
     public static bool TryDeserialize(ReadOnlySpan<byte> data, out PacketClientInitializationDetails value)
     {
@@ -19,7 +19,7 @@ public class PacketClientInitializationDetails : IDeserializable<PacketClientIni
         if (!reader.TryRead(out short opCode) && opCode != OpCode)
             return false;
 
-        if (!reader.TryRead(out value.LaunchTimestamp))
+        if (!reader.TryRead(out value.TimezoneOffset))
             return false;
 
         return reader.RemainingLength == 0;
