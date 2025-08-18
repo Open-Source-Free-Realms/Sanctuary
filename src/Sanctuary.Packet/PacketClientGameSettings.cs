@@ -8,7 +8,7 @@ public class PacketClientGameSettings : ISerializablePacket
 
     public int Unknown;
     public int Unknown2;
-    public int Unknown3;
+    public int PowerHourEffectTag;
 
     public bool Unknown4;
 
@@ -22,7 +22,7 @@ public class PacketClientGameSettings : ISerializablePacket
 
         writer.Write(Unknown);
         writer.Write(Unknown2);
-        writer.Write(Unknown3);
+        writer.Write(PowerHourEffectTag);
 
         writer.Write(Unknown4);
 

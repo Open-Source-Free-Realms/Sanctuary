@@ -332,7 +332,7 @@ public class GatewayConnection : UdpConnection
         {
             Unknown = 4,
             Unknown2 = 7,
-            Unknown3 = 268,
+            PowerHourEffectTag = 268,
             Unknown4 = true,
             GameTimeScalar = 1.0f
         };
