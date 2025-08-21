@@ -44,7 +44,7 @@ public static class PacketZoneTeleportRequestHandler
 
         var clientUpdatePacketUpdateLocation = new ClientUpdatePacketUpdateLocation
         {
-            Position = new(pointOfInterest.X, pointOfInterest.Y, pointOfInterest.Z, 1f),
+            Position = pointOfInterest.SpawnPosition,
             Rotation = new(rotationZ, 0f, rotationX, 0f),
             Teleport = true
         };

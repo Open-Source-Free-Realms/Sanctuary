@@ -1,4 +1,7 @@
-﻿using Sanctuary.Core.IO;
+﻿using System.Numerics;
+using System.Text.Json.Serialization;
+
+using Sanctuary.Core.IO;
 
 namespace Sanctuary.Packet.Common;
 
@@ -9,9 +12,11 @@ public class PointOfInterestDefinition : ISerializableType
 
     public int LocationId { get; set; }
 
-    public float X { get; set; }
-    public float Y { get; set; }
-    public float Z { get; set; }
+    [JsonConverter(typeof(Vector4JsonConverter))]
+    public Vector4 Position { get; set; }
+
+    [JsonConverter(typeof(Vector4JsonConverter))]
+    public Vector4 SpawnPosition { get; set; }
 
     public float Heading { get; set; }
 
@@ -38,9 +43,9 @@ public class PointOfInterestDefinition : ISerializableType
 
         writer.Write(LocationId);
 
-        writer.Write(X);
-        writer.Write(Y);
-        writer.Write(Z);
+        writer.Write(Position.X);
+        writer.Write(Position.Y);
+        writer.Write(Position.Z);
 
         writer.Write(Heading);
 
