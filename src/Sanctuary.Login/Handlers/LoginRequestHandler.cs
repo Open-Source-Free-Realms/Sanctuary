@@ -59,17 +59,33 @@ public static class LoginRequestHandler
 
         var user = dbContext.Users.SingleOrDefault(x => x.Session == packet.Session);
 
-        if (user is null)
+        if (user is null
+#if !DEBUG
+            || !user.SessionCreated.HasValue
+#endif
+            )
         {
             connection.Send(loginReply);
 
-            _logger.LogWarning("User tried to login with an unknown Session. ( Session: {session} )", packet.Session);
+            _logger.LogWarning("User tried to login with an invalid session. ( Session: {session} )", packet.Session);
 
             return true;
         }
 
-        // TODO: Clear Session from DB once we use a launcher.
-        // user.Session = null;
+#if !DEBUG
+        if ((DateTimeOffset.UtcNow - user.SessionCreated.Value).TotalMinutes > 5)
+        {
+            connection.Send(loginReply);
+
+            _logger.LogWarning("User tried to login with an expired session. ( Session: {session}, SessionCreated: {sessionCreated} )", packet.Session, user.SessionCreated);
+
+            return true;
+        }
+
+        user.Session = null;
+        user.SessionCreated = null;
+#endif
+
         user.LastLogin = DateTimeOffset.UtcNow;
 
         if (dbContext.SaveChanges() <= 0)
