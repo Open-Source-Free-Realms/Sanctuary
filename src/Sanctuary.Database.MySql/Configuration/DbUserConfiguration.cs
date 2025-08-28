@@ -12,6 +12,7 @@ public sealed class DbUserConfiguration : IEntityTypeConfiguration<DbUser>
         builder.HasKey(u => u.Guid);
         builder.Property(u => u.Guid).IsRequired().ValueGeneratedOnAdd();
 
+        builder.HasIndex(u => u.Username).IsUnique();
         builder.Property(u => u.Username).IsRequired().HasMaxLength(254);
         builder.Property(u => u.Password).IsRequired().HasMaxLength(254);
 

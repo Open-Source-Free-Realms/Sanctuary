@@ -7,7 +7,7 @@ public class PacketCheckNameReply : ISerializablePacket
     public const short OpCode = 211;
 
     public string FirstName = null!;
-    public string LastName = null!;
+    public string? LastName;
 
     public int Result;
 

@@ -72,7 +72,7 @@ public class GatewayService : BackgroundService
         }
 
         // Load zones.
-        if (!_zoneManager.LoadZones())
+        if (!_zoneManager.Load())
         {
             _logger.LogCritical("Cannot start {server}, failed to load zones.", nameof(GatewayServer));
 

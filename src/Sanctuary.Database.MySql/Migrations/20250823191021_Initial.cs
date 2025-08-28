@@ -1,5 +1,4 @@
 ﻿using System;
-
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
@@ -66,6 +65,11 @@ namespace Sanctuary.Database.MySql.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     EyeColor = table.Column<int>(type: "int", nullable: false),
                     HairColor = table.Column<int>(type: "int", nullable: false),
+                    PositionX = table.Column<float>(type: "float", nullable: true),
+                    PositionY = table.Column<float>(type: "float", nullable: true),
+                    PositionZ = table.Column<float>(type: "float", nullable: true),
+                    RotationX = table.Column<float>(type: "float", nullable: true),
+                    RotationZ = table.Column<float>(type: "float", nullable: true),
                     ActiveProfileId = table.Column<int>(type: "int", nullable: false),
                     Gender = table.Column<int>(type: "int", nullable: false),
                     ActiveTitleId = table.Column<int>(type: "int", nullable: true),
@@ -76,15 +80,7 @@ namespace Sanctuary.Database.MySql.Migrations
                     ChatBubbleSize = table.Column<int>(type: "int", nullable: false, defaultValue: 1),
                     Created = table.Column<DateTimeOffset>(type: "datetime(6)", nullable: false, defaultValueSql: "NOW()"),
                     LastLogin = table.Column<DateTimeOffset>(type: "datetime(6)", nullable: true),
-                    UserGuid = table.Column<ulong>(type: "bigint unsigned", nullable: false),
-                    Position_W = table.Column<float>(type: "float", nullable: false),
-                    Position_X = table.Column<float>(type: "float", nullable: false),
-                    Position_Y = table.Column<float>(type: "float", nullable: false),
-                    Position_Z = table.Column<float>(type: "float", nullable: false),
-                    Rotation_W = table.Column<float>(type: "float", nullable: false),
-                    Rotation_X = table.Column<float>(type: "float", nullable: false),
-                    Rotation_Y = table.Column<float>(type: "float", nullable: false),
-                    Rotation_Z = table.Column<float>(type: "float", nullable: false)
+                    UserGuid = table.Column<ulong>(type: "bigint unsigned", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -220,6 +216,12 @@ namespace Sanctuary.Database.MySql.Migrations
                 column: "CharacterGuid");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Items_Tint_Definition_CharacterGuid",
+                table: "Items",
+                columns: new[] { "Tint", "Definition", "CharacterGuid" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Mounts_CharacterGuid",
                 table: "Mounts",
                 column: "CharacterGuid");
@@ -238,6 +240,12 @@ namespace Sanctuary.Database.MySql.Migrations
                 name: "IX_Titles_CharacterGuid",
                 table: "Titles",
                 column: "CharacterGuid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Username",
+                table: "Users",
+                column: "Username",
+                unique: true);
         }
 
         /// <inheritdoc />

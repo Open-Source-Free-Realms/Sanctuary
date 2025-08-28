@@ -33,8 +33,8 @@ public class ClientPcData
     public int FacePaintId;
     public int ModelCustomizationId;
 
-    public Vector4 Position { get; set; }
-    public Quaternion Rotation { get; set; }
+    public Vector4 Position { get; protected set; }
+    public Quaternion Rotation { get; protected set; }
 
     public NameData Name = new();
 
@@ -324,7 +324,7 @@ public class ClientPcData
 
     public List<ClientPcProfile> Profiles = new();
 
-    public int ActiveProfile;
+    public int ActiveProfileId;
 
     public List<ProfileTypeEntry> ProfileTypes = new();
 
@@ -499,7 +499,7 @@ public class ClientPcData
 
         writer.Write(Profiles);
 
-        writer.Write(ActiveProfile);
+        writer.Write(ActiveProfileId);
 
         writer.Write(ProfileTypes);
 

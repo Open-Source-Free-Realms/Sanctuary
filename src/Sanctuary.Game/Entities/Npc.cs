@@ -1,86 +1,149 @@
 ﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
+using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 
 namespace Sanctuary.Game.Entities;
 
-public class Npc : IEntity, IEntityInteract
+public class Npc : IEntity
 {
-    public static ulong UniqueGuid = 100_000_000_000u;
+    public ulong Guid { get; init; }
 
-    public ulong Guid { get; init; } = UniqueGuid++;
-    public Vector4 Position { get; set; }
-    public Quaternion Rotation { get; set; }
+    public Vector4 Position { get; private set; }
+    public Quaternion Rotation { get; private set; }
 
     public bool Visible { get; set; }
 
-    public required IZone Zone { get; set; }
-    public ConcurrentDictionary<ulong, IEntity> VisibleEntities { get; } = new();
+    public IZone Zone { get; set; }
+    public ZoneTile ZoneTile { get; protected set; } = ZoneTile.Empty;
+    public ConcurrentDictionary<ulong, Npc> VisibleNpcs { get; } = [];
+    public ConcurrentDictionary<ulong, Player> VisiblePlayers { get; } = [];
 
-    public int NameId;
+    public int NameId { get; set; }
+    public string? Name { get; set; }
+    public int SubTextNameId { get; set; }
+    public bool HideNamePlate { get; set; }
+    public int NameplateImageId { get; set; }
+    public float VerticalOffset { get; set; }
 
-    public int ModelId;
+    public int ModelId { get; set; }
+    public int TerrainObjectId { get; set; }
 
-    public float Scale;
+    public string? TextureAlias { get; set; }
+    public string? TintAlias { get; set; }
+    public int TintId { get; set; }
 
-    public int Disposition;
+    public float Scale { get; set; }
 
-    public string TextureAlias = null!;
+    /// <summary>
+    /// 0 - Hostile
+    /// 1 - Neutral
+    /// 2 - Ally
+    /// </summary>
+    public int Disposition { get; set; } = 1;
 
-    public string TintAlias = null!;
-    public int TintId;
+    public int Animation { get; set; } = 1;
 
-    public string Name = null!;
+    public int CompositeEffectId { get; set; }
 
-    public int CompositeEffectId;
+    public int InteractRange { get; set; } = 100;
+    public bool IsInteractable { get; set; } = true;
 
-    public bool HideNamePlate;
+    public int MovementType { get; set; }
 
-    public int ImageSetId;
+    public int AreaDefinitionId { get; set; }
+
+    public int ImageSetId { get; set; }
+
+    public byte CursorId { get; set; }
+
+    // public NotificationInfo? Notification { get; set; }
+
+    public List<CharacterAttachmentData> Attachments { get; set; } = [];
+
+    public bool Static { get; set; }
+
+    public Npc(IZone zone)
+    {
+        Zone = zone;
+    }
+
+    #region Events
 
     public void OnInteract(IEntity other)
     {
         if (other is not Player player)
             return;
-
-        var commandPacketInteractionList = new CommandPacketInteractionList();
-
-        commandPacketInteractionList.List.Guid = Guid;
-
-        var interactions = new[]
-        {
-            new InteractionData // Remove
-            {
-                EventId = 999999,
-                IconId = 135,
-                ButtonText = 18704
-            }
-        };
-
-        commandPacketInteractionList.List.Interactions.AddRange(interactions);
-
-        player.SendTunneled(commandPacketInteractionList);
     }
 
-    public virtual void OnEntityAdd(IEntity entity)
+    public virtual void OnAddVisibleNpcs(IEnumerable<Npc> npcs)
     {
-        VisibleEntities.TryAdd(entity.Guid, entity);
+        foreach (var npc in npcs)
+            VisibleNpcs.TryAdd(npc.Guid, npc);
     }
 
-    public virtual void OnEntityRemove(IEntity entity)
+    public virtual void OnAddVisiblePlayers(IEnumerable<Player> players)
     {
-        VisibleEntities.TryRemove(entity.Guid, out _);
+        foreach (var player in players)
+            VisiblePlayers.TryAdd(player.Guid, player);
     }
 
-    public virtual void Update()
+    public virtual void OnRemoveVisibleNpcs(IEnumerable<Npc> npcs)
+    {
+        foreach (var npc in npcs)
+            VisibleNpcs.TryRemove(npc.Guid, out _);
+    }
+
+    public virtual void OnRemoveVisiblePlayers(IEnumerable<Player> players)
+    {
+        foreach (var player in players)
+            VisiblePlayers.TryRemove(player.Guid, out _);
+    }
+
+    #endregion
+
+    #region Update
+
+    public virtual void UpdateEveryTick()
     {
     }
 
     public virtual void UpdateEverySecond()
     {
     }
+
+    public void UpdatePosition(Vector4 position, Quaternion rotation)
+    {
+        Position = position;
+        Rotation = rotation;
+
+        if (Visible)
+        {
+            UpdateZoneTile();
+        }
+    }
+
+    public virtual void TeleportToZone(IZone zone, Vector4 position, Quaternion rotation)
+    {
+    }
+
+    protected void UpdateZoneTile()
+    {
+        var newZoneTile = Zone.GetTileFromPosition(Position);
+
+        if (newZoneTile == ZoneTile)
+            return;
+
+        Zone.UpdateEntityZoneTile(this, ZoneTile, newZoneTile);
+
+        ZoneTile = newZoneTile;
+    }
+
+    #endregion
 
     public virtual PlayerUpdatePacketAddNpc GetAddNpcPacket()
     {
@@ -104,16 +167,15 @@ public class Npc : IEntity, IEntityInteract
             Position = Position,
             Rotation = Rotation,
 
-            // playerUpdatePacketAddNpc.Attachments = TODO
-
-            Unknown26 = default,
+            Attachments = Attachments,
+            HasAttachments = Attachments.Count > 0,
 
             Disposition = Disposition,
 
-            AnimSlotId = 1,
+            Animation = Animation,
 
             Unknown16 = default,
-            VerticalOffset = default,
+            VerticalOffset = VerticalOffset,
 
             CompositeEffectId = CompositeEffectId,
 
@@ -127,24 +189,24 @@ public class Npc : IEntity, IEntityInteract
             Unknown23 = default,
             Unknown24 = default,
 
-            TerrainObjectId = default,
+            TerrainObjectId = TerrainObjectId,
 
             Speed = default,
 
             Unknown28 = default,
 
-            InteractRange = 100,
+            InteractRange = InteractRange,
 
-            Unknown30 = default,
-            Unknown31 = default,
-            Unknown32 = default,
+            WalkAnimId = default, // Walk GroupAnimId
+            RunAnimId = default, // Sprint GroupAnimId
+            StandAnimId = default, // Idle GroupAnimId
 
             Unknown33 = default,
             Unknown34 = default,
 
-            SubTextNameId = default,
+            SubTextNameId = SubTextNameId,
 
-            Unknown36 = default,
+            Unknown36 = default, // AnimationEvent
             TemporaryAppearance = default,
 
             // playerUpdatePacketAddNpc.EffectTags = TODO
@@ -161,17 +223,17 @@ public class Npc : IEntity, IEntityInteract
 
             Tilt = default,
 
-            Unknown45 = default,
+            NameColor = default,
 
-            AreaDefinitionId = default,
+            AreaDefinitionId = AreaDefinitionId,
 
-            ImageSetId = default,
+            ImageSetId = ImageSetId,
 
-            IsInteractable = true,
+            IsInteractable = IsInteractable,
 
             RiderGuid = default,
 
-            Unknown50 = default,
+            MovementType = MovementType,
 
             Unknown51 = default,
 
@@ -194,7 +256,7 @@ public class Npc : IEntity, IEntityInteract
             ReplaceTerrainObject = default,
 
             Unknown63 = default,
-            Unknown64 = default,
+            Unknown64 = 3050,
 
             FlyByEffectId = default,
 
@@ -205,14 +267,51 @@ public class Npc : IEntity, IEntityInteract
 
             NameScale = default,
 
-            NameplateImageId = default
+            NameplateImageId = NameplateImageId
         };
 
         return packet;
     }
 
+    #region Equatable
+
+    public bool Equals(IEntity? other)
+    {
+        return Guid == other?.Guid;
+    }
+
+    public override bool Equals([NotNullWhen(true)] object? obj)
+    {
+        if (obj is Npc other)
+            return Equals(other);
+
+        return false;
+    }
+
+    public override int GetHashCode()
+    {
+        return Guid.GetHashCode();
+    }
+
+    public static bool operator ==(Npc left, Npc right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(Npc left, Npc right)
+    {
+        return !(left == right);
+    }
+
+    #endregion
+
     public virtual void Dispose()
     {
-        Zone.RemoveEntity(this);
+        foreach (var visiblePlayer in VisiblePlayers)
+            visiblePlayer.Value.OnRemoveVisibleNpcs([this]);
+
+        ZoneTile.Entities.Remove(Guid, out _);
+
+        Zone.TryRemoveNpc(Guid);
     }
 }

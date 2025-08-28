@@ -9,9 +9,7 @@ public sealed class DbTitleConfiguration : IEntityTypeConfiguration<DbTitle>
 {
     public void Configure(EntityTypeBuilder<DbTitle> builder)
     {
-        builder.ToTable("Titles");
-
-        builder.HasKey(c => new { c.Id, c.CharacterGuid });
-        builder.Property(p => p.Id).IsRequired().ValueGeneratedNever();
+        builder.HasKey(t => new { t.Id, t.CharacterGuid });
+        builder.Property(t => t.Id).IsRequired().ValueGeneratedNever();
     }
 }

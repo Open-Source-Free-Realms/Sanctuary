@@ -49,7 +49,7 @@ public static class InventoryPacketEquipByGuidHandler
             return true;
         }
 
-        var profile = connection.Player.Profile;
+        var profile = connection.Player.ActiveProfile;
 
         if (profile is null)
         {
@@ -100,7 +100,7 @@ public static class InventoryPacketEquipByGuidHandler
 
         playerUpdatePacketEquipItemChange.Attachment = clientUpdatePacketEquipItem.Attachment;
 
-        playerUpdatePacketEquipItemChange.ProfileId = connection.Player.ActiveProfile;
+        playerUpdatePacketEquipItemChange.ProfileId = connection.Player.ActiveProfileId;
 
         if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out var itemClass))
         {

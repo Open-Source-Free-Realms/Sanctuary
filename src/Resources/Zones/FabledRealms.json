@@ -1,0 +1,88 @@
+{
+  "$type": "Starting",
+  "Id": 1,
+  "Name": "FabledRealms",
+  "Type": "Starting",
+  "TileSize": 64,
+  "StartLatitude": -48,
+  "StartLongitude": -32,
+  "EndLatitude": 80,
+  "EndLongitude": 96,
+  "SpawnPosition": [
+    -1904.883,
+    -39.7098,
+    412.6024
+  ],
+  "SpawnRotation": [
+    0.5531712,
+    0.8330676
+  ],
+  "AreaDefinitions": [
+    {
+      "Id": 2,
+      "Shape": "Rectangle",
+      "X1": -1680,
+      "Z1": 1700,
+      "X2": -2820,
+      "Z2": 820
+    },
+    {
+      "Id": 3,
+      "Shape": "Circle",
+      "X1": -540,
+      "Z1": 2240,
+      "Radius": 700
+    },
+    {
+      "Id": 4,
+      "Shape": "Circle",
+      "X1": -1030,
+      "Z1": -410,
+      "Radius": 270
+    },
+    {
+      "Id": 5,
+      "Shape": "Rectangle",
+      "X1": -860,
+      "Z1": 490,
+      "X2": -1540,
+      "Z2": 130
+    },
+    {
+      "Id": 6,
+      "Shape": "Rectangle",
+      "X1": 520,
+      "Z1": -1000,
+      "X2": -1300,
+      "Z2": -2050
+    },
+    {
+      "Id": 7,
+      "Shape": "Circle",
+      "X1": 90,
+      "Z1": 1200,
+      "Radius": 260
+    },
+    {
+      "Id": 8,
+      "Shape": "Circle",
+      "X1": 380,
+      "Z1": 400,
+      "Radius": 350
+    },
+    {
+      "Id": 9,
+      "Shape": "Circle",
+      "X1": 50,
+      "Z1": -430,
+      "Radius": 120
+    },
+    {
+      "Id": 10,
+      "Shape": "Circle",
+      "X1": 970,
+      "Z1": 2140,
+      "Radius": 900
+    }
+  ]
+}

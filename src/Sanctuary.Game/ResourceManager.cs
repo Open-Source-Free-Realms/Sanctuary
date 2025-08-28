@@ -27,7 +27,6 @@ public class ResourceManager : IResourceManager
     public static readonly string ItemCategoriesFile = Path.Combine(BaseDirectory, "ItemCategories.txt");
     public static readonly string ItemCategoryGroupsFile = Path.Combine(BaseDirectory, "ItemCategoryGroups.txt");
 
-    public static readonly string ZonesFile = Path.Combine(BaseDirectory, "Zones.json");
     public static readonly string ZonesDirectory = Path.Combine(BaseDirectory, "Zones");
     public static readonly string HousesFile = Path.Combine(BaseDirectory, "Houses.json");
     public static readonly string MountsFile = Path.Combine(BaseDirectory, "Mounts.json");
@@ -121,7 +120,7 @@ public class ResourceManager : IResourceManager
         if (!ItemCategoryGroups.Load(ItemCategoryGroupsFile))
             return false;
 
-        if (!Zones.Load(ZonesFile, ZonesDirectory))
+        if (!Zones.Load(ZonesDirectory))
             return false;
 
         if (!Houses.Load(HousesFile))
@@ -149,6 +148,9 @@ public class ResourceManager : IResourceManager
     {
         try
         {
+            if (File.GetAttributes(e.FullPath).HasFlag(FileAttributes.Directory))
+                return;
+
             _fileSystemWatcher.EnableRaisingEvents = false;
 
             var loaded = false;
@@ -173,8 +175,6 @@ public class ResourceManager : IResourceManager
                 loaded = ItemCategories.Load(ItemCategoriesFile);
             else if (e.FullPath == ItemCategoryGroupsFile)
                 loaded = ItemCategoryGroups.Load(ItemCategoryGroupsFile);
-            else if (e.FullPath == ZonesFile)
-                loaded = Zones.Load(ZonesFile, ZonesDirectory);
             else if (e.FullPath == HousesFile)
                 loaded = Houses.Load(HousesFile);
             else if (e.FullPath == MountsFile)

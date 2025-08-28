@@ -34,14 +34,8 @@ public static class PacketDismountRequestHandler
 
         connection.Player.SendTunneledToVisible(packetDismountResponse, true);
 
-        connection.Player.OnEntityRemove(connection.Player.Mount);
-
-        foreach (var visibleEntity in connection.Player.VisibleEntities)
-        {
-            visibleEntity.Value.OnEntityRemove(connection.Player.Mount);
-        }
-
         connection.Player.Mount.Dispose();
+        connection.Player.Mount = null;
 
         connection.Player.UpdateCharacterStats(
             CharacterStats.MaxMovementSpeed.Set(8f),

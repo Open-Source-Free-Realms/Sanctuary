@@ -8,8 +8,9 @@ public class PacketClientBeginZoning : ISerializablePacket
 {
     public const short OpCode = 31;
 
-    public string Name = null!;
-    public int Type;
+    public required string Name;
+
+    public int Type = 2;
 
     public Vector4 Position;
     public Quaternion Rotation;
@@ -17,6 +18,12 @@ public class PacketClientBeginZoning : ISerializablePacket
     public string? Sky;
 
     public bool Tutorial;
+
+    // Used in;
+    // PlayerUpdatePacketJump
+    // ClientUpdatePacketUpdateLocation
+    // PlayerUpdatePacketUpdatePosition
+    // PlayerUpdatePacketUpdatePositionOnPlatform
     public byte Unknown;
 
     public int Id;

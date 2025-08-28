@@ -3,7 +3,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using Sanctuary.Game.Entities;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
@@ -30,11 +29,10 @@ public static class CommandPacketInteractRequestHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(CommandPacketInteractRequest), packet);
 
-        if (!connection.Player.VisibleEntities.TryGetValue(packet.Guid, out var entity))
+        if (!connection.Player.Zone.TryGetEntity(packet.Guid, out var entity))
             return true;
 
-        if (entity is IEntityInteract entityInteract)
-            entityInteract.OnInteract(connection.Player);
+        entity.OnInteract(connection.Player);
 
         return true;
     }

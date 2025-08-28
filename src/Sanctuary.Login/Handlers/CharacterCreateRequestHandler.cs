@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -193,10 +192,22 @@ public static class CharacterCreateRequestHandler
             return true;
         }
 
-        var characterCount = dbContext.Characters.Count(x => x.UserGuid == connection.Guid);
-        var maxCharacters = dbContext.Users.Where(x => x.Guid == connection.Guid).Select(x => x.MaxCharacters).SingleOrDefault();
+        var dbUser = dbContext.Users.SingleOrDefault(x => x.Guid == connection.Guid);
 
-        if (characterCount >= maxCharacters)
+        if (dbUser is null)
+        {
+            _logger.LogInformation("Failed to create character, unknown user.");
+
+            characterCreateReply.Result = 4;
+
+            connection.Send(characterCreateReply);
+
+            return true;
+        }
+
+        var characterCount = dbContext.Characters.Count(x => x.UserGuid == connection.Guid);
+
+        if (characterCount >= dbUser.MaxCharacters)
         {
             _logger.LogInformation("Failed to create character, max characters.");
 
@@ -222,8 +233,7 @@ public static class CharacterCreateRequestHandler
 
             Gender = model.Gender,
 
-            Position = new Vector4(_options.DefaultPositionX, _options.DefaultPositionY, _options.DefaultPositionZ, 1.0f),
-            Rotation = new Quaternion(_options.DefaultRotationX, 0.0f, _options.DefaultRotationZ, 0.0f),
+            MembershipStatus = dbUser.IsMember ? 2 : 0,
 
             UserGuid = connection.Guid
         };
@@ -266,7 +276,8 @@ public static class CharacterCreateRequestHandler
         {
             Id = dbCharacter.Items.Count + 1,
             Definition = itemChest.Id,
-            Tint = characterData.TintChest
+            Tint = characterData.TintChest,
+            Count = 1
         };
 
         dbCharacter.Items.Add(chestItem);
@@ -275,7 +286,8 @@ public static class CharacterCreateRequestHandler
         {
             Id = dbCharacter.Items.Count + 1,
             Definition = itemLegs.Id,
-            Tint = characterData.TintLegs
+            Tint = characterData.TintLegs,
+            Count = 1
         };
 
         dbCharacter.Items.Add(legItem);
@@ -284,7 +296,8 @@ public static class CharacterCreateRequestHandler
         {
             Id = dbCharacter.Items.Count + 1,
             Definition = itemFeet.Id,
-            Tint = characterData.TintFeet
+            Tint = characterData.TintFeet,
+            Count = 1
         };
 
         dbCharacter.Items.Add(feetItem);
@@ -342,7 +355,8 @@ public static class CharacterCreateRequestHandler
             {
                 Id = dbCharacter.Items.Count + 1,
                 Definition = clientItemDefinition.Id,
-                Tint = clientItemDefinition.Icon.TintId
+                Tint = clientItemDefinition.Icon.TintId,
+                Count = 1
             };
 
             dbCharacter.Items.Add(dbItem);
@@ -417,7 +431,8 @@ public static class CharacterCreateRequestHandler
                         {
                             Id = dbCharacter.Items.Count + 1,
                             Definition = defaultClientItemDefinition.Id,
-                            Tint = defaultClientItemDefinition.Icon.TintId
+                            Tint = defaultClientItemDefinition.Icon.TintId,
+                            Count = 1
                         };
 
                         dbCharacter.Items.Add(dbItem);

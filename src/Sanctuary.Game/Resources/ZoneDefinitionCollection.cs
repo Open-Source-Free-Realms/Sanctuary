@@ -1,16 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Collections;
-using Sanctuary.Game.Resources.Definitions;
+using Sanctuary.Game.Resources.Definitions.Zones;
 
 namespace Sanctuary.Game.Resources;
 
-public class ZoneDefinitionCollection : ObservableConcurrentDictionary<int, ZoneDefinition>
+public class ZoneDefinitionCollection : ObservableConcurrentDictionary<int, BaseZoneDefinition>
 {
     private readonly ILogger _logger;
 
@@ -19,40 +18,28 @@ public class ZoneDefinitionCollection : ObservableConcurrentDictionary<int, Zone
         _logger = logger;
     }
 
-    public bool Load(string filePath, string zoneFilePath)
+    public bool Load(string directoryPath)
     {
-        if (!File.Exists(filePath))
+        if (!Directory.Exists(directoryPath))
         {
-            _logger.LogError("Failed to find file \"{file}\"", filePath);
+            _logger.LogError("Failed to find directory \"{directory}\"", directoryPath);
             return false;
         }
 
-        try
+        foreach (var filePath in Directory.EnumerateFiles(directoryPath, "*.json"))
         {
-            using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            using var streamReader = new StreamReader(fileStream);
-
-            var entries = JsonSerializer.Deserialize<List<ZoneDefinition>>(streamReader.ReadToEnd());
-
-            if (entries is null)
+            try
             {
-                _logger.LogError("No entries found in file \"{file}\".", filePath);
-                return false;
-            }
+                var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
+                using var streamReader = new StreamReader(fileStream);
 
-            foreach (var entry in entries)
-            {
-                var gzneFilePath = Path.Combine(zoneFilePath, $"{entry.Name}.gzne");
+                var entry = JsonSerializer.Deserialize<BaseZoneDefinition>(streamReader.ReadToEnd());
 
-                var gzne = LoadGzneDefinition(gzneFilePath);
-
-                if (gzne is null)
+                if (entry is null)
                 {
-                    _logger.LogError("Failed to load gzne for zone \"{name}\".", entry.Name);
-                    continue;
+                    _logger.LogError("Failed to parse file \"{file}\".", filePath);
+                    return false;
                 }
-
-                entry.Gzne = gzne;
 
                 if (!TryAdd(entry.Id, entry))
                 {
@@ -60,56 +47,19 @@ public class ZoneDefinitionCollection : ObservableConcurrentDictionary<int, Zone
                     continue;
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to parse file \"{file}\".", filePath);
-            return false;
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to parse file \"{file}\".", filePath);
+                return false;
+            }
         }
 
         if (Count == 0)
         {
-            _logger.LogError("No data was loaded. \"{file}\"", filePath);
+            _logger.LogError("No data was loaded.");
             return false;
         }
 
         return true;
-    }
-
-    private GzneDefinition? LoadGzneDefinition(string filePath)
-    {
-        if (!File.Exists(filePath))
-            return null;
-
-        var gzneDefinition = new GzneDefinition();
-
-        using var binaryReader = new BinaryReader(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-
-        var magic = new string(binaryReader.ReadChars(4));
-
-        if (magic != "GZNE")
-            return null;
-
-        var version = binaryReader.ReadInt32();
-
-        if (version > 3)
-            return null;
-
-        if (version >= 3)
-            gzneDefinition.HideTerrain = (binaryReader.ReadInt32() & 1) == 1;
-
-        gzneDefinition.ChunkSize = binaryReader.ReadInt32();
-        gzneDefinition.TileSize = binaryReader.ReadInt32();
-
-        gzneDefinition.WorldMin = binaryReader.ReadSingle();
-        gzneDefinition.Unknown = binaryReader.ReadInt32();
-
-        gzneDefinition.StartLongitude = binaryReader.ReadInt32();
-        gzneDefinition.StartLatitude = binaryReader.ReadInt32();
-
-        gzneDefinition.EndLongitude = binaryReader.ReadInt32();
-        gzneDefinition.EndLatitude = binaryReader.ReadInt32();
-
-        return gzneDefinition;
     }
 }

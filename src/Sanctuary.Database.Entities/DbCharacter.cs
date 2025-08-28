@@ -22,8 +22,11 @@ public class DbCharacter
     public int EyeColor { get; set; }
     public int HairColor { get; set; }
 
-    public Vector4 Position { get; set; }
-    public Quaternion Rotation { get; set; }
+    public float? PositionX { get; set; }
+    public float? PositionY { get; set; }
+    public float? PositionZ { get; set; }
+    public float? RotationX { get; set; }
+    public float? RotationZ { get; set; }
 
     public int ActiveProfileId { get; set; }
 

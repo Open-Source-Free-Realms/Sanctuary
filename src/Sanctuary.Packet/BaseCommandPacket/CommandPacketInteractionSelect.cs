@@ -10,7 +10,7 @@ public class CommandPacketInteractionSelect : BaseCommandPacket, IDeserializable
 
     public ulong Guid;
 
-    public int EventId;
+    public int Id;
 
     public CommandPacketInteractionSelect() : base(OpCode)
     {
@@ -28,7 +28,7 @@ public class CommandPacketInteractionSelect : BaseCommandPacket, IDeserializable
         if (!reader.TryRead(out value.Guid))
             return false;
 
-        if (!reader.TryRead(out value.EventId))
+        if (!reader.TryRead(out value.Id))
             return false;
 
         return reader.RemainingLength == 0;

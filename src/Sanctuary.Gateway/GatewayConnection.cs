@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Numerics;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -151,11 +152,18 @@ public class GatewayConnection : UdpConnection
         Player.FacePaint = dbCharacter.FacePaint;
         Player.ModelCustomization = dbCharacter.ModelCustomization;
 
-        Player.Position = dbCharacter.Position;
-        Player.Rotation = dbCharacter.Rotation;
+        var position = dbCharacter.PositionX.HasValue && dbCharacter.PositionY.HasValue && dbCharacter.PositionZ.HasValue
+            ? new Vector4(dbCharacter.PositionX.Value, dbCharacter.PositionY.Value, dbCharacter.PositionZ.Value, 1f)
+            : startingZone.SpawnPosition;
+
+        var rotation = dbCharacter.RotationX.HasValue && dbCharacter.RotationZ.HasValue
+            ? new Quaternion(dbCharacter.RotationX.Value, 0f, dbCharacter.RotationZ.Value, 0f)
+            : startingZone.SpawnRotation;
+
+        Player.UpdatePosition(position, rotation);
 
         Player.Name.FirstName = dbCharacter.FirstName;
-        Player.Name.LastName = dbCharacter.LastName;
+        Player.Name.LastName = dbCharacter.LastName ?? string.Empty;
 
         Player.Birthday = dbCharacter.Created;
 
@@ -222,7 +230,7 @@ public class GatewayConnection : UdpConnection
             }
         }
 
-        Player.ActiveProfile = dbCharacter.ActiveProfileId;
+        Player.ActiveProfileId = dbCharacter.ActiveProfileId;
 
         foreach (var dbItem in dbCharacter.Items)
         {
@@ -328,8 +336,8 @@ public class GatewayConnection : UdpConnection
     {
         var packetSendZoneDetails = new PacketSendZoneDetails
         {
-            Name = Player.Zone.Definition.Name,
-            Id = Player.Zone.Definition.Id
+            Name = Player.Zone.Name,
+            Id = Player.Zone.Id
         };
 
         SendTunneled(packetSendZoneDetails);

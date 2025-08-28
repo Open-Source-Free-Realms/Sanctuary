@@ -21,13 +21,6 @@ public sealed class LoginServerOptions : ServerOptions
     public int DefaultTitleId { get; set; }
     public required int DefaultProfileId { get; set; }
 
-    public required float DefaultPositionX { get; set; }
-    public required float DefaultPositionY { get; set; }
-    public required float DefaultPositionZ { get; set; }
-
-    public required float DefaultRotationX { get; set; }
-    public required float DefaultRotationZ { get; set; }
-
     public bool UnlockAllItems { get; set; }
     public bool UnlockAllTitles { get; set; }
     public bool UnlockAllMounts { get; set; }

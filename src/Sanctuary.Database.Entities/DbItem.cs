@@ -8,7 +8,7 @@ public class DbItem
     public int Id { get; set; }
 
     public int Tint { get; set; }
-    public int Count { get; set; } = 1;
+    public int Count { get; set; }
     public int Definition { get; set; }
 
     public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;

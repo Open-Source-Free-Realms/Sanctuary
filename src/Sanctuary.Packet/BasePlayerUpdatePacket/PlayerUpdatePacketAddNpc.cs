@@ -19,8 +19,8 @@ public class PlayerUpdatePacketAddNpc : BasePlayerUpdatePacket, ISerializablePac
 
     public bool Unknown;
 
-    public string TextureAlias = null!;
-    public string TintAlias = null!;
+    public string? TextureAlias;
+    public string? TintAlias;
 
     public int TintId;
 
@@ -38,7 +38,7 @@ public class PlayerUpdatePacketAddNpc : BasePlayerUpdatePacket, ISerializablePac
 
     public List<CharacterAttachmentData> Attachments = new();
 
-    public bool Unknown26;
+    public bool HasAttachments;
 
     /// <summary>
     /// 0 - Hostile
@@ -47,7 +47,7 @@ public class PlayerUpdatePacketAddNpc : BasePlayerUpdatePacket, ISerializablePac
     /// </summary>
     public int Disposition;
 
-    public int AnimSlotId;
+    public int Animation;
 
     public bool Unknown16;
 
@@ -57,7 +57,7 @@ public class PlayerUpdatePacketAddNpc : BasePlayerUpdatePacket, ISerializablePac
 
     public int WieldType;
 
-    public string Name = null!;
+    public string? Name;
 
     public bool HideNamePlate;
 
@@ -73,9 +73,9 @@ public class PlayerUpdatePacketAddNpc : BasePlayerUpdatePacket, ISerializablePac
 
     public int InteractRange;
 
-    public int Unknown30;
-    public int Unknown31;
-    public int Unknown32;
+    public int WalkAnimId;
+    public int RunAnimId;
+    public int StandAnimId;
 
     public bool Unknown33;
     public bool Unknown34;
@@ -93,8 +93,8 @@ public class PlayerUpdatePacketAddNpc : BasePlayerUpdatePacket, ISerializablePac
     public int Unknown39;
 
     public bool Unknown40;
-    public bool Unknown41;
-    public bool Unknown42;
+    public bool Unknown41; // Health bar
+    public bool Unknown42; // Collision?
 
     public bool HasTilt;
 
@@ -103,7 +103,7 @@ public class PlayerUpdatePacketAddNpc : BasePlayerUpdatePacket, ISerializablePac
     [JsonConverter(typeof(Vector4JsonConverter))]
     public Vector4 Tilt;
 
-    public int Unknown45;
+    public float NameColor;
 
     public int AreaDefinitionId;
 
@@ -113,7 +113,10 @@ public class PlayerUpdatePacketAddNpc : BasePlayerUpdatePacket, ISerializablePac
 
     public ulong RiderGuid;
 
-    public int Unknown50;
+    // 0 - None
+    // 1 - Controller
+    // 2 - Physics
+    public int MovementType;
 
     public float Unknown51;
 
@@ -186,7 +189,7 @@ public class PlayerUpdatePacketAddNpc : BasePlayerUpdatePacket, ISerializablePac
         writer.Write(Position);
         writer.Write(Rotation);
 
-        writer.Write(AnimSlotId);
+        writer.Write(Animation);
 
         writer.Write(Attachments);
 
@@ -216,7 +219,7 @@ public class PlayerUpdatePacketAddNpc : BasePlayerUpdatePacket, ISerializablePac
 
         writer.Write(TerrainObjectId);
 
-        writer.Write(Unknown26);
+        writer.Write(HasAttachments);
 
         writer.Write(Speed);
 
@@ -224,10 +227,10 @@ public class PlayerUpdatePacketAddNpc : BasePlayerUpdatePacket, ISerializablePac
 
         writer.Write(InteractRange);
 
-        writer.Write(Unknown30);
-        writer.Write(Unknown31);
+        writer.Write(WalkAnimId);
+        writer.Write(RunAnimId);
 
-        writer.Write(Unknown32);
+        writer.Write(StandAnimId);
 
         writer.Write(Unknown33);
         writer.Write(Unknown34);
@@ -247,13 +250,14 @@ public class PlayerUpdatePacketAddNpc : BasePlayerUpdatePacket, ISerializablePac
         writer.Write(Unknown40);
         writer.Write(Unknown41);
         writer.Write(Unknown42);
+
         writer.Write(HasTilt);
 
         Customization.Serialize(writer);
 
         writer.Write(Tilt);
 
-        writer.Write(Unknown45);
+        writer.Write(NameColor);
         writer.Write(AreaDefinitionId);
         writer.Write(ImageSetId);
 
@@ -261,7 +265,7 @@ public class PlayerUpdatePacketAddNpc : BasePlayerUpdatePacket, ISerializablePac
 
         writer.Write(RiderGuid);
 
-        writer.Write(Unknown50);
+        writer.Write(MovementType);
 
         writer.Write(Unknown51);
 

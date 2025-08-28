@@ -1,10 +1,16 @@
-﻿namespace Sanctuary.Game;
+﻿using System.Diagnostics.CodeAnalysis;
+
+using Sanctuary.Game.Entities;
+using Sanctuary.Game.Zones;
+
+namespace Sanctuary.Game;
 
 public interface IZoneManager
 {
-    IZone StartingZone { get; }
+    StartingZone StartingZone { get; }
 
-    IZone? Get(int zoneId);
+    bool Load();
 
-    bool LoadZones();
+    bool TryGetPlayer(ulong guid, [MaybeNullWhen(false)] out Player player);
+    bool TryGetPlayer(string name, [MaybeNullWhen(false)] out Player player);
 }

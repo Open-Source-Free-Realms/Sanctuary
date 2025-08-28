@@ -36,7 +36,7 @@ public static class CommandPacketSetProfileHandler
         if (profile is null)
             return true;
 
-        connection.Player.ActiveProfile = packet.Id;
+        connection.Player.ActiveProfileId = packet.Id;
 
         var clientUpdatePacketActivateProfile = new ClientUpdatePacketActivateProfile();
 

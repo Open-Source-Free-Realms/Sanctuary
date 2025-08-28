@@ -35,7 +35,7 @@ public static class PacketCheckNameRequestHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(PacketCheckNameRequest), packet);
 
-        if (string.IsNullOrEmpty(packet.FirstName) || string.IsNullOrWhiteSpace(packet.LastName))
+        if (string.IsNullOrWhiteSpace(packet.FirstName))
         {
             _logger.LogError("Invalid name received.");
             return true;

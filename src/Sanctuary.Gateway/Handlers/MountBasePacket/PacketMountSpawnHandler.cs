@@ -46,9 +46,6 @@ public static class PacketMountSpawnHandler
         if (!connection.Player.Zone.TryCreateMount(connection.Player, mountDefinition, out var mount))
             return true;
 
-        mount.Position = connection.Player.Position;
-        mount.Rotation = connection.Player.Rotation;
-
         mount.Visible = true;
 
         mount.NameId = mountDefinition.NameId;
@@ -61,23 +58,21 @@ public static class PacketMountSpawnHandler
 
         mount.ImageSetId = mountDefinition.ImageSetId;
 
+        mount.Seat = 0;
+        mount.QueuePosition = 1;
+
         connection.Player.Mount = mount;
 
-        connection.Player.OnEntityAdd(mount);
-
-        foreach (var visibleEntity in connection.Player.VisibleEntities)
-        {
-            visibleEntity.Value.OnEntityAdd(mount);
-        }
+        mount.UpdatePosition(connection.Player.Position, connection.Player.Rotation);
 
         var packetMountResponse = new PacketMountResponse();
 
         packetMountResponse.RiderGuid = mount.Rider.Guid;
         packetMountResponse.MountGuid = mount.Guid;
 
-        packetMountResponse.Seat = 0;
+        packetMountResponse.Seat = mount.Seat;
 
-        packetMountResponse.QueuePosition = 1;
+        packetMountResponse.QueuePosition = mount.QueuePosition;
 
         packetMountResponse.Unknown = 1;
 

@@ -14,8 +14,8 @@ public sealed class DbCharacterConfiguration : IEntityTypeConfiguration<DbCharac
 
         builder.Property(c => c.Ticket).IsRequired(false);
 
-        builder.Property(c => c.FirstName).IsRequired();
-        builder.Property(c => c.LastName).IsRequired(false);
+        builder.Property(c => c.FirstName).IsRequired().HasMaxLength(16);
+        builder.Property(c => c.LastName).IsRequired(false).HasMaxLength(16);
 
         builder.Property(c => c.Model).IsRequired();
         builder.Property(c => c.Head).IsRequired();
@@ -28,8 +28,12 @@ public sealed class DbCharacterConfiguration : IEntityTypeConfiguration<DbCharac
         builder.Property(c => c.EyeColor).IsRequired();
         builder.Property(c => c.HairColor).IsRequired();
 
-        builder.ComplexProperty(c => c.Position).IsRequired();
-        builder.ComplexProperty(c => c.Rotation).IsRequired();
+        builder.Property(c => c.PositionX).IsRequired(false);
+        builder.Property(c => c.PositionY).IsRequired(false);
+        builder.Property(c => c.PositionZ).IsRequired(false);
+
+        builder.Property(c => c.RotationX).IsRequired(false);
+        builder.Property(c => c.RotationZ).IsRequired(false);
 
         builder.Property(c => c.ActiveProfileId).IsRequired();
 
@@ -59,7 +63,7 @@ public sealed class DbCharacterConfiguration : IEntityTypeConfiguration<DbCharac
 
         builder.HasMany(c => c.Mounts)
             .WithOne(m => m.Character)
-            .HasForeignKey(p => p.CharacterGuid)
+            .HasForeignKey(m => m.CharacterGuid)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasMany(c => c.Profiles)

@@ -49,14 +49,14 @@ public class PlayerUpdatePacketAddPc : BasePlayerUpdatePacket, ISerializablePack
 
     public List<ulong> Guilds = new();
 
-    public int ActiveProfile;
+    public int ActiveProfileId;
 
     public PlayerTitleData Title = new();
 
     public ulong MountGuid;
 
-    public int Unknown10;
-    public int Unknown11;
+    public int MountSeat;
+    public int MountQueuePosition;
     public float NameVerticalOffset;
 
     public int WieldType;
@@ -114,7 +114,7 @@ public class PlayerUpdatePacketAddPc : BasePlayerUpdatePacket, ISerializablePack
 
         writer.Write(Guilds);
 
-        writer.Write(ActiveProfile);
+        writer.Write(ActiveProfileId);
 
         Title.Serialize(writer);
 
@@ -122,8 +122,8 @@ public class PlayerUpdatePacketAddPc : BasePlayerUpdatePacket, ISerializablePack
 
         writer.Write(MountGuid);
 
-        writer.Write(Unknown10);
-        writer.Write(Unknown11);
+        writer.Write(MountSeat);
+        writer.Write(MountQueuePosition);
 
         writer.Write(NameVerticalOffset);
 

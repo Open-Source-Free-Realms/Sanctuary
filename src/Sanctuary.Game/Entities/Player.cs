@@ -2,11 +2,13 @@
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 
-using Sanctuary.Core.Extensions;
 using Sanctuary.Core.IO;
+using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.UdpLibrary;
@@ -14,15 +16,17 @@ using Sanctuary.UdpLibrary.Enumerations;
 
 namespace Sanctuary.Game.Entities;
 
-public sealed class Player : ClientPcData, IEntity, IEntitySession, IEntityInteract
+public sealed class Player : ClientPcData, IEntity
 {
     private readonly UdpConnection _connection;
     private readonly IResourceManager _resourceManager;
 
     public bool Visible { get; set; }
 
-    public required IZone Zone { get; set; }
-    public ConcurrentDictionary<ulong, IEntity> VisibleEntities { get; } = new();
+    public IZone Zone { get; set; }
+    public ZoneTile ZoneTile { get; private set; } = ZoneTile.Empty;
+    public ConcurrentDictionary<ulong, Npc> VisibleNpcs { get; } = [];
+    public ConcurrentDictionary<ulong, Player> VisiblePlayers { get; } = [];
 
     private int ZoneAreaId { get; set; }
 
@@ -30,17 +34,22 @@ public sealed class Player : ClientPcData, IEntity, IEntitySession, IEntityInter
     public int ChatBubbleBackgroundColor { get; set; }
     public int ChatBubbleSize { get; set; }
 
-    public ClientPcProfile? Profile => Profiles.SingleOrDefault(x => x.Id == ActiveProfile);
+    public ClientPcProfile ActiveProfile => Profiles.Single(x => x.Id == ActiveProfileId);
 
     public Mount? Mount { get; set; }
 
-    public Player(ulong guid, UdpConnection connection, IResourceManager resourceManager)
+    public Vector4 StartingZonePosition { get; set; }
+    public Quaternion StartingZoneRotation { get; set; }
+
+    public Player(BaseZone zone, UdpConnection connection, IResourceManager resourceManager)
     {
-        Guid = guid;
+        Zone = zone;
 
         _connection = connection;
         _resourceManager = resourceManager;
     }
+
+    #region Connection
 
     public void Send(ISerializablePacket packet)
     {
@@ -51,11 +60,10 @@ public sealed class Player : ClientPcData, IEntity, IEntitySession, IEntityInter
 
     public void SendToVisible(ISerializablePacket packet, bool sendToSelf = false)
     {
-        var visibleEntities = VisibleEntities.ToFrozenDictionary();
+        var visiblePlayers = VisiblePlayers.ToFrozenDictionary();
 
-        foreach (var visibleEntity in visibleEntities)
-            if (visibleEntity.Value is IEntitySession entitySession)
-                entitySession.Send(packet);
+        foreach (var visiblePlayer in visiblePlayers)
+            visiblePlayer.Value.Send(packet);
 
         if (sendToSelf)
             Send(packet);
@@ -71,141 +79,136 @@ public sealed class Player : ClientPcData, IEntity, IEntitySession, IEntityInter
         Send(packetTunneled);
     }
 
+    [Obsolete]
+    public void SendTunneled(byte[] buffer)
+    {
+        var packetTunneled = new PacketTunneledClientPacket
+        {
+            Payload = buffer
+        };
+
+        Send(packetTunneled);
+    }
+
     public void SendTunneledToVisible(ISerializablePacket packet, bool sendToSelf = false)
     {
-        var visibleEntities = VisibleEntities.ToFrozenDictionary();
+        var visiblePlayers = VisiblePlayers.ToFrozenDictionary();
 
-        foreach (var visibleEntity in visibleEntities)
-            if (visibleEntity.Value is IEntitySession entitySession)
-                entitySession.SendTunneled(packet);
+        foreach (var visiblePlayer in visiblePlayers)
+            visiblePlayer.Value.SendTunneled(packet);
 
         if (sendToSelf)
             SendTunneled(packet);
     }
 
-    public void Update()
+    #endregion
+
+    #region Update
+
+    public void UpdateEveryTick()
     {
-        // UpdateVisibleEntities();
     }
 
     public void UpdateEverySecond()
     {
-        UpdateZoneArea();
     }
 
-    public void OnEntityAdd(IEntity entity)
+    public void UpdatePosition(Vector4 position, Quaternion rotation)
     {
-        if (entity is Player player)
+        Position = position;
+        Rotation = rotation;
+
+        if (Visible)
         {
-            var playerUpdatePacketAddPc = player.GetAddPcPacket();
+            UpdateZoneTile();
 
-            SendTunneled(playerUpdatePacketAddPc);
+            UpdateZoneArea();
         }
-        else if (entity is Npc npc)
-        {
-            var playerUpdatePacketAddNpc = npc.GetAddNpcPacket();
-
-            SendTunneled(playerUpdatePacketAddNpc);
-        }
-
-        VisibleEntities.TryAdd(entity.Guid, entity);
     }
 
-    public void OnEntityRemove(IEntity entity)
+    private void UpdateZoneTile()
     {
-        var playerUpdatePacketRemovePlayerGracefully = new PlayerUpdatePacketRemovePlayerGracefully();
+        var newZoneTile = Zone.GetTileFromPosition(Position);
 
-        playerUpdatePacketRemovePlayerGracefully.Guid = entity.Guid;
-
-        playerUpdatePacketRemovePlayerGracefully.Animate = false;
-        playerUpdatePacketRemovePlayerGracefully.Delay = 0;
-        playerUpdatePacketRemovePlayerGracefully.EffectDelay = 0;
-        playerUpdatePacketRemovePlayerGracefully.CompositeEffectId = 46;
-        playerUpdatePacketRemovePlayerGracefully.Duration = 1000;
-
-        SendTunneled(playerUpdatePacketRemovePlayerGracefully);
-
-        /* var playerUpdatePacketRemovePlayer = new PlayerUpdatePacketRemovePlayer();
-
-        playerUpdatePacketRemovePlayer.Guid = entity.Guid;
-
-        SendTunneled(playerUpdatePacketRemovePlayer); */
-
-        VisibleEntities.TryRemove(entity.Guid, out _);
-    }
-
-    public void OnInteract(IEntity other)
-    {
-        if (other is not Player player)
+        if (newZoneTile == ZoneTile)
             return;
 
-        var commandPacketInteractionList = new CommandPacketInteractionList();
+        Zone.UpdateEntityZoneTile(this, ZoneTile, newZoneTile);
 
-        commandPacketInteractionList.List.Guid = Guid;
+        ZoneTile = newZoneTile;
+    }
 
-        var eventId = 0;
+    public void TeleportToZone(IZone zone, Vector4 position, Quaternion rotation)
+    {
+        if (Zone == zone)
+            return;
 
-        var interactions = new[]
+        if (Zone is StartingZone)
         {
-            new InteractionData // Add Friend
-            {
-                EventId = eventId++,
-                IconId = 134,
-                ButtonText = 3370
-            },
-            /* new InteractionData // Remove Friend
-            {
-                EventId = eventId++,
-                IconId = 135,
-                ButtonText = 3371
-            },
-            new InteractionData // Invite to Group
-            {
-                EventId = eventId++,
-                IconId = 136,
-                ButtonText = 3372
-            },
-            new InteractionData // Remove from Group
-            {
-                EventId = eventId++,
-                IconId = 137,
-                ButtonText = 430592
-            }, */
-            new InteractionData // Trade
-            {
-                EventId = eventId++,
-                IconId = 737,
-                ButtonText = 3299
-            },
-            new InteractionData // Inspect
-            {
-                EventId = eventId++,
-                IconId = 133,
-                ButtonText = 3902
-            },
-            new InteractionData // Ignore
-            {
-                EventId = eventId++,
-                IconId = 9557,
-                ButtonText = 2816
-            },
-            /* new InteractionData // Stop Ignoring
-            {
-                EventId = eventId++,
-                IconId = 12052,
-                ButtonText = 2817
-            }, */
-            new InteractionData // Duel
-            {
-                EventId = eventId++,
-                IconId = 1348,
-                ButtonText = 3318
-            }
+            StartingZonePosition = Position;
+            StartingZoneRotation = Rotation;
+        }
+
+        if (Mount is not null)
+            Mount.TeleportToZone(zone, position, rotation);
+
+        // Alert/Remove visible entities
+        foreach (var visiblePlayer in VisiblePlayers)
+            visiblePlayer.Value.OnRemoveVisiblePlayers([this]);
+
+        OnRemoveVisibleNpcs(VisibleNpcs.Values);
+        OnRemoveVisiblePlayers(VisiblePlayers.Values);
+
+        ZoneTile.Entities.Remove(Guid, out _);
+
+        Zone.TryRemovePlayer(Guid);
+
+        // Add to new zone/zonetile
+
+        zone.TryAddPlayer(this);
+
+        // Teleport to new zone
+
+        Visible = false;
+
+        Zone = zone;
+
+        ZoneTile = ZoneTile.Empty;
+
+        UpdatePosition(position, rotation);
+
+        var packetClientBeginZoning = new PacketClientBeginZoning
+        {
+            Name = Zone.Name,
+            Position = position,
+            Rotation = rotation,
+            Sky = "sky_deep_mines.xml",
+            Id = Zone.Id,
+            GeometryId = 214,
+            OverrideUpdateRadius = true
         };
 
-        commandPacketInteractionList.List.Interactions.AddRange(interactions);
+        SendTunneled(packetClientBeginZoning);
+    }
 
-        player.SendTunneled(commandPacketInteractionList);
+    private void UpdateZoneArea()
+    {
+        if (Zone is not StartingZone startingZone)
+            return;
+
+        var zoneAreaId = startingZone.GetZoneAreaId(Position);
+
+        if (ZoneAreaId == zoneAreaId)
+            return;
+
+        ZoneAreaId = zoneAreaId;
+
+        var packetPOIChangeMessage = new PacketPOIChangeMessage
+        {
+            ZoneId = zoneAreaId
+        };
+
+        SendTunneled(packetPOIChangeMessage);
     }
 
     public void UpdateCharacterStats(params CharacterStat[] characterStats)
@@ -236,18 +239,131 @@ public sealed class Player : ClientPcData, IEntity, IEntitySession, IEntityInter
         }
     }
 
+    #endregion
+
+    #region Events
+
+    public void OnAddVisibleNpcs(IEnumerable<Npc> npcs)
+    {
+        foreach (var npc in npcs)
+        {
+            var playerUpdatePacketAddNpc = npc.GetAddNpcPacket();
+
+            SendTunneled(playerUpdatePacketAddNpc);
+        }
+
+        /* var playerUpdatePacketNpcRelevance = new PlayerUpdatePacketNpcRelevance();
+
+        foreach (var npc in npcs)
+        {
+            if (npc.CursorId == 0)
+                continue;
+
+            playerUpdatePacketNpcRelevance.Entries.Add(new PlayerUpdatePacketNpcRelevance.Entry
+            {
+                Guid = npc.Guid,
+                HasCursor = true,
+                CursorId = npc.CursorId,
+                Unknown2 = false
+            });
+        }
+
+        if (playerUpdatePacketNpcRelevance.Entries.Count > 0)
+            SendTunneled(playerUpdatePacketNpcRelevance);
+
+        var playerUpdatePacketAddNotifications = new PlayerUpdatePacketAddNotifications();
+
+        foreach (var npc in npcs)
+        {
+            if (npc.Notification is null)
+                continue;
+
+            playerUpdatePacketAddNotifications.Notifications.Add(npc.Notification);
+
+            SendTunneled(playerUpdatePacketAddNotifications);
+        }
+
+        foreach (var npc in npcs)
+            VisibleNpcs.TryAdd(npc.Guid, npc); */
+    }
+
+    public void OnAddVisiblePlayers(IEnumerable<Player> players)
+    {
+        foreach (var player in players)
+        {
+            var playerUpdatePacketAddPc = player.GetAddPcPacket();
+
+            SendTunneled(playerUpdatePacketAddPc);
+        }
+
+        foreach (var player in players)
+            VisiblePlayers.TryAdd(player.Guid, player);
+    }
+
+    public void OnRemoveVisibleNpcs(IEnumerable<Npc> npcs)
+    {
+        foreach (var npc in npcs)
+        {
+            if (npc is Mount mount)
+            {
+                var playerUpdatePacketRemovePlayerGracefully = new PlayerUpdatePacketRemovePlayerGracefully();
+
+                playerUpdatePacketRemovePlayerGracefully.Guid = npc.Guid;
+
+                playerUpdatePacketRemovePlayerGracefully.Animate = false;
+                playerUpdatePacketRemovePlayerGracefully.Delay = 0;
+                playerUpdatePacketRemovePlayerGracefully.EffectDelay = 0;
+                playerUpdatePacketRemovePlayerGracefully.CompositeEffectId = 46;
+                playerUpdatePacketRemovePlayerGracefully.Duration = 1000;
+
+                SendTunneled(playerUpdatePacketRemovePlayerGracefully);
+
+                Debug.WriteLine($"RemoveMount: {Guid} {mount.Guid} {mount.Seat} {mount.QueuePosition}");
+            }
+            else
+            {
+                var playerUpdatePacketRemovePlayer = new PlayerUpdatePacketRemovePlayer();
+
+                playerUpdatePacketRemovePlayer.Guid = npc.Guid;
+
+                SendTunneled(playerUpdatePacketRemovePlayer);
+            }
+        }
+
+        foreach (var npc in npcs)
+            VisibleNpcs.TryRemove(npc.Guid, out _);
+    }
+
+    public void OnRemoveVisiblePlayers(IEnumerable<Player> players)
+    {
+        foreach (var player in players)
+        {
+            var playerUpdatePacketRemovePlayer = new PlayerUpdatePacketRemovePlayer();
+
+            playerUpdatePacketRemovePlayer.Guid = player.Guid;
+
+            SendTunneled(playerUpdatePacketRemovePlayer);
+        }
+
+        foreach (var player in players)
+            VisiblePlayers.TryRemove(player.Guid, out _);
+    }
+
+    public void OnInteract(IEntity other)
+    {
+        if (other is not Player player)
+            return;
+    }
+
+    #endregion
+
     public List<CharacterAttachmentData> GetAttachments()
     {
         var list = new List<CharacterAttachmentData>();
 
-        var activeProfile = Profile;
-
-        if (activeProfile is null)
-            return list;
-
-        foreach (var profileItem in activeProfile.Items)
+        foreach (var profileItem in ActiveProfile.Items)
         {
-            var clientItem = Items.SingleOrDefault(x => x.Id == profileItem.Value.Id);
+            var clientItem = Items.FirstOrDefault(x => x.Id == profileItem.Value.Id);
 
             if (clientItem is null)
                 continue;
@@ -306,7 +422,10 @@ public sealed class Player : ClientPcData, IEntity, IEntitySession, IEntityInter
 
             // playerUpdatePacketAddPc.TemporaryAppearance = 277;
 
-            ActiveProfile = ActiveProfile
+            ActiveProfileId = ActiveProfileId,
+
+            MountQueuePosition = -1,
+            MountSeat = -1,
         };
 
         var activeTitle = Titles.FirstOrDefault(x => x.Id == ActiveTitle);
@@ -317,67 +436,64 @@ public sealed class Player : ClientPcData, IEntity, IEntitySession, IEntityInter
         if (Mount is not null)
         {
             packet.MountGuid = Mount.Guid;
+            packet.MountSeat = Mount.Seat;
+            packet.MountQueuePosition = Mount.QueuePosition;
 
             packet.NameVerticalOffset = Mount.Definition.NameVerticalOffset;
+
+            Debug.WriteLine($"AddPc: {Name} {Guid} | {Mount.Guid} {Mount.Seat} {Mount.QueuePosition}");
         }
 
         return packet;
     }
 
-    private void UpdateZoneArea()
+    #region Equatable
+
+    public bool Equals(IEntity? other)
     {
-        foreach (var areaDefinition in Zone.Definition.AreaDefinitions)
-        {
-            if (areaDefinition.Shape == "Circle")
-            {
-                var circle = new Vector3(areaDefinition.X1, 0, areaDefinition.Z1);
-
-                if (Position.IsInCircle(circle, areaDefinition.Radius))
-                {
-                    SetZoneAreaId(areaDefinition.Id);
-
-                    return;
-                }
-            }
-            else if (areaDefinition.Shape == "Rectangle")
-            {
-                var p1 = new Vector3(areaDefinition.X1, 0, areaDefinition.Z1);
-                var p2 = new Vector3(areaDefinition.X2, 0, areaDefinition.Z2);
-
-                if (Position.IsInRectangle(p1, p2))
-                {
-                    SetZoneAreaId(areaDefinition.Id);
-
-                    return;
-                }
-            }
-            else
-            {
-                throw new NotImplementedException(nameof(areaDefinition.Shape));
-            }
-        }
+        return Guid == other?.Guid;
     }
 
-    private void SetZoneAreaId(int id)
+    public override bool Equals([NotNullWhen(true)] object? obj)
     {
-        if (ZoneAreaId == id)
-            return;
+        if (obj is Player other)
+            return Equals(other);
 
-        ZoneAreaId = id;
-
-        var packetPOIChangeMessage = new PacketPOIChangeMessage
-        {
-            ZoneId = id
-        };
-
-        SendTunneled(packetPOIChangeMessage);
+        return false;
     }
+
+    public override int GetHashCode()
+    {
+        return Guid.GetHashCode();
+    }
+
+    public static bool operator ==(Player left, Player right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(Player left, Player right)
+    {
+        return !(left == right);
+    }
+
+    #endregion
 
     public void Dispose()
     {
-        if (Mount is not null)
-            Zone.RemoveEntity(Mount);
+        foreach (var visiblePlayer in VisiblePlayers)
+            visiblePlayer.Value.OnRemoveVisiblePlayers([this]);
 
-        Zone.RemoveEntity(this);
+        if (Mount is not null)
+        {
+            Mount.ZoneTile.Entities.Remove(Mount.Guid, out _);
+
+            Zone.TryRemoveNpc(Mount.Guid);
+            Mount = null;
+        }
+
+        ZoneTile.Entities.Remove(Guid, out _);
+
+        Zone.TryRemovePlayer(Guid);
     }
 }

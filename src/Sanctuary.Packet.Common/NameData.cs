@@ -5,9 +5,9 @@ namespace Sanctuary.Packet.Common;
 public class NameData
 {
     public string FirstName = string.Empty;
-    public string? LastName;
+    public string LastName = string.Empty;
 
-    public string? FullName => string.IsNullOrEmpty(LastName)
+    public string FullName => string.IsNullOrWhiteSpace(LastName)
         ? FirstName
         : $"{FirstName} {LastName}";
 
@@ -36,10 +36,8 @@ public class NameData
         if (!reader.TryRead(out LastNameSuffixId))
             return false;
 
-        if (!reader.TryRead(out var firstName))
+        if (!reader.TryRead(out FirstName))
             return false;
-
-        FirstName = firstName;
 
         if (!reader.TryRead(out LastName))
             return false;
