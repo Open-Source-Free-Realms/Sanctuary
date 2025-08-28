@@ -80,25 +80,25 @@ public class Npc : IEntity
             return;
     }
 
-    public virtual void OnAddVisibleNpcs(IEnumerable<Npc> npcs)
+    public virtual void OnAddVisibleNpcs(params IEnumerable<Npc> npcs)
     {
         foreach (var npc in npcs)
             VisibleNpcs.TryAdd(npc.Guid, npc);
     }
 
-    public virtual void OnAddVisiblePlayers(IEnumerable<Player> players)
+    public virtual void OnAddVisiblePlayers(params IEnumerable<Player> players)
     {
         foreach (var player in players)
             VisiblePlayers.TryAdd(player.Guid, player);
     }
 
-    public virtual void OnRemoveVisibleNpcs(IEnumerable<Npc> npcs)
+    public virtual void OnRemoveVisibleNpcs(params IEnumerable<Npc> npcs)
     {
         foreach (var npc in npcs)
             VisibleNpcs.TryRemove(npc.Guid, out _);
     }
 
-    public virtual void OnRemoveVisiblePlayers(IEnumerable<Player> players)
+    public virtual void OnRemoveVisiblePlayers(params IEnumerable<Player> players)
     {
         foreach (var player in players)
             VisiblePlayers.TryRemove(player.Guid, out _);

@@ -44,10 +44,10 @@ public interface IEntity : IEquatable<IEntity>, IDisposable
 
     void OnInteract(IEntity entity);
 
-    void OnAddVisibleNpcs(IEnumerable<Npc> npcs);
-    void OnAddVisiblePlayers(IEnumerable<Player> players);
-    void OnRemoveVisibleNpcs(IEnumerable<Npc> npcs);
-    void OnRemoveVisiblePlayers(IEnumerable<Player> players);
+    void OnAddVisibleNpcs(params IEnumerable<Npc> npcs);
+    void OnAddVisiblePlayers(params IEnumerable<Player> players);
+    void OnRemoveVisibleNpcs(params IEnumerable<Npc> npcs);
+    void OnRemoveVisiblePlayers(params IEnumerable<Player> players);
 
     #endregion
 }

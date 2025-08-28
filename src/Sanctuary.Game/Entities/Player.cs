@@ -243,7 +243,7 @@ public sealed class Player : ClientPcData, IEntity
 
     #region Events
 
-    public void OnAddVisibleNpcs(IEnumerable<Npc> npcs)
+    public void OnAddVisibleNpcs(params IEnumerable<Npc> npcs)
     {
         foreach (var npc in npcs)
         {
@@ -287,7 +287,7 @@ public sealed class Player : ClientPcData, IEntity
             VisibleNpcs.TryAdd(npc.Guid, npc); */
     }
 
-    public void OnAddVisiblePlayers(IEnumerable<Player> players)
+    public void OnAddVisiblePlayers(params IEnumerable<Player> players)
     {
         foreach (var player in players)
         {
@@ -300,7 +300,7 @@ public sealed class Player : ClientPcData, IEntity
             VisiblePlayers.TryAdd(player.Guid, player);
     }
 
-    public void OnRemoveVisibleNpcs(IEnumerable<Npc> npcs)
+    public void OnRemoveVisibleNpcs(params IEnumerable<Npc> npcs)
     {
         foreach (var npc in npcs)
         {
@@ -334,7 +334,7 @@ public sealed class Player : ClientPcData, IEntity
             VisibleNpcs.TryRemove(npc.Guid, out _);
     }
 
-    public void OnRemoveVisiblePlayers(IEnumerable<Player> players)
+    public void OnRemoveVisiblePlayers(params IEnumerable<Player> players)
     {
         foreach (var player in players)
         {

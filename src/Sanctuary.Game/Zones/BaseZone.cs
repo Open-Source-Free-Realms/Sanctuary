@@ -263,7 +263,7 @@ public abstract class BaseZone : IZone, IDisposable
                                         break;
 
                                     case Player player:
-                                        zoneTileNpc.OnAddVisiblePlayers([player]);
+                                        zoneTileNpc.OnAddVisiblePlayers(player);
                                         break;
                                 }
                             }
@@ -280,12 +280,12 @@ public abstract class BaseZone : IZone, IDisposable
                                 {
                                     case Npc npc:
                                         {
-                                            zoneTilePlayer.OnAddVisibleNpcs([npc]);
+                                            zoneTilePlayer.OnAddVisibleNpcs(npc);
                                         }
                                         break;
 
                                     case Player player:
-                                        zoneTilePlayer.OnAddVisiblePlayers([player]);
+                                        zoneTilePlayer.OnAddVisiblePlayers(player);
                                         break;
                                 }
                             }
@@ -325,7 +325,7 @@ public abstract class BaseZone : IZone, IDisposable
                                         break;
 
                                     case Player player:
-                                        zoneTileNpc.OnRemoveVisiblePlayers([player]);
+                                        zoneTileNpc.OnRemoveVisiblePlayers(player);
                                         break;
                                 }
                             }
@@ -345,12 +345,12 @@ public abstract class BaseZone : IZone, IDisposable
                                             if (zoneTilePlayer.Mount is not null && zoneTilePlayer.Mount == npc)
                                                 continue;
 
-                                            zoneTilePlayer.OnRemoveVisibleNpcs([npc]);
+                                            zoneTilePlayer.OnRemoveVisibleNpcs(npc);
                                         }
                                         break;
 
                                     case Player player:
-                                        zoneTilePlayer.OnRemoveVisiblePlayers([player]);
+                                        zoneTilePlayer.OnRemoveVisiblePlayers(player);
                                         break;
                                 }
                             }
