@@ -4,23 +4,24 @@ namespace Sanctuary.Packet.Common;
 
 public class InteractionData : ISerializableType
 {
-    public int EventId;
+    public int Id;
+
     public int IconId;
     public int ButtonText;
-    public int Unknown4;
-    public int Unknown5;
-    public int Unknown6;
+    public int Type;
+    public int Param1;
+    public int Param2;
     public int DescString;
     public int TooltipId;
 
     public void Serialize(PacketWriter writer)
     {
-        writer.Write(EventId);
+        writer.Write(Id);
         writer.Write(IconId);
         writer.Write(ButtonText);
-        writer.Write(Unknown4);
-        writer.Write(Unknown5);
-        writer.Write(Unknown6);
+        writer.Write(Type);
+        writer.Write(Param1);
+        writer.Write(Param2);
         writer.Write(TooltipId);
     }
 }

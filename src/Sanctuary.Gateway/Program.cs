@@ -91,6 +91,7 @@ builder.ConfigureServices((hostBuilderContext, serviceCollection) =>
     // Managers
     serviceCollection.AddSingleton<IZoneManager, ZoneManager>();
     serviceCollection.AddSingleton<IResourceManager, ResourceManager>();
+    serviceCollection.AddSingleton<IInteractionManager, InteractionManager>();
 });
 
 builder.ConfigureLogging(loggingBuilder =>

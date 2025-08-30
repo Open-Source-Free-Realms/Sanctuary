@@ -8,6 +8,7 @@ using System.Linq;
 using System.Numerics;
 
 using Sanctuary.Core.IO;
+using Sanctuary.Game.Interactions;
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -349,10 +350,15 @@ public sealed class Player : ClientPcData, IEntity
             VisiblePlayers.TryRemove(player.Guid, out _);
     }
 
-    public void OnInteract(IEntity other)
+    public void OnInteract(Player player)
     {
-        if (other is not Player player)
-            return;
+        var commandPacketInteractionList = new CommandPacketInteractionList();
+
+        commandPacketInteractionList.List.Guid = Guid;
+
+        commandPacketInteractionList.List.Interactions.Add(InspectInteraction.Data);
+
+        player.SendTunneled(commandPacketInteractionList);
     }
 
     #endregion

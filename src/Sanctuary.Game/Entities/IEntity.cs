@@ -42,7 +42,7 @@ public interface IEntity : IEquatable<IEntity>, IDisposable
 
     #region Events
 
-    void OnInteract(IEntity entity);
+    void OnInteract(Player player);
 
     void OnAddVisibleNpcs(params IEnumerable<Npc> npcs);
     void OnAddVisiblePlayers(params IEnumerable<Player> players);

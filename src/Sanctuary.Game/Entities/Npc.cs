@@ -74,10 +74,8 @@ public class Npc : IEntity
 
     #region Events
 
-    public void OnInteract(IEntity other)
+    public void OnInteract(Player player)
     {
-        if (other is not Player player)
-            return;
     }
 
     public virtual void OnAddVisibleNpcs(params IEnumerable<Npc> npcs)

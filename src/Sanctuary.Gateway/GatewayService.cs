@@ -24,18 +24,30 @@ public class GatewayService : BackgroundService
     private readonly GatewayServerOptions _options;
     private readonly IServiceProvider _serviceProvider;
     private readonly IResourceManager _resourceManager;
+    private readonly IInteractionManager _interactionManager;
     private readonly IHostApplicationLifetime _hostApplicationLifetime;
     private readonly IDbContextFactory<DatabaseContext> _dbContextFactory;
 
-    public GatewayService(ILogger<GatewayService> logger, LoginClient client, GatewayServer server, IOptions<GatewayServerOptions> options, IZoneManager zoneManager, IResourceManager resourceManager, IServiceProvider serviceProvider, IDbContextFactory<DatabaseContext> dbContextFactory, IHostApplicationLifetime hostApplicationLifetime)
+    public GatewayService(
+        ILogger<GatewayService> logger,
+        LoginClient client,
+        GatewayServer server,
+        IOptions<GatewayServerOptions> options,
+        IZoneManager zoneManager,
+        IServiceProvider serviceProvider,
+        IResourceManager resourceManager,
+        IInteractionManager interactionManager,
+        IDbContextFactory<DatabaseContext> dbContextFactory,
+        IHostApplicationLifetime hostApplicationLifetime)
     {
         _logger = logger;
         _client = client;
         _server = server;
         _options = options.Value;
         _zoneManager = zoneManager;
-        _resourceManager = resourceManager;
         _serviceProvider = serviceProvider;
+        _resourceManager = resourceManager;
+        _interactionManager = interactionManager;
         _dbContextFactory = dbContextFactory;
         _hostApplicationLifetime = hostApplicationLifetime;
     }
@@ -75,6 +87,16 @@ public class GatewayService : BackgroundService
         if (!_zoneManager.Load())
         {
             _logger.LogCritical("Cannot start {server}, failed to load zones.", nameof(GatewayServer));
+
+            _hostApplicationLifetime.StopApplication();
+
+            return Task.CompletedTask;
+        }
+
+        // Load interactions.
+        if (!_interactionManager.Load())
+        {
+            _logger.LogCritical("Cannot start {server}, failed to load interactions.", nameof(GatewayServer));
 
             _hostApplicationLifetime.StopApplication();
 
