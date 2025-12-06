@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
@@ -513,8 +512,6 @@ public sealed class Player : ClientPcData, IEntity
             packet.MountQueuePosition = Mount.QueuePosition;
 
             packet.NameVerticalOffset = Mount.Definition.NameVerticalOffset;
-
-            Debug.WriteLine($"AddPc: {Name} {Guid} | {Mount.Guid} {Mount.Seat} {Mount.QueuePosition}");
         }
 
         return packet;
