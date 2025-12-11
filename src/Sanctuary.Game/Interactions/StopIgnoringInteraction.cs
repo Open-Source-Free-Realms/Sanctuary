@@ -44,9 +44,6 @@ public class StopIgnoringInteraction : IInteraction
 
         player.Ignores.RemoveAll(x => x.Guid == otherPlayer.Guid);
 
-        if (dbContext.SaveChanges() <= 0)
-            return;
-
         var ignoreRemovePacket = new IgnoreRemovePacket
         {
             Guid = otherPlayer.Guid
