@@ -56,6 +56,7 @@ public static class CheckNamePacketHandler
         checkNameResponsePacket.Result = packet.Type switch
         {
             NameChangeType.Character => OnCheckCharacterName(connection, packet),
+            NameChangeType.Guild => OnCheckGuildName(connection, packet),
             _ => CheckNameResponse.Invalid
         };
 
@@ -92,7 +93,42 @@ public static class CheckNamePacketHandler
         }
 
         using var dbContext = _dbContextFactory.CreateDbContext();
+
         var taken = dbContext.Characters.Any(x => x.FirstName == packet.Name.FirstName && x.LastName == packet.Name.LastName);
+
+        if (taken)
+            return CheckNameResponse.Taken;
+
+        return CheckNameResponse.Available;
+    }
+
+    private static CheckNameResponse OnCheckGuildName(GatewayConnection connection, CheckNamePacket packet)
+    {
+        // TODO: Implement the following checks (https://archive.ph/3DB0L)
+        //  3 - Profane
+        // 11 - IllegalCharacters
+
+        if (string.IsNullOrWhiteSpace(packet.Name.FirstName))
+            return CheckNameResponse.IncorrectLength;
+
+        if (packet.Name.FirstName.Length < 3)
+            return CheckNameResponse.FirstNameTooShort;
+
+        if (packet.Name.FirstName.Length > 14)
+            return CheckNameResponse.FirstNameTooLong;
+
+        if (packet.Name.LastName != string.Empty)
+        {
+            if (packet.Name.LastName.Length < 3)
+                return CheckNameResponse.LastNameTooShort;
+
+            if (packet.Name.LastName.Length > 14)
+                return CheckNameResponse.LastNameTooLong;
+        }
+
+        using var dbContext = _dbContextFactory.CreateDbContext();
+
+        var taken = dbContext.Guilds.Any(x => x.Name == packet.Name.FirstName);
 
         if (taken)
             return CheckNameResponse.Taken;

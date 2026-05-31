@@ -113,6 +113,32 @@ public static class PacketChatHandler
                 }
                 break;
 
+            case ChatChannel.GuildSay:
+                {
+                    _chatLogger.LogInformation("{Channel}|From: \"{FromName}\" ({FromGuid}), Guild: {GuildGuid} Msg: \"{Message}\"",
+                        packet.Channel,
+                        packet.FromName,
+                        packet.FromGuid,
+                        packet.GuildGuid,
+                        packet.Message
+                    );
+
+                    if (connection.Player.GuildData is null)
+                        return true;
+
+                    foreach (var guildMember in connection.Player.GuildData.Members)
+                    {
+                        if (!_zoneManager.TryGetPlayer(guildMember.Key, out var guildPlayer))
+                            continue;
+
+                        if (guildPlayer.GuildData is null)
+                            continue;
+
+                        guildPlayer.SendTunneled(packet);
+                    }
+                }
+                break;
+
             default:
                 {
                     _chatLogger.LogInformation("{Channel}|From: \"{FromName}\" ({FromGuid}), Msg: \"{Message}\"",

@@ -47,16 +47,16 @@ public class PlayerUpdatePacketAddPc : BasePlayerUpdatePacket, ISerializablePack
     // Custom Model Id
     public int TemporaryAppearance;
 
-    public List<ulong> Guilds = new();
+    public Dictionary<int, ulong> Guilds = new();
 
     public int ActiveProfileId;
 
     public PlayerTitleData Title = new();
 
     public ulong MountGuid;
-
     public int MountSeat;
     public int MountQueuePosition;
+
     public float NameVerticalOffset;
 
     public int WieldType;
@@ -112,7 +112,13 @@ public class PlayerUpdatePacketAddPc : BasePlayerUpdatePacket, ISerializablePack
 
         writer.Write(TemporaryAppearance);
 
-        writer.Write(Guilds);
+        writer.Write(Guilds.Count);
+
+        foreach (var guild in Guilds)
+        {
+            writer.Write(guild.Key);
+            writer.Write(guild.Value);
+        }
 
         writer.Write(ActiveProfileId);
 

@@ -78,7 +78,7 @@ public ref struct PacketReader
         return false;
     }
 
-    public unsafe bool TryRead<T>([MaybeNullWhen(false)] out T result) where T : unmanaged
+    public unsafe bool TryRead<T>(out T result) where T : unmanaged
     {
         if (MemoryMarshal.TryRead(RemainingSpan, out result))
         {
@@ -182,7 +182,7 @@ public ref struct PacketReader
         return true;
     }
 
-    public bool TryRead([MaybeNullWhen(false)] out string value)
+    public bool TryRead(out string value)
     {
         if (!TryRead(out int length))
         {

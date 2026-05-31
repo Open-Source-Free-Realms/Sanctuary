@@ -12,15 +12,8 @@ public static class GuidHelper
         Max = 15
     }
 
-    public static ulong GetPlayerGuid(ulong id)
-    {
-        return GetGuid(GuidType.Player, id);
-    }
-
-    public static ulong GetPlayerId(ulong guid)
-    {
-        return GetId(GuidType.Player, guid);
-    }
+    public static ulong GetPlayerGuid(ulong id) => GetGuid(GuidType.Player, id);
+    public static ulong GetPlayerId(ulong guid) => GetId(GuidType.Player, guid);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static ulong GetGuid(GuidType type, ulong id)

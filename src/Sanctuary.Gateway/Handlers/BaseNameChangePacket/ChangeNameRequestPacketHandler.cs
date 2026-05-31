@@ -40,11 +40,6 @@ public static class ChangeNameRequestPacketHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(ChangeNameRequestPacket), packet);
 
-        if (connection.Player.Guid != packet.Guid)
-        {
-            _logger.LogError("Invalid player guid. {guid}", packet.Guid);
-        }
-
         var nameChangeResponsePacket = new NameChangeResponsePacket();
 
         nameChangeResponsePacket.Type = packet.Type;
@@ -54,6 +49,7 @@ public static class ChangeNameRequestPacketHandler
         nameChangeResponsePacket.Result = packet.Type switch
         {
             NameChangeType.Character => OnChangeCharacterName(connection, packet),
+            NameChangeType.Guild => OnChangeGuildName(connection, packet),
             _ => ChangeNameResponse.Error
         };
 
@@ -99,6 +95,47 @@ public static class ChangeNameRequestPacketHandler
                 continue;
 
             friendPlayer.SendTunneled(friendRenamePacket);
+        }
+
+        return ChangeNameResponse.Pending;
+    }
+
+    private static ChangeNameResponse OnChangeGuildName(GatewayConnection connection, ChangeNameRequestPacket packet)
+    {
+        if (connection.Player.GuildData is null)
+            return ChangeNameResponse.Error;
+
+        using var dbContext = _dbContextFactory.CreateDbContext();
+
+        var dbGuild = dbContext.Guilds.FirstOrDefault(x => x.Id == packet.Guid);
+
+        if (dbGuild is null)
+            return ChangeNameResponse.Error;
+
+        dbGuild.Name = packet.Name.FirstName;
+
+        if (dbContext.SaveChanges() <= 0)
+            return ChangeNameResponse.Error;
+
+        var guildNameUpdatePacket = new GuildNameUpdatePacket
+        {
+            Guid = packet.Guid,
+            Name = dbGuild.Name
+        };
+
+        connection.SendTunneled(guildNameUpdatePacket);
+
+        foreach (var guildMember in connection.Player.GuildData.Members)
+        {
+            if (!_zoneManager.TryGetPlayer(guildMember.Key, out var guildPlayer))
+                continue;
+
+            if (guildPlayer.GuildData is null)
+                continue;
+
+            guildPlayer.GuildData.Name = dbGuild.Name;
+
+            guildPlayer.SendTunneledToVisible(guildNameUpdatePacket);
         }
 
         return ChangeNameResponse.Pending;

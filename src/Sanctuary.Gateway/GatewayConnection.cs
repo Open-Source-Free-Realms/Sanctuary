@@ -79,6 +79,8 @@ public class GatewayConnection : UdpConnection
 
         SendFriendOffline();
 
+        SendGuildMemberOffline();
+
         _loginClient.SendCharacterLogout(GuidHelper.GetPlayerId(Player.Guid));
 
         SavePlayerToDatabase();
@@ -237,7 +239,14 @@ public class GatewayConnection : UdpConnection
         Player.MembershipStatus = dbCharacter.MembershipStatus;
         Player.ShowMemberNagScreen = _options.ShowMemberNagScreen;
 
-        foreach (var dbProfile in dbCharacter.Profiles)
+        using var dbContext = _dbContextFactory.CreateDbContext();
+
+        var dbProfiles = dbContext.Profiles
+            .AsNoTracking()
+            .Include(x => x.Items)
+            .Where(x => x.CharacterId == dbCharacter.Id);
+
+        foreach (var dbProfile in dbProfiles)
         {
             if (!_resourceManager.Profiles.TryGetValue(dbProfile.Id, out var profileData))
                 continue;
@@ -296,7 +305,11 @@ public class GatewayConnection : UdpConnection
 
         Player.ActiveProfileId = dbCharacter.ActiveProfileId;
 
-        foreach (var dbItem in dbCharacter.Items)
+        var dbItems = dbContext.Items
+            .AsNoTracking()
+            .Where(x => x.CharacterId == dbCharacter.Id);
+
+        foreach (var dbItem in dbItems)
         {
             Player.Items.Add(new ClientItem
             {
@@ -309,7 +322,11 @@ public class GatewayConnection : UdpConnection
 
         Player.Gender = dbCharacter.Gender;
 
-        foreach (var dbMount in dbCharacter.Mounts)
+        var dbMounts = dbContext.Mounts
+            .AsNoTracking()
+            .Where(x => x.CharacterId == dbCharacter.Id);
+
+        foreach (var dbMount in dbMounts)
         {
             if (!_resourceManager.Mounts.TryGetValue(dbMount.Definition, out var mountDefinition))
                 continue;
@@ -343,7 +360,11 @@ public class GatewayConnection : UdpConnection
         Player.ActionBars.Add(clientActionBar.Id, clientActionBar);
         // End - Store on DB
 
-        foreach (var dbTitle in dbCharacter.Titles)
+        var dbTitles = dbContext.Titles
+            .AsNoTracking()
+            .Where(x => x.CharacterId == dbCharacter.Id);
+
+        foreach (var dbTitle in dbTitles)
         {
             if (!_resourceManager.PlayerTitles.TryGetValue(dbTitle.Id, out var playerTitle))
                 continue;
@@ -361,7 +382,12 @@ public class GatewayConnection : UdpConnection
         Player.ChatBubbleBackgroundColor = dbCharacter.ChatBubbleBackgroundColor;
         Player.ChatBubbleSize = dbCharacter.ChatBubbleSize;
 
-        foreach (var dbFriend in dbCharacter.Friends)
+        var dbFriends = dbContext.Friends
+            .AsNoTracking()
+            .Include(x => x.FriendCharacter)
+            .Where(x => x.CharacterId == dbCharacter.Id);
+
+        foreach (var dbFriend in dbFriends)
         {
             var friendData = new FriendData
             {
@@ -389,7 +415,12 @@ public class GatewayConnection : UdpConnection
             Player.Friends.Add(friendData);
         }
 
-        foreach (var dbIgnore in dbCharacter.Ignores)
+        var dbIgnores = dbContext.Ignores
+            .AsNoTracking()
+            .Include(x => x.IgnoreCharacter)
+            .Where(x => x.CharacterId == dbCharacter.Id);
+
+        foreach (var dbIgnore in dbIgnores)
         {
             var ignoreData = new IgnoreData
             {
@@ -401,6 +432,61 @@ public class GatewayConnection : UdpConnection
         }
 
         Player.StationCash = dbCharacter.StationCash;
+
+        if (dbCharacter.GuildMemberId > 0)
+        {
+            var dbGuild = dbContext.Guilds
+                .AsNoTracking()
+                .Include(x => x.Members)
+                    .ThenInclude(x => x.Character)
+                .SingleOrDefault(x => x.Members.Any(x => x.Id == dbCharacter.Id));
+
+            if (dbGuild is not null)
+            {
+                var guildData = new GuildData
+                {
+                    Guid = dbGuild.Id,
+
+                    Name = dbGuild.Name,
+
+                    CanRenameGuild = true,
+
+                    MaxMembers = dbGuild.MaxMembers
+                };
+
+                foreach (var dbGuildMember in dbGuild.Members)
+                {
+                    var memberGuid = GuidHelper.GetPlayerGuid(dbGuildMember.Id);
+
+                    var guildMember = new GuildMember
+                    {
+                        Guid = memberGuid,
+
+                        Role = dbGuildMember.Role,
+
+                        Name =
+                        {
+                            FirstName = dbGuildMember.Character.FirstName,
+                            LastName = dbGuildMember.Character.LastName ?? string.Empty
+                        },
+                    };
+
+                    if (_zoneManager.TryGetPlayer(memberGuid, out var memberPlayer))
+                    {
+                        guildMember.Online = true;
+
+                        guildMember.WorldId = memberPlayer.Zone.Id;
+
+                        guildMember.ProfileId = memberPlayer.ActiveProfileId;
+                        guildMember.ProfileRank = memberPlayer.ActiveProfile.Rank;
+                    }
+
+                    guildData.Members.Add(memberGuid, guildMember);
+                }
+
+                player.GuildData = guildData;
+            }
+        }
 
         return true;
     }
@@ -539,6 +625,40 @@ public class GatewayConnection : UdpConnection
             otherFriendPlayer.Online = false;
 
             friendPlayer.SendTunneled(friendOfflinePacket);
+        }
+    }
+
+    public void SendGuildMemberOffline()
+    {
+        if (Player.GuildData is null)
+            return;
+
+        var guildMemberStatusUpdatePacket = new GuildMemberStatusUpdatePacket
+        {
+            GuildGuid = Player.GuildData.Guid,
+            MemberGuid = Player.Guid,
+
+            Name = Player.Name,
+
+            Online = false,
+
+            Type = 6
+        };
+
+        foreach (var guildMember in Player.GuildData.Members)
+        {
+            if (guildMember.Key == Player.Guid)
+                continue;
+
+            if (!_zoneManager.TryGetPlayer(guildMember.Key, out var guildPlayer))
+                continue;
+
+            if (guildPlayer.GuildData is null)
+                continue;
+
+            guildPlayer.GuildData.Members[Player.Guid].Online = false;
+
+            guildPlayer.SendTunneled(guildMemberStatusUpdatePacket);
         }
     }
 
