@@ -182,7 +182,7 @@ public ref struct PacketReader
         return true;
     }
 
-    public bool TryRead([MaybeNullWhen(false)] out string value)
+    public bool TryRead(out string value)
     {
         if (!TryRead(out int length))
         {

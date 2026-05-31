@@ -67,6 +67,8 @@ public sealed class StartingZone : BaseZone
 
         SendMembershipSubscriptionInfo(player);
 
+        SendListOfActivities(player);
+
         SendInGamePurchase(player);
 
         var packetZoneDoneSendingInitialData = new PacketZoneDoneSendingInitialData();
@@ -1078,6 +1080,215 @@ public sealed class StartingZone : BaseZone
         };
 
         player.SendTunneled(packetMembershipSubscriptionInfo);
+    }
+
+    private void SendListOfActivities(Player player)
+    {
+        /* var activityProfileListPacket = new ActivityProfileListPacket
+        {
+            Activities = new Dictionary<int, ActivityForProfileType>()
+            {
+                {
+                    // Fisherman
+                    137, new ActivityForProfileType
+                    {
+                        ProfileId = 137,
+                        QuestId = 1968,
+                        IconId = 20740,
+                        BadgeId = 4843,
+                        QuestTitle = 412490,
+                        QuestDescription = 412491,
+                    }
+                },
+                {
+                    // Soccer Star
+                    52, new ActivityForProfileType
+                    {
+                        ProfileId = 52,
+                        QuestId = 1965,
+                        IconId = 20743,
+                        BadgeId = 4842,
+                        QuestTitle = 412463,
+                        QuestDescription = 412464
+                    }
+                },
+                {
+                    // Demo Derby Driver
+                    49, new ActivityForProfileType
+                    {
+                        ProfileId = 49,
+                        QuestId = 1960,
+                        IconId = 8059,
+                        BadgeId = 46,
+                        QuestTitle = 412342,
+                        QuestDescription = 412343
+                    }
+                },
+                {
+                    // Kart Driver
+                    48, new ActivityForProfileType
+                    {
+                        ProfileId = 48,
+                        QuestId = 1961,
+                        IconId = 20725,
+                        BadgeId = 46,
+                        QuestTitle = 407752,
+                        QuestDescription = 412379
+                    }
+                },
+                {
+                    // Chef
+                    45, new ActivityForProfileType
+                    {
+                        ProfileId = 45,
+                        QuestId = 1978,
+                        IconId = 156,
+                        BadgeId = 11,
+                        QuestTitle = 413021,
+                        QuestDescription = 413022
+                    }
+                },
+                {
+                    // Archer
+                    35, new ActivityForProfileType
+                    {
+                        ProfileId = 35,
+                        QuestId = 1952,
+                        IconId = 1335,
+                        BadgeId = 32,
+                        QuestTitle = 412187,
+                        QuestDescription = 412188
+                    }
+                },
+                {
+                    // Warrior
+                    32, new ActivityForProfileType
+                    {
+                        ProfileId = 32,
+                        QuestId = 1966,
+                        IconId = 21594,
+                        BadgeId = 10,
+                        QuestTitle = 412471,
+                        QuestDescription = 412472
+                    }
+                },
+                {
+                    // Miner
+                    14, new ActivityForProfileType
+                    {
+                        ProfileId = 14,
+                        QuestId = 1979,
+                        IconId = 1341,
+                        BadgeId = 11,
+                        QuestTitle = 139748,
+                        QuestDescription = 413026
+                    }
+                },
+                {
+                    // Wizard
+                    12, new ActivityForProfileType
+                    {
+                        ProfileId = 12,
+                        QuestId = 1967,
+                        IconId = 1343,
+                        BadgeId = 12,
+                        QuestTitle = 412481,
+                        QuestDescription = 412482
+                    }
+                },
+                {
+                    // Medic
+                    11, new ActivityForProfileType
+                    {
+                        ProfileId = 11,
+                        QuestId = 1962,
+                        IconId = 1340,
+                        BadgeId = 13,
+                        QuestTitle = 412422,
+                        QuestDescription = 412423
+                    }
+                },
+                {
+                    // Postman
+                    4, new ActivityForProfileType
+                    {
+                        ProfileId = 4,
+                        QuestId = 1964,
+                        IconId = 1339,
+                        BadgeId = 11,
+                        QuestTitle = 412445,
+                        QuestDescription = 412446
+                    }
+                },
+                {
+                    // Ninja
+                    2, new ActivityForProfileType
+                    {
+                        ProfileId = 2,
+                        QuestId = 1963,
+                        IconId = 1342,
+                        BadgeId = 10,
+                        QuestTitle = 412437,
+                        QuestDescription = 412438
+                    }
+                },
+                {
+                    // Brawler
+                    43, new ActivityForProfileType
+                    {
+                        ProfileId = 43,
+                        QuestId = 1593,
+                        IconId = 1337,
+                        BadgeId = 10,
+                        QuestTitle = 388503,
+                        QuestDescription = 388504
+                    }
+                },
+                {
+                    // Card Duelist
+                    120, new ActivityForProfileType
+                    {
+                        ProfileId = 120,
+                        QuestId = 1304,
+                        IconId = 396,
+                        BadgeId = 1783,
+                        QuestTitle = 103744,
+                        QuestDescription = 103745
+                    }
+                },
+                {
+                    // Blacksmith
+                    16, new ActivityForProfileType
+                    {
+                        ProfileId = 16,
+                        QuestId = 1019,
+                        IconId = 1336,
+                        BadgeId = 11,
+                        QuestTitle = 90071,
+                        QuestDescription = 90072
+                    }
+                }
+            }
+        };
+
+        player.SendTunneled(activityProfileListPacket); */
+
+        var clientActivities = _resourceManager.ClientActivityDefinitions.Values.Where(x => x.ServerType == 2).ToList();
+
+        var activityPacketListOfActivities = new ActivityPacketListOfActivities
+        {
+            ServerType = 2,
+            Activities = clientActivities
+        };
+
+        player.SendTunneled(activityPacketListOfActivities);
+
+        var clientWorldActivities = _resourceManager.ClientActivityDefinitions.Values.Where(x => x.ServerType == 1).ToList();
+
+        activityPacketListOfActivities.ServerType = 1;
+        activityPacketListOfActivities.Activities = clientWorldActivities;
+
+        player.SendTunneled(activityPacketListOfActivities);
     }
 
     private void SendInGamePurchase(Player player)
