@@ -477,7 +477,7 @@ public class UdpParams
         UserSuppliedEncryptExpansionBytes2 = 0;
 
         Reliable[0].MaxInstandingPackets = 400;
-        Reliable[0].MaxOutstandingBytes = 64 * 1024; // DO NOT INCREASE; latent client bug when larger than socket buffer size
+        Reliable[0].MaxOutstandingBytes = 200 * 1024;
         Reliable[0].MaxOutstandingPackets = 400;
         Reliable[0].OutOfOrder = false;
         Reliable[0].Coalesce = true;
