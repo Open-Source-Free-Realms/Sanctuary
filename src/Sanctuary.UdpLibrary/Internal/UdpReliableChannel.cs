@@ -63,6 +63,7 @@ internal class UdpReliableChannel
         public LogicalPacket? Parent;
         public int? DataPtr;
         public int DataLen;
+        public long ReliableId;
     }
 
     private struct IncomingQueueEntry
@@ -461,7 +462,12 @@ internal class UdpReliableChannel
                             // if we have queue space
                             if (readyPtr < readyEnd)
                             {
-                                ReadyQueue[readyPtr++] = entry;
+                                ReadyQueue[readyPtr] = entry;
+                                // remember this entry's true reliable id (its ring position),
+                                // mirroring the original library which stored pointers into the
+                                // physical-packet ring and recovered the id from the offset.
+                                ReadyQueue[readyPtr].ReliableId = i;
+                                readyPtr++;
                             }
                             else
                             {
@@ -513,9 +519,14 @@ internal class UdpReliableChannel
                     if (entry.DataPtr.Value != 0 || entry.DataLen != entry.Parent.GetDataLen())
                         fragment = true;
 
-                    // we can calculate what our reliableId should be based on our position in the array
-                    // need to handle the case where we wrap around the end of the array
-                    var reliableId = ReliableOutgoingPendingId + (readyWalk - 1);
+                    // use the entry's true reliable id (captured from its ring position when it
+                    // was queued). Deriving the id from the ready-queue index instead is only
+                    // correct when the ready queue is a gapless prefix of the outstanding window;
+                    // under partial resends the queue is compacted, which would otherwise stamp the
+                    // payload with the wrong sequence number and duplicate data under a fresh id.
+                    // That causes a correctly-fired G9 (corrupted packet) error from the client
+                    // whenever there's enough backpressure on the wire to cause many retransmissions.
+                    var reliableId = entry.ReliableId;
 
                     // prep the actual packet and send it
                     buf[0] = 0;
