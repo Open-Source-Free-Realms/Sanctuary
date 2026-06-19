@@ -50,6 +50,9 @@ public static class CommandPacketAddFriendRequestHandler
         if (!_zoneManager.TryGetPlayer(GuidHelper.GetPlayerGuid(dbCharacter.Id), out var player))
             return true;
 
+        if (player.Guid == connection.Player.Guid)
+            return true;
+
         if (player.Ignores.Any(x => x.Guid == connection.Player.Guid))
             return true;
 
