@@ -81,12 +81,6 @@ builder.ConfigureServices((hostBuilderContext, serviceCollection) =>
             ProtocolName = "CGAPI_527"
         };
 
-        for (int i = 0; i < udpParams.Reliable.Length; i++)
-        {
-            // DO NOT INCREASE; latent client bug when larger than socket buffer size
-            udpParams.Reliable[i].MaxOutstandingBytes = 64 * 1024;
-        }
-
         if (serverOptions.UseCompression)
         {
             udpParams.EncryptMethod[0] = EncryptMethod.UserSupplied;
