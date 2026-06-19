@@ -524,8 +524,6 @@ internal class UdpReliableChannel
                     // correct when the ready queue is a gapless prefix of the outstanding window;
                     // under partial resends the queue is compacted, which would otherwise stamp the
                     // payload with the wrong sequence number and duplicate data under a fresh id.
-                    // That causes a correctly-fired G9 (corrupted packet) error from the client
-                    // whenever there's enough backpressure on the wire to cause many retransmissions.
                     var reliableId = entry.ReliableId;
 
                     // prep the actual packet and send it
