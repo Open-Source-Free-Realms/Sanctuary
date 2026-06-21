@@ -4,10 +4,10 @@ namespace Sanctuary.Packet.Common;
 
 public class NameData
 {
-    public string FirstName = string.Empty;
-    public string LastName = string.Empty;
+    public string? FirstName = string.Empty;
+    public string? LastName = string.Empty;
 
-    public string FullName => string.IsNullOrWhiteSpace(LastName)
+    public string? FullName => string.IsNullOrWhiteSpace(LastName)
         ? FirstName
         : $"{FirstName} {LastName}";
 
@@ -47,6 +47,6 @@ public class NameData
 
     public override string ToString()
     {
-        return FullName;
+        return FullName ?? string.Empty;
     }
 }

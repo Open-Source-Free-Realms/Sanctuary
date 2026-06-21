@@ -64,6 +64,9 @@ public static class ChangeNameRequestPacketHandler
 
     private static ChangeNameResponse OnChangeCharacterName(GatewayConnection connection, ChangeNameRequestPacket packet)
     {
+        if (string.IsNullOrWhiteSpace(packet.Name.FirstName))
+            return ChangeNameResponse.Error;
+
         using var dbContext = _dbContextFactory.CreateDbContext();
 
         var dbCharacter = dbContext.Characters.FirstOrDefault(x => x.Id == GuidHelper.GetPlayerId(connection.Player.Guid));

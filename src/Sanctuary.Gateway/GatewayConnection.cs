@@ -36,7 +36,7 @@ public class GatewayConnection : UdpConnection
     private readonly IResourceManager _resourceManager;
     private readonly IDbContextFactory<DatabaseContext> _dbContextFactory;
 
-    private ICipher _cipher;
+    private CipherCCM _cipher;
 #pragma warning disable CS0649
     private bool _useEncryption; // Hardcoded in the client.
 #pragma warning restore CS0649
@@ -233,6 +233,7 @@ public class GatewayConnection : UdpConnection
         Player.Coins = dbCharacter.Coins;
 
         Player.Birthday = dbCharacter.Created;
+        Player.PlayTime = dbCharacter.PlayTime;
 
         Player.MembershipStatus = dbCharacter.MembershipStatus;
         Player.ShowMemberNagScreen = _options.ShowMemberNagScreen;
@@ -443,6 +444,7 @@ public class GatewayConnection : UdpConnection
         dbCharacter.ActiveProfileId = Player.ActiveProfileId;
 
         dbCharacter.ActiveTitleId = Player.ActiveTitle;
+        dbCharacter.PlayTime = Player.PlayTime;
 
         // End ClientPcData
 
