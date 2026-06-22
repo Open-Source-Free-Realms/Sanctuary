@@ -8,7 +8,7 @@ public class QuickChatSendTellPacket : QuickChatSendChatPacketBase, ISerializabl
 {
     public new const short OpCode = 2;
 
-    public string? ToName;
+    public string ToName;
 
     public ulong Unknown;
 
