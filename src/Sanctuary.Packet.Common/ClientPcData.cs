@@ -478,8 +478,7 @@ public class ClientPcData
         writer.Write(Birthday);
         writer.Write(Age);
 
-        // TODO: Update the database with minutes instead of seconds
-        writer.Write(PlayTime / 60);
+        writer.Write(PlayTime);
 
         writer.Write(IsUnderage);
         writer.Write(IsOpenChatEnabled);

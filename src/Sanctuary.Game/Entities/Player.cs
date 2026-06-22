@@ -121,7 +121,6 @@ public sealed class Player : ClientPcData, IEntity
 
     public void UpdateEverySecond()
     {
-        PlayTime++;
     }
 
     public void UpdatePosition(Vector4 position, Quaternion rotation)
