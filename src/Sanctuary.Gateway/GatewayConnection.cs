@@ -233,6 +233,7 @@ public class GatewayConnection : UdpConnection
         Player.Coins = dbCharacter.Coins;
 
         Player.Birthday = dbCharacter.Created;
+        Player.PlayTime = dbCharacter.PlayTime;
 
         Player.MembershipStatus = dbCharacter.MembershipStatus;
         Player.ShowMemberNagScreen = _options.ShowMemberNagScreen;
@@ -443,6 +444,9 @@ public class GatewayConnection : UdpConnection
         dbCharacter.ActiveProfileId = Player.ActiveProfileId;
 
         dbCharacter.ActiveTitleId = Player.ActiveTitle;
+
+        if (dbCharacter.LastLogin.HasValue)
+            dbCharacter.PlayTime += (int)(DateTimeOffset.UtcNow - dbCharacter.LastLogin.Value).TotalMinutes;
 
         // End ClientPcData
 
