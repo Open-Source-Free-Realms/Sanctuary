@@ -16,11 +16,11 @@ public class ConcurrentSet<T> : IEnumerable<T> where T : notnull
         _dictionary = new ConcurrentDictionary<T, byte>();
     }
 
-    public bool Add(T item) => _dictionary.TryAdd(item, 0);
+    public bool TryAdd(T item) => _dictionary.TryAdd(item, 0);
 
     public bool Contains(T item) => _dictionary.ContainsKey(item);
 
-    public bool Remove(T item) => _dictionary.TryRemove(item, out _);
+    public bool TryRemove(T item) => _dictionary.TryRemove(item, out _);
 
     public void Clear() => _dictionary.Clear();
 

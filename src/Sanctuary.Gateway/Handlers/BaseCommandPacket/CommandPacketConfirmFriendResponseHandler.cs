@@ -43,7 +43,7 @@ public static class CommandPacketConfirmFriendResponseHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(CommandPacketConfirmFriendResponse), packet);
 
-        if (!connection.Player.IncomingFriendRequests.Remove(packet.Guid))
+        if (!connection.Player.IncomingFriendRequests.TryRemove(packet.Guid))
             return true;
 
         if (!_zoneManager.TryGetPlayer(packet.Guid, out var player))
