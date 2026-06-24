@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Sanctuary.Core.Collections;
 
-public class ConcurrentSet<T> : IEnumerable<T>
+public class ConcurrentSet<T> : IEnumerable<T> where T : notnull
 {
     private readonly ConcurrentDictionary<T, byte> _dictionary;
 
