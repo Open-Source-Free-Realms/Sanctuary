@@ -44,8 +44,6 @@ public static class PacketChatHandler
         {
             case ChatChannel.Tell:
                 {
-                    var toName = packet.ToName.FullName;
-
                     if (_zoneManager.TryGetPlayer(packet.ToName.FullName, out var toPlayer))
                     {
                         _chatLogger.LogInformation("Tell|From: \"{FromName}\" ({FromGuid}), To: \"{ToName}\" ({ToGuid}), Msg: \"{Message}\"",

@@ -64,7 +64,6 @@ public static class ChangeNameRequestPacketHandler
 
     private static ChangeNameResponse OnChangeCharacterName(GatewayConnection connection, ChangeNameRequestPacket packet)
     {
-
         using var dbContext = _dbContextFactory.CreateDbContext();
 
         var dbCharacter = dbContext.Characters.FirstOrDefault(x => x.Id == GuidHelper.GetPlayerId(connection.Player.Guid));

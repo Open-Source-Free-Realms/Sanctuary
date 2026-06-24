@@ -36,7 +36,7 @@ public class GatewayConnection : UdpConnection
     private readonly IResourceManager _resourceManager;
     private readonly IDbContextFactory<DatabaseContext> _dbContextFactory;
 
-    private CipherCCM _cipher;
+    private ICipher _cipher;
 #pragma warning disable CS0649
     private bool _useEncryption; // Hardcoded in the client.
 #pragma warning restore CS0649
