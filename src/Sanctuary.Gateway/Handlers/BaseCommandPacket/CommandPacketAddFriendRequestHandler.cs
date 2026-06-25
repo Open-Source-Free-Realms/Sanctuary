@@ -50,8 +50,16 @@ public static class CommandPacketAddFriendRequestHandler
         if (!_zoneManager.TryGetPlayer(GuidHelper.GetPlayerGuid(dbCharacter.Id), out var player))
             return true;
 
+        if (player.Guid == connection.Player.Guid)
+            return true;
+
         if (player.Ignores.Any(x => x.Guid == connection.Player.Guid))
             return true;
+
+        if (player.Friends.Any(x => x.Guid == connection.Player.Guid))
+            return true;
+
+        player.IncomingFriendRequests.TryAdd(connection.Player.Guid);
 
         var friendMessagePacket = new FriendMessagePacket();
 

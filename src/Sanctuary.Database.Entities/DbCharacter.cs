@@ -41,6 +41,8 @@ public class DbCharacter
 
     public int ActiveProfileId { get; set; }
 
+    public int PlayTime { get; set; }
+
     public int Gender { get; set; }
 
     public int? ActiveTitleId { get; set; }
