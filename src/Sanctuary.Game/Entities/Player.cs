@@ -50,6 +50,8 @@ public sealed class Player : ClientPcData, IEntity
     public int StationCash { get; set; }
     public List<CoinStoreTransactionRecord> CoinStoreTransactions { get; set; } = [];
 
+    public int TimezoneOffset { get; set; }
+
     public Vector4 StartingZonePosition { get; set; }
     public Quaternion StartingZoneRotation { get; set; }
 
