@@ -9,8 +9,8 @@ public class EffectTag : ISerializableType
     public int Unknown2;
     public int Unknown3;
 
-    public ulong StartTime;
-    public ulong Unknown11;
+    public uint StartTime;
+    public uint Unknown11;
 
     public long Unknown9;
     public bool Unknown8;
