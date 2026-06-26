@@ -18,7 +18,7 @@ public class PlayerHousingInstanceInfo : ISerializableType
     public int FixtureCount;
     public int FurnitureScore;
 
-    public DateTime LastVisited;
+    public DateTimeOffset LastVisited;
 
     public bool IsLocked;
     public bool IsMembersOnly;
@@ -36,7 +36,7 @@ public class PlayerHousingInstanceInfo : ISerializableType
 
     public int FactoryPlotId;
 
-    public long WhenCreated;
+    public DateTimeOffset WhenCreated;
 
     public void Serialize(PacketWriter writer)
     {

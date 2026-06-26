@@ -19,15 +19,17 @@ public class PlayerUpdatePacketNpcRelevance : BasePlayerUpdatePacket, ISerializa
         /// </summary>
         public byte CursorId;
 
-        public bool Unknown2;
+        public bool HasCursor;
 
         public void Serialize(PacketWriter writer)
         {
             writer.Write(Guid);
 
             writer.Write(Unknown);
+
             writer.Write(CursorId);
-            writer.Write(Unknown2);
+
+            writer.Write(HasCursor);
         }
     }
 

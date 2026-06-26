@@ -6,6 +6,25 @@ public class BaseItemDefinition : ISerializableType
 {
     public int Id { get; set; }
 
+    /// <summary>
+    ///  0 - Normal
+    ///  1 - Clothing
+    ///  2 - Pet
+    ///  3 - Pet Clothing
+    ///  4 - Pet Supply
+    ///  5 - Recipe
+    ///  6 - Gift
+    ///  7 - Tcg Card
+    /// 12 - Style Card
+    /// 15 - Job
+    /// 16 - House
+    /// 17 - Customization
+    /// 19 - Mount
+    /// 27 - Name Change
+    /// 28 - Unknown
+    /// 29 - Housing
+    /// 30 - Bank
+    /// </summary>
     public int Type { get; set; }
 
     public int NameId { get; set; }

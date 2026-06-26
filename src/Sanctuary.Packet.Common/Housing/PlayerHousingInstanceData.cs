@@ -19,7 +19,7 @@ public class PlayerHousingInstanceData
     public string? Name;
 
     public bool IsLocked;
-    public bool PetAutospawn;
+    public bool IsFloraAllowed;
 
     public int MaxFixtureCount;
     public int MaxLandmarkCount;
@@ -27,11 +27,11 @@ public class PlayerHousingInstanceData
     public int Unknown15;
 
     public bool Unknown14;
-    public bool Unknown17;
+
+    public bool Preview;
 
     public int CurFixtureCount;
-
-    public int Unknown13;
+    public int CurLandmarkCount;
 
     public int IconId;
 
@@ -78,10 +78,10 @@ public class PlayerHousingInstanceData
         writer.Write(Permissions);
 
         writer.Write(IsLocked);
-        writer.Write(PetAutospawn);
+        writer.Write(IsFloraAllowed);
 
         writer.Write(CurFixtureCount);
-        writer.Write(Unknown13);
+        writer.Write(CurLandmarkCount);
 
         writer.Write(Unknown14);
 
@@ -91,7 +91,8 @@ public class PlayerHousingInstanceData
 
         writer.Write(IconId);
 
-        writer.Write(Unknown17);
+        writer.Write(Preview);
+
         writer.Write(Unknown18);
 
         writer.Write(FurnitureScore);
