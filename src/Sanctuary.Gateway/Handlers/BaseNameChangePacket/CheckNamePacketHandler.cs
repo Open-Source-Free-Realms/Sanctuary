@@ -1,10 +1,13 @@
-﻿using System;
+using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
+using Sanctuary.Core.Configuration;
 using Sanctuary.Database;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -17,6 +20,10 @@ public static class CheckNamePacketHandler
 {
     private static ILogger _logger = null!;
     private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
+    private static NameFilterOptions _nameFilterOptions = new();
+    private const int MinNameLength = 3;
+    private const int MaxNameLength = 14;
+    private static readonly Regex ValidNamePartRegex = new("^[A-Za-z'-]+$", RegexOptions.Compiled);
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -24,6 +31,10 @@ public static class CheckNamePacketHandler
         _logger = loggerFactory.CreateLogger(nameof(CheckNamePacketHandler));
 
         _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
+
+        var nameFilterOptionsMonitor = serviceProvider.GetRequiredService<IOptionsMonitor<NameFilterOptions>>();
+        _nameFilterOptions = nameFilterOptionsMonitor.CurrentValue;
+        nameFilterOptionsMonitor.OnChange(o => _nameFilterOptions = o);
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -55,7 +66,7 @@ public static class CheckNamePacketHandler
 
         checkNameResponsePacket.Result = packet.Type switch
         {
-            NameChangeType.Character => OnCheckCharacterName(connection, packet),
+            NameChangeType.Character => OnCheckCharacterName(packet),
             _ => CheckNameResponse.Invalid
         };
 
@@ -64,39 +75,50 @@ public static class CheckNamePacketHandler
         return true;
     }
 
-    private static CheckNameResponse OnCheckCharacterName(GatewayConnection connection, CheckNamePacket packet)
+    private static CheckNameResponse OnCheckCharacterName(CheckNamePacket packet)
     {
-        // TODO: Implement the following checks (https://archive.ph/3DB0L)
-        //  3 - Profane
-        // 11 - IllegalCharacters
+        var firstName = (packet.Name.FirstName ?? string.Empty).Trim();
+        var lastName = (packet.Name.LastName ?? string.Empty).Trim();
 
-        if (string.IsNullOrWhiteSpace(packet.Name.FirstName)
-            || packet.Name.LastName != string.Empty && string.IsNullOrWhiteSpace(packet.Name.LastName))
-        {
+        if (string.IsNullOrWhiteSpace(firstName))
             return CheckNameResponse.IncorrectLength;
-        }
 
-        if (packet.Name.FirstName.Length < 3)
+        if (firstName.Length < MinNameLength)
             return CheckNameResponse.FirstNameTooShort;
 
-        if (packet.Name.FirstName.Length > 14)
+        if (firstName.Length > MaxNameLength)
             return CheckNameResponse.FirstNameTooLong;
 
-        if (packet.Name.LastName != string.Empty)
+        if (lastName.Length > 0)
         {
-            if (packet.Name.LastName.Length < 3)
+            if (lastName.Length < MinNameLength)
                 return CheckNameResponse.LastNameTooShort;
 
-            if (packet.Name.LastName.Length > 14)
+            if (lastName.Length > MaxNameLength)
                 return CheckNameResponse.LastNameTooLong;
         }
 
+        if (!HasValidCharacters(firstName) || (lastName.Length > 0 && !HasValidCharacters(lastName)))
+            return CheckNameResponse.IllegalCharacters;
+
+        if (_nameFilterOptions.BlockedSubstrings.Any(token => !string.IsNullOrWhiteSpace(token)
+            && (firstName.Contains(token, StringComparison.OrdinalIgnoreCase)
+                || (lastName.Length > 0 && lastName.Contains(token, StringComparison.OrdinalIgnoreCase)))))
+        {
+            return CheckNameResponse.Profane;
+        }
+
         using var dbContext = _dbContextFactory.CreateDbContext();
-        var taken = dbContext.Characters.Any(x => x.FirstName == packet.Name.FirstName && x.LastName == packet.Name.LastName);
+        var taken = dbContext.Characters.Any(x => x.FirstName == firstName && (x.LastName ?? string.Empty) == lastName);
 
         if (taken)
             return CheckNameResponse.Taken;
 
         return CheckNameResponse.Available;
+    }
+
+    private static bool HasValidCharacters(string namePart)
+    {
+        return ValidNamePartRegex.IsMatch(namePart);
     }
 }
