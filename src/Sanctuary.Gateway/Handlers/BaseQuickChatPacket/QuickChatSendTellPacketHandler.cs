@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Linq;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -37,6 +38,9 @@ public static class QuickChatSendTellPacketHandler
             return true;
 
         if (!_zoneManager.TryGetPlayer(packet.ToName, out var toPlayer))
+            return true;
+
+        if (toPlayer.Ignores.Any(x => x.Guid == connection.Player.Guid))
             return true;
 
         packet.Name = connection.Player.Name;
