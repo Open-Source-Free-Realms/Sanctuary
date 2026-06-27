@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Database;
-using Sanctuary.Game;
+using Sanctuary.Game.Resources;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -18,7 +18,7 @@ public static class CheckNamePacketHandler
 {
     private static ILogger _logger = null!;
     private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
-    private static IResourceManager _resourceManager = null!;
+    private static NameFilterCollection _nameFilterCollection = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -26,7 +26,7 @@ public static class CheckNamePacketHandler
         _logger = loggerFactory.CreateLogger(nameof(CheckNamePacketHandler));
 
         _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
-        _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
+        _nameFilterCollection = serviceProvider.GetRequiredService<NameFilterCollection>();
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
