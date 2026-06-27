@@ -1,4 +1,6 @@
-﻿using Sanctuary.Game.Resources;
+﻿using System.Collections.Generic;
+
+using Sanctuary.Game.Resources;
 
 namespace Sanctuary.Game;
 
@@ -31,6 +33,8 @@ public interface IResourceManager
     ProfileDefinitionCollection Profiles { get; }
     QuickChatDefinitionCollection QuickChats { get; }
     PointOfInterestDefinitionCollection PointOfInterests { get; }
+
+    ICollection<string> NameFilterBlockedSubstrings { get; }
 
     bool Load();
 }
