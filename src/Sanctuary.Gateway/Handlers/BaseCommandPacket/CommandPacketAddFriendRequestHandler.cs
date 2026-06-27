@@ -51,11 +51,7 @@ public static class CommandPacketAddFriendRequestHandler
 
         if (!_zoneManager.TryGetPlayer(targetGuid, out var player))
         {
-            connection.SendTunneled(new FriendMessagePacket
-            {
-                Type = FriendMessageType.NoTeleportFriendOffline,
-                Guid = targetGuid
-            });
+            // TODO: Implement proper "friend target offline"
 
             return true;
         }
