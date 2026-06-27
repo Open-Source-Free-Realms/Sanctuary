@@ -12,5 +12,8 @@
     "LoginGatewayChallenge": "OSFR-EDITz@2024",
 
     "ShowMemberNagScreen": false
+  },
+  "NameFilter": {
+    "BlockedSubstrings": []
   }
 }
