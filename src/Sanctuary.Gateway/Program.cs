@@ -48,9 +48,6 @@ builder.ConfigureServices((hostBuilderContext, serviceCollection) =>
         .BindConfiguration(ServerOptions.Section)
         .ValidateOnStart();
 
-    serviceCollection.AddOptions<NameFilterOptions>()
-        .BindConfiguration(NameFilterOptions.Section);
-
     // Database
     serviceCollection.AddDatabase(hostBuilderContext.Configuration);
 
