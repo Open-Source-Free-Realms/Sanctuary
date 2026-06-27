@@ -177,6 +177,8 @@ public static class CoinStoreSellToClientRequestPacketHandler
 
             clientItem.Serialize(writer);
 
+            clientItemDefinition.Serialize(writer);
+
             var clientUpdatePacketItemAdd = new ClientUpdatePacketItemAdd();
 
             clientUpdatePacketItemAdd.Payload = writer.Buffer;
