@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Globalization;
 
 using Microsoft.Extensions.Configuration;
@@ -47,6 +47,9 @@ builder.ConfigureServices((hostBuilderContext, serviceCollection) =>
     serviceCollection.AddOptions<GatewayServerOptions>()
         .BindConfiguration(ServerOptions.Section)
         .ValidateOnStart();
+
+    serviceCollection.AddOptions<NameFilterOptions>()
+        .BindConfiguration(NameFilterOptions.Section);
 
     // Database
     serviceCollection.AddDatabase(hostBuilderContext.Configuration);
