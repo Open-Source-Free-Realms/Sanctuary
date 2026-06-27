@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Numerics;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -42,10 +43,16 @@ public static class PacketZoneTeleportRequestHandler
         var rotationX = MathF.Cos(pointOfInterest.Heading);
         var rotationZ = MathF.Sin(pointOfInterest.Heading);
 
+        var position = pointOfInterest.SpawnPosition;
+        var rotation = new Quaternion(rotationZ, 0f, rotationX, 0f);
+
+        connection.Player.Mount?.UpdatePosition(position, rotation);
+        connection.Player.UpdatePosition(position, rotation);
+
         var clientUpdatePacketUpdateLocation = new ClientUpdatePacketUpdateLocation
         {
-            Position = pointOfInterest.SpawnPosition,
-            Rotation = new(rotationZ, 0f, rotationX, 0f),
+            Position = position,
+            Rotation = rotation,
             Teleport = true
         };
 

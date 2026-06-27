@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -36,10 +36,16 @@ public static class PacketWorldTeleportRequestHandler
         if (!_zoneManager.TryGetPlayer(packet.Guid, out var player))
             return true;
 
+        var position = player.Position;
+        var rotation = player.Rotation;
+
+        connection.Player.Mount?.UpdatePosition(position, rotation);
+        connection.Player.UpdatePosition(position, rotation);
+
         var clientUpdatePacketUpdateLocation = new ClientUpdatePacketUpdateLocation
         {
-            Position = player.Position,
-            Rotation = player.Rotation,
+            Position = position,
+            Rotation = rotation,
             Teleport = true
         };
 
