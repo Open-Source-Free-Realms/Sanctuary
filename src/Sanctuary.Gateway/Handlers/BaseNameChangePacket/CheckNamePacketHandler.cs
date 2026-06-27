@@ -5,10 +5,9 @@ using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
-using Sanctuary.Core.Configuration;
 using Sanctuary.Database;
+using Sanctuary.Game;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -20,7 +19,7 @@ public static class CheckNamePacketHandler
 {
     private static ILogger _logger = null!;
     private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
-    private static NameFilterOptions _nameFilterOptions = new();
+    private static IResourceManager _resourceManager = null!;
     private const int MinNameLength = 3;
     private const int MaxNameLength = 14;
     private static readonly Regex ValidNamePartRegex = new("^[A-Za-z'-]+$", RegexOptions.Compiled);
@@ -31,10 +30,7 @@ public static class CheckNamePacketHandler
         _logger = loggerFactory.CreateLogger(nameof(CheckNamePacketHandler));
 
         _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
-
-        var nameFilterOptionsMonitor = serviceProvider.GetRequiredService<IOptionsMonitor<NameFilterOptions>>();
-        _nameFilterOptions = nameFilterOptionsMonitor.CurrentValue;
-        nameFilterOptionsMonitor.OnChange(o => _nameFilterOptions = o);
+        _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -101,7 +97,7 @@ public static class CheckNamePacketHandler
         if (!HasValidCharacters(firstName) || (lastName.Length > 0 && !HasValidCharacters(lastName)))
             return CheckNameResponse.IllegalCharacters;
 
-        if (_nameFilterOptions.BlockedSubstrings.Any(token => !string.IsNullOrWhiteSpace(token)
+        if (_resourceManager.NameFilterBlockedSubstrings.Any(token => !string.IsNullOrWhiteSpace(token)
             && (firstName.Contains(token, StringComparison.OrdinalIgnoreCase)
                 || (lastName.Length > 0 && lastName.Contains(token, StringComparison.OrdinalIgnoreCase)))))
         {
