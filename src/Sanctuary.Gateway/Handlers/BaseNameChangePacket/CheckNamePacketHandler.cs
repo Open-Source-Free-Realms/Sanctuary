@@ -94,9 +94,9 @@ public static class CheckNamePacketHandler
                 return CheckNameResponse.LastNameTooLong;
         }
 
-        if (_resourceManager.NameFilterBlockedSubstrings.Any(token => !string.IsNullOrWhiteSpace(token)
-            && (packet.Name.FirstName.Contains(token, StringComparison.OrdinalIgnoreCase)
-                || (packet.Name.LastName.Length > 0 && packet.Name.LastName.Contains(token, StringComparison.OrdinalIgnoreCase)))))
+        if (_nameFilterCollection.BlockedSubstrings.Exists(token =>
+            !string.IsNullOrWhiteSpace(token)
+            && packet.Name.FullName.Contains(token, StringComparison.OrdinalIgnoreCase)))
         {
             return CheckNameResponse.Profane;
         }
