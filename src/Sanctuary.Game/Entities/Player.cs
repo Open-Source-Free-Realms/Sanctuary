@@ -556,16 +556,11 @@ public sealed class Player : ClientPcData, IEntity
 
     public void Dispose()
     {
+        Mount?.Dispose();
+        Mount = null;
+
         foreach (var visiblePlayer in VisiblePlayers)
             visiblePlayer.Value.OnRemoveVisiblePlayers([this]);
-
-        if (Mount is not null)
-        {
-            Mount.ZoneTile.Entities.Remove(Mount.Guid, out _);
-
-            Zone.TryRemoveNpc(Mount.Guid);
-            Mount = null;
-        }
 
         ZoneTile.Entities.Remove(Guid, out _);
 
