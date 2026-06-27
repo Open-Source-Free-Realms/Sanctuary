@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 
 using Microsoft.Extensions.Logging;
 
@@ -45,10 +44,6 @@ public class ResourceManager : IResourceManager
     public static readonly string PointOfInterestsFile = Path.Combine(BaseDirectory, "PointOfInterests.json");
     public static readonly string NameFilterFile = Path.Combine(BaseDirectory, "NameFilter.txt");
 
-    private ICollection<string> _nameFilterBlockedSubstrings = [];
-
-    public ICollection<string> NameFilterBlockedSubstrings => _nameFilterBlockedSubstrings;
-
     public IdToStringLookup HairMappings { get; }
     public IdToStringLookup HeadMappings { get; }
     public IdToStringLookup SkinToneMappings { get; }
@@ -77,6 +72,7 @@ public class ResourceManager : IResourceManager
     public ProfileDefinitionCollection Profiles { get; }
     public QuickChatDefinitionCollection QuickChats { get; }
     public PointOfInterestDefinitionCollection PointOfInterests { get; }
+    public NameFilterCollection NameFilter { get; }
 
     public ResourceManager(ILogger<ResourceManager> logger)
     {
@@ -114,14 +110,13 @@ public class ResourceManager : IResourceManager
         QuickChats = new(_logger);
         PlayerTitles = new(_logger);
         PointOfInterests = new(_logger);
+        NameFilter = new(_logger);
     }
 
     public bool Load()
     {
-        if (!NameFilterCollection.TryLoad(NameFilterFile, _logger, out var nameFilterBlockedSubstrings))
+        if (!NameFilter.Load(NameFilterFile))
             return false;
-
-        _nameFilterBlockedSubstrings = nameFilterBlockedSubstrings;
 
         if (!HairMappings.Load(HairMappingsFile))
             return false;
@@ -246,12 +241,7 @@ public class ResourceManager : IResourceManager
             else if (e.FullPath == PointOfInterestsFile)
                 loaded = PointOfInterests.Load(PointOfInterestsFile);
             else if (e.FullPath == NameFilterFile)
-            {
-                loaded = NameFilterCollection.TryLoad(NameFilterFile, _logger, out var nameFilterBlockedSubstrings);
-
-                if (loaded)
-                    _nameFilterBlockedSubstrings = nameFilterBlockedSubstrings;
-            }
+                loaded = NameFilter.Load(NameFilterFile);
             else
                 _logger.LogWarning("Unknown file changed. File: {filepath}", e.FullPath);
 

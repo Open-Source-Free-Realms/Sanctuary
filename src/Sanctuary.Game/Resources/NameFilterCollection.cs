@@ -7,32 +7,36 @@ using Microsoft.Extensions.Logging;
 
 namespace Sanctuary.Game.Resources;
 
-public static class NameFilterCollection
+public class NameFilterCollection : List<string>
 {
-    public static bool TryLoad(string filePath, ILogger logger, out ICollection<string> blockedSubstrings)
-    {
-        blockedSubstrings = [];
+    private readonly ILogger _logger;
 
+    public NameFilterCollection(ILogger logger)
+    {
+        _logger = logger;
+    }
+
+    public bool Load(string filePath)
+    {
         if (!File.Exists(filePath))
         {
-            logger.LogError("Failed to find file \"{file}\"", filePath);
+            _logger.LogError("Failed to find file \"{file}\"", filePath);
             return false;
         }
 
         try
         {
-            var entries = File.ReadAllLines(filePath)
+            Clear();
+            AddRange(File.ReadAllLines(filePath)
                 .Select(x => x.Trim())
                 .Where(x => !string.IsNullOrWhiteSpace(x))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToArray();
-
-            blockedSubstrings = entries;
+            .ToList());
             return true;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to parse file \"{file}\".", filePath);
+            _logger.LogError(ex, "Failed to parse file \"{file}\".", filePath);
             return false;
         }
     }

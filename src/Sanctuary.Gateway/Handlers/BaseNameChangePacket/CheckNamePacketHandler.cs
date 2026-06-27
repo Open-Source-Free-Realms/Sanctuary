@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Database;
-using Sanctuary.Game.Resources;
+using Sanctuary.Game;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -18,7 +18,7 @@ public static class CheckNamePacketHandler
 {
     private static ILogger _logger = null!;
     private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
-    private static NameFilterCollection _nameFilterCollection = null!;
+    private static IResourceManager _resourceManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -26,7 +26,7 @@ public static class CheckNamePacketHandler
         _logger = loggerFactory.CreateLogger(nameof(CheckNamePacketHandler));
 
         _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
-        _nameFilterCollection = serviceProvider.GetRequiredService<NameFilterCollection>();
+        _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -94,8 +94,7 @@ public static class CheckNamePacketHandler
                 return CheckNameResponse.LastNameTooLong;
         }
 
-        if (_nameFilterCollection.BlockedSubstrings.Exists(token =>
-            !string.IsNullOrWhiteSpace(token)
+        if (_resourceManager.NameFilter.Any(token => !string.IsNullOrWhiteSpace(token)
             && packet.Name.FullName.Contains(token, StringComparison.OrdinalIgnoreCase)))
         {
             return CheckNameResponse.Profane;
