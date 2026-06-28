@@ -8,6 +8,7 @@ public class PlayerUpdatePacketReplaceBaseModel : BasePlayerUpdatePacket, ISeria
 
     public ulong Guid;
     public int ModelId;
+    public int CompositeEffectId;
 
     public PlayerUpdatePacketReplaceBaseModel() : base(OpCode)
     {
@@ -21,6 +22,7 @@ public class PlayerUpdatePacketReplaceBaseModel : BasePlayerUpdatePacket, ISeria
 
         writer.Write(Guid);
         writer.Write(ModelId);
+        writer.Write(CompositeEffectId);
 
         return writer.Buffer;
     }

@@ -4,6 +4,7 @@ using System.Text.Json;
 
 using Microsoft.Extensions.Logging;
 
+using Sanctuary.Core.Collections;
 using Sanctuary.Game.Resources.Definitions;
 
 namespace Sanctuary.Game.Resources;
@@ -12,16 +13,13 @@ public class ConsumableCollection
 {
     private readonly ILogger _logger;
 
-    public BoomboxDefinitionCollection Boomboxes { get; }
-    public FoodEffectCollection FoodEffects { get; }
-    public TransformAbilityCollection Transformations { get; }
+    public ObservableConcurrentDictionary<int, BoomboxDefinition> Boomboxes { get; } = new();
+    public ObservableConcurrentDictionary<int, FoodEffectDefinition> FoodEffects { get; } = new();
+    public ObservableConcurrentDictionary<int, TransformAbilityDefinition> Transformations { get; } = new();
 
     public ConsumableCollection(ILogger logger)
     {
         _logger = logger;
-        Boomboxes = new BoomboxDefinitionCollection(logger);
-        FoodEffects = new FoodEffectCollection(logger);
-        Transformations = new TransformAbilityCollection(logger);
     }
 
     public bool Load(string filePath)

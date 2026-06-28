@@ -39,6 +39,11 @@ public class Npc : IEntity
 
     public float Scale { get; set; }
 
+    /// <summary>
+    /// 0 - Hostile
+    /// 1 - Neutral
+    /// 2 - Ally
+    /// </summary>
     public int Disposition { get; set; } = 1;
     public System.Action<Player>? InteractAction { get; set; }
 
@@ -71,6 +76,7 @@ public class Npc : IEntity
 
     public void OnInteract(Player player)
     {
+        InteractAction?.Invoke(player);
     }
 
     public virtual void OnAddVisibleNpcs(params IEnumerable<Npc> npcs)

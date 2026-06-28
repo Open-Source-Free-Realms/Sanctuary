@@ -55,7 +55,7 @@ public sealed class Player : ClientPcData, IEntity
     public Dictionary<int, Dictionary<int, int>> ActionBarItemGuids { get; set; } = new();
 
     public int TemporaryAppearance { get; set; }
-
+    public DateTimeOffset? TemporaryAppearanceExpiresAt { get; set; }
 
 
     public Vector4 StartingZonePosition { get; set; }
@@ -127,6 +127,11 @@ public sealed class Player : ClientPcData, IEntity
 
     public void UpdateEveryTick()
     {
+        if (TemporaryAppearanceExpiresAt.HasValue &&
+            TemporaryAppearanceExpiresAt.Value <= DateTimeOffset.UtcNow)
+        {
+            RemoveTemporaryAppearance();
+        }
     }
 
     public void UpdateEverySecond()
@@ -499,6 +504,7 @@ public sealed class Player : ClientPcData, IEntity
             IsUnderage = Age < 18,
             IsMember = MembershipStatus != 0,
 
+            TemporaryAppearance = TemporaryAppearance,
 
             ActiveProfileId = ActiveProfileId,
 
@@ -528,55 +534,31 @@ public sealed class Player : ClientPcData, IEntity
     {
         TemporaryAppearance = modelId;
 
-        var replacePacket = new PlayerUpdatePacketReplaceBaseModel
+        if (durationMs > 0)
         {
-            Guid = Guid,
-            ModelId = modelId
-        };
-        SendTunneled(replacePacket);
+            TemporaryAppearanceExpiresAt = DateTimeOffset.UtcNow.AddMilliseconds(durationMs);
+        }
 
         var appearancePacket = new PlayerUpdatePacketUpdateTemporaryAppearance
         {
             Guid = Guid,
             TemporaryAppearance = modelId
         };
-        SendToVisible(appearancePacket, true);
 
-        if (durationMs > 0)
-        {
-            var capturedGuid = Guid;
-            System.Threading.Tasks.Task.Delay(durationMs).ContinueWith(_ =>
-            {
-                try
-                {
-                    TemporaryAppearance = 0;
-                    var removePacket = new PlayerUpdatePacketRemoveTemporaryAppearance
-                    {
-                        Guid = capturedGuid
-                    };
-                    SendToVisible(removePacket, true);
-                }
-                catch { }
-            });
-        }
+        SendTunneledToVisible(appearancePacket, true);
     }
 
     public void RemoveTemporaryAppearance()
     {
         TemporaryAppearance = 0;
+        TemporaryAppearanceExpiresAt = null;
 
         var removePacket = new PlayerUpdatePacketRemoveTemporaryAppearance
         {
             Guid = Guid
         };
-        SendToVisible(removePacket, true);
 
-        var replacePacket = new PlayerUpdatePacketReplaceBaseModel
-        {
-            Guid = Guid,
-            ModelId = Model
-        };
-        SendTunneled(replacePacket);
+        SendTunneledToVisible(removePacket, true);
     }
 
     #region Equatable

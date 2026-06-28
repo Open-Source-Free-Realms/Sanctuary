@@ -17,7 +17,6 @@ public interface IZone
 
     void OnClientIsReady(Player entity);
     void OnClientFinishedLoading(Player entity);
-    void RefreshPlayerCustomizations(Player player);
 
     #endregion
 

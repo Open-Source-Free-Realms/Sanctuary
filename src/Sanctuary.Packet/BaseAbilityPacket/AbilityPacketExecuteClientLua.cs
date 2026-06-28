@@ -6,7 +6,10 @@ public class AbilityPacketExecuteClientLua : BaseAbilityPacket, ISerializablePac
 {
     public new const short OpCode = 17;
 
-    public int AbilityId;
+    public string Script = string.Empty;
+    public float Param1;
+    public float Param2;
+    public float Param3;
 
     public AbilityPacketExecuteClientLua() : base(OpCode)
     {
@@ -18,7 +21,10 @@ public class AbilityPacketExecuteClientLua : BaseAbilityPacket, ISerializablePac
 
         Write(writer);
 
-        writer.Write(AbilityId);
+        writer.Write(Script);
+        writer.Write(Param1);
+        writer.Write(Param2);
+        writer.Write(Param3);
 
         return writer.Buffer;
     }

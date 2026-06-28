@@ -140,7 +140,7 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             cooldownSlot.Slot.NameId = capturedItemDef.NameId;
             cooldownSlot.Slot.Unknown5 = 1;
             cooldownSlot.Slot.Unknown6 = 4;
-            cooldownSlot.Slot.Clear = 15;
+            cooldownSlot.Slot.Unknown7 = 15;
             cooldownSlot.Slot.Enabled = false;
             cooldownSlot.Slot.Unknown10 = 0;
             cooldownSlot.Slot.TotalRefreshTime = cooldownMs;
@@ -167,7 +167,7 @@ public static class AbilityPacketClientRequestStartAbilityHandler
                         tickSlot.Slot.NameId = capturedItemDef.NameId;
                         tickSlot.Slot.Unknown5 = 1;
                         tickSlot.Slot.Unknown6 = 4;
-                        tickSlot.Slot.Clear = 15;
+                        tickSlot.Slot.Unknown7 = 15;
                         tickSlot.Slot.Enabled = false;
                         tickSlot.Slot.Unknown10 = elapsed;
                         tickSlot.Slot.TotalRefreshTime = cooldownMs;
@@ -194,7 +194,7 @@ public static class AbilityPacketClientRequestStartAbilityHandler
                     readySlot.Slot.NameId = capturedItemDef.NameId;
                     readySlot.Slot.Unknown5 = 1;
                     readySlot.Slot.Unknown6 = 4;
-                    readySlot.Slot.Clear = 15;
+                    readySlot.Slot.Unknown7 = 15;
                     readySlot.Slot.Enabled = true;
                     readySlot.Slot.Unknown10 = 1000;
                     readySlot.Slot.TotalRefreshTime = 1000;
@@ -253,7 +253,7 @@ public static class AbilityPacketClientRequestStartAbilityHandler
                 cooldownSlot.Slot.NameId = capturedItemDef.NameId;
                 cooldownSlot.Slot.Unknown5 = 1;
                 cooldownSlot.Slot.Unknown6 = 4;
-                cooldownSlot.Slot.Clear = 15;
+                cooldownSlot.Slot.Unknown7 = 15;
                 cooldownSlot.Slot.Enabled = false;
                 cooldownSlot.Slot.Unknown10 = 0;
                 cooldownSlot.Slot.TotalRefreshTime = cooldownMs;
@@ -279,7 +279,7 @@ public static class AbilityPacketClientRequestStartAbilityHandler
                             tickSlot.Slot.NameId = capturedItemDef.NameId;
                             tickSlot.Slot.Unknown5 = 1;
                             tickSlot.Slot.Unknown6 = 4;
-                            tickSlot.Slot.Clear = 15;
+                            tickSlot.Slot.Unknown7 = 15;
                             tickSlot.Slot.Enabled = false;
                             tickSlot.Slot.Unknown10 = elapsed;
                             tickSlot.Slot.TotalRefreshTime = cooldownMs;
@@ -306,7 +306,7 @@ public static class AbilityPacketClientRequestStartAbilityHandler
                         readySlot.Slot.NameId = capturedItemDef.NameId;
                         readySlot.Slot.Unknown5 = 1;
                         readySlot.Slot.Unknown6 = 4;
-                        readySlot.Slot.Clear = 15;
+                        readySlot.Slot.Unknown7 = 15;
                         readySlot.Slot.Enabled = true;
                         readySlot.Slot.Unknown10 = 1000;
                         readySlot.Slot.TotalRefreshTime = 1000;
@@ -425,7 +425,7 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             clientUpdatePacketUpdateActionBarSlot.Slot.NameId = clientItemDefinition.NameId;
             clientUpdatePacketUpdateActionBarSlot.Slot.Unknown5 = 1;
             clientUpdatePacketUpdateActionBarSlot.Slot.Unknown6 = 4;
-            clientUpdatePacketUpdateActionBarSlot.Slot.Clear = 15;
+            clientUpdatePacketUpdateActionBarSlot.Slot.Unknown7 = 15;
             clientUpdatePacketUpdateActionBarSlot.Slot.Enabled = true;
             clientUpdatePacketUpdateActionBarSlot.Slot.Unknown10 = 1000;
             clientUpdatePacketUpdateActionBarSlot.Slot.TotalRefreshTime = 1000;
@@ -489,7 +489,10 @@ public static class AbilityPacketClientRequestStartAbilityHandler
         {
             var abilityPacketExecuteClientLua = new AbilityPacketExecuteClientLua
             {
-                AbilityId = abilityId
+                Script = string.Empty,
+                Param1 = 0,
+                Param2 = 0,
+                Param3 = 0
             };
 
             connection.Player.SendTunneledToVisible(abilityPacketExecuteClientLua, true);
@@ -753,7 +756,7 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             boomboxNpc.TintAlias = itemDef.TintAlias ?? "";
             boomboxNpc.Scale = 1.0f;
             boomboxNpc.Animation = 2100; // Bouncing animation
-            boomboxNpc.CompositeEffectId = effectId; // Owned by the entity — client stops it when RemovePlayer is received
+            boomboxNpc.CompositeEffectId = effectId; // Owned by the entity â€” client stops it when RemovePlayer is received
             boomboxNpc.HideNamePlate = true;
             boomboxNpc.IsInteractable = false;
 

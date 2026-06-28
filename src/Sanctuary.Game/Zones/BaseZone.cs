@@ -82,10 +82,6 @@ public abstract class BaseZone : IZone, IDisposable
     {
     }
 
-    public virtual void RefreshPlayerCustomizations(Player player)
-    {
-    }
-
     #endregion
 
     #region Entities
