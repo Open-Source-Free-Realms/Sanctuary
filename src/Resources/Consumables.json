@@ -18,6 +18,14 @@
     { "ItemId": 76934, "ModelId": 4100, "EffectId": 16827, "DanceSequence": [3568009, 3569009, 3570009, 3571009] }
   ],
 
+  "Cakes": [
+    { "ItemId": 17597, "Type": "ScaredyCake", "CooldownMs": 60000 },
+    { "ItemId": 69819, "Type": "ScaredyCake", "CooldownMs": 60000 },
+    { "ItemId": 69825, "Type": "BossCake",   "CooldownMs": 30000 },
+    { "ItemId": 69828, "Type": "BossCake",   "CooldownMs": 30000 },
+    { "ItemId": 69839, "Type": "BossCake",   "CooldownMs": 30000 }
+  ],
+
   "FoodEffects": [
     { "AbilityId": 1956, "CompositeEffectId": 47 },
     { "AbilityId": 1957, "CompositeEffectId": 5032 },

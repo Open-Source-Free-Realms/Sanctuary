@@ -14,6 +14,7 @@ public class ConsumableCollection
     private readonly ILogger _logger;
 
     public ObservableConcurrentDictionary<int, BoomboxDefinition> Boomboxes { get; } = new();
+    public ObservableConcurrentDictionary<int, CakeItemDefinition> Cakes { get; } = new();
     public ObservableConcurrentDictionary<int, FoodEffectDefinition> FoodEffects { get; } = new();
     public ObservableConcurrentDictionary<int, TransformAbilityDefinition> Transformations { get; } = new();
 
@@ -67,6 +68,16 @@ public class ConsumableCollection
             }
             _logger.LogInformation("Loaded {count} FoodEffect definitions.", FoodEffects.Count);
 
+            foreach (var entry in consumables.Cakes)
+            {
+                if (!Cakes.TryAdd(entry.ItemId, entry))
+                {
+                    _logger.LogWarning("Failed to add Cake entry. ItemId={id} \"{file}\"", entry.ItemId, filePath);
+                    return false;
+                }
+            }
+            _logger.LogInformation("Loaded {count} Cake definitions.", Cakes.Count);
+
             foreach (var entry in consumables.Transformations)
             {
                 if (!Transformations.TryAdd(entry.AbilityId, entry))
@@ -83,7 +94,7 @@ public class ConsumableCollection
             return false;
         }
 
-        if (Boomboxes.Count == 0 && FoodEffects.Count == 0 && Transformations.Count == 0)
+        if (Boomboxes.Count == 0 && FoodEffects.Count == 0 && Transformations.Count == 0 && Cakes.Count == 0)
         {
             _logger.LogError("No data was loaded from \"{file}\"", filePath);
             return false;

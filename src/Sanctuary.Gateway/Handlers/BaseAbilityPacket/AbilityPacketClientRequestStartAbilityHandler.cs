@@ -13,6 +13,7 @@ using Sanctuary.Core.Helpers;
 using Sanctuary.Core.IO;
 using Sanctuary.Database;
 using Sanctuary.Game;
+using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
@@ -104,12 +105,11 @@ public static class AbilityPacketClientRequestStartAbilityHandler
         }
 
         bool isBoombox = _resourceManager.Consumables.Boomboxes.ContainsKey(clientItemDefinition.Id);
+        bool isCake = _resourceManager.Consumables.Cakes.TryGetValue(clientItemDefinition.Id, out var cakeDef);
+        bool isScaredyCake = isCake && cakeDef!.Type == CakeItemType.ScaredyCake;
+        bool isBossCake = isCake && cakeDef!.Type == CakeItemType.BossCake;
 
-        bool isScaredyCake = clientItemDefinition.ActivatableAbilityId == 4360;
-        bool isBossCake = clientItemDefinition.ActivatableAbilityId >= 4370 && clientItemDefinition.ActivatableAbilityId <= 4373;
-        bool isCake = isScaredyCake || isBossCake;
-
-        if (isBossCake || isBoombox || isScaredyCake)
+        if (isCake || isBoombox)
         {
             var playerCooldowns = _boomboxCooldowns.GetOrAdd(connection.Player.Guid, _ => new ConcurrentDictionary<int, DateTimeOffset>());
 
@@ -126,7 +126,7 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             else
                 SpawnBoomboxNpc(connection, clientItemDefinition);
 
-            int cooldownMs = isBossCake ? 30_000 : 60_000;
+            int cooldownMs = isCake ? cakeDef!.CooldownMs : 60_000;
             playerCooldowns[clientItemDefinition.Id] = DateTimeOffset.UtcNow.AddMilliseconds(cooldownMs);
 
             var capturedSlot = packet.Data.Slot;
