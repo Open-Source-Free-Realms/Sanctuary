@@ -15,6 +15,7 @@ public class ClientPcData
     public ulong Guid { get; init; }
 
     public int Model;
+    public int TemporaryAppearance;
 
     public string Head = null!;
     public string Hair = null!;
@@ -340,10 +341,10 @@ public class ClientPcData
     // public List<Acquaintance> Acquaintances = new();
     // public List<RecipeData> Recipes = new();
 
-    // public List<UnknownPetStruct> Pets = new();
+    public List<PacketPetInfo> Pets = new();
 
-    public int ActivePetId;
-    public ulong ActivePetGuid;
+    // public int ActivePetId;
+    // public ulong ActivePetGuid;
 
     public List<PacketMountInfo> Mounts = new();
 
@@ -526,10 +527,11 @@ public class ClientPcData
 
         writer.Write(0); // TODO Recipes
 
-        writer.Write(0); // TODO Pets
-
-        writer.Write(ActivePetId);
-        writer.Write(ActivePetGuid);
+        // CONFIRMED: Pets CANNOT be in ClientPcData - client crashes even with 1 pet
+        // The Pet Collection UI must work differently than Mount Collection
+        writer.Write(0); // Pets count (must always be 0)
+        writer.Write(0); // ActivePetId (required field)
+        writer.Write((ulong)0); // ActivePetGuid (required field)
 
         writer.Write(Mounts);
 

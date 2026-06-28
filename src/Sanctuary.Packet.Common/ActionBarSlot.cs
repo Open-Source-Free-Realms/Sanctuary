@@ -14,6 +14,7 @@ public class ActionBarSlot : ISerializableType
     public int Unknown5;
     public int Unknown6;
     public int Unknown7;
+    public int Clear;
 
     public int ManaCost;
 

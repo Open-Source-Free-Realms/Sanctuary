@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Collections.Generic;
@@ -79,6 +79,10 @@ public abstract class BaseZone : IZone, IDisposable
     }
 
     public virtual void OnClientFinishedLoading(Player player)
+    {
+    }
+
+    public virtual void RefreshPlayerCustomizations(Player player)
     {
     }
 

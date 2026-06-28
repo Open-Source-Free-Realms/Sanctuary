@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Collections.Generic;
@@ -51,6 +51,11 @@ public sealed class Player : ClientPcData, IEntity
     public List<CoinStoreTransactionRecord> CoinStoreTransactions { get; set; } = [];
 
     public int TimezoneOffset { get; set; }
+
+    // Tracks which item GUIDs are on which action bar slot.
+    public Dictionary<int, Dictionary<int, int>> ActionBarItemGuids { get; set; } = new();
+
+
 
     public Vector4 StartingZonePosition { get; set; }
     public Quaternion StartingZoneRotation { get; set; }
@@ -520,6 +525,62 @@ public sealed class Player : ClientPcData, IEntity
         }
 
         return packet;
+    }
+
+
+    public void ApplyTemporaryAppearance(int modelId, int durationMs)
+    {
+        TemporaryAppearance = modelId;
+
+        var replacePacket = new PlayerUpdatePacketReplaceBaseModel
+        {
+            Guid = Guid,
+            ModelId = modelId
+        };
+        SendTunneled(replacePacket);
+
+        var appearancePacket = new PlayerUpdatePacketUpdateTemporaryAppearance
+        {
+            Guid = Guid,
+            TemporaryAppearance = modelId
+        };
+        SendToVisible(appearancePacket, true);
+
+        if (durationMs > 0)
+        {
+            var capturedGuid = Guid;
+            System.Threading.Tasks.Task.Delay(durationMs).ContinueWith(_ =>
+            {
+                try
+                {
+                    TemporaryAppearance = 0;
+                    var removePacket = new PlayerUpdatePacketRemoveTemporaryAppearance
+                    {
+                        Guid = capturedGuid
+                    };
+                    SendToVisible(removePacket, true);
+                }
+                catch { }
+            });
+        }
+    }
+
+    public void RemoveTemporaryAppearance()
+    {
+        TemporaryAppearance = 0;
+
+        var removePacket = new PlayerUpdatePacketRemoveTemporaryAppearance
+        {
+            Guid = Guid
+        };
+        SendToVisible(removePacket, true);
+
+        var replacePacket = new PlayerUpdatePacketReplaceBaseModel
+        {
+            Guid = Guid,
+            ModelId = Model
+        };
+        SendTunneled(replacePacket);
     }
 
     #region Equatable

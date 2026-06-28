@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
@@ -45,6 +45,7 @@ public class Npc : IEntity
     /// 2 - Ally
     /// </summary>
     public int Disposition { get; set; } = 1;
+    public System.Action<Player>? InteractAction { get; set; }
 
     public int Animation { get; set; } = 1;
 
