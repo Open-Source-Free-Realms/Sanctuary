@@ -55,6 +55,8 @@ public sealed class Player : ClientPcData, IEntity
     // Tracks which item GUIDs are on which action bar slot.
     public Dictionary<int, Dictionary<int, int>> ActionBarItemGuids { get; set; } = new();
 
+    public int TemporaryAppearance { get; set; }
+
 
 
     public Vector4 StartingZonePosition { get; set; }
