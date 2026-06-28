@@ -34,7 +34,7 @@ public static class PacketZoneSafeTeleportRequestHandler
         var rotation = new Quaternion(0f, 0f, 0f, 0f);
 
         connection.Player.Mount?.UpdatePosition(position, rotation);
-        connection.Player.UpdatePosition(position, rotation);
+        connection.Player.UpdatePosition(position, rotation, updateZoneArea: false);
 
         var clientUpdatePacketUpdateLocation = new ClientUpdatePacketUpdateLocation
         {
