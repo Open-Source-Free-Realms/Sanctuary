@@ -39,11 +39,6 @@ public class Npc : IEntity
 
     public float Scale { get; set; }
 
-    /// <summary>
-    /// 0 - Hostile
-    /// 1 - Neutral
-    /// 2 - Ally
-    /// </summary>
     public int Disposition { get; set; } = 1;
     public System.Action<Player>? InteractAction { get; set; }
 
@@ -62,7 +57,6 @@ public class Npc : IEntity
 
     public byte CursorId { get; set; }
 
-    // public NotificationInfo? Notification { get; set; }
 
     public List<CharacterAttachmentData> Attachments { get; set; } = [];
 
@@ -208,7 +202,6 @@ public class Npc : IEntity
             Unknown36 = default, // AnimationEvent
             TemporaryAppearance = default,
 
-            // playerUpdatePacketAddNpc.EffectTags = TODO
 
             Unknown38 = default,
             Unknown39 = default,
@@ -218,7 +211,6 @@ public class Npc : IEntity
 
             HasTilt = default,
 
-            // playerUpdatePacketAddNpc.Customization = TODO
 
             Tilt = default,
 
@@ -248,9 +240,6 @@ public class Npc : IEntity
             Unknown57 = default,
             Unknown58 = default,
 
-            // playerUpdatePacketAddNpc.Head = TODO
-            // playerUpdatePacketAddNpc.Hair = TODO
-            // playerUpdatePacketAddNpc.ModelCustomization = TODO
 
             ReplaceTerrainObject = default,
 

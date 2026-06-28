@@ -25,7 +25,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
     private static IResourceManager _resourceManager = null!;
     private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
 
-    // playerGuid ? (itemDefinitionId ? cooldown expiry)
     private static readonly ConcurrentDictionary<ulong, ConcurrentDictionary<int, DateTimeOffset>> _boomboxCooldowns = new();
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
@@ -47,7 +46,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
 
         _logger.LogInformation("AbilityPacket: Id={Id} Slot={Slot}", packet.Data.Id, packet.Data.Slot);
 
-        // Check if this is an item ability (ActionBarId = 2 is ItemActionBar)
         if (packet.Data.Id == 2)
         {
             return HandleItemAbility(connection, packet);
@@ -55,7 +53,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
 
         var abilityPacketFailed = new AbilityPacketFailed
         {
-            // You can't use that ability right now.
             StringId = 3079
         };
 
@@ -66,7 +63,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
 
     private static bool HandleItemAbility(GatewayConnection connection, AbilityPacketClientRequestStartAbility packet)
     {
-        // Get the action bar slot to find the item
         connection.Player.ActionBars.TryGetValue(2, out var actionBar);
 
         Packet.Common.ActionBarSlot? slot = null;
@@ -80,7 +76,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             return true;
         }
 
-        // Get the item GUID from the tracked action bar items
         if (!connection.Player.ActionBarItemGuids.TryGetValue(2, out var actionBarItems) ||
             !actionBarItems.TryGetValue(packet.Data.Slot, out var itemGuid))
         {
@@ -88,7 +83,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             return true;
         }
 
-        // Find the item in the player's inventory by GUID
         var clientItem = connection.Player.Items.FirstOrDefault(x => x.Id == itemGuid);
 
         if (clientItem is null)
@@ -103,7 +97,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             return true;
         }
 
-        // Check if item has an activatable ability
         if (clientItemDefinition.ActivatableAbilityId == 0)
         {
             SendFailure(connection, 3079);
@@ -141,9 +134,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             var capturedCount = clientItem.Count;
             var capturedPlayerGuid = connection.Player.Guid;
 
-            // Cooldown sweep: Enabled=false hides the icon and lets C++ draw the sweep overlay.
-            // Unknown10 (RefreshTimeLeft) = elapsed ms from 0; TotalRefreshTime = total duration.
-            // Periodic ticks update elapsed so the sweep advances visually.
             var cooldownSlot = new ClientUpdatePacketUpdateActionBarSlot { Data = { Id = 2, Slot = capturedSlot } };
             cooldownSlot.Slot.IsEmpty = false;
             cooldownSlot.Slot.IconId = capturedItemDef.Icon.Id;
@@ -160,7 +150,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             cooldownSlot.Slot.Unknown15 = 0;
             connection.SendTunneled(cooldownSlot);
 
-            // Send elapsed-time updates every 2s so the client sweep advances.
             var startTime = DateTimeOffset.UtcNow;
             _ = Task.Run(async () =>
             {
@@ -249,8 +238,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             var capturedPlayerGuid = connection.Player.Guid;
             var cooldownMs = transform.CooldownMs;
 
-            // Show cooldown sweep only when the player has more of this item remaining in the stack.
-            // If this was the last one, ConsumeItem will clear the slot and no sweep is needed.
             bool willHaveItemLeft = capturedCount > 1;
 
             if (clientItemDefinition.SingleUse)
@@ -333,7 +320,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             }
             else
             {
-                // Item was the last in the stack — slot is now empty, just clear the cooldown entry when done.
                 Task.Delay(cooldownMs).ContinueWith(_ =>
                 {
                     if (_boomboxCooldowns.TryGetValue(capturedPlayerGuid, out var cd))
@@ -344,7 +330,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             return true;
         }
 
-        // Trigger the ability effect FIRST (before consuming)
         TriggerAbilityEffect(connection, clientItemDefinition);
 
         if (clientItemDefinition.SingleUse)
@@ -367,7 +352,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             return true;
         }
 
-        // Decrement item count
         dbItem.Count--;
 
         var shouldDeleteItem = dbItem.Count <= 0;
@@ -383,7 +367,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             return true;
         }
 
-        // Update client-side item
         if (shouldDeleteItem)
         {
             connection.Player.Items.Remove(clientItem);
@@ -395,7 +378,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
 
             connection.SendTunneled(clientUpdatePacketItemDelete);
 
-            // Clear the action bar slot
             var clientUpdatePacketUpdateActionBarSlot = new ClientUpdatePacketUpdateActionBarSlot
             {
                 Data =
@@ -407,7 +389,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
 
             clientUpdatePacketUpdateActionBarSlot.Slot.IsEmpty = true;
 
-            // Remove from tracked items
             if (connection.Player.ActionBarItemGuids.TryGetValue(2, out var trackedItems))
             {
                 trackedItems.Remove(actionBarSlot);
@@ -430,7 +411,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
 
             connection.SendTunneled(clientUpdatePacketItemUpdate);
 
-            // Update action bar slot quantity
             var clientUpdatePacketUpdateActionBarSlot = new ClientUpdatePacketUpdateActionBarSlot
             {
                 Data =
@@ -494,7 +474,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
         }
         else if (abilityId == 1964) // Graveyard Flambe - shadow flames
         {
-            // Visual effect only for this one
             var flameEffect = new PlayerUpdatePacketPlayCompositeEffect
             {
                 Guid = connection.Player.Guid,
@@ -508,7 +487,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
         }
         else
         {
-            // For other consumables, just send the ability packet
             var abilityPacketExecuteClientLua = new AbilityPacketExecuteClientLua
             {
                 AbilityId = abilityId
@@ -516,7 +494,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
 
             connection.Player.SendTunneledToVisible(abilityPacketExecuteClientLua, true);
 
-            // Play a themed composite effect if one is mapped for this ability
             int effectId = 0;
             if (_resourceManager.Consumables.FoodEffects.TryGetValue(abilityId, out var foodEffect))
                 effectId = foodEffect.CompositeEffectId;
@@ -559,7 +536,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             cakeNpc.IsInteractable = true;
             cakeNpc.CursorId = 5; // triggers NpcRelevance packet ? client shows "Press X"
 
-            // Spawn 1.5 m in front of the player
             var forwardDirection = Vector3.Transform(new Vector3(0, 0, 1), connection.Player.Rotation);
             var spawnPosition = new Vector4(
                 connection.Player.Position.X + forwardDirection.X * 1.5f,
@@ -571,8 +547,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             cakeNpc.Visible = true;
             cakeNpc.UpdatePosition(spawnPosition, connection.Player.Rotation);
 
-            // When a player presses X near the cake, play the jumpscare effect sequence.
-            // One trigger at a time — ignore while a scare is already playing.
             var scareActive = false;
             cakeNpc.InteractAction = (interactingPlayer) =>
             {
@@ -626,8 +600,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
                 Clear = false
             };
 
-            // Use OnAddVisibleNpcs so each player also gets the NpcRelevance packet
-            // (CursorId=5 ? client shows the "Press X to interact" prompt)
             connection.Player.SendTunneled(poofEffect);
             connection.Player.OnAddVisibleNpcs([cakeNpc]);
             foreach (var player in connection.Player.VisiblePlayers.Values)
@@ -700,7 +672,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             cakeNpc.Visible = true;
             cakeNpc.UpdatePosition(spawnPosition, connection.Player.Rotation);
 
-            // Randomly pick one of the 4 boss transformations each time a player interacts
             int[] bossAbilities = [4370, 4371, 4372, 4373];
 
             cakeNpc.InteractAction = (interactingPlayer) =>
@@ -767,7 +738,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             if (zone is not Game.Zones.StartingZone startingZone)
                 return;
 
-            // Try to create an NPC for the boombox
             if (!startingZone.TryCreateNpc(out var boomboxNpc))
                 return;
 
@@ -787,7 +757,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             boomboxNpc.HideNamePlate = true;
             boomboxNpc.IsInteractable = false;
 
-            // Position boombox to the left of player
             var leftDirection = System.Numerics.Vector3.Transform(
                 new System.Numerics.Vector3(-1, 0, 0),
                 connection.Player.Rotation
@@ -803,16 +772,12 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             boomboxNpc.UpdatePosition(spawnPosition, connection.Player.Rotation);
             boomboxNpc.Visible = true;
 
-            // Send the AddNpc packet to all nearby players so they can see the boombox
             var addNpcPacket = boomboxNpc.GetAddNpcPacket();
 
-            // Filter players by distance - only affect players within range
             const float BoomboxRangeInMeters = 15.0f; // 2 meters range
 
-            // Always include the spawning player first
             var nearbyPlayers = new List<Game.Entities.Player> { connection.Player };
 
-            // Add other players within range
             foreach (var player in connection.Player.VisiblePlayers.Values)
             {
                 float distance = Vector3.Distance(
@@ -826,7 +791,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
                 }
             }
 
-            // Poof of smoke at the spawn position when the boombox materializes
             var poofEffect = new PlayerUpdatePacketPlayCompositeEffect
             {
                 Guid = boomboxNpc.Guid,
@@ -838,28 +802,20 @@ public static class AbilityPacketClientRequestStartAbilityHandler
                 Clear = false
             };
 
-            // Send the boombox and its spawn poof to all nearby players
             foreach (var player in nearbyPlayers)
             {
                 player.SendTunneled(poofEffect);
                 player.SendTunneled(addNpcPacket);
             }
 
-            // Capture the NPC object so the despawn lambda can reach its tile and visible-player list.
             var capturedNpc = boomboxNpc;
 
-            // Start making nearby players dance every 3 seconds
             StartBoomboxDancing(startingZone, spawnPosition, danceSequence, 60_000);
 
-            // Schedule despawn after cooldown duration
             Task.Delay(60_000).ContinueWith(_ =>
             {
                 try
                 {
-                    // RemovePlayerGracefully tells the client to tear down the entity and
-                    // its embedded composite effect (music notes / audio).  Using the
-                    // graceful form ensures the client runs the full entity-removal path,
-                    // including stopping animation-driven MX_ audio tracks.
                     // CompositeEffectId=21 plays the despawn poof on the way out.
                     var removePacket = new PlayerUpdatePacketRemovePlayerGracefully
                     {
@@ -871,9 +827,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
                         Duration = 500
                     };
 
-                    // Send to every player currently in the zone — those who never saw the
-                    // boombox will ignore the unknown GUID; this avoids maintaining a
-                    // per-boombox subscriber list.
                     var players = startingZone.Players;
                     if (players is not null)
                     {
@@ -881,7 +834,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
                             player.SendTunneled(removePacket);
                     }
 
-                    // Full server-side cleanup: tile entity list, VisiblePlayers tracking, NPC registry.
                     capturedNpc.Dispose();
                 }
                 catch { }
@@ -908,11 +860,9 @@ public static class AbilityPacketClientRequestStartAbilityHandler
                 {
                     await System.Threading.Tasks.Task.Delay(danceInterval);
 
-                    // Get the current animation ID from the sequence and cycle through
                     int currentQuickChatId = danceSequence[sequenceIndex];
                     sequenceIndex = (sequenceIndex + 1) % danceSequence.Length; // Cycle back to 0 after reaching end
 
-                    // Get all players in the zone and filter by distance from boombox
                     var allPlayers = zone.Players?.ToList() ?? new List<Game.Entities.Player>();
                     var playersInRange = allPlayers.Where(p =>
                     {
@@ -927,7 +877,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
                     {
                         try
                         {
-                            // Send QuickChat packet as if the player used the emote
                             var quickChatPacket = new QuickChatSendChatToChannelPacket
                             {
                                 Id = currentQuickChatId,
@@ -938,10 +887,8 @@ public static class AbilityPacketClientRequestStartAbilityHandler
                                 GuildGuid = 0
                             };
 
-                            // Send to the player themselves
                             player.SendTunneled(quickChatPacket);
 
-                            // Send to all visible players
                             foreach (var visiblePlayer in player.VisiblePlayers.Values)
                             {
                                 visiblePlayer.SendTunneled(quickChatPacket);

@@ -52,7 +52,6 @@ public sealed class Player : ClientPcData, IEntity
 
     public int TimezoneOffset { get; set; }
 
-    // Tracks which item GUIDs are on which action bar slot.
     public Dictionary<int, Dictionary<int, int>> ActionBarItemGuids { get; set; } = new();
 
     public int TemporaryAppearance { get; set; }
@@ -173,7 +172,6 @@ public sealed class Player : ClientPcData, IEntity
         if (Mount is not null)
             Mount.TeleportToZone(zone, position, rotation);
 
-        // Alert/Remove visible entities
         foreach (var visiblePlayer in VisiblePlayers)
             visiblePlayer.Value.OnRemoveVisiblePlayers([this]);
 
@@ -184,11 +182,9 @@ public sealed class Player : ClientPcData, IEntity
 
         Zone.TryRemovePlayer(Guid);
 
-        // Add to new zone/zonetile
 
         zone.TryAddPlayer(this);
 
-        // Teleport to new zone
 
         Visible = false;
 
@@ -449,7 +445,6 @@ public sealed class Player : ClientPcData, IEntity
 
         var compositeEffectId = clientItemDefinition.CompositeEffectId;
 
-        // Update the Weapon composite effect if we have a Flair Shard equipped.
         if (slot == 7)
         {
             var flairShardcompositeEffectId = GetFlairShardCompositeEffect();
@@ -504,7 +499,6 @@ public sealed class Player : ClientPcData, IEntity
             IsUnderage = Age < 18,
             IsMember = MembershipStatus != 0,
 
-            // playerUpdatePacketAddPc.TemporaryAppearance = 277;
 
             ActiveProfileId = ActiveProfileId,
 

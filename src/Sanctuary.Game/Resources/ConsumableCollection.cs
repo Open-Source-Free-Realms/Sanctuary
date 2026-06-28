@@ -8,10 +8,6 @@ using Sanctuary.Game.Resources.Definitions;
 
 namespace Sanctuary.Game.Resources;
 
-/// <summary>
-/// Loads and manages consumable items from the consolidated Consumables.json file.
-/// Provides access to Boomboxes, FoodEffects, and Transformations.
-/// </summary>
 public class ConsumableCollection
 {
     private readonly ILogger _logger;
@@ -53,7 +49,6 @@ public class ConsumableCollection
                 return false;
             }
 
-            // Load Boomboxes
             foreach (var entry in consumables.Boomboxes)
             {
                 if (!Boomboxes.TryAdd(entry.ItemId, entry))
@@ -64,7 +59,6 @@ public class ConsumableCollection
             }
             _logger.LogInformation("Loaded {count} Boombox definitions.", Boomboxes.Count);
 
-            // Load FoodEffects
             foreach (var entry in consumables.FoodEffects)
             {
                 if (!FoodEffects.TryAdd(entry.AbilityId, entry))
@@ -75,7 +69,6 @@ public class ConsumableCollection
             }
             _logger.LogInformation("Loaded {count} FoodEffect definitions.", FoodEffects.Count);
 
-            // Load Transformations
             foreach (var entry in consumables.Transformations)
             {
                 if (!Transformations.TryAdd(entry.AbilityId, entry))

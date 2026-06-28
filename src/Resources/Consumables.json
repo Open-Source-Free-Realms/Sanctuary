@@ -19,21 +19,21 @@
   ],
 
   "FoodEffects": [
-    { "AbilityId": 1956, "CompositeEffectId": 47,    "Comment": "Electric Veal Meat → PFX_electricity_blue_skel_loop" },
-    { "AbilityId": 1957, "CompositeEffectId": 5032,  "Comment": "Rocking Road Mix → PFX_barrier-rock_gray_loop" },
-    { "AbilityId": 1958, "CompositeEffectId": 1,     "Comment": "Fiery Fury Candy → PFX_fire_skel_loop" },
-    { "AbilityId": 1960, "CompositeEffectId": 5,     "Comment": "Mr. Gleam's Granola Bar → PFX_magic-glow_white_neck_trail_loop" },
-    { "AbilityId": 1961, "CompositeEffectId": 5102,  "Comment": "Silver Surf 'n Turf → PFX_water_blue_cog_elemental-barrier_loop" },
-    { "AbilityId": 1962, "CompositeEffectId": 174,   "Comment": "Deep Mines Delight → PFX_spores-smoke_brown_chest_cloud" },
-    { "AbilityId": 1963, "CompositeEffectId": 1115,  "Comment": "Roaring Rapids Roast → PFX_waves_blue_body_land" },
-    { "AbilityId": 1965, "CompositeEffectId": 5298,  "Comment": "Noxious Pork Chops → PFX_smoke-bubbles_green_head_anesthesia_loop" },
-    { "AbilityId": 1966, "CompositeEffectId": 12,    "Comment": "Firefrog Legs → PFX_fire_orange_feet_sprint_loop" },
-    { "AbilityId": 1967, "CompositeEffectId": 5370,  "Comment": "Hot Sauce Buns → PFX_steam_red_ears_taunt_loop" },
-    { "AbilityId": 1968, "CompositeEffectId": 5732,  "Comment": "Arbor Buttercake → WFX_leaves_multi_falling_skel_loop" },
-    { "AbilityId": 1969, "CompositeEffectId": 1107,  "Comment": "Pixiedust Pie → PFX_pixie_dust_med_interact_loop" },
-    { "AbilityId": 1970, "CompositeEffectId": 630,   "Comment": "Frosty Flakes → PFX_clouds-snowflakes_white_mouth_breath_loop" },
-    { "AbilityId": 1973, "CompositeEffectId": 15173, "Comment": "Scrumptious Soup → PFX_steam_white_rising_skel" },
-    { "AbilityId": 2004, "CompositeEffectId": 4013,  "Comment": "Steaming Pretzels → PFX_steam_white_rising" }
+    { "AbilityId": 1956, "CompositeEffectId": 47 },
+    { "AbilityId": 1957, "CompositeEffectId": 5032 },
+    { "AbilityId": 1958, "CompositeEffectId": 1 },
+    { "AbilityId": 1960, "CompositeEffectId": 5 },
+    { "AbilityId": 1961, "CompositeEffectId": 5102 },
+    { "AbilityId": 1962, "CompositeEffectId": 174 },
+    { "AbilityId": 1963, "CompositeEffectId": 1115 },
+    { "AbilityId": 1965, "CompositeEffectId": 5298 },
+    { "AbilityId": 1966, "CompositeEffectId": 12 },
+    { "AbilityId": 1967, "CompositeEffectId": 5370 },
+    { "AbilityId": 1968, "CompositeEffectId": 5732 },
+    { "AbilityId": 1969, "CompositeEffectId": 1107 },
+    { "AbilityId": 1970, "CompositeEffectId": 630 },
+    { "AbilityId": 1973, "CompositeEffectId": 15173 },
+    { "AbilityId": 2004, "CompositeEffectId": 4013 }
   ],
 
   "Transformations": [
@@ -103,9 +103,9 @@
     { "AbilityId": 3038, "ModelId": 130, "DurationMs": 10000, "CooldownMs": 10000 },
     { "AbilityId": 286,  "ModelId": 22,  "DurationMs": 10000, "CooldownMs": 10000 },
     { "AbilityId": 3070, "ModelId": 177, "DurationMs": 10000, "CooldownMs": 10000 },
-    { "AbilityId": 4370, "ModelId": 2055, "DurationMs": 30000, "CooldownMs": 10000, "Comment": "Boss Cake → Stone Heart" },
-    { "AbilityId": 4371, "ModelId": 1944, "DurationMs": 30000, "CooldownMs": 10000, "Comment": "Boss Cake → Abominable Snowman" },
-    { "AbilityId": 4372, "ModelId": 1702, "DurationMs": 30000, "CooldownMs": 10000, "Comment": "Boss Cake → Pumpkin Prince" },
-    { "AbilityId": 4373, "ModelId": 22,   "DurationMs": 30000, "CooldownMs": 10000, "Comment": "Boss Cake → Cakenstein" }
+    { "AbilityId": 4370, "ModelId": 2055, "DurationMs": 30000, "CooldownMs": 10000 },
+    { "AbilityId": 4371, "ModelId": 1944, "DurationMs": 30000, "CooldownMs": 10000 },
+    { "AbilityId": 4372, "ModelId": 1702, "DurationMs": 30000, "CooldownMs": 10000 },
+    { "AbilityId": 4373, "ModelId": 22,   "DurationMs": 30000, "CooldownMs": 10000 }
   ]
 }
