@@ -772,27 +772,10 @@ public static class AbilityPacketClientRequestStartAbilityHandler
                 connection.Player.Position.W
             );
 
-            boomboxNpc.UpdatePosition(spawnPosition, connection.Player.Rotation);
+            // Visible must be set before UpdatePosition so UpdateZoneTile() fires
+            // and the zone tile system sends AddNpc to all players in range.
             boomboxNpc.Visible = true;
-
-            var addNpcPacket = boomboxNpc.GetAddNpcPacket();
-
-            const float BoomboxRangeInMeters = 15.0f; // 2 meters range
-
-            var nearbyPlayers = new List<Game.Entities.Player> { connection.Player };
-
-            foreach (var player in connection.Player.VisiblePlayers.Values)
-            {
-                float distance = Vector3.Distance(
-                    new Vector3(player.Position.X, player.Position.Y, player.Position.Z),
-                    new Vector3(spawnPosition.X, spawnPosition.Y, spawnPosition.Z)
-                );
-
-                if (distance <= BoomboxRangeInMeters)
-                {
-                    nearbyPlayers.Add(player);
-                }
-            }
+            boomboxNpc.UpdatePosition(spawnPosition, connection.Player.Rotation);
 
             var poofEffect = new PlayerUpdatePacketPlayCompositeEffect
             {
@@ -805,11 +788,18 @@ public static class AbilityPacketClientRequestStartAbilityHandler
                 Clear = false
             };
 
-            foreach (var player in nearbyPlayers)
+            // Zone tile system sent AddNpc to boomboxNpc.VisiblePlayers via OnAddVisibleNpcs.
+            // Send poof after AddNpc so the entity exists on the client when the effect plays.
+            var pktRecipients = boomboxNpc.VisiblePlayers.Values.ToList();
+            if (!boomboxNpc.VisiblePlayers.ContainsKey(connection.Player.Guid))
             {
-                player.SendTunneled(poofEffect);
-                player.SendTunneled(addNpcPacket);
+                // Spawner is outside zone tile range — send packets manually.
+                connection.Player.SendTunneled(boomboxNpc.GetAddNpcPacket());
+                pktRecipients.Insert(0, connection.Player);
             }
+
+            foreach (var player in pktRecipients)
+                player.SendTunneled(poofEffect);
 
             var capturedNpc = boomboxNpc;
 
