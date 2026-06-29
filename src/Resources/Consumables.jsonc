@@ -19,13 +19,30 @@
   ],
 
   "Cakes": [
-    { "ItemId": 17597, "Type": "ScaredyCake", "CooldownMs": 60000 }, // Scaredy Cake
-    { "ItemId": 69819, "Type": "ScaredyCake", "CooldownMs": 60000 }, // Scaredy Cake
+    // Scaredy Cake — spawns a cake NPC that plays a random scare effect on interact
+    {
+      "ItemId": 17597, "Type": "ScaredyCake", "CooldownMs": 60000,
+      "ModelId": 1724, "NameId": 16634, "SpawnPoofEffectId": 21, "LifetimeMs": 60000,
+      "ScareGroups": [
+        [5455,  5165,  15923], // Bats:  EFX_bats_exp_flyaway, SFX_OS_BatChirps, PFX_halloween_icing_splat_cog
+        [15909, 15960, 15961], // Ghost: PFX_halloween_ghosts_up_loop, SFX_Halloween_GhostCrys, SFX_Halloween_GhostMoans
+        [15744, 5118,  15959]  // Raven: EFX_birds_pink_med_flyaway, SFX_BirdCrowCaw, SFX_Halloween_Crows
+      ]
+    }, // Scaredy Cake
+    {
+      "ItemId": 69819, "Type": "ScaredyCake", "CooldownMs": 60000,
+      "ModelId": 1724, "NameId": 16634, "SpawnPoofEffectId": 21, "LifetimeMs": 60000,
+      "ScareGroups": [
+        [5455,  5165,  15923],
+        [15909, 15960, 15961],
+        [15744, 5118,  15959]
+      ]
+    }, // Scaredy Cake
 
     // Boss Cake — spawns a cake NPC that randomly applies one of the TransformAbilityIds to the interacting player
-    { "ItemId": 69825, "Type": "BossCake", "CooldownMs": 30000, "TransformAbilityIds": [4370, 4371, 4372, 4373] }, // Chiller Boombox
-    { "ItemId": 69828, "Type": "BossCake", "CooldownMs": 30000, "TransformAbilityIds": [4370, 4371, 4372, 4373] }, // Jack-O-Lantern
-    { "ItemId": 69839, "Type": "BossCake", "CooldownMs": 30000, "TransformAbilityIds": [4370, 4371, 4372, 4373] }  // Bat Cupcake
+    { "ItemId": 69825, "Type": "BossCake", "CooldownMs": 30000, "ModelId": 1724, "NameId": 16635, "SpawnPoofEffectId": 21, "LifetimeMs": 60000, "TransformAbilityIds": [4370, 4371, 4372, 4373] }, // Chiller Boombox
+    { "ItemId": 69828, "Type": "BossCake", "CooldownMs": 30000, "ModelId": 1724, "NameId": 16635, "SpawnPoofEffectId": 21, "LifetimeMs": 60000, "TransformAbilityIds": [4370, 4371, 4372, 4373] }, // Jack-O-Lantern
+    { "ItemId": 69839, "Type": "BossCake", "CooldownMs": 30000, "ModelId": 1724, "NameId": 16635, "SpawnPoofEffectId": 21, "LifetimeMs": 60000, "TransformAbilityIds": [4370, 4371, 4372, 4373] }  // Bat Cupcake
   ],
 
   "FoodEffects": [
@@ -43,7 +60,9 @@
     { "AbilityId": 1969, "CompositeEffectId": 1107  }, // Pixiedust Pie
     { "AbilityId": 1970, "CompositeEffectId": 630   }, // Frosty Flakes
     { "AbilityId": 1973, "CompositeEffectId": 15173 }, // Scrumptious Soup
-    { "AbilityId": 2004, "CompositeEffectId": 4013  }  // Steaming Pretzels
+    { "AbilityId": 2004, "CompositeEffectId": 4013  }, // Steaming Pretzels
+    { "AbilityId": 1964, "CompositeEffectId": 5265  }, // Graveyard Flambe (shadow flames)
+    { "AbilityId": 660,  "CompositeEffectId": 5343, "QuickChatId": 3340, "EffectDelayMs": 300 } // Can of Beans
   ],
 
   "Transformations": [
