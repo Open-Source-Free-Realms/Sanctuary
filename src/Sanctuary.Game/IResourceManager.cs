@@ -1,4 +1,4 @@
-﻿using Sanctuary.Game.Resources;
+using Sanctuary.Game.Resources;
 
 namespace Sanctuary.Game;
 
@@ -31,6 +31,7 @@ public interface IResourceManager
     ProfileDefinitionCollection Profiles { get; }
     QuickChatDefinitionCollection QuickChats { get; }
     PointOfInterestDefinitionCollection PointOfInterests { get; }
+    ConsumableCollection Consumables { get; }
 
     bool Load();
 }

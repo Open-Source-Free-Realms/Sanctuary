@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Collections.Generic;
@@ -206,11 +206,11 @@ public abstract class BaseZone : IZone, IDisposable
     private ZoneTile GetTileFromCoordinate(int longitude, int latitude)
     {
         if (longitude < _zoneDefinition.StartLongitude ||
-            longitude > _zoneDefinition.StartLongitude + _zoneDefinition.EndLongitude)
+            longitude >= _zoneDefinition.EndLongitude)
             return ZoneTile.Empty;
 
         if (latitude < _zoneDefinition.StartLatitude ||
-            latitude > _zoneDefinition.StartLatitude + _zoneDefinition.EndLatitude)
+            latitude >= _zoneDefinition.EndLatitude)
             return ZoneTile.Empty;
 
         var tileHash = ZoneTile.GetHash(longitude, latitude);

@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 
 using Microsoft.Extensions.Logging;
 
@@ -42,6 +42,7 @@ public class ResourceManager : IResourceManager
     public static readonly string QuickChatsFile = Path.Combine(BaseDirectory, "QuickChats.json");
     public static readonly string PlayerTitlesFile = Path.Combine(BaseDirectory, "PlayerTitles.json");
     public static readonly string PointOfInterestsFile = Path.Combine(BaseDirectory, "PointOfInterests.json");
+    public static readonly string ConsumablesFile = Path.Combine(BaseDirectory, "Consumables.jsonc");
 
     public IdToStringLookup HairMappings { get; }
     public IdToStringLookup HeadMappings { get; }
@@ -71,6 +72,7 @@ public class ResourceManager : IResourceManager
     public ProfileDefinitionCollection Profiles { get; }
     public QuickChatDefinitionCollection QuickChats { get; }
     public PointOfInterestDefinitionCollection PointOfInterests { get; }
+    public ConsumableCollection Consumables { get; }
 
     public ResourceManager(ILogger<ResourceManager> logger)
     {
@@ -108,6 +110,7 @@ public class ResourceManager : IResourceManager
         QuickChats = new(_logger);
         PlayerTitles = new(_logger);
         PointOfInterests = new(_logger);
+        Consumables = new(_logger);
     }
 
     public bool Load()
@@ -176,6 +179,9 @@ public class ResourceManager : IResourceManager
             return false;
 
         if (!PointOfInterests.Load(PointOfInterestsFile))
+            return false;
+
+        if (!Consumables.Load(ConsumablesFile))
             return false;
 
         return true;

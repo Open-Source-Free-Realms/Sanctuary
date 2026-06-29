@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
@@ -45,6 +45,7 @@ public class Npc : IEntity
     /// 2 - Ally
     /// </summary>
     public int Disposition { get; set; } = 1;
+    public System.Action<Player>? InteractAction { get; set; }
 
     public int Animation { get; set; } = 1;
 
@@ -61,7 +62,6 @@ public class Npc : IEntity
 
     public byte CursorId { get; set; }
 
-    // public NotificationInfo? Notification { get; set; }
 
     public List<CharacterAttachmentData> Attachments { get; set; } = [];
 
@@ -76,6 +76,7 @@ public class Npc : IEntity
 
     public void OnInteract(Player player)
     {
+        InteractAction?.Invoke(player);
     }
 
     public virtual void OnAddVisibleNpcs(params IEnumerable<Npc> npcs)
@@ -207,7 +208,6 @@ public class Npc : IEntity
             Unknown36 = default, // AnimationEvent
             TemporaryAppearance = default,
 
-            // playerUpdatePacketAddNpc.EffectTags = TODO
 
             Unknown38 = default,
             Unknown39 = default,
@@ -217,7 +217,6 @@ public class Npc : IEntity
 
             HasTilt = default,
 
-            // playerUpdatePacketAddNpc.Customization = TODO
 
             Tilt = default,
 
@@ -247,9 +246,6 @@ public class Npc : IEntity
             Unknown57 = default,
             Unknown58 = default,
 
-            // playerUpdatePacketAddNpc.Head = TODO
-            // playerUpdatePacketAddNpc.Hair = TODO
-            // playerUpdatePacketAddNpc.ModelCustomization = TODO
 
             ReplaceTerrainObject = default,
 
