@@ -47,7 +47,7 @@ public class BasicTest
         serverThread.Start();
         clientThread.Start();
 
-        while (serverThread.IsAlive || clientThread.IsAlive)
+        while (serverThread.IsAlive && clientThread.IsAlive)
         {
         }
     }
@@ -68,16 +68,13 @@ public class BasicTest
         while (connection.Status == Status.Negotiating)
             manager.GiveTime();
 
-        var count = 0ul;
-
         while (connection.Status != Status.Disconnected)
         {
             manager.GiveTime();
 
             connection.GetStats(out var stats);
 
-            Debug.WriteLine("{0}\t{1}  AVE={2} HIGH={3} LOW={4} MSTR={5},{6} CRC={7} ORD={8}  {9}<<{10}  {11}>>{12}",
-                count++,
+            Debug.WriteLine("{0}  AVE={1} HIGH={2} LOW={3} MSTR={4},{5} CRC={6} ORD={7}  {8}<<{9}  {10}>>{11}",
                 connection,
                 stats.AveragePingTime,
                 stats.HighPingTime,
@@ -91,5 +88,7 @@ public class BasicTest
                 stats.SyncOurSent,
                 stats.SyncTheirReceived);
         }
+
+        Assert.AreEqual(DisconnectReason.Application, connection.DisconnectReason);
     }
 }
