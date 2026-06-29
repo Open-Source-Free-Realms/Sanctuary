@@ -177,6 +177,7 @@ public sealed class Player : ClientPcData, IEntity
         if (Mount is not null)
             Mount.TeleportToZone(zone, position, rotation);
 
+        // Alert/Remove visible entities
         foreach (var visiblePlayer in VisiblePlayers)
             visiblePlayer.Value.OnRemoveVisiblePlayers([this]);
 
@@ -187,10 +188,10 @@ public sealed class Player : ClientPcData, IEntity
 
         Zone.TryRemovePlayer(Guid);
 
-
+        // Add to new zone/zonetile
         zone.TryAddPlayer(this);
 
-
+        // Teleport to new zone
         Visible = false;
 
         Zone = zone;
@@ -450,6 +451,7 @@ public sealed class Player : ClientPcData, IEntity
 
         var compositeEffectId = clientItemDefinition.CompositeEffectId;
 
+        // Update the Weapon composite effect if we have a Flair Shard equipped.
         if (slot == 7)
         {
             var flairShardcompositeEffectId = GetFlairShardCompositeEffect();
