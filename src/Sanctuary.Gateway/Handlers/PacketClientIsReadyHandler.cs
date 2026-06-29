@@ -3,7 +3,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using Sanctuary.Game;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
@@ -13,14 +12,12 @@ namespace Sanctuary.Gateway.Handlers;
 public static class PacketClientIsReadyHandler
 {
     private static ILogger _logger = null!;
-    private static IResourceManager _resourceManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
         var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
-        _logger = loggerFactory.CreateLogger(nameof(PacketClientIsReadyHandler));
 
-        _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
+        _logger = loggerFactory.CreateLogger(nameof(PacketClientIsReadyHandler));
     }
 
     public static bool HandlePacket(GatewayConnection connection)

@@ -127,7 +127,7 @@ public sealed class Player : ClientPcData, IEntity
     {
     }
 
-    public void UpdatePosition(Vector4 position, Quaternion rotation)
+    public void UpdatePosition(Vector4 position, Quaternion rotation, bool updateZoneArea = true)
     {
         Position = position;
         Rotation = rotation;
@@ -136,7 +136,8 @@ public sealed class Player : ClientPcData, IEntity
         {
             UpdateZoneTile();
 
-            UpdateZoneArea();
+            if (updateZoneArea)
+                UpdateZoneArea();
         }
     }
 
