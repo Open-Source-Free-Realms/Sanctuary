@@ -120,7 +120,7 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             }
 
             if (isBossCake)
-                SpawnBossCakeNpc(connection);
+                SpawnBossCakeNpc(connection, cakeDef!);
             else if (isScaredyCake)
                 SpawnCakeNpc(connection);
             else
@@ -153,7 +153,7 @@ public static class AbilityPacketClientRequestStartAbilityHandler
                 return true;
             }
 
-            ApplyTransform(connection, transform.ModelId, transform.DurationMs);
+            ApplyTransform(connection, transform.ModelId, transform.DurationMs, transform.CompositeEffectId);
 
             playerCooldowns[clientItemDefinition.Id] = DateTimeOffset.UtcNow.AddMilliseconds(transform.CooldownMs);
 
@@ -485,7 +485,7 @@ public static class AbilityPacketClientRequestStartAbilityHandler
         catch (Exception ex) { _logger.LogError(ex, "SpawnCakeNpc: error during NPC spawn"); }
     }
 
-    private static void SpawnBossCakeNpc(GatewayConnection connection)
+    private static void SpawnBossCakeNpc(GatewayConnection connection, CakeItemDefinition cakeDef)
     {
         try
         {
@@ -518,14 +518,16 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             cakeNpc.Visible = true;
             cakeNpc.UpdatePosition(spawnPosition, connection.Player.Rotation);
 
-            int[] bossAbilities = [4370, 4371, 4372, 4373];
+            int[] bossAbilities = cakeDef.TransformAbilityIds.Length > 0
+                ? cakeDef.TransformAbilityIds
+                : [4370, 4371, 4372, 4373];
 
             cakeNpc.InteractAction = (interactingPlayer) =>
             {
                 int abilityId = bossAbilities[Random.Shared.Next(bossAbilities.Length)];
 
                 if (_resourceManager.Consumables.Transformations.TryGetValue(abilityId, out var transform))
-                    ApplyTransform(interactingPlayer, transform.ModelId, transform.DurationMs);
+                    ApplyTransform(interactingPlayer, transform.ModelId, transform.DurationMs, transform.CompositeEffectId);
             };
 
             var poofEffect = new PlayerUpdatePacketPlayCompositeEffect
@@ -748,11 +750,11 @@ public static class AbilityPacketClientRequestStartAbilityHandler
         connection.SendTunneled(abilityPacketFailed);
     }
 
-    internal static void ApplyTransform(GatewayConnection connection, int temporaryAppearance, int durationMs)
-        => connection.Player.ApplyTemporaryAppearance(temporaryAppearance, durationMs);
+    internal static void ApplyTransform(GatewayConnection connection, int temporaryAppearance, int durationMs, int effectId = 0)
+        => connection.Player.ApplyTemporaryAppearance(temporaryAppearance, durationMs, effectId);
 
-    internal static void ApplyTransform(Game.Entities.Player player, int temporaryAppearance, int durationMs)
-        => player.ApplyTemporaryAppearance(temporaryAppearance, durationMs);
+    internal static void ApplyTransform(Game.Entities.Player player, int temporaryAppearance, int durationMs, int effectId = 0)
+        => player.ApplyTemporaryAppearance(temporaryAppearance, durationMs, effectId);
 
     internal static void RemoveTransform(GatewayConnection connection)
         => connection.Player.RemoveTemporaryAppearance();

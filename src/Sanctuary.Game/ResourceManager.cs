@@ -42,7 +42,7 @@ public class ResourceManager : IResourceManager
     public static readonly string QuickChatsFile = Path.Combine(BaseDirectory, "QuickChats.json");
     public static readonly string PlayerTitlesFile = Path.Combine(BaseDirectory, "PlayerTitles.json");
     public static readonly string PointOfInterestsFile = Path.Combine(BaseDirectory, "PointOfInterests.json");
-    public static readonly string ConsumablesFile = Path.Combine(BaseDirectory, "Consumables.json");
+    public static readonly string ConsumablesFile = Path.Combine(BaseDirectory, "Consumables.jsonc");
 
     public IdToStringLookup HairMappings { get; }
     public IdToStringLookup HeadMappings { get; }

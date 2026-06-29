@@ -37,7 +37,8 @@ public class ConsumableCollection
 
             var jsonSerializerOptions = new JsonSerializerOptions
             {
-                PropertyNameCaseInsensitive = true
+                PropertyNameCaseInsensitive = true,
+                ReadCommentHandling = JsonCommentHandling.Skip
             };
 
             var consumables = JsonSerializer.Deserialize<ConsumableDefinitions>(fileStream, jsonSerializerOptions);
