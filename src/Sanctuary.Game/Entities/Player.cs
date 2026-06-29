@@ -57,6 +57,8 @@ public sealed class Player : ClientPcData, IEntity
     public int TemporaryAppearance { get; set; }
     public DateTimeOffset? TemporaryAppearanceExpiresAt { get; set; }
 
+    private record PendingCooldown(int ActionBarId, int SlotIndex, int IconId, int NameId, int Count, int CooldownMs, DateTimeOffset StartedAt);
+    private readonly ConcurrentDictionary<(int, int), PendingCooldown> _pendingCooldowns = new();
 
     public Vector4 StartingZonePosition { get; set; }
     public Quaternion StartingZoneRotation { get; set; }
@@ -136,6 +138,41 @@ public sealed class Player : ClientPcData, IEntity
 
     public void UpdateEverySecond()
     {
+        var now = DateTimeOffset.UtcNow;
+        foreach (var (key, cooldown) in _pendingCooldowns)
+        {
+            int elapsed = (int)(now - cooldown.StartedAt).TotalMilliseconds;
+            bool expired = elapsed >= cooldown.CooldownMs;
+            SendTunneled(BuildCooldownSlotPacket(cooldown, expired ? cooldown.CooldownMs : elapsed, expired));
+            if (expired)
+                _pendingCooldowns.TryRemove(key, out _);
+        }
+    }
+
+    public void StartActionBarCooldown(int actionBarId, int slotIndex, int iconId, int nameId, int count, int cooldownMs)
+    {
+        var cooldown = new PendingCooldown(actionBarId, slotIndex, iconId, nameId, count, cooldownMs, DateTimeOffset.UtcNow);
+        _pendingCooldowns[(actionBarId, slotIndex)] = cooldown;
+        SendTunneled(BuildCooldownSlotPacket(cooldown, 0, false));
+    }
+
+    private static ClientUpdatePacketUpdateActionBarSlot BuildCooldownSlotPacket(PendingCooldown cooldown, int elapsed, bool enabled)
+    {
+        var packet = new ClientUpdatePacketUpdateActionBarSlot { Data = { Id = cooldown.ActionBarId, Slot = cooldown.SlotIndex } };
+        packet.Slot.IsEmpty = false;
+        packet.Slot.IconId = cooldown.IconId;
+        packet.Slot.NameId = cooldown.NameId;
+        packet.Slot.Unknown5 = 1;
+        packet.Slot.Unknown6 = 4;
+        packet.Slot.Unknown7 = 15;
+        packet.Slot.Enabled = enabled;
+        packet.Slot.Unknown10 = elapsed;
+        packet.Slot.TotalRefreshTime = cooldown.CooldownMs;
+        packet.Slot.Unknown12 = elapsed;
+        packet.Slot.Quantity = cooldown.Count;
+        packet.Slot.ForceDismount = true;
+        packet.Slot.Unknown15 = elapsed;
+        return packet;
     }
 
     public void UpdatePosition(Vector4 position, Quaternion rotation)

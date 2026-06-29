@@ -26,7 +26,7 @@ public static class AbilityPacketClientRequestStartAbilityHandler
     private static IResourceManager _resourceManager = null!;
     private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
 
-    private static readonly ConcurrentDictionary<ulong, ConcurrentDictionary<int, DateTimeOffset>> _boomboxCooldowns = new();
+    private static readonly ConcurrentDictionary<ulong, ConcurrentDictionary<int, DateTimeOffset>> _itemCooldowns = new();
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -111,7 +111,7 @@ public static class AbilityPacketClientRequestStartAbilityHandler
 
         if (isCake || isBoombox)
         {
-            var playerCooldowns = _boomboxCooldowns.GetOrAdd(connection.Player.Guid, _ => new ConcurrentDictionary<int, DateTimeOffset>());
+            var playerCooldowns = _itemCooldowns.GetOrAdd(connection.Player.Guid, _ => new ConcurrentDictionary<int, DateTimeOffset>());
 
             if (playerCooldowns.TryGetValue(clientItemDefinition.Id, out var expiry) && DateTimeOffset.UtcNow < expiry)
             {
@@ -129,82 +129,7 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             int cooldownMs = isCake ? cakeDef!.CooldownMs : 60_000;
             playerCooldowns[clientItemDefinition.Id] = DateTimeOffset.UtcNow.AddMilliseconds(cooldownMs);
 
-            var capturedSlot = packet.Data.Slot;
-            var capturedItemDef = clientItemDefinition;
-            var capturedCount = clientItem.Count;
-            var capturedPlayerGuid = connection.Player.Guid;
-
-            var cooldownSlot = new ClientUpdatePacketUpdateActionBarSlot { Data = { Id = 2, Slot = capturedSlot } };
-            cooldownSlot.Slot.IsEmpty = false;
-            cooldownSlot.Slot.IconId = capturedItemDef.Icon.Id;
-            cooldownSlot.Slot.NameId = capturedItemDef.NameId;
-            cooldownSlot.Slot.Unknown5 = 1;
-            cooldownSlot.Slot.Unknown6 = 4;
-            cooldownSlot.Slot.Unknown7 = 15;
-            cooldownSlot.Slot.Enabled = false;
-            cooldownSlot.Slot.Unknown10 = 0;
-            cooldownSlot.Slot.TotalRefreshTime = cooldownMs;
-            cooldownSlot.Slot.Unknown12 = 0;
-            cooldownSlot.Slot.Quantity = capturedCount;
-            cooldownSlot.Slot.ForceDismount = true;
-            cooldownSlot.Slot.Unknown15 = 0;
-            connection.SendTunneled(cooldownSlot);
-
-            var startTime = DateTimeOffset.UtcNow;
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    while (true)
-                    {
-                        await Task.Delay(2000);
-                        int elapsed = (int)(DateTimeOffset.UtcNow - startTime).TotalMilliseconds;
-                        if (elapsed >= cooldownMs) break;
-
-                        var tickSlot = new ClientUpdatePacketUpdateActionBarSlot { Data = { Id = 2, Slot = capturedSlot } };
-                        tickSlot.Slot.IsEmpty = false;
-                        tickSlot.Slot.IconId = capturedItemDef.Icon.Id;
-                        tickSlot.Slot.NameId = capturedItemDef.NameId;
-                        tickSlot.Slot.Unknown5 = 1;
-                        tickSlot.Slot.Unknown6 = 4;
-                        tickSlot.Slot.Unknown7 = 15;
-                        tickSlot.Slot.Enabled = false;
-                        tickSlot.Slot.Unknown10 = elapsed;
-                        tickSlot.Slot.TotalRefreshTime = cooldownMs;
-                        tickSlot.Slot.Unknown12 = elapsed;
-                        tickSlot.Slot.Quantity = capturedCount;
-                        tickSlot.Slot.ForceDismount = true;
-                        tickSlot.Slot.Unknown15 = elapsed;
-                        connection.SendTunneled(tickSlot);
-                    }
-                }
-                catch { }
-            });
-
-            Task.Delay(cooldownMs).ContinueWith(_ =>
-            {
-                try
-                {
-                    if (_boomboxCooldowns.TryGetValue(capturedPlayerGuid, out var cd))
-                        cd.TryRemove(capturedItemDef.Id, out DateTimeOffset _);
-
-                    var readySlot = new ClientUpdatePacketUpdateActionBarSlot { Data = { Id = 2, Slot = capturedSlot } };
-                    readySlot.Slot.IsEmpty = false;
-                    readySlot.Slot.IconId = capturedItemDef.Icon.Id;
-                    readySlot.Slot.NameId = capturedItemDef.NameId;
-                    readySlot.Slot.Unknown5 = 1;
-                    readySlot.Slot.Unknown6 = 4;
-                    readySlot.Slot.Unknown7 = 15;
-                    readySlot.Slot.Enabled = true;
-                    readySlot.Slot.Unknown10 = 1000;
-                    readySlot.Slot.TotalRefreshTime = 1000;
-                    readySlot.Slot.Quantity = capturedCount;
-                    readySlot.Slot.ForceDismount = true;
-                    readySlot.Slot.Unknown15 = 1000;
-                    connection.SendTunneled(readySlot);
-                }
-                catch { }
-            });
+            connection.Player.StartActionBarCooldown(2, packet.Data.Slot, clientItemDefinition.Icon.Id, clientItemDefinition.NameId, clientItem.Count, cooldownMs);
 
             return true;
         }
@@ -214,7 +139,7 @@ public static class AbilityPacketClientRequestStartAbilityHandler
         if (_resourceManager.Consumables.Transformations.TryGetValue(clientItemDefinition.ActivatableAbilityId, out var transform))
         {
             _logger.LogInformation("Transform match: modelId={ModelId} durationMs={Duration}", transform.ModelId, transform.DurationMs);
-            var playerCooldowns = _boomboxCooldowns.GetOrAdd(connection.Player.Guid, _ => new ConcurrentDictionary<int, DateTimeOffset>());
+            var playerCooldowns = _itemCooldowns.GetOrAdd(connection.Player.Guid, _ => new ConcurrentDictionary<int, DateTimeOffset>());
 
             if (playerCooldowns.TryGetValue(clientItemDefinition.Id, out var expiry) && DateTimeOffset.UtcNow < expiry)
             {
@@ -235,7 +160,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             var capturedSlot = packet.Data.Slot;
             var capturedItemDef = clientItemDefinition;
             var capturedCount = clientItem.Count;
-            var capturedPlayerGuid = connection.Player.Guid;
             var cooldownMs = transform.CooldownMs;
 
             bool willHaveItemLeft = capturedCount > 1;
@@ -244,88 +168,7 @@ public static class AbilityPacketClientRequestStartAbilityHandler
                 ConsumeItem(connection, clientItem, clientItemDefinition, capturedSlot);
 
             if (willHaveItemLeft)
-            {
-                var startTime = DateTimeOffset.UtcNow;
-
-                var cooldownSlot = new ClientUpdatePacketUpdateActionBarSlot { Data = { Id = 2, Slot = capturedSlot } };
-                cooldownSlot.Slot.IsEmpty = false;
-                cooldownSlot.Slot.IconId = capturedItemDef.Icon.Id;
-                cooldownSlot.Slot.NameId = capturedItemDef.NameId;
-                cooldownSlot.Slot.Unknown5 = 1;
-                cooldownSlot.Slot.Unknown6 = 4;
-                cooldownSlot.Slot.Unknown7 = 15;
-                cooldownSlot.Slot.Enabled = false;
-                cooldownSlot.Slot.Unknown10 = 0;
-                cooldownSlot.Slot.TotalRefreshTime = cooldownMs;
-                cooldownSlot.Slot.Unknown12 = 0;
-                cooldownSlot.Slot.Quantity = capturedCount - 1;
-                cooldownSlot.Slot.ForceDismount = true;
-                cooldownSlot.Slot.Unknown15 = 0;
-                connection.SendTunneled(cooldownSlot);
-
-                _ = Task.Run(async () =>
-                {
-                    try
-                    {
-                        while (true)
-                        {
-                            await Task.Delay(2000);
-                            int elapsed = (int)(DateTimeOffset.UtcNow - startTime).TotalMilliseconds;
-                            if (elapsed >= cooldownMs) break;
-
-                            var tickSlot = new ClientUpdatePacketUpdateActionBarSlot { Data = { Id = 2, Slot = capturedSlot } };
-                            tickSlot.Slot.IsEmpty = false;
-                            tickSlot.Slot.IconId = capturedItemDef.Icon.Id;
-                            tickSlot.Slot.NameId = capturedItemDef.NameId;
-                            tickSlot.Slot.Unknown5 = 1;
-                            tickSlot.Slot.Unknown6 = 4;
-                            tickSlot.Slot.Unknown7 = 15;
-                            tickSlot.Slot.Enabled = false;
-                            tickSlot.Slot.Unknown10 = elapsed;
-                            tickSlot.Slot.TotalRefreshTime = cooldownMs;
-                            tickSlot.Slot.Unknown12 = elapsed;
-                            tickSlot.Slot.Quantity = capturedCount - 1;
-                            tickSlot.Slot.ForceDismount = true;
-                            tickSlot.Slot.Unknown15 = elapsed;
-                            connection.SendTunneled(tickSlot);
-                        }
-                    }
-                    catch { }
-                });
-
-                Task.Delay(cooldownMs).ContinueWith(_ =>
-                {
-                    try
-                    {
-                        if (_boomboxCooldowns.TryGetValue(capturedPlayerGuid, out var cd))
-                            cd.TryRemove(capturedItemDef.Id, out DateTimeOffset _);
-
-                        var readySlot = new ClientUpdatePacketUpdateActionBarSlot { Data = { Id = 2, Slot = capturedSlot } };
-                        readySlot.Slot.IsEmpty = false;
-                        readySlot.Slot.IconId = capturedItemDef.Icon.Id;
-                        readySlot.Slot.NameId = capturedItemDef.NameId;
-                        readySlot.Slot.Unknown5 = 1;
-                        readySlot.Slot.Unknown6 = 4;
-                        readySlot.Slot.Unknown7 = 15;
-                        readySlot.Slot.Enabled = true;
-                        readySlot.Slot.Unknown10 = 1000;
-                        readySlot.Slot.TotalRefreshTime = 1000;
-                        readySlot.Slot.Quantity = capturedCount - 1;
-                        readySlot.Slot.ForceDismount = true;
-                        readySlot.Slot.Unknown15 = 1000;
-                        connection.SendTunneled(readySlot);
-                    }
-                    catch { }
-                });
-            }
-            else
-            {
-                Task.Delay(cooldownMs).ContinueWith(_ =>
-                {
-                    if (_boomboxCooldowns.TryGetValue(capturedPlayerGuid, out var cd))
-                        cd.TryRemove(capturedItemDef.Id, out DateTimeOffset _);
-                });
-            }
+                connection.Player.StartActionBarCooldown(2, capturedSlot, capturedItemDef.Icon.Id, capturedItemDef.NameId, capturedCount - 1, cooldownMs);
 
             return true;
         }
@@ -483,7 +326,7 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             connection.SendTunneled(flameEffect);
             connection.Player.SendToVisible(flameEffect, false);
 
-            _logger.LogInformation($"Player {connection.Player.Name.FirstName} activated shadow flames");
+            _logger.LogInformation("Player {Name} activated shadow flames", connection.Player.Name?.FirstName);
         }
         else
         {
@@ -636,10 +479,10 @@ public static class AbilityPacketClientRequestStartAbilityHandler
 
                     capturedNpc.Dispose();
                 }
-                catch { }
+                catch (Exception ex) { _logger.LogError(ex, "SpawnCakeNpc: error during NPC cleanup"); }
             });
         }
-        catch { }
+        catch (Exception ex) { _logger.LogError(ex, "SpawnCakeNpc: error during NPC spawn"); }
     }
 
     private static void SpawnBossCakeNpc(GatewayConnection connection)
@@ -726,10 +569,10 @@ public static class AbilityPacketClientRequestStartAbilityHandler
 
                     capturedNpc.Dispose();
                 }
-                catch { }
+                catch (Exception ex) { _logger.LogError(ex, "SpawnBossCakeNpc: error during NPC cleanup"); }
             });
         }
-        catch { }
+        catch (Exception ex) { _logger.LogError(ex, "SpawnBossCakeNpc: error during NPC spawn"); }
     }
 
     private static void SpawnBoomboxNpc(GatewayConnection connection, Packet.Common.ClientItemDefinition itemDef)
@@ -829,10 +672,10 @@ public static class AbilityPacketClientRequestStartAbilityHandler
 
                     capturedNpc.Dispose();
                 }
-                catch { }
+                catch (Exception ex) { _logger.LogError(ex, "SpawnBoomboxNpc: error during NPC cleanup"); }
             });
         }
-        catch { }
+        catch (Exception ex) { _logger.LogError(ex, "SpawnBoomboxNpc: error during NPC spawn"); }
     }
 
     private static void StartBoomboxDancing(Game.Zones.StartingZone zone, Vector4 boomboxPosition, int[] danceSequence, int durationMs)
@@ -887,11 +730,11 @@ public static class AbilityPacketClientRequestStartAbilityHandler
                                 visiblePlayer.SendTunneled(quickChatPacket);
                             }
                         }
-                        catch { }
+                        catch (Exception ex) { _logger.LogError(ex, "StartBoomboxDancing: error sending dance packet to player {Guid}", player.Guid); }
                     }
                 }
             }
-            catch { }
+            catch (Exception ex) { _logger.LogError(ex, "StartBoomboxDancing: unhandled error"); }
         });
     }
 
