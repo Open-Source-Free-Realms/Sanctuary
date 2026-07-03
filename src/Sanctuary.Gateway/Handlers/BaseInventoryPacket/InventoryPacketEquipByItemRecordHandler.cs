@@ -147,7 +147,7 @@ public static class InventoryPacketEquipByItemRecordHandler
 
         playerUpdatePacketEquipItemChange.Attachment = clientUpdatePacketEquipItem.Attachment;
 
-        playerUpdatePacketEquipItemChange.ProfileId = connection.Player.ActiveProfileId;
+        playerUpdatePacketEquipItemChange.ProfileId = packet.ProfileId;
 
         if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out var itemClass))
         {
