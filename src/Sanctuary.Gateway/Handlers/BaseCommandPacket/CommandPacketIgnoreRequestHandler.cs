@@ -97,9 +97,6 @@ public static class CommandPacketIgnoreRequestHandler
 
             connection.Player.Ignores.RemoveAll(x => x.Guid == playerToIgnore.Guid);
 
-            if (dbContext.SaveChanges() <= 0)
-                return true;
-
             var ignoreRemovePacket = new IgnoreRemovePacket
             {
                 Guid = playerToIgnore.Guid
