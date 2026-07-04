@@ -50,6 +50,11 @@ public sealed class Player : ClientPcData, IEntity
     public Vector4 StartingZonePosition { get; set; }
     public Quaternion StartingZoneRotation { get; set; }
 
+    // Action-bar slot -> item instance id (ClientItem.Id) the player assigned there. The client's
+    // "use ability" request (AbilityPacketClientRequestStartAbility) only carries the action-bar slot,
+    // not the item, so we track assignments here to resolve which item (e.g. a fishing lure) was used.
+    public readonly Dictionary<int, int> ActionBarAssignments = new();
+
     public Player(BaseZone zone, UdpConnection connection, IResourceManager resourceManager)
     {
         Zone = zone;
@@ -108,6 +113,52 @@ public sealed class Player : ClientPcData, IEntity
 
         if (sendToSelf)
             SendTunneled(packet);
+    }
+
+    #endregion
+
+    #region Inventory
+
+    /// <summary>
+    /// Grants an item to the player's inventory and sends the client the "item added" update
+    /// (which shows the pickup popup). Returns false if the item definition is unknown.
+    /// The item id is generated in-memory; callers that persist the item to the DB should use the
+    /// <see cref="GiveItem(int,int,int)"/> overload with the DB-assigned id so the in-memory
+    /// <see cref="ClientItem.Id"/> matches the <c>DbItem.Id</c> (the key other systems match on).
+    /// </summary>
+    public bool GiveItem(int definitionId, int count = 1)
+        => GiveItem(definitionId, count, Items.Count == 0 ? 1 : Items.Max(x => x.Id) + 1);
+
+    /// <summary>
+    /// Grants an item using an explicit item id (e.g. a DB-assigned id) so the in-memory item lines up
+    /// with its persisted row. Returns false if the item definition is unknown.
+    /// </summary>
+    public bool GiveItem(int definitionId, int count, int itemId)
+    {
+        if (!_resourceManager.ClientItemDefinitions.TryGetValue(definitionId, out var definition))
+            return false;
+
+        var item = new ClientItem
+        {
+            Id = itemId,
+            Definition = definitionId,
+            Count = count,
+            Tint = 0
+        };
+
+        Items.Add(item);
+
+        // Add the item to the bag.
+        using var writer = new PacketWriter();
+        item.Serialize(writer);
+        definition.Serialize(writer);
+        SendTunneled(new ClientUpdatePacketItemAdd { Payload = writer.Buffer });
+
+        // Show the yellow "You received: <item> x<count>" text at the bottom of the screen
+        // (RewardBundle opcode 50, single-item sub-type; display-only).
+        SendTunneled(new RewardBundlePacketSingleItem { ItemDefinitionId = definitionId, Count = count });
+
+        return true;
     }
 
     #endregion

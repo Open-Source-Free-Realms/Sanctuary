@@ -34,6 +34,15 @@ public static class InventoryPacketItemActionBarAssignHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(InventoryPacketItemActionBarAssign), packet);
 
+        // Track which item instance sits in each action-bar slot so a later "use ability" request (which
+        // only carries the slot, not the item) can be resolved back to the item (e.g. a fishing lure).
+        if (packet.Guid == 0)
+            connection.Player.ActionBarAssignments.Remove(packet.Slot);
+        else
+            connection.Player.ActionBarAssignments[packet.Slot] = packet.Guid;
+
+        _logger.LogInformation("ActionBar assign: Slot={slot} ItemGuid={guid}", packet.Slot, packet.Guid);
+
         var clientUpdatePacketUpdateActionBarSlot = new ClientUpdatePacketUpdateActionBarSlot
         {
             Data =

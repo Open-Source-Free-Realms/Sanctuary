@@ -121,6 +121,13 @@ public abstract class BaseZone : IZone, IDisposable
         return _npcs.TryAdd(npc.Guid, npc) && _entities.TryAdd(npc.Guid, npc);
     }
 
+    /// <summary>Allocates the next unique entity guid (for zone-owned NPCs a subclass constructs itself).</summary>
+    protected ulong NextEntityGuid() => _uniqueGuid++;
+
+    /// <summary>Registers an already-constructed NPC (e.g. a custom subclass) into the zone's entity set.</summary>
+    protected bool TryRegisterNpc(Npc npc) =>
+        _npcs.TryAdd(npc.Guid, npc) && _entities.TryAdd(npc.Guid, npc);
+
     public bool TryCreateMount(Player rider, MountDefinition definition, [MaybeNullWhen(false)] out Mount mount)
     {
         mount = new Mount(this, rider, definition)
@@ -231,10 +238,15 @@ public abstract class BaseZone : IZone, IDisposable
         var tilesToAdd = newVisibleTiles.Except(oldVisibleTiles);
         var tilesToRemove = oldVisibleTiles.Except(newVisibleTiles);
 
+        // Become discoverable in our own tile BEFORE cross-notifying. Otherwise two players entering a
+        // tile concurrently each finish AddEntityToZoneTiles (which scans the other's tile) before the
+        // other has added itself here, so they miss each other — intermittent, one-directional visibility
+        // that only a later move fixes. Adding first guarantees the later scanner sees us (it also
+        // cross-notifies both directions), so co-located players always end up mutually visible.
+        to.Entities.TryAdd(entity.Guid, entity);
+
         AddEntityToZoneTiles(entity, tilesToAdd);
         RemoveEntityFromZoneTiles(entity, tilesToRemove);
-
-        to.Entities.TryAdd(entity.Guid, entity);
     }
 
     private void AddEntityToZoneTiles(IEntity entity, IEnumerable<ZoneTile> zoneTiles)

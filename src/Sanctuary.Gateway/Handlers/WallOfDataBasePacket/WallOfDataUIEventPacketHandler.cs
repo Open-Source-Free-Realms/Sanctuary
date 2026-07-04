@@ -33,6 +33,19 @@ public static class WallOfDataUIEventPacketHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(WallOfDataUIEventPacket), packet);
 
+        if (packet.TableName == "ChatLog" &&
+    packet.Callback == "sendChatMessage" &&
+    packet.Param is not null && packet.Param.StartsWith("/pos"))
+        {
+            var chatPacketDebugChat = new ChatPacketDebugChat
+            {
+                Message = $"Position (X,Y,Z): {connection.Player.Position.X} {connection.Player.Position.Y} {connection.Player.Position.Z}",
+                PrintToChat = true
+            };
+
+            connection.SendTunneled(chatPacketDebugChat);
+        }
+
         return true;
     }
 }

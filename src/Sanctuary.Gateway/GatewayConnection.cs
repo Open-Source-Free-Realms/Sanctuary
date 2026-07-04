@@ -77,6 +77,8 @@ public class GatewayConnection : UdpConnection
         if (Player is null)
             return;
 
+        Fishing.FishingSessions.Remove(Player.Guid);
+
         SendFriendOffline();
 
         _loginClient.SendCharacterLogout(GuidHelper.GetPlayerId(Player.Guid));

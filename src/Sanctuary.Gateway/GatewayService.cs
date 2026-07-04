@@ -128,6 +128,9 @@ public class GatewayService : BackgroundService
         {
             _server.GiveTime();
             _client.GiveTime();
+
+            // Drive server-side minigame timers (e.g. fishing bite timing).
+            Fishing.FishingSessions.Tick();
         }
 
         return Task.CompletedTask;

@@ -3,6 +3,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using Sanctuary.Gateway.Fishing;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
@@ -43,6 +44,40 @@ public static class MiniGameStartGamePacketHandler
             };
 
             connection.SendTunneled(commandPacketStartFlashGame);
+        }
+        else if (FishingActivityZones.TryGet(packet.StateId, out var fishingZone))
+        {
+            var packetClientBeginZoning = new PacketClientBeginZoning
+            {
+                Name = fishingZone.ZoneName,
+                Type = 2,
+                Position = fishingZone.SpawnPosition,
+                Rotation = fishingZone.SpawnRotation,
+                Sky = fishingZone.Sky,
+                Unknown = 1,
+                Id = packet.StateId,
+                GeometryId = 214,
+                OverrideUpdateRadius = true
+            };
+
+            connection.SendTunneled(packetClientBeginZoning);
+
+            connection.SendTunneled(new PlayerUpdatePacketUpdateCharacterState
+            {
+                Guid = connection.Player.Guid,
+                State = FishingActivityZones.FishingCharacterState
+            });
+
+            // Create/refresh the fishing session and record which zone the player entered so the
+            // RegisterPlayerResponse can report the correct zone config.
+            var session = FishingSessions.GetOrCreate(connection.Player);
+            session.SetZone(packet.StateId, fishingZone);
+            session.Reset();
+
+            _logger.LogInformation(
+                "Started fishing minigame activity {activityId}, zoning to {zoneName}",
+                packet.StateId,
+                fishingZone.ZoneName);
         }
 
         return true;

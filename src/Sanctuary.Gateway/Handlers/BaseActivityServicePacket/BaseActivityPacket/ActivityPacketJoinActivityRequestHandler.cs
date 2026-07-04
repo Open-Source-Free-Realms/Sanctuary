@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Sanctuary.Core.Helpers;
 using Sanctuary.Core.IO;
 using Sanctuary.Game;
+using Sanctuary.Gateway.Fishing;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
@@ -143,6 +144,80 @@ public static class ActivityPacketJoinActivityRequestHandler
 
             writer.Write(1);
             writer.Write(2);
+
+            writer.Write(miniGameGroupInfo.Serialize());
+
+            var clientActivityLaunchPacketInviteDetails = new ClientActivityLaunchPacketInviteDetails(packet.ActivityId, 0)
+            {
+                Guid = connection.Player.Guid,
+                Inviter = "Test",
+                Members =
+                {
+                    new()
+                    {
+                        Id = 1,
+                        Guid = connection.Player.Guid,
+                        InviteStatus = 2,
+                        IsFoundingMember = true
+                    }
+                },
+                Request =
+                {
+                    RequestorGuid = connection.Player.Guid,
+                    SysHashkey = JenkinsHelper.OneAtATimeHash("Minigame"),
+                    ReqId = 69420,
+                    MinMembers = 1,
+                    MaxMembers = 1,
+                    ImageSetId = clientActivityDefinition.ImageSetId,
+                    NameStringId = clientActivityDefinition.DisplayNameId,
+                    DescStringId = clientActivityDefinition.DisplayDescriptionId,
+                    SysSpecificData = writer.Buffer
+                }
+            };
+
+            connection.SendTunneled(clientActivityLaunchPacketInviteDetails);
+
+            var clientActivityLaunchPacketActivityLaunched = new ClientActivityLaunchPacketActivityLaunched(packet.ActivityId, 0);
+
+            clientActivityLaunchPacketActivityLaunched.Guids.Add(connection.Player.Guid);
+
+            connection.SendTunneled(clientActivityLaunchPacketActivityLaunched);
+
+            var miniGameInfoPacket = new MiniGameInfoPacket(packet.ActivityId, -1, -1)
+            {
+                Info = miniGameInfo
+            };
+
+            connection.SendTunneled(miniGameInfoPacket);
+        }
+        else if (FishingActivityZones.IsFishingActivity(packet.ActivityId))
+        {
+            var miniGameInfo = new MiniGameInfo()
+            {
+                NameId = clientActivityDefinition.DisplayNameId,
+                IconId = clientActivityDefinition.ImageSetId,
+                DescriptionId = clientActivityDefinition.DisplayDescriptionId,
+                Difficulty = clientActivityDefinition.Difficulty,
+                ProfileType = 21,
+                Type = 21,
+                PreselectedGameId = packet.ActivityId,
+                ShowActionBar = true
+            };
+
+            var miniGameGroupInfo = new MiniGameGroupInfo()
+            {
+                Id = 10,
+                NameId = clientActivityDefinition.DisplayNameId,
+                DescriptionId = clientActivityDefinition.DisplayDescriptionId,
+                IconId = clientActivityDefinition.ImageSetId
+            };
+
+            using var writer = new PacketWriter();
+
+            miniGameInfo.Serialize(writer);
+
+            writer.Write(0);
+            writer.Write(0);
 
             writer.Write(miniGameGroupInfo.Serialize());
 
