@@ -4,6 +4,7 @@ using System.Linq;
 using System.Numerics;
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Extensions;
 using Sanctuary.Core.IO;
@@ -27,7 +28,74 @@ public sealed class StartingZone : BaseZone
 
         _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
         _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
+
+        _logger = serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("FishingScenery");
+
+        SpawnFishingScenery();
     }
+
+    private readonly ILogger _logger;
+
+    #region Fishing scenery (ambient fish + fishing-spot markers)
+
+    // Model ids (Models.txt): 418 = fish.adr (generic overworld fish); 1684 = sg_fishing_node_01, the
+    // fishing-spot "whirlpool" node that marks where you can fish. Populates each fishing hole's water
+    // with slowly-wandering fish + spot markers, visible in the overworld before/while fishing.
+    private const int OverworldFishModelId = 418;
+    private const int FishingSpotNodeModelId = 1684;
+
+    private void SpawnFishingScenery()
+    {
+        // TEMP/DIAGNOSTIC: spawn right at the zone login point so we can confirm the fish render + move at
+        // all. The player logs in here, so the school should be right in front of them on login. Once
+        // confirmed, we relocate to each hole's real overworld pond coords (FISHING_1TO1_PLAN.md G9).
+        var spawn = SpawnPosition;
+        SpawnFishingSpot(new Vector3(spawn.X, spawn.Y, spawn.Z), fishCount: 8, wanderRadius: 6f, seed: 1);
+    }
+
+    private void SpawnFishingSpot(Vector3 center, int fishCount, float wanderRadius, int seed)
+    {
+        // The fishing-spot marker (the light-blue whirlpool node that shows where you can fish).
+        var node = new Npc(this)
+        {
+            Guid = NextEntityGuid(),
+            ModelId = FishingSpotNodeModelId,
+            Scale = 1f,
+            IsInteractable = false,
+            HideNamePlate = true
+        };
+
+        if (TryRegisterNpc(node))
+        {
+            node.Visible = true;
+            node.UpdatePosition(new Vector4(center.X, center.Y, center.Z, 1f), Quaternion.Identity);
+        }
+
+        // A small school of fish wandering the pond.
+        for (var i = 0; i < fishCount; i++)
+        {
+            var fish = new AmbientFishNpc(this, center, wanderRadius, speed: 1.2f, seed: seed * 100 + i)
+            {
+                Guid = NextEntityGuid(),
+                ModelId = OverworldFishModelId,
+                Scale = 1f,
+                IsInteractable = false,
+                HideNamePlate = true
+            };
+
+            if (!TryRegisterNpc(fish))
+                continue;
+
+            fish.Visible = true;
+
+            var start = fish.PickTarget(); // scatter the fish across the pond to start
+            fish.UpdatePosition(new Vector4(start.X, start.Y, start.Z, 1f), Quaternion.Identity);
+        }
+
+        _logger.LogInformation("Spawned fishing scenery: {n} fish + 1 spot marker around {center}", fishCount, center);
+    }
+
+    #endregion
 
     #region Client Is Ready
 

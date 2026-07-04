@@ -62,6 +62,7 @@ public static class PacketTunneledClientPacketHandler
             PlayerUpdatePacketJump.OpCode => PlayerUpdatePacketJumpHandler.HandlePacket(connection, packet.Payload),
             BaseCoinStorePacket.OpCode => BaseCoinStorePacketHandler.HandlePacket(connection, reader),
             BaseActivityServicePacket.OpCode => BaseActivityServicePacketHandler.HandlePacket(connection, reader, 2),
+            BaseFishingPacket.OpCode => BaseFishingPacketHandler.HandlePacket(connection, reader),
             MountBasePacket.OpCode => MountBasePacketHandler.HandlePacket(connection, reader),
             PacketClientInitializationDetails.OpCode => PacketClientInitializationDetailsHandler.HandlePacket(connection, packet.Payload),
             BaseNameChangePacket.OpCode => BaseNameChangePacketHandler.HandlePacket(connection, reader),
