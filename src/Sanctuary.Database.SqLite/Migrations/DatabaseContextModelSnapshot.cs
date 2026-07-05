@@ -96,6 +96,9 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     b.Property<int>("Gender")
                         .HasColumnType("INTEGER");
 
+                    b.Property<ulong?>("GuildMemberId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Hair")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -130,9 +133,6 @@ namespace Sanctuary.Database.Sqlite.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int?>("ModelCustomizationId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("PlayTime")
                         .HasColumnType("INTEGER");
 
                     b.Property<float?>("PositionX")
@@ -171,6 +171,11 @@ namespace Sanctuary.Database.Sqlite.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("FullName");
+
+                    b.HasIndex("GuildMemberId")
+                        .IsUnique();
+
                     b.HasIndex("UserId");
 
                     b.ToTable("Characters");
@@ -194,6 +199,58 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     b.HasIndex("CharacterId");
 
                     b.ToTable("Friends");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbGuild", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("DATE()");
+
+                    b.Property<int>("MaxMembers")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(100);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Guilds");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbGuildMember", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<ulong>("GuildId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset>("Joined")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("DATE()");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GuildId");
+
+                    b.ToTable("GuildMembers");
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbIgnore", b =>
@@ -392,11 +449,18 @@ namespace Sanctuary.Database.Sqlite.Migrations
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbCharacter", b =>
                 {
+                    b.HasOne("Sanctuary.Database.Entities.DbGuildMember", "GuildMember")
+                        .WithOne("Character")
+                        .HasForeignKey("Sanctuary.Database.Entities.DbCharacter", "GuildMemberId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("Sanctuary.Database.Entities.DbUser", "User")
                         .WithMany("Characters")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("GuildMember");
 
                     b.Navigation("User");
                 });
@@ -418,6 +482,17 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     b.Navigation("Character");
 
                     b.Navigation("FriendCharacter");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbGuildMember", b =>
+                {
+                    b.HasOne("Sanctuary.Database.Entities.DbGuild", "Guild")
+                        .WithMany("Members")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Guild");
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbIgnore", b =>
@@ -496,6 +571,17 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     b.Navigation("Profiles");
 
                     b.Navigation("Titles");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbGuild", b =>
+                {
+                    b.Navigation("Members");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbGuildMember", b =>
+                {
+                    b.Navigation("Character")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbUser", b =>

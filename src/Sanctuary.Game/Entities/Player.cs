@@ -52,6 +52,8 @@ public sealed class Player : ClientPcData, IEntity
 
     public int TimezoneOffset { get; set; }
 
+    public GuildData? GuildData { get; set; }
+
     public Vector4 StartingZonePosition { get; set; }
     public Quaternion StartingZoneRotation { get; set; }
 
@@ -387,6 +389,9 @@ public sealed class Player : ClientPcData, IEntity
             commandPacketInteractionList.List.Interactions.Add(IgnoreInteraction.Data);
         }
 
+        if (GuildData is null && GuildInviteInteraction.CanInvite(player))
+            commandPacketInteractionList.List.Interactions.Add(GuildInviteInteraction.Data);
+
         player.SendTunneled(commandPacketInteractionList);
     }
 
@@ -518,6 +523,9 @@ public sealed class Player : ClientPcData, IEntity
 
             packet.NameVerticalOffset = Mount.Definition.NameVerticalOffset;
         }
+
+        if (GuildData is not null)
+            packet.Guilds.Add(0, GuildData.Guid);
 
         return packet;
     }
