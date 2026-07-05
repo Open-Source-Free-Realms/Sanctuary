@@ -67,6 +67,8 @@ public static class CharacterDeleteRequestHandler
             characterDeleteReply.Status = 2;
 
             connection.Send(characterDeleteReply);
+
+            return true;
         }
 
         characterDeleteReply.Status = 1;
