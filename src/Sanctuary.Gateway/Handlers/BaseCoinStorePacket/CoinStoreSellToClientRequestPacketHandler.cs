@@ -10,6 +10,7 @@ using Sanctuary.Core.IO;
 using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game;
+using Sanctuary.Gateway.Services;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -87,6 +88,11 @@ public static class CoinStoreSellToClientRequestPacketHandler
             return true;
         }
 
+        var tint = packet.ItemRecord.Tint;
+
+        if (!clientItemDefinition.IsTintable)
+            tint = clientItemDefinition.Icon.TintId;
+
         using var dbContext = _dbContextFactory.CreateDbContext();
 
         var dbQuery = dbContext.Characters
@@ -94,7 +100,7 @@ public static class CoinStoreSellToClientRequestPacketHandler
             .Select(x => new
             {
                 Character = x,
-                Item = x.Items.SingleOrDefault(i => i.Definition == clientItemDefinition.Id && i.Tint == packet.ItemRecord.Tint),
+                Item = x.Items.SingleOrDefault(i => i.Definition == clientItemDefinition.Id && i.Tint == tint),
                 NextId = x.Items.Max(i => i.Id)
             })
             .SingleOrDefault();
@@ -112,6 +118,7 @@ public static class CoinStoreSellToClientRequestPacketHandler
 
         if (dbItem is not null)
         {
+            dbItem.Tint = tint;
             dbItem.Count += packet.Quantity;
         }
         else
@@ -120,7 +127,7 @@ public static class CoinStoreSellToClientRequestPacketHandler
             {
                 Id = dbQuery.NextId + 1,
                 Definition = clientItemDefinition.Id,
-                Tint = packet.ItemRecord.Tint,
+                Tint = tint,
 
                 Count = packet.Quantity
             };
@@ -139,12 +146,13 @@ public static class CoinStoreSellToClientRequestPacketHandler
             return true;
         }
 
-        var clientItem = connection.Player.Items.SingleOrDefault(x => x.Definition == clientItemDefinition.Id && x.Tint == packet.ItemRecord.Tint);
+        var clientItem = connection.Player.Items.SingleOrDefault(x => x.Definition == clientItemDefinition.Id && x.Tint == tint);
 
         var addItem = false;
 
         if (clientItem is not null)
         {
+            clientItem.Tint = dbItem.Tint;
             clientItem.Count = dbItem.Count;
         }
         else
@@ -156,7 +164,9 @@ public static class CoinStoreSellToClientRequestPacketHandler
                 Id = dbItem.Id,
                 Tint = dbItem.Tint,
                 Count = dbItem.Count,
-                Definition = dbItem.Definition
+                Definition = dbItem.Definition,
+                ActivateEnabled = clientItemDefinition.ActivatableAbilityId > 0,
+                AbilityCount = clientItemDefinition.ActivatableAbilityId > 0 ? 1 : 0
             };
 
             connection.Player.Items.Add(clientItem);
@@ -212,6 +222,15 @@ public static class CoinStoreSellToClientRequestPacketHandler
         connection.SendTunneled(coinStoreTransactionCompletePacket);
 
         connection.Player.CoinStoreTransactions.Add(coinStoreTransactionCompletePacket.TransactionRecord);
+
+        ItemActionBarService.ReplayOwnedCarouselItemsForMarketplaceOpen(connection, _resourceManager, _logger);
+
+        _logger.LogInformation(
+            "{connection} refreshed quick-item carousel after coin store purchase. ( ItemGuid: {itemGuid}, Definition: {definition}, Count: {count} )",
+            connection,
+            clientItem.Id,
+            clientItem.Definition,
+            clientItem.Count);
 
         return true;
     }

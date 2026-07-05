@@ -46,7 +46,7 @@ public class LoginConnection : UdpConnection
             ? OtherSideDisconnectReason
             : DisconnectReason;
 
-        _logger.LogInformation("{connection} disconnected. {reason}", this, reason);
+        _logger.LogInformation("{connection} disconnected from {ip}. {reason}", this, EndPoint.Address, reason);
     }
 
     public override void OnRoutePacket(Span<byte> data)

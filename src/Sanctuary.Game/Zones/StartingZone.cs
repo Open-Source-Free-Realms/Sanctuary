@@ -14,7 +14,7 @@ using Sanctuary.Packet.Common;
 
 namespace Sanctuary.Game.Zones;
 
-public sealed class StartingZone : BaseZone
+public class StartingZone : BaseZone
 {
     private readonly IZoneManager _zoneManager;
     private readonly IResourceManager _resourceManager;
@@ -54,6 +54,8 @@ public sealed class StartingZone : BaseZone
         };
 
         player.SendTunneled(clientUpdatePacketMana);
+
+        SendGuildData(player);
 
         SendReferenceData(player);
 
@@ -143,6 +145,87 @@ public sealed class StartingZone : BaseZone
         ]);
 
         player.SendTunneled(clientUpdatePacketUpdateStat);
+    }
+
+    private void SendGuildData(Player player)
+    {
+        var guildCanCreateGuildPacket = new GuildCanCreateGuildPacket
+        {
+            CanCreateGuild = player.Profiles.Any(x => x.Rank >= 15) && player.GuildData is null
+        };
+
+        player.SendTunneled(guildCanCreateGuildPacket);
+
+        if (player.GuildData is null)
+            return;
+
+        var guildDataFullPacket = new GuildDataFullPacket
+        {
+            Data = player.GuildData,
+            Guid = player.GuildData.Guid
+        };
+
+        player.SendTunneled(guildDataFullPacket);
+
+        var guildPlayerStatusUpdatePacket = new GuildPlayerStatusUpdatePacket
+        {
+            PlayerGuid = player.Guid,
+            GuildGuid = player.GuildData.Guid,
+            IsInGuild = true
+        };
+
+        player.SendTunneled(guildPlayerStatusUpdatePacket);
+
+        if (!player.GuildData.Members.TryGetValue(player.Guid, out var playerGuildMember))
+            return;
+
+        var guildMemberStatusUpdatePacket = new GuildMemberStatusUpdatePacket
+        {
+            GuildGuid = player.GuildData.Guid,
+            MemberGuid = player.Guid,
+            Name = player.Name,
+            Role = playerGuildMember.Role,
+            Online = true,
+            Type = 6,
+            WorldId = player.Zone.Id,
+            ProfileId = player.ActiveProfileId,
+            ProfileRank = player.ActiveProfile.Rank
+        };
+
+        foreach (var guildMember in player.GuildData.Members)
+        {
+            if (guildMember.Key == player.Guid)
+                continue;
+
+            if (!_zoneManager.TryGetPlayer(guildMember.Key, out var guildPlayer))
+                continue;
+
+            if (guildPlayer.GuildData is null)
+                continue;
+
+            if (guildPlayer.GuildData.Members.TryGetValue(player.Guid, out var onlineMember))
+            {
+                onlineMember.Online = true;
+                onlineMember.WorldId = player.Zone.Id;
+                onlineMember.ProfileId = player.ActiveProfileId;
+                onlineMember.ProfileRank = player.ActiveProfile.Rank;
+            }
+            else
+            {
+                guildPlayer.GuildData.Members[player.Guid] = new GuildMember
+                {
+                    Guid = player.Guid,
+                    Name = player.Name,
+                    Role = playerGuildMember.Role,
+                    Online = true,
+                    WorldId = player.Zone.Id,
+                    ProfileId = player.ActiveProfileId,
+                    ProfileRank = player.ActiveProfile.Rank
+                };
+            }
+
+            guildPlayer.SendTunneled(guildMemberStatusUpdatePacket);
+        }
     }
 
     private void SendReferenceData(Player player)

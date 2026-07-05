@@ -33,6 +33,7 @@ public static class BaseInventoryPacketHandler
             InventoryPacketEquippedRemove.OpCode => InventoryPacketEquippedRemoveHandler.HandlePacket(connection, reader.Span),
             InventoryPacketEquipByGuid.OpCode => InventoryPacketEquipByGuidHandler.HandlePacket(connection, reader.Span),
             InventoryPacketItemActionBarAssign.OpCode => InventoryPacketItemActionBarAssignHandler.HandlePacket(connection, reader.Span),
+            InventoryPacketItemActionBarAssignByItemRecord.OpCode => InventoryPacketItemActionBarAssignByItemRecordHandler.HandlePacket(connection, reader.Span),
             InventoryPacketEquipByItemRecord.OpCode => InventoryPacketEquipByItemRecordHandler.HandlePacket(connection, reader.Span),
             InventoryPacketUseStyleCard.OpCode => InventoryPacketUseStyleCardHandler.HandlePacket(connection, reader.Span),
             InventoryPacketPreviewStyleCard.OpCode => InventoryPacketPreviewStyleCardHandler.HandlePacket(connection, reader.Span),

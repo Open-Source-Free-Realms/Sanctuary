@@ -64,6 +64,8 @@ public class UdpConnection : PriorityQueueMember
     private UdpClockStamp LastSendTime;
     private UdpClockStamp LastReceiveTime;
     private UdpClockStamp LastPortAliveTime;
+    private UdpClockStamp FirstCorruptPacketTime;
+    private int ConsecutiveCorruptPackets;
 
     private byte[] MultiBufferData;
     private int MultiBufferOffset;
@@ -154,6 +156,8 @@ public class UdpConnection : PriorityQueueMember
         // makes it send out the first connect packet immediately (if we are in negotiating mode)
         LastPortAliveTime = LastSendTime = 0;
         LastReceiveTime = UdpManager.CachedClock;
+        FirstCorruptPacketTime = 0;
+        ConsecutiveCorruptPackets = 0;
         LastClockSyncTime = 0;
         DataHoldTime = 0;
         GettingTime = false;
@@ -684,6 +688,9 @@ public class UdpConnection : PriorityQueueMember
         if (Status != Status.Connected)
             return;
 
+        FirstCorruptPacketTime = 0;
+        ConsecutiveCorruptPackets = 0;
+
         UdpManager.IncrementApplicationPacketsReceived();
 
         ConnectionStats.ApplicationPacketsReceived++;
@@ -702,7 +709,17 @@ public class UdpConnection : PriorityQueueMember
 
         UdpManager.CallbackPacketCorrupt(this, data, reason);
 
-        InternalDisconnect(0, DisconnectReason.CorruptPacket);
+        if (FirstCorruptPacketTime == 0 || UdpManager.CachedClockElapsed(FirstCorruptPacketTime) > 10000)
+        {
+            FirstCorruptPacketTime = UdpManager.CachedClock;
+            ConsecutiveCorruptPackets = 1;
+            return;
+        }
+
+        ConsecutiveCorruptPackets++;
+
+        if (ConsecutiveCorruptPackets >= 3)
+            InternalDisconnect(0, DisconnectReason.CorruptPacket);
     }
 
     internal void ProcessCookedPacket(Span<byte> data)
@@ -1915,6 +1932,6 @@ public class UdpConnection : PriorityQueueMember
 
     public override string ToString()
     {
-        return EndPoint.ToString();
+        return $"{GetType().Name}#{ConnectCode:X8}";
     }
 }

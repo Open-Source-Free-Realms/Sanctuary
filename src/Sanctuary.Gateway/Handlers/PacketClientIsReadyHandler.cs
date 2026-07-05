@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Game;
+using Sanctuary.Gateway.Services;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
@@ -27,7 +28,22 @@ public static class PacketClientIsReadyHandler
     {
         _logger.LogTrace("Received {name} packet.", nameof(PacketClientIsReady));
 
-        connection.Player.Zone.OnClientIsReady(connection.Player);
+        try
+        {
+            connection.Player.Zone.OnClientIsReady(connection.Player);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Client ready initialization failed. PlayerGuid: {playerGuid}, CharacterName: {characterName}, Zone: {zone}, GuildGuid: {guildGuid}",
+                connection.Player.Guid,
+                connection.Player.Name,
+                connection.Player.Zone.Name,
+                connection.Player.GuildData?.Guid);
+
+            connection.Disconnect();
+        }
 
         return true;
     }

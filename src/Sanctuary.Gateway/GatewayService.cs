@@ -11,7 +11,9 @@ using Sanctuary.Core.Configuration;
 using Sanctuary.Database;
 using Sanctuary.Game;
 using Sanctuary.Packet.Common.Extensions;
+using Sanctuary.Gateway.Services;
 using Sanctuary.UdpLibrary.Enumerations;
+using System.Linq;
 
 namespace Sanctuary.Gateway;
 
@@ -27,6 +29,7 @@ public class GatewayService : BackgroundService
     private readonly IInteractionManager _interactionManager;
     private readonly IHostApplicationLifetime _hostApplicationLifetime;
     private readonly IDbContextFactory<DatabaseContext> _dbContextFactory;
+    private readonly BanStore _banStore;
 
     public GatewayService(
         ILogger<GatewayService> logger,
@@ -38,6 +41,7 @@ public class GatewayService : BackgroundService
         IResourceManager resourceManager,
         IInteractionManager interactionManager,
         IDbContextFactory<DatabaseContext> dbContextFactory,
+        BanStore banStore,
         IHostApplicationLifetime hostApplicationLifetime)
     {
         _logger = logger;
@@ -49,6 +53,7 @@ public class GatewayService : BackgroundService
         _resourceManager = resourceManager;
         _interactionManager = interactionManager;
         _dbContextFactory = dbContextFactory;
+        _banStore = banStore;
         _hostApplicationLifetime = hostApplicationLifetime;
     }
 
@@ -74,6 +79,7 @@ public class GatewayService : BackgroundService
         }
 
         // Load resources.
+  
         if (!_resourceManager.Load())
         {
             _logger.LogCritical("Cannot start {server}, failed to load resources.", nameof(GatewayServer));
@@ -82,6 +88,9 @@ public class GatewayService : BackgroundService
 
             return Task.CompletedTask;
         }
+
+        ItemActionBarService.ApplyCarouselDefinitionCompatibility(_resourceManager);
+
 
         // Load zones.
         if (!_zoneManager.Load())
@@ -107,7 +116,6 @@ public class GatewayService : BackgroundService
         _serviceProvider.ConfigurePacketHandlers();
 
         // Connect to the Login Server.
-
         var clientConnection = _client.EstablishConnection(_options.LoginGatewayAddress);
 
         if (clientConnection is null)
@@ -119,17 +127,64 @@ public class GatewayService : BackgroundService
             return Task.CompletedTask;
         }
 
-        _logger.LogInformation($"{nameof(GatewayServer)} started and is listening on port '{_options.Port}'.");
+        _logger.LogInformation("{server} started and is listening on port '{port}'.", nameof(GatewayServer), _options.Port);
 
         _server.OnStarted();
+
+        var nextBanSweepUtc = DateTime.UtcNow.AddSeconds(10);
 
         // Main server loop.
         while (!cancellationToken.IsCancellationRequested && clientConnection.Status != Status.Disconnected)
         {
             _server.GiveTime();
             _client.GiveTime();
+
+            if (DateTime.UtcNow >= nextBanSweepUtc)
+            {
+                nextBanSweepUtc = DateTime.UtcNow.AddSeconds(10);
+                RunBanSweep();
+            }
+
+            Thread.Sleep(1);
         }
 
         return Task.CompletedTask;
     }
+
+    private void RunBanSweep()
+{
+    try
+    {
+        _banStore.ReloadIfChanged();
+
+        var connections = _server.Connections.ToArray();
+
+        foreach (var connection in connections)
+        {
+            if (connection is null)
+                continue;
+
+            if (connection.Status == Status.Disconnected)
+                continue;
+
+            if (connection.UserId == 0)
+                continue;
+
+            if (_banStore.IsUserIdBanned(connection.UserId))
+            {
+                _logger.LogInformation(
+                    "Disconnecting banned user. UserId: {userId}, Username: {username}, Connection: {connection}",
+                    connection.UserId,
+                    connection.Username ?? string.Empty,
+                    connection);
+
+                connection.Disconnect();
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error during ban sweep.");
+    }
+}
 }

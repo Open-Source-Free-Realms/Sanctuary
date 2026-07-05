@@ -7,6 +7,7 @@
     <UserSecretsId>a8566dff-3d15-47ef-b515-7d41d8e1abee</UserSecretsId>
     <BaseOutputPath>$(SolutionDir)bin</BaseOutputPath>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <ContainerDevelopmentMode>Regular</ContainerDevelopmentMode>
   </PropertyGroup>
@@ -16,6 +17,7 @@
     <PackageReference Include="NLog" />
     <PackageReference Include="NLog.Extensions.Logging" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="System.IO.Pipelines" />
   </ItemGroup>
 
   <ItemGroup>
@@ -42,8 +44,14 @@
   <Target Name="CopyResources" AfterTargets="PostBuildEvent">
     <ItemGroup>
       <ResourceFiles Include="$(SolutionDir)Resources\**\*.*" />
+      <DataFiles Include="$(SolutionDir)Data\**\*.*" />
     </ItemGroup>
     <Copy SourceFiles="@(ResourceFiles)" DestinationFolder="$(OutputPath)Resources\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(DataFiles)" DestinationFolder="$(OutputPath)Data\%(RecursiveDir)" SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="CopySystemIoPipelines" AfterTargets="Build">
+    <Copy SourceFiles="$(NuGetPackageRoot)system.io.pipelines\9.0.9\lib\net9.0\System.IO.Pipelines.dll" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" />
   </Target>
 
 </Project>

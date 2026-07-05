@@ -40,23 +40,39 @@ public static class PacketTunneledClientWorldPacketHandler
         var handled = opCode switch
         {
             BaseCommandPacket.OpCode => BaseCommandPacketHandler.HandlePacket(connection, reader),
+            BaseCombatPacket.OpCode => BaseCombatPacketHandler.HandlePacket(connection, reader),
+            BaseAbilityPacket.OpCode => BaseAbilityPacketHandler.HandlePacket(connection, reader),
             PacketWorldTeleportRequest.OpCode => PacketWorldTeleportRequestHandler.HandlePacket(connection, packet.Payload),
             PacketBaseInGamePurchase.OpCode => PacketBaseInGamePurchaseHandler.HandlePacket(connection, reader),
             PacketSetLocale.OpCode => PacketSetLocaleHandler.HandlePacket(connection, packet.Payload),
             BaseLobbyGameDefinitionPacket.OpCode => BaseLobbyGameDefinitionPacketHandler.HandlePacket(connection, reader),
             BaseHousingPacket.OpCode => BaseHousingPacketHandler.HandlePacket(connection, reader),
+            BaseGuildPacket.OpCode => BaseGuildPacketHandler.HandlePacket(connection, reader),
             BaseFotomatPacket.OpCode => BaseFotomatPacketHandler.HandlePacket(connection, reader),
             WallOfDataBasePacket.OpCode => WallOfDataBasePacketHandler.HandlePacket(connection, reader),
             _ => false
         };
 
-#if DEBUG
         if (!handled)
         {
-            reader.Reset();
-            System.Diagnostics.Debug.WriteLine(reader.ReadTunneledPacketName(), "TunneledClientWorld");
+            var packetName = "Unknown";
+
+            try
+            {
+                reader.Reset();
+                packetName = reader.ReadTunneledPacketName();
+            }
+            catch
+            {
+                // Keep the original failure visible below.
+            }
+
+            _logger.LogDebug(
+                "{connection} received unhandled TunneledClientWorld packet. ( Packet: {packetName}, Data: {data} )",
+                connection,
+                packetName,
+                Convert.ToHexString(packet.Payload));
         }
-#endif
 
         return handled;
     }

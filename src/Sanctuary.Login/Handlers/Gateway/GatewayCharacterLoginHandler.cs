@@ -12,11 +12,13 @@ namespace Sanctuary.Login.Handlers;
 public static class GatewayCharacterLoginHandler
 {
     private static ILogger _logger = null!;
+    private static ILogger _serverEvents = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
         var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
         _logger = loggerFactory.CreateLogger(nameof(GatewayCharacterLoginHandler));
+        _serverEvents = loggerFactory.CreateLogger("ServerEvents");
     }
 
     public static bool HandlePacket(GatewayConnection connection, Span<byte> data)
@@ -30,6 +32,11 @@ public static class GatewayCharacterLoginHandler
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(GatewayCharacterLogin), packet);
 
         connection.OnlineCharacters.Add(packet.Id);
+
+        _serverEvents.LogInformation(
+            "Gateway marked character online. CharacterId: {characterId}, Gateway: {gateway}",
+            packet.Id,
+            connection.ServerAddress);
 
         return true;
     }

@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Game;
+using Sanctuary.Gateway.Services;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
@@ -31,8 +32,29 @@ public static class WallOfDataUIEventPacketHandler
             return false;
         }
 
-        _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(WallOfDataUIEventPacket), packet);
+        _logger.LogInformation(
+    "{connection} received WallOfData UI event. ( TableName: {tableName}, Callback: {callback}, Param: {param} )",
+    connection,
+    packet.TableName,
+    packet.Callback,
+    packet.Param);
+
+        if (IsMarketplaceOpenEvent(packet))
+        {
+            ItemActionBarService.ReplayOwnedCarouselItemsForMarketplaceOpen(connection, _resourceManager, _logger);
+
+            _logger.LogInformation(
+                "{connection} replayed owned quick-items after marketplace UI opened for carousel population.",
+                connection);
+        }
 
         return true;
+    }
+
+    private static bool IsMarketplaceOpenEvent(WallOfDataUIEventPacket packet)
+    {
+        return string.Equals(packet.TableName, "Marketplace", StringComparison.OrdinalIgnoreCase) ||
+            (string.Equals(packet.TableName, "GameDock", StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(packet.Callback, "Open Marketplace", StringComparison.OrdinalIgnoreCase));
     }
 }

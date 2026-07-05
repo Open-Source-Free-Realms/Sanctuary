@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Linq;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.IO;
+using Sanctuary.Gateway.Combat;
 using Sanctuary.Game;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
@@ -16,6 +17,7 @@ public static class CommandPacketSetProfileHandler
 {
     private static ILogger _logger = null!;
     private static IZoneManager _zoneManager = null!;
+    private static IResourceManager _resourceManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -23,6 +25,7 @@ public static class CommandPacketSetProfileHandler
         _logger = loggerFactory.CreateLogger(nameof(CommandPacketSetProfileHandler));
 
         _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
+        _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -33,7 +36,7 @@ public static class CommandPacketSetProfileHandler
             return false;
         }
 
-        _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(CommandPacketSetProfile), packet);
+        _logger.LogInformation("Received {name} packet. ( ProfileId: {profileId} )", nameof(CommandPacketSetProfile), packet.Id);
 
         var profile = connection.Player.Profiles.FirstOrDefault(x => x.Id == packet.Id);
 
@@ -56,6 +59,7 @@ public static class CommandPacketSetProfileHandler
         clientUpdatePacketActivateProfile.CompositeEffect = 4005; // PFX_Job_Swirl
 
         connection.SendTunneled(clientUpdatePacketActivateProfile);
+        CombatBootstrap.SendForProfile(connection, _resourceManager, profile.Id, _logger);
 
         var playerUpdatePacketEquippedItemsChange = new PlayerUpdatePacketEquippedItemsChange();
 
@@ -89,3 +93,4 @@ public static class CommandPacketSetProfileHandler
         return true;
     }
 }
+

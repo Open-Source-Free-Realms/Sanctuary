@@ -1,9 +1,10 @@
 [
   {
+    "Comment": "Blackspore Swamp Lot",
     "Id": 1,
     "NameId": 6514,
     "ZoneId": 1,
-    "Icon": 33439,
+    "Icon": 6844,
     "SpawnPosition": [444.3, 5.2, 429.3, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -14,10 +15,11 @@
     ]
   },
   {
+    "Comment": "Sunset Party Boat",
     "Id": 2,
     "NameId": 5103265,
     "ZoneId": 2,
-    "Icon": 47733,
+    "Icon": 8887,
     "SpawnPosition": [391, 32.45, 424.8, 0],
     "SpawnRotation": [0, 1, 0, 0 ],
     "BuildAreas": [
@@ -28,10 +30,11 @@
     ]
   },
   {
+    "Comment": "Bog Shore Lot",
     "Id": 3,
     "NameId": 69974,
     "ZoneId": 3,
-    "Icon": 33593,
+    "Icon": 6870,
     "SpawnPosition": [520.5, 0, 513.1, 0],
     "SpawnRotation": [0, 1, 0, 0],
     "BuildAreas": [
@@ -42,10 +45,11 @@
     ]
   },
   {
+    "Comment": "Briar Falls Lot",
     "Id": 4,
     "NameId": 69975,
     "ZoneId": 4,
-    "Icon": 33596,
+    "Icon": 6871,
     "SpawnPosition": [585.7, 0, 545.5, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -56,10 +60,11 @@
     ]
   },
   {
+    "Comment": "Briarwood Lot",
     "Id": 5,
     "NameId": 5184,
     "ZoneId": 5,
-    "Icon": 31260,
+    "Icon": 6877,
     "SpawnPosition": [442.2, 0, 431.7, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -70,10 +75,11 @@
     ]
   },
   {
+    "Comment": "Briarwall Towers Lot",
     "Id": 6,
     "NameId": 69971,
     "ZoneId": 6,
-    "Icon": 37055,
+    "Icon": 7500,
     "SpawnPosition": [566.9, 0, 557.1, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -84,6 +90,7 @@
     ]
   },
   {
+    "Comment": "Castle Test Lot (TO BE CHANGED)",
     "Id": 7,
     "NameId": 510215,
     "ZoneId": 7,
@@ -98,10 +105,11 @@
     ]
   },
   {
+    "Comment": "Shrouded Stairs Lot",
     "Id": 8,
     "NameId": 69965,
     "ZoneId": 8,
-    "Icon": 33638,
+    "Icon": 6846,
     "SpawnPosition": [445.6, -1.02, 431.4, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -112,10 +120,11 @@
     ]
   },
   {
+    "Comment": "Shrouded Glade Lot",
     "Id": 9,
     "NameId": 69964,
     "ZoneId": 9,
-    "Icon": 33445,
+    "Icon": 6846,
     "SpawnPosition": [445.6, -1.02, 431.4, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -126,10 +135,11 @@
     ]
   },
   {
+    "Comment": "Lonely Island Lot",
     "Id": 10,
     "NameId": 8322,
     "ZoneId": 10,
-    "Icon": 33121,
+    "Icon": 6788,
     "SpawnPosition": [368.1, 25.2, 426.2, 0],
     "SpawnRotation": [-0.63, -1, 0, 0],
     "BuildAreas": [
@@ -140,10 +150,11 @@
     ]
   },
   {
+    "Comment": "Seaside Lot",
     "Id": 14,
     "NameId": 8320,
     "ZoneId": 14,
-    "Icon": 32638,
+    "Icon": 6707,
     "SpawnPosition": [568.8, 50.8, 517.9, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -154,6 +165,7 @@
     ]
   },
   {
+    "Comment": "Bat Cavern Lot (Wrong Icon)",
     "Id": 15,
     "NameId": 69977,
     "ZoneId": 15,
@@ -168,10 +180,11 @@
     ]
   },
   {
+    "Comment": "Crystal Mines Lot",
     "Id": 16,
     "NameId": 69973,
     "ZoneId": 16,
-    "Icon": 33599,
+    "Icon": 6872,
     "SpawnPosition": [378.6, 8.8, 427.8, 0],
     "SpawnRotation": [1, 0, 0, 0],
     "BuildAreas": [
@@ -182,10 +195,11 @@
     ]
   },
   {
+    "Comment": "Shrouded Gloam Lot",
     "Id": 17,
     "NameId": 17432,
     "ZoneId": 17,
-    "Icon": 39401,
+    "Icon": 7891,
     "SpawnPosition": [509.5, -0.82, 495.5, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -196,6 +210,7 @@
     ]
   },
   {
+    "Comment": "Snow Days Lot (TO BE CHANGED)",
     "Id": 18,
     "NameId": 441205,
     "ZoneId": 18,
@@ -210,10 +225,11 @@
     ]
   },
   {
+    "Comment": "Snowhill Lot",
     "Id": 19,
     "NameId": 5185,
     "ZoneId": 19,
-    "Icon": 31266,
+    "Icon": 6441,
     "SpawnPosition": [428.4, -0.82, 419.8, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -224,10 +240,11 @@
     ]
   },
   {
+    "Comment": "Vale Stream Lot",
     "Id": 20,
     "NameId": 69976,
     "ZoneId": 20,
-    "Icon": 33617,
+    "Icon": 6877,
     "SpawnPosition": [573.1, 0, 561.6, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -238,10 +255,11 @@
     ]
   },
   {
+    "Comment": "Wugachug Lot",
     "Id": 21,
     "NameId": 69967,
     "ZoneId": 21,
-    "Icon": 33454,
+    "Icon": 6849,
     "SpawnPosition": [573.1, 0, 559.8, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -252,10 +270,11 @@
     ]
   },
   {
+    "Comment": "Blackspore Swamp House",
     "Id": 22,
     "NameId": 69966,
     "ZoneId": 22,
-    "Icon": 33439,
+    "Icon": 6897,
     "SpawnPosition": [639.77, 5, 557, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -266,6 +285,7 @@
     ]
   },
   {
+    "Comment": "Chromakey Zone (TO BE CHANGED)",
     "Id": 23,
     "NameId": 426811,
     "ZoneId": 23,
@@ -280,10 +300,11 @@
     ]
   },
   {
+    "Comment": "Apartment",
     "Id": 24,
     "NameId": 420151,
     "ZoneId": 24,
-    "Icon": 27226,
+    "Icon": 5651,
     "SpawnPosition": [63.2, 4.79, 54.81, 0],
     "SpawnRotation": [0, 1, 0, 0],
     "BuildAreas": [
@@ -294,6 +315,7 @@
     ]
   },
   {
+    "Comment": "Wilds Condo",
     "Id": 25,
     "NameId": 296,
     "ZoneId": 25,
@@ -308,10 +330,11 @@
     ]
   },
   {
+    "Comment": "Large Wilds House",
     "Id": 26,
     "NameId": 6290,
     "ZoneId": 26,
-    "Icon": 27229,
+    "Icon": 5652,
     "SpawnPosition": [444.9, -0.4, 405.5, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -322,10 +345,11 @@
     ]
   },
   {
+    "Comment": "Small Wilds House",
     "Id": 27,
     "NameId": 6289,
     "ZoneId": 27,
-    "Icon": 27232,
+    "Icon": 5653,
     "SpawnPosition": [792.74, 0, 762.4, 0],
     "SpawnRotation": [0, 1, 0, 0],
     "BuildAreas": [
@@ -336,10 +360,11 @@
     ]
   },
   {
+    "Comment": "Club House",
     "Id": 28,
     "NameId": 6775,
     "ZoneId": 28,
-    "Icon": 34759,
+    "Icon": 7000,
     "SpawnPosition": [560.9, 100, 552.2, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -350,10 +375,11 @@
     ]
   },
   {
+    "Comment": "Snowhill Lodge",
     "Id": 29,
-    "NameId": 404,
+    "NameId": 26345,
     "ZoneId": 29,
-    "Icon": 38416,
+    "Icon": 7724,
     "SpawnPosition": [434.6, -0.8, 421.4, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -364,10 +390,11 @@
     ]
   },
   {
+    "Comment": "Rumbledome Lot",
     "Id": 30,
     "NameId": 442333,
     "ZoneId": 30,
-    "Icon": 44468,
+    "Icon": 8358,
     "SpawnPosition": [511, 61.6, 416.2, 0],
     "SpawnRotation": [-0.65, 1, 0, 0],
     "BuildAreas": [
@@ -378,6 +405,7 @@
     ]
   },
   {
+    "Comment": "Sunstone Valley Lot (TO BE ADDED)",
     "Id": 31,
     "NameId": 394,
     "ZoneId": 31,
@@ -392,6 +420,7 @@
     ]
   },
   {
+    "Comment": "Sunstone Dam (TO BE ADDED)",
     "Id": 32,
     "NameId": 33944,
     "ZoneId": 32,
@@ -406,10 +435,11 @@
     ]
   },
   {
+    "Comment": "Briarwood Farm",
     "Id": 33,
     "NameId": 435461,
     "ZoneId": 33,
-    "Icon": 36591,
+    "Icon": 7406,
     "SpawnPosition": [1409, 0, 750.8, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -420,10 +450,11 @@
     ]
   },
   {
+    "Comment": "Wilds Farm",
     "Id": 34,
     "NameId": 5409,
     "ZoneId": 34,
-    "Icon": 35450,
+    "Icon": 7168,
     "SpawnPosition": [1409, 0, 750.8, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [

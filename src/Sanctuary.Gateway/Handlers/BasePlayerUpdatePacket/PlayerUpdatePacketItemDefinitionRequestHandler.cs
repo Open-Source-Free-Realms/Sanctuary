@@ -32,7 +32,10 @@ public static class PlayerUpdatePacketItemDefinitionRequestHandler
             return false;
         }
 
-        _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(PlayerUpdatePacketItemDefinitionRequest), packet);
+        _logger.LogInformation(
+            "{connection} received item definition request. ( Definition: {definition} )",
+            connection,
+            packet.Id);
 
         if (!_resourceManager.ClientItemDefinitions.TryGetValue(packet.Id, out var clientItemDefinition))
         {
@@ -47,6 +50,19 @@ public static class PlayerUpdatePacketItemDefinitionRequestHandler
         packet.Payload = writer.Buffer;
 
         connection.SendTunneled(packet);
+
+        _logger.LogInformation(
+            "{connection} sent requested item definition. ( Definition: {definition}, NameId: {nameId}, IconId: {iconId}, CategoryId: {categoryId}, Class: {class}, Type: {type}, ActivatableAbilityId: {abilityId}, ModelName: {modelName}, TextureAlias: {textureAlias} )",
+            connection,
+            clientItemDefinition.Id,
+            clientItemDefinition.NameId,
+            clientItemDefinition.Icon.Id,
+            clientItemDefinition.CategoryId,
+            clientItemDefinition.Class,
+            clientItemDefinition.Type,
+            clientItemDefinition.ActivatableAbilityId,
+            clientItemDefinition.ModelName,
+            clientItemDefinition.TextureAlias);
 
         return true;
     }

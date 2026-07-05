@@ -68,8 +68,8 @@ public class LoginService : BackgroundService
         // Register services on static packet handlers.
         _serviceProvider.ConfigurePacketHandlers();
 
-        _logger.LogInformation($"{nameof(LoginServer)} started and is listening on port '{_options.Port}'.");
-        _logger.LogInformation($"{nameof(GatewayServer)} started and is connecting to address '{_options.LoginGatewayPort}'.");
+        _logger.LogInformation("{server} started and is listening on port {port}.", nameof(LoginServer), _options.Port);
+        _logger.LogInformation("{server} started and is listening on port {port}.", nameof(GatewayServer), _options.LoginGatewayPort);
 
         // Main server loop.
         while (!cancellationToken.IsCancellationRequested)

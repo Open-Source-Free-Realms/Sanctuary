@@ -15,6 +15,8 @@ using Sanctuary.Gateway;
 using Sanctuary.UdpLibrary.Configuration;
 using Sanctuary.UdpLibrary.Enumerations;
 
+using Sanctuary.Gateway.Services;
+
 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
 
@@ -96,6 +98,11 @@ builder.ConfigureServices((hostBuilderContext, serviceCollection) =>
     serviceCollection.AddSingleton<IZoneManager, ZoneManager>();
     serviceCollection.AddSingleton<IResourceManager, ResourceManager>();
     serviceCollection.AddSingleton<IInteractionManager, InteractionManager>();
+
+    
+    serviceCollection.AddSingleton<BanStore>();
+    serviceCollection.AddSingleton<IpHistoryStore>();
+    serviceCollection.AddSingleton<IChatLogWriter, ChatLogWriter>();
 });
 
 builder.ConfigureLogging((hostBuilderContext, loggingBuilder) =>

@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -56,8 +57,16 @@ public static class CheckNamePacketHandler
         checkNameResponsePacket.Result = packet.Type switch
         {
             NameChangeType.Character => OnCheckCharacterName(connection, packet),
+            NameChangeType.Guild => OnCheckGuildName(connection, packet),
             _ => CheckNameResponse.Invalid
         };
+
+        _logger.LogTrace(
+            "Check name result. Type: {type}, Guid: {guid}, Name: \"{name}\", Result: {result}",
+            packet.Type,
+            packet.Guid,
+            packet.Name.FullName,
+            checkNameResponsePacket.Result);
 
         connection.SendTunneled(checkNameResponsePacket);
 
@@ -98,5 +107,53 @@ public static class CheckNamePacketHandler
             return CheckNameResponse.Taken;
 
         return CheckNameResponse.Available;
+    }
+
+    private static CheckNameResponse OnCheckGuildName(GatewayConnection connection, CheckNamePacket packet)
+    {
+        var guildName = NormalizeGuildName(packet.Name.FullName);
+
+        if (connection.Player.GuildData is null)
+            return CheckNameResponse.NotLeader;
+
+        if (!IsValidGuildName(guildName))
+            return CheckNameResponse.IncorrectLength;
+
+        using var dbContext = _dbContextFactory.CreateDbContext();
+
+        var guildGuid = connection.Player.GuildData.Guid;
+        var characterId = GuidHelper.GetPlayerId(connection.Player.Guid);
+        var role = dbContext.GuildMembers
+            .AsNoTracking()
+            .Where(x => x.GuildId == guildGuid && x.Id == characterId)
+            .Select(x => (int?)x.Role)
+            .SingleOrDefault();
+
+        if (role != 1)
+            return CheckNameResponse.NotLeader;
+
+        var normalizedGuildName = guildName.ToLower();
+        var taken = dbContext.Guilds.Any(x => x.Id != guildGuid && x.Name.ToLower() == normalizedGuildName);
+
+        if (taken)
+            return CheckNameResponse.Taken;
+
+        packet.Name.FirstName = guildName;
+        packet.Name.LastName = string.Empty;
+
+        return CheckNameResponse.Available;
+    }
+
+    private static string NormalizeGuildName(string? name)
+    {
+        return string.Join(' ', (name ?? string.Empty).Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries));
+    }
+
+    private static bool IsValidGuildName(string name)
+    {
+        if (name.Length is < 3 or > 32)
+            return false;
+
+        return name.All(c => char.IsLetterOrDigit(c) || c is ' ' or '\'' or '-');
     }
 }

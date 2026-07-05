@@ -1,0 +1,5 @@
+ability_id,launch_sha1,confidence,source
+0x131F,62601b357cd3,high,analysis_logs/ability_correlation_20260604/reconstructed_ability_candidates.csv
+0x1323,00fcabab4c81,high,analysis_logs/ability_correlation_20260604/reconstructed_ability_candidates.csv
+0x13C4,23ad2a2fd4dd,high,analysis_logs/ability_correlation_20260604/reconstructed_ability_candidates.csv
+0x13C5,992aa3e373b9,high,analysis_logs/ability_correlation_20260604/reconstructed_ability_candidates.csv

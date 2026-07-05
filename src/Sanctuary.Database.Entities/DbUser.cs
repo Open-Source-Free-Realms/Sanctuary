@@ -13,6 +13,7 @@ public sealed class DbUser
     public string? Session { get; set; }
     public DateTimeOffset? SessionCreated { get; set; }
 
+
     public int MaxCharacters { get; set; }
 
     public bool IsLocked { get; set; }

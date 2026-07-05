@@ -45,7 +45,7 @@ public static class LoginRequestHandler
 
         var loginReply = new LoginReply();
 
-        // Have we already logged-in?
+      
         if (connection.UserId > 0)
         {
             connection.Send(loginReply);
@@ -59,42 +59,47 @@ public static class LoginRequestHandler
 
         var user = dbContext.Users.SingleOrDefault(x => x.Session == packet.Session);
 
-        if (user is null
-#if !DEBUG
-            || !user.SessionCreated.HasValue
-#endif
-            )
+        if (user == null)
+        {
+            
+            System.Threading.Thread.Sleep(50);
+
+            user = dbContext.Users.SingleOrDefault(x => x.Session == packet.Session);
+        }
+
+        if (user is null || !user.SessionCreated.HasValue)
         {
             connection.Send(loginReply);
 
-            _logger.LogWarning("User tried to login with an invalid session. ( Session: {session} )", packet.Session);
+            _logger.LogWarning(
+                "Invalid session | Session: {session}",
+                packet.Session
+            );
 
             return true;
         }
 
-#if !DEBUG
-        if ((DateTimeOffset.UtcNow - user.SessionCreated.Value).TotalMinutes > 5)
+        var now = DateTimeOffset.UtcNow;
+
+        if ((now - user.SessionCreated.Value).TotalMinutes > 20)
         {
             connection.Send(loginReply);
 
-            _logger.LogWarning("User tried to login with an expired session. ( Session: {session}, SessionCreated: {sessionCreated} )", packet.Session, user.SessionCreated);
+            _logger.LogWarning(
+                "Expired session | Session: {session} | Created: {created}",
+                packet.Session,
+                user.SessionCreated
+            );
 
             return true;
         }
 
-        user.Session = null;
-        user.SessionCreated = null;
-#endif
+     
+        user.LastLogin = now;
 
-        user.LastLogin = DateTimeOffset.UtcNow;
+        dbContext.SaveChanges();
 
-        if (dbContext.SaveChanges() <= 0)
-        {
-            connection.Send(loginReply);
-
-            return true;
-        }
-
+        
         if (_options.IsLocked && !user.IsAdmin)
         {
             loginReply.Status = 2;

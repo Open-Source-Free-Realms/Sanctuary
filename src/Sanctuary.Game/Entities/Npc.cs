@@ -1,9 +1,11 @@
 ﻿using System.Collections.Concurrent;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
 using Sanctuary.Game.Zones;
+using Sanctuary.Game.Interactions;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 
@@ -39,7 +41,13 @@ public class Npc : IEntity
 
     public float Scale { get; set; }
 
-    /// <summary>
+    
+
+    // --- Command-spawn metadata (used for interaction permissions)
+    public bool IsCommandSpawned { get; set; }
+    public ulong SpawnedByGuid { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+/// <summary>
     /// 0 - Hostile
     /// 1 - Neutral
     /// 2 - Ally
@@ -61,6 +69,42 @@ public class Npc : IEntity
 
     public byte CursorId { get; set; }
 
+    public bool HasHealthBar { get; set; }
+    public int MaxHitpoints { get; set; }
+    public int CurrentHitpoints { get; set; }
+
+    public int MaxHealth
+    {
+        get => MaxHitpoints;
+        set => MaxHitpoints = value;
+    }
+
+    public int Health
+    {
+        get => CurrentHitpoints;
+        set => CurrentHitpoints = value;
+    }
+
+    public bool ShowHealthBar
+    {
+        get => HasHealthBar;
+        set => HasHealthBar = value;
+    }
+
+    public bool IsHostile => Disposition == 0;
+    public bool IsDamageable => MaxHitpoints > 0;
+    public bool IsAlive => !IsDamageable || CurrentHitpoints > 0;
+
+    public bool ApplyDamage(int amount)
+    {
+        if (!IsAlive)
+            return false;
+
+        CurrentHitpoints = Math.Max(0, CurrentHitpoints - amount);
+
+        return CurrentHitpoints == 0;
+    }
+
     // public NotificationInfo? Notification { get; set; }
 
     public List<CharacterAttachmentData> Attachments { get; set; } = [];
@@ -75,8 +119,76 @@ public class Npc : IEntity
     #region Events
 
     public void OnInteract(Player player)
+{
+    if (!IsInteractable)
+        return;
+
+    var listPacket = new CommandPacketInteractionList();
+    listPacket.List.Guid = Guid;
+
+    if (EnterHeweyEscapeInteraction.IsHeweyEscapeMarker(this))
     {
+        var encounterDetails = new EncounterDetailsResponsePacket
+        {
+            EncounterType = 7,
+            EncounterId = 20103,
+            NameId = NameId != 0 ? NameId : 102010,
+            DescriptionId = 0,
+            Difficulty = 1,
+            DetailImageId = 34069,
+            ThumbnailImageId = 34070,
+            RewardPreviewBundleId = 0
+        };
+
+        player.SendTunneled(new EncounterRunningListResponsePacket
+        {
+            Encounters = { encounterDetails }
+        });
+        player.SendTunneled(encounterDetails);
+        player.SendTunneled(new ActivityPacketListOfActivities
+        {
+            Activities =
+            {
+                new()
+                {
+                    Id = 20103,
+                    DisplayNameId = NameId != 0 ? NameId : 102010,
+                    DisplayDescriptionId = SubTextNameId,
+                    NameId = NameId != 0 ? NameId : 102010,
+                    DescriptionId = SubTextNameId,
+                    Category = 1,
+                    ImageSetId = ImageSetId != 0 ? ImageSetId : 4199,
+                    ActivityPositionId = 20103,
+                    CanPlayerJoin = 1,
+                    Difficulty = 1,
+                    AppSystemId = 1,
+                    DetailImageFilename = "heweys_escape_detail.dds",
+                    ThumbnailImageFilename = "heweys_escape_thumb.dds",
+                    MinigameDetail = 1
+                }
+            }
+        });
+        player.SendTunneled(new ExecuteScriptPacket
+        {
+            Script = "MinigameDetail.Show"
+        });
+        player.SendTunneled(new ExecuteScriptPacket
+        {
+            Script = "MinigameDetail.Populate",
+            Params = { 20103 }
+        });
+        return;
     }
+
+    // Keep Inspect (shows menu + inspect option)
+    listPacket.List.Interactions.Add(InspectInteraction.Data);
+
+    // Add Remove button ONLY for the spawner on command-spawned NPCs
+            if (player.IsAdmin)
+            listPacket.List.Interactions.Add(RemoveNpcInteraction.Data);
+
+        player.SendTunneled(listPacket);
+}
 
     public virtual void OnAddVisibleNpcs(params IEnumerable<Npc> npcs)
     {
@@ -212,7 +324,7 @@ public class Npc : IEntity
             Unknown38 = default,
             Unknown39 = default,
             Unknown40 = default,
-            Unknown41 = default,
+            Unknown41 = HasHealthBar,
             Unknown42 = default,
 
             HasTilt = default,
@@ -304,12 +416,21 @@ public class Npc : IEntity
     #endregion
 
     public virtual void Dispose()
+{
+    // Force-remove this NPC from every player currently in the zone.
+    foreach (var player in Zone.Players)
     {
-        foreach (var visiblePlayer in VisiblePlayers)
-            visiblePlayer.Value.OnRemoveVisibleNpcs([this]);
-
-        ZoneTile.Entities.Remove(Guid, out _);
-
-        Zone.TryRemoveNpc(Guid);
+        player.OnRemoveVisibleNpcs([this]);
     }
+
+    // Clean up NPC-to-player visibility tracking too.
+    foreach (var visiblePlayer in VisiblePlayers.Values)
+    {
+        OnRemoveVisiblePlayers([visiblePlayer]);
+    }
+
+    ZoneTile.Entities.Remove(Guid, out _);
+    Zone.TryRemoveNpc(Guid);
 }
+}
+

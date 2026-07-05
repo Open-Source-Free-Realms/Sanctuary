@@ -60,6 +60,7 @@ internal class UdpReliableChannel
     {
         public UdpClockStamp FirstTimeStamp;
         public UdpClockStamp LastTimeStamp;
+        public long ReliableId;
         public LogicalPacket? Parent;
         public int? DataPtr;
         public int DataLen;
@@ -461,7 +462,8 @@ internal class UdpReliableChannel
                             // if we have queue space
                             if (readyPtr < readyEnd)
                             {
-                                ReadyQueue[readyPtr++] = entry;
+                                ReadyQueue[readyPtr] = entry;
+                                readyPtr++;
                             }
                             else
                             {
@@ -513,9 +515,7 @@ internal class UdpReliableChannel
                     if (entry.DataPtr.Value != 0 || entry.DataLen != entry.Parent.GetDataLen())
                         fragment = true;
 
-                    // we can calculate what our reliableId should be based on our position in the array
-                    // need to handle the case where we wrap around the end of the array
-                    var reliableId = ReliableOutgoingPendingId + (readyWalk - 1);
+                    var reliableId = entry.ReliableId;
 
                     // prep the actual packet and send it
                     buf[0] = 0;
@@ -888,6 +888,7 @@ internal class UdpReliableChannel
             entry.Parent = LogicalPacketList[0];
             entry.FirstTimeStamp = 0;
             entry.LastTimeStamp = 0;
+            entry.ReliableId = ReliableOutgoingId;
 
             // calculate how much we can send based on our starting position (mFragmentNextPos) in the logical packet.
             // if we can't send it the rest of data to end of packet, then send the fragment portion and addref, otherwise send the whole thing and pop the logical packet

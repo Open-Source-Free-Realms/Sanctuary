@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Docker Compose": {
+      "commandName": "DockerCompose",
+      "commandVersion": "1.0",
+      "serviceActions": {
+        "sanctuary.gateway": "StartDebugging",
+        "sanctuary.login": "StartDebugging"
+      }
+    }
+  }
+}

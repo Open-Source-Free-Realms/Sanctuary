@@ -3,6 +3,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using Sanctuary.Gateway.Services;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
@@ -29,12 +30,6 @@ public static class ClientHousingPacketSetEditModeHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(ClientHousingPacketSetEditMode), packet);
 
-        var housingPacketUpdateHouseInfo = new HousingPacketUpdateHouseInfo();
-
-        housingPacketUpdateHouseInfo.InEditMode = packet.InEditMode;
-
-        connection.SendTunneled(housingPacketUpdateHouseInfo);
-
-        return true;
+        return HousingService.SetEditMode(connection, packet.InEditMode);
     }
 }

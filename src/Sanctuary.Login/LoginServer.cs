@@ -30,7 +30,10 @@ public class LoginServer : UdpManager<LoginConnection>
 
     public override bool OnConnectRequest(UdpConnection udpConnection)
     {
-        _logger.LogInformation("{connection} connected.", udpConnection);
+        _logger.LogInformation(
+            "{connection} connected from {ip}.",
+            udpConnection,
+            udpConnection.EndPoint.Address);
 
         return true;
     }

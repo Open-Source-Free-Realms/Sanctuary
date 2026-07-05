@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
+using Sanctuary.Gateway.Combat;
 using Sanctuary.Game;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -53,6 +54,17 @@ public static class InventoryPacketEquipByGuidHandler
             _logger.LogWarning("User tried to equip unknown item definition. {guid} {definition}", packet.Guid, clientItem.Definition);
             return true;
         }
+
+        _logger.LogInformation(
+            "Equip request resolved item. ( ProfileId: {profileId}, Guid: {guid}, Definition: {definition}, Class: {class}, Slot: {slot}, ActivatableAbilityId: {activatableAbilityId}, PassiveAbilityId: {passiveAbilityId}, Abilities: {abilities} )",
+            packet.ProfileId,
+            packet.Guid,
+            clientItem.Definition,
+            clientItemDefinition.Class,
+            clientItemDefinition.Slot,
+            clientItemDefinition.ActivatableAbilityId,
+            clientItemDefinition.PassiveAbilityId,
+            string.Join(", ", clientItemDefinition.Abilities.Select(x => $"slot={x.Slot}/id={x.Id}/unk={x.Unknown}/icon={x.IconId}")));
 
         var profile = connection.Player.Profiles.SingleOrDefault(x => x.Id == packet.ProfileId);
 
@@ -134,6 +146,7 @@ public static class InventoryPacketEquipByGuidHandler
         clientUpdatePacketEquipItem.Equip = true;
 
         connection.SendTunneled(clientUpdatePacketEquipItem);
+        CombatBootstrap.SendForProfile(connection, _resourceManager, packet.ProfileId, _logger);
 
         var playerUpdatePacketEquipItemChange = new PlayerUpdatePacketEquipItemChange();
 
@@ -230,3 +243,4 @@ public static class InventoryPacketEquipByGuidHandler
         return true;
     }
 }
+

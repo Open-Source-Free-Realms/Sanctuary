@@ -88,20 +88,35 @@ public static class CommandPacketConfirmFriendResponseHandler
         if (inviterDbCharacter is null || inviteeDbCharacter is null)
             return;
 
-        inviterDbCharacter.Friends.Add(new DbFriend
-        {
-            FriendCharacterId = inviteeDbCharacter.Id
-        });
+        var inviterAlreadyHasInvitee = dbContext.Friends.Any(x =>
+            x.CharacterId == inviterDbCharacter.Id &&
+            x.FriendCharacterId == inviteeDbCharacter.Id);
 
-        inviteeDbCharacter.Friends.Add(new DbFriend
-        {
-            FriendCharacterId = inviterDbCharacter.Id
-        });
+        var inviteeAlreadyHasInviter = dbContext.Friends.Any(x =>
+            x.CharacterId == inviteeDbCharacter.Id &&
+            x.FriendCharacterId == inviterDbCharacter.Id);
 
-        if (dbContext.SaveChanges() <= 0)
+        if (!inviterAlreadyHasInvitee)
+        {
+            inviterDbCharacter.Friends.Add(new DbFriend
+            {
+                FriendCharacterId = inviteeDbCharacter.Id
+            });
+        }
+
+        if (!inviteeAlreadyHasInviter)
+        {
+            inviteeDbCharacter.Friends.Add(new DbFriend
+            {
+                FriendCharacterId = inviterDbCharacter.Id
+            });
+        }
+
+        if (dbContext.ChangeTracker.HasChanges() && dbContext.SaveChanges() <= 0)
             return;
 
         // Inviter
+        if (!inviter.Friends.Any(x => x.Guid == invitee.Guid))
         {
             var inviterFriendData = new FriendData
             {
@@ -135,6 +150,7 @@ public static class CommandPacketConfirmFriendResponseHandler
         }
 
         // Invitee
+        if (!invitee.Friends.Any(x => x.Guid == inviter.Guid))
         {
             var inviteeFriendData = new FriendData
             {

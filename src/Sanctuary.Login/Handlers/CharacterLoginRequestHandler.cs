@@ -19,6 +19,7 @@ namespace Sanctuary.Login.Handlers;
 public static class CharacterLoginRequestHandler
 {
     private static ILogger _logger = null!;
+    private static ILogger _serverEvents = null!;
     private static GatewayServer _gatewayServer = null!;
     private static LoginServerOptions _options = null!;
     private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
@@ -27,6 +28,7 @@ public static class CharacterLoginRequestHandler
     {
         var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
         _logger = loggerFactory.CreateLogger(nameof(CharacterLoginRequestHandler));
+        _serverEvents = loggerFactory.CreateLogger("ServerEvents");
 
         _gatewayServer = serviceProvider.GetRequiredService<GatewayServer>();
         _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
@@ -77,16 +79,27 @@ public static class CharacterLoginRequestHandler
             return true;
         }
 
-        var ticket = Guid.NewGuid();
+        Guid ticket;
 
-        character.Ticket = ticket;
-        character.LastLogin = DateTimeOffset.UtcNow;
-
-        if (dbContext.SaveChanges() <= 0)
+        try
         {
-            characterLoginReply.Status = 6;
+            ticket = Guid.NewGuid();
 
+            character.Ticket = ticket;
+            character.LastLogin = DateTimeOffset.UtcNow;
+
+            dbContext.SaveChanges();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to save character login ticket to database. ( UserId: {userId}, CharacterId: {characterId} )",
+                connection.UserId,
+                character.Id);
+
+            characterLoginReply.Status = 6;
             connection.Send(characterLoginReply);
+
+            return true;
         }
 
         // TODO: Client currently doesn't let the user pick a server so default to the first one.
@@ -127,6 +140,15 @@ public static class CharacterLoginRequestHandler
         characterLoginReply.Payload = clientCharacterData.Serialize();
 
         connection.Send(characterLoginReply);
+
+        var characterName = $"{character.FirstName} {character.LastName}".Trim();
+
+        _serverEvents.LogInformation(
+            "Player selected character. UserId: {userId}, Character: \"{characterName}\", IP: {ip}, Gateway: {gateway}",
+            connection.UserId,
+            characterName,
+            connection.EndPoint.Address,
+            gatewayServer.ServerAddress);
 
         return true;
     }

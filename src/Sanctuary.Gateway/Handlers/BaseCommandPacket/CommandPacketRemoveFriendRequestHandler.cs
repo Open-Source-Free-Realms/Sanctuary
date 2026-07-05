@@ -11,6 +11,7 @@ using Sanctuary.Game;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
+using Sanctuary.Packet.Common.Chat;
 
 namespace Sanctuary.Gateway.Handlers;
 
@@ -40,49 +41,64 @@ public static class CommandPacketRemoveFriendRequestHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(CommandPacketRemoveFriendRequest), packet);
 
-        Handle(connection, packet.Name);
-
-        return true;
-    }
-
-    public static void Handle(GatewayConnection connection, NameData name)
-    {
         using var dbContext = _dbContextFactory.CreateDbContext();
 
-        var dbCharacterToRemove = dbContext.Characters
-            .AsNoTracking()
-            .Include(x => x.Friends)
-                .ThenInclude(x => x.FriendCharacter)
-            .FirstOrDefault(x => x.FullName == name.FullName);
+        var requesterCharacterId = GuidHelper.GetPlayerId(connection.Player.Guid);
 
+        var dbCharacterToRemove = dbContext.Characters.FirstOrDefault(x => x.FullName == packet.Name.FullName);
         if (dbCharacterToRemove is null)
-            return;
-
-        var dbFriendsToRemove = dbContext.Friends.Where(x => (x.CharacterId == dbCharacterToRemove.Id &&
-                                                              x.FriendCharacterId == GuidHelper.GetPlayerId(connection.Player.Guid)) ||
-                                                             (x.FriendCharacterId == dbCharacterToRemove.Id &&
-                                                             x.CharacterId == GuidHelper.GetPlayerId(connection.Player.Guid)));
-
-        if (dbFriendsToRemove.ExecuteDelete() <= 0)
-            return;
-
-        var dbCharacterToRemoveGuid = GuidHelper.GetPlayerGuid(dbCharacterToRemove.Id);
-
-        connection.Player.Friends.RemoveAll(x => x.Guid == dbCharacterToRemoveGuid);
-
-        connection.Player.SendTunneled(new FriendRemovePacket
         {
-            Guid = GuidHelper.GetPlayerGuid(dbCharacterToRemoveGuid)
+            SendSystemMessage(connection, "Player not found.");
+            return true;
+        }
+
+        var targetCharacterId = dbCharacterToRemove.Id;
+        var targetGuid = GuidHelper.GetPlayerGuid(targetCharacterId);
+
+        // Delete both directions from the Friends table.
+        var removed = dbContext.Friends
+            .Where(x =>
+                (x.CharacterId == requesterCharacterId && x.FriendCharacterId == targetCharacterId) ||
+                (x.CharacterId == targetCharacterId && x.FriendCharacterId == requesterCharacterId))
+            .ExecuteDelete();
+
+        if (removed <= 0)
+        {
+            SendSystemMessage(connection, "That player is not on your friends list.");
+            return true;
+        }
+
+        // Update the requester's in-memory friends list.
+        connection.Player.Friends.RemoveAll(x => x.Guid == targetGuid);
+
+        // If the other player is online, update their in-memory list too.
+        if (_zoneManager.TryGetPlayer(targetGuid, out var targetPlayer))
+            targetPlayer.Friends.RemoveAll(x => x.Guid == connection.Player.Guid);
+
+        // Remove from the client UI immediately.
+        connection.SendTunneled(new FriendRemovePacket
+        {
+            Guid = targetGuid
         });
 
-        if (_zoneManager.TryGetPlayer(dbCharacterToRemoveGuid, out var player))
+        // If the other player is online, remove requester from their UI too.
+        if (_zoneManager.TryGetPlayer(targetGuid, out targetPlayer))
         {
-            player.Friends.RemoveAll(x => x.Guid == connection.Player.Guid);
-
-            player.SendTunneled(new FriendRemovePacket
+            targetPlayer.SendTunneled(new FriendRemovePacket
             {
                 Guid = connection.Player.Guid
             });
         }
+
+        return true;
+    }
+
+    private static void SendSystemMessage(GatewayConnection connection, string message)
+    {
+        connection.Player.SendTunneled(new PacketChat
+        {
+            Channel = ChatChannel.System,
+            Message = message
+        });
     }
 }

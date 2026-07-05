@@ -25,10 +25,13 @@ public sealed class Player : ClientPcData, IEntity
 
     public bool Visible { get; set; }
 
+
     public IZone Zone { get; set; }
     public ZoneTile ZoneTile { get; private set; } = ZoneTile.Empty;
     public ConcurrentDictionary<ulong, Npc> VisibleNpcs { get; } = [];
     public ConcurrentDictionary<ulong, Player> VisiblePlayers { get; } = [];
+
+
 
     private int ZoneAreaId { get; set; }
 
@@ -36,7 +39,9 @@ public sealed class Player : ClientPcData, IEntity
     public int ChatBubbleBackgroundColor { get; set; }
     public int ChatBubbleSize { get; set; }
 
-    public ClientPcProfile ActiveProfile => Profiles.Single(x => x.Id == ActiveProfileId);
+    public ClientPcProfile ActiveProfile => Profiles.FirstOrDefault(x => x.Id == ActiveProfileId)
+        ?? Profiles.FirstOrDefault()
+        ?? new ClientPcProfile { Id = ActiveProfileId };
 
     public Mount? Mount { get; set; }
 
@@ -45,11 +50,18 @@ public sealed class Player : ClientPcData, IEntity
 
     public ConcurrentDictionary<ChatChannel, bool> ChatChannelStatus { get; set; } = [];
 
+    public ConcurrentDictionary<int, int> ItemActionBarSlots { get; } = [];
+
     public int StationCash { get; set; }
+    public bool IsAdmin { get; set; }
     public List<CoinStoreTransactionRecord> CoinStoreTransactions { get; set; } = [];
+
+    public GuildData? GuildData { get; set; }
 
     public Vector4 StartingZonePosition { get; set; }
     public Quaternion StartingZoneRotation { get; set; }
+    public Vector4 LastGroundedPosition { get; private set; }
+    public bool HasLastGroundedPosition { get; private set; }
 
     public Player(BaseZone zone, UdpConnection connection, IResourceManager resourceManager)
     {
@@ -125,8 +137,19 @@ public sealed class Player : ClientPcData, IEntity
 
     public void UpdatePosition(Vector4 position, Quaternion rotation)
     {
+        UpdatePosition(position, rotation, updateGroundedPosition: true);
+    }
+
+    public void UpdatePosition(Vector4 position, Quaternion rotation, bool updateGroundedPosition)
+    {
         Position = position;
         Rotation = rotation;
+
+        if (updateGroundedPosition)
+        {
+            LastGroundedPosition = position;
+            HasLastGroundedPosition = true;
+        }
 
         if (Visible)
         {
@@ -153,7 +176,7 @@ public sealed class Player : ClientPcData, IEntity
         if (Zone == zone)
             return;
 
-        if (Zone is StartingZone)
+        if (Zone is StartingZone && Zone is not CombatInstanceZone)
         {
             StartingZonePosition = Position;
             StartingZoneRotation = Rotation;
@@ -260,9 +283,11 @@ public sealed class Player : ClientPcData, IEntity
             var playerUpdatePacketAddNpc = npc.GetAddNpcPacket();
 
             SendTunneled(playerUpdatePacketAddNpc);
+
+            VisibleNpcs.TryAdd(npc.Guid, npc);
         }
 
-        /* var playerUpdatePacketNpcRelevance = new PlayerUpdatePacketNpcRelevance();
+        var playerUpdatePacketNpcRelevance = new PlayerUpdatePacketNpcRelevance();
 
         foreach (var npc in npcs)
         {
@@ -272,7 +297,7 @@ public sealed class Player : ClientPcData, IEntity
             playerUpdatePacketNpcRelevance.Entries.Add(new PlayerUpdatePacketNpcRelevance.Entry
             {
                 Guid = npc.Guid,
-                HasCursor = true,
+                Unknown = true,
                 CursorId = npc.CursorId,
                 Unknown2 = false
             });
@@ -281,7 +306,7 @@ public sealed class Player : ClientPcData, IEntity
         if (playerUpdatePacketNpcRelevance.Entries.Count > 0)
             SendTunneled(playerUpdatePacketNpcRelevance);
 
-        var playerUpdatePacketAddNotifications = new PlayerUpdatePacketAddNotifications();
+        /* var playerUpdatePacketAddNotifications = new PlayerUpdatePacketAddNotifications();
 
         foreach (var npc in npcs)
         {
@@ -383,6 +408,9 @@ public sealed class Player : ClientPcData, IEntity
             commandPacketInteractionList.List.Interactions.Add(IgnoreInteraction.Data);
         }
 
+        if (GuildData is null && GuildInviteInteraction.CanInvite(player))
+            commandPacketInteractionList.List.Interactions.Add(GuildInviteInteraction.Data);
+
         player.SendTunneled(commandPacketInteractionList);
     }
 
@@ -421,6 +449,18 @@ public sealed class Player : ClientPcData, IEntity
         }
 
         return list;
+    }
+
+    public int GetEquippedWeaponDefinitionId()
+    {
+        const int WeaponSlot = 7;
+
+        if (!ActiveProfile.Items.TryGetValue(WeaponSlot, out var profileItem))
+            return 0;
+
+        var clientItem = Items.FirstOrDefault(x => x.Id == profileItem.Id);
+
+        return clientItem?.Definition ?? 0;
     }
 
     public CharacterAttachmentData? GetAttachment(int slot)
@@ -517,6 +557,9 @@ public sealed class Player : ClientPcData, IEntity
             Debug.WriteLine($"AddPc: {Name} {Guid} | {Mount.Guid} {Mount.Seat} {Mount.QueuePosition}");
         }
 
+        if (GuildData is not null)
+            packet.Guilds.Add(0, GuildData.Guid);
+
         return packet;
     }
 
@@ -569,4 +612,182 @@ public sealed class Player : ClientPcData, IEntity
 
         Zone.TryRemovePlayer(Guid);
     }
+
+    // Spawns an NPC at the player's position/rotation.
+    // Chat: !spawnnpc <nameId> <modelId> [scale] [textureAlias...]
+    public Npc? SpawnNpc(
+        int nameId,
+        int modelId,
+        float scale = 1.0f,
+        string? textureAlias = null,
+        Vector4? position = null,
+        Quaternion? rotation = null,
+        int compositeEffectId = 0,
+        int animationId = 1)
+    {
+        if (Zone is null)
+            return null;
+
+        if (!Zone.TryCreateNpc(out var npc))
+            return null;
+
+        npc.Visible = true;
+        npc.IsInteractable = true;
+
+        npc.NameId = nameId;
+        npc.ModelId = modelId;
+
+        npc.TextureAlias = textureAlias ?? string.Empty;
+
+        npc.Scale = (scale <= 0f) ? 1.0f : scale;
+        npc.CompositeEffectId = compositeEffectId;
+        npc.Animation = animationId;
+
+        npc.IsCommandSpawned = true;
+        npc.SpawnedByGuid = this.Guid;
+        npc.CreatedAtUtc = DateTime.UtcNow;
+
+        npc.UpdatePosition(position ?? Position, rotation ?? Rotation);
+
+        if (npc.ZoneTile == ZoneTile.Empty)
+        {
+            Zone.TryRemoveNpc(npc.Guid);
+            return null;
+        }
+
+        return npc;
+    }
+    public int ImportNpcsFromJson(string path, int count = int.MaxValue, int offset = 0)
+    {
+        if (Zone is null || !System.IO.File.Exists(path))
+            return 0;
+
+        var json = System.IO.File.ReadAllText(path);
+        var list = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.JsonElement>(json);
+
+        if (list.ValueKind != System.Text.Json.JsonValueKind.Array)
+            return 0;
+
+        int imported = 0;
+        int index = 0;
+
+        foreach (var npcData in list.EnumerateArray())
+        {
+            if (index++ < offset)
+                continue;
+
+            if (imported >= count)
+                break;
+
+            if (!Zone.TryCreateNpc(out var npc))
+                continue;
+
+            npc.Visible = true;
+            npc.IsInteractable = true;
+
+            if (npcData.TryGetProperty("NameId", out var nameId))
+                npc.NameId = nameId.GetInt32();
+
+            if (npcData.TryGetProperty("ModelId", out var modelId))
+                npc.ModelId = modelId.GetInt32();
+            else if (npcData.TryGetProperty("Model Id", out var modelId2))
+                npc.ModelId = modelId2.GetInt32();
+
+            if (npcData.TryGetProperty("Name", out var name) && name.ValueKind == System.Text.Json.JsonValueKind.String)
+                npc.Name = name.GetString();
+
+            if (npcData.TryGetProperty("TextureAlias", out var tex) && tex.ValueKind == System.Text.Json.JsonValueKind.String)
+                npc.TextureAlias = tex.GetString();
+            else if (npcData.TryGetProperty("Texture Alias", out var tex2) && tex2.ValueKind == System.Text.Json.JsonValueKind.String)
+                npc.TextureAlias = tex2.GetString();
+
+            npc.Scale = 1.0f;
+            npc.IsCommandSpawned = true;
+            npc.SpawnedByGuid = this.Guid;
+            npc.CreatedAtUtc = System.DateTime.UtcNow;
+
+            float px = npcData.TryGetProperty("PositionX", out var p1) ? p1.GetSingle() : npcData.GetProperty("Position X").GetSingle();
+            float py = npcData.TryGetProperty("PositionY", out var p2) ? p2.GetSingle() : npcData.GetProperty("Position Y").GetSingle();
+            float pz = npcData.TryGetProperty("PositionZ", out var p3) ? p3.GetSingle() : npcData.GetProperty("Position Z").GetSingle();
+
+            float rx = npcData.TryGetProperty("RotationX", out var r1) ? r1.GetSingle() : npcData.GetProperty("Rotation X").GetSingle();
+            float ry = npcData.TryGetProperty("RotationY", out var r2) ? r2.GetSingle() : (npcData.TryGetProperty("Rotation Y", out var r2b) ? r2b.GetSingle() : 0f);
+
+            float rz = 0f;
+            if (npcData.TryGetProperty("RotationZ", out var r3))
+                rz = r3.ValueKind == System.Text.Json.JsonValueKind.String ? float.Parse(r3.GetString() ?? "0", System.Globalization.CultureInfo.InvariantCulture) : r3.GetSingle();
+            else if (npcData.TryGetProperty("Rotation Z", out var r3b))
+                rz = r3b.ValueKind == System.Text.Json.JsonValueKind.String ? float.Parse(r3b.GetString() ?? "0", System.Globalization.CultureInfo.InvariantCulture) : r3b.GetSingle();
+
+            npc.UpdatePosition(
+                new System.Numerics.Vector4(px, py, pz, 1f),
+                new System.Numerics.Quaternion(rx, ry, rz, 1f)
+            );
+
+            if (npc.ZoneTile == ZoneTile.Empty)
+            {
+                Zone.TryRemoveNpc(npc.Guid);
+                continue;
+            }
+
+            imported++;
+        }
+
+        return imported;
+    }
+
+    public int ImportNpcsFromJsonFiles(string directory, int count = int.MaxValue, int offset = 0)
+    {
+        if (!System.IO.Directory.Exists(directory))
+            return 0;
+
+        int imported = 0;
+
+        foreach (var file in System.IO.Directory.GetFiles(directory, "*.json"))
+        {
+            var importedFromFile = ImportNpcsFromJson(file, count, offset);
+            imported += importedFromFile;
+        }
+
+        return imported;
+    }
+
+    public int BackupCommandSpawnedNpcsToJson(string path)
+    {
+        if (Zone is null)
+            return 0;
+
+        var npcs = Zone.Npcs
+            .Where(n => n.IsCommandSpawned)
+            .Select(n => new
+            {
+                n.NameId,
+                n.Name,
+                n.ModelId,
+                n.TextureAlias,
+                PositionX = n.Position.X,
+                PositionY = n.Position.Y,
+                PositionZ = n.Position.Z,
+                RotationX = n.Rotation.X,
+                RotationY = n.Rotation.Y,
+                RotationZ = n.Rotation.Z,
+                n.Scale
+            })
+            .ToList();
+
+        var json = System.Text.Json.JsonSerializer.Serialize(npcs, new System.Text.Json.JsonSerializerOptions
+        {
+            WriteIndented = true
+        });
+
+        System.IO.File.WriteAllText(path, json);
+        return npcs.Count;
+    }
+
+    public void Disconnect(int flushTimeout = 0)
+    {
+        _connection.Disconnect(flushTimeout);
+    }
+
+
 }

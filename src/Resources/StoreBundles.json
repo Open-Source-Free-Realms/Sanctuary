@@ -20216,7 +20216,7 @@
       "Image": "6323",
       "Tint": "234"
     },
-    "TintGroup": "2",
+    "TintGroup": "3",
     "Entries": [
       {
         "Quantity": 1,
@@ -20300,6 +20300,122 @@
     "CategoryGroupId": 267,
     "CategoryDisplayOrder": 466000,
     "DiscountType": 211,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Clocktopus",
+    "LaunchTime": "2010-12-15T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "7798"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4897,
+        "MarketingItemId": 79445
+      }
+    ],
+    "Id": 474747,
+    "NameId": 19040,
+    "DescriptionId": 19041,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 267,
+    "CategoryDisplayOrder": 466000,
+    "DiscountType": 211,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Skullz Chopper",
+    "LaunchTime": "2010-12-15T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "8405"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4897,
+        "MarketingItemId": 79448
+      }
+    ],
+    "Id": 505050,
+    "NameId": 442318,
+    "DescriptionId": 1114,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 267,
+    "CategoryDisplayOrder": 466000,
+    "DiscountType": 211,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Magic Carpet",
+    "LaunchTime": "2010-12-15T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "8498"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4898,
+        "MarketingItemId": 79449
+      }
+    ],
+    "Id": 515151,
+    "NameId": 510189,
+    "DescriptionId": 442905,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 266,
+    "CategoryDisplayOrder": 564000,
+    "DiscountType": 105,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Flying Saucer",
+    "LaunchTime": "2010-12-15T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "7710"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4898,
+        "MarketingItemId": 79450
+      }
+    ],
+    "Id": 525252,
+    "NameId": 2664,
+    "DescriptionId": 2665,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 267,
+    "CategoryDisplayOrder": 564000,
+    "DiscountType": 105,
     "SkuId": 1,
     "MemberDiscount": 10,
     "MembersOnlyPrice": 1
@@ -20401,6 +20517,64 @@
     "MembersOnlyPrice": 1
   },
   {
+    "Comment": "Wonderous Tiger",
+    "LaunchTime": "2010-12-15T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "8501"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4900,
+        "MarketingItemId": 79436
+      }
+    ],
+    "Id": 373737,
+    "NameId": 442894,
+    "DescriptionId": 510213,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 269,
+    "CategoryDisplayOrder": 758000,
+    "DiscountType": 402,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Giant Turkey",
+    "LaunchTime": "2010-12-15T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "92"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4900,
+        "MarketingItemId": 79437
+      }
+    ],
+    "Id": 383838,
+    "NameId": 9268,
+    "DescriptionId": 9269,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 269,
+    "CategoryDisplayOrder": 758000,
+    "DiscountType": 402,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
     "Comment": "Nightmare",
     "LaunchTime": "2010-12-15T08:00:00+00:00",
     "ExpireTime": "2090-01-01T08:00:00+00:00",
@@ -20440,7 +20614,7 @@
       "Image": "6320",
       "Tint": "249"
     },
-    "TintGroup": "2",
+    "TintGroup": "3",
     "Entries": [
       {
         "Quantity": 1,
@@ -20593,6 +20767,100 @@
     "MembersOnlyPrice": 1
   },
   {
+    "Comment": "Skeletal T-Rex",
+    "LaunchTime": "2010-12-15T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "7799",
+      "Tint": "249"
+    },
+    "TintGroup": "2",
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4906,
+        "MarketingItemId": 79446
+      }
+    ],
+    "Id": 484848,
+    "NameId": 19042,
+    "DescriptionId": 19043,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "IsTintable": true,
+    "StoreId": 1,
+    "CategoryGroupId": 268,
+    "CategoryDisplayOrder": 1183000,
+    "DiscountType": 302,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Polar Bear",
+    "LaunchTime": "2010-12-15T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "8225"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4907,
+        "MarketingItemId": 79447
+      }
+    ],
+    "Id": 494949,
+    "NameId": 441220,
+    "DescriptionId": 441234,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 269,
+    "CategoryDisplayOrder": 1187000,
+    "DiscountType": 414,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Reindeer",
+    "LaunchTime": "2010-12-15T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "5614"
+    },
+    "TintGroup": "2",
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4907,
+        "MarketingItemId": 79451
+      }
+    ],
+    "Id": 535353,
+    "NameId": 436679,
+    "DescriptionId": 4419630,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "TextureAlias": "green-blanket",
+    "TintAlias": "dyetint",
+    "StoreId": 1,
+    "CategoryGroupId": 269,
+    "CategoryDisplayOrder": 1187000,
+    "DiscountType": 414,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1,
+    "IsTintable": true
+  },
+  {
     "Comment": "Stallion",
     "LaunchTime": "2010-12-15T08:00:00+00:00",
     "ExpireTime": "2090-01-01T08:00:00+00:00",
@@ -20600,7 +20868,7 @@
       "Image": "6324",
       "Tint": "235"
     },
-    "TintGroup": "2",
+    "TintGroup": "3",
     "Entries": [
       {
         "Quantity": 1,
@@ -20721,6 +20989,122 @@
     "MembersOnlyPrice": 1
   },
   {
+    "Comment": "Roasted Turkey",
+    "LaunchTime": "2010-12-15T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "8617"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4911,
+        "MarketingItemId": 79461
+      }
+    ],
+    "Id": 616161,
+    "NameId": 5102766,
+    "DescriptionId": 5102769,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 269,
+    "CategoryDisplayOrder": 1277000,
+    "DiscountType": 401,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Burnt Turkey",
+    "LaunchTime": "2010-12-15T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "8615"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4911,
+        "MarketingItemId": 79462
+      }
+    ],
+    "Id": 626262,
+    "NameId": 5102767,
+    "DescriptionId": 5102770,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 269,
+    "CategoryDisplayOrder": 1277000,
+    "DiscountType": 401,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Raw Turkey",
+    "LaunchTime": "2010-12-15T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "8616"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4911,
+        "MarketingItemId": 79463
+      }
+    ],
+    "Id": 636363,
+    "NameId": 5102765,
+    "DescriptionId": 5102768,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 269,
+    "CategoryDisplayOrder": 1277000,
+    "DiscountType": 401,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Octopus",
+    "LaunchTime": "2010-12-15T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "8496"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4911,
+        "MarketingItemId": 79444
+      }
+    ],
+    "Id": 464646,
+    "NameId": 442880,
+    "DescriptionId": 442881,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 269,
+    "CategoryDisplayOrder": 1277000,
+    "DiscountType": 401,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
     "Comment": "Unicorn",
     "LaunchTime": "2010-12-15T08:00:00+00:00",
     "ExpireTime": "2090-01-01T08:00:00+00:00",
@@ -20760,7 +21144,7 @@
       "Image": "6317",
       "Tint": "256"
     },
-    "TintGroup": "2",
+    "TintGroup": "3",
     "Entries": [
       {
         "Quantity": 1,
@@ -20792,7 +21176,7 @@
       "Image": "6325",
       "Tint": "233"
     },
-    "TintGroup": "2",
+    "TintGroup": "3",
     "Entries": [
       {
         "Quantity": 1,
@@ -20824,7 +21208,7 @@
       "Image": "6319",
       "Tint": "249"
     },
-    "TintGroup": "2",
+    "TintGroup": "3",
     "Entries": [
       {
         "Quantity": 1,
@@ -21191,6 +21575,535 @@
     "MembersOnlyPrice": 1
   },
   {
+    "Comment": "Eyeball",
+    "LaunchTime": "2011-01-10T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "8571"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4929,
+        "MarketingItemId": 79439
+      }
+    ],
+    "Id": 414141,
+    "NameId": 5102489,
+    "DescriptionId": 5102490,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 268,
+    "CategoryDisplayOrder": 1221000,
+    "DiscountType": 303,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Snow Globe",
+    "LaunchTime": "2011-01-10T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "6995"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4929,
+        "MarketingItemId": 79440
+      }
+    ],
+    "Id": 424242,
+    "NameId": 7504,
+    "DescriptionId": 7505,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 268,
+    "CategoryDisplayOrder": 1221000,
+    "DiscountType": 303,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Giant Jack-O-Lantern",
+    "LaunchTime": "2011-01-10T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "6939"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4929,
+        "MarketingItemId": 79441
+      }
+    ],
+    "Id": 434343,
+    "NameId": 9917,
+    "DescriptionId": 9918,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 268,
+    "CategoryDisplayOrder": 1221000,
+    "DiscountType": 303,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Clockwork Horse",
+    "LaunchTime": "2011-01-10T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "7886"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4929,
+        "MarketingItemId": 79443
+      }
+    ],
+    "Id": 453535,
+    "NameId": 8779,
+    "DescriptionId": 8780,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 267,
+    "CategoryDisplayOrder": 1208000,
+    "DiscountType": 213,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Chrome Drake",
+    "LaunchTime": "2011-01-10T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "8406"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4929,
+        "MarketingItemId": 79454
+      }
+    ],
+    "Id": 452525,
+    "NameId": 442331,
+    "DescriptionId": 439599,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 267,
+    "CategoryDisplayOrder": 1208000,
+    "DiscountType": 213,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Valiant Gleam Cycle",
+    "LaunchTime": "2011-01-10T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "8766"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4929,
+        "MarketingItemId": 79456
+      }
+    ],
+    "Id": 565656,
+    "NameId": 5103065,
+    "DescriptionId": 1114,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 267,
+    "CategoryDisplayOrder": 1208000,
+    "DiscountType": 213,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Lawless Gloam Chopper",
+    "LaunchTime": "2011-01-10T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "8767"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4929,
+        "MarketingItemId": 79457
+      }
+    ],
+    "Id": 575757,
+    "NameId": 5103066,
+    "DescriptionId": 1114,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 267,
+    "CategoryDisplayOrder": 1208000,
+    "DiscountType": 213,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Dwarftech Chopper",
+    "LaunchTime": "2011-01-10T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "71"
+    },
+    "TintGroup": "2",
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4929,
+        "MarketingItemId": 79458
+      }
+    ],
+    "Id": 585858,
+    "NameId": 854,
+    "DescriptionId": 855,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "IsTintable": true,
+    "StoreId": 1,
+    "CategoryGroupId": 267,
+    "CategoryDisplayOrder": 1208000,
+    "DiscountType": 213,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Fan Faire 2011 Bicycle",
+    "LaunchTime": "2011-01-10T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "7499"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4929,
+        "MarketingItemId": 79464
+      }
+    ],
+    "Id": 646464,
+    "NameId": 436136,
+    "DescriptionId": 436137,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 267,
+    "CategoryDisplayOrder": 1208000,
+    "DiscountType": 213,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Robotic Chicken",
+    "LaunchTime": "2011-01-10T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "35"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4929,
+        "MarketingItemId": 79459
+      }
+    ],
+    "Id": 595959,
+    "NameId": 19014,
+    "DescriptionId": 19015,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 267,
+    "CategoryDisplayOrder": 1208000,
+    "DiscountType": 213,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Holiday Tree Board",
+    "LaunchTime": "2011-01-10T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "6996"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4929,
+        "MarketingItemId": 79460
+      }
+    ],
+    "Id": 606060,
+    "NameId": 7503,
+    "DescriptionId": 7505,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 267,
+    "CategoryDisplayOrder": 1208000,
+    "DiscountType": 213,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Robo-Roo",
+    "LaunchTime": "2011-01-10T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "8034"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4929,
+        "MarketingItemId": 79455
+      }
+    ],
+    "Id": 451515,
+    "NameId": 440558,
+    "DescriptionId": 440559,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 267,
+    "CategoryDisplayOrder": 1208000,
+    "DiscountType": 213,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Gloamstone Hoverboard",
+    "LaunchTime": "2011-01-10T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "7015"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4929,
+        "MarketingItemId": 79442
+      }
+    ],
+    "Id": 444444,
+    "NameId": 387,
+    "DescriptionId": 388,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 267,
+    "CategoryDisplayOrder": 1208000,
+    "DiscountType": 213,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Icy Hoverboard",
+    "LaunchTime": "2011-01-10T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "6659",
+      "TintId": "109"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4929,
+        "MarketingItemId": 10383
+      }
+    ],
+    "Id": 454545,
+    "NameId": 6232,
+    "DescriptionId": 6312,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 267,
+    "CategoryDisplayOrder": 1208000,
+    "DiscountType": 213,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Snowball",
+    "LaunchTime": "2011-01-10T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "6978",
+      "Tint": "117"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4898,
+        "MarketingItemId": 17179
+      }
+    ],
+    "Id": 232323,
+    "NameId": 22959,
+    "DescriptionId": 22965,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 268,
+    "CategoryDisplayOrder": 612000,
+    "DiscountType": 303,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Beach Ball",
+    "LaunchTime": "2011-01-10T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "6854",
+      "Tint": "92"
+    },
+    "TintGroup": "3",
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4898,
+        "MarketingItemId": 14316
+      }
+    ],
+    "Id": 242424,
+    "NameId": 6408,
+    "DescriptionId": 6409,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "IsTintable": true,
+    "CategoryGroupId": 268,
+    "CategoryDisplayOrder": 1315000,
+    "DiscountType": 303,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Chrome Dragon",
+    "LaunchTime": "2011-01-10T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "6425"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4898,
+        "MarketingItemId": 77471
+      }
+    ],
+    "Id": 252525,
+    "NameId": 5232,
+    "DescriptionId": 5233,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 266,
+    "CategoryDisplayOrder": 1315000,
+    "DiscountType": 105,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Phoenix",
+    "LaunchTime": "2011-01-10T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "6889"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4898,
+        "MarketingItemId": 10421
+      }
+    ],
+    "Id": 333333,
+    "NameId": 6574,
+    "DescriptionId": 6576,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 266,
+    "CategoryDisplayOrder": 1315000,
+    "DiscountType": 105,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
     "Comment": "Hydra Ride",
     "LaunchTime": "2011-01-10T08:00:00+00:00",
     "ExpireTime": "2090-01-01T08:00:00+00:00",
@@ -21333,6 +22246,128 @@
     "StoreId": 1,
     "CategoryGroupId": 267,
     "CategoryDisplayOrder": 477000,
+    "DiscountType": 213,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Broomstick",
+    "LaunchTime": "2011-01-26T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "8035",
+      "Tint": "100"
+    },
+    "TintGroup": "2",
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4989,
+        "MarketingItemId": 79433
+      }
+    ],
+    "Id": 343434,
+    "NameId": 9911,
+    "DescriptionId": 9912,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "IsTintable": true,
+    "StoreId": 1,
+    "CategoryGroupId": 267,
+    "CategoryDisplayOrder": 477000,
+    "DiscountType": 213,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Dragonfire Broomstick",
+    "LaunchTime": "2011-01-26T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "8598"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4989,
+        "MarketingItemId": 79434
+      }
+    ],
+    "Id": 353535,
+    "NameId": 5102679,
+    "DescriptionId": 5102680,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 267,
+    "CategoryDisplayOrder": 477000,
+    "DiscountType": 213,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Sparky",
+    "LaunchTime": "2011-01-26T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "7911"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4989,
+        "MarketingItemId": 79435
+      }
+    ],
+    "Id": 363636,
+    "NameId": 17468,
+    "DescriptionId": 17469,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 267,
+    "CategoryDisplayOrder": 1208000,
+    "DiscountType": 213,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Pogo Stick",
+    "LaunchTime": "2011-01-26T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "8121",
+      "Tint": "100"
+    },
+    "TintGroup": "3",
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4989,
+        "MarketingItemId": 79438
+      }
+    ],
+    "Id": 393939,
+    "NameId": 14105,
+    "DescriptionId": 14106,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "IsTintable": true,
+    "StoreId": 1,
+    "CategoryGroupId": 267,
+    "CategoryDisplayOrder": 1208000,
     "DiscountType": 213,
     "SkuId": 1,
     "MemberDiscount": 10,
@@ -29962,22 +30997,21 @@
   },
   {
     "Comment": "Lawn Chair",
-    "LaunchTime": "2013-05-21T07:00:00+00:00",
-    "ExpireTime": "2040-08-15T07:00:00+00:00",
+    "LaunchTime": "2010-12-15T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
     "Image": {
       "Image": "8456",
-      "Tint": "233"
+      "Tint": "100"
     },
     "TintGroup": "2",
     "Entries": [
       {
         "Quantity": 1,
-        "GameItemId": 5593,
-        "MarketingItemId": 78399,
-        "ImageTintOverride": "233"
+        "GameItemId": 4898,
+        "MarketingItemId": 79410
       }
     ],
-    "Id": 5603,
+    "Id": 200000,
     "NameId": 442689,
     "DescriptionId": 442690,
     "Status": 1,
@@ -29987,9 +31021,345 @@
     "IsTintable": true,
     "StoreId": 1,
     "CategoryGroupId": 267,
-    "DisplayOrder": 1,
-    "CategoryDisplayOrder": 1000,
-    "DiscountType": 402,
+    "CategoryDisplayOrder": 564000,
+    "DiscountType": 105,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Santa's Sleigh-mobile",
+    "LaunchTime": "2010-12-15T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "8144"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4898,
+        "MarketingItemId": 79452
+      }
+    ],
+    "Id": 545454,
+    "NameId": 4419436,
+    "DescriptionId": 4419631,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 267,
+    "CategoryDisplayOrder": 564000,
+    "DiscountType": 105,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Retro Bike",
+    "LaunchTime": "2010-12-15T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "8564"
+    },
+    "TintGroup": "2",
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4898,
+        "MarketingItemId": 79453
+      }
+    ],
+    "Id": 555555,
+    "NameId": 5102429,
+    "DescriptionId": 5102430,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "IsTintable": true,
+    "StoreId": 1,
+    "CategoryGroupId": 267,
+    "CategoryDisplayOrder": 564000,
+    "DiscountType": 105,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Haunted Hoverboard",
+    "LaunchTime": "2010-12-15T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "6922"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4898,
+        "MarketingItemId": 10424
+      }
+    ],
+    "Id": 212121,
+    "NameId": 6605,
+    "DescriptionId": 6606,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 267,
+    "CategoryDisplayOrder": 231000,
+    "DiscountType": 213,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Futuristic Bicycle",
+    "LaunchTime": "2010-12-15T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "7297"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4898,
+        "MarketingItemId": 79417
+      }
+    ],
+    "Id": 262626,
+    "NameId": 435220,
+    "DescriptionId": 435221,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 267,
+    "CategoryDisplayOrder": 930000,
+    "DiscountType": 105,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Glacierator 5000",
+    "LaunchTime": "2010-12-15T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "7700"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4898,
+        "MarketingItemId": 11763
+      }
+    ],
+    "Id": 272727,
+    "NameId": 385,
+    "DescriptionId": 386,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 267,
+    "CategoryDisplayOrder": 55000,
+    "DiscountType": 105,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Surfboard",
+    "LaunchTime": "2010-12-15T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "6658",
+      "TintId": "92"
+    },
+    "TintGroup": "3",
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4898,
+        "MarketingItemId": 15733
+      }
+    ],
+    "Id": 323232,
+    "NameId": 5635,
+    "DescriptionId": 6193,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "IsTintable": true,
+    "StoreId": 1,
+    "CategoryGroupId": 267,
+    "CategoryDisplayOrder": 56000,
+    "DiscountType": 105,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Wooden Surfboard",
+    "LaunchTime": "2010-12-15T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "6659",
+      "TintId": "92"
+    },
+    "TintGroup": "3",
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4898,
+        "MarketingItemId": 15740
+      }
+    ],
+    "Id": 282828,
+    "NameId": 5636,
+    "DescriptionId": 6192,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "IsTintable": true,
+    "StoreId": 1,
+    "CategoryGroupId": 267,
+    "CategoryDisplayOrder": 56000,
+    "DiscountType": 105,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Chilly Surfboard",
+    "LaunchTime": "2010-12-15T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "6658",
+      "TintId": "92"
+    },
+    "TintGroup": "3",
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4898,
+        "MarketingItemId": 16927
+      }
+    ],
+    "Id": 292929,
+    "NameId": 7258,
+    "DescriptionId": 6193,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "IsTintable": true,
+    "StoreId": 1,
+    "CategoryGroupId": 267,
+    "CategoryDisplayOrder": 56000,
+    "DiscountType": 105,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Basalt Surfboard",
+    "LaunchTime": "2010-12-15T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "6791",
+      "TintId": "92"
+    },
+    "TintGroup": "3",
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4898,
+        "MarketingItemId": 16920
+      }
+    ],
+    "Id": 300000,
+    "NameId": 7257,
+    "DescriptionId": 6192,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "IsTintable": true,
+    "StoreId": 1,
+    "CategoryGroupId": 267,
+    "CategoryDisplayOrder": 56000,
+    "DiscountType": 105,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Windstorm Surfboard",
+    "LaunchTime": "2010-12-15T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "6792",
+      "TintId": "92"
+    },
+    "TintGroup": "3",
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4898,
+        "MarketingItemId": 16913
+      }
+    ],
+    "Id": 313131,
+    "NameId": 7256,
+    "DescriptionId": 6193,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "IsTintable": true,
+    "StoreId": 1,
+    "CategoryGroupId": 267,
+    "CategoryDisplayOrder": 56000,
+    "DiscountType": 105,
+    "SkuId": 1,
+    "MemberDiscount": 10,
+    "MembersOnlyPrice": 1
+  },
+  {
+    "Comment": "Kangaroo",
+    "LaunchTime": "2010-12-15T08:00:00+00:00",
+    "ExpireTime": "2090-01-01T08:00:00+00:00",
+    "Image": {
+      "Image": "7665",
+      "TintId": "553"
+    },
+    "Entries": [
+      {
+        "Quantity": 1,
+        "GameItemId": 4899,
+        "MarketingItemId": 11584
+      }
+    ],
+    "Id": 222222,
+    "NameId": 378,
+    "DescriptionId": 379,
+    "Status": 1,
+    "CurrencyType": 1,
+    "Price": 1,
+    "AltCurrencyPrice": 1,
+    "StoreId": 1,
+    "CategoryGroupId": 269,
+    "CategoryDisplayOrder": 930000,
+    "DiscountType": 413,
     "SkuId": 1,
     "MemberDiscount": 10,
     "MembersOnlyPrice": 1
@@ -34927,36 +36297,6 @@
     "CategoryGroupId": 10001,
     "CategoryDisplayOrder": 632000,
     "DiscountType": 219000,
-    "SkuId": 1,
-    "IsVisible": true,
-    "MemberDiscount": 10,
-    "IsMerchantOnly": true
-  },
-  {
-    "Comment": "Large Wilds House",
-    "LaunchTime": "2012-12-03T16:00:01+00:00",
-    "ExpireTime": "2040-12-31T08:00:00+00:00",
-    "Image": {
-      "Image": "5652"
-    },
-    "Entries": [
-      {
-        "Quantity": 1,
-        "GameItemId": 2742,
-        "MarketingItemId": 2214
-      }
-    ],
-    "Id": 50048,
-    "NameId": 6290,
-    "DescriptionId": 6296,
-    "Status": 1,
-    "CurrencyType": 1,
-    "Price": 1,
-    "AltCurrencyPrice": 1,
-    "StoreId": 1,
-    "CategoryGroupId": 10001,
-    "CategoryDisplayOrder": 15500,
-    "DiscountType": 223000,
     "SkuId": 1,
     "IsVisible": true,
     "MemberDiscount": 10,
