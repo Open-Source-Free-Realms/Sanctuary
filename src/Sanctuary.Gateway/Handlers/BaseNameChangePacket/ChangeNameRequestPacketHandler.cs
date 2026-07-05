@@ -78,6 +78,11 @@ public static class ChangeNameRequestPacketHandler
         if (packet.Name.LastName != string.Empty && (packet.Name.LastName.Length is < 3 or > 14))
             return ChangeNameResponse.Error;
 
+        if (CharacterNameHelper.ContainsIllegalCharacters(packet.Name.FullName))
+        {
+            return ChangeNameResponse.Error;
+        }
+
         if (_resourceManager.NameFilter.Any(token => !string.IsNullOrWhiteSpace(token)
             && packet.Name.FullName.Contains(token, StringComparison.OrdinalIgnoreCase)))
         {

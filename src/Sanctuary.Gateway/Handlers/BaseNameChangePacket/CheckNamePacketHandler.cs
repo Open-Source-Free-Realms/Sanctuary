@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Game;
 using Sanctuary.Packet;
@@ -69,10 +70,6 @@ public static class CheckNamePacketHandler
 
     private static CheckNameResponse OnCheckCharacterName(GatewayConnection connection, CheckNamePacket packet)
     {
-        // TODO: Implement the following checks (https://archive.ph/3DB0L)
-        //  3 - Profane
-        // 11 - IllegalCharacters
-
         if (string.IsNullOrWhiteSpace(packet.Name.FirstName)
             || packet.Name.LastName != string.Empty && string.IsNullOrWhiteSpace(packet.Name.LastName))
         {
@@ -92,6 +89,11 @@ public static class CheckNamePacketHandler
 
             if (packet.Name.LastName.Length > 14)
                 return CheckNameResponse.LastNameTooLong;
+        }
+
+        if (CharacterNameHelper.ContainsIllegalCharacters(packet.Name.FullName))
+        {
+            return CheckNameResponse.IllegalCharacters;
         }
 
         if (_resourceManager.NameFilter.Any(token => !string.IsNullOrWhiteSpace(token)
