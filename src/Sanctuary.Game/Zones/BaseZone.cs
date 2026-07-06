@@ -123,6 +123,11 @@ public abstract class BaseZone : IZone, IDisposable
 
     public bool TryCreateNpc(NpcDefinition definition, [MaybeNullWhen(false)] out Npc npc)
     {
+        var scale = 1f;
+
+        if (_resourceManager.Models.TryGetValue(definition.ModelId, out var model) && model.Scale != 0f)
+            scale = model.Scale;
+
         npc = new Npc(this)
         {
             Guid = _uniqueGuid++,
@@ -130,6 +135,7 @@ public abstract class BaseZone : IZone, IDisposable
             Name = definition.Name,
             ModelId = definition.ModelId,
             TextureAlias = definition.TextureAlias,
+            Scale = scale,
             Static = definition.Static,
             Visible = true
         };
