@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 using System.Text.Json.Serialization;
 
@@ -24,5 +25,5 @@ public class NpcDefinition
     public Vector4 Position => new(SpawnPosition[0], SpawnPosition[1], SpawnPosition[2], 1f);
 
     [JsonIgnore]
-    public Quaternion Rotation => Quaternion.CreateFromYawPitchRoll(SpawnHeading, 0f, 0f);
+    public Quaternion Rotation => new(MathF.Sin(SpawnHeading), 0f, MathF.Cos(SpawnHeading), 0f);
 }
