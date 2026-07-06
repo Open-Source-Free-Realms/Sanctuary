@@ -374,8 +374,13 @@ public abstract class BaseZone : IZone, IDisposable
         {
             try
             {
-                foreach (var entity in _entities.ToFrozenDictionary())
+                foreach (var entity in _entities)
+                {
+                    if (entity.Value is Npc { Static: true })
+                        continue;
+
                     entity.Value.UpdateEveryTick();
+                }
             }
             catch (Exception ex)
             {
@@ -390,8 +395,13 @@ public abstract class BaseZone : IZone, IDisposable
         {
             try
             {
-                foreach (var entity in _entities.ToFrozenDictionary())
+                foreach (var entity in _entities)
+                {
+                    if (entity.Value is Npc { Static: true })
+                        continue;
+
                     entity.Value.UpdateEverySecond();
+                }
             }
             catch (Exception ex)
             {
