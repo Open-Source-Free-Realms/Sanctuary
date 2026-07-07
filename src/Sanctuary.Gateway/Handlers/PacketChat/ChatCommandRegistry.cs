@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 using Sanctuary.Database;
 using Sanctuary.Game;
@@ -27,6 +28,7 @@ public static class ChatCommandRegistry
 {
     private static IZoneManager _zoneManager = null!;
     private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
+    private static ILogger _adminLogger = null!;
 
     private static readonly Dictionary<string, ChatCommandDefinition> Commands = new Dictionary<string, ChatCommandDefinition>
     {
@@ -40,10 +42,11 @@ public static class ChatCommandRegistry
         ["help"] = new ChatCommandDefinition(ChatCommandRole.Player, "!admin help", Help),
     };
 
-    public static void Initialize(IZoneManager zoneManager, IDbContextFactory<DatabaseContext> dbContextFactory)
+    public static void Initialize(IZoneManager zoneManager, IDbContextFactory<DatabaseContext> dbContextFactory, ILogger adminLogger)
     {
         _zoneManager = zoneManager;
         _dbContextFactory = dbContextFactory;
+        _adminLogger = adminLogger;
     }
 
     public static ChatCommandRole GetRole(Player player)
@@ -117,6 +120,8 @@ public static class ChatCommandRegistry
         if (_zoneManager.TryGetPlayer(targetName, out var targetPlayer))
             targetPlayer.Disconnect();
 
+        LogAction(connection, "Ban", targetName, banUntilTime is null ? "Permanent" : $"Until: {banUntilTime:u}");
+
         SendSystemMessage(connection, banUntilTime is null
             ? $"{targetName} has been banned permanently."
             : $"{targetName} has been banned until {banUntilTime:u}.");
@@ -147,6 +152,8 @@ public static class ChatCommandRegistry
             .ExecuteUpdate(x => x
                 .SetProperty(u => u.IsLocked, false)
                 .SetProperty(u => u.LockedUntil, (DateTimeOffset?)null));
+
+        LogAction(connection, "Unban", targetName);
 
         SendSystemMessage(connection, $"{targetName} has been unbanned.");
     }
@@ -186,6 +193,8 @@ public static class ChatCommandRegistry
             targetPlayer.MutedUntil = muteUntilTime;
         }
 
+        LogAction(connection, "Mute", targetName, muteUntilTime is null ? "Permanent" : $"Until: {muteUntilTime:u}");
+
         SendSystemMessage(connection, muteUntilTime is null
             ? $"{targetName} has been muted."
             : $"{targetName} has been muted until {muteUntilTime:u}.");
@@ -223,6 +232,8 @@ public static class ChatCommandRegistry
             targetPlayer.MutedUntil = null;
         }
 
+        LogAction(connection, "Unmute", targetName);
+
         SendSystemMessage(connection, $"{targetName} has been unmuted.");
     }
 
@@ -243,6 +254,8 @@ public static class ChatCommandRegistry
         }
 
         targetPlayer.Disconnect();
+
+        LogAction(connection, "Kick", targetName);
 
         SendSystemMessage(connection, $"{targetName} has been kicked.");
     }
@@ -271,6 +284,8 @@ public static class ChatCommandRegistry
 
         if (_zoneManager.TryGetPlayer(targetName, out var targetPlayer))
             targetPlayer.IsMod = isMod;
+
+        LogAction(connection, isMod ? "Promote" : "Demote", targetName);
 
         SendSystemMessage(connection, isMod
             ? $"{targetName} has been promoted to moderator."
@@ -342,5 +357,16 @@ public static class ChatCommandRegistry
         };
 
         connection.Player.SendTunneled(packet);
+    }
+
+    private static void LogAction(GatewayConnection connection, string action, string targetName, string? detail = null)
+    {
+        _adminLogger.LogInformation("{Action}|Actor: \"{ActorName}\" ({ActorGuid}), Target: \"{TargetName}\"{Detail}",
+            action,
+            connection.Player.Name,
+            connection.Player.Guid,
+            targetName,
+            detail is null ? string.Empty : $", {detail}"
+        );
     }
 }

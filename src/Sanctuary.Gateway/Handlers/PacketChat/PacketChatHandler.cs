@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Game;
 using Sanctuary.Packet;
@@ -19,6 +20,7 @@ public static class PacketChatHandler
     private static ILogger _logger = null!;
     private static ILogger _chatLogger = null!;
     private static IZoneManager _zoneManager = null!;
+    private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -27,10 +29,11 @@ public static class PacketChatHandler
         _chatLogger = loggerFactory.CreateLogger("Chat");
 
         _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
+        _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
 
-        var dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
+        var adminLogger = loggerFactory.CreateLogger("Admin");
 
-        ChatCommandRegistry.Initialize(_zoneManager, dbContextFactory);
+        ChatCommandRegistry.Initialize(_zoneManager, _dbContextFactory, adminLogger);
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -52,6 +55,12 @@ public static class PacketChatHandler
         if (packet.Message.StartsWith("!admin"))
         {
             ChatCommandRegistry.HandleCommand(connection, packet.Message);
+            return true;
+        }
+
+        if (connection.Player.IsMuted && !TryClearExpiredMute(connection))
+        {
+            SendMuteNotice(connection);
             return true;
         }
 
@@ -154,5 +163,43 @@ public static class PacketChatHandler
         }
 
         return true;
+    }
+
+    private static bool TryClearExpiredMute(GatewayConnection connection)
+    {
+        if (connection.Player.MutedUntil is not { } mutedUntil || mutedUntil > DateTimeOffset.UtcNow)
+            return false;
+
+        connection.Player.IsMuted = false;
+        connection.Player.MutedUntil = null;
+
+        using DatabaseContext dbContext = _dbContextFactory.CreateDbContext();
+
+        ulong characterId = GuidHelper.GetPlayerId(connection.Player.Guid);
+
+        dbContext.Users
+            .Where(u => u.Characters.Any(c => c.Id == characterId))
+            .ExecuteUpdate(u => u
+                .SetProperty(x => x.IsMuted, false)
+                .SetProperty(x => x.MutedUntil, (DateTimeOffset?)null));
+
+        return true;
+    }
+
+    private static void SendMuteNotice(GatewayConnection connection)
+    {
+        var message = connection.Player.MutedUntil is { } mutedUntil
+            ? $"You are muted until {mutedUntil:u} and cannot send chat messages."
+            : "You are muted and cannot send chat messages.";
+
+        var packet = new PacketChat
+        {
+            Channel = ChatChannel.System,
+            FromName = connection.Player.Name,
+            ToName = connection.Player.Name,
+            Message = message
+        };
+
+        connection.Player.SendTunneled(packet);
     }
 }
