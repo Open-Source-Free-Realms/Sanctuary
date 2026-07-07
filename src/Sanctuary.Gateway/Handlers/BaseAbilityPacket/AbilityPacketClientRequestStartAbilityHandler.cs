@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
@@ -26,6 +27,13 @@ public static class AbilityPacketClientRequestStartAbilityHandler
     private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
 
     private static readonly ConcurrentDictionary<ulong, ConcurrentDictionary<int, DateTimeOffset>> _itemCooldowns = new();
+
+    /// <summary>Animation id that returns a player to their normal standing idle after a boombox dance
+    /// (sent via SetAnimation flags=1).</summary>
+    private const int BoomboxIdleAnimId = 1;
+
+    /// <summary>How long a boombox stays out and plays (and its use cooldown) - kept the same value.</summary>
+    private const int BoomboxDurationMs = 25_000;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -107,7 +115,7 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             else
                 SpawnBoomboxNpc(connection, clientItemDefinition);
 
-            int cooldownMs = isCake ? cakeDef!.CooldownMs : 60_000;
+            int cooldownMs = isCake ? cakeDef!.CooldownMs : BoomboxDurationMs;
             playerCooldowns[clientItemDefinition.Id] = DateTimeOffset.UtcNow.AddMilliseconds(cooldownMs);
             connection.Player.StartActionBarCooldown(2, packet.Data.Slot, clientItemDefinition.Icon.Id, clientItemDefinition.NameId, clientItem.Count, cooldownMs);
 
@@ -458,51 +466,86 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             var capturedNpc = boomboxNpc;
 
             const float BoomboxRangeInMeters = 15.0f;
-            const int DanceInterval = 3000;
-            int iterations = 60_000 / DanceInterval;
+            var danceCenter = new Vector3(spawnPosition.X, spawnPosition.Y, spawnPosition.Z);
+
+            // Reset a single player to the normal standing idle (used when they leave range / it ends).
+            static void ResetPlayer(Game.Entities.Player p) =>
+                p.SendTunneledToVisible(new PlayerUpdatePacketSetAnimation
+                {
+                    Guid = p.Guid,
+                    AnimationId = BoomboxIdleAnimId,
+                    Flags = 1
+                }, sendToSelf: true);
 
             Task.Run(async () =>
             {
+                // Players currently dancing to this boombox (so we can reset them on leave / end).
+                var dancing = new HashSet<ulong>();
                 try
                 {
+                    // Rotate through the boombox's DanceSequence: each dance loops for SwitchMs, then the next
+                    // plays. Everyone in range is driven by ONE SetSynchronizedAnimations packet so the whole
+                    // crowd dances phase-locked and re-syncs on each rotation.
+                    const int SwitchMs = 4000;
                     int sequenceIndex = 0;
-                    for (int i = 0; i < iterations; i++)
+                    int previousAnim = -1;
+
+                    for (int elapsed = 0; elapsed < BoomboxDurationMs; elapsed += SwitchMs)
                     {
-                        await Task.Delay(DanceInterval);
+                        await Task.Delay(SwitchMs);
 
-                        int quickChatId = danceSequence[sequenceIndex];
-                        sequenceIndex = (sequenceIndex + 1) % danceSequence.Length;
+                        int currentAnim = danceSequence.Length > 0 ? danceSequence[sequenceIndex % danceSequence.Length] : 3501;
+                        sequenceIndex++;
+                        bool animChanged = currentAnim != previousAnim;
+                        previousAnim = currentAnim;
 
-                        var playersInRange = (startingZone.Players ?? []).Where(p =>
-                            Vector3.Distance(new Vector3(p.Position.X, p.Position.Y, p.Position.Z),
-                                             new Vector3(spawnPosition.X, spawnPosition.Y, spawnPosition.Z))
-                            <= BoomboxRangeInMeters).ToList();
+                        var players = startingZone.Players ?? [];
+                        var inRange = players.Where(p =>
+                            Vector3.Distance(new Vector3(p.Position.X, p.Position.Y, p.Position.Z), danceCenter) <= BoomboxRangeInMeters)
+                            .ToList();
+                        var inRangeGuids = inRange.Select(p => p.Guid).ToHashSet();
 
-                        foreach (var player in playersInRange)
+                        bool rosterChanged = !dancing.SetEquals(inRangeGuids);
+
+                        // Reset players who just left range.
+                        foreach (var p in players.Where(p => dancing.Contains(p.Guid) && !inRangeGuids.Contains(p.Guid)).ToList())
                         {
-                            try
+                            try { ResetPlayer(p); } catch (Exception ex) { _logger.LogError(ex, "SpawnBoomboxNpc: reset failed for {Guid}", p.Guid); }
+                        }
+
+                        dancing = inRangeGuids;
+
+                        // (Re)sync the crowd only when the dance rotates or the roster changed - re-sending the
+                        // same anim to the same players each tick would restart their loop (a visible hitch).
+                        if (inRange.Count > 0 && (animChanged || rosterChanged))
+                        {
+                            var sync = new PlayerUpdatePacketSetSynchronizedAnimations();
+                            foreach (var p in inRange)
+                                sync.Animations.Add(new PlayerUpdatePacketSetSynchronizedAnimations.Animation { Guid = p.Guid, AnimationId = currentAnim });
+
+                            var recipients = new HashSet<Game.Entities.Player>(inRange);
+                            foreach (var p in inRange)
+                                foreach (var vp in p.VisiblePlayers.Values)
+                                    recipients.Add(vp);
+
+                            foreach (var r in recipients)
                             {
-                                var dancePacket = new QuickChatSendChatToChannelPacket
-                                {
-                                    Id = quickChatId,
-                                    Guid = player.Guid,
-                                    Name = player.Name ?? new Packet.Common.NameData(),
-                                    Channel = Packet.Common.Chat.ChatChannel.WorldArea,
-                                    AreaNameId = 0,
-                                    GuildGuid = 0
-                                };
-                                player.SendTunneled(dancePacket);
-                                foreach (var visiblePlayer in player.VisiblePlayers.Values)
-                                    visiblePlayer.SendTunneled(dancePacket);
+                                try { r.SendTunneled(sync); } catch (Exception ex) { _logger.LogError(ex, "SpawnBoomboxNpc: sync send failed for {Guid}", r.Guid); }
                             }
-                            catch (Exception ex) { _logger.LogError(ex, "SpawnBoomboxNpc: error sending dance packet to player {Guid}", player.Guid); }
                         }
                     }
                 }
                 catch (Exception ex) { _logger.LogError(ex, "SpawnBoomboxNpc: unhandled error in dance loop"); }
+                finally
+                {
+                    foreach (var p in (startingZone.Players ?? []).Where(p => dancing.Contains(p.Guid)).ToList())
+                    {
+                        try { ResetPlayer(p); } catch { /* player may have disconnected */ }
+                    }
+                }
             });
 
-            Task.Delay(60_000).ContinueWith(_ =>
+            Task.Delay(BoomboxDurationMs).ContinueWith(_ =>
             {
                 try
                 {
