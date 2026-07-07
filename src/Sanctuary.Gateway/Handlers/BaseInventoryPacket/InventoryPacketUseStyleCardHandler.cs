@@ -95,51 +95,38 @@ public static class InventoryPacketUseStyleCardHandler
             case 0:
                 dbCharacter.Head = stringParam;
                 dbCharacter.HeadId = clientItemDefinition.Param2;
-                connection.Player.Head = stringParam;
-                connection.Player.HeadId = clientItemDefinition.Param2;
                 break;
 
             case 1:
                 dbCharacter.SkinTone = stringParam;
                 dbCharacter.SkinToneId = clientItemDefinition.Param2;
-                connection.Player.SkinTone = stringParam;
-                connection.Player.SkinToneId = clientItemDefinition.Param2;
                 break;
 
             case 2:
                 dbCharacter.Hair = stringParam;
                 dbCharacter.HairId = clientItemDefinition.Param2;
-                connection.Player.Hair = stringParam;
-                connection.Player.HairId = clientItemDefinition.Param2;
                 break;
 
             case 3:
                 dbCharacter.HairColor = clientItemDefinition.Param2;
-                connection.Player.HairColor = clientItemDefinition.Param2;
                 break;
 
             case 4:
                 dbCharacter.EyeColor = clientItemDefinition.Param2;
-                connection.Player.EyeColor = clientItemDefinition.Param2;
                 break;
 
             case 5:
                 dbCharacter.ModelCustomization = stringParam;
                 dbCharacter.ModelCustomizationId = clientItemDefinition.Param2;
-                connection.Player.ModelCustomization = stringParam;
-                connection.Player.ModelCustomizationId = clientItemDefinition.Param2;
                 break;
 
             case 6:
                 dbCharacter.FacePaint = stringParam;
                 dbCharacter.FacePaintId = clientItemDefinition.Param2;
-                connection.Player.FacePaint = stringParam;
-                connection.Player.FacePaintId = clientItemDefinition.Param2;
                 break;
 
             case 8:
                 dbCharacter.Model = clientItemDefinition.Param2;
-                connection.Player.Model = clientItemDefinition.Param2;
                 break;
         }
 
@@ -163,6 +150,20 @@ public static class InventoryPacketUseStyleCardHandler
             _logger.LogWarning("Failed to save to database.");
             return;
         }
+
+        connection.Player.Head = dbCharacter.Head;
+        connection.Player.HeadId = dbCharacter.HeadId;
+        connection.Player.SkinTone = dbCharacter.SkinTone;
+        connection.Player.SkinToneId = dbCharacter.SkinToneId;
+        connection.Player.Hair = dbCharacter.Hair;
+        connection.Player.HairId = dbCharacter.HairId;
+        connection.Player.HairColor = dbCharacter.HairColor;
+        connection.Player.EyeColor = dbCharacter.EyeColor;
+        connection.Player.ModelCustomization = dbCharacter.ModelCustomization;
+        connection.Player.ModelCustomizationId = dbCharacter.ModelCustomizationId ?? 0;
+        connection.Player.FacePaint = dbCharacter.FacePaint;
+        connection.Player.FacePaintId = dbCharacter.FacePaintId ?? 0;
+        connection.Player.Model = dbCharacter.Model;
 
         if (deleteItem)
             connection.Player.Items.Remove(clientItem);
