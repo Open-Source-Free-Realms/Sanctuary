@@ -60,6 +60,39 @@ public static class ChatCommandRegistry
         return ChatCommandRole.Player;
     }
 
+    private static bool TryParseTarget(string[] args, out string parsedTargetName, out DateTimeOffset? parsedUntilValue, out string? error)
+    {
+        parsedTargetName = string.Empty;
+        parsedUntilValue = null;
+        error = null;
+
+        if (args.Length == 0)
+            return false;
+
+        if (args.Length > 1 && int.TryParse(args[^1], out var minutes))
+        {
+            if (minutes <= 0)
+            {
+                error = "Duration must be a positive number of minutes.";
+                return false;
+            }
+
+            parsedTargetName = string.Join(' ', args[..^1]);
+            parsedUntilValue = DateTimeOffset.UtcNow.AddMinutes(minutes);
+        }
+        else
+        {
+            parsedTargetName = string.Join(' ', args);
+        }
+
+        return true;
+    }
+
+    private static bool IsSelfTarget(GatewayConnection connection, string targetName)
+    {
+        return connection.Player.Name.FullName == targetName;
+    }
+
     public static void HandleCommand(GatewayConnection connection, string message)
     {
         string[] tokens = message.Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -90,16 +123,17 @@ public static class ChatCommandRegistry
 
     private static void Ban(GatewayConnection connection, string[] args)
     {
-        if (args.Length < 1)
+        if (!TryParseTarget(args, out var targetName, out var banUntilTime, out var error))
         {
-            SendSystemMessage(connection, $"Usage: {Commands["ban"].Usage}");
+            SendSystemMessage(connection, error ?? $"Usage: {Commands["ban"].Usage}");
             return;
         }
 
-        if (!TryParseDuration(connection, args, 1, out var banUntilTime))
+        if (IsSelfTarget(connection, targetName))
+        {
+            SendSystemMessage(connection, "You cannot ban yourself.");
             return;
-
-        string targetName = args[0];
+        }
 
         using DatabaseContext dbContext = _dbContextFactory.CreateDbContext();
 
@@ -135,7 +169,7 @@ public static class ChatCommandRegistry
             return;
         }
 
-        string targetName = args[0];
+        string targetName = string.Join(' ', args);
 
         using DatabaseContext dbContext = _dbContextFactory.CreateDbContext();
 
@@ -160,16 +194,17 @@ public static class ChatCommandRegistry
 
     private static void Mute(GatewayConnection connection, string[] args)
     {
-        if (args.Length < 1)
+        if (!TryParseTarget(args, out var targetName, out var muteUntilTime, out var error))
         {
-            SendSystemMessage(connection, $"Usage: {Commands["mute"].Usage}");
+            SendSystemMessage(connection, error ?? $"Usage: {Commands["mute"].Usage}");
             return;
         }
 
-        if (!TryParseDuration(connection, args, 1, out var muteUntilTime))
+        if (IsSelfTarget(connection, targetName))
+        {
+            SendSystemMessage(connection, "You cannot mute yourself.");
             return;
-
-        string targetName = args[0];
+        }
 
         using DatabaseContext dbContext = _dbContextFactory.CreateDbContext();
 
@@ -208,7 +243,7 @@ public static class ChatCommandRegistry
             return;
         }
 
-        string targetName = args[0];
+        string targetName = string.Join(' ', args);
 
         using DatabaseContext dbContext = _dbContextFactory.CreateDbContext();
 
@@ -245,7 +280,13 @@ public static class ChatCommandRegistry
             return;
         }
 
-        var targetName = args[0];
+        var targetName = string.Join(' ', args);
+
+        if (IsSelfTarget(connection, targetName))
+        {
+            SendSystemMessage(connection, "You cannot kick yourself.");
+            return;
+        }
 
         if (!_zoneManager.TryGetPlayer(targetName, out var targetPlayer))
         {
@@ -300,7 +341,7 @@ public static class ChatCommandRegistry
             return;
         }
 
-        string parsedTargetName = args[0];
+        string parsedTargetName = string.Join(' ', args);
         SetMod(connection, parsedTargetName, true);
     }
 
@@ -312,7 +353,7 @@ public static class ChatCommandRegistry
             return;
         }
 
-        SetMod(connection, args[0], false);
+        SetMod(connection, string.Join(' ', args), false);
     }
 
     private static void Help(GatewayConnection connection, string[] args)
@@ -327,23 +368,6 @@ public static class ChatCommandRegistry
 
         foreach (var usage in usages)
             SendSystemMessage(connection, usage);
-    }
-
-    private static bool TryParseDuration(GatewayConnection connection, string[] args, int index, out DateTimeOffset? until)
-    {
-        until = null;
-
-        if (args.Length <= index)
-            return true;
-
-        if (!int.TryParse(args[index], out var minutes) || minutes <= 0)
-        {
-            SendSystemMessage(connection, "Duration must be a positive number of minutes.");
-            return false;
-        }
-
-        until = DateTimeOffset.UtcNow.AddMinutes(minutes);
-        return true;
     }
 
     private static void SendSystemMessage(GatewayConnection connection, string message)
