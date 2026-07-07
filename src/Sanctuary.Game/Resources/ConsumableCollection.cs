@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 using Microsoft.Extensions.Logging;
 
@@ -38,7 +39,8 @@ public class ConsumableCollection
             var jsonSerializerOptions = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
-                ReadCommentHandling = JsonCommentHandling.Skip
+                ReadCommentHandling = JsonCommentHandling.Skip,
+                Converters = { new JsonStringEnumConverter() } // parse CakeItemType from strings ("BossCake"/"ScaredyCake")
             };
 
             var consumables = JsonSerializer.Deserialize<ConsumableDefinitions>(fileStream, jsonSerializerOptions);
