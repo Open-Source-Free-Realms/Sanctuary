@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Linq;
+using System.IO;
 using System.Reflection;
 
 using Microsoft.EntityFrameworkCore;
@@ -33,6 +33,8 @@ public sealed class DatabaseContext : DbContext
         // optionsBuilder.EnableDetailedErrors();
         // optionsBuilder.EnableSensitiveDataLogging();
 #endif
+        optionsBuilder.ConfigureWarnings(warnings =>
+            warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -48,15 +50,27 @@ public sealed class DatabaseContext : DbContext
 
     private Assembly? LoadProviderAssembly()
     {
-        var prefix = $"{typeof(DatabaseFactory).Namespace}.";
+        string? providerAssembly = null;
 
-        return AppDomain.CurrentDomain.GetAssemblies()
-            .FirstOrDefault(a =>
-            {
-                var name = a.GetName().Name;
-                return name is not null
-                       && name.StartsWith(prefix, StringComparison.Ordinal)
-                       && (name.EndsWith(".MySql", StringComparison.Ordinal) || name.EndsWith(".Sqlite", StringComparison.Ordinal));
-            });
+        if (Database.IsMySql())
+            providerAssembly = $"{typeof(DatabaseFactory).Namespace}.MySql";
+        else if (Database.IsSqlite())
+            providerAssembly = $"{typeof(DatabaseFactory).Namespace}.Sqlite";
+
+        ArgumentException.ThrowIfNullOrEmpty(providerAssembly);
+
+        Assembly? assembly = null;
+
+        try
+        {
+            assembly = EF.IsDesignTime
+                     ? Assembly.Load(providerAssembly)
+                     : Assembly.LoadFrom(Path.Combine(AppContext.BaseDirectory, $"{providerAssembly}.dll"));
+        }
+        catch
+        {
+        }
+
+        return assembly;
     }
 }
