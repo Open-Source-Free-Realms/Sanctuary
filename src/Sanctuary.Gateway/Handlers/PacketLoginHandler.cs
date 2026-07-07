@@ -80,6 +80,7 @@ public static class PacketLoginHandler
 
         var character = dbContext.Characters
             .AsNoTracking()
+            .Include(x => x.User)
             .Include(x => x.Items)
             .Include(x => x.Titles)
             .Include(x => x.Mounts)
@@ -101,6 +102,28 @@ public static class PacketLoginHandler
             connection.Disconnect();
 
             return true;
+        }
+
+        if (character.User.IsLocked)
+        {
+            if (character.User.LockedUntil <= DateTimeOffset.UtcNow)
+            {
+                dbContext.Users
+                    .Where(x => x.Id == character.User.Id)
+                    .ExecuteUpdate(x => x
+                        .SetProperty(u => u.IsLocked, false)
+                        .SetProperty(u => u.LockedUntil, (DateTimeOffset?)null));
+            }
+            else
+            {
+                _logger.LogWarning("{connection} connected with a banned account. ( Guid: {guid}, Ticket: \"{ticket}\" )", connection, packet.Guid, packet.Ticket);
+
+                connection.Send(packetLoginReply);
+
+                connection.Disconnect();
+
+                return true;
+            }
         }
 
 #if !DEBUG

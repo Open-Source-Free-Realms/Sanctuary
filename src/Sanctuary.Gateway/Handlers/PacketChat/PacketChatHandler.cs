@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Linq;
 
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using Sanctuary.Database;
 using Sanctuary.Game;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
@@ -25,6 +27,10 @@ public static class PacketChatHandler
         _chatLogger = loggerFactory.CreateLogger("Chat");
 
         _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
+
+        var dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
+
+        ChatCommandRegistry.Initialize(_zoneManager, dbContextFactory);
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -36,6 +42,18 @@ public static class PacketChatHandler
         }
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(PacketChat), packet);
+
+        if (packet.Message == null)
+        {
+            _logger.LogWarning("Received {name} packet with null message. ( {packet} )", nameof(PacketChat), packet);
+            return false;
+        }
+        
+        if (packet.Message.StartsWith("!admin"))
+        {
+            ChatCommandRegistry.HandleCommand(connection, packet.Message);
+            return true;
+        }
 
         packet.FromGuid = connection.Player.Guid;
         packet.FromName = connection.Player.Name;
