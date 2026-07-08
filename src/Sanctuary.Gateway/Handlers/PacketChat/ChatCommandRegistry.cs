@@ -38,7 +38,7 @@ public static class ChatCommandRegistry
         ["unmute"] = new ChatCommandDefinition(ChatCommandRole.Mod, "!admin unmute <player>", Unmute),
         ["promote"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin promote <player>", Promote),
         ["demote"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin demote <player>", Demote),
-        ["help"] = new ChatCommandDefinition(ChatCommandRole.Player, "!admin help", Help),
+        ["help"] = new ChatCommandDefinition(ChatCommandRole.Mod, "!admin help", Help),
     };
 
     public static void Initialize(IZoneManager zoneManager, IDbContextFactory<DatabaseContext> dbContextFactory, ILogger adminLogger)
