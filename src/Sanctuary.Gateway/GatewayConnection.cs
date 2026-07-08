@@ -362,11 +362,6 @@ public class GatewayConnection : UdpConnection
         Player.ChatBubbleBackgroundColor = dbCharacter.ChatBubbleBackgroundColor;
         Player.ChatBubbleSize = dbCharacter.ChatBubbleSize;
 
-        Player.IsAdmin = dbCharacter.User.IsAdmin;
-        Player.IsMod = dbCharacter.User.IsMod;
-        Player.IsMuted = dbCharacter.User.IsMuted;
-        Player.MutedUntil = dbCharacter.User.MutedUntil;
-
         foreach (var dbFriend in dbCharacter.Friends)
         {
             var friendData = new FriendData
