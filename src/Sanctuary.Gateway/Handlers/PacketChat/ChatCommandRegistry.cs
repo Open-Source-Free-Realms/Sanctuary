@@ -137,7 +137,7 @@ public static class ChatCommandRegistry
 
         using DatabaseContext dbContext = _dbContextFactory.CreateDbContext();
 
-        var target = dbContext.Characters.SingleOrDefault(x => x.FullName == targetName);
+        var target = dbContext.Characters.SingleOrDefault(character => character.FullName == targetName);
 
         if (target is null)
         {
@@ -173,7 +173,7 @@ public static class ChatCommandRegistry
 
         using DatabaseContext dbContext = _dbContextFactory.CreateDbContext();
 
-        var target = dbContext.Characters.SingleOrDefault(x => x.FullName == targetName);
+        var target = dbContext.Characters.SingleOrDefault(character => character.FullName == targetName);
 
         if (target is null)
         {
@@ -182,8 +182,8 @@ public static class ChatCommandRegistry
         }
 
         dbContext.Users
-            .Where(x => x.Id == target.UserId)
-            .ExecuteUpdate(x => x
+            .Where(user => user.Id == target.UserId)
+            .ExecuteUpdate(user => user
                 .SetProperty(u => u.IsLocked, false)
                 .SetProperty(u => u.LockedUntil, (DateTimeOffset?)null));
 
@@ -208,7 +208,7 @@ public static class ChatCommandRegistry
 
         using DatabaseContext dbContext = _dbContextFactory.CreateDbContext();
 
-        var target = dbContext.Characters.SingleOrDefault(x => x.FullName == targetName);
+        var target = dbContext.Characters.SingleOrDefault(character => character.FullName == targetName);
 
         if (target is null)
         {
@@ -217,8 +217,8 @@ public static class ChatCommandRegistry
         }
 
         dbContext.Users
-            .Where(x => x.Id == target.UserId)
-            .ExecuteUpdate(x => x
+            .Where(user => user.Id == target.UserId)
+            .ExecuteUpdate(user => user
                 .SetProperty(u => u.IsMuted, true)
                 .SetProperty(u => u.MutedUntil, muteUntilTime));
 
@@ -247,7 +247,7 @@ public static class ChatCommandRegistry
 
         using DatabaseContext dbContext = _dbContextFactory.CreateDbContext();
 
-        var target = dbContext.Characters.SingleOrDefault(x => x.FullName == targetName);
+        var target = dbContext.Characters.SingleOrDefault(character => character.FullName == targetName);
 
         if (target is null)
         {
@@ -256,8 +256,8 @@ public static class ChatCommandRegistry
         }
 
         dbContext.Users
-            .Where(x => x.Id == target.UserId)
-            .ExecuteUpdate(x => x
+            .Where(user => user.Id == target.UserId)
+            .ExecuteUpdate(user => user
                 .SetProperty(u => u.IsMuted, false)
                 .SetProperty(u => u.MutedUntil, (DateTimeOffset?)null));
 
@@ -320,8 +320,8 @@ public static class ChatCommandRegistry
         }
 
         dbContext.Users
-            .Where(x => x.Id == target.UserId)
-            .ExecuteUpdate(x => x.SetProperty(u => u.IsMod, isMod));
+            .Where(user => user.Id == target.UserId)
+            .ExecuteUpdate(user => user.SetProperty(u => u.IsMod, isMod));
 
         if (_zoneManager.TryGetPlayer(targetName, out var targetPlayer))
             targetPlayer.IsMod = isMod;
@@ -361,9 +361,9 @@ public static class ChatCommandRegistry
         ChatCommandRole role = GetRole(connection.Player);
 
         string[] usages = Commands.Values
-            .Where(x => role >= x.RequiredRole)
-            .OrderBy(x => x.Usage)
-            .Select(x => x.Usage)
+            .Where(command => role >= command.RequiredRole)
+            .OrderBy(command => command.Usage)
+            .Select(command => command.Usage)
             .ToArray();
 
         foreach (var usage in usages)
