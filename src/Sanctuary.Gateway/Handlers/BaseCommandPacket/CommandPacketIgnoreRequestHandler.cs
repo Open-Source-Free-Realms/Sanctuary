@@ -9,10 +9,10 @@ using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game;
+using Sanctuary.Gateway.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
-using Sanctuary.Packet.Common.Chat;
 
 namespace Sanctuary.Gateway.Handlers;
 
@@ -48,7 +48,7 @@ public static class CommandPacketIgnoreRequestHandler
 
         if (dbCharacterToIgnore is null)
         {
-            SendSystemMessage(connection, "Player not found.");
+            ChatHelper.SendSystemMessage(connection, "Player not found.");
             return true;
         }
 
@@ -58,7 +58,7 @@ public static class CommandPacketIgnoreRequestHandler
 
         if (requesterCharacterId == targetCharacterId)
         {
-            SendSystemMessage(connection, "You cannot ignore yourself.");
+            ChatHelper.SendSystemMessage(connection, "You cannot ignore yourself.");
             return true;
         }
 
@@ -66,7 +66,7 @@ public static class CommandPacketIgnoreRequestHandler
         {
             if (connection.Player.Ignores.Any(x => x.Guid == ignoredCharacterGuid))
             {
-                SendSystemMessage(connection, "That player is already ignored.");
+                ChatHelper.SendSystemMessage(connection, "That player is already ignored.");
                 return true;
             }
 
@@ -76,7 +76,7 @@ public static class CommandPacketIgnoreRequestHandler
 
             if (areFriends)
             {
-                SendSystemMessage(connection, "You cannot ignore a player on your friends list.");
+                ChatHelper.SendSystemMessage(connection, "You cannot ignore a player on your friends list.");
                 return true;
             }
 
@@ -117,7 +117,7 @@ public static class CommandPacketIgnoreRequestHandler
 
             if (dbIgnoreToRemove.ExecuteDelete() <= 0)
             {
-                SendSystemMessage(connection, "That player is not on your ignore list.");
+                ChatHelper.SendSystemMessage(connection, "That player is not on your ignore list.");
                 return true;
             }
 
@@ -134,12 +134,4 @@ public static class CommandPacketIgnoreRequestHandler
         return true;
     }
 
-    private static void SendSystemMessage(GatewayConnection connection, string message)
-    {
-        connection.Player.SendTunneled(new PacketChat
-        {
-            Channel = ChatChannel.System,
-            Message = message
-        });
-    }
 }
