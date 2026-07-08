@@ -63,12 +63,21 @@ public static class CharacterDeleteRequestHandler
         try
         {
             // Delete references first to avoid foreign key constraint violations.
-            dbContext.Friends.Where(f => f.FriendCharacterId == character.Id).ExecuteDelete();
-            dbContext.Ignores.Where(i => i.IgnoreCharacterId == character.Id).ExecuteDelete();
+            var friends = dbContext.Friends.Where(f => f.FriendCharacterId == character.Id);
+            var ignores = dbContext.Ignores.Where(i => i.IgnoreCharacterId == character.Id);
 
+            dbContext.Friends.RemoveRange(friends);
+            dbContext.Ignores.RemoveRange(ignores);
             dbContext.Remove(character);
 
-            dbContext.SaveChanges();
+            if (dbContext.SaveChanges() == 0)
+            {
+                characterDeleteReply.Status = 2;
+
+                connection.Send(characterDeleteReply);
+
+                return true;
+            }
         }
         catch (DbUpdateException ex)
         {
