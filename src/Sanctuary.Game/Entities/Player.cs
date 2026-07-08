@@ -36,7 +36,8 @@ public sealed class Player : ClientPcData, IEntity
     public int ChatBubbleBackgroundColor { get; set; }
     public int ChatBubbleSize { get; set; }
 
-    public ClientPcProfile ActiveProfile => Profiles.Single(x => x.Id == ActiveProfileId);
+    public ClientPcProfile ActiveProfile =>
+        Profiles.FirstOrDefault(x => x.Id == ActiveProfileId) ?? Profiles.First();
 
     public Mount? Mount { get; set; }
 
@@ -262,6 +263,9 @@ public sealed class Player : ClientPcData, IEntity
         foreach (var npc in npcs)
         {
             var playerUpdatePacketAddNpc = npc.GetAddNpcPacket();
+
+            if (npc is Mount mount && mount.Rider.Guid == Guid)
+                playerUpdatePacketAddNpc.RiderGuid = 0;
 
             SendTunneled(playerUpdatePacketAddNpc);
         }

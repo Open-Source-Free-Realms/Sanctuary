@@ -60,10 +60,34 @@ public static class CharacterDeleteRequestHandler
             return true;
         }
 
-        dbContext.Remove(character);
-
-        if (dbContext.SaveChanges() <= 0)
+        try
         {
+            // Delete references first to avoid foreign key constraint violations.
+            var characterId = character.Id;
+
+            var friends = dbContext.Friends.Where(f =>
+                f.CharacterId == characterId || f.FriendCharacterId == characterId);
+
+            var ignores = dbContext.Ignores.Where(i =>
+                i.CharacterId == characterId || i.IgnoreCharacterId == characterId);
+
+            dbContext.Friends.RemoveRange(friends);
+            dbContext.Ignores.RemoveRange(ignores);
+            dbContext.Remove(character);
+
+            if (dbContext.SaveChanges() == 0)
+            {
+                characterDeleteReply.Status = 2;
+
+                connection.Send(characterDeleteReply);
+
+                return true;
+            }
+        }
+        catch (DbUpdateException ex)
+        {
+            _logger.LogError(ex, "Failed to delete character {CharacterId}.", character.Id);
+
             characterDeleteReply.Status = 2;
 
             connection.Send(characterDeleteReply);

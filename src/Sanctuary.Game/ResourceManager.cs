@@ -42,6 +42,7 @@ public class ResourceManager : IResourceManager
     public static readonly string QuickChatsFile = Path.Combine(BaseDirectory, "QuickChats.json");
     public static readonly string PlayerTitlesFile = Path.Combine(BaseDirectory, "PlayerTitles.json");
     public static readonly string PointOfInterestsFile = Path.Combine(BaseDirectory, "PointOfInterests.json");
+    public static readonly string NameFilterFile = Path.Combine(BaseDirectory, "NameFilter.txt");
 
     public IdToStringLookup HairMappings { get; }
     public IdToStringLookup HeadMappings { get; }
@@ -71,6 +72,7 @@ public class ResourceManager : IResourceManager
     public ProfileDefinitionCollection Profiles { get; }
     public QuickChatDefinitionCollection QuickChats { get; }
     public PointOfInterestDefinitionCollection PointOfInterests { get; }
+    public NameFilterCollection NameFilter { get; }
 
     public ResourceManager(ILogger<ResourceManager> logger)
     {
@@ -108,10 +110,14 @@ public class ResourceManager : IResourceManager
         QuickChats = new(_logger);
         PlayerTitles = new(_logger);
         PointOfInterests = new(_logger);
+        NameFilter = new(_logger);
     }
 
     public bool Load()
     {
+        if (!NameFilter.Load(NameFilterFile))
+            return false;
+
         if (!HairMappings.Load(HairMappingsFile))
             return false;
 
@@ -234,6 +240,8 @@ public class ResourceManager : IResourceManager
                 loaded = PlayerTitles.Load(PlayerTitlesFile);
             else if (e.FullPath == PointOfInterestsFile)
                 loaded = PointOfInterests.Load(PointOfInterestsFile);
+            else if (e.FullPath == NameFilterFile)
+                loaded = NameFilter.Load(NameFilterFile);
             else
                 _logger.LogWarning("Unknown file changed. File: {filepath}", e.FullPath);
 
