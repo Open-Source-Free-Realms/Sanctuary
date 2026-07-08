@@ -38,7 +38,16 @@ public static class GuildCreatePacketHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(GuildCreatePacket), packet);
 
-        if (string.IsNullOrEmpty(packet.TemporaryName))
+        var guildName = NormalizeGuildName(packet.TemporaryName ?? packet.Name);
+
+        _logger.LogTrace(
+            "Guild create name fields. Name: \"{name}\", TemporaryName: \"{temporaryName}\", Locale: \"{locale}\", Normalized: \"{normalized}\"",
+            packet.Name,
+            packet.TemporaryName,
+            packet.Locale,
+            guildName);
+
+        if (!IsValidGuildName(guildName))
         {
             connection.SendTunneled(new GuildErrorPacket
             {
@@ -50,7 +59,8 @@ public static class GuildCreatePacketHandler
 
         using var dbContext = _dbContextFactory.CreateDbContext();
 
-        var nameTaken = dbContext.Guilds.Any(x => x.Name == packet.TemporaryName);
+        var normalizedGuildName = guildName.ToLower();
+        var nameTaken = dbContext.Guilds.Any(x => x.Name.ToLower() == normalizedGuildName);
 
         if (nameTaken)
         {
@@ -70,7 +80,8 @@ public static class GuildCreatePacketHandler
 
         var dbGuild = new DbGuild
         {
-            Name = packet.TemporaryName
+            Name = guildName,
+            MaxMembers = 100
         };
 
         dbContext.Guilds.Add(dbGuild);
@@ -152,5 +163,18 @@ public static class GuildCreatePacketHandler
         });
 
         return true;
+    }
+
+    private static string NormalizeGuildName(string? name)
+    {
+        return string.Join(' ', (name ?? string.Empty).Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries));
+    }
+
+    private static bool IsValidGuildName(string name)
+    {
+        if (name.Length is < 3 or > 32)
+            return false;
+
+        return name.All(c => char.IsLetterOrDigit(c) || c is ' ' or '\'' or '-');
     }
 }

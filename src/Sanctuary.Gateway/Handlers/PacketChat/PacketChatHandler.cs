@@ -115,23 +115,24 @@ public static class PacketChatHandler
 
             case ChatChannel.GuildSay:
                 {
-                    _chatLogger.LogInformation("{Channel}|From: \"{FromName}\" ({FromGuid}), Guild: {GuildGuid} Msg: \"{Message}\"",
-                        packet.Channel,
+                    if (connection.Player.GuildData is null)
+                        break;
+
+                    packet.GuildGuid = connection.Player.GuildData.Guid;
+
+                    _chatLogger.LogInformation("GuildSay|GuildGuid: {GuildGuid}, From: \"{FromName}\" ({FromGuid}), Msg: \"{Message}\"",
+                        packet.GuildGuid,
                         packet.FromName,
                         packet.FromGuid,
-                        packet.GuildGuid,
                         packet.Message
                     );
 
-                    if (connection.Player.GuildData is null)
-                        return true;
-
-                    foreach (var guildMember in connection.Player.GuildData.Members)
+                    foreach (var guildPlayer in _zoneManager.GetPlayers())
                     {
-                        if (!_zoneManager.TryGetPlayer(guildMember.Key, out var guildPlayer))
+                        if (guildPlayer.GuildData is null || guildPlayer.GuildData.Guid != packet.GuildGuid)
                             continue;
 
-                        if (guildPlayer.GuildData is null)
+                        if (guildPlayer.Guid != connection.Player.Guid && guildPlayer.Ignores.Any(x => x.Guid == connection.Player.Guid))
                             continue;
 
                         guildPlayer.SendTunneled(packet);

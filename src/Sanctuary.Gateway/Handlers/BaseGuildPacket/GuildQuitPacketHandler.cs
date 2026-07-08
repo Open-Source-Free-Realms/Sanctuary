@@ -46,35 +46,34 @@ public static class GuildQuitPacketHandler
         if (connection.Player.GuildData.Guid != packet.Guid)
             return true;
 
-        if (!connection.Player.GuildData.Members.TryGetValue(connection.Player.Guid, out var quitGuildMember))
-            return true;
-
-        if (quitGuildMember.Role == GuildRole.Leader.Id && connection.Player.GuildData.Members.Count > 1)
-        {
-            connection.SendTunneled(new GuildErrorPacket
-            {
-                MessageName = "GuildPromoteAtMinRank"
-            });
-
-            return true;
-        }
-
         using var dbContext = _dbContextFactory.CreateDbContext();
+        using var transaction = dbContext.Database.BeginTransaction();
 
-        var dbGuildMemberToRemove = dbContext.GuildMembers
-            .Where(x => x.GuildId == packet.Guid && x.Id == GuidHelper.GetPlayerId(connection.Player.Guid));
+        var characterId = GuidHelper.GetPlayerId(connection.Player.Guid);
+        var quitRole = dbContext.GuildMembers
+            .AsNoTracking()
+            .Where(x => x.GuildId == packet.Guid && x.Id == characterId)
+            .Select(x => (int?)x.Role)
+            .SingleOrDefault();
 
-        if (dbGuildMemberToRemove.ExecuteDelete() <= 0)
+        if (quitRole is null)
             return true;
 
         var result = dbContext.Characters
-            .Where(x => x.Id == GuidHelper.GetPlayerId(connection.Player.Guid))
+            .Where(x => x.Id == characterId)
             .ExecuteUpdate(x => x.SetProperty(x => x.GuildMemberId, (ulong?)null));
 
         if (result <= 0)
             return true;
 
+        var dbGuildMemberToRemove = dbContext.GuildMembers
+            .Where(x => x.GuildId == packet.Guid && x.Id == characterId);
+
+        if (dbGuildMemberToRemove.ExecuteDelete() <= 0)
+            return true;
+
         var hasMembers = dbContext.GuildMembers.Any(m => m.GuildId == packet.Guid);
+        GuildMemberStatusUpdatePacket? promotedLeaderStatusUpdatePacket = null;
 
         if (!hasMembers)
         {
@@ -84,6 +83,60 @@ public static class GuildQuitPacketHandler
             if (dbGuildToDelete.ExecuteDelete() <= 0)
                 return true;
         }
+        else if (quitRole == GuildRole.Leader.Id
+                 && !dbContext.GuildMembers.Any(m => m.GuildId == packet.Guid && m.Role == GuildRole.Leader.Id))
+        {
+            var newLeader = dbContext.GuildMembers
+                .Include(x => x.Character)
+                .Where(x => x.GuildId == packet.Guid)
+                .AsEnumerable()
+                .OrderBy(x => x.Role)
+                .ThenBy(x => x.Id)
+                .FirstOrDefault();
+
+            if (newLeader is not null)
+            {
+                newLeader.Role = GuildRole.Leader.Id;
+
+                if (dbContext.SaveChanges() <= 0)
+                    return true;
+
+                var newLeaderGuid = GuidHelper.GetPlayerGuid(newLeader.Id);
+                var memberName = new NameData
+                {
+                    FirstName = newLeader.Character.FirstName,
+                    LastName = newLeader.Character.LastName ?? string.Empty
+                };
+
+                var online = _zoneManager.TryGetPlayer(newLeaderGuid, out var newLeaderPlayer);
+                var worldId = 0;
+                var profileId = 0;
+                var profileRank = 0;
+
+                if (online)
+                {
+                    memberName = newLeaderPlayer!.Name;
+                    worldId = newLeaderPlayer.Zone.Id;
+                    profileId = newLeaderPlayer.ActiveProfileId;
+                    profileRank = newLeaderPlayer.ActiveProfile.Rank;
+                }
+
+                promotedLeaderStatusUpdatePacket = new GuildMemberStatusUpdatePacket
+                {
+                    GuildGuid = packet.Guid,
+                    MemberGuid = newLeaderGuid,
+                    Name = memberName,
+                    Role = GuildRole.Leader.Id,
+                    Online = online,
+                    Type = 4,
+                    WorldId = worldId,
+                    ProfileId = profileId,
+                    ProfileRank = profileRank
+                };
+            }
+        }
+
+        transaction.Commit();
 
         var guildPlayerStatusUpdatePacket = new GuildPlayerStatusUpdatePacket
         {
@@ -111,17 +164,25 @@ public static class GuildQuitPacketHandler
 
         connection.SendTunneled(guildMemberStatusUpdatePacket);
 
-        foreach (var guildMember in connection.Player.GuildData.Members)
+        foreach (var guildPlayer in _zoneManager.GetPlayers())
         {
-            if (!_zoneManager.TryGetPlayer(guildMember.Key, out var guildPlayer))
-                continue;
-
-            if (guildPlayer.GuildData is null)
+            if (guildPlayer.GuildData is null || guildPlayer.GuildData.Guid != packet.Guid)
                 continue;
 
             guildPlayer.GuildData.Members.Remove(connection.Player.Guid);
 
+            if (guildPlayer.Guid == connection.Player.Guid)
+                continue;
+
             guildPlayer.SendTunneled(guildMemberStatusUpdatePacket);
+
+            if (promotedLeaderStatusUpdatePacket is null)
+                continue;
+
+            if (guildPlayer.GuildData.Members.TryGetValue(promotedLeaderStatusUpdatePacket.MemberGuid, out var promotedMember))
+                promotedMember.Role = promotedLeaderStatusUpdatePacket.Role;
+
+            guildPlayer.SendTunneled(promotedLeaderStatusUpdatePacket);
         }
 
         connection.Player.GuildData = null;

@@ -58,11 +58,46 @@ public static class GuildInviteAcceptPacketHandler
         if (dbCharacter is null)
             return true;
 
+        var guildGuid = player.GuildData.Guid;
+        var deletedOrphanedMembers = dbContext.GuildMembers
+            .Where(x => x.GuildId == guildGuid && !dbContext.Characters.Any(c => c.Id == x.Id))
+            .ExecuteDelete();
+
+        if (deletedOrphanedMembers > 0)
+        {
+            _logger.LogWarning(
+                "Deleted orphaned guild members before invite accept. GuildGuid: {guildGuid}, DeletedMembers: {deletedMembers}",
+                guildGuid,
+                deletedOrphanedMembers);
+        }
+
         var dbGuild = dbContext.Guilds
-            .SingleOrDefault(x => x.Id == player.GuildData.Guid);
+            .Include(x => x.Members)
+            .SingleOrDefault(x => x.Id == guildGuid);
 
         if (dbGuild is null)
             return true;
+
+        if (dbCharacter.GuildMemberId is not null)
+        {
+            connection.SendTunneled(new GuildErrorPacket
+            {
+                MessageName = "GuildInviteeInMaxGuilds"
+            });
+
+            return true;
+        }
+
+        var maxMembers = dbGuild.MaxMembers > 0 ? dbGuild.MaxMembers : 100;
+        if (dbGuild.Members.Count >= maxMembers)
+        {
+            connection.SendTunneled(new GuildErrorPacket
+            {
+                MessageName = "GuildMemberCountExceeded"
+            });
+
+            return true;
+        }
 
         var dbGuildMember = new DbGuildMember
         {
@@ -84,7 +119,7 @@ public static class GuildInviteAcceptPacketHandler
 
         var memberGuid = GuidHelper.GetPlayerGuid(dbGuildMember.Id);
 
-        guildData.Members.Add(memberGuid, new GuildMember
+        var newGuildMember = new GuildMember
         {
             Guid = memberGuid,
 
@@ -98,7 +133,9 @@ public static class GuildInviteAcceptPacketHandler
 
             ProfileId = connection.Player.ActiveProfileId,
             ProfileRank = connection.Player.ActiveProfile.Rank
-        });
+        };
+
+        guildData.Members[memberGuid] = newGuildMember;
 
         connection.Player.GuildData = guildData;
 
@@ -138,13 +175,19 @@ public static class GuildInviteAcceptPacketHandler
             ProfileRank = connection.Player.ActiveProfile.Rank
         };
 
-        player.SendTunneled(guildMemberStatusUpdatePacket);
-
-        connection.Player.SendTunneled(guildMemberStatusUpdatePacket);
-
-        player.SendTunneled(new GuildErrorPacket
+        foreach (var onlinePlayer in _zoneManager.GetPlayers())
         {
-            MessageName = "GuildInviteAccepted"
+            if (onlinePlayer.GuildData is null || onlinePlayer.GuildData.Guid != guildData.Guid)
+                continue;
+
+            onlinePlayer.GuildData.Members[memberGuid] = newGuildMember;
+            onlinePlayer.SendTunneled(guildMemberStatusUpdatePacket);
+        }
+
+        player.SendTunneled(new GuildInviteAcceptNotificationPacket
+        {
+            PlayerGuid = connection.Player.Guid,
+            Name = connection.Player.Name
         });
 
         return true;

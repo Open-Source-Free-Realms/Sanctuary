@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +8,6 @@ using Microsoft.Extensions.Logging;
 using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Game;
-using Sanctuary.Game.Entities;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -41,22 +40,26 @@ public static class GuildDemotePacketHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(GuildDemotePacket), packet);
 
-        if (connection.Player.GuildData is null)
+        if (connection.Player.GuildData is null || connection.Player.GuildData.Guid != packet.GuildGuid)
             return true;
 
-        if (!connection.Player.GuildData.Members.TryGetValue(connection.Player.Guid, out var demoterGuildMember))
+        var demoterId = GuidHelper.GetPlayerId(connection.Player.Guid);
+        var targetId = GuidHelper.GetPlayerId(packet.PlayerGuid);
+
+        using var dbContext = _dbContextFactory.CreateDbContext();
+
+        var demoterGuildMember = dbContext.GuildMembers
+            .AsNoTracking()
+            .SingleOrDefault(x => x.GuildId == packet.GuildGuid && x.Id == demoterId);
+
+        var targetGuildMember = dbContext.GuildMembers
+            .Include(x => x.Character)
+            .SingleOrDefault(x => x.GuildId == packet.GuildGuid && x.Id == targetId);
+
+        if (demoterGuildMember is null || targetGuildMember is null)
             return true;
 
-        if (!_zoneManager.TryGetPlayer(packet.PlayerGuid, out var demotePlayer))
-            return true;
-
-        if (demotePlayer.GuildData is null)
-            return true;
-
-        if (!demotePlayer.GuildData.Members.TryGetValue(demotePlayer.Guid, out var demoteGuildMember))
-            return true;
-
-        if (demoterGuildMember.Role >= demoteGuildMember.Role)
+        if (targetId == demoterId || !CanDemoteMember(demoterGuildMember.Role, targetGuildMember.Role))
         {
             connection.SendTunneled(new GuildErrorPacket
             {
@@ -66,7 +69,7 @@ public static class GuildDemotePacketHandler
             return true;
         }
 
-        if (demoteGuildMember.Role == GuildRole.Recruit.Id)
+        if (targetGuildMember.Role == GuildRole.Recruit.Id)
         {
             connection.SendTunneled(new GuildErrorPacket
             {
@@ -76,51 +79,68 @@ public static class GuildDemotePacketHandler
             return true;
         }
 
-        using var dbContext = _dbContextFactory.CreateDbContext();
-
-        var dbGuildMember = dbContext.GuildMembers
-            .SingleOrDefault(x => x.GuildId == packet.GuildGuid && x.Id == GuidHelper.GetPlayerId(packet.PlayerGuid));
-
-        if (dbGuildMember is null)
-            return true;
-
-        dbGuildMember.Role += 1;
+        targetGuildMember.Role += 1;
 
         if (dbContext.SaveChanges() <= 0)
             return true;
 
-        demoteGuildMember.Role += 1;
+        var memberName = new NameData
+        {
+            FirstName = targetGuildMember.Character.FirstName,
+            LastName = targetGuildMember.Character.LastName ?? string.Empty
+        };
+
+        var online = _zoneManager.TryGetPlayer(packet.PlayerGuid, out var targetPlayer);
+        var worldId = 0;
+        var profileId = 0;
+        var profileRank = 0;
+
+        if (online)
+        {
+            memberName = targetPlayer!.Name;
+            worldId = targetPlayer.Zone.Id;
+            profileId = targetPlayer.ActiveProfileId;
+            profileRank = targetPlayer.ActiveProfile.Rank;
+
+            if (targetPlayer.GuildData?.Members.TryGetValue(packet.PlayerGuid, out var targetOnlineMember) == true)
+                targetOnlineMember.Role = targetGuildMember.Role;
+        }
 
         var guildMemberStatusUpdatePacket = new GuildMemberStatusUpdatePacket
         {
             GuildGuid = packet.GuildGuid,
             MemberGuid = packet.PlayerGuid,
-
-            Name = demotePlayer.Name,
-
-            Role = demoteGuildMember.Role,
-
-            Online = true,
-
+            Name = memberName,
+            Role = targetGuildMember.Role,
+            Online = online,
             Type = 5,
-
-            WorldId = demotePlayer.Zone.Id,
-
-            ProfileId = demotePlayer.ActiveProfileId,
-            ProfileRank = demotePlayer.ActiveProfile.Rank
+            WorldId = worldId,
+            ProfileId = profileId,
+            ProfileRank = profileRank
         };
 
-        foreach (var guildMember in connection.Player.GuildData.Members)
+        foreach (var guildPlayer in _zoneManager.GetPlayers())
         {
-            if (!_zoneManager.TryGetPlayer(guildMember.Key, out var guildPlayer))
+            if (guildPlayer.GuildData is null || guildPlayer.GuildData.Guid != packet.GuildGuid)
                 continue;
 
-            if (guildPlayer.GuildData is null)
-                continue;
+            if (guildPlayer.GuildData.Members.TryGetValue(packet.PlayerGuid, out var visibleMember))
+                visibleMember.Role = targetGuildMember.Role;
 
             guildPlayer.SendTunneled(guildMemberStatusUpdatePacket);
         }
 
         return true;
+    }
+
+    private static bool CanDemoteMember(int actorRole, int targetRole)
+    {
+        if (actorRole == GuildRole.Leader.Id)
+            return true;
+
+        if (actorRole == GuildRole.Officer.Id)
+            return targetRole > GuildRole.Officer.Id;
+
+        return false;
     }
 }

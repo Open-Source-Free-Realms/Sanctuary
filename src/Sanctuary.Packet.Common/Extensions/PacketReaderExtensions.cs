@@ -895,7 +895,6 @@ public static class PacketReaderExtensions
                 30 => "GuildPaidRenameCheckReplyPacket",
                 31 => "GuildPlayerStatusUpdatePacket",
                 32 => "GuildCanCreateGuildPacket",
-                33 => "GuildCreateGuildPacket",
                 _ => "BaseGuildPacket"
             },
             130 => reader.Read<short>() switch

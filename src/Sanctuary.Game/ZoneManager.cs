@@ -76,6 +76,15 @@ public class ZoneManager : IZoneManager
         return false;
     }
 
+    public System.Collections.Generic.IEnumerable<Player> GetPlayers()
+    {
+        foreach (var zone in _zones)
+        {
+            foreach (var zonePlayer in zone.Value.Players)
+                yield return zonePlayer;
+        }
+    }
+
     private bool TryCreateStartingZone(int definitionId, [MaybeNullWhen(false)] out StartingZone zone)
     {
         zone = default;

@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 
+using Sanctuary.Core.Collections;
 using Sanctuary.Core.IO;
 using Sanctuary.Game.Interactions;
 using Sanctuary.Game.Zones;
@@ -42,10 +43,14 @@ public sealed class Player : ClientPcData, IEntity
     public List<FriendData> Friends { get; set; } = [];
     public List<IgnoreData> Ignores { get; set; } = [];
 
+    public ConcurrentSet<ulong> IncomingFriendRequests { get; } = [];
+
     public ConcurrentDictionary<ChatChannel, bool> ChatChannelStatus { get; set; } = [];
 
     public int StationCash { get; set; }
     public List<CoinStoreTransactionRecord> CoinStoreTransactions { get; set; } = [];
+
+    public int TimezoneOffset { get; set; }
 
     public GuildData? GuildData { get; set; }
 
@@ -384,7 +389,7 @@ public sealed class Player : ClientPcData, IEntity
             commandPacketInteractionList.List.Interactions.Add(IgnoreInteraction.Data);
         }
 
-        if (GuildData is null)
+        if (GuildData is null && GuildInviteInteraction.CanInvite(player))
             commandPacketInteractionList.List.Interactions.Add(GuildInviteInteraction.Data);
 
         player.SendTunneled(commandPacketInteractionList);
@@ -559,16 +564,11 @@ public sealed class Player : ClientPcData, IEntity
 
     public void Dispose()
     {
+        Mount?.Dispose();
+        Mount = null;
+
         foreach (var visiblePlayer in VisiblePlayers)
             visiblePlayer.Value.OnRemoveVisiblePlayers([this]);
-
-        if (Mount is not null)
-        {
-            Mount.ZoneTile.Entities.Remove(Mount.Guid, out _);
-
-            Zone.TryRemoveNpc(Mount.Guid);
-            Mount = null;
-        }
 
         ZoneTile.Entities.Remove(Guid, out _);
 

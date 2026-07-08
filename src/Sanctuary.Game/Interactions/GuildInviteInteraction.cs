@@ -17,10 +17,11 @@ public class GuildInviteInteraction : IInteraction
 
     public void OnInteract(Player player, IEntity other)
     {
-        if (player.GuildData is null)
+        if (!CanInvite(player))
             return;
 
-        if (player.GuildData.Members.Count >= player.GuildData.MaxMembers)
+        var maxMembers = player.GuildData!.MaxMembers > 0 ? player.GuildData.MaxMembers : 100;
+        if (player.GuildData.Members.Count >= maxMembers)
         {
             player.SendTunneled(new GuildErrorPacket
             {
@@ -58,6 +59,7 @@ public class GuildInviteInteraction : IInteraction
 
                 InviterPlayerGuid = player.Guid,
                 InviterName = player.Name,
+                InviteeName = otherPlayer.Name,
             },
             GuildName = player.GuildData.Name
         };
@@ -68,5 +70,16 @@ public class GuildInviteInteraction : IInteraction
         {
             MessageName = "GuildInviteSuccess"
         });
+    }
+
+    public static bool CanInvite(Player player)
+    {
+        if (player.GuildData is null)
+            return false;
+
+        if (!player.GuildData.Members.TryGetValue(player.Guid, out var guildMember))
+            return false;
+
+        return guildMember.Role is 1 or 2;
     }
 }

@@ -44,7 +44,47 @@ public static class GuildInvitePacketHandler
         if (connection.Player.GuildData is null)
             return true;
 
-        if (connection.Player.GuildData.Members.Count >= connection.Player.GuildData.MaxMembers)
+        using var dbContext = _dbContextFactory.CreateDbContext();
+
+        var guildGuid = connection.Player.GuildData.Guid;
+        var deletedOrphanedMembers = dbContext.GuildMembers
+            .Where(x => x.GuildId == guildGuid && !dbContext.Characters.Any(c => c.Id == x.Id))
+            .ExecuteDelete();
+
+        if (deletedOrphanedMembers > 0)
+        {
+            _logger.LogWarning(
+                "Deleted orphaned guild members before invite. GuildGuid: {guildGuid}, DeletedMembers: {deletedMembers}",
+                guildGuid,
+                deletedOrphanedMembers);
+        }
+
+        var dbGuild = dbContext.Guilds
+            .Include(x => x.Members)
+            .SingleOrDefault(x => x.Id == guildGuid);
+
+        if (dbGuild is null)
+            return true;
+
+        var inviterId = GuidHelper.GetPlayerId(connection.Player.Guid);
+        var inviterRole = dbContext.GuildMembers
+            .AsNoTracking()
+            .Where(x => x.GuildId == guildGuid && x.Id == inviterId)
+            .Select(x => (int?)x.Role)
+            .SingleOrDefault();
+
+        if (!CanInvite(inviterRole))
+        {
+            connection.SendTunneled(new GuildErrorPacket
+            {
+                MessageName = "GuildPromoteCantPromoteAbove"
+            });
+
+            return true;
+        }
+
+        var maxMembers = dbGuild.MaxMembers > 0 ? dbGuild.MaxMembers : 100;
+        if (dbGuild.Members.Count >= maxMembers)
         {
             connection.SendTunneled(new GuildErrorPacket
             {
@@ -54,18 +94,7 @@ public static class GuildInvitePacketHandler
             return true;
         }
 
-        using var dbContext = _dbContextFactory.CreateDbContext();
-
-        DbCharacter? dbCharacter = null;
-
-        if (!string.IsNullOrEmpty(packet.PlayerName))
-        {
-            dbCharacter = dbContext.Characters.SingleOrDefault(x => x.FullName == packet.PlayerName);
-        }
-        else if (packet.PlayerGuid > 0)
-        {
-            dbCharacter = dbContext.Characters.SingleOrDefault(x => x.Id == GuidHelper.GetPlayerId(packet.PlayerGuid));
-        }
+        var dbCharacter = FindInvitee(dbContext, packet, guildGuid);
 
         if (dbCharacter is null)
         {
@@ -117,5 +146,50 @@ public static class GuildInvitePacketHandler
         });
 
         return true;
+    }
+
+    private static DbCharacter? FindInvitee(DatabaseContext dbContext, GuildInvitePacket packet, ulong currentGuildGuid)
+    {
+        var candidateGuid = packet.PlayerGuid;
+
+        if (candidateGuid == currentGuildGuid && packet.GuildGuid > 0)
+            candidateGuid = packet.GuildGuid;
+
+        if (candidateGuid > 0)
+        {
+            try
+            {
+                var characterId = GuidHelper.GetPlayerId(candidateGuid);
+                var byGuid = dbContext.Characters.SingleOrDefault(x => x.Id == characterId);
+
+                if (byGuid is not null)
+                    return byGuid;
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                var byRawId = dbContext.Characters.SingleOrDefault(x => x.Id == candidateGuid);
+
+                if (byRawId is not null)
+                    return byRawId;
+            }
+        }
+
+        var playerName = NormalizeName(packet.PlayerName);
+
+        if (string.IsNullOrWhiteSpace(playerName))
+            return null;
+
+        var normalizedPlayerName = playerName.ToLower();
+        return dbContext.Characters.SingleOrDefault(x => x.FullName != null && x.FullName.ToLower() == normalizedPlayerName);
+    }
+
+    private static string NormalizeName(string? name)
+    {
+        return string.Join(' ', (name ?? string.Empty).Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries));
+    }
+
+    private static bool CanInvite(int? role)
+    {
+        return role is 1 or 2;
     }
 }
