@@ -103,6 +103,26 @@ public static class PacketLoginHandler
             return true;
         }
 
+        var orphanedIgnores = character.Ignores
+            .Where(x => x.IgnoreCharacter is null)
+            .ToList();
+
+        if (orphanedIgnores.Count > 0)
+        {
+            var orphanedIgnoreIds = orphanedIgnores
+                .Select(x => x.IgnoreCharacterId)
+                .ToList();
+
+            dbContext.Ignores
+                .Where(x => x.CharacterId == character.Id && orphanedIgnoreIds.Contains(x.IgnoreCharacterId))
+                .ExecuteDelete();
+
+            foreach (var orphanedIgnore in orphanedIgnores)
+            {
+                character.Ignores.Remove(orphanedIgnore);
+            }
+        }
+
 #if !DEBUG
         var result = dbContext.Characters
             .Where(x => x.Id == character.Id)

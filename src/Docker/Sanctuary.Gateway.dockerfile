@@ -9,7 +9,6 @@ COPY . /src
 RUN dotnet build "Sanctuary.Gateway/Sanctuary.Gateway.csproj" -c $BUILD_CONFIGURATION
 RUN dotnet build "Sanctuary.Database.MySql/Sanctuary.Database.MySql.csproj" -c $BUILD_CONFIGURATION
 RUN dotnet build "Sanctuary.Database.SqLite/Sanctuary.Database.Sqlite.csproj" -c $BUILD_CONFIGURATION
-RUN dotnet build "Sanctuary.Database.SqlServer/Sanctuary.Database.SqlServer.csproj" -c $BUILD_CONFIGURATION
 
 FROM base AS final
 ARG BUILD_CONFIGURATION=Release

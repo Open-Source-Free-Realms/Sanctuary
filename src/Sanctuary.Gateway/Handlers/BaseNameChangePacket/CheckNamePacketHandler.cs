@@ -1,11 +1,13 @@
-﻿using System;
+using System;
 using System.Linq;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
+using Sanctuary.Game;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -17,6 +19,7 @@ public static class CheckNamePacketHandler
 {
     private static ILogger _logger = null!;
     private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
+    private static IResourceManager _resourceManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -24,6 +27,7 @@ public static class CheckNamePacketHandler
         _logger = loggerFactory.CreateLogger(nameof(CheckNamePacketHandler));
 
         _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
+        _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -66,10 +70,6 @@ public static class CheckNamePacketHandler
 
     private static CheckNameResponse OnCheckCharacterName(GatewayConnection connection, CheckNamePacket packet)
     {
-        // TODO: Implement the following checks (https://archive.ph/3DB0L)
-        //  3 - Profane
-        // 11 - IllegalCharacters
-
         if (string.IsNullOrWhiteSpace(packet.Name.FirstName)
             || packet.Name.LastName != string.Empty && string.IsNullOrWhiteSpace(packet.Name.LastName))
         {
@@ -89,6 +89,17 @@ public static class CheckNamePacketHandler
 
             if (packet.Name.LastName.Length > 14)
                 return CheckNameResponse.LastNameTooLong;
+        }
+
+        if (CharacterNameHelper.ContainsIllegalCharacters(packet.Name.FullName))
+        {
+            return CheckNameResponse.IllegalCharacters;
+        }
+
+        if (_resourceManager.NameFilter.Any(token =>
+            packet.Name.FullName.Contains(token, StringComparison.OrdinalIgnoreCase)))
+        {
+            return CheckNameResponse.Profane;
         }
 
         using var dbContext = _dbContextFactory.CreateDbContext();

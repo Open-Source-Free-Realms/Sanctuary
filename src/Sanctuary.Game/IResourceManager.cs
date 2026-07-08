@@ -32,6 +32,7 @@ public interface IResourceManager
     QuickChatDefinitionCollection QuickChats { get; }
     PointOfInterestDefinitionCollection PointOfInterests { get; }
     NpcDefinitionCollection Npcs { get; }
+    NameFilterCollection NameFilter { get; }
 
     bool Load();
 }

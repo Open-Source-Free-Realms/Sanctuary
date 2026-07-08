@@ -74,8 +74,12 @@ public class LoginService : BackgroundService
         // Main server loop.
         while (!cancellationToken.IsCancellationRequested)
         {
-            _loginServer.GiveTime();
-            _gatewayServer.GiveTime();
+            var hadData = false;
+            hadData |= _loginServer.GiveTime();
+            hadData |= _gatewayServer.GiveTime();
+
+            if (!hadData)
+                Thread.Sleep(1);
         }
 
         return Task.CompletedTask;
