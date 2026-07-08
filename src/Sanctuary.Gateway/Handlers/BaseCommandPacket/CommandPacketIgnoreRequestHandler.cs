@@ -121,7 +121,7 @@ public static class CommandPacketIgnoreRequestHandler
                 return true;
             }
 
-            connection.Player.Ignores.RemoveAll(x => x.Guid == playerToIgnore.Guid);
+            connection.Player.Ignores.RemoveAll(x => x.Guid == ignoredCharacterGuid);
 
             var ignoreRemovePacket = new IgnoreRemovePacket
             {
