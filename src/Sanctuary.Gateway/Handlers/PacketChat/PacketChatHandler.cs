@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Game;
+using Sanctuary.Game.Entities;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 using Sanctuary.Packet.Common.Chat;
@@ -34,6 +35,48 @@ public static class PacketChatHandler
         var adminLogger = loggerFactory.CreateLogger("Admin");
 
         ChatCommandRegistry.Initialize(_zoneManager, _dbContextFactory, adminLogger);
+    }
+
+    private static bool TryClearExpiredMute(GatewayConnection connection)
+    {
+        Player player = connection.Player;
+
+        // mute is not expired if the current time has not exceeded mute time or if player is permanently muted (MutedUntil is null)
+        if (player.MutedUntil == null || player.MutedUntil > DateTimeOffset.UtcNow)
+            return false;
+
+        connection.Player.IsMuted = false;
+        connection.Player.MutedUntil = null;
+
+        using DatabaseContext dbContext = _dbContextFactory.CreateDbContext();
+
+        ulong characterId = GuidHelper.GetPlayerId(connection.Player.Guid);
+
+        dbContext.Users
+            .Where(u => u.Characters.Any(c => c.Id == characterId))
+            .ExecuteUpdate(u => u
+                .SetProperty(x => x.IsMuted, false)
+                .SetProperty(x => x.MutedUntil, (DateTimeOffset?)null));
+
+        return true;
+    }
+
+    private static void SendMuteNotice(GatewayConnection connection)
+    {
+        DateTimeOffset? mutedUntil = connection.Player.MutedUntil;
+        var message = mutedUntil != null
+            ? $"You are muted until {mutedUntil:u} and cannot send chat messages."
+            : "You are muted and cannot send chat messages.";
+
+        var packet = new PacketChat
+        {
+            Channel = ChatChannel.System,
+            FromName = connection.Player.Name,
+            ToName = connection.Player.Name,
+            Message = message
+        };
+
+        connection.Player.SendTunneled(packet);
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -163,43 +206,5 @@ public static class PacketChatHandler
         }
 
         return true;
-    }
-
-    private static bool TryClearExpiredMute(GatewayConnection connection)
-    {
-        if (connection.Player.MutedUntil is not { } mutedUntil || mutedUntil > DateTimeOffset.UtcNow)
-            return false;
-
-        connection.Player.IsMuted = false;
-        connection.Player.MutedUntil = null;
-
-        using DatabaseContext dbContext = _dbContextFactory.CreateDbContext();
-
-        ulong characterId = GuidHelper.GetPlayerId(connection.Player.Guid);
-
-        dbContext.Users
-            .Where(u => u.Characters.Any(c => c.Id == characterId))
-            .ExecuteUpdate(u => u
-                .SetProperty(x => x.IsMuted, false)
-                .SetProperty(x => x.MutedUntil, (DateTimeOffset?)null));
-
-        return true;
-    }
-
-    private static void SendMuteNotice(GatewayConnection connection)
-    {
-        var message = connection.Player.MutedUntil is { } mutedUntil
-            ? $"You are muted until {mutedUntil:u} and cannot send chat messages."
-            : "You are muted and cannot send chat messages.";
-
-        var packet = new PacketChat
-        {
-            Channel = ChatChannel.System,
-            FromName = connection.Player.Name,
-            ToName = connection.Player.Name,
-            Message = message
-        };
-
-        connection.Player.SendTunneled(packet);
     }
 }
