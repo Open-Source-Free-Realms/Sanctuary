@@ -93,6 +93,42 @@ public static class ChatCommandRegistry
         return connection.Player.Name.FullName == targetName;
     }
 
+    private static bool IsAuthorizedAgainstTarget(GatewayConnection connection, bool targetIsAdmin)
+    {
+        if (!targetIsAdmin)
+        {
+            return true;
+        }
+            
+        ChatCommandRole role = GetRole(connection.Player);
+        return role >= ChatCommandRole.Admin;
+    }
+
+    private static bool TryResolveTarget(GatewayConnection connection, DatabaseContext dbContext, string targetName, out ulong targetUserId)
+    {
+        var target = dbContext.Characters
+            .Where(character => character.FullName == targetName)
+            .Select(character => new { character.UserId, character.User.IsAdmin })
+            .SingleOrDefault();
+
+        if (target is null)
+        {
+            SendSystemMessage(connection, $"No player named \"{targetName}\" was found.");
+            targetUserId = 0;
+            return false;
+        }
+
+        if (!IsAuthorizedAgainstTarget(connection, target.IsAdmin))
+        {
+            SendSystemMessage(connection, "You don't have permission to target an admin.");
+            targetUserId = 0;
+            return false;
+        }
+
+        targetUserId = target.UserId;
+        return true;
+    }
+
     public static void HandleCommand(GatewayConnection connection, string message)
     {
         string[] tokens = message.Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -137,16 +173,11 @@ public static class ChatCommandRegistry
 
         using DatabaseContext dbContext = _dbContextFactory.CreateDbContext();
 
-        var target = dbContext.Characters.SingleOrDefault(character => character.FullName == targetName);
-
-        if (target is null)
-        {
-            SendSystemMessage(connection, $"No player named \"{targetName}\" was found.");
+        if (!TryResolveTarget(connection, dbContext, targetName, out var targetUserId))
             return;
-        }
 
         dbContext.Users
-            .Where(x => x.Id == target.UserId)
+            .Where(x => x.Id == targetUserId)
             .ExecuteUpdate(x => x
                 .SetProperty(u => u.IsLocked, true)
                 .SetProperty(u => u.LockedUntil, banUntilTime));
@@ -173,16 +204,11 @@ public static class ChatCommandRegistry
 
         using DatabaseContext dbContext = _dbContextFactory.CreateDbContext();
 
-        var target = dbContext.Characters.SingleOrDefault(character => character.FullName == targetName);
-
-        if (target is null)
-        {
-            SendSystemMessage(connection, $"No player named \"{targetName}\" was found.");
+        if (!TryResolveTarget(connection, dbContext, targetName, out var targetUserId))
             return;
-        }
 
         dbContext.Users
-            .Where(user => user.Id == target.UserId)
+            .Where(user => user.Id == targetUserId)
             .ExecuteUpdate(user => user
                 .SetProperty(u => u.IsLocked, false)
                 .SetProperty(u => u.LockedUntil, (DateTimeOffset?)null));
@@ -208,16 +234,11 @@ public static class ChatCommandRegistry
 
         using DatabaseContext dbContext = _dbContextFactory.CreateDbContext();
 
-        var target = dbContext.Characters.SingleOrDefault(character => character.FullName == targetName);
-
-        if (target is null)
-        {
-            SendSystemMessage(connection, $"No player named \"{targetName}\" was found.");
+        if (!TryResolveTarget(connection, dbContext, targetName, out var targetUserId))
             return;
-        }
 
         dbContext.Users
-            .Where(user => user.Id == target.UserId)
+            .Where(user => user.Id == targetUserId)
             .ExecuteUpdate(user => user
                 .SetProperty(u => u.IsMuted, true)
                 .SetProperty(u => u.MutedUntil, muteUntilTime));
@@ -247,16 +268,11 @@ public static class ChatCommandRegistry
 
         using DatabaseContext dbContext = _dbContextFactory.CreateDbContext();
 
-        var target = dbContext.Characters.SingleOrDefault(character => character.FullName == targetName);
-
-        if (target is null)
-        {
-            SendSystemMessage(connection, $"No player named \"{targetName}\" was found.");
+        if (!TryResolveTarget(connection, dbContext, targetName, out var targetUserId))
             return;
-        }
 
         dbContext.Users
-            .Where(user => user.Id == target.UserId)
+            .Where(user => user.Id == targetUserId)
             .ExecuteUpdate(user => user
                 .SetProperty(u => u.IsMuted, false)
                 .SetProperty(u => u.MutedUntil, (DateTimeOffset?)null));
@@ -291,6 +307,12 @@ public static class ChatCommandRegistry
         if (!_zoneManager.TryGetPlayer(targetName, out var targetPlayer))
         {
             SendSystemMessage(connection, $"{targetName} is not online.");
+            return;
+        }
+
+        if (!IsAuthorizedAgainstTarget(connection, targetPlayer.IsAdmin))
+        {
+            SendSystemMessage(connection, "You don't have permission to target an admin.");
             return;
         }
 
