@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 
 using Microsoft.EntityFrameworkCore;
@@ -83,8 +83,8 @@ public static class ChangeNameRequestPacketHandler
             return ChangeNameResponse.Error;
         }
 
-        if (_resourceManager.NameFilter.Any(token => !string.IsNullOrWhiteSpace(token)
-            && packet.Name.FullName.Contains(token, StringComparison.OrdinalIgnoreCase)))
+        if (_resourceManager.NameFilter.Any(token =>
+            packet.Name.FullName.Contains(token, StringComparison.OrdinalIgnoreCase)))
         {
             return ChangeNameResponse.Error;
         }
