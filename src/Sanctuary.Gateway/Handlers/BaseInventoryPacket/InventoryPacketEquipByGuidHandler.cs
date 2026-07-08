@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 
 using Microsoft.EntityFrameworkCore;
@@ -143,7 +143,7 @@ public static class InventoryPacketEquipByGuidHandler
 
         playerUpdatePacketEquipItemChange.Attachment = clientUpdatePacketEquipItem.Attachment;
 
-        playerUpdatePacketEquipItemChange.ProfileId = packet.ProfileId;
+        playerUpdatePacketEquipItemChange.ProfileId = connection.Player.ActiveProfileId;
 
         if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out var itemClass))
         {
@@ -180,7 +180,7 @@ public static class InventoryPacketEquipByGuidHandler
 
                     playerUpdatePacketEquipItemChange.Attachment.Slot = weaponClientItemDefinition.Slot;
 
-                    playerUpdatePacketEquipItemChange.ProfileId = packet.ProfileId;
+                    playerUpdatePacketEquipItemChange.ProfileId = connection.Player.ActiveProfileId;
 
                     if (!_resourceManager.ItemClasses.TryGetValue(weaponClientItemDefinition.Class, out itemClass))
                         return true;
@@ -215,7 +215,7 @@ public static class InventoryPacketEquipByGuidHandler
 
                     playerUpdatePacketEquipItemChange.Attachment.Slot = clientItemDefinition.Slot;
 
-                    playerUpdatePacketEquipItemChange.ProfileId = packet.ProfileId;
+                    playerUpdatePacketEquipItemChange.ProfileId = connection.Player.ActiveProfileId;
 
                     if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out itemClass))
                         return true;
