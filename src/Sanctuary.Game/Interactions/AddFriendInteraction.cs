@@ -34,13 +34,8 @@ public class AddFriendInteraction : IInteraction
         if (player.Friends.Any(x => x.Guid == otherPlayer.Guid))
             return;
 
-        if (player.OutgoingFriendRequests.Count >= Player.MaxOutgoingFriendRequests)
-            return;
-
         if (!otherPlayer.IncomingFriendRequests.TryAdd(player.Guid))
             return;
-
-        player.OutgoingFriendRequests.TryAdd(otherPlayer.Guid);
 
         var friendMessagePacket = new FriendMessagePacket();
 
