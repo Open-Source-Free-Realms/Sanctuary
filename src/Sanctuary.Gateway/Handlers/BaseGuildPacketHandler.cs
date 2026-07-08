@@ -40,6 +40,7 @@ public static class BaseGuildPacketHandler
             GuildInviteDeclinePacket.OpCode => GuildInviteDeclinePacketHandler.HandlePacket(connection, reader.Span),
             GuildInviteTimeOutPacket.OpCode => GuildInviteTimeOutPacketHandler.HandlePacket(connection, reader.Span),
             GuildNameRequestPacket.OpCode => GuildNameRequestPacketHandler.HandlePacket(connection, reader.Span),
+            GuildRenameGuildPacket.OpCode => GuildRenameGuildPacketHandler.HandlePacket(connection, reader.Span),
             GuildPaidRenameCheckRequestPacket.OpCode => GuildPaidRenameCheckRequestPacketHandler.HandlePacket(connection, reader.Span),
             _ => false
         };

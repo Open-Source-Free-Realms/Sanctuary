@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Packet;
+using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
 
 namespace Sanctuary.Login.Handlers;
@@ -60,6 +61,49 @@ public static class CharacterDeleteRequestHandler
             return true;
         }
 
+        using var transaction = dbContext.Database.BeginTransaction();
+
+        var guildMember = dbContext.GuildMembers
+            .AsNoTracking()
+            .SingleOrDefault(x => x.Id == character.Id);
+
+        if (guildMember is not null)
+        {
+            character.GuildMemberId = null;
+
+            var deletedGuildMember = dbContext.GuildMembers
+                .Where(x => x.Id == character.Id)
+                .ExecuteDelete();
+
+            if (deletedGuildMember <= 0)
+            {
+                characterDeleteReply.Status = 2;
+                connection.Send(characterDeleteReply);
+                return true;
+            }
+
+            var hasMembers = dbContext.GuildMembers.Any(x => x.GuildId == guildMember.GuildId);
+            if (!hasMembers)
+            {
+                dbContext.Guilds
+                    .Where(x => x.Id == guildMember.GuildId)
+                    .ExecuteDelete();
+            }
+            else if (guildMember.Role == GuildRole.Leader.Id
+                     && !dbContext.GuildMembers.Any(x => x.GuildId == guildMember.GuildId && x.Role == GuildRole.Leader.Id))
+            {
+                var newLeader = dbContext.GuildMembers
+                    .Where(x => x.GuildId == guildMember.GuildId)
+                    .OrderBy(x => x.Role)
+                    .ThenBy(x => x.Joined)
+                    .ThenBy(x => x.Id)
+                    .FirstOrDefault();
+
+                if (newLeader is not null)
+                    newLeader.Role = GuildRole.Leader.Id;
+            }
+        }
+
         dbContext.Remove(character);
 
         if (dbContext.SaveChanges() <= 0)
@@ -68,6 +112,8 @@ public static class CharacterDeleteRequestHandler
 
             connection.Send(characterDeleteReply);
         }
+
+        transaction.Commit();
 
         characterDeleteReply.Status = 1;
         characterDeleteReply.EntityKey = packet.EntityKey;

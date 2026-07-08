@@ -36,9 +36,10 @@ public static class GuildInviteDeclinePacketHandler
         if (!_zoneManager.TryGetPlayer(packet.PlayerGuid, out var player))
             return true;
 
-        player.SendTunneled(new GuildErrorPacket
+        player.SendTunneled(new GuildInviteDeclineNotificationPacket
         {
-            MessageName = "GuildInviteDeclined"
+            PlayerGuid = connection.Player.Guid,
+            Name = connection.Player.Name
         });
 
         return true;

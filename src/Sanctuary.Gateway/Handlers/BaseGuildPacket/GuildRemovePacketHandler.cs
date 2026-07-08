@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 
 using Microsoft.EntityFrameworkCore;
@@ -40,57 +40,78 @@ public static class GuildRemovePacketHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(GuildRemovePacket), packet);
 
-        if (connection.Player.GuildData is null)
+        if (connection.Player.GuildData is null || connection.Player.GuildData.Guid != packet.GuildGuid)
             return true;
 
-        if (connection.Player.GuildData.Guid != packet.GuildGuid)
-            return true;
+        var removerId = GuidHelper.GetPlayerId(connection.Player.Guid);
+        var targetId = GuidHelper.GetPlayerId(packet.PlayerGuid);
 
         using var dbContext = _dbContextFactory.CreateDbContext();
 
-        var dbGuildMemberToRemove = dbContext.GuildMembers
-            .Where(x => x.GuildId == packet.GuildGuid && x.Id == GuidHelper.GetPlayerId(packet.PlayerGuid));
+        var removerGuildMember = dbContext.GuildMembers
+            .AsNoTracking()
+            .SingleOrDefault(x => x.GuildId == packet.GuildGuid && x.Id == removerId);
 
-        if (dbGuildMemberToRemove.ExecuteDelete() <= 0)
+        var targetGuildMember = dbContext.GuildMembers
+            .AsNoTracking()
+            .SingleOrDefault(x => x.GuildId == packet.GuildGuid && x.Id == targetId);
+
+        if (removerGuildMember is null || targetGuildMember is null)
             return true;
 
-        var result = dbContext.Characters
-            .Where(x => x.Id == GuidHelper.GetPlayerId(packet.PlayerGuid))
+        if (targetId == removerId || !CanManageMember(removerGuildMember.Role, targetGuildMember.Role))
+        {
+            connection.SendTunneled(new GuildErrorPacket
+            {
+                MessageName = "GuildPromoteCantPromoteAbove"
+            });
+
+            return true;
+        }
+
+        using var transaction = dbContext.Database.BeginTransaction();
+
+        dbContext.Characters
+            .Where(x => x.Id == targetId)
             .ExecuteUpdate(x => x.SetProperty(x => x.GuildMemberId, (ulong?)null));
 
-        if (result <= 0)
+        var deleted = dbContext.GuildMembers
+            .Where(x => x.GuildId == packet.GuildGuid && x.Id == targetId)
+            .ExecuteDelete();
+
+        if (deleted <= 0)
             return true;
+
+        transaction.Commit();
 
         var guildMemberStatusUpdatePacket = new GuildMemberStatusUpdatePacket
         {
             GuildGuid = packet.GuildGuid,
             MemberGuid = packet.PlayerGuid,
-
             Type = 2
         };
 
-        foreach (var guildMember in connection.Player.GuildData.Members)
+        foreach (var guildPlayer in _zoneManager.GetPlayers())
         {
-            if (guildMember.Key == packet.PlayerGuid)
-                continue;
-
-            if (!_zoneManager.TryGetPlayer(guildMember.Key, out var guildPlayer))
-                continue;
-
-            if (guildPlayer.GuildData is null)
+            if (guildPlayer.GuildData is null || guildPlayer.GuildData.Guid != packet.GuildGuid)
                 continue;
 
             guildPlayer.GuildData.Members.Remove(packet.PlayerGuid);
 
+            if (guildPlayer.Guid == packet.PlayerGuid)
+                continue;
+
             guildPlayer.SendTunneled(guildMemberStatusUpdatePacket);
         }
+
+        connection.Player.GuildData.Members.Remove(packet.PlayerGuid);
 
         if (!_zoneManager.TryGetPlayer(packet.PlayerGuid, out var player))
             return true;
 
         var guildCanCreateGuildPacket = new GuildCanCreateGuildPacket
         {
-            CanCreateGuild = connection.Player.Profiles.Any(x => x.Rank >= 15)
+            CanCreateGuild = player.Profiles.Any(x => x.Rank >= 15)
         };
 
         player.SendTunneled(guildCanCreateGuildPacket);
@@ -103,9 +124,19 @@ public static class GuildRemovePacketHandler
         };
 
         player.SendTunneledToVisible(guildPlayerStatusUpdatePacket, true);
-
         player.GuildData = null;
 
         return true;
+    }
+
+    private static bool CanManageMember(int actorRole, int targetRole)
+    {
+        if (actorRole == GuildRole.Leader.Id)
+            return true;
+
+        if (actorRole == GuildRole.Officer.Id)
+            return targetRole > GuildRole.Officer.Id;
+
+        return false;
     }
 }

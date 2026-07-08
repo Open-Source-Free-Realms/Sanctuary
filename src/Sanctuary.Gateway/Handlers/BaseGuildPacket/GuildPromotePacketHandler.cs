@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 
 using Microsoft.EntityFrameworkCore;
@@ -40,22 +40,26 @@ public static class GuildPromotePacketHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(GuildPromotePacket), packet);
 
-        if (connection.Player.GuildData is null)
+        if (connection.Player.GuildData is null || connection.Player.GuildData.Guid != packet.GuildGuid)
             return true;
 
-        if (!connection.Player.GuildData.Members.TryGetValue(connection.Player.Guid, out var promoterGuildMember))
+        var promoterId = GuidHelper.GetPlayerId(connection.Player.Guid);
+        var targetId = GuidHelper.GetPlayerId(packet.PlayerGuid);
+
+        using var dbContext = _dbContextFactory.CreateDbContext();
+
+        var promoterGuildMember = dbContext.GuildMembers
+            .AsNoTracking()
+            .SingleOrDefault(x => x.GuildId == packet.GuildGuid && x.Id == promoterId);
+
+        var targetGuildMember = dbContext.GuildMembers
+            .Include(x => x.Character)
+            .SingleOrDefault(x => x.GuildId == packet.GuildGuid && x.Id == targetId);
+
+        if (promoterGuildMember is null || targetGuildMember is null)
             return true;
 
-        if (!_zoneManager.TryGetPlayer(packet.PlayerGuid, out var promotePlayer))
-            return true;
-
-        if (promotePlayer.GuildData is null)
-            return true;
-
-        if (!promotePlayer.GuildData.Members.TryGetValue(promotePlayer.Guid, out var promoteGuildMember))
-            return true;
-
-        if (promoterGuildMember.Role >= promoteGuildMember.Role)
+        if (targetId == promoterId || !CanPromoteMember(promoterGuildMember.Role, targetGuildMember.Role))
         {
             connection.SendTunneled(new GuildErrorPacket
             {
@@ -65,7 +69,7 @@ public static class GuildPromotePacketHandler
             return true;
         }
 
-        if (promoteGuildMember.Role == GuildRole.Leader.Id)
+        if (targetGuildMember.Role == GuildRole.Leader.Id)
         {
             connection.SendTunneled(new GuildErrorPacket
             {
@@ -75,51 +79,80 @@ public static class GuildPromotePacketHandler
             return true;
         }
 
-        using var dbContext = _dbContextFactory.CreateDbContext();
+        var newRole = targetGuildMember.Role - 1;
 
-        var dbGuildMember = dbContext.GuildMembers
-            .SingleOrDefault(x => x.GuildId == packet.GuildGuid && x.Id == GuidHelper.GetPlayerId(packet.PlayerGuid));
+        if (promoterGuildMember.Role == GuildRole.Officer.Id && newRole < GuildRole.Officer.Id)
+        {
+            connection.SendTunneled(new GuildErrorPacket
+            {
+                MessageName = "GuildPromoteCantPromoteAbove"
+            });
 
-        if (dbGuildMember is null)
             return true;
+        }
 
-        dbGuildMember.Role -= 1;
+        targetGuildMember.Role = newRole;
 
         if (dbContext.SaveChanges() <= 0)
             return true;
 
-        promoteGuildMember.Role -= 1;
+        var memberName = new NameData
+        {
+            FirstName = targetGuildMember.Character.FirstName,
+            LastName = targetGuildMember.Character.LastName ?? string.Empty
+        };
+
+        var online = _zoneManager.TryGetPlayer(packet.PlayerGuid, out var targetPlayer);
+        var worldId = 0;
+        var profileId = 0;
+        var profileRank = 0;
+
+        if (online)
+        {
+            memberName = targetPlayer!.Name;
+            worldId = targetPlayer.Zone.Id;
+            profileId = targetPlayer.ActiveProfileId;
+            profileRank = targetPlayer.ActiveProfile.Rank;
+
+            if (targetPlayer.GuildData?.Members.TryGetValue(packet.PlayerGuid, out var targetOnlineMember) == true)
+                targetOnlineMember.Role = targetGuildMember.Role;
+        }
 
         var guildMemberStatusUpdatePacket = new GuildMemberStatusUpdatePacket
         {
             GuildGuid = packet.GuildGuid,
             MemberGuid = packet.PlayerGuid,
-
-            Name = promotePlayer.Name,
-
-            Role = promoteGuildMember.Role,
-
-            Online = true,
-
+            Name = memberName,
+            Role = targetGuildMember.Role,
+            Online = online,
             Type = 4,
-
-            WorldId = promotePlayer.Zone.Id,
-
-            ProfileId = promotePlayer.ActiveProfileId,
-            ProfileRank = promotePlayer.ActiveProfile.Rank
+            WorldId = worldId,
+            ProfileId = profileId,
+            ProfileRank = profileRank
         };
 
-        foreach (var guildMember in connection.Player.GuildData.Members)
+        foreach (var guildPlayer in _zoneManager.GetPlayers())
         {
-            if (!_zoneManager.TryGetPlayer(guildMember.Key, out var guildPlayer))
+            if (guildPlayer.GuildData is null || guildPlayer.GuildData.Guid != packet.GuildGuid)
                 continue;
 
-            if (guildPlayer.GuildData is null)
-                continue;
+            if (guildPlayer.GuildData.Members.TryGetValue(packet.PlayerGuid, out var visibleMember))
+                visibleMember.Role = targetGuildMember.Role;
 
             guildPlayer.SendTunneled(guildMemberStatusUpdatePacket);
         }
 
         return true;
+    }
+
+    private static bool CanPromoteMember(int actorRole, int targetRole)
+    {
+        if (actorRole == GuildRole.Leader.Id)
+            return true;
+
+        if (actorRole == GuildRole.Officer.Id)
+            return targetRole > GuildRole.Officer.Id;
+
+        return false;
     }
 }

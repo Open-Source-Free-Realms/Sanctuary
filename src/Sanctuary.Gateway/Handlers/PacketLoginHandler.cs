@@ -78,11 +78,25 @@ public static class PacketLoginHandler
 
         using var dbContext = _dbContextFactory.CreateDbContext();
 
-        var dbCharacter = dbContext.Characters
+        var character = dbContext.Characters
             .AsNoTracking()
+            .Include(x => x.Items)
+            .Include(x => x.Titles)
+            .Include(x => x.Mounts)
+            .Include(x => x.Friends)
+                .ThenInclude(x => x.FriendCharacter)
+            .Include(x => x.Ignores)
+                .ThenInclude(x => x.IgnoreCharacter)
+            .Include(x => x.Profiles)
+                .ThenInclude(x => x.Items)
+            .Include(x => x.GuildMember)
+                .ThenInclude(x => x!.Guild)
+                    .ThenInclude(x => x.Members)
+                        .ThenInclude(x => x.Character)
+            .AsSplitQuery()
             .SingleOrDefault(x => x.Id == GuidHelper.GetPlayerId(packet.Guid) && x.Ticket == ticket);
 
-        if (dbCharacter is null)
+        if (character is null)
         {
             _logger.LogWarning("{connection} connected with an invalid guid or ticket. ( Guid: {guid}, Ticket: \"{ticket}\" )", connection, packet.Guid, packet.Ticket);
 
@@ -95,7 +109,7 @@ public static class PacketLoginHandler
 
 #if !DEBUG
         var result = dbContext.Characters
-            .Where(x => x.Id == dbCharacter.Id)
+            .Where(x => x.Id == character.Id)
             .ExecuteUpdate(x => x.SetProperty(x => x.Ticket, (Guid?)null));
 
         if (result <= 0)
@@ -108,7 +122,7 @@ public static class PacketLoginHandler
         }
 #endif
 
-        if (!connection.CreatePlayerFromDatabase(dbCharacter))
+        if (!connection.CreatePlayerFromDatabase(character))
         {
             connection.Send(packetLoginReply);
 
@@ -117,7 +131,7 @@ public static class PacketLoginHandler
             return true;
         }
 
-        _loginClient.SendCharacterLogin(dbCharacter.Id);
+        _loginClient.SendCharacterLogin(character.Id);
 
         packetLoginReply.Success = true;
 

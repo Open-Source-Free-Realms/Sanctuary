@@ -235,18 +235,10 @@ public class GatewayConnection : UdpConnection
         Player.Coins = dbCharacter.Coins;
 
         Player.Birthday = dbCharacter.Created;
-
         Player.MembershipStatus = dbCharacter.MembershipStatus;
         Player.ShowMemberNagScreen = _options.ShowMemberNagScreen;
 
-        using var dbContext = _dbContextFactory.CreateDbContext();
-
-        var dbProfiles = dbContext.Profiles
-            .AsNoTracking()
-            .Include(x => x.Items)
-            .Where(x => x.CharacterId == dbCharacter.Id);
-
-        foreach (var dbProfile in dbProfiles)
+        foreach (var dbProfile in dbCharacter.Profiles)
         {
             if (!_resourceManager.Profiles.TryGetValue(dbProfile.Id, out var profileData))
                 continue;
@@ -305,11 +297,7 @@ public class GatewayConnection : UdpConnection
 
         Player.ActiveProfileId = dbCharacter.ActiveProfileId;
 
-        var dbItems = dbContext.Items
-            .AsNoTracking()
-            .Where(x => x.CharacterId == dbCharacter.Id);
-
-        foreach (var dbItem in dbItems)
+        foreach (var dbItem in dbCharacter.Items)
         {
             Player.Items.Add(new ClientItem
             {
@@ -322,11 +310,7 @@ public class GatewayConnection : UdpConnection
 
         Player.Gender = dbCharacter.Gender;
 
-        var dbMounts = dbContext.Mounts
-            .AsNoTracking()
-            .Where(x => x.CharacterId == dbCharacter.Id);
-
-        foreach (var dbMount in dbMounts)
+        foreach (var dbMount in dbCharacter.Mounts)
         {
             if (!_resourceManager.Mounts.TryGetValue(dbMount.Definition, out var mountDefinition))
                 continue;
@@ -360,11 +344,7 @@ public class GatewayConnection : UdpConnection
         Player.ActionBars.Add(clientActionBar.Id, clientActionBar);
         // End - Store on DB
 
-        var dbTitles = dbContext.Titles
-            .AsNoTracking()
-            .Where(x => x.CharacterId == dbCharacter.Id);
-
-        foreach (var dbTitle in dbTitles)
+        foreach (var dbTitle in dbCharacter.Titles)
         {
             if (!_resourceManager.PlayerTitles.TryGetValue(dbTitle.Id, out var playerTitle))
                 continue;
@@ -382,12 +362,7 @@ public class GatewayConnection : UdpConnection
         Player.ChatBubbleBackgroundColor = dbCharacter.ChatBubbleBackgroundColor;
         Player.ChatBubbleSize = dbCharacter.ChatBubbleSize;
 
-        var dbFriends = dbContext.Friends
-            .AsNoTracking()
-            .Include(x => x.FriendCharacter)
-            .Where(x => x.CharacterId == dbCharacter.Id);
-
-        foreach (var dbFriend in dbFriends)
+        foreach (var dbFriend in dbCharacter.Friends)
         {
             var friendData = new FriendData
             {
@@ -415,12 +390,7 @@ public class GatewayConnection : UdpConnection
             Player.Friends.Add(friendData);
         }
 
-        var dbIgnores = dbContext.Ignores
-            .AsNoTracking()
-            .Include(x => x.IgnoreCharacter)
-            .Where(x => x.CharacterId == dbCharacter.Id);
-
-        foreach (var dbIgnore in dbIgnores)
+        foreach (var dbIgnore in dbCharacter.Ignores)
         {
             var ignoreData = new IgnoreData
             {
@@ -433,59 +403,59 @@ public class GatewayConnection : UdpConnection
 
         Player.StationCash = dbCharacter.StationCash;
 
-        if (dbCharacter.GuildMemberId > 0)
+        if (dbCharacter.GuildMember?.Guild is not null)
         {
-            var dbGuild = dbContext.Guilds
-                .AsNoTracking()
-                .Include(x => x.Members)
-                    .ThenInclude(x => x.Character)
-                .SingleOrDefault(x => x.Members.Any(x => x.Id == dbCharacter.Id));
+            var dbGuild = dbCharacter.GuildMember.Guild;
+            var orphanedMemberIds = dbGuild.Members
+                .Where(x => x.Character is null)
+                .Select(x => x.Id)
+                .ToList();
 
-            if (dbGuild is not null)
+            if (orphanedMemberIds.Count > 0)
             {
-                var guildData = new GuildData
+                using var dbContext = _dbContextFactory.CreateDbContext();
+                dbContext.GuildMembers
+                    .Where(x => orphanedMemberIds.Contains(x.Id))
+                    .ExecuteDelete();
+            }
+
+            var guildData = new GuildData
+            {
+                Guid = dbGuild.Id,
+                Name = dbGuild.Name,
+                CanRenameGuild = true,
+                MaxMembers = dbGuild.MaxMembers
+            };
+
+            foreach (var dbGuildMember in dbGuild.Members)
+            {
+                if (dbGuildMember.Character is null)
+                    continue;
+
+                var memberGuid = GuidHelper.GetPlayerGuid(dbGuildMember.Id);
+                var guildMember = new GuildMember
                 {
-                    Guid = dbGuild.Id,
-
-                    Name = dbGuild.Name,
-
-                    CanRenameGuild = true,
-
-                    MaxMembers = dbGuild.MaxMembers
+                    Guid = memberGuid,
+                    Role = dbGuildMember.Role,
+                    Name =
+                    {
+                        FirstName = dbGuildMember.Character.FirstName,
+                        LastName = dbGuildMember.Character.LastName ?? string.Empty
+                    }
                 };
 
-                foreach (var dbGuildMember in dbGuild.Members)
+                if (_zoneManager.TryGetPlayer(memberGuid, out var memberPlayer))
                 {
-                    var memberGuid = GuidHelper.GetPlayerGuid(dbGuildMember.Id);
-
-                    var guildMember = new GuildMember
-                    {
-                        Guid = memberGuid,
-
-                        Role = dbGuildMember.Role,
-
-                        Name =
-                        {
-                            FirstName = dbGuildMember.Character.FirstName,
-                            LastName = dbGuildMember.Character.LastName ?? string.Empty
-                        },
-                    };
-
-                    if (_zoneManager.TryGetPlayer(memberGuid, out var memberPlayer))
-                    {
-                        guildMember.Online = true;
-
-                        guildMember.WorldId = memberPlayer.Zone.Id;
-
-                        guildMember.ProfileId = memberPlayer.ActiveProfileId;
-                        guildMember.ProfileRank = memberPlayer.ActiveProfile.Rank;
-                    }
-
-                    guildData.Members.Add(memberGuid, guildMember);
+                    guildMember.Online = true;
+                    guildMember.WorldId = memberPlayer.Zone.Id;
+                    guildMember.ProfileId = memberPlayer.ActiveProfileId;
+                    guildMember.ProfileRank = memberPlayer.ActiveProfile.Rank;
                 }
 
-                player.GuildData = guildData;
+                guildData.Members[memberGuid] = guildMember;
             }
+
+            Player.GuildData = guildData;
         }
 
         return true;
@@ -633,16 +603,20 @@ public class GatewayConnection : UdpConnection
         if (Player.GuildData is null)
             return;
 
+        if (!Player.GuildData.Members.TryGetValue(Player.Guid, out var playerGuildMember))
+            return;
+
         var guildMemberStatusUpdatePacket = new GuildMemberStatusUpdatePacket
         {
             GuildGuid = Player.GuildData.Guid,
             MemberGuid = Player.Guid,
-
             Name = Player.Name,
-
+            Role = playerGuildMember.Role,
             Online = false,
-
-            Type = 6
+            Type = 6,
+            WorldId = 0,
+            ProfileId = Player.ActiveProfileId,
+            ProfileRank = Player.ActiveProfile.Rank
         };
 
         foreach (var guildMember in Player.GuildData.Members)
@@ -656,7 +630,14 @@ public class GatewayConnection : UdpConnection
             if (guildPlayer.GuildData is null)
                 continue;
 
-            guildPlayer.GuildData.Members[Player.Guid].Online = false;
+            if (guildPlayer.GuildData.Members.TryGetValue(Player.Guid, out var onlineMember))
+            {
+                onlineMember.Online = false;
+                onlineMember.Role = playerGuildMember.Role;
+                onlineMember.WorldId = 0;
+                onlineMember.ProfileId = Player.ActiveProfileId;
+                onlineMember.ProfileRank = Player.ActiveProfile.Rank;
+            }
 
             guildPlayer.SendTunneled(guildMemberStatusUpdatePacket);
         }
