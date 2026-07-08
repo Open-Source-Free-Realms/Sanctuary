@@ -342,29 +342,13 @@ namespace Sanctuary.Database.Sqlite.Migrations
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(false);
 
-                    b.Property<bool>("IsMod")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(false);
-
-                    b.Property<bool>("IsMuted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(false);
-
                     b.Property<DateTimeOffset?>("LastLogin")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTimeOffset?>("LockedUntil")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("MaxCharacters")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(10);
-
-                    b.Property<DateTimeOffset?>("MutedUntil")
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("Password")
                         .IsRequired()
