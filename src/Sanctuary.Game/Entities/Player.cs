@@ -273,6 +273,9 @@ public sealed class Player : ClientPcData, IEntity
         {
             var playerUpdatePacketAddNpc = npc.GetAddNpcPacket();
 
+            if (npc is Mount mount && mount.Rider.Guid == Guid)
+                playerUpdatePacketAddNpc.RiderGuid = 0;
+
             SendTunneled(playerUpdatePacketAddNpc);
         }
 
