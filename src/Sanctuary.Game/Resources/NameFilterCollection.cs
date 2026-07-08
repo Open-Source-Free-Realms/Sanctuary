@@ -31,7 +31,7 @@ public class NameFilterCollection : List<string>
                 .Select(x => x.Trim())
                 .Where(x => !string.IsNullOrWhiteSpace(x))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
-            .ToList());
+                .ToList());
             return true;
         }
         catch (Exception ex)
