@@ -63,8 +63,13 @@ public static class CharacterDeleteRequestHandler
         try
         {
             // Delete references first to avoid foreign key constraint violations.
-            var friends = dbContext.Friends.Where(f => f.FriendCharacterId == character.Id);
-            var ignores = dbContext.Ignores.Where(i => i.IgnoreCharacterId == character.Id);
+            var characterId = character.Id;
+
+            var friends = dbContext.Friends.Where(f =>
+                f.CharacterId == characterId || f.FriendCharacterId == characterId);
+
+            var ignores = dbContext.Ignores.Where(i =>
+                i.CharacterId == characterId || i.IgnoreCharacterId == characterId);
 
             dbContext.Friends.RemoveRange(friends);
             dbContext.Ignores.RemoveRange(ignores);

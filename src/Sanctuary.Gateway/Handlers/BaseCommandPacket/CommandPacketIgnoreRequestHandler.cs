@@ -12,6 +12,7 @@ using Sanctuary.Game;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
+using Sanctuary.Packet.Common.Chat;
 
 namespace Sanctuary.Gateway.Handlers;
 
@@ -41,23 +42,45 @@ public static class CommandPacketIgnoreRequestHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(CommandPacketIgnoreRequest), packet);
 
-
         using var dbContext = _dbContextFactory.CreateDbContext();
 
         var dbCharacterToIgnore = dbContext.Characters.FirstOrDefault(x => x.FullName == packet.Name.FullName);
 
         if (dbCharacterToIgnore is null)
+        {
+            SendSystemMessage(connection, "Player not found.");
             return true;
+        }
 
-        if (!_zoneManager.TryGetPlayer(GuidHelper.GetPlayerGuid(dbCharacterToIgnore.Id), out var playerToIgnore))
+        var ignoredCharacterGuid = GuidHelper.GetPlayerGuid(dbCharacterToIgnore.Id);
+        var requesterCharacterId = GuidHelper.GetPlayerId(connection.Player.Guid);
+        var targetCharacterId = dbCharacterToIgnore.Id;
+
+        if (requesterCharacterId == targetCharacterId)
+        {
+            SendSystemMessage(connection, "You cannot ignore yourself.");
             return true;
+        }
 
         if (packet.Ignore)
         {
-            if (connection.Player.Ignores.Any(x => x.Guid == playerToIgnore.Guid))
+            if (connection.Player.Ignores.Any(x => x.Guid == ignoredCharacterGuid))
+            {
+                SendSystemMessage(connection, "That player is already ignored.");
                 return true;
+            }
 
-            var dbCharacter = dbContext.Characters.FirstOrDefault(x => x.Id == GuidHelper.GetPlayerId(connection.Player.Guid));
+            var areFriends = dbContext.Friends.Any(x =>
+                (x.CharacterId == requesterCharacterId && x.FriendCharacterId == targetCharacterId) ||
+                (x.CharacterId == targetCharacterId && x.FriendCharacterId == requesterCharacterId));
+
+            if (areFriends)
+            {
+                SendSystemMessage(connection, "You cannot ignore a player on your friends list.");
+                return true;
+            }
+
+            var dbCharacter = dbContext.Characters.FirstOrDefault(x => x.Id == requesterCharacterId);
 
             if (dbCharacter is null)
                 return true;
@@ -73,8 +96,8 @@ public static class CommandPacketIgnoreRequestHandler
 
             var ignoreData = new IgnoreData
             {
-                Guid = playerToIgnore.Guid,
-                Name = playerToIgnore.Name.FullName
+                Guid = ignoredCharacterGuid,
+                Name = dbCharacterToIgnore.FullName
             };
 
             connection.Player.Ignores.Add(ignoreData);
@@ -89,25 +112,34 @@ public static class CommandPacketIgnoreRequestHandler
         else
         {
             var dbIgnoreToRemove = dbContext.Ignores.Where(x =>
-                x.CharacterId == GuidHelper.GetPlayerId(connection.Player.Guid) &&
-                x.IgnoreCharacterId == dbCharacterToIgnore.Id);
+                x.CharacterId == requesterCharacterId &&
+                x.IgnoreCharacterId == targetCharacterId);
 
             if (dbIgnoreToRemove.ExecuteDelete() <= 0)
+            {
+                SendSystemMessage(connection, "That player is not on your ignore list.");
                 return true;
+            }
 
-            connection.Player.Ignores.RemoveAll(x => x.Guid == playerToIgnore.Guid);
-
-            if (dbContext.SaveChanges() <= 0)
-                return true;
+            connection.Player.Ignores.RemoveAll(x => x.Guid == ignoredCharacterGuid);
 
             var ignoreRemovePacket = new IgnoreRemovePacket
             {
-                Guid = playerToIgnore.Guid
+                Guid = ignoredCharacterGuid
             };
 
             connection.SendTunneled(ignoreRemovePacket);
         }
 
         return true;
+    }
+
+    private static void SendSystemMessage(GatewayConnection connection, string message)
+    {
+        connection.Player.SendTunneled(new PacketChat
+        {
+            Channel = ChatChannel.System,
+            Message = message
+        });
     }
 }
