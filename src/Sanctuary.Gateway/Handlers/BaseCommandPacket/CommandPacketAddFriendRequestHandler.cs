@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Game;
+using Sanctuary.Game.Entities;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -65,7 +66,16 @@ public static class CommandPacketAddFriendRequestHandler
         if (player.Friends.Any(x => x.Guid == connection.Player.Guid))
             return true;
 
-        player.IncomingFriendRequests.TryAdd(connection.Player.Guid);
+        if (connection.Player.Friends.Any(x => x.Guid == targetGuid))
+            return true;
+
+        if (connection.Player.OutgoingFriendRequests.Count >= Player.MaxOutgoingFriendRequests)
+            return true;
+
+        if (!player.IncomingFriendRequests.TryAdd(connection.Player.Guid))
+            return true;
+
+        connection.Player.OutgoingFriendRequests.TryAdd(targetGuid);
 
         var friendMessagePacket = new FriendMessagePacket();
 

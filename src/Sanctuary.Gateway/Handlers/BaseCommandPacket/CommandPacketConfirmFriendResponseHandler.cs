@@ -48,6 +48,8 @@ public static class CommandPacketConfirmFriendResponseHandler
         if (!_zoneManager.TryGetPlayer(packet.Guid, out var player))
             return true;
 
+        player.OutgoingFriendRequests.TryRemove(connection.Player.Guid);
+
         var friendMessagePacket = new FriendMessagePacket();
 
         switch (packet.Status)

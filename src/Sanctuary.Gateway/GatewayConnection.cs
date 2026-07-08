@@ -79,6 +79,8 @@ public class GatewayConnection : UdpConnection
 
         SendFriendOffline();
 
+        Player.OutgoingFriendRequests.Clear();
+
         _loginClient.SendCharacterLogout(GuidHelper.GetPlayerId(Player.Guid));
 
         SavePlayerToDatabase();
