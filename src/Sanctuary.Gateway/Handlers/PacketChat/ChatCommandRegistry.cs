@@ -178,8 +178,8 @@ public static class ChatCommandRegistry
             return;
 
         dbContext.Users
-            .Where(x => x.Id == targetUserId)
-            .ExecuteUpdate(x => x
+            .Where(user => user.Id == targetUserId)
+            .ExecuteUpdate(user => user
                 .SetProperty(u => u.IsLocked, true)
                 .SetProperty(u => u.LockedUntil, banUntilTime));
 
@@ -299,7 +299,7 @@ public static class ChatCommandRegistry
 
         using DatabaseContext dbContext = _dbContextFactory.CreateDbContext();
 
-        var target = dbContext.Characters.SingleOrDefault(x => x.FullName == targetName);
+        var target = dbContext.Characters.SingleOrDefault(character => character.FullName == targetName);
 
         if (target is null)
         {
