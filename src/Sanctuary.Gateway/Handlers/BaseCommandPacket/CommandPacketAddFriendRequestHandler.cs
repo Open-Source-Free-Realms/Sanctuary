@@ -65,9 +65,6 @@ public static class CommandPacketAddFriendRequestHandler
         if (player.Friends.Any(x => x.Guid == connection.Player.Guid))
             return true;
 
-        if (connection.Player.Friends.Any(x => x.Guid == targetGuid))
-            return true;
-
         if (!player.IncomingFriendRequests.TryAdd(connection.Player.Guid))
             return true;
 
