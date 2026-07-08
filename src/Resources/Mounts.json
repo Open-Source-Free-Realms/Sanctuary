@@ -370,7 +370,15 @@
     "ImageSetId": 8556,
     "ModelId": 4590,
     "Stats": {
-      "MaxMovementSpeed": 12.5
+      "MaxMovementSpeed": 12.5,
+      "GlideDefaultForwardSpeed": 12,
+      "GlideMinForwardSpeed": 6,
+      "GlideMaxForwardSpeed": 22,
+      "GlideFallTime": 0.75,
+      "GlideFallSpeed": 3,
+      "GlideEnabled": 1,
+      "GlideAccel": 4,
+      "JumpHeight": 5,
     }
   },
   {
