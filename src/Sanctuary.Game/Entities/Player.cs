@@ -36,6 +36,11 @@ public sealed class Player : ClientPcData, IEntity
     public int ChatBubbleBackgroundColor { get; set; }
     public int ChatBubbleSize { get; set; }
 
+    public bool IsAdmin { get; set; }
+    public bool IsMod { get; set; }
+    public bool IsMuted { get; set; }
+    public DateTimeOffset? MutedUntil { get; set; }
+
     public ClientPcProfile ActiveProfile => Profiles.Single(x => x.Id == ActiveProfileId);
 
     public Mount? Mount { get; set; }
@@ -113,6 +118,11 @@ public sealed class Player : ClientPcData, IEntity
 
         if (sendToSelf)
             SendTunneled(packet);
+    }
+
+    public void Disconnect()
+    {
+        _connection.Disconnect();
     }
 
     #endregion

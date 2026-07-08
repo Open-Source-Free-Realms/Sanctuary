@@ -24,6 +24,10 @@ public sealed class DbUserConfiguration : IEntityTypeConfiguration<DbUser>
         builder.Property(u => u.IsLocked).IsRequired().HasDefaultValue(false);
         builder.Property(u => u.IsMember).IsRequired().HasDefaultValue(false);
         builder.Property(u => u.IsAdmin).IsRequired().HasDefaultValue(false);
+        builder.Property(u => u.IsMod).IsRequired().HasDefaultValue(false);
+        builder.Property(u => u.LockedUntil).IsRequired(false);
+        builder.Property(u => u.IsMuted).IsRequired().HasDefaultValue(false);
+        builder.Property(u => u.MutedUntil).IsRequired(false);
 
         builder.Property(u => u.Created).IsRequired().HasDefaultValueSql("DATE()");
         builder.Property(u => u.LastLogin).IsRequired(false);
