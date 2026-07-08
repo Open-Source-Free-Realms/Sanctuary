@@ -68,7 +68,7 @@ public static class PacketZoneSafeTeleportRequestHandler
     private static PointOfInterestDefinition? FindNearestSafePointOfInterest(Vector4 playerPosition)
     {
         var hubPointsOfInterest = _resourceManager.PointOfInterests.Values
-            .Where(x => x.NotificationType == 7)
+            .Where(x => x.NotificationType == PointOfInterestNotificationType.ZoneHub)
             .ToList();
 
         var candidates = hubPointsOfInterest.Count > 0
