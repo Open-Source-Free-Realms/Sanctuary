@@ -388,8 +388,12 @@ public static class ChatCommandRegistry
             .Select(command => command.Usage)
             .ToArray();
 
+        string fullHelpString = "";
         foreach (var usage in usages)
-            SendSystemMessage(connection, usage);
+        {
+            fullHelpString += usage + "\n";
+        }
+        SendSystemMessage(connection, fullHelpString);
     }
 
     private static void SendSystemMessage(GatewayConnection connection, string message)
