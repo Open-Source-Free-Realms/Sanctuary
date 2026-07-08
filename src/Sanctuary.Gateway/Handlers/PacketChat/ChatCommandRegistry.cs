@@ -36,7 +36,6 @@ public static class ChatCommandRegistry
         ["unban"] = new ChatCommandDefinition(ChatCommandRole.Mod, "!admin unban <player>", Unban),
         ["mute"] = new ChatCommandDefinition(ChatCommandRole.Mod, "!admin mute <player> [minutes]", Mute),
         ["unmute"] = new ChatCommandDefinition(ChatCommandRole.Mod, "!admin unmute <player>", Unmute),
-        ["kick"] = new ChatCommandDefinition(ChatCommandRole.Mod, "!admin kick <player>", Kick),
         ["promote"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin promote <player>", Promote),
         ["demote"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin demote <player>", Demote),
         ["help"] = new ChatCommandDefinition(ChatCommandRole.Player, "!admin help", Help),
@@ -49,12 +48,17 @@ public static class ChatCommandRegistry
         _adminLogger = adminLogger;
     }
 
-    public static ChatCommandRole GetRole(Player player)
+    public static ChatCommandRole GetPlayerRole(Player player)
     {
-        if (player.IsAdmin)
+        return GetRoleFromFlags(player.IsAdmin, player.IsMod);
+    }
+
+    private static ChatCommandRole GetRoleFromFlags(bool isAdmin, bool isMod)
+    {
+        if (isAdmin)
             return ChatCommandRole.Admin;
 
-        if (player.IsMod)
+        if (isMod)
             return ChatCommandRole.Mod;
 
         return ChatCommandRole.Player;
@@ -93,22 +97,16 @@ public static class ChatCommandRegistry
         return connection.Player.Name.FullName == targetName;
     }
 
-    private static bool IsAuthorizedAgainstTarget(GatewayConnection connection, bool targetIsAdmin)
+    private static bool IsAuthorizedAgainstTarget(ChatCommandRole playerRole, ChatCommandRole targetRole)
     {
-        if (!targetIsAdmin)
-        {
-            return true;
-        }
-            
-        ChatCommandRole role = GetRole(connection.Player);
-        return role >= ChatCommandRole.Admin;
+        return playerRole > targetRole;
     }
 
     private static bool TryResolveTarget(GatewayConnection connection, DatabaseContext dbContext, string targetName, out ulong targetUserId)
     {
         var target = dbContext.Characters
             .Where(character => character.FullName == targetName)
-            .Select(character => new { character.UserId, character.User.IsAdmin })
+            .Select(character => new { character.UserId, character.User.IsAdmin, character.User.IsMod })
             .SingleOrDefault();
 
         if (target is null)
@@ -118,9 +116,11 @@ public static class ChatCommandRegistry
             return false;
         }
 
-        if (!IsAuthorizedAgainstTarget(connection, target.IsAdmin))
+        ChatCommandRole playerRole = GetRoleFromFlags(connection.Player.IsAdmin, connection.Player.IsMod);
+        ChatCommandRole targetRole = GetRoleFromFlags(target.IsAdmin, target.IsMod);
+        if (!IsAuthorizedAgainstTarget(playerRole, targetRole))
         {
-            SendSystemMessage(connection, "You don't have permission to target an admin.");
+            SendSystemMessage(connection, "You don't have permission to target this player.");
             targetUserId = 0;
             return false;
         }
@@ -148,7 +148,8 @@ public static class ChatCommandRegistry
             return;
         }
 
-        if (GetRole(connection.Player) < command.RequiredRole)
+        ChatCommandRole playerRole = GetPlayerRole(connection.Player);
+        if (playerRole < command.RequiredRole)
         {
             SendSystemMessage(connection, "You don't have permission to use this command.");
             return;
@@ -288,44 +289,9 @@ public static class ChatCommandRegistry
         SendSystemMessage(connection, $"{targetName} has been unmuted.");
     }
 
-    private static void Kick(GatewayConnection connection, string[] args)
-    {
-        if (args.Length < 1)
-        {
-            SendSystemMessage(connection, $"Usage: {Commands["kick"].Usage}");
-            return;
-        }
-
-        var targetName = string.Join(' ', args);
-
-        if (IsSelfTarget(connection, targetName))
-        {
-            SendSystemMessage(connection, "You cannot kick yourself.");
-            return;
-        }
-
-        if (!_zoneManager.TryGetPlayer(targetName, out var targetPlayer))
-        {
-            SendSystemMessage(connection, $"{targetName} is not online.");
-            return;
-        }
-
-        if (!IsAuthorizedAgainstTarget(connection, targetPlayer.IsAdmin))
-        {
-            SendSystemMessage(connection, "You don't have permission to target an admin.");
-            return;
-        }
-
-        targetPlayer.Disconnect();
-
-        LogAction(connection, "Kick", targetName);
-
-        SendSystemMessage(connection, $"{targetName} has been kicked.");
-    }
-
     private static void SetMod(GatewayConnection connection, string targetName, bool isMod)
     {
-        if (GetRole(connection.Player) < ChatCommandRole.Admin)
+        if (GetPlayerRole(connection.Player) < ChatCommandRole.Admin)
         {
             SendSystemMessage(connection, "You don't have permission to use this command.");
             return;
@@ -380,7 +346,7 @@ public static class ChatCommandRegistry
 
     private static void Help(GatewayConnection connection, string[] args)
     {
-        ChatCommandRole role = GetRole(connection.Player);
+        ChatCommandRole role = GetPlayerRole(connection.Player);
 
         string[] usages = Commands.Values
             .Where(command => role >= command.RequiredRole)
