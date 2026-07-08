@@ -2,18 +2,18 @@
   "Boomboxes": [
     { "ItemId": 878,   "ModelId": 1936, "EffectId": 16379, "DanceSequence": [3531, 3532, 3533, 3534] },          // Jingle Bell Boombox
     { "ItemId": 76641, "ModelId": 1936, "EffectId": 16379, "DanceSequence": [3531, 3532, 3533, 3534] },          // Jingle Bell Boombox
-    { "ItemId": 1180,  "ModelId": 1973, "EffectId": 0,     "DanceSequence": [3501, 3502, 3503, 3504, 3505] },    // Realms Roll Boombox
-    { "ItemId": 1913,  "ModelId": 1979, "EffectId": 16452, "DanceSequence": [3501, 3502, 3503, 3504, 3505] },    // Rainbow Randomizer Boombox
-    { "ItemId": 8185,  "ModelId": 2217, "EffectId": 0,     "DanceSequence": [3551, 3552, 3553, 3554] },          // Totem Boombox
+    { "ItemId": 1180,  "ModelId": 1973, "EffectId": 0,     "DanceSequence": [3501] },                            // Realms Roll Boombox (freestyle_01 loop - avatar has no rroll, only freestyle_01)
+    { "ItemId": 1913,  "ModelId": 1979, "EffectId": 16452, "DanceSequence": [3568000, 3568007, 3568011] },       // Rainbow Randomizer Boombox (ballet/wackyscifi/8bit medley - rotates for variety)
+    { "ItemId": 8185,  "ModelId": 2217, "EffectId": 0,     "DanceSequence": [3551] },                            // Totem Boombox (totem_01 loop - avatar only has totem_01)
     { "ItemId": 35759, "ModelId": 4012, "EffectId": 17042, "DanceSequence": [3568004, 3569004, 3570004, 3571004] }, // Clockwork Boombox
     { "ItemId": 48244, "ModelId": 3893, "EffectId": 0,     "DanceSequence": [3568005, 3569005, 3570005, 3571005] }, // Boombox XVD-S
-    { "ItemId": 56774, "ModelId": 1661, "EffectId": 0,     "DanceSequence": [3501, 3502, 3503, 3504, 3505] },    // Hip-Hop Boombox
-    { "ItemId": 69825, "ModelId": 1062, "EffectId": 0,     "DanceSequence": [3511, 3512, 3513, 3514, 3515] },    // Chiller Boombox
+    { "ItemId": 56774, "ModelId": 1661, "EffectId": 0,     "DanceSequence": [3568012, 3569012, 3570012, 3571012] }, // Hip-Hop Boombox (shuffle dance)
+    { "ItemId": 69825, "ModelId": 1062, "EffectId": 0,     "DanceSequence": [3511, 3512, 3513, 3514] },          // Chiller Boombox (zombie - avatar lacks zombie_05)
     { "ItemId": 76927, "ModelId": 4076, "EffectId": 16452, "DanceSequence": [3568010, 3569010, 3570010, 3571010] }, // Pop-Dance Boombox
     { "ItemId": 76928, "ModelId": 2201, "EffectId": 16451, "DanceSequence": [3568006, 3569006, 3570006, 3571006] }, // Tiki Boombox
     { "ItemId": 76930, "ModelId": 4096, "EffectId": 16453, "DanceSequence": [3568001, 3569001, 3570001, 3571001] }, // Big Band Boombox
     { "ItemId": 76933, "ModelId": 4099, "EffectId": 0,     "DanceSequence": [3568008, 3569008, 3570008, 3571008] }, // Hootenanny Boombox
-    { "ItemId": 76935, "ModelId": 4428, "EffectId": 16928, "DanceSequence": [3501, 3502, 3503, 3504, 3505] },    // Realmshake Boombox
+    { "ItemId": 76935, "ModelId": 4428, "EffectId": 16928, "DanceSequence": [3568003, 3569003, 3570003, 3571003] }, // Realmshake Boombox (headbanger - full 4-clip shake)
     { "ItemId": 77329, "ModelId": 2059, "EffectId": 16466, "DanceSequence": [3560, 3561, 3562, 3563] },          // Lovelectric Boombox
     { "ItemId": 76934, "ModelId": 4100, "EffectId": 16827, "DanceSequence": [3568009, 3569009, 3570009, 3571009] } // Xylophone
   ],

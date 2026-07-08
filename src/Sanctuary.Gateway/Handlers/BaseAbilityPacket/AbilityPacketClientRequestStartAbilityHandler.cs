@@ -29,7 +29,7 @@ public static class AbilityPacketClientRequestStartAbilityHandler
     private static readonly ConcurrentDictionary<ulong, ConcurrentDictionary<int, DateTimeOffset>> _itemCooldowns = new();
 
     /// <summary>Animation id that returns a player to their normal standing idle after a boombox dance
-    /// (sent via SetAnimation flags=1).</summary>
+    /// (sent via SetAnimation flags=1); confirmed in-game with /anim.</summary>
     private const int BoomboxIdleAnimId = 1;
 
     /// <summary>How long a boombox stays out and plays (and its use cooldown) - kept the same value.</summary>
@@ -483,21 +483,58 @@ public static class AbilityPacketClientRequestStartAbilityHandler
                 var dancing = new HashSet<ulong>();
                 try
                 {
-                    // Rotate through the boombox's DanceSequence: each dance loops for SwitchMs, then the next
-                    // plays. Everyone in range is driven by ONE SetSynchronizedAnimations packet so the whole
-                    // crowd dances phase-locked and re-syncs on each rotation.
+                    // Poll the crowd every TickMs so anyone who walks up starts dancing within ~1s, but only
+                    // rotate to the next dance every SwitchMs. A dance is selected and played on the very first
+                    // tick (no startup delay). On a rotation the whole crowd is re-synced (phase-locked);
+                    // newcomers between rotations are started on the current dance without restarting everyone
+                    // already dancing. The loop runs the full BoomboxDurationMs, and dances loop, so the crowd
+                    // keeps dancing until the boombox despawns.
+                    const int TickMs = 1000;
                     const int SwitchMs = 4000;
                     int sequenceIndex = 0;
                     int previousAnim = -1;
+                    int currentAnim = 3501;
+                    int sinceSwitch = SwitchMs; // >= SwitchMs so a dance is selected and played on the first tick
 
-                    for (int elapsed = 0; elapsed < BoomboxDurationMs; elapsed += SwitchMs)
+                    // Start `animId` in sync on `targets`, delivered to them + anyone who has one of them visible.
+                    static void SyncDance(List<Game.Entities.Player> targets, int animId)
                     {
-                        await Task.Delay(SwitchMs);
+                        if (targets.Count == 0)
+                            return;
 
-                        int currentAnim = danceSequence.Length > 0 ? danceSequence[sequenceIndex % danceSequence.Length] : 3501;
-                        sequenceIndex++;
-                        bool animChanged = currentAnim != previousAnim;
-                        previousAnim = currentAnim;
+                        var sync = new PlayerUpdatePacketSetSynchronizedAnimations();
+                        foreach (var p in targets)
+                            sync.Animations.Add(new PlayerUpdatePacketSetSynchronizedAnimations.Animation { Guid = p.Guid, AnimationId = animId });
+
+                        var recipients = new HashSet<Game.Entities.Player>(targets);
+                        foreach (var p in targets)
+                            foreach (var vp in p.VisiblePlayers.Values)
+                                recipients.Add(vp);
+
+                        foreach (var r in recipients)
+                        {
+                            try { r.SendTunneled(sync); } catch (Exception ex) { _logger.LogError(ex, "SpawnBoomboxNpc: sync send failed for {Guid}", r.Guid); }
+                        }
+                    }
+
+                    for (int elapsed = 0; elapsed < BoomboxDurationMs; elapsed += TickMs)
+                    {
+                        // Advance the dance rotation when due (and select the first dance on the first tick).
+                        // Only flag a change when the id actually differs, so single-dance boomboxes don't
+                        // re-blast (and hitch) the crowd every SwitchMs.
+                        bool animChanged = false;
+                        if (sinceSwitch >= SwitchMs)
+                        {
+                            int selected = danceSequence.Length > 0 ? danceSequence[sequenceIndex % danceSequence.Length] : 3501;
+                            sequenceIndex++;
+                            sinceSwitch = 0;
+                            if (selected != previousAnim)
+                            {
+                                currentAnim = selected;
+                                previousAnim = selected;
+                                animChanged = true;
+                            }
+                        }
 
                         var players = startingZone.Players ?? [];
                         var inRange = players.Where(p =>
@@ -505,39 +542,30 @@ public static class AbilityPacketClientRequestStartAbilityHandler
                             .ToList();
                         var inRangeGuids = inRange.Select(p => p.Guid).ToHashSet();
 
-                        bool rosterChanged = !dancing.SetEquals(inRangeGuids);
-
                         // Reset players who just left range.
                         foreach (var p in players.Where(p => dancing.Contains(p.Guid) && !inRangeGuids.Contains(p.Guid)).ToList())
                         {
                             try { ResetPlayer(p); } catch (Exception ex) { _logger.LogError(ex, "SpawnBoomboxNpc: reset failed for {Guid}", p.Guid); }
                         }
 
+                        var newcomers = inRange.Where(p => !dancing.Contains(p.Guid)).ToList();
                         dancing = inRangeGuids;
 
-                        // (Re)sync the crowd only when the dance rotates or the roster changed - re-sending the
-                        // same anim to the same players each tick would restart their loop (a visible hitch).
-                        if (inRange.Count > 0 && (animChanged || rosterChanged))
-                        {
-                            var sync = new PlayerUpdatePacketSetSynchronizedAnimations();
-                            foreach (var p in inRange)
-                                sync.Animations.Add(new PlayerUpdatePacketSetSynchronizedAnimations.Animation { Guid = p.Guid, AnimationId = currentAnim });
+                        // On a rotation, re-sync the whole crowd (phase-lock). Otherwise just start any late
+                        // arrivals on the current dance so players already dancing don't hitch.
+                        if (animChanged)
+                            SyncDance(inRange, currentAnim);
+                        else if (newcomers.Count > 0)
+                            SyncDance(newcomers, currentAnim);
 
-                            var recipients = new HashSet<Game.Entities.Player>(inRange);
-                            foreach (var p in inRange)
-                                foreach (var vp in p.VisiblePlayers.Values)
-                                    recipients.Add(vp);
-
-                            foreach (var r in recipients)
-                            {
-                                try { r.SendTunneled(sync); } catch (Exception ex) { _logger.LogError(ex, "SpawnBoomboxNpc: sync send failed for {Guid}", r.Guid); }
-                            }
-                        }
+                        await Task.Delay(TickMs);
+                        sinceSwitch += TickMs;
                     }
                 }
                 catch (Exception ex) { _logger.LogError(ex, "SpawnBoomboxNpc: unhandled error in dance loop"); }
                 finally
                 {
+                    // Stop everyone still dancing when the boombox's dance ends.
                     foreach (var p in (startingZone.Players ?? []).Where(p => dancing.Contains(p.Guid)).ToList())
                     {
                         try { ResetPlayer(p); } catch { /* player may have disconnected */ }
