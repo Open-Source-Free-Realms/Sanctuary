@@ -24,33 +24,25 @@ public static class PacketClientFinishedLoadingHandler
         _logger.LogTrace("Received {name} packet.", nameof(PacketClientFinishedLoading));
 
         connection.Player.Visible = true;
-
         connection.Player.UpdatePosition(connection.Player.Position, connection.Player.Rotation);
 
-        var mount = connection.Player.Mount;
-
-        if (mount is not null)
+        if (connection.Player.Mount is not null)
         {
-            mount.Visible = true;
+            var mount = connection.Player.Mount;
 
+            mount.Visible = true;
             mount.UpdatePosition(connection.Player.Position, connection.Player.Rotation);
 
-            var packetMountResponse = new PacketMountResponse();
-
-            packetMountResponse.RiderGuid = mount.Rider.Guid;
-            packetMountResponse.MountGuid = mount.Guid;
-
-            packetMountResponse.Seat = mount.Seat;
-
-            packetMountResponse.QueuePosition = mount.QueuePosition;
-
-            packetMountResponse.Unknown = 1;
-
-            packetMountResponse.CompositeEffectId = 46; // PFX_Teleport_Flash
-
-            // packetMountResponse.NameVerticalOffset = mountDefinition.NameVerticalOffset;
-
-            connection.Player.SendTunneled(packetMountResponse);
+            connection.Player.SendTunneled(new PacketMountResponse
+            {
+                RiderGuid = connection.Player.Guid,
+                MountGuid = mount.Guid,
+                Seat = mount.Seat,
+                QueuePosition = mount.QueuePosition,
+                Unknown = 1,
+                CompositeEffectId = 46,
+                NameVerticalOffset = mount.Definition.NameVerticalOffset
+            });
         }
 
         connection.Player.Zone.OnClientFinishedLoading(connection.Player);

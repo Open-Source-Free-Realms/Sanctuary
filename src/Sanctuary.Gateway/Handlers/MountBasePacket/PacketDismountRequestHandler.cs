@@ -27,20 +27,30 @@ public static class PacketDismountRequestHandler
         if (connection.Player.Mount is null)
             return true;
 
-        var packetDismountResponse = new PacketDismountResponse();
-
-        packetDismountResponse.RiderGuid = connection.Player.Guid;
-        packetDismountResponse.CompositeEffectId = 0; // PFX_Teleport_Flash
+        var packetDismountResponse = new PacketDismountResponse
+        {
+            RiderGuid = connection.Player.Guid,
+            CompositeEffectId = 0,
+        };
 
         connection.Player.SendTunneledToVisible(packetDismountResponse, true);
-
-        connection.Player.Mount.Dispose();
-        connection.Player.Mount = null;
 
         connection.Player.UpdateCharacterStats(
             CharacterStats.MaxMovementSpeed.Set(8f),
             CharacterStats.GlideEnabled.Set(0),
             CharacterStats.JumpHeight.Set(0f));
+
+        connection.Player.SendTunneledToVisible(new PlayerUpdatePacketRemovePlayerGracefully
+        {
+            Guid = connection.Player.Mount.Guid,
+            Animate = false,
+            Delay = 0,
+            EffectDelay = 0,
+            CompositeEffectId = 0,
+        }, true);
+
+        connection.Player.Mount.Dispose();
+        connection.Player.Mount = null;
 
         return true;
     }

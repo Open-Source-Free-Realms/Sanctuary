@@ -46,8 +46,8 @@ public static class PacketZoneTeleportRequestHandler
         var position = pointOfInterest.SpawnPosition;
         var rotation = new Quaternion(rotationZ, 0f, rotationX, 0f);
 
-        connection.Player.Mount?.UpdatePosition(position, rotation);
         connection.Player.UpdatePosition(position, rotation, updateZoneArea: false);
+        connection.Player.Mount?.UpdatePosition(position, rotation);
 
         var clientUpdatePacketUpdateLocation = new ClientUpdatePacketUpdateLocation
         {

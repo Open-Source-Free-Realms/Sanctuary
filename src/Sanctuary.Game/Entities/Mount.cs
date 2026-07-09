@@ -52,13 +52,8 @@ public class Mount : Npc
     {
         var packet = base.GetAddNpcPacket();
 
-        packet.RiderGuid = Rider.Guid;
+        packet.RiderGuid = 0;
 
         return packet;
-    }
-
-    public override void Dispose()
-    {
-        base.Dispose();
     }
 }

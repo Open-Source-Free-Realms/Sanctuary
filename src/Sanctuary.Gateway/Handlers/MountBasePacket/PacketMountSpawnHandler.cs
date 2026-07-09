@@ -76,22 +76,20 @@ public static class PacketMountSpawnHandler
 
         mount.UpdatePosition(connection.Player.Position, connection.Player.Rotation);
 
-        var packetMountResponse = new PacketMountResponse();
+        foreach (var visiblePlayer in connection.Player.VisiblePlayers)
+            visiblePlayer.Value.OnAddVisiblePlayers([connection.Player]);
 
-        packetMountResponse.RiderGuid = mount.Rider.Guid;
-        packetMountResponse.MountGuid = mount.Guid;
-
-        packetMountResponse.Seat = mount.Seat;
-
-        packetMountResponse.QueuePosition = mount.QueuePosition;
-
-        packetMountResponse.Unknown = 1;
-
-        packetMountResponse.CompositeEffectId = 46; // PFX_Teleport_Flash
-
-        packetMountResponse.NameVerticalOffset = mountDefinition.NameVerticalOffset;
-
-        connection.Player.SendTunneledToVisible(packetMountResponse, true);
+        connection.Player.SendTunneled(mount.GetAddNpcPacket());
+        connection.Player.SendTunneled(new PacketMountResponse
+        {
+            RiderGuid = connection.Player.Guid,
+            MountGuid = mount.Guid,
+            Seat = mount.Seat,
+            QueuePosition = mount.QueuePosition,
+            Unknown = 1,
+            CompositeEffectId = 46,
+            NameVerticalOffset = mountDefinition.NameVerticalOffset
+        });
 
         var mountStats = mountDefinition.Stats;
 
