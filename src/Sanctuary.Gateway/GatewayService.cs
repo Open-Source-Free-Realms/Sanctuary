@@ -126,8 +126,12 @@ public class GatewayService : BackgroundService
         // Main server loop.
         while (!cancellationToken.IsCancellationRequested && clientConnection.Status != Status.Disconnected)
         {
-            _server.GiveTime();
-            _client.GiveTime();
+            var hadData = false;
+            hadData |= _server.GiveTime();
+            hadData |= _client.GiveTime();
+
+            if (!hadData)
+                Thread.Sleep(1);
         }
 
         return Task.CompletedTask;

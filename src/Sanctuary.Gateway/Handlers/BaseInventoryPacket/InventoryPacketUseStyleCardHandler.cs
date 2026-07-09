@@ -130,11 +130,45 @@ public static class InventoryPacketUseStyleCardHandler
                 break;
         }
 
+        var dbItem = dbContext.Items.SingleOrDefault(x => x.CharacterId == dbCharacter.Id && x.Id == clientItem.Id);
+
+        if (dbItem is null)
+        {
+            _logger.LogWarning("Invalid database style card item.");
+            return;
+        }
+
+        var deleteItem = clientItem.Count == 1;
+
+        if (deleteItem)
+            dbContext.Items.Remove(dbItem);
+        else
+            dbItem.Count -= 1;
+
         if (dbContext.SaveChanges() <= 0)
         {
             _logger.LogWarning("Failed to save to database.");
             return;
         }
+
+        connection.Player.Head = dbCharacter.Head;
+        connection.Player.HeadId = dbCharacter.HeadId;
+        connection.Player.SkinTone = dbCharacter.SkinTone;
+        connection.Player.SkinToneId = dbCharacter.SkinToneId;
+        connection.Player.Hair = dbCharacter.Hair;
+        connection.Player.HairId = dbCharacter.HairId;
+        connection.Player.HairColor = dbCharacter.HairColor;
+        connection.Player.EyeColor = dbCharacter.EyeColor;
+        connection.Player.ModelCustomization = dbCharacter.ModelCustomization;
+        connection.Player.ModelCustomizationId = dbCharacter.ModelCustomizationId ?? 0;
+        connection.Player.FacePaint = dbCharacter.FacePaint;
+        connection.Player.FacePaintId = dbCharacter.FacePaintId ?? 0;
+        connection.Player.Model = dbCharacter.Model;
+
+        if (deleteItem)
+            connection.Player.Items.Remove(clientItem);
+        else
+            clientItem.Count = dbItem.Count;
 
         var playerUpdatePacketCustomizationChange = new PlayerUpdatePacketCustomizationChange();
 
@@ -149,6 +183,26 @@ public static class InventoryPacketUseStyleCardHandler
         });
 
         connection.Player.SendTunneledToVisible(playerUpdatePacketCustomizationChange, true);
+
+        if (deleteItem)
+        {
+            var clientUpdatePacketItemDelete = new ClientUpdatePacketItemDelete
+            {
+                ItemGuid = clientItem.Id
+            };
+
+            connection.SendTunneled(clientUpdatePacketItemDelete);
+        }
+        else
+        {
+            var clientUpdatePacketItemUpdate = new ClientUpdatePacketItemUpdate
+            {
+                ItemGuid = clientItem.Id,
+                Count = clientItem.Count
+            };
+
+            connection.SendTunneled(clientUpdatePacketItemUpdate);
+        }
     }
 
     private static string? GetHeadStringParam(int headId)

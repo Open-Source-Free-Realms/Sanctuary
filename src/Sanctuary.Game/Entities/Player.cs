@@ -36,7 +36,8 @@ public sealed class Player : ClientPcData, IEntity
     public int ChatBubbleBackgroundColor { get; set; }
     public int ChatBubbleSize { get; set; }
 
-    public ClientPcProfile ActiveProfile => Profiles.Single(x => x.Id == ActiveProfileId);
+    public ClientPcProfile ActiveProfile =>
+        Profiles.FirstOrDefault(x => x.Id == ActiveProfileId) ?? Profiles.First();
 
     public Mount? Mount { get; set; }
 
@@ -176,7 +177,7 @@ public sealed class Player : ClientPcData, IEntity
         return packet;
     }
 
-    public void UpdatePosition(Vector4 position, Quaternion rotation)
+    public void UpdatePosition(Vector4 position, Quaternion rotation, bool updateZoneArea = true)
     {
         Position = position;
         Rotation = rotation;
@@ -185,7 +186,8 @@ public sealed class Player : ClientPcData, IEntity
         {
             UpdateZoneTile();
 
-            UpdateZoneArea();
+            if (updateZoneArea)
+                UpdateZoneArea();
         }
     }
 
@@ -310,10 +312,13 @@ public sealed class Player : ClientPcData, IEntity
         {
             var playerUpdatePacketAddNpc = npc.GetAddNpcPacket();
 
+            if (npc is Mount mount && mount.Rider.Guid == Guid)
+                playerUpdatePacketAddNpc.RiderGuid = 0;
+
             SendTunneled(playerUpdatePacketAddNpc);
         }
 
-        /* var playerUpdatePacketNpcRelevance = new PlayerUpdatePacketNpcRelevance();
+        var playerUpdatePacketNpcRelevance = new PlayerUpdatePacketNpcRelevance();
 
         foreach (var npc in npcs)
         {
@@ -324,8 +329,7 @@ public sealed class Player : ClientPcData, IEntity
             {
                 Guid = npc.Guid,
                 HasCursor = true,
-                CursorId = npc.CursorId,
-                Unknown2 = false
+                CursorId = npc.CursorId
             });
         }
 
@@ -340,12 +344,13 @@ public sealed class Player : ClientPcData, IEntity
                 continue;
 
             playerUpdatePacketAddNotifications.Notifications.Add(npc.Notification);
-
-            SendTunneled(playerUpdatePacketAddNotifications);
         }
 
+        if (playerUpdatePacketAddNotifications.Notifications.Count > 0)
+            SendTunneled(playerUpdatePacketAddNotifications);
+
         foreach (var npc in npcs)
-            VisibleNpcs.TryAdd(npc.Guid, npc); */
+            VisibleNpcs.TryAdd(npc.Guid, npc);
     }
 
     public void OnAddVisiblePlayers(params IEnumerable<Player> players)
@@ -632,16 +637,11 @@ public sealed class Player : ClientPcData, IEntity
 
     public void Dispose()
     {
+        Mount?.Dispose();
+        Mount = null;
+
         foreach (var visiblePlayer in VisiblePlayers)
             visiblePlayer.Value.OnRemoveVisiblePlayers([this]);
-
-        if (Mount is not null)
-        {
-            Mount.ZoneTile.Entities.Remove(Mount.Guid, out _);
-
-            Zone.TryRemoveNpc(Mount.Guid);
-            Mount = null;
-        }
 
         ZoneTile.Entities.Remove(Guid, out _);
 

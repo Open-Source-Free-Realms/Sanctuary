@@ -121,6 +121,53 @@ public abstract class BaseZone : IZone, IDisposable
         return _npcs.TryAdd(npc.Guid, npc) && _entities.TryAdd(npc.Guid, npc);
     }
 
+    public bool TryCreateNpc(NpcDefinition definition, [MaybeNullWhen(false)] out Npc npc)
+    {
+        var scale = 1f;
+
+        if (_resourceManager.Models.TryGetValue(definition.ModelId, out var model) && model.Scale != 0f)
+            scale = model.Scale;
+
+        npc = new Npc(this)
+        {
+            Guid = _uniqueGuid++,
+            NameId = definition.NameId,
+            Name = definition.Name,
+            ModelId = definition.ModelId,
+            TextureAlias = definition.TextureAlias,
+            Scale = scale,
+            Static = definition.Static,
+            Visible = true
+        };
+
+        if (!_npcs.TryAdd(npc.Guid, npc) || !_entities.TryAdd(npc.Guid, npc))
+        {
+            return false;
+        }
+
+        npc.UpdatePosition(definition.Position, definition.Rotation);
+
+        return true;
+    }
+
+    protected void SpawnNpcs()
+    {
+        var count = 0;
+
+        foreach (var definition in _resourceManager.Npcs.Values)
+        {
+            if (!TryCreateNpc(definition, out _))
+            {
+                _logger.LogWarning("Failed to spawn NPC {id}.", definition.Id);
+                continue;
+            }
+
+            count++;
+        }
+
+        _logger.LogInformation("Spawned {count} NPC(s).", count);
+    }
+
     public bool TryCreateMount(Player rider, MountDefinition definition, [MaybeNullWhen(false)] out Mount mount)
     {
         mount = new Mount(this, rider, definition)
@@ -374,8 +421,13 @@ public abstract class BaseZone : IZone, IDisposable
         {
             try
             {
-                foreach (var entity in _entities.ToFrozenDictionary())
+                foreach (var entity in _entities)
+                {
+                    if (entity.Value is Npc { Static: true })
+                        continue;
+
                     entity.Value.UpdateEveryTick();
+                }
             }
             catch (Exception ex)
             {
@@ -390,8 +442,13 @@ public abstract class BaseZone : IZone, IDisposable
         {
             try
             {
-                foreach (var entity in _entities.ToFrozenDictionary())
+                foreach (var entity in _entities)
+                {
+                    if (entity.Value is Npc { Static: true })
+                        continue;
+
                     entity.Value.UpdateEverySecond();
+                }
             }
             catch (Exception ex)
             {

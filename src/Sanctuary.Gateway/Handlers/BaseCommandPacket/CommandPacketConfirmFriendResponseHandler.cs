@@ -53,6 +53,9 @@ public static class CommandPacketConfirmFriendResponseHandler
         switch (packet.Status)
         {
             case 0:
+                if (connection.Player.Friends.Any(x => x.Guid == player.Guid))
+                    return true;
+
                 OnAccept(player, connection.Player);
 
                 friendMessagePacket.Type = FriendMessageType.FriendAddRequestAccepted;

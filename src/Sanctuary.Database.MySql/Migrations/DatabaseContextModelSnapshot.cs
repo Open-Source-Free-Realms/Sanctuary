@@ -96,8 +96,8 @@ namespace Sanctuary.Database.MySql.Migrations
 
                     b.Property<string>("FullName")
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasMaxLength(32)
-                        .HasColumnType("varchar(32)")
+                        .HasMaxLength(33)
+                        .HasColumnType("varchar(33)")
                         .HasComputedColumnSql("CONCAT_WS(' ', `FirstName`, NULLIF(`LastName`, ''))", true);
 
                     b.Property<int>("Gender")
@@ -137,6 +137,9 @@ namespace Sanctuary.Database.MySql.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<int?>("ModelCustomizationId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PlayTime")
                         .HasColumnType("int");
 
                     b.Property<float?>("PositionX")
