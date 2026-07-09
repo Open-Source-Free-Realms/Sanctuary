@@ -20,7 +20,6 @@ public sealed class DbUser
     public bool IsAdmin { get; set; }
     public bool IsMod { get; set; }
     public DateTimeOffset? LockedUntil { get; set; }
-    public bool IsMuted { get; set; }
     public DateTimeOffset? MutedUntil { get; set; }
     public DateTimeOffset Created { get; set; }
     public DateTimeOffset? LastLogin { get; set; }

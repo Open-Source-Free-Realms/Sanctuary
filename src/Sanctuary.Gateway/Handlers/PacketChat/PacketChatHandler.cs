@@ -37,30 +37,6 @@ public static class PacketChatHandler
         ChatCommandRegistry.Initialize(_zoneManager, _dbContextFactory, adminLogger);
     }
 
-    private static bool TryClearExpiredMute(GatewayConnection connection)
-    {
-        Player player = connection.Player;
-
-        // mute is not expired if the current time has not exceeded mute time or if player is permanently muted (MutedUntil is null)
-        if (player.MutedUntil == null || player.MutedUntil > DateTimeOffset.UtcNow)
-            return false;
-
-        connection.Player.IsMuted = false;
-        connection.Player.MutedUntil = null;
-
-        using DatabaseContext dbContext = _dbContextFactory.CreateDbContext();
-
-        ulong characterId = GuidHelper.GetPlayerId(connection.Player.Guid);
-
-        dbContext.Users
-            .Where(u => u.Characters.Any(c => c.Id == characterId))
-            .ExecuteUpdate(u => u
-                .SetProperty(x => x.IsMuted, false)
-                .SetProperty(x => x.MutedUntil, (DateTimeOffset?)null));
-
-        return true;
-    }
-
     private static void SendMuteNotice(GatewayConnection connection)
     {
         DateTimeOffset? mutedUntil = connection.Player.MutedUntil;
@@ -101,7 +77,7 @@ public static class PacketChatHandler
             return true;
         }
 
-        if (connection.Player.IsMuted && !TryClearExpiredMute(connection))
+        if (connection.Player.IsMuted())
         {
             SendMuteNotice(connection);
             return true;

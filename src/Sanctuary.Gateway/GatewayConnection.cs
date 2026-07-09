@@ -364,7 +364,6 @@ public class GatewayConnection : UdpConnection
 
         Player.IsAdmin = dbCharacter.User.IsAdmin;
         Player.IsMod = dbCharacter.User.IsMod;
-        Player.IsMuted = dbCharacter.User.IsMuted;
         Player.MutedUntil = dbCharacter.User.MutedUntil;
 
         foreach (var dbFriend in dbCharacter.Friends)

@@ -32,12 +32,12 @@ public static class ChatCommandRegistry
 
     private static readonly Dictionary<string, ChatCommandDefinition> Commands = new Dictionary<string, ChatCommandDefinition>
     {
-        ["ban"] = new ChatCommandDefinition(ChatCommandRole.Mod, "!admin ban <player> [minutes]", Ban),
-        ["unban"] = new ChatCommandDefinition(ChatCommandRole.Mod, "!admin unban <player>", Unban),
-        ["mute"] = new ChatCommandDefinition(ChatCommandRole.Mod, "!admin mute <player> [minutes]", Mute),
-        ["unmute"] = new ChatCommandDefinition(ChatCommandRole.Mod, "!admin unmute <player>", Unmute),
-        ["promote"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin promote <player>", Promote),
-        ["demote"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin demote <player>", Demote),
+        ["ban"] = new ChatCommandDefinition(ChatCommandRole.Mod, "!admin ban [player] [minutes]", Ban),
+        ["unban"] = new ChatCommandDefinition(ChatCommandRole.Mod, "!admin unban [player]", Unban),
+        ["mute"] = new ChatCommandDefinition(ChatCommandRole.Mod, "!admin mute [player] [minutes]", Mute),
+        ["unmute"] = new ChatCommandDefinition(ChatCommandRole.Mod, "!admin unmute [player]", Unmute),
+        ["promote"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin promote [player]", Promote),
+        ["demote"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin demote [player]", Demote),
         ["help"] = new ChatCommandDefinition(ChatCommandRole.Mod, "!admin help", Help),
     };
 
@@ -227,6 +227,12 @@ public static class ChatCommandRegistry
             return;
         }
 
+        if (muteUntilTime == null)
+        {
+            SendSystemMessage(connection, $"Please specify a duration in minutes for mute. Usage: {Commands["mute"].Usage}");
+            return;
+        }
+
         if (IsSelfTarget(connection, targetName))
         {
             SendSystemMessage(connection, "You cannot mute yourself.");
@@ -241,20 +247,16 @@ public static class ChatCommandRegistry
         dbContext.Users
             .Where(user => user.Id == targetUserId)
             .ExecuteUpdate(user => user
-                .SetProperty(u => u.IsMuted, true)
                 .SetProperty(u => u.MutedUntil, muteUntilTime));
 
         if (_zoneManager.TryGetPlayer(targetName, out var targetPlayer))
         {
-            targetPlayer.IsMuted = true;
             targetPlayer.MutedUntil = muteUntilTime;
         }
 
-        LogAction(connection, "Mute", targetName, muteUntilTime is null ? "Permanent" : $"Until: {muteUntilTime:u}");
+        LogAction(connection, "Mute", targetName, $"Until: {muteUntilTime:u}");
 
-        SendSystemMessage(connection, muteUntilTime is null
-            ? $"{targetName} has been muted."
-            : $"{targetName} has been muted until {muteUntilTime:u}.");
+        SendSystemMessage(connection, $"{targetName} has been muted until {muteUntilTime:u}.");
     }
 
     private static void Unmute(GatewayConnection connection, string[] args)
@@ -275,12 +277,10 @@ public static class ChatCommandRegistry
         dbContext.Users
             .Where(user => user.Id == targetUserId)
             .ExecuteUpdate(user => user
-                .SetProperty(u => u.IsMuted, false)
                 .SetProperty(u => u.MutedUntil, (DateTimeOffset?)null));
 
         if (_zoneManager.TryGetPlayer(targetName, out var targetPlayer))
         {
-            targetPlayer.IsMuted = false;
             targetPlayer.MutedUntil = null;
         }
 

@@ -38,7 +38,6 @@ public sealed class Player : ClientPcData, IEntity
 
     public bool IsAdmin { get; set; }
     public bool IsMod { get; set; }
-    public bool IsMuted { get; set; }
     public DateTimeOffset? MutedUntil { get; set; }
 
     public ClientPcProfile ActiveProfile => Profiles.Single(x => x.Id == ActiveProfileId);
@@ -120,6 +119,13 @@ public sealed class Player : ClientPcData, IEntity
             SendTunneled(packet);
     }
 
+    public bool IsMuted()
+    {
+        DateTimeOffset currentTime = DateTimeOffset.UtcNow;
+        DateTimeOffset? mutedUntil = MutedUntil;
+        return mutedUntil.HasValue && mutedUntil > currentTime;
+    }
+    
     public void Disconnect()
     {
         _connection.Disconnect();

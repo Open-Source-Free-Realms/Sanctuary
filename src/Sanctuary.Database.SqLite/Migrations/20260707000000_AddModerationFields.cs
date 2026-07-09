@@ -17,13 +17,6 @@ public partial class AddModerationFields : Migration
             nullable: false,
             defaultValue: false);
 
-        migrationBuilder.AddColumn<bool>(
-            name: "IsMuted",
-            table: "Users",
-            type: "INTEGER",
-            nullable: false,
-            defaultValue: false);
-
         migrationBuilder.AddColumn<System.DateTimeOffset>(
             name: "LockedUntil",
             table: "Users",
@@ -42,10 +35,6 @@ public partial class AddModerationFields : Migration
     {
         migrationBuilder.DropColumn(
             name: "IsMod",
-            table: "Users");
-
-        migrationBuilder.DropColumn(
-            name: "IsMuted",
             table: "Users");
 
         migrationBuilder.DropColumn(
