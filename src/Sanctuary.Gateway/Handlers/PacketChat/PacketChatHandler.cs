@@ -40,16 +40,13 @@ public static class PacketChatHandler
     private static void SendMuteNotice(GatewayConnection connection)
     {
         DateTimeOffset? mutedUntil = connection.Player.MutedUntil;
-        var message = mutedUntil != null
-            ? $"You are muted until {mutedUntil:u} and cannot send chat messages."
-            : "You are muted and cannot send chat messages.";
 
         var packet = new PacketChat
         {
             Channel = ChatChannel.System,
             FromName = connection.Player.Name,
             ToName = connection.Player.Name,
-            Message = message
+            Message = $"You are muted until {mutedUntil:u} and cannot send chat messages."
         };
 
         connection.Player.SendTunneled(packet);
