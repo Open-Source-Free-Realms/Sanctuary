@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Microsoft.EntityFrameworkCore;
@@ -99,7 +100,10 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
 
         using var dbContext = _dbContextFactory.CreateDbContext();
 
-        var dbCharacter = dbContext.Characters.SingleOrDefault(x => x.Id == GuidHelper.GetPlayerId(connection.Player.Guid));
+        var dbCharacter = dbContext.Characters
+            .Include(x => x.Items)
+            .Include(x => x.Mounts)
+            .SingleOrDefault(x => x.Id == GuidHelper.GetPlayerId(connection.Player.Guid));
 
         if (dbCharacter is null)
         {
@@ -110,9 +114,10 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
             return true;
         }
 
-        var lastItemId = dbContext.Items.Where(i => i.CharacterId == dbCharacter.Id)
-            .Select(i => (int?)i.Id)
-            .Max() ?? 0;
+        var lastItemId = dbCharacter.Items.Count > 0 ? dbCharacter.Items.Max(i => i.Id) : 0;
+        var lastMountId = dbCharacter.Mounts.Count > 0 ? dbCharacter.Mounts.Max(x => x.Id) : 0;
+
+        var pendingUpdates = new List<Action>();
 
         foreach (var bundleEntry in appStoreBundleDefinition.Entries)
         {
@@ -129,7 +134,7 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
             {
                 var totalQuantity = orderDetail.Quantity * bundleEntry.Quantity;
 
-                var dbItem = dbContext.Items.SingleOrDefault(i => i.CharacterId == dbCharacter.Id &&
+                var dbItem = dbCharacter.Items.SingleOrDefault(i =>
                     i.Definition == clientItemDefinition.Id && i.Tint == orderDetailTint);
 
                 if (dbItem is not null)
@@ -140,7 +145,7 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
                 {
                     dbItem = new DbItem
                     {
-                        Id = lastItemId++ + 1,
+                        Id = ++lastItemId,
                         Definition = clientItemDefinition.Id,
                         Tint = orderDetailTint,
 
@@ -150,53 +155,59 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
                     dbCharacter.Items.Add(dbItem);
                 }
 
-                var clientItem = connection.Player.Items.SingleOrDefault(x => x.Definition == clientItemDefinition.Id && x.Tint == orderDetailTint);
+                var itemDefinition = clientItemDefinition;
+                var savedItem = dbItem;
 
-                var addItem = false;
-
-                if (clientItem is not null)
+                pendingUpdates.Add(() =>
                 {
-                    clientItem.Count = dbItem.Count;
-                }
-                else
-                {
-                    addItem = true;
+                    var clientItem = connection.Player.Items.SingleOrDefault(x => x.Definition == itemDefinition.Id && x.Tint == orderDetailTint);
 
-                    clientItem = new ClientItem
+                    var addItem = false;
+
+                    if (clientItem is not null)
                     {
-                        Id = dbItem.Id,
-                        Tint = dbItem.Tint,
-                        Count = dbItem.Count,
-                        Definition = dbItem.Definition
-                    };
-
-                    connection.Player.Items.Add(clientItem);
-                }
-
-                if (addItem)
-                {
-                    using var writer = new PacketWriter();
-
-                    clientItem.Serialize(writer);
-
-                    clientItemDefinition.Serialize(writer);
-
-                    var clientUpdatePacketItemAdd = new ClientUpdatePacketItemAdd();
-
-                    clientUpdatePacketItemAdd.Payload = writer.Buffer;
-
-                    connection.SendTunneled(clientUpdatePacketItemAdd);
-                }
-                else
-                {
-                    var clientUpdatePacketItemUpdate = new ClientUpdatePacketItemUpdate
+                        clientItem.Count = savedItem.Count;
+                    }
+                    else
                     {
-                        ItemGuid = clientItem.Id,
-                        Count = clientItem.Count,
-                    };
+                        addItem = true;
 
-                    connection.SendTunneled(clientUpdatePacketItemUpdate);
-                }
+                        clientItem = new ClientItem
+                        {
+                            Id = savedItem.Id,
+                            Tint = savedItem.Tint,
+                            Count = savedItem.Count,
+                            Definition = savedItem.Definition
+                        };
+
+                        connection.Player.Items.Add(clientItem);
+                    }
+
+                    if (addItem)
+                    {
+                        using var writer = new PacketWriter();
+
+                        clientItem.Serialize(writer);
+
+                        itemDefinition.Serialize(writer);
+
+                        var clientUpdatePacketItemAdd = new ClientUpdatePacketItemAdd();
+
+                        clientUpdatePacketItemAdd.Payload = writer.Buffer;
+
+                        connection.SendTunneled(clientUpdatePacketItemAdd);
+                    }
+                    else
+                    {
+                        var clientUpdatePacketItemUpdate = new ClientUpdatePacketItemUpdate
+                        {
+                            ItemGuid = clientItem.Id,
+                            Count = clientItem.Count,
+                        };
+
+                        connection.SendTunneled(clientUpdatePacketItemUpdate);
+                    }
+                });
             }
             else if (clientItemDefinition.Type == 19) // Mounts
             {
@@ -209,7 +220,7 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
                     return true;
                 }
 
-                if (connection.Player.Mounts.Any(x => x.Definition == mountDefinition.Id && x.TintId == orderDetailTint))
+                if (dbCharacter.Mounts.Any(x => x.Definition == mountDefinition.Id && x.Tint == orderDetailTint))
                 {
                     packetInGamePurchasePlaceOrderResponse.Result = 2;
 
@@ -218,13 +229,9 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
                     return true;
                 }
 
-                var lastMountId = dbContext.Mounts.Where(x => x.CharacterId == dbCharacter.Id)
-                    .Select(x => (int?)x.Id)
-                    .Max() ?? 0;
-
                 var dbMount = new DbMount
                 {
-                    Id = lastMountId + 1,
+                    Id = ++lastMountId,
 
                     Tint = orderDetailTint,
                     Definition = mountDefinition.Id,
@@ -233,24 +240,30 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
 
                 dbCharacter.Mounts.Add(dbMount);
 
-                connection.Player.Mounts.Add(new PacketMountInfo
+                var mountDef = mountDefinition;
+                var savedMount = dbMount;
+
+                pendingUpdates.Add(() =>
                 {
-                    Id = dbMount.Id,
-                    Definition = mountDefinition.Id,
-                    NameId = mountDefinition.NameId,
-                    ImageSetId = mountDefinition.ImageSetId,
-                    TintId = orderDetailTint,
-                    MembersOnly = mountDefinition.MembersOnly,
-                    IsUpgradable = mountDefinition.IsUpgradable,
-                    IsUpgraded = dbMount.IsUpgraded
+                    connection.Player.Mounts.Add(new PacketMountInfo
+                    {
+                        Id = savedMount.Id,
+                        Definition = mountDef.Id,
+                        NameId = mountDef.NameId,
+                        ImageSetId = mountDef.ImageSetId,
+                        TintId = orderDetailTint,
+                        MembersOnly = mountDef.MembersOnly,
+                        IsUpgradable = mountDef.IsUpgradable,
+                        IsUpgraded = savedMount.IsUpgraded
+                    });
+
+                    var packetMountList = new PacketMountList
+                    {
+                        Mounts = connection.Player.Mounts
+                    };
+
+                    connection.Player.SendTunneled(packetMountList);
                 });
-
-                var packetMountList = new PacketMountList
-                {
-                    Mounts = connection.Player.Mounts
-                };
-
-                connection.Player.SendTunneled(packetMountList);
             }
             else
             {
@@ -276,6 +289,9 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
         }
 
         connection.Player.StationCash = dbCharacter.StationCash;
+
+        foreach (var pendingUpdate in pendingUpdates)
+            pendingUpdate();
 
         packetInGamePurchasePlaceOrderResponse.Result = 1;
 
