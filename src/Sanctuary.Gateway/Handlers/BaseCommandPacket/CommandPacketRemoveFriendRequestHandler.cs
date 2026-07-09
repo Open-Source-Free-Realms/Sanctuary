@@ -72,7 +72,7 @@ public static class CommandPacketRemoveFriendRequestHandler
 
         connection.Player.SendTunneled(new FriendRemovePacket
         {
-            Guid = GuidHelper.GetPlayerGuid(dbCharacterToRemoveGuid)
+            Guid = dbCharacterToRemoveGuid
         });
 
         if (_zoneManager.TryGetPlayer(dbCharacterToRemoveGuid, out var player))

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +20,7 @@ public static class ChangeNameRequestPacketHandler
     private static ILogger _logger = null!;
     private static IZoneManager _zoneManager = null!;
     private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
+    private static IResourceManager _resourceManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -28,6 +29,7 @@ public static class ChangeNameRequestPacketHandler
 
         _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
         _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
+        _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -64,11 +66,38 @@ public static class ChangeNameRequestPacketHandler
 
     private static ChangeNameResponse OnChangeCharacterName(GatewayConnection connection, ChangeNameRequestPacket packet)
     {
+        if (string.IsNullOrWhiteSpace(packet.Name.FirstName)
+            || packet.Name.LastName != string.Empty && string.IsNullOrWhiteSpace(packet.Name.LastName))
+        {
+            return ChangeNameResponse.Error;
+        }
+
+        if (packet.Name.FirstName.Length is < 3 or > 14)
+            return ChangeNameResponse.Error;
+
+        if (packet.Name.LastName != string.Empty && (packet.Name.LastName.Length is < 3 or > 14))
+            return ChangeNameResponse.Error;
+
+        if (CharacterNameHelper.ContainsIllegalCharacters(packet.Name.FullName))
+        {
+            return ChangeNameResponse.Error;
+        }
+
+        if (_resourceManager.NameFilter.Any(token =>
+            packet.Name.FullName.Contains(token, StringComparison.OrdinalIgnoreCase)))
+        {
+            return ChangeNameResponse.Error;
+        }
+
         using var dbContext = _dbContextFactory.CreateDbContext();
 
         var dbCharacter = dbContext.Characters.FirstOrDefault(x => x.Id == GuidHelper.GetPlayerId(connection.Player.Guid));
 
         if (dbCharacter is null)
+            return ChangeNameResponse.Error;
+
+        var taken = dbContext.Characters.Any(x => x.FirstName == packet.Name.FirstName && x.LastName == packet.Name.LastName);
+        if (taken)
             return ChangeNameResponse.Error;
 
         dbCharacter.FirstName = packet.Name.FirstName;

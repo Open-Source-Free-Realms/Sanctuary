@@ -61,7 +61,7 @@ public class Npc : IEntity
 
     public byte CursorId { get; set; }
 
-    // public NotificationInfo? Notification { get; set; }
+    public NotificationInfo? Notification { get; set; }
 
     public List<CharacterAttachmentData> Attachments { get; set; } = [];
 

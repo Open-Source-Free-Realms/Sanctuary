@@ -198,7 +198,7 @@ public static class CharacterCreateRequestHandler
         {
             _logger.LogInformation("Failed to create character, unknown user.");
 
-            characterCreateReply.Result = 4;
+            characterCreateReply.Result = 3;
 
             connection.Send(characterCreateReply);
 
@@ -211,7 +211,7 @@ public static class CharacterCreateRequestHandler
         {
             _logger.LogInformation("Failed to create character, max characters.");
 
-            characterCreateReply.Result = 4;
+            characterCreateReply.Result = 6;
 
             connection.Send(characterCreateReply);
 
@@ -324,11 +324,19 @@ public static class CharacterCreateRequestHandler
 
         dbContext.Characters.Add(dbCharacter);
 
-        if (dbContext.SaveChanges() > 0)
+        if (dbContext.SaveChanges() <= 0)
         {
-            characterCreateReply.Result = 1;
-            characterCreateReply.Guid = GuidHelper.GetPlayerGuid(dbCharacter.Id);
+            _logger.LogError("Failed to create character, database save failed.");
+
+            characterCreateReply.Result = 3;
+
+            connection.Send(characterCreateReply);
+
+            return true;
         }
+
+        characterCreateReply.Result = 1;
+        characterCreateReply.Guid = GuidHelper.GetPlayerGuid(dbCharacter.Id);
 
         connection.Send(characterCreateReply);
 
