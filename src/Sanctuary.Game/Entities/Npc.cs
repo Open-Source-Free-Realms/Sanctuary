@@ -61,7 +61,7 @@ public class Npc : IEntity
 
     public byte CursorId { get; set; }
 
-    // public NotificationInfo? Notification { get; set; }
+    public NotificationInfo? Notification { get; set; }
 
     public List<CharacterAttachmentData> Attachments { get; set; } = [];
 
@@ -114,7 +114,7 @@ public class Npc : IEntity
     {
     }
 
-    public void UpdatePosition(Vector4 position, Quaternion rotation)
+    public void UpdatePosition(Vector4 position, Quaternion rotation, bool updateZoneArea = true)
     {
         Position = position;
         Rotation = rotation;

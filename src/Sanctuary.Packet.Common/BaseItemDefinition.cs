@@ -142,7 +142,7 @@ public class BaseItemDefinition : ISerializableType
 
         writer.Write(TintAlias);
 
-        writer.Write(ForceDisablePreview);
+        writer.Write(ForceDisablePreview || Type == 16);
 
         writer.Write(MemberDiscount);
 

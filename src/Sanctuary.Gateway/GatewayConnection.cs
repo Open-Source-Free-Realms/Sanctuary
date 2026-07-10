@@ -295,6 +295,22 @@ public class GatewayConnection : UdpConnection
             }
         }
 
+        if (Player.Profiles.Count == 0)
+        {
+            _logger.LogError("Character {id} has no valid profiles.", dbCharacter.Id);
+            return false;
+        }
+
+        if (!Player.Profiles.Any(x => x.Id == dbCharacter.ActiveProfileId))
+        {
+            _logger.LogWarning(
+                "Character {id} has invalid ActiveProfileId {profileId}; using first profile.",
+                dbCharacter.Id,
+                dbCharacter.ActiveProfileId);
+
+            dbCharacter.ActiveProfileId = Player.Profiles[0].Id;
+        }
+
         Player.ActiveProfileId = dbCharacter.ActiveProfileId;
 
         foreach (var dbItem in dbCharacter.Items)
@@ -361,6 +377,10 @@ public class GatewayConnection : UdpConnection
         Player.ChatBubbleForegroundColor = dbCharacter.ChatBubbleForegroundColor;
         Player.ChatBubbleBackgroundColor = dbCharacter.ChatBubbleBackgroundColor;
         Player.ChatBubbleSize = dbCharacter.ChatBubbleSize;
+
+        Player.IsAdmin = dbCharacter.User.IsAdmin;
+        Player.IsMod = dbCharacter.User.IsMod;
+        Player.MutedUntil = dbCharacter.User.MutedUntil;
 
         foreach (var dbFriend in dbCharacter.Friends)
         {

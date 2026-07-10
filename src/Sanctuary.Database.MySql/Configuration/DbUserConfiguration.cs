@@ -21,7 +21,6 @@ public sealed class DbUserConfiguration : IEntityTypeConfiguration<DbUser>
 
         builder.Property(u => u.MaxCharacters).IsRequired().HasDefaultValue(10);
 
-        builder.Property(u => u.IsLocked).IsRequired().HasDefaultValue(false);
         builder.Property(u => u.IsMember).IsRequired().HasDefaultValue(false);
         builder.Property(u => u.IsAdmin).IsRequired().HasDefaultValue(false);
 

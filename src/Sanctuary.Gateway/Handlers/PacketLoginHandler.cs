@@ -80,6 +80,7 @@ public static class PacketLoginHandler
 
         var character = dbContext.Characters
             .AsNoTracking()
+            .Include(x => x.User)
             .Include(x => x.Items)
             .Include(x => x.Titles)
             .Include(x => x.Mounts)
@@ -101,6 +102,49 @@ public static class PacketLoginHandler
             connection.Disconnect();
 
             return true;
+        }
+
+        if (character.User.LockedUntil != null)
+        {
+            DateTimeOffset currentTime = DateTimeOffset.UtcNow;
+            DateTimeOffset? lockedUntil = character.User.LockedUntil;
+            if (lockedUntil <= currentTime)
+            {
+                dbContext.Users
+                    .Where(x => x.Id == character.User.Id)
+                    .ExecuteUpdate(x => x
+                        .SetProperty(u => u.LockedUntil, (DateTimeOffset?)null));
+            }
+            else
+            {
+                _logger.LogWarning("{connection} connected with a banned account. ( Guid: {guid}, Ticket: \"{ticket}\" )", connection, packet.Guid, packet.Ticket);
+
+                connection.Send(packetLoginReply);
+
+                connection.Disconnect();
+
+                return true;
+            }
+        }
+      
+        var orphanedIgnores = character.Ignores
+            .Where(x => x.IgnoreCharacter is null)
+            .ToList();
+
+        if (orphanedIgnores.Count > 0)
+        {
+            var orphanedIgnoreIds = orphanedIgnores
+                .Select(x => x.IgnoreCharacterId)
+                .ToList();
+
+            dbContext.Ignores
+                .Where(x => x.CharacterId == character.Id && orphanedIgnoreIds.Contains(x.IgnoreCharacterId))
+                .ExecuteDelete();
+
+            foreach (var orphanedIgnore in orphanedIgnores)
+            {
+                character.Ignores.Remove(orphanedIgnore);
+            }
         }
 
 #if !DEBUG

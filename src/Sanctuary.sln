@@ -34,6 +34,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Resources", "Resources", "{
 		Resources\ItemClasses.txt = Resources\ItemClasses.txt
 		Resources\Models.txt = Resources\Models.txt
 		Resources\Mounts.json = Resources\Mounts.json
+		Resources\NameFilter.txt = Resources\NameFilter.txt
 		Resources\PlayerTitles.json = Resources\PlayerTitles.json
 		Resources\PointOfInterests.json = Resources\PointOfInterests.json
 		Resources\Profiles.json = Resources\Profiles.json
