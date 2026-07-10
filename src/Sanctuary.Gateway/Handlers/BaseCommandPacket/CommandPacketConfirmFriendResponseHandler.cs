@@ -56,7 +56,8 @@ public static class CommandPacketConfirmFriendResponseHandler
                 if (connection.Player.Friends.Any(x => x.Guid == player.Guid))
                     return true;
 
-                OnAccept(player, connection.Player);
+                if (!OnAccept(player, connection.Player))
+                    return true;
 
                 friendMessagePacket.Type = FriendMessageType.FriendAddRequestAccepted;
                 break;
@@ -81,7 +82,7 @@ public static class CommandPacketConfirmFriendResponseHandler
         return true;
     }
 
-    private static void OnAccept(Player inviter, Player invitee)
+    private static bool OnAccept(Player inviter, Player invitee)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
 
@@ -89,7 +90,7 @@ public static class CommandPacketConfirmFriendResponseHandler
         var inviteeDbCharacter = dbContext.Characters.SingleOrDefault(x => x.Id == GuidHelper.GetPlayerId(invitee.Guid));
 
         if (inviterDbCharacter is null || inviteeDbCharacter is null)
-            return;
+            return false;
 
         inviterDbCharacter.Friends.Add(new DbFriend
         {
@@ -102,7 +103,7 @@ public static class CommandPacketConfirmFriendResponseHandler
         });
 
         if (dbContext.SaveChanges() <= 0)
-            return;
+            return false;
 
         // Inviter
         {
@@ -169,5 +170,7 @@ public static class CommandPacketConfirmFriendResponseHandler
 
             invitee.SendTunneled(inviteeFriendAddPacket);
         }
+
+        return true;
     }
 }
