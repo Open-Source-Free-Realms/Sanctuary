@@ -104,14 +104,15 @@ public static class PacketLoginHandler
             return true;
         }
 
-        if (character.User.IsLocked)
+        if (character.User.LockedUntil != null)
         {
-            if (character.User.LockedUntil <= DateTimeOffset.UtcNow)
+            DateTimeOffset currentTime = DateTimeOffset.UtcNow;
+            DateTimeOffset? lockedUntil = character.User.LockedUntil;
+            if (lockedUntil <= currentTime)
             {
                 dbContext.Users
                     .Where(x => x.Id == character.User.Id)
                     .ExecuteUpdate(x => x
-                        .SetProperty(u => u.IsLocked, false)
                         .SetProperty(u => u.LockedUntil, (DateTimeOffset?)null));
             }
             else

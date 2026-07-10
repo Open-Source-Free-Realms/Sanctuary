@@ -177,11 +177,11 @@ public static class ChatCommandRegistry
         if (!TryResolveTarget(connection, dbContext, targetName, out var targetUserId))
             return;
 
+        DateTimeOffset lockedUntil = banUntilTime ?? DateTimeOffset.MaxValue;
         dbContext.Users
             .Where(user => user.Id == targetUserId)
             .ExecuteUpdate(user => user
-                .SetProperty(u => u.IsLocked, true)
-                .SetProperty(u => u.LockedUntil, banUntilTime));
+                .SetProperty(u => u.LockedUntil, lockedUntil));
 
         if (_zoneManager.TryGetPlayer(targetName, out var targetPlayer))
             targetPlayer.Disconnect();
@@ -211,7 +211,6 @@ public static class ChatCommandRegistry
         dbContext.Users
             .Where(user => user.Id == targetUserId)
             .ExecuteUpdate(user => user
-                .SetProperty(u => u.IsLocked, false)
                 .SetProperty(u => u.LockedUntil, (DateTimeOffset?)null));
 
         LogAction(connection, "Unban", targetName);
