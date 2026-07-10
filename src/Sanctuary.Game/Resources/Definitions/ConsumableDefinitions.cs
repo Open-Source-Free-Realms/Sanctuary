@@ -11,4 +11,6 @@ public class ConsumableDefinitions
     public List<FoodEffectDefinition> FoodEffects { get; set; } = new();
 
     public List<TransformAbilityDefinition> Transformations { get; set; } = new();
+
+    public List<RandomTransformFoodDefinition> RandomTransformFoods { get; set; } = new();
 }

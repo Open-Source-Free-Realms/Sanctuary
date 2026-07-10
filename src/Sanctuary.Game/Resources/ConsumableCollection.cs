@@ -18,6 +18,7 @@ public class ConsumableCollection
     public ObservableConcurrentDictionary<int, CakeItemDefinition> Cakes { get; } = new();
     public ObservableConcurrentDictionary<int, FoodEffectDefinition> FoodEffects { get; } = new();
     public ObservableConcurrentDictionary<int, TransformAbilityDefinition> Transformations { get; } = new();
+    public ObservableConcurrentDictionary<int, RandomTransformFoodDefinition> RandomTransformFoods { get; } = new();
 
     public ConsumableCollection(ILogger logger)
     {
@@ -90,6 +91,16 @@ public class ConsumableCollection
                 }
             }
             _logger.LogInformation("Loaded {count} Transformation definitions.", Transformations.Count);
+
+            foreach (var entry in consumables.RandomTransformFoods)
+            {
+                if (!RandomTransformFoods.TryAdd(entry.ItemId, entry))
+                {
+                    _logger.LogWarning("Failed to add RandomTransformFood entry. ItemId={id} \"{file}\"", entry.ItemId, filePath);
+                    return false;
+                }
+            }
+            _logger.LogInformation("Loaded {count} RandomTransformFood definitions.", RandomTransformFoods.Count);
         }
         catch (Exception ex)
         {

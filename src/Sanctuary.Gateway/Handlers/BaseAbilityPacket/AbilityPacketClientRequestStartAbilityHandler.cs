@@ -32,8 +32,11 @@ public static class AbilityPacketClientRequestStartAbilityHandler
     /// (sent via SetAnimation flags=1); confirmed in-game with /anim.</summary>
     private const int BoomboxIdleAnimId = 1;
 
-    /// <summary>How long a boombox stays out and plays (and its use cooldown) - kept the same value.</summary>
-    private const int BoomboxDurationMs = 25_000;
+    /// <summary>How long a boombox stays out and plays (and its use cooldown).</summary>
+    private const int BoomboxDurationMs = 120_000;
+
+    /// <summary>Use cooldown for food-effect consumables (matches the boombox duration).</summary>
+    private const int FoodEffectCooldownMs = 120_000;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -124,7 +127,14 @@ public static class AbilityPacketClientRequestStartAbilityHandler
 
         _logger.LogInformation("HandleItemAbility: itemDef={ItemDefId} abilityId={AbilityId}", clientItemDefinition.Id, clientItemDefinition.ActivatableAbilityId);
 
-        if (_resourceManager.Consumables.Transformations.TryGetValue(clientItemDefinition.ActivatableAbilityId, out var transform))
+        // Random-transform foods (e.g. Jack-O-Lantern) roll one of their listed transformations
+        // instead of using the item's fixed ActivatableAbilityId.
+        var transformAbilityId = clientItemDefinition.ActivatableAbilityId;
+
+        if (_resourceManager.Consumables.RandomTransformFoods.TryGetValue(clientItemDefinition.Id, out var randomFood) && randomFood.TransformAbilityIds.Length > 0)
+            transformAbilityId = randomFood.TransformAbilityIds[Random.Shared.Next(randomFood.TransformAbilityIds.Length)];
+
+        if (_resourceManager.Consumables.Transformations.TryGetValue(transformAbilityId, out var transform))
         {
             _logger.LogInformation("Transform match: modelId={ModelId} durationMs={Duration}", transform.ModelId, transform.DurationMs);
 
@@ -158,6 +168,36 @@ public static class AbilityPacketClientRequestStartAbilityHandler
 
             if (willHaveItemLeft)
                 connection.Player.StartActionBarCooldown(2, capturedSlot, capturedItemDef.Icon.Id, capturedItemDef.NameId, capturedCount - 1, cooldownMs);
+
+            return true;
+        }
+
+        // Food-effect consumables share the boombox-style item cooldown so they can't be spammed.
+        if (_resourceManager.Consumables.FoodEffects.ContainsKey(clientItemDefinition.ActivatableAbilityId))
+        {
+            var playerCooldowns = _itemCooldowns.GetOrAdd(connection.Player.Guid, _ => new ConcurrentDictionary<int, DateTimeOffset>());
+
+            if (playerCooldowns.TryGetValue(clientItemDefinition.Id, out var expiry) && DateTimeOffset.UtcNow < expiry)
+            {
+                SendFailure(connection, 3079);
+                return true;
+            }
+
+            playerCooldowns[clientItemDefinition.Id] = DateTimeOffset.UtcNow.AddMilliseconds(FoodEffectCooldownMs);
+
+            TriggerAbilityEffect(connection, clientItemDefinition);
+
+            var capturedSlot = packet.Data.Slot;
+            var capturedCount = clientItem.Count;
+
+            bool willHaveItemLeft = !clientItemDefinition.SingleUse || capturedCount > 1;
+
+            if (clientItemDefinition.SingleUse)
+                ConsumeItem(connection, clientItem, clientItemDefinition, capturedSlot);
+
+            if (willHaveItemLeft)
+                connection.Player.StartActionBarCooldown(2, capturedSlot, clientItemDefinition.Icon.Id, clientItemDefinition.NameId,
+                    clientItemDefinition.SingleUse ? capturedCount - 1 : capturedCount, FoodEffectCooldownMs);
 
             return true;
         }
@@ -351,9 +391,20 @@ public static class AbilityPacketClientRequestStartAbilityHandler
                         Clear = true
                     });
 
-                    var group = cakeDef.ScareGroups[Random.Shared.Next(cakeDef.ScareGroups.Length)];
-                    foreach (var effectId in group)
-                        SendEffect(effectId);
+                    // Roll across all outcomes: each scare group and each transform is equally likely.
+                    var roll = Random.Shared.Next(cakeDef.ScareGroups.Length + cakeDef.TransformAbilityIds.Length);
+
+                    if (roll < cakeDef.ScareGroups.Length)
+                    {
+                        foreach (var effectId in cakeDef.ScareGroups[roll])
+                            SendEffect(effectId);
+                    }
+                    else
+                    {
+                        var abilityId = cakeDef.TransformAbilityIds[roll - cakeDef.ScareGroups.Length];
+                        if (_resourceManager.Consumables.Transformations.TryGetValue(abilityId, out var scareTransform))
+                            ApplyTransform(interactingPlayer, scareTransform.ModelId, scareTransform.DurationMs, scareTransform.CompositeEffectId);
+                    }
 
                     Task.Delay(cakeDef.ScareCooldownMs).ContinueWith(_ => { scareActive = false; });
                 };
