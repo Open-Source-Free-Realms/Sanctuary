@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -43,9 +44,23 @@ public static class InventoryPacketItemActionBarAssignHandler
             }
         };
 
+        // Ensure action bar exists
+        if (!connection.Player.ActionBars.ContainsKey(2))
+        {
+            connection.Player.ActionBars[2] = new Packet.Common.ClientActionBar { Id = 2 };
+        }
+
         if (packet.Guid == 0)
         {
             clientUpdatePacketUpdateActionBarSlot.Slot.IsEmpty = true;
+
+            // Remove from server-side tracking
+            connection.Player.ActionBars[2].Slots.Remove(packet.Slot);
+
+            if (connection.Player.ActionBarItemGuids.ContainsKey(2))
+            {
+                connection.Player.ActionBarItemGuids[2].Remove(packet.Slot);
+            }
 
             connection.SendTunneled(clientUpdatePacketUpdateActionBarSlot);
 
@@ -82,6 +97,32 @@ public static class InventoryPacketItemActionBarAssignHandler
         clientUpdatePacketUpdateActionBarSlot.Slot.Quantity = clientItem.Count;
         clientUpdatePacketUpdateActionBarSlot.Slot.ForceDismount = true;
         clientUpdatePacketUpdateActionBarSlot.Slot.Unknown15 = 1000;
+
+        // Store the slot information server-side with the item GUID
+        var slotData = new Packet.Common.ActionBarSlot
+        {
+            IsEmpty = false,
+            IconId = clientItemDefinition.Icon.Id,
+            NameId = clientItemDefinition.NameId,
+            Unknown5 = 1,
+            Unknown6 = 4,
+            Unknown7 = 15,
+            Enabled = true,
+            Unknown10 = 1000,
+            TotalRefreshTime = 1000,
+            Quantity = clientItem.Count,
+            ForceDismount = true,
+            Unknown15 = 1000
+        };
+
+        connection.Player.ActionBars[2].Slots[packet.Slot] = slotData;
+
+        // Track the item GUID for this slot
+        if (!connection.Player.ActionBarItemGuids.ContainsKey(2))
+        {
+            connection.Player.ActionBarItemGuids[2] = new Dictionary<int, int>();
+        }
+        connection.Player.ActionBarItemGuids[2][packet.Slot] = packet.Guid;
 
         connection.SendTunneled(clientUpdatePacketUpdateActionBarSlot);
 
