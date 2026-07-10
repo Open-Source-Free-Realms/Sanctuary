@@ -24,12 +24,15 @@ public static class PacketClientFinishedLoadingHandler
         _logger.LogTrace("Received {name} packet.", nameof(PacketClientFinishedLoading));
 
         connection.Player.Visible = true;
+
+        if (connection.Player.Mount is not null)
+            connection.Player.Mount.Visible = true;
+
         connection.Player.UpdatePosition(connection.Player.Position, connection.Player.Rotation);
 
         if (connection.Player.Mount is not null)
         {
-            connection.Player.Mount.Visible = true;
-
+            connection.Player.SendTunneled(connection.Player.Mount.GetAddNpcPacket());
             connection.Player.SendTunneled(connection.Player.Mount.GetMountResponsePacket());
         }
 

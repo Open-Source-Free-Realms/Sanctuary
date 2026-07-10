@@ -66,7 +66,7 @@ public class Mount : Npc
             Seat = Seat,
             QueuePosition = QueuePosition,
             Unknown = 1,
-            CompositeEffectId = 46, // PFX_Teleport_Flash
+            CompositeEffectId = 0, // PFX_Teleport_Flash
             NameVerticalOffset = Definition.NameVerticalOffset
         };
     }

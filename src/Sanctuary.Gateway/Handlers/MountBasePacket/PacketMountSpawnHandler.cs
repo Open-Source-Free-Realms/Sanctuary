@@ -80,7 +80,11 @@ public static class PacketMountSpawnHandler
             visiblePlayer.Value.OnAddVisiblePlayers([connection.Player]);
 
         connection.Player.SendTunneled(mount.GetAddNpcPacket());
-        connection.Player.SendTunneled(mount.GetMountResponsePacket());
+
+        var mountResponse = mount.GetMountResponsePacket();
+        mountResponse.CompositeEffectId = 46; // PFX_Teleport_Flash
+
+        connection.Player.SendTunneledToVisible(mountResponse, sendToSelf: true);
 
         var mountStats = mountDefinition.Stats;
 
