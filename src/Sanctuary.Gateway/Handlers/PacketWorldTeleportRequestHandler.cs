@@ -40,7 +40,6 @@ public static class PacketWorldTeleportRequestHandler
         var rotation = player.Rotation;
 
         connection.Player.UpdatePosition(position, rotation, updateZoneArea: false);
-        connection.Player.Mount?.UpdatePosition(position, rotation);
 
         var clientUpdatePacketUpdateLocation = new ClientUpdatePacketUpdateLocation
         {

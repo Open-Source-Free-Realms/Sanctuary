@@ -74,22 +74,13 @@ public static class PacketMountSpawnHandler
 
         connection.Player.Mount = mount;
 
-        mount.UpdatePosition(connection.Player.Position, connection.Player.Rotation);
+        connection.Player.UpdatePosition(connection.Player.Position, connection.Player.Rotation);
 
         foreach (var visiblePlayer in connection.Player.VisiblePlayers)
             visiblePlayer.Value.OnAddVisiblePlayers([connection.Player]);
 
         connection.Player.SendTunneled(mount.GetAddNpcPacket());
-        connection.Player.SendTunneled(new PacketMountResponse
-        {
-            RiderGuid = connection.Player.Guid,
-            MountGuid = mount.Guid,
-            Seat = mount.Seat,
-            QueuePosition = mount.QueuePosition,
-            Unknown = 1,
-            CompositeEffectId = 46,
-            NameVerticalOffset = mountDefinition.NameVerticalOffset
-        });
+        connection.Player.SendTunneled(mount.GetMountResponsePacket());
 
         var mountStats = mountDefinition.Stats;
 

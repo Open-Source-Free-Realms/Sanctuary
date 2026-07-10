@@ -56,4 +56,18 @@ public class Mount : Npc
 
         return packet;
     }
+
+    public PacketMountResponse GetMountResponsePacket()
+    {
+        return new PacketMountResponse
+        {
+            RiderGuid = Rider.Guid,
+            MountGuid = Guid,
+            Seat = Seat,
+            QueuePosition = QueuePosition,
+            Unknown = 1,
+            CompositeEffectId = 46, // PFX_Teleport_Flash
+            NameVerticalOffset = Definition.NameVerticalOffset
+        };
+    }
 }

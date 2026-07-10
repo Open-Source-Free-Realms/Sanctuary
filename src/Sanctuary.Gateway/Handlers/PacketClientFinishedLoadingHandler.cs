@@ -28,21 +28,9 @@ public static class PacketClientFinishedLoadingHandler
 
         if (connection.Player.Mount is not null)
         {
-            var mount = connection.Player.Mount;
+            connection.Player.Mount.Visible = true;
 
-            mount.Visible = true;
-            mount.UpdatePosition(connection.Player.Position, connection.Player.Rotation);
-
-            connection.Player.SendTunneled(new PacketMountResponse
-            {
-                RiderGuid = connection.Player.Guid,
-                MountGuid = mount.Guid,
-                Seat = mount.Seat,
-                QueuePosition = mount.QueuePosition,
-                Unknown = 1,
-                CompositeEffectId = 46,
-                NameVerticalOffset = mount.Definition.NameVerticalOffset
-            });
+            connection.Player.SendTunneled(connection.Player.Mount.GetMountResponsePacket());
         }
 
         connection.Player.Zone.OnClientFinishedLoading(connection.Player);

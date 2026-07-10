@@ -133,6 +133,8 @@ public sealed class Player : ClientPcData, IEntity
         Position = position;
         Rotation = rotation;
 
+        Mount?.UpdatePosition(position, rotation, updateZoneArea);
+
         if (Visible)
         {
             UpdateZoneTile();
@@ -318,16 +320,7 @@ public sealed class Player : ClientPcData, IEntity
 
                 SendTunneled(addPc);
                 SendTunneled(player.Mount.GetAddNpcPacket());
-                SendTunneled(new PacketMountResponse
-                {
-                    RiderGuid = player.Guid,
-                    MountGuid = player.Mount.Guid,
-                    Seat = player.Mount.Seat,
-                    QueuePosition = player.Mount.QueuePosition,
-                    Unknown = 1,
-                    CompositeEffectId = 46,
-                    NameVerticalOffset = player.Mount.Definition.NameVerticalOffset
-                });
+                SendTunneled(player.Mount.GetMountResponsePacket());
             }
             else
                 SendTunneled(player.GetAddPcPacket());
