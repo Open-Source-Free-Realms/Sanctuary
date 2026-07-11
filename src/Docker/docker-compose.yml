@@ -3,7 +3,8 @@ services:
     image: ${DOCKER_REGISTRY-}sanctuary-gateway
     build:
       context: ../
-      dockerfile: Docker/Sanctuary.Gateway.dockerfile
+      dockerfile: Docker/Sanctuary.dockerfile
+      target: gateway
     restart: unless-stopped
     ports:
       - "20260:20260/udp"
@@ -24,7 +25,8 @@ services:
     image: ${DOCKER_REGISTRY-}sanctuary-login
     build:
       context: ../
-      dockerfile: Docker/Sanctuary.Login.dockerfile
+      dockerfile: Docker/Sanctuary.dockerfile
+      target: login
     restart: unless-stopped
     ports:
       - "20041:20041/udp"
