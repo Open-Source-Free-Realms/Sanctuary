@@ -1,0 +1,31 @@
+name: Update Public Server
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy over SSH
+        env:
+          DEPLOY_HOST: ${{ secrets.PUBLIC_SERVER_HOST }}
+          DEPLOY_USER: ${{ secrets.PUBLIC_SERVER_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.PUBLIC_SERVER_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.PUBLIC_SERVER_HOST_RECORD }}
+          DEPLOY_SCRIPT_DIR: ${{ secrets.PUBLIC_SERVER_SCRIPT_DIR }}
+          DEPLOY_SCRIPT: ${{ secrets.PUBLIC_SERVER_UPDATE_SCRIPT }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+          ssh -i ~/.ssh/deploy_key \
+            -o UserKnownHostsFile=~/.ssh/known_hosts \
+            -o IdentitiesOnly=yes \
+            "$DEPLOY_USER@$DEPLOY_HOST" \
+            "cd '$DEPLOY_SCRIPT_DIR' && './$DEPLOY_SCRIPT' '$BRANCH'"

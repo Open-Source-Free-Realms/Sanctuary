@@ -1,0 +1,53 @@
+name: .NET
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./src
+
+    services:
+      mariadb:
+        image: mariadb:11.6
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_USER: user
+          MYSQL_PASSWORD: password
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: sanctuary_test
+        options: >-
+          --health-cmd="mariadb-admin ping -uroot -ppassword --silent"
+          --health-interval=5s
+          --health-timeout=2s
+          --health-retries=5
+          --health-start-period=10s
+
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Verify MariaDB connection
+      run: nc -zv 127.0.0.1 3306
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v5
+      with:
+        global-json-file: ./src/global.json
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --no-restore
+
+    - name: Test
+      run: dotnet test --no-build --verbosity normal

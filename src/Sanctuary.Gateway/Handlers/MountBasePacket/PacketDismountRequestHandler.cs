@@ -46,7 +46,8 @@ public static class PacketDismountRequestHandler
             Animate = false,
             Delay = 0,
             EffectDelay = 0,
-            CompositeEffectId = 0,
+            CompositeEffectId = 46,
+            Duration = 1000,
         }, true);
 
         connection.Player.Mount.Dispose();
