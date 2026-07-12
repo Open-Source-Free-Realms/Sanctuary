@@ -14,8 +14,6 @@
 
     <PackageReference Include="BCrypt.Net-Next" />
 
-    <PackageReference Include="Refit.HttpClientFactory" />
-
     <PackageReference Include="SixLabors.ImageSharp" />
 
     <PackageReference Include="NLog" />
