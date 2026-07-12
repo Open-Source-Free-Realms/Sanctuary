@@ -1,4 +1,4 @@
-﻿namespace Sanctuary.Core.Configuration;
+﻿namespace Sanctuary.Database;
 
 public enum DatabaseProvider
 {

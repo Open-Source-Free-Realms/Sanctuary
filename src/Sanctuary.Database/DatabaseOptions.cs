@@ -1,9 +1,12 @@
-﻿namespace Sanctuary.Core.Configuration;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Sanctuary.Database;
 
 public sealed class DatabaseOptions
 {
     public const string Section = "Database";
 
+    [Required]
     public required DatabaseProvider Provider { get; set; }
 
     /// <summary>
@@ -12,5 +15,7 @@ public sealed class DatabaseOptions
     /// If the type is being omitted, it is assumed to be MySQL (and not MariaDB).
     /// </summary>
     public string? VersionString { get; set; }
+
+    [Required]
     public required string ConnectionString { get; set; }
 }

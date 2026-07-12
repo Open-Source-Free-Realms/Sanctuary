@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
 
 using Sanctuary.Core.Configuration;
+using Sanctuary.Core.Extensions;
 using Sanctuary.Database;
 using Sanctuary.Game;
 using Sanctuary.Login;

@@ -3,13 +3,13 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Sanctuary.Database;
+using Sanctuary.Database.Sqlite;
 
 #nullable disable
 
 namespace Sanctuary.Database.Sqlite.Migrations
 {
-    [DbContext(typeof(DatabaseContext))]
+    [DbContext(typeof(SqliteDatabaseContext))]
     partial class DatabaseContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

@@ -36,14 +36,16 @@ public static class AuthEndpoints
 
     private static async Task<IResult> LoginHandlerAsync(
         LoginRequestModel request,
-        DatabaseContext databaseContext,
         CancellationToken cancellationToken,
-        IOptionsSnapshot<WebAPIOptions> webAPIOptions)
+        IOptionsSnapshot<WebAPIOptions> webAPIOptions,
+        IDbContextFactory<DatabaseContext> dbContextFactory)
     {
         if (!MiniValidator.TryValidate(request, out var errors))
             return Results.ValidationProblem(errors);
 
-        var dbUser = await databaseContext.Users.FirstOrDefaultAsync(x => x.Username == request.Username, cancellationToken);
+        var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var dbUser = await dbContext.Users.FirstOrDefaultAsync(x => x.Username == request.Username, cancellationToken);
 
         if (dbUser is null)
         {
@@ -62,7 +64,7 @@ public static class AuthEndpoints
         dbUser.Session = Guid.NewGuid().ToString("N");
         dbUser.SessionCreated = DateTimeOffset.UtcNow;
 
-        if (await databaseContext.SaveChangesAsync(cancellationToken) <= 0)
+        if (await dbContext.SaveChangesAsync(cancellationToken) <= 0)
         {
             _logger.LogError("Failed to update session info for username: {Username}", dbUser.Username);
 
@@ -78,13 +80,15 @@ public static class AuthEndpoints
 
     private static async Task<IResult> RegisterHandlerAsync(
         RegisterRequestModel request,
-        DatabaseContext databaseContext,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        IDbContextFactory<DatabaseContext> dbContextFactory)
     {
         if (!MiniValidator.TryValidate(request, out var errors))
             return Results.ValidationProblem(errors);
 
-        var usernameTaken = await databaseContext.Users.AnyAsync(x => x.Username == request.Username, cancellationToken);
+        var dbContext = await dbContextFactory.CreateDbContextAsync();
+
+        var usernameTaken = await dbContext.Users.AnyAsync(x => x.Username == request.Username, cancellationToken);
 
         if (usernameTaken)
         {
@@ -102,9 +106,9 @@ public static class AuthEndpoints
             Password = hashedPassword
         };
 
-        await databaseContext.Users.AddAsync(dbUser, cancellationToken);
+        await dbContext.Users.AddAsync(dbUser, cancellationToken);
 
-        if (await databaseContext.SaveChangesAsync(cancellationToken) <= 0)
+        if (await dbContext.SaveChangesAsync(cancellationToken) <= 0)
         {
             _logger.LogError("Failed to add new user: {Username}", request.Username);
 
