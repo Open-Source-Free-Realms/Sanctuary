@@ -10,7 +10,7 @@ namespace Sanctuary.Packet;
 // "Merchant" interaction (ShopInteraction, Type 17) being selected on a merchant NPC.
 //
 // Layout recovered from live client↔server captures (p2/p12 pcaps): the header
-// [MerchantSetId][PlayerGuid][MerchantGuid] is confirmed — MerchantGuid == the vendor NPC
+// [MerchantSetId][PlayerGuid][MerchantGuid] is confirmed - MerchantGuid == the vendor NPC
 // guid, which the client then echoes back in every buy/sell (CoinStoreSellToClientRequest
 // MerchantGuid + MerchantUnknown=MerchantSetId), so the existing buy/sell handlers work
 // unchanged. The item list reuses the proven ItemDefinitionMetaData dictionary encoding
@@ -30,7 +30,7 @@ public class CoinStoreMerchantListPacket : BaseCoinStorePacket, ISerializablePac
 
     // The merchant grid, as FIXED 38-byte records (NOT the 19-byte ItemDefinitionMetaData
     // dictionary the coin-store item lists use). PacketWriter.Write<T>(IList<T>) emits
-    // [int count][each record] — matching the wire capture exactly.
+    // [int count][each record] - matching the wire capture exactly.
     public List<CoinStoreMerchantItem> Items = new();
 
     public CoinStoreMerchantListPacket() : base(OpCode)

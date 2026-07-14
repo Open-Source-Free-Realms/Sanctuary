@@ -15,9 +15,9 @@ public class MerchantWare
 }
 
 // The two data files that define the shops. Both are read FRESH on every shop-open, so editing a
-// cost or ware list (by hand, or via a future admin tool) takes effect on the next open — no restart.
-//  - MerchantItems.json : flat [{Id,Cost}] of EVERY ware across all sets = the coin-store catalog.
-//  - MerchantSets.json  : {setId: [itemId,...]} = what each merchant subtype's set sells.
+// cost or ware list (by hand, or via a future admin tool) takes effect on the next open - no restart.
+// - MerchantItems.json : flat [{Id,Cost}] of EVERY ware across all sets = the coin-store catalog.
+// - MerchantSets.json : {setId: [itemId,...]} = what each merchant subtype's set sells.
 public static class MerchantStore
 {
     public static readonly string FilePath = Path.Combine(ResourceManager.BaseDirectory, "MerchantItems.json");
@@ -43,7 +43,7 @@ public static class MerchantStore
                     if (wares is { Count: > 0 })
                         return wares;
                 }
-                catch { /* corrupt — reseed */ }
+                catch { /* corrupt - reseed */ }
             }
             return Seed(resourceManager);
         }
@@ -62,7 +62,7 @@ public static class MerchantStore
                     if (sets is { Count: > 0 })
                         return sets;
                 }
-                catch { /* corrupt — reseed */ }
+                catch { /* corrupt - reseed */ }
             }
             return SeedSets(resourceManager);
         }
@@ -82,7 +82,7 @@ public static class MerchantStore
                     if (map is { Count: > 0 })
                         return map;
                 }
-                catch { /* corrupt — fall through to empty */ }
+                catch { /* corrupt - fall through to empty */ }
             }
             return new Dictionary<string, int>();
         }

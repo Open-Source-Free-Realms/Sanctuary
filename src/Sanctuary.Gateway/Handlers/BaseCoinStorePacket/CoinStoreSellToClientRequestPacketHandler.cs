@@ -61,13 +61,13 @@ public static class CoinStoreSellToClientRequestPacketHandler
             return true;
         }
 
-        // Buyable item types. All three are granted the same way — a plain inventory DbItem —
+        // Buyable item types. All three are granted the same way - a plain inventory DbItem -
         // so they share this path:
-        //   1  = equipment / wearables (the original captured merchant wares)
-        //   5  = recipes (chef/blacksmith merchants sell these; e.g. "Crispy Choychoy Delight
-        //        Recipe"). Without 5 here, ~15 job-merchant wares clicked "Buy" and hard-failed
-        //        with Result 8. See fr-re/findings/merchant-buy-investigation.md.
-        //   12 = consumables
+        // 1 = equipment / wearables (the original captured merchant wares)
+        // 5 = recipes (chef/blacksmith merchants sell these; e.g. "Crispy Choychoy Delight
+        // Recipe"). Without 5 here, ~15 job-merchant wares clicked "Buy" and hard-failed
+        // with Result 8.
+        // 12 = consumables
         // Types that need special grant handling (mounts, houses, bundles) are still rejected.
         if (clientItemDefinition.Type != 1 &&
             clientItemDefinition.Type != 5 &&
@@ -82,7 +82,7 @@ public static class CoinStoreSellToClientRequestPacketHandler
 
         // Merchant wares carry their configured price on the definition itself (ShopInteraction
         // writes def.Cost = the store cost before pushing it), so the standard member/non-member
-        // pricing below already charges the configured cost — consistent with what the window shows.
+        // pricing below already charges the configured cost - consistent with what the window shows.
         var cost = connection.Player.MembershipStatus == 0
             ? clientItemDefinition.Cost
             : clientItemDefinition.GetMemberPurchasePrice();

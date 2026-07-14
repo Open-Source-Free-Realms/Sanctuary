@@ -148,7 +148,7 @@ public abstract class BaseZone : IZone, IDisposable
             definition.ModelFileName.Contains("merchant", System.StringComparison.OrdinalIgnoreCase))
         {
             // Canonical ware set, resolved by NPC name (each named merchant sold one job+tier;
-            // see ShopInteraction.SetIdForNpc + fr-re/findings/merchant-ware-canon.md), falling
+            // see ShopInteraction.SetIdForNpc + the reverse-engineering notes), falling
             // back to the job subtype from the model for unnamed merchants.
             npc.MerchantSetId = Interactions.ShopInteraction.SetIdForNpc(definition.Name, definition.ModelFileName);
             npc.Interactions.Add(Interactions.ShopInteraction.Data);
@@ -158,8 +158,8 @@ public abstract class BaseZone : IZone, IDisposable
             // without clicking. Sent via PlayerUpdatePacketAddNotifications when the NPC becomes
             // visible (Player.OnAddVisibleNpcs). The exact tuple was recovered from live merchant
             // captures (identical across 3 pcaps / 7+ vendors, zero variance): the client selects
-            // the merchant coin from the whole tuple — NotificationType=1, IconId=1, IconState=12
-            // — keyed by ReferenceId=3227 ("Merchant", CodeStringMappings.txt). IconId here is a
+            // the merchant coin from the whole tuple - NotificationType=1, IconId=1, IconState=12
+            // - keyed by ReferenceId=3227 ("Merchant", CodeStringMappings.txt). IconId here is a
             // client notification-table index, NOT a raw ImageSets/Images id.
             npc.Notification = new NotificationInfo
             {
@@ -169,7 +169,7 @@ public abstract class BaseZone : IZone, IDisposable
                 IconId = 1,
                 IconState = 12,
                 NameId = npc.NameId,
-                ReferenceId = 3227, // "Merchant" — the merchant discriminator
+                ReferenceId = 3227, // "Merchant" - the merchant discriminator
                 Enabled = true
             };
         }

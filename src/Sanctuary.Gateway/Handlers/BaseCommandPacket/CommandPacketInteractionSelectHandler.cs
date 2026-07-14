@@ -58,7 +58,7 @@ public static class CommandPacketInteractionSelectHandler
         }
 
         // A choice was made, so dismiss the on-screen interaction menu for that entity. Without
-        // this the selected button (e.g. "Merchant") stays stuck on screen — it overlaps the
+        // this the selected button (e.g. "Merchant") stays stuck on screen - it overlaps the
         // merchant window's close (X), so clicking X re-clicks the button and reopens the shop.
         // Real FR sends count=0 interaction lists; an empty list clears the menu.
         DismissInteractionMenu(connection, packet.Guid);
@@ -66,7 +66,7 @@ public static class CommandPacketInteractionSelectHandler
         // Clear the stored selection now the interaction is resolved. The client bundles a generic
         // FreeInteractionNpc (26/20) "interact with selection" poll into its periodic 141/1 traffic;
         // if SelectedGuid is still the merchant NPC, FreeInteractionNpcHandler re-fires OnInteract on
-        // every poll and re-arms the "Merchant" menu — which keeps the interaction live so the
+        // every poll and re-arms the "Merchant" menu - which keeps the interaction live so the
         // merchant window (opened by a REAL NPC click, which sets SelectedGuid via 26/19) never
         // closes and the client floods 141/1. Cleared here (at store-open / 26/10) rather than in the
         // 26/43 close handler because the close bundle delivers 26/20 before 26/43.
@@ -77,7 +77,7 @@ public static class CommandPacketInteractionSelectHandler
 
     // Sends an empty interaction list for the entity to clear the on-screen interaction menu
     // after a selection. The shop/coin-store window is a separate packet, so this does not
-    // close the shop — only the lingering interaction buttons.
+    // close the shop - only the lingering interaction buttons.
     private static void DismissInteractionMenu(GatewayConnection connection, ulong guid)
     {
         var clear = new CommandPacketInteractionList();

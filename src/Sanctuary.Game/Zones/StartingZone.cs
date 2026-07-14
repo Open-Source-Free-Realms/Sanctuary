@@ -178,8 +178,8 @@ public sealed class StartingZone : BaseZone
         // Register the merchant wares in the coin-store catalog from login onward (as
         // ItemDefinitionMetaData). Without this the client's NPCMerchantV2 buy widget never marks
         // the ware rows purchasable, so the merchant window's quantity stepper stays blank and BUY
-        // is inert (the price still shows — it comes from the separate ClientItemDefinition push).
-        // Retail catalogued these early in the session. See fr-re/findings/merchant-buy-investigation.md.
+        // is inert (the price still shows - it comes from the separate ClientItemDefinition push).
+        // Retail catalogued these early in the session.
         foreach (var ware in Interactions.MerchantStore.Load(_resourceManager))
         {
             coinStoreItemListPacket.DynamicItems[ware.Id] = new ItemDefinitionMetaData

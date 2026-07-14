@@ -7,7 +7,7 @@ using Sanctuary.Packet.Common;
 
 namespace Sanctuary.Game.Interactions;
 
-// "Merchant" — the interaction offered by vendor NPCs (models containing "merchant"). Selecting it
+// "Merchant" - the interaction offered by vendor NPCs (models containing "merchant"). Selecting it
 // opens the client's merchant window bound to this NPC and shows its wares. Buying/selling then
 // flows through the existing coin-store buy/sell handlers (the client echoes this NPC's guid back
 // as the MerchantGuid). See docs/merchant-shops.md for the full click → menu → shop flow.
@@ -37,7 +37,7 @@ public class ShopInteraction : IInteraction
         _resourceManager = resourceManager;
     }
 
-    // The wares for merchant set 468 (chef), exactly as captured on the wire (25 items) — the one
+    // The wares for merchant set 468 (chef), exactly as captured on the wire (25 items) - the one
     // capture-verified set. Every id is a Type-1 item the buy handler accepts. Per-set ware lists
     // now live in Resources/MerchantSets.json; this array is the fallback seed for set 468.
     public static readonly int[] MerchantWares =
@@ -50,10 +50,10 @@ public class ShopInteraction : IInteraction
     // Resolve which ware set a merchant NPC sells. Real FreeRealms merchants were one-job-one-tier:
     // each named NPC sold a specific tier of a specific job's gear (outfit + weapon + jewelry). We
     // reproduce that from the wiki `==Sells==` inventories keyed by NPC NAME in MerchantNpcSets.json
-    // (see fr-re/findings/merchant-ware-canon.md). Resolution order:
-    //   1. exact NPC name  -> its canonical set (e.g. "McMann" = Brawler tier-16),
-    //   2. "*<subtype>"    -> that job's default (lowest-tier) set, for NPCs the wiki didn't name,
-    //   3. 468             -> the byte-captured chef set (last-resort so a merchant always stocks).
+    // (see the reverse-engineering notes). Resolution order:
+    // 1. exact NPC name -> its canonical set (e.g. "McMann" = Brawler tier-16),
+    // 2. "*<subtype>" -> that job's default (lowest-tier) set, for NPCs the wiki didn't name,
+    // 3. 468 -> the byte-captured chef set (last-resort so a merchant always stocks).
     // Kart/Demolition had no canonical job vendor (their gear was the Marketplace), so their
     // NPCs resolve to themed fallback sets (480/481) via the "*kart"/"*demolition" keys.
     public static int SetIdForNpc(string? name, string? modelFileName)
@@ -105,7 +105,7 @@ public class ShopInteraction : IInteraction
         // price renders as 0 and the member-discount math divides by zero ("NaN%").
         var definitions = new List<ClientItemDefinition>();
 
-        // This merchant SET's wares (per subtype — blacksmith/miner/chef/…), from
+        // This merchant SET's wares (per subtype - blacksmith/miner/chef/…), from
         // Resources/MerchantSets.json; costs from the editable Resources/MerchantItems.json.
         foreach (var wareId in MerchantStore.WaresForSet(resourceManager, merchantSetId))
         {
@@ -113,7 +113,7 @@ public class ShopInteraction : IInteraction
                 continue;
 
             // The client shows a merchant item's price from its DEFINITION (not the 165/10
-            // record), and the buy handler charges def.Cost too — so the configured cost must be
+            // record), and the buy handler charges def.Cost too - so the configured cost must be
             // written onto the definition we push. These ware defs are merchant-only (not in the
             // Station-Cash catalog), so setting the cost here does not affect anything else.
             def.Cost = MerchantStore.CostFor(resourceManager, wareId);
@@ -132,11 +132,11 @@ public class ShopInteraction : IInteraction
                 IconTintId = def.Icon.TintId,
                 NameId = def.NameId,
                 DescriptionId = def.DescriptionId,
-                // Cost stays at its -1 default — the captured wire value for every ware. The
+                // Cost stays at its -1 default - the captured wire value for every ware. The
                 // displayed + charged price come from the pushed ClientItemDefinition (def.Cost)
                 // above, not this field. (Buy-ability is gated by coin-store CATALOG membership,
-                // registered via the 165/9 dynamic-list + login 165/1 DynamicItems — not by this
-                // record. See fr-re/findings/merchant-buy-investigation.md.)
+                // registered via the 165/9 dynamic-list + login 165/1 DynamicItems - not by this
+                // record.
             });
         }
 

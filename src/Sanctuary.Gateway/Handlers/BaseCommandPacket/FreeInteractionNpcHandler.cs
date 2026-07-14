@@ -19,7 +19,7 @@ public static class FreeInteractionNpcHandler
     }
 
     // The client's "interact with my current selection" click. FreeInteractionNpc (base command
-    // opcode 26, sub-opcode 20) carries no payload — the target is whatever the player last
+    // opcode 26, sub-opcode 20) carries no payload - the target is whatever the player last
     // selected, which arrived in the preceding CommandPacketSelectPlayer (26/19) and was stored on
     // connection.SelectedGuid. Resolve that entity and open its interaction menu via OnInteract,
     // the same path a direct interact-request uses. OnInteract is a no-op for NPCs that offer no

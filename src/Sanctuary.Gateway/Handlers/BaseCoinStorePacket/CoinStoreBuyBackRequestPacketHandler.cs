@@ -9,11 +9,11 @@ using Sanctuary.Packet.Common.Attributes;
 namespace Sanctuary.Gateway.Handlers;
 
 // Answers the coin-store "Buy Back" request (165/12) with the ack (165/13) the client waits for,
-// echoing the EntryId — byte-identical to the real FR server for the captured case. The capture
+// echoing the EntryId - byte-identical to the real FR server for the captured case. The capture
 // shows this reply was a standalone ack (no item/coin update bundled), so we mirror that.
 // If in-client testing later shows the sold item should be returned, extend this to repurchase from
 // connection.Player.CoinStoreTransactions (the Type==2 sells), mirroring the 165/4 buy path.
-// RE: fr-re/findings/merchant-buyback-investigation.md.
+// Recovered from live packet captures.
 [PacketHandler]
 public static class CoinStoreBuyBackRequestPacketHandler
 {

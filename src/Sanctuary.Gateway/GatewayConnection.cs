@@ -47,8 +47,8 @@ public class GatewayConnection : UdpConnection
     public string Locale { get; set; } = "en_US";
 
     // The entity guid the client last selected (CommandPacketSelectPlayer 26/19). The
-    // client's FreeInteractionNpc (26/20) click carries no guid — it means "interact with
-    // my current selection" — so we resolve the target from here.
+    // client's FreeInteractionNpc (26/20) click carries no guid - it means "interact with
+    // my current selection" - so we resolve the target from here.
     public ulong SelectedGuid { get; set; }
 
     public GatewayConnection(ILogger<GatewayConnection> logger, IOptions<GatewayServerOptions> options, IZoneManager zoneManager, LoginClient loginClient, GatewayServer gatewayServer, IResourceManager resourceManager, IServiceProvider serviceProvider, IDbContextFactory<DatabaseContext> dbContextFactory, SocketAddress socketAddress, int connectCode) : base(gatewayServer, socketAddress, connectCode)

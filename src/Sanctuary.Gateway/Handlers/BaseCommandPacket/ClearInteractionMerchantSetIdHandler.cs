@@ -18,7 +18,7 @@ public static class ClearInteractionMerchantSetIdHandler
         _logger = loggerFactory.CreateLogger(nameof(ClearInteractionMerchantSetIdHandler));
     }
 
-    // ClearInteractionMerchantSetId (26/43) has no payload — the client sends it (twice) when
+    // ClearInteractionMerchantSetId (26/43) has no payload - the client sends it (twice) when
     // the merchant window closes. The reference server sends nothing in reply, so we simply
     // consume it (returning true) to silence the double unhandled-packet warning. The on-screen
     // interaction menu is dismissed by the client itself once the interaction list is sent with
