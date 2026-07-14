@@ -38,6 +38,8 @@ public static class BaseCommandPacketHandler
             CommandPacketConfirmFriendResponse.OpCode => CommandPacketConfirmFriendResponseHandler.HandlePacket(connection, reader.Span),
             CommandPacketSetChatBubbleColor.OpCode => CommandPacketSetChatBubbleColorHandler.HandlePacket(connection, reader.Span),
             CommandPacketSelectPlayer.OpCode => CommandPacketSelectPlayerHandler.HandlePacket(connection, reader.Span),
+            FreeInteractionNpc.OpCode => FreeInteractionNpcHandler.HandlePacket(connection),
+            ClearInteractionMerchantSetId.OpCode => ClearInteractionMerchantSetIdHandler.HandlePacket(connection),
             CommandPacketFriendsPositionRequest.OpCode => CommandPacketFriendsPositionRequestHandler.HandlePacket(connection),
             CommandPacketIgnoreRequest.OpCode => CommandPacketIgnoreRequestHandler.HandlePacket(connection, reader.Span),
             CommandPacketChatChannelOn.OpCode => CommandPacketChatChannelOnHandler.HandlePacket(connection, reader.Span),

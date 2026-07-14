@@ -67,6 +67,14 @@ public class Npc : IEntity
 
     public bool Static { get; set; }
 
+    // The interaction-menu entries this NPC offers (e.g. a vendor's "Merchant" button).
+    // Populated at spawn from the NPC's model/type (see BaseZone.TryCreateNpc).
+    public List<InteractionData> Interactions { get; } = new();
+
+    // If this NPC is a merchant, the merchant "set" id the client binds its shop window to
+    // (echoed back in buy/sell as MerchantUnknown). 0 for non-merchants.
+    public int MerchantSetId { get; set; }
+
     public Npc(IZone zone)
     {
         Zone = zone;
@@ -76,6 +84,25 @@ public class Npc : IEntity
 
     public void OnInteract(Player player)
     {
+        // Reuses the proven CommandPacketInteractionList/InteractionData packets (the
+        // same ones player-to-player interactions use), so no inferred layout here.
+        if (Interactions.Count == 0)
+            return;
+
+        var packet = new CommandPacketInteractionList();
+
+        packet.List.Guid = Guid;
+
+        // Real FR sends both flags = 1 on every interaction list; this marks the menu as a
+        // managed/auto-dismissable interaction session so the client clears it on close.
+        // Leaving them false left the "Merchant" button stuck on screen after closing the shop.
+        packet.List.Unknown = true;
+        packet.List.Unknown2 = true;
+
+        foreach (var interaction in Interactions)
+            packet.List.Interactions.Add(interaction);
+
+        player.SendTunneled(packet);
     }
 
     public virtual void OnAddVisibleNpcs(params IEnumerable<Npc> npcs)

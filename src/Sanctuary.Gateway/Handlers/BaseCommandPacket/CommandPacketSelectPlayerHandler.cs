@@ -29,7 +29,9 @@ public static class CommandPacketSelectPlayerHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(CommandPacketSelectPlayer), packet);
 
-        // TODO
+        // Remember what the client selected. The follow-up FreeInteractionNpc (26/20) click
+        // carries no guid and acts on this selection (opens the NPC's interaction menu).
+        connection.SelectedGuid = packet.SelectGuid;
 
         return true;
     }

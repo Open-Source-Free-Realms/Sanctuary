@@ -34,6 +34,7 @@ public static class BaseCoinStorePacketHandler
             CoinStoreSellToClientRequestPacket.OpCode => CoinStoreSellToClientRequestPacketHandler.HandlePacket(connection, reader.Span),
             CoinStoreBuyFromClientRequestPacket.OpCode => CoinStoreBuyFromClientRequestPacketHandler.HandlePacket(connection, reader.Span),
             CoinStoreItemDynamicListUpdateRequestPacket.OpCode => CoinStoreItemDynamicListUpdateRequestPacketHandler.HandlePacket(connection, reader.Span),
+            CoinStoreBuyBackRequestPacket.OpCode => CoinStoreBuyBackRequestPacketHandler.HandlePacket(connection, reader.Span),
             _ => false
         };
     }

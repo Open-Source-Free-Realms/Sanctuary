@@ -15,6 +15,7 @@ using Microsoft.Extensions.Logging;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Zones;
+using Sanctuary.Packet.Common;
 using Sanctuary.UdpLibrary;
 
 namespace Sanctuary.Game.Zones;
@@ -140,6 +141,38 @@ public abstract class BaseZone : IZone, IDisposable
             Visible = true
         };
 
+        // Merchant NPCs (models like human_m_merchant_kart.agr) offer the "Merchant" shop
+        // interaction, which opens the client's merchant window (see ShopInteraction). Reuses the
+        // existing interaction-menu packets, so no inferred layout.
+        if (definition.ModelFileName is not null &&
+            definition.ModelFileName.Contains("merchant", System.StringComparison.OrdinalIgnoreCase))
+        {
+            // Per-subtype ware set from the model (blacksmith/miner/chef/…), so each merchant
+            // sells its own goods instead of all sharing one set.
+            npc.MerchantSetId = Interactions.ShopInteraction.SetIdForModel(definition.ModelFileName);
+            npc.Interactions.Add(Interactions.ShopInteraction.Data);
+            npc.CursorId = 13; // cursor_interaction_talk.cur (Cursors.txt id 13)
+
+            // Floating "coin" marker above the vendor's head so players can tell it's a shop
+            // without clicking. Sent via PlayerUpdatePacketAddNotifications when the NPC becomes
+            // visible (Player.OnAddVisibleNpcs). The exact tuple was recovered from live merchant
+            // captures (identical across 3 pcaps / 7+ vendors, zero variance): the client selects
+            // the merchant coin from the whole tuple — NotificationType=1, IconId=1, IconState=12
+            // — keyed by ReferenceId=3227 ("Merchant", CodeStringMappings.txt). IconId here is a
+            // client notification-table index, NOT a raw ImageSets/Images id.
+            npc.Notification = new NotificationInfo
+            {
+                Guid = npc.Guid,
+                IsCompact = false,
+                NotificationType = 1,
+                IconId = 1,
+                IconState = 12,
+                NameId = npc.NameId,
+                ReferenceId = 3227, // "Merchant" — the merchant discriminator
+                Enabled = true
+            };
+        }
+
         if (!_npcs.TryAdd(npc.Guid, npc) || !_entities.TryAdd(npc.Guid, npc))
         {
             return false;
@@ -152,20 +185,28 @@ public abstract class BaseZone : IZone, IDisposable
 
     protected void SpawnNpcs()
     {
+        // Seed the editable merchant cost file on first boot so it can be read/edited
+        // immediately (before any shop is opened).
+        Interactions.MerchantStore.EnsureSeeded(_resourceManager);
+
         var count = 0;
+        var merchants = 0;
 
         foreach (var definition in _resourceManager.Npcs.Values)
         {
-            if (!TryCreateNpc(definition, out _))
+            if (!TryCreateNpc(definition, out var npc))
             {
                 _logger.LogWarning("Failed to spawn NPC {id}.", definition.Id);
                 continue;
             }
 
+            if (npc.MerchantSetId > 0)
+                merchants++;
+
             count++;
         }
 
-        _logger.LogInformation("Spawned {count} NPC(s).", count);
+        _logger.LogInformation("Spawned {count} NPC(s) ({merchants} merchants).", count, merchants);
     }
 
     public bool TryCreateMount(Player rider, MountDefinition definition, [MaybeNullWhen(false)] out Mount mount)

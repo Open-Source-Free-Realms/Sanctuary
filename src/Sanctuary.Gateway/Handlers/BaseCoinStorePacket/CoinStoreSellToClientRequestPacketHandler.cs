@@ -61,8 +61,16 @@ public static class CoinStoreSellToClientRequestPacketHandler
             return true;
         }
 
-        // TODO: Implement other item types
+        // Buyable item types. All three are granted the same way — a plain inventory DbItem —
+        // so they share this path:
+        //   1  = equipment / wearables (the original captured merchant wares)
+        //   5  = recipes (chef/blacksmith merchants sell these; e.g. "Crispy Choychoy Delight
+        //        Recipe"). Without 5 here, ~15 job-merchant wares clicked "Buy" and hard-failed
+        //        with Result 8. See fr-re/findings/merchant-buy-investigation.md.
+        //   12 = consumables
+        // Types that need special grant handling (mounts, houses, bundles) are still rejected.
         if (clientItemDefinition.Type != 1 &&
+            clientItemDefinition.Type != 5 &&
             clientItemDefinition.Type != 12)
         {
             coinStoreTransactionCompletePacket.Result = 8;
@@ -72,6 +80,9 @@ public static class CoinStoreSellToClientRequestPacketHandler
             return true;
         }
 
+        // Merchant wares carry their configured price on the definition itself (ShopInteraction
+        // writes def.Cost = the store cost before pushing it), so the standard member/non-member
+        // pricing below already charges the configured cost — consistent with what the window shows.
         var cost = connection.Player.MembershipStatus == 0
             ? clientItemDefinition.Cost
             : clientItemDefinition.GetMemberPurchasePrice();
@@ -100,7 +111,11 @@ public static class CoinStoreSellToClientRequestPacketHandler
             {
                 Character = x,
                 Item = x.Items.SingleOrDefault(i => i.Definition == clientItemDefinition.Id && i.Tint == tint),
-                NextId = x.Items.Max(i => i.Id)
+                // Guard the empty-inventory case: EF translates Max over no rows to SQL
+                // MAX() = NULL, which throws when materialized into non-nullable int. A
+                // player with zero items (fresh char, or sold everything) buying an item
+                // would otherwise crash here. Matches the guarded pattern in ItemRewards.
+                NextId = x.Items.Any() ? x.Items.Max(i => i.Id) : 0
             })
             .SingleOrDefault();
 
