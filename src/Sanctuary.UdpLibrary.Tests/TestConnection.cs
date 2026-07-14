@@ -12,8 +12,6 @@ internal class TestConnection : UdpConnection
     private ulong _count;
     private readonly Random _random = new Random();
 
-    public bool Server { get; set; }
-
     public TestConnection(UdpManager<TestConnection> udpManager, SocketAddress socketAddress, long timeout) : base(udpManager, socketAddress, timeout)
     {
     }
@@ -39,6 +37,12 @@ internal class TestConnection : UdpConnection
 
     public override void OnRoutePacket(Span<byte> data)
     {
+        if (_count > 100)
+        {
+            Disconnect();
+            return;
+        }
+
         var reader = new PacketReader(data);
 
         if (!reader.TryRead(out byte opCode))

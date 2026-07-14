@@ -341,12 +341,12 @@ namespace Sanctuary.Database.MySql.Migrations
                         .HasColumnType("tinyint(1)")
                         .HasDefaultValue(false);
 
-                    b.Property<bool>("IsLocked")
+                    b.Property<bool>("IsMember")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
                         .HasDefaultValue(false);
 
-                    b.Property<bool>("IsMember")
+                    b.Property<bool>("IsMod")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
                         .HasDefaultValue(false);
@@ -354,10 +354,16 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.Property<DateTimeOffset?>("LastLogin")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<DateTimeOffset?>("LockedUntil")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<int>("MaxCharacters")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasDefaultValue(10);
+
+                    b.Property<DateTimeOffset?>("MutedUntil")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Password")
                         .IsRequired()

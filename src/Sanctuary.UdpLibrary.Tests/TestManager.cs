@@ -19,7 +19,7 @@ internal class TestManager : UdpManager<TestConnection>
     {
         Debug.WriteLine($"{udpConnection}", nameof(OnConnectRequest));
 
-        Span<byte> buf = stackalloc byte[1];
+        Span<byte> buf = [_server ? (byte)1 : (byte)2];
         udpConnection.Send(UdpChannel.Reliable1, buf);
 
         return true;
