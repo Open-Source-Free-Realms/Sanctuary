@@ -183,11 +183,15 @@ public class StartingZone : BaseZone
         {
             GuildGuid = player.GuildData.Guid,
             MemberGuid = player.Guid,
+
             Name = player.Name,
             Role = playerGuildMember.Role,
             Online = true,
+
             Type = 6,
+
             WorldId = player.Zone.Id,
+
             ProfileId = player.ActiveProfileId,
             ProfileRank = player.ActiveProfile.Rank
         };

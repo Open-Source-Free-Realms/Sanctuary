@@ -235,6 +235,7 @@ public class GatewayConnection : UdpConnection
         Player.Coins = dbCharacter.Coins;
 
         Player.Birthday = dbCharacter.Created;
+
         Player.MembershipStatus = dbCharacter.MembershipStatus;
         Player.ShowMemberNagScreen = _options.ShowMemberNagScreen;
 
@@ -610,6 +611,7 @@ public class GatewayConnection : UdpConnection
         {
             GuildGuid = Player.GuildData.Guid,
             MemberGuid = Player.Guid,
+
             Name = Player.Name,
             Role = playerGuildMember.Role,
             Online = false,

@@ -4,7 +4,9 @@ namespace Sanctuary.Database.Entities;
 
 public class DbGuildMember
 {
-    // Same value as DbCharacter.Id.
+    /// <summary>
+    /// Same as <see cref="DbCharacter.Id"/>, but independent PK.
+    /// </summary>
     public ulong Id { get; set; }
 
     public int Role { get; set; }
