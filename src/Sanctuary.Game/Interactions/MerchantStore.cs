@@ -22,6 +22,9 @@ public static class MerchantStore
 {
     public static readonly string FilePath = Path.Combine(ResourceManager.BaseDirectory, "MerchantItems.json");
     public static readonly string SetsFilePath = Path.Combine(ResourceManager.BaseDirectory, "MerchantSets.json");
+    // Maps a merchant NPC name -> the setId it sells (its canonical wiki inventory). "*<subtype>"
+    // keys (e.g. "*brawler") are the fallback used when an NPC name has no explicit entry.
+    public static readonly string NpcSetsFilePath = Path.Combine(ResourceManager.BaseDirectory, "MerchantNpcSets.json");
 
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
     private static readonly object Gate = new();
@@ -62,6 +65,26 @@ public static class MerchantStore
                 catch { /* corrupt — reseed */ }
             }
             return SeedSets(resourceManager);
+        }
+    }
+
+    // NPC name -> setId (the merchant's canonical inventory). Read fresh so edits apply on next
+    // shop-open. Returns an empty map if the file is missing (callers fall back to subtype/468).
+    public static Dictionary<string, int> LoadNpcSets()
+    {
+        lock (Gate)
+        {
+            if (File.Exists(NpcSetsFilePath))
+            {
+                try
+                {
+                    var map = JsonSerializer.Deserialize<Dictionary<string, int>>(File.ReadAllText(NpcSetsFilePath));
+                    if (map is { Count: > 0 })
+                        return map;
+                }
+                catch { /* corrupt — fall through to empty */ }
+            }
+            return new Dictionary<string, int>();
         }
     }
 

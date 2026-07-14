@@ -147,9 +147,10 @@ public abstract class BaseZone : IZone, IDisposable
         if (definition.ModelFileName is not null &&
             definition.ModelFileName.Contains("merchant", System.StringComparison.OrdinalIgnoreCase))
         {
-            // Per-subtype ware set from the model (blacksmith/miner/chef/…), so each merchant
-            // sells its own goods instead of all sharing one set.
-            npc.MerchantSetId = Interactions.ShopInteraction.SetIdForModel(definition.ModelFileName);
+            // Canonical ware set, resolved by NPC name (each named merchant sold one job+tier;
+            // see ShopInteraction.SetIdForNpc + fr-re/findings/merchant-ware-canon.md), falling
+            // back to the job subtype from the model for unnamed merchants.
+            npc.MerchantSetId = Interactions.ShopInteraction.SetIdForNpc(definition.Name, definition.ModelFileName);
             npc.Interactions.Add(Interactions.ShopInteraction.Data);
             npc.CursorId = 13; // cursor_interaction_talk.cur (Cursors.txt id 13)
 

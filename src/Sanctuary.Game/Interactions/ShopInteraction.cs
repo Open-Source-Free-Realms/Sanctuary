@@ -47,29 +47,38 @@ public class ShopInteraction : IInteraction
         57, 56, 55, 54, 53
     };
 
-    // Merchant model subtype -> MerchantSetId (which ware set they sell). chef=468 is the
-    // byte-captured set; the rest are derived from the FreeRealms wiki vendor inventories
-    // (see fr-re/findings/data-sources.md + Resources/MerchantSets.json). Kart/Demolition had no
-    // in-world job vendor (their gear was the Marketplace), so those sets are a category fallback.
-    public static readonly Dictionary<string, int> SubtypeToSetId = new()
+    // Resolve which ware set a merchant NPC sells. Real FreeRealms merchants were one-job-one-tier:
+    // each named NPC sold a specific tier of a specific job's gear (outfit + weapon + jewelry). We
+    // reproduce that from the wiki `==Sells==` inventories keyed by NPC NAME in MerchantNpcSets.json
+    // (see fr-re/findings/merchant-ware-canon.md). Resolution order:
+    //   1. exact NPC name  -> its canonical set (e.g. "McMann" = Brawler tier-16),
+    //   2. "*<subtype>"    -> that job's default (lowest-tier) set, for NPCs the wiki didn't name,
+    //   3. 468             -> the byte-captured chef set (last-resort so a merchant always stocks).
+    // Kart/Demolition had no canonical job vendor (their gear was the Marketplace), so their
+    // NPCs resolve to themed fallback sets (480/481) via the "*kart"/"*demolition" keys.
+    public static int SetIdForNpc(string? name, string? modelFileName)
     {
-        ["chef"] = 468, ["blacksmith"] = 469, ["miner"] = 470, ["medic"] = 471,
-        ["archer"] = 472, ["wizard"] = 473, ["warrior"] = 474, ["brawler"] = 475,
-        ["ninja"] = 476, ["postman"] = 477, ["kart"] = 478, ["demolition"] = 479,
-    };
+        var npcSets = MerchantStore.LoadNpcSets();
 
-    // Resolve a merchant model file name (e.g. "human_m_merchant_blacksmith_african.agr") to its
-    // MerchantSetId, defaulting to the captured chef set (468) if the subtype is unknown.
-    public static int SetIdForModel(string? modelFileName)
-    {
-        if (modelFileName is not null)
-        {
-            var m = System.Text.RegularExpressions.Regex.Match(modelFileName, "merchant_([a-z]+)");
-            if (m.Success && SubtypeToSetId.TryGetValue(m.Groups[1].Value, out var setId))
-                return setId;
-        }
+        if (!string.IsNullOrWhiteSpace(name) && npcSets.TryGetValue(name, out var byName))
+            return byName;
+
+        var subtype = SubtypeOf(modelFileName);
+        if (subtype is not null && npcSets.TryGetValue("*" + subtype, out var bySubtype))
+            return bySubtype;
 
         return 468;
+    }
+
+    // The subtype token embedded in a merchant model file name
+    // (e.g. "human_m_merchant_blacksmith_african.agr" -> "blacksmith"), or null if not a merchant.
+    public static string? SubtypeOf(string? modelFileName)
+    {
+        if (modelFileName is null)
+            return null;
+
+        var m = System.Text.RegularExpressions.Regex.Match(modelFileName, "merchant_([a-z]+)");
+        return m.Success ? m.Groups[1].Value : null;
     }
 
     public void OnInteract(Player player, IEntity other)
