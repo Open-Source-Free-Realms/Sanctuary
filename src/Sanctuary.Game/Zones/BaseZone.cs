@@ -30,7 +30,7 @@ public abstract class BaseZone : IZone, IDisposable
     private const int VisibleTileRadius = 2;
     private readonly Dictionary<int, ZoneTile> _tiles;
 
-    private static ulong _uniqueGuid = 100_000_000_000u;
+    private static ulong _nextNpcGuid = NpcBaseGuid;
 
     private readonly ConcurrentDictionary<ulong, Npc> _npcs = new();
     private readonly ConcurrentDictionary<ulong, Player> _players = new();
@@ -38,6 +38,7 @@ public abstract class BaseZone : IZone, IDisposable
 
     private const int FrameRate = 10;
     private const float TickRate = 1000f / FrameRate;
+    private const ulong NpcBaseGuid = 100_000_000_000u;
 
     private readonly PeriodicTimer _updateEveryTickTimer = new(TimeSpan.FromMilliseconds(TickRate));
     private readonly PeriodicTimer _updateEverySecondTimer = new(TimeSpan.FromSeconds(1));
@@ -115,7 +116,7 @@ public abstract class BaseZone : IZone, IDisposable
     {
         npc = new Npc(this)
         {
-            Guid = _uniqueGuid++
+            Guid = _nextNpcGuid++
         };
 
         return _npcs.TryAdd(npc.Guid, npc) && _entities.TryAdd(npc.Guid, npc);
@@ -128,9 +129,11 @@ public abstract class BaseZone : IZone, IDisposable
         if (_resourceManager.Models.TryGetValue(definition.ModelId, out var model) && model.Scale != 0f)
             scale = model.Scale;
 
+        var guid = NpcBaseGuid + (ulong)definition.Id;
+
         npc = new Npc(this)
         {
-            Guid = _uniqueGuid++,
+            Guid = guid,
             NameId = definition.NameId,
             Name = definition.Name,
             ModelId = definition.ModelId,
@@ -144,6 +147,10 @@ public abstract class BaseZone : IZone, IDisposable
         {
             return false;
         }
+
+        // Keep the dynamic NPC GUID space above the statically assigned GUIDs
+        if (guid >= _nextNpcGuid)
+            _nextNpcGuid = guid + 1;
 
         npc.UpdatePosition(definition.Position, definition.Rotation);
 
@@ -172,7 +179,7 @@ public abstract class BaseZone : IZone, IDisposable
     {
         mount = new Mount(this, rider, definition)
         {
-            Guid = _uniqueGuid++
+            Guid = _nextNpcGuid++
         };
 
         return _npcs.TryAdd(mount.Guid, mount) && _entities.TryAdd(mount.Guid, mount);
