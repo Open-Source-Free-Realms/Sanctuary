@@ -44,7 +44,6 @@ public static class InventoryPacketItemActionBarAssignHandler
             }
         };
 
-        // Ensure action bar exists
         if (!connection.Player.ActionBars.ContainsKey(2))
         {
             connection.Player.ActionBars[2] = new Packet.Common.ClientActionBar { Id = 2 };
@@ -54,7 +53,6 @@ public static class InventoryPacketItemActionBarAssignHandler
         {
             clientUpdatePacketUpdateActionBarSlot.Slot.IsEmpty = true;
 
-            // Remove from server-side tracking
             connection.Player.ActionBars[2].Slots.Remove(packet.Slot);
 
             if (connection.Player.ActionBarItemGuids.ContainsKey(2))
@@ -98,7 +96,6 @@ public static class InventoryPacketItemActionBarAssignHandler
         clientUpdatePacketUpdateActionBarSlot.Slot.ForceDismount = true;
         clientUpdatePacketUpdateActionBarSlot.Slot.Unknown15 = 1000;
 
-        // Store the slot information server-side with the item GUID
         var slotData = new Packet.Common.ActionBarSlot
         {
             IsEmpty = false,
@@ -117,7 +114,6 @@ public static class InventoryPacketItemActionBarAssignHandler
 
         connection.Player.ActionBars[2].Slots[packet.Slot] = slotData;
 
-        // Track the item GUID for this slot
         if (!connection.Player.ActionBarItemGuids.ContainsKey(2))
         {
             connection.Player.ActionBarItemGuids[2] = new Dictionary<int, int>();

@@ -1,6 +1,5 @@
 using Sanctuary.Core.IO;
 
-using System;
 namespace Sanctuary.Packet;
 
 public class PlayerUpdatePacketUpdateTemporaryAppearance : BasePlayerUpdatePacket, ISerializablePacket

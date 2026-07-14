@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Reflection;
 
 using Microsoft.EntityFrameworkCore;
@@ -33,8 +32,6 @@ public sealed class DatabaseContext : DbContext
         // optionsBuilder.EnableDetailedErrors();
         // optionsBuilder.EnableSensitiveDataLogging();
 #endif
-        optionsBuilder.ConfigureWarnings(warnings =>
-            warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -65,7 +62,7 @@ public sealed class DatabaseContext : DbContext
         {
             assembly = EF.IsDesignTime
                      ? Assembly.Load(providerAssembly)
-                     : Assembly.LoadFrom(Path.Combine(AppContext.BaseDirectory, $"{providerAssembly}.dll"));
+                     : Assembly.LoadFrom($"{providerAssembly}.dll");
         }
         catch
         {

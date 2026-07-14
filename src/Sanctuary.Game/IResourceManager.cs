@@ -1,4 +1,4 @@
-using Sanctuary.Game.Resources;
+﻿using Sanctuary.Game.Resources;
 
 namespace Sanctuary.Game;
 

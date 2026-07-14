@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Collections.Generic;
@@ -61,6 +61,8 @@ public sealed class Player : ClientPcData, IEntity
 
     private record PendingCooldown(int ActionBarId, int SlotIndex, int IconId, int NameId, int Count, int CooldownMs, DateTimeOffset StartedAt);
     private readonly ConcurrentDictionary<(int, int), PendingCooldown> _pendingCooldowns = new();
+
+    private readonly ConcurrentQueue<(DateTimeOffset SendAt, ISerializablePacket Packet, bool SendToSelf)> _delayedPackets = new();
 
     public Vector4 StartingZonePosition { get; set; }
     public Quaternion StartingZoneRotation { get; set; }
@@ -125,6 +127,11 @@ public sealed class Player : ClientPcData, IEntity
             SendTunneled(packet);
     }
 
+    public void SendTunneledToVisibleDelayed(ISerializablePacket packet, int delayMs, bool sendToSelf = false)
+    {
+        _delayedPackets.Enqueue((DateTimeOffset.UtcNow.AddMilliseconds(delayMs), packet, sendToSelf));
+    }
+
     #endregion
 
     #region Update
@@ -135,6 +142,12 @@ public sealed class Player : ClientPcData, IEntity
             TemporaryAppearanceExpiresAt.Value <= DateTimeOffset.UtcNow)
         {
             RemoveTemporaryAppearance();
+        }
+
+        while (_delayedPackets.TryPeek(out var delayed) && delayed.SendAt <= DateTimeOffset.UtcNow)
+        {
+            if (_delayedPackets.TryDequeue(out delayed))
+                SendTunneledToVisible(delayed.Packet, delayed.SendToSelf);
         }
     }
 
@@ -229,9 +242,11 @@ public sealed class Player : ClientPcData, IEntity
         Zone.TryRemovePlayer(Guid);
 
         // Add to new zone/zonetile
+
         zone.TryAddPlayer(this);
 
         // Teleport to new zone
+
         Visible = false;
 
         Zone = zone;
@@ -573,7 +588,6 @@ public sealed class Player : ClientPcData, IEntity
 
         return packet;
     }
-
 
     public void ApplyTemporaryAppearance(int modelId, int durationMs, int effectId = 0)
     {
