@@ -1,6 +1,0 @@
-﻿{
-  "Database": {
-    "Provider": "Sqlite",
-    "ConnectionString": "Data Source=sanctuary.db"
-  }
-}
