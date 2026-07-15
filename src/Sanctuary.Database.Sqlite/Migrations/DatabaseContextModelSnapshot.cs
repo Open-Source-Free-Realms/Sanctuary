@@ -2,48 +2,45 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Sanctuary.Database;
+using Sanctuary.Database.Sqlite;
 
 #nullable disable
 
 namespace Sanctuary.Database.Sqlite.Migrations
 {
-    [DbContext(typeof(DatabaseContext))]
-    [Migration("20250830192154_AddFriendAndIgnore")]
-    partial class AddFriendAndIgnore
+    [DbContext(typeof(SqliteDatabaseContext))]
+    partial class DatabaseContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.7");
+            modelBuilder.HasAnnotation("ProductVersion", "9.0.9");
 
             modelBuilder.Entity("DbItemDbProfile", b =>
                 {
                     b.Property<int>("ItemsId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<ulong>("ItemsCharacterGuid")
+                    b.Property<ulong>("ItemsCharacterId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("ProfilesId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<ulong>("ProfilesCharacterGuid")
+                    b.Property<ulong>("ProfilesCharacterId")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("ItemsId", "ItemsCharacterGuid", "ProfilesId", "ProfilesCharacterGuid");
+                    b.HasKey("ItemsId", "ItemsCharacterId", "ProfilesId", "ProfilesCharacterId");
 
-                    b.HasIndex("ProfilesId", "ProfilesCharacterGuid");
+                    b.HasIndex("ProfilesId", "ProfilesCharacterId");
 
                     b.ToTable("ProfileItems", (string)null);
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbCharacter", b =>
                 {
-                    b.Property<ulong>("Guid")
+                    b.Property<ulong>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
@@ -68,6 +65,9 @@ namespace Sanctuary.Database.Sqlite.Migrations
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(1);
 
+                    b.Property<int>("Coins")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTimeOffset>("Created")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
@@ -78,6 +78,9 @@ namespace Sanctuary.Database.Sqlite.Migrations
 
                     b.Property<string>("FacePaint")
                         .HasColumnType("TEXT");
+
+                    b.Property<int?>("FacePaintId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -100,9 +103,15 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     b.Property<int>("HairColor")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("HairId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Head")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("HeadId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTimeOffset?>("LastLogin")
                         .HasColumnType("TEXT");
@@ -119,6 +128,12 @@ namespace Sanctuary.Database.Sqlite.Migrations
 
                     b.Property<string>("ModelCustomization")
                         .HasColumnType("TEXT");
+
+                    b.Property<int?>("ModelCustomizationId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PlayTime")
+                        .HasColumnType("INTEGER");
 
                     b.Property<float?>("PositionX")
                         .HasColumnType("REAL");
@@ -139,28 +154,34 @@ namespace Sanctuary.Database.Sqlite.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("SkinToneId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("StationCash")
+                        .HasColumnType("INTEGER");
+
                     b.Property<Guid?>("Ticket")
                         .HasColumnType("TEXT");
 
-                    b.Property<ulong>("UserGuid")
+                    b.Property<ulong>("UserId")
                         .HasColumnType("INTEGER");
 
                     b.Property<float>("VipRank")
                         .HasColumnType("REAL");
 
-                    b.HasKey("Guid");
+                    b.HasKey("Id");
 
-                    b.HasIndex("UserGuid");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Characters");
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbFriend", b =>
                 {
-                    b.Property<ulong>("FriendCharacterGuid")
+                    b.Property<ulong>("FriendCharacterId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<ulong>("CharacterGuid")
+                    b.Property<ulong>("CharacterId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTimeOffset>("Created")
@@ -168,19 +189,19 @@ namespace Sanctuary.Database.Sqlite.Migrations
                         .HasColumnType("TEXT")
                         .HasDefaultValueSql("DATE()");
 
-                    b.HasKey("FriendCharacterGuid", "CharacterGuid");
+                    b.HasKey("FriendCharacterId", "CharacterId");
 
-                    b.HasIndex("CharacterGuid");
+                    b.HasIndex("CharacterId");
 
                     b.ToTable("Friends");
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbIgnore", b =>
                 {
-                    b.Property<ulong>("IgnoreCharacterGuid")
+                    b.Property<ulong>("IgnoreCharacterId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<ulong>("CharacterGuid")
+                    b.Property<ulong>("CharacterId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTimeOffset>("Created")
@@ -188,9 +209,9 @@ namespace Sanctuary.Database.Sqlite.Migrations
                         .HasColumnType("TEXT")
                         .HasDefaultValueSql("DATE()");
 
-                    b.HasKey("IgnoreCharacterGuid", "CharacterGuid");
+                    b.HasKey("IgnoreCharacterId", "CharacterId");
 
-                    b.HasIndex("CharacterGuid");
+                    b.HasIndex("CharacterId");
 
                     b.ToTable("Ignores");
                 });
@@ -200,13 +221,11 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("INTEGER");
 
-                    b.Property<ulong>("CharacterGuid")
+                    b.Property<ulong>("CharacterId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Count")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(1);
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTimeOffset>("Created")
                         .ValueGeneratedOnAdd()
@@ -219,11 +238,11 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     b.Property<int>("Tint")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("Id", "CharacterGuid");
+                    b.HasKey("Id", "CharacterId");
 
-                    b.HasIndex("CharacterGuid");
+                    b.HasIndex("CharacterId");
 
-                    b.HasIndex("Definition", "CharacterGuid")
+                    b.HasIndex("Tint", "Definition", "CharacterId")
                         .IsUnique();
 
                     b.ToTable("Items");
@@ -234,7 +253,7 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("INTEGER");
 
-                    b.Property<ulong>("CharacterGuid")
+                    b.Property<ulong>("CharacterId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTimeOffset>("Created")
@@ -242,12 +261,21 @@ namespace Sanctuary.Database.Sqlite.Migrations
                         .HasColumnType("TEXT")
                         .HasDefaultValueSql("DATE()");
 
+                    b.Property<int>("Definition")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("IsUpgraded")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("Id", "CharacterGuid");
+                    b.Property<int>("Tint")
+                        .HasColumnType("INTEGER");
 
-                    b.HasIndex("CharacterGuid");
+                    b.HasKey("Id", "CharacterId");
+
+                    b.HasIndex("CharacterId");
+
+                    b.HasIndex("Tint", "Definition", "CharacterId")
+                        .IsUnique();
 
                     b.ToTable("Mounts");
                 });
@@ -257,7 +285,7 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("INTEGER");
 
-                    b.Property<ulong>("CharacterGuid")
+                    b.Property<ulong>("CharacterId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Level")
@@ -266,9 +294,9 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     b.Property<int>("LevelXP")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("Id", "CharacterGuid");
+                    b.HasKey("Id", "CharacterId");
 
-                    b.HasIndex("CharacterGuid");
+                    b.HasIndex("CharacterId");
 
                     b.ToTable("Profiles");
                 });
@@ -278,19 +306,19 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("INTEGER");
 
-                    b.Property<ulong>("CharacterGuid")
+                    b.Property<ulong>("CharacterId")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("Id", "CharacterGuid");
+                    b.HasKey("Id", "CharacterId");
 
-                    b.HasIndex("CharacterGuid");
+                    b.HasIndex("CharacterId");
 
-                    b.ToTable("Titles", (string)null);
+                    b.ToTable("Titles");
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbUser", b =>
                 {
-                    b.Property<ulong>("Guid")
+                    b.Property<ulong>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
@@ -304,12 +332,12 @@ namespace Sanctuary.Database.Sqlite.Migrations
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(false);
 
-                    b.Property<bool>("IsLocked")
+                    b.Property<bool>("IsMember")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(false);
 
-                    b.Property<bool>("IsMember")
+                    b.Property<bool>("IsMod")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(false);
@@ -317,10 +345,16 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     b.Property<DateTimeOffset?>("LastLogin")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTimeOffset?>("LockedUntil")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("MaxCharacters")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(10);
+
+                    b.Property<DateTimeOffset?>("MutedUntil")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Password")
                         .IsRequired()
@@ -339,7 +373,7 @@ namespace Sanctuary.Database.Sqlite.Migrations
                         .HasMaxLength(254)
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Guid");
+                    b.HasKey("Id");
 
                     b.HasIndex("Username")
                         .IsUnique();
@@ -351,13 +385,13 @@ namespace Sanctuary.Database.Sqlite.Migrations
                 {
                     b.HasOne("Sanctuary.Database.Entities.DbItem", null)
                         .WithMany()
-                        .HasForeignKey("ItemsId", "ItemsCharacterGuid")
+                        .HasForeignKey("ItemsId", "ItemsCharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Sanctuary.Database.Entities.DbProfile", null)
                         .WithMany()
-                        .HasForeignKey("ProfilesId", "ProfilesCharacterGuid")
+                        .HasForeignKey("ProfilesId", "ProfilesCharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -366,7 +400,7 @@ namespace Sanctuary.Database.Sqlite.Migrations
                 {
                     b.HasOne("Sanctuary.Database.Entities.DbUser", "User")
                         .WithMany("Characters")
-                        .HasForeignKey("UserGuid")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -377,13 +411,13 @@ namespace Sanctuary.Database.Sqlite.Migrations
                 {
                     b.HasOne("Sanctuary.Database.Entities.DbCharacter", "Character")
                         .WithMany("Friends")
-                        .HasForeignKey("CharacterGuid")
+                        .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Sanctuary.Database.Entities.DbCharacter", "FriendCharacter")
                         .WithMany()
-                        .HasForeignKey("FriendCharacterGuid")
+                        .HasForeignKey("FriendCharacterId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
@@ -396,13 +430,13 @@ namespace Sanctuary.Database.Sqlite.Migrations
                 {
                     b.HasOne("Sanctuary.Database.Entities.DbCharacter", "Character")
                         .WithMany("Ignores")
-                        .HasForeignKey("CharacterGuid")
+                        .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Sanctuary.Database.Entities.DbCharacter", "IgnoreCharacter")
                         .WithMany()
-                        .HasForeignKey("IgnoreCharacterGuid")
+                        .HasForeignKey("IgnoreCharacterId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
@@ -415,7 +449,7 @@ namespace Sanctuary.Database.Sqlite.Migrations
                 {
                     b.HasOne("Sanctuary.Database.Entities.DbCharacter", "Character")
                         .WithMany("Items")
-                        .HasForeignKey("CharacterGuid")
+                        .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -426,7 +460,7 @@ namespace Sanctuary.Database.Sqlite.Migrations
                 {
                     b.HasOne("Sanctuary.Database.Entities.DbCharacter", "Character")
                         .WithMany("Mounts")
-                        .HasForeignKey("CharacterGuid")
+                        .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -437,7 +471,7 @@ namespace Sanctuary.Database.Sqlite.Migrations
                 {
                     b.HasOne("Sanctuary.Database.Entities.DbCharacter", "Character")
                         .WithMany("Profiles")
-                        .HasForeignKey("CharacterGuid")
+                        .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -448,7 +482,7 @@ namespace Sanctuary.Database.Sqlite.Migrations
                 {
                     b.HasOne("Sanctuary.Database.Entities.DbCharacter", "Character")
                         .WithMany("Titles")
-                        .HasForeignKey("CharacterGuid")
+                        .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

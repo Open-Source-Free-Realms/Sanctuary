@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Sanctuary.Database;
+using Sanctuary.Database.Sqlite;
 
 #nullable disable
 
 namespace Sanctuary.Database.Sqlite.Migrations
 {
-    [DbContext(typeof(DatabaseContext))]
+    [DbContext(typeof(SqliteDatabaseContext))]
     [Migration("20260707000000_AddModerationFields")]
     partial class AddModerationFields
     {

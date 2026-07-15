@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 using NLog.Extensions.Logging;
 
-using Sanctuary.Core.Configuration;
+using Sanctuary.Core.Extensions;
 using Sanctuary.Database;
 using Sanctuary.WebAPI.Endpoints;
 using Sanctuary.WebAPI.Options;
@@ -29,10 +29,12 @@ if (forwardedHeaderSection is not null)
 
 // Options
 builder.Services.AddOptionsWithValidateOnStart<DatabaseOptions>()
-    .BindConfiguration(DatabaseOptions.Section);
+    .BindConfiguration(DatabaseOptions.Section)
+    .ValidateOnStart();
 
 builder.Services.AddOptionsWithValidateOnStart<WebAPIOptions>()
-    .BindConfiguration(WebAPIOptions.Section);
+    .BindConfiguration(WebAPIOptions.Section)
+    .ValidateOnStart();
 
 // Database
 builder.Services.AddDatabase(builder.Configuration);

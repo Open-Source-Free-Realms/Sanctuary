@@ -4,15 +4,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Sanctuary.Database;
+using Sanctuary.Database.Sqlite;
 
 #nullable disable
 
 namespace Sanctuary.Database.Sqlite.Migrations
 {
-    [DbContext(typeof(DatabaseContext))]
-    [Migration("20250823191050_Initial")]
-    partial class Initial
+    [DbContext(typeof(SqliteDatabaseContext))]
+    [Migration("20250830192154_AddFriendAndIgnore")]
+    partial class AddFriendAndIgnore
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -84,6 +84,12 @@ namespace Sanctuary.Database.Sqlite.Migrations
                         .HasMaxLength(16)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("FullName")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT")
+                        .HasComputedColumnSql("CONCAT_WS(' ', FirstName, NULLIF(LastName, ''))", true);
+
                     b.Property<int>("Gender")
                         .HasColumnType("INTEGER");
 
@@ -147,6 +153,46 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     b.HasIndex("UserGuid");
 
                     b.ToTable("Characters");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbFriend", b =>
+                {
+                    b.Property<ulong>("FriendCharacterGuid")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<ulong>("CharacterGuid")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("DATE()");
+
+                    b.HasKey("FriendCharacterGuid", "CharacterGuid");
+
+                    b.HasIndex("CharacterGuid");
+
+                    b.ToTable("Friends");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbIgnore", b =>
+                {
+                    b.Property<ulong>("IgnoreCharacterGuid")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<ulong>("CharacterGuid")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("DATE()");
+
+                    b.HasKey("IgnoreCharacterGuid", "CharacterGuid");
+
+                    b.HasIndex("CharacterGuid");
+
+                    b.ToTable("Ignores");
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbItem", b =>
@@ -327,6 +373,44 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbFriend", b =>
+                {
+                    b.HasOne("Sanctuary.Database.Entities.DbCharacter", "Character")
+                        .WithMany("Friends")
+                        .HasForeignKey("CharacterGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Sanctuary.Database.Entities.DbCharacter", "FriendCharacter")
+                        .WithMany()
+                        .HasForeignKey("FriendCharacterGuid")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Character");
+
+                    b.Navigation("FriendCharacter");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbIgnore", b =>
+                {
+                    b.HasOne("Sanctuary.Database.Entities.DbCharacter", "Character")
+                        .WithMany("Ignores")
+                        .HasForeignKey("CharacterGuid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Sanctuary.Database.Entities.DbCharacter", "IgnoreCharacter")
+                        .WithMany()
+                        .HasForeignKey("IgnoreCharacterGuid")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Character");
+
+                    b.Navigation("IgnoreCharacter");
+                });
+
             modelBuilder.Entity("Sanctuary.Database.Entities.DbItem", b =>
                 {
                     b.HasOne("Sanctuary.Database.Entities.DbCharacter", "Character")
@@ -373,6 +457,10 @@ namespace Sanctuary.Database.Sqlite.Migrations
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbCharacter", b =>
                 {
+                    b.Navigation("Friends");
+
+                    b.Navigation("Ignores");
+
                     b.Navigation("Items");
 
                     b.Navigation("Mounts");

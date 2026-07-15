@@ -6,13 +6,11 @@
   <ItemGroup>
     <PackageVersion Include="BCrypt.Net-Next" Version="4.2.0" />
     <PackageVersion Include="Collections.Pooled" Version="2.0.0-preview.27" />
-    <PackageVersion Include="coverlet.collector" Version="10.0.1" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.Certificate" Version="9.0.17" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.17" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.17" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.17" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.17" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.17" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.9" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
     <PackageVersion Include="Microsoft.Extensions.Configuration" Version="10.0.9" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.9" />
@@ -23,8 +21,7 @@
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.7.0" />
     <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
     <PackageVersion Include="MiniValidation" Version="0.10.0" />
-    <PackageVersion Include="MSTest.TestAdapter" Version="4.3.0" />
-    <PackageVersion Include="MSTest.TestFramework" Version="4.3.0" />
+    <PackageVersion Include="MSTest" Version="4.2.3" />
     <PackageVersion Include="NLog" Version="6.1.4" />
     <PackageVersion Include="NLog.Extensions.Logging" Version="6.1.4" />
     <PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />

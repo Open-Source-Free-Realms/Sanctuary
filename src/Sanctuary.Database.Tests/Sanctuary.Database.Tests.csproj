@@ -2,16 +2,17 @@
 
   <PropertyGroup>
     <Nullable>enable</Nullable>
+    <IsTestProject>true</IsTestProject>
     <TargetFramework>$(TargetFramework)</TargetFramework>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ZLibDotNet" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="MSTest" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Sanctuary.Database\Sanctuary.Database.csproj" />
     <ProjectReference Include="..\Sanctuary.Database.MySql\Sanctuary.Database.MySql.csproj" />
     <ProjectReference Include="..\Sanctuary.Database.Sqlite\Sanctuary.Database.Sqlite.csproj" />
   </ItemGroup>
