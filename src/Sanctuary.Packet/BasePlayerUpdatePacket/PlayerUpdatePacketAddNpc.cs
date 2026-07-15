@@ -103,7 +103,9 @@ public class PlayerUpdatePacketAddNpc : BasePlayerUpdatePacket, ISerializablePac
     [JsonConverter(typeof(Vector4JsonConverter))]
     public Vector4 Tilt;
 
-    public float NameColor;
+    // ARGB int32 (client m_nNameColor) — a static nameplate color; 0 lets the client's disposition
+    // resolver pick the color.
+    public int NameColor;
 
     public int AreaDefinitionId;
 
