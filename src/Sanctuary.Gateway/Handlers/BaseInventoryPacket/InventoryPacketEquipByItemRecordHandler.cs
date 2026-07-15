@@ -58,7 +58,9 @@ public static class InventoryPacketEquipByItemRecordHandler
         if (clientItemDefinition.Type != 1)
             return true;
 
-        var profile = connection.Player.Profiles.SingleOrDefault(x => x.Id == packet.ProfileId);
+        var storageProfileId = RefereeProfileAlias.ToStorageProfileId(connection.Player, packet.ProfileId);
+        var clientProfileId = RefereeProfileAlias.ToClientProfileId(connection.Player, storageProfileId);
+        var profile = connection.Player.Profiles.SingleOrDefault(x => x.Id == storageProfileId);
 
         if (profile is null)
         {
@@ -70,7 +72,7 @@ public static class InventoryPacketEquipByItemRecordHandler
 
         var dbProfile = dbContext.Profiles
             .Include(x => x.Items)
-            .SingleOrDefault(x => x.CharacterId == GuidHelper.GetPlayerId(connection.Player.Guid) && x.Id == packet.ProfileId);
+            .SingleOrDefault(x => x.CharacterId == GuidHelper.GetPlayerId(connection.Player.Guid) && x.Id == storageProfileId);
 
         if (dbProfile is null)
         {
@@ -133,7 +135,7 @@ public static class InventoryPacketEquipByItemRecordHandler
         clientUpdatePacketEquipItem.Attachment.CompositeEffectId = clientItemDefinition.CompositeEffectId;
         clientUpdatePacketEquipItem.Attachment.Slot = packet.Slot;
 
-        clientUpdatePacketEquipItem.ProfileId = packet.ProfileId;
+        clientUpdatePacketEquipItem.ProfileId = clientProfileId;
 
         clientUpdatePacketEquipItem.Equip = true;
 
@@ -147,7 +149,7 @@ public static class InventoryPacketEquipByItemRecordHandler
 
         playerUpdatePacketEquipItemChange.Attachment = clientUpdatePacketEquipItem.Attachment;
 
-        playerUpdatePacketEquipItemChange.ProfileId = connection.Player.ActiveProfileId;
+        playerUpdatePacketEquipItemChange.ProfileId = clientProfileId;
 
         if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out var itemClass))
         {

@@ -1076,7 +1076,8 @@ public sealed class StartingZone : BaseZone
     {
         var packetMembershipSubscriptionInfo = new PacketMembershipSubscriptionInfo
         {
-            IsMember = player.MembershipStatus != 0
+            IsMember = !player.IsReferee && player.MembershipStatus != 0,
+            IsReferee = player.IsReferee
         };
 
         player.SendTunneled(packetMembershipSubscriptionInfo);

@@ -229,6 +229,7 @@ public class GatewayConnection : UdpConnection
 
         Player.Name.FirstName = dbCharacter.FirstName;
         Player.Name.LastName = dbCharacter.LastName ?? string.Empty;
+        Player.IsReferee = IsRefereeCharacter(dbCharacter);
 
         Player.Coins = dbCharacter.Coins;
 
@@ -313,6 +314,9 @@ public class GatewayConnection : UdpConnection
 
         Player.ActiveProfileId = dbCharacter.ActiveProfileId;
 
+        if (Player.IsReferee)
+            AddRefereeProfileAlias(Player);
+
         foreach (var dbItem in dbCharacter.Items)
         {
             Player.Items.Add(new ClientItem
@@ -367,6 +371,9 @@ public class GatewayConnection : UdpConnection
 
             Player.Titles.Add(playerTitle);
         }
+
+        if (Player.IsReferee)
+            AddRefereeTitle(Player);
 
         Player.ActiveTitle = dbCharacter.ActiveTitleId ?? 0;
 
@@ -424,6 +431,78 @@ public class GatewayConnection : UdpConnection
         Player.StationCash = dbCharacter.StationCash;
 
         return true;
+    }
+
+    private static bool IsRefereeCharacter(DbCharacter character)
+    {
+        return HasName(character, "Raising", "Kaines")
+            || HasName(character, "Jags")
+            || HasName(character, "Layla")
+            || HasName(character, "Haylie");
+    }
+
+    private static bool HasName(DbCharacter character, string firstName, string? lastName = null)
+    {
+        if (lastName is null && string.Equals(character.FullName, firstName, StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (!string.Equals(character.FirstName, firstName, StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        if (lastName is not null)
+            return string.Equals(character.LastName, lastName, StringComparison.OrdinalIgnoreCase);
+
+        return string.IsNullOrWhiteSpace(character.LastName);
+    }
+
+    private static void AddRefereeProfileAlias(Player player)
+    {
+        if (player.Profiles.Any(x => x.Id == Player.RefereeProfileId))
+            return;
+
+        var source = player.Profiles.FirstOrDefault(x => x.Id == player.ActiveProfileId) ?? player.Profiles.First();
+
+        player.Profiles.Add(new ClientPcProfile
+        {
+            Id = Player.RefereeProfileId,
+            NameId = source.NameId,
+            DescriptionId = source.DescriptionId,
+            Type = source.Type,
+            Icon = source.Icon,
+            AbilityBgImageSet = source.AbilityBgImageSet,
+            BadgeImageSet = source.BadgeImageSet,
+            ButtonImageSet = source.ButtonImageSet,
+            MembersOnly = source.MembersOnly,
+            IsCombat = source.IsCombat,
+            ItemClasses = source.ItemClasses,
+            Unknown11 = source.Unknown11,
+            Unknown12 = source.Unknown12,
+            Unknown13 = source.Unknown13,
+            Unknown14 = source.Unknown14,
+            Unknown15 = source.Unknown15,
+            Rank = source.Rank,
+            RankPercent = source.RankPercent,
+            StarsAvailable = source.StarsAvailable,
+            StarsEarned = source.StarsEarned,
+            Unknown20 = source.Unknown20,
+            Items = source.Items,
+            Unknown21 = source.Unknown21,
+            Abilities = source.Abilities,
+            AbilityExperiences = source.AbilityExperiences
+        });
+    }
+
+    private static void AddRefereeTitle(Player player)
+    {
+        if (player.Titles.Any(x => x.Id == Player.RefereeTitleId))
+            return;
+
+        player.Titles.Add(new PlayerTitleData
+        {
+            Id = Player.RefereeTitleId,
+            Type = 1,
+            NameId = Player.RefereeTitleNameId
+        });
     }
 
     private void SavePlayerToDatabase()
@@ -539,7 +618,30 @@ public class GatewayConnection : UdpConnection
     {
         var packetSendSelfToClient = new PacketSendSelfToClient();
 
-        packetSendSelfToClient.Payload = Player.Serialize();
+        if (Player.IsReferee)
+        {
+            var activeProfileId = Player.ActiveProfileId;
+            var membershipStatus = Player.MembershipStatus;
+            var showMemberNagScreen = Player.ShowMemberNagScreen;
+
+            try
+            {
+                Player.ActiveProfileId = Player.RefereeProfileId;
+                Player.MembershipStatus = 0;
+                Player.ShowMemberNagScreen = false;
+                packetSendSelfToClient.Payload = Player.Serialize();
+            }
+            finally
+            {
+                Player.ActiveProfileId = activeProfileId;
+                Player.MembershipStatus = membershipStatus;
+                Player.ShowMemberNagScreen = showMemberNagScreen;
+            }
+        }
+        else
+        {
+            packetSendSelfToClient.Payload = Player.Serialize();
+        }
 
         SendTunneled(packetSendSelfToClient);
     }

@@ -20,6 +20,10 @@ namespace Sanctuary.Game.Entities;
 
 public sealed class Player : ClientPcData, IEntity
 {
+    public const int RefereeProfileId = 58;
+    public const int RefereeTitleId = 900100;
+    public const int RefereeTitleNameId = 900100;
+
     private readonly UdpConnection _connection;
     private readonly IResourceManager _resourceManager;
 
@@ -38,6 +42,7 @@ public sealed class Player : ClientPcData, IEntity
 
     public bool IsAdmin { get; set; }
     public bool IsMod { get; set; }
+    public bool IsReferee { get; set; }
     public DateTimeOffset? MutedUntil { get; set; }
 
     public ClientPcProfile ActiveProfile =>
@@ -508,11 +513,12 @@ public sealed class Player : ClientPcData, IEntity
             MaxMovementSpeed = Stats[CharacterStatId.MaxMovementSpeed],
 
             IsUnderage = Age < 18,
-            IsMember = MembershipStatus != 0,
+            IsMember = !IsReferee && MembershipStatus != 0,
+            IsReferee = IsReferee,
 
             // playerUpdatePacketAddPc.TemporaryAppearance = 277;
 
-            ActiveProfileId = ActiveProfileId,
+            ActiveProfileId = IsReferee ? RefereeProfileId : ActiveProfileId,
 
             MountQueuePosition = -1,
             MountSeat = -1,

@@ -39,7 +39,9 @@ public static class InventoryPacketEquippedRemoveHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(InventoryPacketEquippedRemove), packet);
 
-        var profile = connection.Player.Profiles.SingleOrDefault(x => x.Id == packet.ProfileId);
+        var storageProfileId = RefereeProfileAlias.ToStorageProfileId(connection.Player, packet.ProfileId);
+        var clientProfileId = RefereeProfileAlias.ToClientProfileId(connection.Player, storageProfileId);
+        var profile = connection.Player.Profiles.SingleOrDefault(x => x.Id == storageProfileId);
 
         if (profile is null)
         {
@@ -70,7 +72,7 @@ public static class InventoryPacketEquippedRemoveHandler
         var clientUpdatePacketUnequipSlot = new ClientUpdatePacketUnequipSlot();
 
         clientUpdatePacketUnequipSlot.Slot = packet.Slot;
-        clientUpdatePacketUnequipSlot.ProfileId = packet.ProfileId;
+        clientUpdatePacketUnequipSlot.ProfileId = clientProfileId;
 
         connection.SendTunneled(clientUpdatePacketUnequipSlot);
 
@@ -82,7 +84,7 @@ public static class InventoryPacketEquippedRemoveHandler
 
         playerUpdatePacketEquipItemChange.Attachment.Slot = packet.Slot;
 
-        playerUpdatePacketEquipItemChange.ProfileId = packet.ProfileId;
+        playerUpdatePacketEquipItemChange.ProfileId = clientProfileId;
 
         if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out var itemClass))
         {
@@ -115,7 +117,7 @@ public static class InventoryPacketEquippedRemoveHandler
                     playerUpdatePacketEquipItemChange.Attachment.CompositeEffectId = weaponClientItemDefinition.CompositeEffectId;
                     playerUpdatePacketEquipItemChange.Attachment.Slot = weaponClientItemDefinition.Slot;
 
-                    playerUpdatePacketEquipItemChange.ProfileId = packet.ProfileId;
+                    playerUpdatePacketEquipItemChange.ProfileId = clientProfileId;
 
                     if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out itemClass))
                         return true;
@@ -131,7 +133,7 @@ public static class InventoryPacketEquippedRemoveHandler
 
         var dbProfile = dbContext.Profiles
             .Include(x => x.Items)
-            .SingleOrDefault(x => x.CharacterId == GuidHelper.GetPlayerId(connection.Player.Guid) && x.Id == packet.ProfileId);
+            .SingleOrDefault(x => x.CharacterId == GuidHelper.GetPlayerId(connection.Player.Guid) && x.Id == storageProfileId);
 
         if (dbProfile is null)
         {
