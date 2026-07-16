@@ -60,7 +60,16 @@ public static class GuildCreatePacketHandler
         using var dbContext = _dbContextFactory.CreateDbContext();
 
         var normalizedGuildName = guildName.ToLower();
-        var nameTaken = dbContext.Guilds.Any(x => x.Name.ToLower() == normalizedGuildName);
+        var sameNameGuilds = dbContext.Guilds
+            .Where(x => x.Name.ToLower() == normalizedGuildName);
+
+        // Older servers could leave the guild row behind after its last member quit.
+        // Delete that empty row before checking the unique name so it can be reused.
+        sameNameGuilds
+            .Where(x => !x.Members.Any())
+            .ExecuteDelete();
+
+        var nameTaken = sameNameGuilds.Any();
 
         if (nameTaken)
         {
