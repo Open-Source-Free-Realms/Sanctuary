@@ -27,6 +27,14 @@ namespace Sanctuary.Gateway;
 
 public class GatewayConnection : UdpConnection
 {
+    public const int EnforcerProfileId = 20;
+    public const int EnforcerModelId = 536;
+    public const int EnforcerProfileNameId = 2301;
+    private const int EnforcerJacketDefinitionId = 309;
+    private const int EnforcerPantsDefinitionId = 310;
+    private const int EnforcerJacketSlot = 3;
+    private const int EnforcerPantsSlot = 4;
+
     private readonly ILogger _logger;
     private readonly LoginClient _loginClient;
     private readonly IZoneManager _zoneManager;
@@ -35,6 +43,7 @@ public class GatewayConnection : UdpConnection
     private readonly IServiceProvider _serviceProvider;
     private readonly IResourceManager _resourceManager;
     private readonly IDbContextFactory<DatabaseContext> _dbContextFactory;
+    private int _enforcerStorageProfileId;
 
     private ICipher _cipher;
 #pragma warning disable CS0649
@@ -43,6 +52,7 @@ public class GatewayConnection : UdpConnection
 
     // Player will only be null during login.
     public Player Player { get; private set; } = null!;
+    public bool IsEnforcer { get; private set; }
 
     public string Locale { get; set; } = "en_US";
 
@@ -229,6 +239,7 @@ public class GatewayConnection : UdpConnection
 
         Player.Name.FirstName = dbCharacter.FirstName;
         Player.Name.LastName = dbCharacter.LastName ?? string.Empty;
+        IsEnforcer = IsEnforcerWhitelisted(dbCharacter);
 
         Player.Coins = dbCharacter.Coins;
 
@@ -313,6 +324,26 @@ public class GatewayConnection : UdpConnection
 
         Player.ActiveProfileId = dbCharacter.ActiveProfileId;
 
+        if (IsEnforcer)
+        {
+            _enforcerStorageProfileId = dbCharacter.ActiveProfileId;
+
+            if (AddEnforcerProfileAlias(Player))
+            {
+                Player.ActiveProfileId = EnforcerProfileId;
+                Player.Model = EnforcerModelId;
+            }
+            else
+            {
+                IsEnforcer = false;
+                Player.Profiles.RemoveAll(x => x.Id == EnforcerProfileId);
+                _logger.LogWarning(
+                    "Skipped Enforcer runtime override because the profile alias could not be created. ( CharacterId: {CharacterId}, Name: {CharacterName} )",
+                    dbCharacter.Id,
+                    dbCharacter.FullName);
+            }
+        }
+
         foreach (var dbItem in dbCharacter.Items)
         {
             Player.Items.Add(new ClientItem
@@ -322,6 +353,26 @@ public class GatewayConnection : UdpConnection
                 Count = dbItem.Count,
                 Definition = dbItem.Definition
             });
+        }
+
+        if (IsEnforcer)
+        {
+            if (AddEnforcerUniform(Player))
+            {
+                ApplyEnforcerAppearance(Player);
+            }
+            else
+            {
+                IsEnforcer = false;
+                Player.Profiles.RemoveAll(x => x.Id == EnforcerProfileId);
+                Player.ActiveProfileId = _enforcerStorageProfileId;
+                Player.Model = dbCharacter.Model;
+
+                _logger.LogWarning(
+                    "Skipped Enforcer runtime override because the uniform could not be created. ( CharacterId: {CharacterId}, Name: {CharacterName} )",
+                    dbCharacter.Id,
+                    dbCharacter.FullName);
+            }
         }
 
         Player.Gender = dbCharacter.Gender;
@@ -426,6 +477,156 @@ public class GatewayConnection : UdpConnection
         return true;
     }
 
+    private bool IsEnforcerWhitelisted(DbCharacter dbCharacter)
+    {
+        return _options.EnforcerWhitelist?.Any(entry =>
+            entry.UserId != 0 &&
+            entry.CharacterId != 0 &&
+            entry.UserId == dbCharacter.UserId &&
+            entry.CharacterId == dbCharacter.Id) == true;
+    }
+
+    private static bool AddEnforcerProfileAlias(Player player)
+    {
+        var existingAliasCount = player.Profiles.Count(x => x.Id == EnforcerProfileId);
+
+        if (existingAliasCount != 0)
+            return false;
+
+        var backingProfile = player.Profiles.FirstOrDefault(x => x.Id == 1)
+            ?? player.Profiles.FirstOrDefault(x => x.Id == player.ActiveProfileId)
+            ?? player.Profiles.FirstOrDefault();
+
+        if (backingProfile is null)
+            return false;
+
+        player.Profiles.Add(new ClientPcProfile
+        {
+            Id = EnforcerProfileId,
+            NameId = EnforcerProfileNameId,
+            DescriptionId = 0,
+            Type = backingProfile.Type,
+            Icon = backingProfile.Icon,
+            AbilityBgImageSet = backingProfile.AbilityBgImageSet,
+            BadgeImageSet = backingProfile.BadgeImageSet,
+            ButtonImageSet = backingProfile.ButtonImageSet,
+            MembersOnly = false,
+            IsCombat = 0,
+            ItemClasses = new Dictionary<int, ProfileItemClassData>
+            {
+                [47] = new()
+                {
+                    Id = 47,
+                    Unknown = 5
+                }
+            },
+            Unknown11 = backingProfile.Unknown11,
+            Unknown12 = backingProfile.Unknown12,
+            Unknown13 = backingProfile.Unknown13,
+            Unknown14 = backingProfile.Unknown14,
+            Unknown15 = backingProfile.Unknown15,
+            Rank = backingProfile.Rank,
+            RankPercent = backingProfile.RankPercent,
+            StarsAvailable = backingProfile.StarsAvailable,
+            StarsEarned = backingProfile.StarsEarned,
+            Unknown20 = backingProfile.Unknown20,
+            Unknown21 = backingProfile.Unknown21,
+            Abilities = backingProfile.Abilities,
+            AbilityExperiences = backingProfile.AbilityExperiences
+        });
+
+        return true;
+    }
+
+    private bool AddEnforcerUniform(Player player)
+    {
+        var profile = player.Profiles.SingleOrDefault(x => x.Id == EnforcerProfileId);
+
+        if (profile is null ||
+            !_resourceManager.ClientItemDefinitions.TryGetValue(EnforcerJacketDefinitionId, out var jacketDefinition) ||
+            !_resourceManager.ClientItemDefinitions.TryGetValue(EnforcerPantsDefinitionId, out var pantsDefinition) ||
+            jacketDefinition.Slot != EnforcerJacketSlot ||
+            pantsDefinition.Slot != EnforcerPantsSlot)
+        {
+            return false;
+        }
+
+        var usedItemIds = player.Items.Select(x => x.Id).ToHashSet();
+        var jacketItemId = AllocateRuntimeItemId(usedItemIds);
+        var pantsItemId = AllocateRuntimeItemId(usedItemIds);
+
+        if (jacketItemId == 0 || pantsItemId == 0)
+            return false;
+
+        player.Items.Add(new ClientItem
+        {
+            Id = jacketItemId,
+            Count = 1,
+            Definition = EnforcerJacketDefinitionId,
+            Tint = 0
+        });
+
+        player.Items.Add(new ClientItem
+        {
+            Id = pantsItemId,
+            Count = 1,
+            Definition = EnforcerPantsDefinitionId,
+            Tint = 0
+        });
+
+        profile.Items[EnforcerJacketSlot] = new ProfileItem
+        {
+            Id = jacketItemId,
+            Slot = EnforcerJacketSlot
+        };
+
+        profile.Items[EnforcerPantsSlot] = new ProfileItem
+        {
+            Id = pantsItemId,
+            Slot = EnforcerPantsSlot
+        };
+
+        _logger.LogInformation(
+            "Applied Enforcer runtime uniform. ( Player: {PlayerGuid}, JacketItem: {JacketItemId}, PantsItem: {PantsItemId} )",
+            player.Guid,
+            jacketItemId,
+            pantsItemId);
+
+        return true;
+    }
+
+    private static int AllocateRuntimeItemId(ISet<int> usedItemIds)
+    {
+        for (var id = int.MaxValue; id > 0; id--)
+        {
+            if (usedItemIds.Add(id))
+                return id;
+        }
+
+        return 0;
+    }
+
+    private static void ApplyEnforcerAppearance(Player player)
+    {
+        player.Head = string.Empty;
+        player.HeadId = 0;
+
+        player.Hair = string.Empty;
+        player.HairId = 0;
+        player.HairColor = 0;
+
+        player.EyeColor = 0;
+
+        player.SkinTone = string.Empty;
+        player.SkinToneId = 0;
+
+        player.FacePaint = null;
+        player.FacePaintId = 0;
+
+        player.ModelCustomization = null;
+        player.ModelCustomizationId = 0;
+    }
+
     private void SavePlayerToDatabase()
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
@@ -461,7 +662,7 @@ public class GatewayConnection : UdpConnection
         dbCharacter.RotationX = float.IsNaN(rotation.X) ? null : rotation.X;
         dbCharacter.RotationZ = float.IsNaN(rotation.Z) ? null : rotation.Z;
 
-        dbCharacter.ActiveProfileId = Player.ActiveProfileId;
+        dbCharacter.ActiveProfileId = GetStorageActiveProfileId(Player);
 
         dbCharacter.ActiveTitleId = Player.ActiveTitle;
 
@@ -476,6 +677,17 @@ public class GatewayConnection : UdpConnection
 
         if (dbContext.SaveChanges() <= 0)
             _logger.LogError("Failed to save character data to database");
+    }
+
+    private int GetStorageActiveProfileId(Player player)
+    {
+        if (IsEnforcer && player.ActiveProfileId == EnforcerProfileId)
+            return player.Profiles.FirstOrDefault(x => x.Id == _enforcerStorageProfileId)?.Id
+                ?? player.Profiles.FirstOrDefault(x => x.Id == 1)?.Id
+                ?? player.Profiles.FirstOrDefault(x => x.Id != EnforcerProfileId)?.Id
+                ?? player.ActiveProfileId;
+
+        return player.ActiveProfileId;
     }
 
     public void SendInitializationParameters()

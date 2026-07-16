@@ -11,6 +11,7 @@
     "LoginGatewayAddress": "localhost:20041",
     "LoginGatewayChallenge": "OSFR-EDITz@2024",
 
-    "ShowMemberNagScreen": false
+    "ShowMemberNagScreen": false,
+    "EnforcerWhitelist": []
   }
 }

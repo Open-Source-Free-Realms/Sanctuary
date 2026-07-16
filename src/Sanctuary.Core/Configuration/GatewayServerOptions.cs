@@ -25,4 +25,12 @@ public sealed class GatewayServerOptions : ServerOptions
     public required string LoginGatewayChallenge { get; set; }
 
     public bool ShowMemberNagScreen { get; set; }
+
+    public EnforcerWhitelistEntry[] EnforcerWhitelist { get; set; } = [];
+}
+
+public sealed class EnforcerWhitelistEntry
+{
+    public ulong UserId { get; set; }
+    public ulong CharacterId { get; set; }
 }

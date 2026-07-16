@@ -40,6 +40,15 @@ public static class InventoryPacketEquipByGuidHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(InventoryPacketEquipByGuid), packet);
 
+        if (connection.IsEnforcer && connection.Player.ActiveProfileId == GatewayConnection.EnforcerProfileId)
+        {
+            _logger.LogInformation(
+                "Ignored an equip request while the Enforcer runtime profile is active. ( Player: {PlayerGuid}, Item: {ItemGuid} )",
+                connection.Player.Guid,
+                packet.Guid);
+            return true;
+        }
+
         var clientItem = connection.Player.Items.SingleOrDefault(x => x.Id == packet.Guid);
 
         if (clientItem is null)

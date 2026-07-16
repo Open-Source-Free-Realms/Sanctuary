@@ -35,6 +35,9 @@ public static class CommandPacketSetProfileHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(CommandPacketSetProfile), packet);
 
+        if (connection.IsEnforcer && packet.Id != GatewayConnection.EnforcerProfileId)
+            return true;
+
         var profile = connection.Player.Profiles.FirstOrDefault(x => x.Id == packet.Id);
 
         if (profile is null)

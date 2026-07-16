@@ -55,6 +55,15 @@ public static class InventoryPacketUseStyleCardHandler
 
     public static void Equip(GatewayConnection connection, ClientItem clientItem)
     {
+        if (connection.IsEnforcer)
+        {
+            _logger.LogInformation(
+                "Ignored a style card while the Enforcer runtime profile is active. ( Player: {PlayerGuid}, Item: {ItemGuid} )",
+                connection.Player.Guid,
+                clientItem.Id);
+            return;
+        }
+
         if (!_resourceManager.ClientItemDefinitions.TryGetValue(clientItem.Definition, out var clientItemDefinition))
         {
             _logger.LogWarning("Unknown item definition. {id}", clientItem.Definition);

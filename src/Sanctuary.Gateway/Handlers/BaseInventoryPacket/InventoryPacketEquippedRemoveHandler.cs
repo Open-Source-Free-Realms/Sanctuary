@@ -39,6 +39,15 @@ public static class InventoryPacketEquippedRemoveHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(InventoryPacketEquippedRemove), packet);
 
+        if (connection.IsEnforcer && connection.Player.ActiveProfileId == GatewayConnection.EnforcerProfileId)
+        {
+            _logger.LogInformation(
+                "Ignored an unequip request while the Enforcer runtime profile is active. ( Player: {PlayerGuid}, Slot: {Slot} )",
+                connection.Player.Guid,
+                packet.Slot);
+            return true;
+        }
+
         var profile = connection.Player.Profiles.SingleOrDefault(x => x.Id == packet.ProfileId);
 
         if (profile is null)

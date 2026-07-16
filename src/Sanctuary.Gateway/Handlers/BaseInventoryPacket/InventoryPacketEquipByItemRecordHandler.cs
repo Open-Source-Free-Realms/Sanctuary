@@ -40,6 +40,15 @@ public static class InventoryPacketEquipByItemRecordHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(InventoryPacketEquipByItemRecord), packet);
 
+        if (connection.IsEnforcer && connection.Player.ActiveProfileId == GatewayConnection.EnforcerProfileId)
+        {
+            _logger.LogInformation(
+                "Ignored an equip request while the Enforcer runtime profile is active. ( Player: {PlayerGuid}, Definition: {DefinitionId} )",
+                connection.Player.Guid,
+                packet.ItemRecord.Definition);
+            return true;
+        }
+
         var clientItem = connection.Player.Items.SingleOrDefault(x => x.Definition == packet.ItemRecord.Definition && x.Tint == packet.ItemRecord.Tint);
 
         if (clientItem is null)
