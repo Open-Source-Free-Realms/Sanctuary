@@ -1,0 +1,16 @@
+enforcer_m.adr.z,4121300151,320
+enforcer_m.dsk.z,2820031799,1812
+enforcer_m_body_lod0.dme.z,1767807266,30554
+enforcer_m.dma.z,3196373089,138
+enforcer_m.dds.z,1195088484,35101
+enforcer_m_chest_jacket.adr.z,1078437424,96
+enforcer_m_chest_jacket.dme.z,1677086355,11982
+enforcer_m_chest_jacket.dma.z,4275069641,150
+enforcer_m_chest_jacket.dds.z,3457467616,26669
+enforcer_m_legs_pants.adr.z,2694274828,95
+enforcer_m_legs_pants.dme.z,803653387,6916
+enforcer_m_legs_pants.dma.z,692196500,153
+enforcer_m_legs_pants.dds.z,2476267323,8450
+enforcer_loc_walk.gr2.z,2793589749,13578
+enforcer_loc_run.gr2.z,31130863,14439
+enforcer_loc_backpedal.gr2.z,2924350686,19511

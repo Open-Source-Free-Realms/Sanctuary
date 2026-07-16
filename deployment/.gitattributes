@@ -1,0 +1,6 @@
+ClientAssets/*.adr binary
+ClientAssets/*.dds binary
+ClientAssets/*.dma binary
+ClientAssets/*.dme binary
+ClientAssets/*.dsk binary
+ClientAssets/*.gr2 binary
