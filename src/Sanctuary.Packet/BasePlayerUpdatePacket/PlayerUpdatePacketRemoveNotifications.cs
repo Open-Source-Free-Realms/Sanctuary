@@ -4,7 +4,6 @@ using Sanctuary.Core.IO;
 
 namespace Sanctuary.Packet;
 
-// op35 sub11 — clear overhead/minimap notification entries by guid.
 public class PlayerUpdatePacketRemoveNotifications : ISerializablePacket
 {
     public const short OpCode = 35;
