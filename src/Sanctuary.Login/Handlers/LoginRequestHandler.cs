@@ -81,18 +81,7 @@ public static class LoginRequestHandler
 
             return true;
         }
-#endif
 
-        if (_options.IsLocked && !user.IsAdmin)
-        {
-            loginReply.Status = 2;
-
-            connection.Send(loginReply);
-
-            return true;
-        }
-
-#if !DEBUG
         user.Session = null;
         user.SessionCreated = null;
 #endif
@@ -101,6 +90,15 @@ public static class LoginRequestHandler
 
         if (dbContext.SaveChanges() <= 0)
         {
+            connection.Send(loginReply);
+
+            return true;
+        }
+
+        if (_options.IsLocked && !user.IsAdmin)
+        {
+            loginReply.Status = 2;
+
             connection.Send(loginReply);
 
             return true;
