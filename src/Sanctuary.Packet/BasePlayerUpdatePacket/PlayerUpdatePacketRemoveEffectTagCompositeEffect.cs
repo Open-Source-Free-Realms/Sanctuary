@@ -2,7 +2,6 @@ using Sanctuary.Core.IO;
 
 namespace Sanctuary.Packet;
 
-// op35 sub42 — stop a looping composite effect attached via sub41 (TagId must match).
 public class PlayerUpdatePacketRemoveEffectTagCompositeEffect : BasePlayerUpdatePacket, ISerializablePacket
 {
     public new const short OpCode = 42;
