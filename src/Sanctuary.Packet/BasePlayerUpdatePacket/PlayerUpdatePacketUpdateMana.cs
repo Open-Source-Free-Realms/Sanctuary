@@ -2,8 +2,6 @@ using Sanctuary.Core.IO;
 
 namespace Sanctuary.Packet;
 
-// op35 sub9 — per-NPC vitals push; the live server sent one to each encounter NPC right after its
-// AddNpc (values 100 / 800 / 800).
 public class PlayerUpdatePacketUpdateMana : BasePlayerUpdatePacket, ISerializablePacket
 {
     public new const short OpCode = 9;
