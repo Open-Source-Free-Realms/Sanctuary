@@ -2,9 +2,6 @@ using Sanctuary.Core.IO;
 
 namespace Sanctuary.Packet;
 
-/// <summary>Character status bitfield (client ProxiedCharacter::m_nCharacterStatus). Several bits
-/// also halt the character's movement controller (Asleep/Rooted/Stunned/KnockedOut/KnockedBack/
-/// Frozen/Scripted).</summary>
 [System.Flags]
 public enum CharacterStatus
 {
@@ -28,8 +25,7 @@ public enum CharacterStatus
     IsPoppedUp = 0x100000,
 }
 
-// op35 sub20 — set a character's status bitfield. Regular NPCs ship Status=1 (IsNonAttackable);
-// bosses set IsBoss.
+
 public class PlayerUpdatePacketUpdateCharacterState : BasePlayerUpdatePacket, ISerializablePacket
 {
     public new const short OpCode = 20;
