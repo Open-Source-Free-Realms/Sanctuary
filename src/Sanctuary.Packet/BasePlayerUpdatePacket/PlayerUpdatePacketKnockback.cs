@@ -11,7 +11,7 @@ public class PlayerUpdatePacketKnockback : BasePlayerUpdatePacket, ISerializable
 
     public ulong Guid;
 
-    public int Unknown;
+    public int Animation;
 
     public Vector4 Position;
 
