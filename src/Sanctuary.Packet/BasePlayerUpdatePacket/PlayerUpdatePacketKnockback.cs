@@ -4,7 +4,7 @@ using Sanctuary.Core.IO;
 
 namespace Sanctuary.Packet;
 
-// op35 sub4 — hurl an actor along a direction (the arc plays client-side).
+
 public class PlayerUpdatePacketKnockback : BasePlayerUpdatePacket, ISerializablePacket
 {
     public new const short OpCode = 4;
