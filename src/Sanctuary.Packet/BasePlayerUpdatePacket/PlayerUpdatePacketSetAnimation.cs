@@ -2,8 +2,6 @@ using Sanctuary.Core.IO;
 
 namespace Sanctuary.Packet;
 
-// op35 sub8 — play an animation group on a character. AnimationId is an AnimationGroups.xml group id
-// (clip resolution is per-model via its .adr table).
 public class PlayerUpdatePacketSetAnimation : ISerializablePacket
 {
     public const short OpCode = 35;
