@@ -2,8 +2,7 @@ using Sanctuary.Core.IO;
 
 namespace Sanctuary.Packet;
 
-// op35 sub41 — attach a LOOPING composite effect to a character as part of a status-effect tag (the
-// visible half of a buff/debuff). Pair with sub42 to stop the loop.
+
 public class PlayerUpdatePacketAddEffectTagCompositeEffect : BasePlayerUpdatePacket, ISerializablePacket
 {
     public new const short OpCode = 41;
