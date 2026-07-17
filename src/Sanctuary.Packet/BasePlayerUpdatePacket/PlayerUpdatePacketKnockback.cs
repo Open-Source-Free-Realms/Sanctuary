@@ -15,7 +15,7 @@ public class PlayerUpdatePacketKnockback : BasePlayerUpdatePacket, ISerializable
 
     public Vector4 Position;
 
-    /// <summary>Unit XZ direction vector.</summary>
+    
     public Vector4 Direction;
 
     public float Magnitude;
