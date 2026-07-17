@@ -31,6 +31,9 @@ public static class QuickChatSendChatToChannelPacketHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(QuickChatSendChatToChannelPacket), packet);
 
+        if (connection.Player.IsMuted())
+            return true;
+
         packet.Guid = connection.Player.Guid;
         packet.Name = connection.Player.Name;
 
