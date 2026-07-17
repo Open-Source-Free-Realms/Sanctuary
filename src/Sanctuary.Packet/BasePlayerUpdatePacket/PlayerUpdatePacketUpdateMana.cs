@@ -8,9 +8,9 @@ public class PlayerUpdatePacketUpdateMana : BasePlayerUpdatePacket, ISerializabl
 
     public ulong Guid;
 
-    public int Mana = 100;
-    public int Unknown2 = 800;
-    public int Unknown3 = 800;
+    public int BossMana = 100;
+    public int MaxMana = 800;
+    public int Mana = 800;
 
     public PlayerUpdatePacketUpdateMana() : base(OpCode)
     {
