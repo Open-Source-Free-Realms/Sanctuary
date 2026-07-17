@@ -2,11 +2,10 @@ using Sanctuary.Core.IO;
 
 namespace Sanctuary.Packet;
 
-// op35 sub35 — the floating combat damage/heal number over an entity, plus its health-bar update.
+
 // Guid = attacker, Guid2 = victim, Unknown2 = max HP, Unknown3 = current HP after the hit,
 // Unknown4 = the delta (-damage — the floating number).
-// Unlike CombatPacketAttackProcessed with attacker == local player, this does NOT reset the client's
-// action-bar melee timer, so it's the correct vehicle for the player's own hits.
+
 public class PlayerUpdatePacketHitPointModification : BasePlayerUpdatePacket, ISerializablePacket
 {
     public new const short OpCode = 35;
