@@ -1,6 +1,5 @@
-using System.Collections.Generic;
-
 using Sanctuary.Core.IO;
+using Sanctuary.Packet.Common;
 
 namespace Sanctuary.Packet;
 
@@ -13,52 +12,9 @@ public class AbilityPacketSetDefinition : BaseAbilityPacket, ISerializablePacket
 {
     public new const short OpCode = 5;
 
-    public class Slot
-    {
-        public int Type = 3;          // 0 empty, 1/3 ability (AbilityDefinition), 2 item
-        public int Unknown2;
-        public int ManaCost;          // the client greys the slot out while current energy is below this
-        public int ItemDefinitionId;  // Type 2 only
-        public int IconId;
-        public int NameId;
-        public int Unknown7 = 4;
-        public float Unknown8;
-        public int Unknown9 = 1;
-        public int AbilityDefinitionId;
-        public int Unknown11;
-        public bool Unknown12 = true;
-
-        public void Serialize(PacketWriter writer)
-        {
-            writer.Write(Type);
-
-            if (Type == 0)
-                return;
-
-            if (Type == 1 || Type == 3)
-            {
-                writer.Write(Unknown2);
-                writer.Write(ManaCost);
-            }
-            else if (Type == 2)
-            {
-                writer.Write(ItemDefinitionId);
-            }
-
-            writer.Write(IconId);
-            writer.Write(NameId);
-            writer.Write(Unknown7);
-            writer.Write(Unknown8);
-            writer.Write(Unknown9);
-            writer.Write(AbilityDefinitionId);
-            writer.Write(Unknown11);
-            writer.Write(Unknown12);
-        }
-    }
-
     public int ProfileId;
-    public int SlotCount = 8;
-    public List<Slot?> Slots = new();
+
+    public AbilitySet AbilitySet = new();
 
     public AbilityPacketSetDefinition() : base(OpCode)
     {
@@ -67,25 +23,21 @@ public class AbilityPacketSetDefinition : BaseAbilityPacket, ISerializablePacket
     /// <summary>An all-empty toolbar (8 Type-0 slots).</summary>
     public static AbilityPacketSetDefinition CreateEmpty(int profileId)
     {
-        return new AbilityPacketSetDefinition { ProfileId = profileId, SlotCount = 8 };
+        return new AbilityPacketSetDefinition
+        {
+            ProfileId = profileId
+        };
     }
 
     public byte[] Serialize()
     {
         using var writer = new PacketWriter();
 
-        base.Write(writer);
+        Write(writer);
 
         writer.Write(ProfileId);
-        writer.Write(SlotCount);
 
-        for (var i = 0; i < SlotCount; i++)
-        {
-            if (i < Slots.Count && Slots[i] is { } slot)
-                slot.Serialize(writer);
-            else
-                writer.Write(0); // empty slot (Type = 0)
-        }
+        AbilitySet.Serialize(writer);
 
         return writer.Buffer;
     }
