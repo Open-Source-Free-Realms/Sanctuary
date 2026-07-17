@@ -27,8 +27,7 @@ public class PlayerUpdatePacketAddEffectTagCompositeEffect : BasePlayerUpdatePac
         writer.Write(TagId);
         writer.Write(CompositeEffectId);
         writer.Write(SourceGuid);
-        writer.Write(Unknown);
-        writer.Write(Unknown2);
+        writer.Write(Unused);
 
         return writer.Buffer;
     }
