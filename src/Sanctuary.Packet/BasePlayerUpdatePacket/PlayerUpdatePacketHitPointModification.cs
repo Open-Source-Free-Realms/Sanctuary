@@ -3,8 +3,6 @@ using Sanctuary.Core.IO;
 namespace Sanctuary.Packet;
 
 
-// Guid = attacker, Guid2 = victim, Unknown2 = max HP, Unknown3 = current HP after the hit,
-// Unknown4 = the delta (-damage — the floating number).
 
 public class PlayerUpdatePacketHitPointModification : BasePlayerUpdatePacket, ISerializablePacket
 {
