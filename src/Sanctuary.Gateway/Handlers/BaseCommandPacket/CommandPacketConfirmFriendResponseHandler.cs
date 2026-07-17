@@ -42,7 +42,7 @@ public static class CommandPacketConfirmFriendResponseHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(CommandPacketConfirmFriendResponse), packet);
 
-        if (!connection.Player.IncomingFriendRequests.TryRemove(packet.Guid))
+        if (!connection.Player.IncomingFriendRequests.Contains(packet.Guid))
             return true;
 
         if (!_zoneManager.TryGetPlayer(packet.Guid, out var player))
@@ -54,25 +54,35 @@ public static class CommandPacketConfirmFriendResponseHandler
         {
             case 0:
                 if (connection.Player.Friends.Any(x => x.Guid == player.Guid))
+                {
+                    connection.Player.IncomingFriendRequests.TryRemove(packet.Guid);
                     return true;
+                }
 
                 if (!OnAccept(player, connection.Player))
                     return true;
+
+                connection.Player.IncomingFriendRequests.TryRemove(packet.Guid);
 
                 friendMessagePacket.Type = FriendMessageType.FriendAddRequestAccepted;
                 break;
 
             case 1:
+                connection.Player.IncomingFriendRequests.TryRemove(packet.Guid);
                 friendMessagePacket.Type = FriendMessageType.FriendAddRequestDeclined;
                 break;
 
             case 2:
+                connection.Player.IncomingFriendRequests.TryRemove(packet.Guid);
                 friendMessagePacket.Type = FriendMessageType.FriendAddRequestTimedOut;
                 break;
 
             default:
                 break;
         }
+
+        if (friendMessagePacket.Type == default)
+            return true;
 
         friendMessagePacket.Guid = connection.Player.Guid;
         friendMessagePacket.Name = connection.Player.Name;

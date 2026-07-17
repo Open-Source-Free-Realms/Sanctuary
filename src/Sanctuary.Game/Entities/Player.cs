@@ -395,7 +395,7 @@ public sealed class Player : ClientPcData, IEntity
         {
             commandPacketInteractionList.List.Interactions.Add(StopIgnoringInteraction.Data);
         }
-        else
+        else if (!Friends.Any(x => x.Guid == player.Guid))
         {
             commandPacketInteractionList.List.Interactions.Add(IgnoreInteraction.Data);
         }
