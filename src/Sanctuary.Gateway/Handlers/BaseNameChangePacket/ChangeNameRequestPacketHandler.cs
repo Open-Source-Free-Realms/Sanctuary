@@ -45,6 +45,7 @@ public static class ChangeNameRequestPacketHandler
         if (connection.Player.Guid != packet.Guid)
         {
             _logger.LogError("Invalid player guid. {guid}", packet.Guid);
+            return true;
         }
 
         var nameChangeResponsePacket = new NameChangeResponsePacket();

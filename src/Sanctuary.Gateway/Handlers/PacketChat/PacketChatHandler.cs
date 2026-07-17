@@ -97,8 +97,10 @@ public static class PacketChatHandler
                             packet.Message
                         );
 
-                        if (!toPlayer.Ignores.Any(x => x.Guid == connection.Player.Guid))
-                            toPlayer.SendTunneled(packet);
+                        if (toPlayer.Ignores.Any(x => x.Guid == connection.Player.Guid))
+                            break;
+
+                        toPlayer.SendTunneled(packet);
 
                         var tellEchoPacket = new TellEchoPacket();
 
