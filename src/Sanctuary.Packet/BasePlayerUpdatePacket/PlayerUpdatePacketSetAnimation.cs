@@ -2,9 +2,9 @@ using Sanctuary.Core.IO;
 
 namespace Sanctuary.Packet;
 
-public class PlayerUpdatePacketSetAnimation : : BasePlayerUpdatePacket, ISerializablePacket
+public class PlayerUpdatePacketSetAnimation : BasePlayerUpdatePacket, ISerializablePacket
 {
-    public const short OpCode = 8;
+    public new const short OpCode = 8;
 
     public ulong Guid;
     public int AnimationId;

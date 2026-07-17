@@ -31,7 +31,7 @@ public class PlayerUpdatePacketKnockback : BasePlayerUpdatePacket, ISerializable
         Write(writer);
 
         writer.Write(Guid);
-        writer.Write(Unknown);
+        writer.Write(Animation);
         writer.Write(Position);
         writer.Write(Direction);
         writer.Write(Magnitude);
