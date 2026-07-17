@@ -9,10 +9,9 @@ namespace Sanctuary.Packet;
 //   TARGET: floating damage number (-Damage), health bar (CurrentHealth/MaxHealth), recoil, hit FX.
 // Swapping attacker/target makes the victim swing and go on cooldown while the attacker takes the
 // damage.
-public class CombatPacketAttackProcessed : ISerializablePacket
+public class CombatPacketAttackProcessed : BaseCombatPacket, ISerializablePacket
 {
-    public const short OpCode = 32;
-    public const short SubOpCode = 7;
+    public new const short OpCode = 7;
 
     /// <summary>Who swings.</summary>
     public ulong AttackerGuid;
@@ -37,12 +36,15 @@ public class CombatPacketAttackProcessed : ISerializablePacket
     /// <summary>Target's CURRENT HP after this hit (bar position).</summary>
     public int CurrentHealth;
 
+    public CombatPacketAttackProcessed() : base(OpCode)
+    {
+    }
+
     public byte[] Serialize()
     {
         using var writer = new PacketWriter();
 
-        writer.Write(OpCode);
-        writer.Write(SubOpCode);
+        Write(writer);
 
         writer.Write(AttackerGuid);
         writer.Write(AttackerGuid); // duplicated on the wire
