@@ -23,9 +23,9 @@ public class PlayerUpdatePacketUpdateMana : BasePlayerUpdatePacket, ISerializabl
         Write(writer);
 
         writer.Write(Guid);
+        writer.Write(BossMana);
+        writer.Write(MaxMana);
         writer.Write(Mana);
-        writer.Write(Unknown2);
-        writer.Write(Unknown3);
 
         return writer.Buffer;
     }
