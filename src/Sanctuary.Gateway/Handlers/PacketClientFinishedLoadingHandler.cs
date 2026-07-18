@@ -25,32 +25,15 @@ public static class PacketClientFinishedLoadingHandler
 
         connection.Player.Visible = true;
 
+        if (connection.Player.Mount is not null)
+            connection.Player.Mount.Visible = true;
+
         connection.Player.UpdatePosition(connection.Player.Position, connection.Player.Rotation);
 
-        var mount = connection.Player.Mount;
-
-        if (mount is not null)
+        if (connection.Player.Mount is not null)
         {
-            mount.Visible = true;
-
-            mount.UpdatePosition(connection.Player.Position, connection.Player.Rotation);
-
-            var packetMountResponse = new PacketMountResponse();
-
-            packetMountResponse.RiderGuid = mount.Rider.Guid;
-            packetMountResponse.MountGuid = mount.Guid;
-
-            packetMountResponse.Seat = mount.Seat;
-
-            packetMountResponse.QueuePosition = mount.QueuePosition;
-
-            packetMountResponse.Unknown = 1;
-
-            packetMountResponse.CompositeEffectId = 46; // PFX_Teleport_Flash
-
-            // packetMountResponse.NameVerticalOffset = mountDefinition.NameVerticalOffset;
-
-            connection.Player.SendTunneled(packetMountResponse);
+            connection.Player.SendTunneled(connection.Player.Mount.GetAddNpcPacket());
+            connection.Player.SendTunneled(connection.Player.Mount.GetMountResponsePacket());
         }
 
         connection.Player.Zone.OnClientFinishedLoading(connection.Player);

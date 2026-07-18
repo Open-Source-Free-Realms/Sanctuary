@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -60,7 +59,7 @@ public ref struct PacketReader
         return Unsafe.ReadUnaligned<T>(ref MemoryMarshal.GetReference(Read(sizeof(T))));
     }
 
-    private bool TryRead(int count, [MaybeNullWhen(false)] out ReadOnlySpan<byte> result)
+    private bool TryRead(int count, out ReadOnlySpan<byte> result)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(count);
 
@@ -78,7 +77,7 @@ public ref struct PacketReader
         return false;
     }
 
-    public unsafe bool TryRead<T>([MaybeNullWhen(false)] out T result) where T : unmanaged
+    public unsafe bool TryRead<T>(out T result) where T : unmanaged
     {
         if (MemoryMarshal.TryRead(RemainingSpan, out result))
         {
@@ -89,7 +88,7 @@ public ref struct PacketReader
         return false;
     }
 
-    public bool TryReadInt16([MaybeNullWhen(false)] out short result, bool isLittleEndian = false)
+    public bool TryReadInt16(out short result, bool isLittleEndian = false)
     {
         if (!TryRead(out result))
             return false;
@@ -100,7 +99,7 @@ public ref struct PacketReader
         return true;
     }
 
-    public bool TryReadUInt16([MaybeNullWhen(false)] out ushort result, bool isLittleEndian = false)
+    public bool TryReadUInt16(out ushort result, bool isLittleEndian = false)
     {
         if (!TryRead(out result))
             return false;
@@ -111,7 +110,7 @@ public ref struct PacketReader
         return true;
     }
 
-    public bool TryReadInt32([MaybeNullWhen(false)] out int result, bool isLittleEndian = false)
+    public bool TryReadInt32(out int result, bool isLittleEndian = false)
     {
         if (!TryRead(out result))
             return false;
@@ -122,7 +121,7 @@ public ref struct PacketReader
         return true;
     }
 
-    public bool TryReadUInt32([MaybeNullWhen(false)] out uint result, bool isLittleEndian = false)
+    public bool TryReadUInt32(out uint result, bool isLittleEndian = false)
     {
         if (!TryRead(out result))
             return false;
@@ -133,7 +132,7 @@ public ref struct PacketReader
         return true;
     }
 
-    public bool TryReadInt64([MaybeNullWhen(false)] out long result, bool isLittleEndian = false)
+    public bool TryReadInt64(out long result, bool isLittleEndian = false)
     {
         if (!TryRead(out result))
             return false;
@@ -207,7 +206,7 @@ public ref struct PacketReader
         return true;
     }
 
-    public bool TryReadExact(int count, [MaybeNullWhen(false)] out Span<byte> result)
+    public bool TryReadExact(int count, out Span<byte> result)
     {
         if (count >= 0)
         {
@@ -228,7 +227,7 @@ public ref struct PacketReader
         return false;
     }
 
-    public bool TryRead([MaybeNullWhen(false)] out Vector4 value, bool limited = false)
+    public bool TryRead(out Vector4 value, bool limited = false)
     {
         value = new Vector4();
 
@@ -249,7 +248,7 @@ public ref struct PacketReader
         return true;
     }
 
-    public bool TryRead([MaybeNullWhen(false)] out Quaternion value, bool limited = false)
+    public bool TryRead(out Quaternion value, bool limited = false)
     {
         value = new Quaternion();
 

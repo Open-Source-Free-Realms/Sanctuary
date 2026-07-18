@@ -233,6 +233,7 @@ public class GatewayConnection : UdpConnection
         Player.Coins = dbCharacter.Coins;
 
         Player.Birthday = dbCharacter.Created;
+        Player.PlayTime = dbCharacter.PlayTime;
 
         Player.MembershipStatus = dbCharacter.MembershipStatus;
         Player.ShowMemberNagScreen = _options.ShowMemberNagScreen;
@@ -292,6 +293,22 @@ public class GatewayConnection : UdpConnection
                     ProfileId = profileData.Id
                 });
             }
+        }
+
+        if (Player.Profiles.Count == 0)
+        {
+            _logger.LogError("Character {id} has no valid profiles.", dbCharacter.Id);
+            return false;
+        }
+
+        if (!Player.Profiles.Any(x => x.Id == dbCharacter.ActiveProfileId))
+        {
+            _logger.LogWarning(
+                "Character {id} has invalid ActiveProfileId {profileId}; using first profile.",
+                dbCharacter.Id,
+                dbCharacter.ActiveProfileId);
+
+            dbCharacter.ActiveProfileId = Player.Profiles[0].Id;
         }
 
         Player.ActiveProfileId = dbCharacter.ActiveProfileId;
@@ -360,6 +377,10 @@ public class GatewayConnection : UdpConnection
         Player.ChatBubbleForegroundColor = dbCharacter.ChatBubbleForegroundColor;
         Player.ChatBubbleBackgroundColor = dbCharacter.ChatBubbleBackgroundColor;
         Player.ChatBubbleSize = dbCharacter.ChatBubbleSize;
+
+        Player.IsAdmin = dbCharacter.User.IsAdmin;
+        Player.IsMod = dbCharacter.User.IsMod;
+        Player.MutedUntil = dbCharacter.User.MutedUntil;
 
         foreach (var dbFriend in dbCharacter.Friends)
         {
@@ -443,6 +464,9 @@ public class GatewayConnection : UdpConnection
         dbCharacter.ActiveProfileId = Player.ActiveProfileId;
 
         dbCharacter.ActiveTitleId = Player.ActiveTitle;
+
+        if (dbCharacter.LastLogin.HasValue)
+            dbCharacter.PlayTime += (int)(DateTimeOffset.UtcNow - dbCharacter.LastLogin.Value).TotalMinutes;
 
         // End ClientPcData
 

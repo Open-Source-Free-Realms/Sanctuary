@@ -87,6 +87,8 @@ public static class CharacterLoginRequestHandler
             characterLoginReply.Status = 6;
 
             connection.Send(characterLoginReply);
+
+            return true;
         }
 
         // TODO: Client currently doesn't let the user pick a server so default to the first one.

@@ -8,11 +8,15 @@ public class HousingPacketUpdateHouseInfo : BaseHousingPacket, ISerializablePack
 
     public bool InEditMode;
     public bool IsLocked;
-    public bool Unknown4;
+    public bool IsFloraAllowed;
+
     public bool PetAutospawn;
-    public int Unknown2;
+
+    private int Unused = default;
+
     public int CurFixtureCount;
-    public int Unknown7;
+    public int CurLandmarkCount;
+
     public int FurnitureScore;
 
     public HousingPacketUpdateHouseInfo() : base(OpCode)
@@ -27,14 +31,15 @@ public class HousingPacketUpdateHouseInfo : BaseHousingPacket, ISerializablePack
 
         writer.Write(InEditMode);
 
-        writer.Write(Unknown2);
+        writer.Write(Unused);
 
         writer.Write(IsLocked);
-        writer.Write(Unknown4);
+        writer.Write(IsFloraAllowed);
         writer.Write(PetAutospawn);
 
         writer.Write(CurFixtureCount);
-        writer.Write(Unknown7);
+        writer.Write(CurLandmarkCount);
+
         writer.Write(FurnitureScore);
 
         return writer.Buffer;

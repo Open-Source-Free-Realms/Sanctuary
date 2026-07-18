@@ -37,7 +37,7 @@ public static class PacketMountSpawnByItemDefinitionIdHandler
         if (!_resourceManager.ClientItemDefinitions.TryGetValue(packet.ItemDefinitionId, out var clientItemDefinition))
             return true;
 
-        var mountInfo = connection.Player.Mounts.SingleOrDefault(x => x.Definition == clientItemDefinition.Param1);
+        var mountInfo = connection.Player.Mounts.LastOrDefault(x => x.Definition == clientItemDefinition.Param1);
 
         if (mountInfo is null)
             return true;

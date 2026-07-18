@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Sanctuary.Database;
+using Sanctuary.Database.MySql;
 
 #nullable disable
 
 namespace Sanctuary.Database.MySql.Migrations
 {
-    [DbContext(typeof(DatabaseContext))]
+    [DbContext(typeof(MySqlDatabaseContext))]
     partial class DatabaseContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
@@ -96,8 +96,8 @@ namespace Sanctuary.Database.MySql.Migrations
 
                     b.Property<string>("FullName")
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasMaxLength(32)
-                        .HasColumnType("varchar(32)")
+                        .HasMaxLength(33)
+                        .HasColumnType("varchar(33)")
                         .HasComputedColumnSql("CONCAT_WS(' ', `FirstName`, NULLIF(`LastName`, ''))", true);
 
                     b.Property<int>("Gender")
@@ -137,6 +137,9 @@ namespace Sanctuary.Database.MySql.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<int?>("ModelCustomizationId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PlayTime")
                         .HasColumnType("int");
 
                     b.Property<float?>("PositionX")
@@ -338,12 +341,12 @@ namespace Sanctuary.Database.MySql.Migrations
                         .HasColumnType("tinyint(1)")
                         .HasDefaultValue(false);
 
-                    b.Property<bool>("IsLocked")
+                    b.Property<bool>("IsMember")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
                         .HasDefaultValue(false);
 
-                    b.Property<bool>("IsMember")
+                    b.Property<bool>("IsMod")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("tinyint(1)")
                         .HasDefaultValue(false);
@@ -351,10 +354,16 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.Property<DateTimeOffset?>("LastLogin")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<DateTimeOffset?>("LockedUntil")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<int>("MaxCharacters")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasDefaultValue(10);
+
+                    b.Property<DateTimeOffset?>("MutedUntil")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Password")
                         .IsRequired()

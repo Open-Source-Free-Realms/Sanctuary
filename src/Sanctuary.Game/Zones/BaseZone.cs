@@ -30,7 +30,7 @@ public abstract class BaseZone : IZone, IDisposable
     private const int VisibleTileRadius = 2;
     private readonly Dictionary<int, ZoneTile> _tiles;
 
-    private static ulong _uniqueGuid = 100_000_000_000u;
+    private static ulong _nextNpcGuid = NpcBaseGuid;
 
     private readonly ConcurrentDictionary<ulong, Npc> _npcs = new();
     private readonly ConcurrentDictionary<ulong, Player> _players = new();
@@ -38,6 +38,7 @@ public abstract class BaseZone : IZone, IDisposable
 
     private const int FrameRate = 10;
     private const float TickRate = 1000f / FrameRate;
+    private const ulong NpcBaseGuid = 100_000_000_000u;
 
     private readonly PeriodicTimer _updateEveryTickTimer = new(TimeSpan.FromMilliseconds(TickRate));
     private readonly PeriodicTimer _updateEverySecondTimer = new(TimeSpan.FromSeconds(1));
@@ -115,17 +116,70 @@ public abstract class BaseZone : IZone, IDisposable
     {
         npc = new Npc(this)
         {
-            Guid = _uniqueGuid++
+            Guid = _nextNpcGuid++
         };
 
         return _npcs.TryAdd(npc.Guid, npc) && _entities.TryAdd(npc.Guid, npc);
+    }
+
+    public bool TryCreateNpc(NpcDefinition definition, [MaybeNullWhen(false)] out Npc npc)
+    {
+        var scale = 1f;
+
+        if (_resourceManager.Models.TryGetValue(definition.ModelId, out var model) && model.Scale != 0f)
+            scale = model.Scale;
+
+        var guid = NpcBaseGuid + (ulong)definition.Id;
+
+        npc = new Npc(this)
+        {
+            Guid = guid,
+            NameId = definition.NameId,
+            Name = definition.Name,
+            ModelId = definition.ModelId,
+            TextureAlias = definition.TextureAlias,
+            Scale = scale,
+            Static = definition.Static,
+            Visible = true
+        };
+
+        if (!_npcs.TryAdd(npc.Guid, npc) || !_entities.TryAdd(npc.Guid, npc))
+        {
+            return false;
+        }
+
+        // Keep the dynamic NPC GUID space above the statically assigned GUIDs
+        if (guid >= _nextNpcGuid)
+            _nextNpcGuid = guid + 1;
+
+        npc.UpdatePosition(definition.Position, definition.Rotation);
+
+        return true;
+    }
+
+    protected void SpawnNpcs()
+    {
+        var count = 0;
+
+        foreach (var definition in _resourceManager.Npcs.Values)
+        {
+            if (!TryCreateNpc(definition, out _))
+            {
+                _logger.LogWarning("Failed to spawn NPC {id}.", definition.Id);
+                continue;
+            }
+
+            count++;
+        }
+
+        _logger.LogInformation("Spawned {count} NPC(s).", count);
     }
 
     public bool TryCreateMount(Player rider, MountDefinition definition, [MaybeNullWhen(false)] out Mount mount)
     {
         mount = new Mount(this, rider, definition)
         {
-            Guid = _uniqueGuid++
+            Guid = _nextNpcGuid++
         };
 
         return _npcs.TryAdd(mount.Guid, mount) && _entities.TryAdd(mount.Guid, mount);
@@ -206,11 +260,11 @@ public abstract class BaseZone : IZone, IDisposable
     private ZoneTile GetTileFromCoordinate(int longitude, int latitude)
     {
         if (longitude < _zoneDefinition.StartLongitude ||
-            longitude > _zoneDefinition.StartLongitude + _zoneDefinition.EndLongitude)
+            longitude >= _zoneDefinition.EndLongitude)
             return ZoneTile.Empty;
 
         if (latitude < _zoneDefinition.StartLatitude ||
-            latitude > _zoneDefinition.StartLatitude + _zoneDefinition.EndLatitude)
+            latitude >= _zoneDefinition.EndLatitude)
             return ZoneTile.Empty;
 
         var tileHash = ZoneTile.GetHash(longitude, latitude);
@@ -374,8 +428,13 @@ public abstract class BaseZone : IZone, IDisposable
         {
             try
             {
-                foreach (var entity in _entities.ToFrozenDictionary())
+                foreach (var entity in _entities)
+                {
+                    if (entity.Value is Npc { Static: true })
+                        continue;
+
                     entity.Value.UpdateEveryTick();
+                }
             }
             catch (Exception ex)
             {
@@ -390,8 +449,13 @@ public abstract class BaseZone : IZone, IDisposable
         {
             try
             {
-                foreach (var entity in _entities.ToFrozenDictionary())
+                foreach (var entity in _entities)
+                {
+                    if (entity.Value is Npc { Static: true })
+                        continue;
+
                     entity.Value.UpdateEverySecond();
+                }
             }
             catch (Exception ex)
             {

@@ -1,0 +1,47 @@
+<Solution>
+  <Folder Name="/Database/">
+    <Project Path="Sanctuary.Database.MySql/Sanctuary.Database.MySql.csproj" />
+    <Project Path="Sanctuary.Database.Sqlite/Sanctuary.Database.Sqlite.csproj" />
+    <Project Path="Sanctuary.Database.Tests/Sanctuary.Database.Tests.csproj" />
+    <Project Path="Sanctuary.Database/Sanctuary.Database.csproj" />
+  </Folder>
+  <Folder Name="/Network/">
+    <Project Path="Sanctuary.Packet.Common/Sanctuary.Packet.Common.csproj" />
+    <Project Path="Sanctuary.Packet/Sanctuary.Packet.csproj" />
+    <Project Path="Sanctuary.UdpLibrary.Tests/Sanctuary.UdpLibrary.Tests.csproj" />
+    <Project Path="Sanctuary.UdpLibrary/Sanctuary.UdpLibrary.csproj" />
+  </Folder>
+  <Folder Name="/Resources/">
+    <File Path="Resources/ClientItemDefinitions.json" />
+    <File Path="Resources/CoinStoreItems.json" />
+    <File Path="Resources/ItemCategories.txt" />
+    <File Path="Resources/ItemCategoryGroups.txt" />
+    <File Path="Resources/ItemClasses.txt" />
+    <File Path="Resources/Models.txt" />
+    <File Path="Resources/Mounts.json" />
+    <File Path="Resources/NameFilter.txt" />
+    <File Path="Resources/PlayerTitles.json" />
+    <File Path="Resources/PointOfInterests.json" />
+    <File Path="Resources/Profiles.json" />
+    <File Path="Resources/QuickChats.json" />
+    <File Path="Resources/StoreBundleCategories.json" />
+    <File Path="Resources/StoreBundleCategoryGroups.json" />
+    <File Path="Resources/StoreBundleGroups.json" />
+    <File Path="Resources/StoreBundles.json" />
+    <File Path="Resources/Stores.json" />
+  </Folder>
+  <Folder Name="/Resources/CharacterCreate/">
+    <File Path="Resources/CharacterCreate/FacePaintMappings.txt" />
+    <File Path="Resources/CharacterCreate/HairMappings.txt" />
+    <File Path="Resources/CharacterCreate/HeadMappings.txt" />
+    <File Path="Resources/CharacterCreate/ModelCustomizationMappings.txt" />
+    <File Path="Resources/CharacterCreate/SkinToneMappings.txt" />
+  </Folder>
+  <Folder Name="/Servers/">
+    <Project Path="Sanctuary.Gateway/Sanctuary.Gateway.csproj" />
+    <Project Path="Sanctuary.Login/Sanctuary.Login.csproj" />
+  </Folder>
+  <Project Path="Sanctuary.Core/Sanctuary.Core.csproj" />
+  <Project Path="Sanctuary.Game/Sanctuary.Game.csproj" />
+  <Project Path="Sanctuary.WebAPI/Sanctuary.WebAPI.csproj" />
+</Solution>

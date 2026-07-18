@@ -32,7 +32,7 @@ public static class BaseHousingPacketHandler
         {
             ClientHousingPacketSetEditMode.OpCode => ClientHousingPacketSetEditModeHandler.HandlePacket(connection, reader.Span),
             ClientHousingPacketEnterRequest.OpCode => ClientHousingPacketEnterRequestHandler.HandlePacket(connection, reader.Span),
-            _ => false
+            _ => true // housing not implemented
         };
     }
 }

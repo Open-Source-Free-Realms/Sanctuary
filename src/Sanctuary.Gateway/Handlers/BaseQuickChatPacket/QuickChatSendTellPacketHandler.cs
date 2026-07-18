@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Linq;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -33,10 +34,16 @@ public static class QuickChatSendTellPacketHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(QuickChatSendTellPacket), packet);
 
+        if (connection.Player.IsMuted())
+            return true;
+
         if (string.IsNullOrEmpty(packet.ToName))
             return true;
 
         if (!_zoneManager.TryGetPlayer(packet.ToName, out var toPlayer))
+            return true;
+
+        if (toPlayer.Ignores.Any(x => x.Guid == connection.Player.Guid))
             return true;
 
         packet.Name = connection.Player.Name;
