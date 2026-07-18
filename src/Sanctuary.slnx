@@ -16,7 +16,8 @@
   <Folder Name="/Resources/">
     <File Path="Resources/ClientItemDefinitions.json" />
     <File Path="Resources/CoinStoreItems.json" />
-    <File Path="Resources/CollectionNodeSpawns/1.json" />
+    <File Path="Resources/CollectionNodeSpawns/1/briarwood-mushrooms.json" />
+    <File Path="Resources/CollectionNodeSpawns/1/briarwood-mushrooms-rare.json" />
     <File Path="Resources/CollectionNodePools.json" />
     <File Path="Resources/CollectionNodeTypes.json" />
     <File Path="Resources/Collections.json" />

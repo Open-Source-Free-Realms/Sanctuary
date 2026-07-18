@@ -40,13 +40,14 @@ public sealed class ResourceManagerTests
     {
         const int zoneDefinitionId = 999999;
         const int spawnId = 999999;
-        Directory.CreateDirectory(ResourceManager.CollectionNodeSpawnsDirectory);
-        var filePath = Path.Combine(ResourceManager.CollectionNodeSpawnsDirectory, $"{zoneDefinitionId}.json");
+        var zoneDirectory = Path.Combine(ResourceManager.CollectionNodeSpawnsDirectory, zoneDefinitionId.ToString());
+        Directory.CreateDirectory(zoneDirectory);
+        var filePath = Path.Combine(zoneDirectory, "watcher-test.json");
         var resourceManager = new ResourceManager(NullLogger<ResourceManager>.Instance);
         var watcher = GetWatcher(resourceManager);
         watcher.EnableRaisingEvents = false;
         File.WriteAllText(filePath,
-            $"[{{\"Id\":{spawnId},\"Pool\":\"watcher-test\",\"Position\":[1,2,3],\"Heading\":0}}]");
+            $"[{{\"Id\":{spawnId},\"Position\":[1,2,3],\"Heading\":0}}]");
 
         try
         {
@@ -55,19 +56,20 @@ public sealed class ResourceManagerTests
                 BindingFlags.Instance | BindingFlags.NonPublic);
             var eventArgs = new FileSystemEventArgs(
                 WatcherChangeTypes.Changed,
-                ResourceManager.CollectionNodeSpawnsDirectory,
+                zoneDirectory,
                 Path.GetFileName(filePath));
 
             Assert.IsNotNull(handler);
             handler.Invoke(resourceManager, new object[] { resourceManager, eventArgs });
             Assert.IsTrue(resourceManager.CollectionNodeSpawns.TryGetValue(spawnId, out var spawn));
+            Assert.AreEqual("watcher-test", spawn.Pool);
             Assert.AreEqual(zoneDefinitionId, spawn.ZoneDefinitionId);
         }
         finally
         {
             watcher.EnableRaisingEvents = false;
             watcher.Dispose();
-            File.Delete(filePath);
+            Directory.Delete(zoneDirectory, true);
         }
     }
 

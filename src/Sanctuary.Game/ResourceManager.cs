@@ -277,8 +277,9 @@ public class ResourceManager : IResourceManager
 
         var directoryPath = Path.GetDirectoryName(e.FullPath);
         var isTopLevelResource = string.Equals(directoryPath, BaseDirectory, StringComparison.OrdinalIgnoreCase);
-        var isCollectionNodeSpawn = string.Equals(
-            directoryPath, CollectionNodeSpawnsDirectory, StringComparison.OrdinalIgnoreCase);
+        var collectionNodeSpawnPrefix = CollectionNodeSpawnsDirectory + Path.DirectorySeparatorChar;
+        var isCollectionNodeSpawn = directoryPath is not null &&
+            directoryPath.StartsWith(collectionNodeSpawnPrefix, StringComparison.OrdinalIgnoreCase);
 
         if (!isTopLevelResource && !isCollectionNodeSpawn)
             return;

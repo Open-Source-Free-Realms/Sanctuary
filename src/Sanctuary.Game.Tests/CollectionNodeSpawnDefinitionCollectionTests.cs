@@ -19,11 +19,12 @@ public sealed class CollectionNodeSpawnDefinitionCollectionTests
     public void Reload_DoesNotTemporarilyRemoveRetainedHardPoints()
     {
         var directory = Path.Combine(Path.GetTempPath(), $"sanctuary-collections-{Guid.NewGuid():N}");
-        var path = Path.Combine(directory, "1.json");
+        var zoneDirectory = Path.Combine(directory, "1");
+        var path = Path.Combine(zoneDirectory, "briarwood-mushrooms.json");
         var previousContext = SynchronizationContext.Current;
-        Directory.CreateDirectory(directory);
+        Directory.CreateDirectory(zoneDirectory);
         File.WriteAllText(path,
-            "[{\"Id\":1,\"Pool\":\"briarwood-mushrooms\",\"Position\":[1,2,3],\"Heading\":0}]");
+            "[{\"Id\":1,\"Position\":[1,2,3],\"Heading\":0}]");
 
         try
         {
@@ -36,11 +37,12 @@ public sealed class CollectionNodeSpawnDefinitionCollectionTests
                 retainedHardPointWasMissing |= !collection.ContainsKey(1);
 
             File.WriteAllText(path,
-                "[{\"Id\":1,\"Pool\":\"briarwood-mushrooms\",\"Position\":[4,5,6],\"Heading\":1}]");
+                "[{\"Id\":1,\"Position\":[4,5,6],\"Heading\":1}]");
 
             Assert.IsTrue(collection.Load(directory));
             Assert.IsFalse(retainedHardPointWasMissing);
             Assert.AreEqual(4f, collection[1].Position[0]);
+            Assert.AreEqual("briarwood-mushrooms", collection[1].Pool);
             Assert.AreEqual(1, collection[1].ZoneDefinitionId);
         }
         finally
@@ -54,8 +56,9 @@ public sealed class CollectionNodeSpawnDefinitionCollectionTests
     public void PersistentChanges_RoundTripThroughJson()
     {
         var directory = Path.Combine(Path.GetTempPath(), $"sanctuary-collections-{Guid.NewGuid():N}");
-        var path = Path.Combine(directory, "1.json");
-        Directory.CreateDirectory(directory);
+        var zoneDirectory = Path.Combine(directory, "1");
+        var path = Path.Combine(zoneDirectory, "briarwood-mushrooms.json");
+        Directory.CreateDirectory(zoneDirectory);
         File.WriteAllText(path, "[]");
 
         try
@@ -64,6 +67,9 @@ public sealed class CollectionNodeSpawnDefinitionCollectionTests
             Assert.IsTrue(collection.Load(directory));
             Assert.IsTrue(collection.TryAddPersistent(
                 "briarwood-mushrooms", 1, new Vector4(1, 2, 3, 1), 0.5f, out var added));
+
+            var persistedJson = File.ReadAllText(path);
+            Assert.IsFalse(persistedJson.Contains("\"Pool\"", StringComparison.Ordinal));
 
             var reloaded = new CollectionNodeSpawnDefinitionCollection(NullLogger.Instance);
             Assert.IsTrue(reloaded.Load(directory));
@@ -84,16 +90,20 @@ public sealed class CollectionNodeSpawnDefinitionCollectionTests
     }
 
     [TestMethod]
-    public void PersistentChanges_OnlyRewriteTheTargetZoneFile()
+    public void PersistentChanges_OnlyRewriteTheTargetPoolFile()
     {
         var directory = Path.Combine(Path.GetTempPath(), $"sanctuary-collections-{Guid.NewGuid():N}");
-        var firstZonePath = Path.Combine(directory, "1.json");
-        var secondZonePath = Path.Combine(directory, "2.json");
-        const string secondZoneJson =
-            "[{\"Id\":2,\"Pool\":\"second-zone-pool\",\"Position\":[4,5,6],\"Heading\":1}]";
-        Directory.CreateDirectory(directory);
-        File.WriteAllText(firstZonePath,
-            "[{\"Id\":1,\"Pool\":\"first-zone-pool\",\"Position\":[1,2,3],\"Heading\":0}]");
+        var firstZoneDirectory = Path.Combine(directory, "1");
+        var secondZoneDirectory = Path.Combine(directory, "2");
+        var targetPoolPath = Path.Combine(firstZoneDirectory, "target-pool.json");
+        var siblingPoolPath = Path.Combine(firstZoneDirectory, "sibling-pool.json");
+        var secondZonePath = Path.Combine(secondZoneDirectory, "second-zone-pool.json");
+        const string siblingPoolJson = "[{\"Id\":2,\"Position\":[4,5,6],\"Heading\":1}]";
+        const string secondZoneJson = "[{\"Id\":3,\"Position\":[7,8,9],\"Heading\":2}]";
+        Directory.CreateDirectory(firstZoneDirectory);
+        Directory.CreateDirectory(secondZoneDirectory);
+        File.WriteAllText(targetPoolPath, "[{\"Id\":1,\"Position\":[1,2,3],\"Heading\":0}]");
+        File.WriteAllText(siblingPoolPath, siblingPoolJson);
         File.WriteAllText(secondZonePath, secondZoneJson);
 
         try
@@ -101,10 +111,13 @@ public sealed class CollectionNodeSpawnDefinitionCollectionTests
             var collection = new CollectionNodeSpawnDefinitionCollection(NullLogger.Instance);
             Assert.IsTrue(collection.Load(directory));
             Assert.IsTrue(collection.TryAddPersistent(
-                "first-zone-pool", 1, new Vector4(7, 8, 9, 1), 0.5f, out _));
+                "target-pool", 1, new Vector4(10, 11, 12, 1), 0.5f, out _));
 
+            Assert.AreEqual(siblingPoolJson, File.ReadAllText(siblingPoolPath));
             Assert.AreEqual(secondZoneJson, File.ReadAllText(secondZonePath));
-            Assert.HasCount(2, collection.Values.Where(spawn => spawn.ZoneDefinitionId == 1));
+            StringAssert.Contains(File.ReadAllText(targetPoolPath), "\"Id\": 4");
+            Assert.HasCount(2, collection.Values.Where(spawn => spawn.Pool == "target-pool"));
+            Assert.HasCount(3, collection.Values.Where(spawn => spawn.ZoneDefinitionId == 1));
             Assert.HasCount(1, collection.Values.Where(spawn => spawn.ZoneDefinitionId == 2));
         }
         finally
@@ -114,14 +127,33 @@ public sealed class CollectionNodeSpawnDefinitionCollectionTests
     }
 
     [TestMethod]
-    public void Load_RejectsDuplicateIdsAcrossZoneFiles()
+    public void Load_RejectsDuplicateIdsAcrossPoolFiles()
     {
         var directory = Path.Combine(Path.GetTempPath(), $"sanctuary-collections-{Guid.NewGuid():N}");
-        const string spawnJson =
-            "[{\"Id\":1,\"Pool\":\"test-pool\",\"Position\":[1,2,3],\"Heading\":0}]";
-        Directory.CreateDirectory(directory);
-        File.WriteAllText(Path.Combine(directory, "1.json"), spawnJson);
-        File.WriteAllText(Path.Combine(directory, "2.json"), spawnJson);
+        var zoneDirectory = Path.Combine(directory, "1");
+        const string spawnJson = "[{\"Id\":1,\"Position\":[1,2,3],\"Heading\":0}]";
+        Directory.CreateDirectory(zoneDirectory);
+        File.WriteAllText(Path.Combine(zoneDirectory, "first-pool.json"), spawnJson);
+        File.WriteAllText(Path.Combine(zoneDirectory, "second-pool.json"), spawnJson);
+
+        try
+        {
+            var collection = new CollectionNodeSpawnDefinitionCollection(NullLogger.Instance);
+            Assert.IsFalse(collection.Load(directory));
+        }
+        finally
+        {
+            Directory.Delete(directory, true);
+        }
+    }
+
+    [TestMethod]
+    public void Load_RejectsNonCanonicalPoolFileName()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), $"sanctuary-collections-{Guid.NewGuid():N}");
+        var zoneDirectory = Path.Combine(directory, "1");
+        Directory.CreateDirectory(zoneDirectory);
+        File.WriteAllText(Path.Combine(zoneDirectory, "Uppercase-Pool.json"), "[]");
 
         try
         {

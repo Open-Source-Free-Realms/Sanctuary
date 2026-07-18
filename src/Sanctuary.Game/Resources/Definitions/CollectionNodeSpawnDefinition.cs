@@ -7,9 +7,11 @@ namespace Sanctuary.Game.Resources.Definitions;
 public sealed class CollectionNodeSpawnDefinition
 {
     public int Id { get; set; }
-    public required string Pool { get; set; }
     public float[] Position { get; set; } = new float[3];
     public float Heading { get; set; }
+
+    [JsonIgnore]
+    public string Pool { get; set; } = string.Empty;
 
     [JsonIgnore]
     public int ZoneDefinitionId { get; internal set; }
