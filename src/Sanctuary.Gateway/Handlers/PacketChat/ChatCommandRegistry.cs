@@ -418,7 +418,8 @@ public static class ChatCommandRegistry
         position.Y += type.PlacementYOffset;
         var heading = MathF.Atan2(connection.Player.Rotation.X, connection.Player.Rotation.Z);
 
-        if (!_resourceManager.CollectionNodeSpawns.TryAddPersistent(pool.Key, position, heading, out var spawn))
+        if (!_resourceManager.CollectionNodeSpawns.TryAddPersistent(
+            pool.Key, pool.ZoneDefinitionId, position, heading, out var spawn))
         {
             SendSystemMessage(connection, "The collection node could not be saved.");
             return;

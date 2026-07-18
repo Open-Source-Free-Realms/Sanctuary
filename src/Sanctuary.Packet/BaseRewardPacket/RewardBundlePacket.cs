@@ -6,7 +6,9 @@ public class RewardBundlePacket : BaseRewardPacket, ISerializablePacket
 {
     public new const byte OpCode = 1;
 
-    // Defaults reproduce the captured single-item reward notification.
+    // The coin shop's item-received flow provided the behavioral reference for this packet.
+    // Keeping it generic allows collections, combat, quests, and other reward sources to reuse it.
+    // Defaults reproduce the runtime-validated single-item reward notification.
     public bool Success = true;
     public int Unknown1;
     public int RewardKind;

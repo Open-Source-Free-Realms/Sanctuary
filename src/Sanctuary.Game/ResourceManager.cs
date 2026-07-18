@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-
 using System.Linq;
 
 using Microsoft.Extensions.Logging;
@@ -28,7 +27,7 @@ public class ResourceManager : IResourceManager
     public static readonly string CollectionsFile = Path.Combine(BaseDirectory, "Collections.json");
     public static readonly string CollectionNodePoolsFile = Path.Combine(BaseDirectory, "CollectionNodePools.json");
     public static readonly string CollectionNodeTypesFile = Path.Combine(BaseDirectory, "CollectionNodeTypes.json");
-    public static readonly string CollectionNodeSpawnsFile = Path.Combine(BaseDirectory, "CollectionNodeSpawns.json");
+    public static readonly string CollectionNodeSpawnsDirectory = Path.Combine(BaseDirectory, "CollectionNodeSpawns");
 
     public static readonly string CoinStoreItemsFile = Path.Combine(BaseDirectory, "CoinStoreItems.json");
 
@@ -90,7 +89,10 @@ public class ResourceManager : IResourceManager
     public ResourceManager(ILogger<ResourceManager> logger)
     {
         _logger = logger;
-        _fileSystemWatcher = new(BaseDirectory);
+        _fileSystemWatcher = new(BaseDirectory)
+        {
+            IncludeSubdirectories = true
+        };
 
         _fileSystemWatcher.Changed += _fileSystemWatcher_Changed;
         _fileSystemWatcher.EnableRaisingEvents = true;
@@ -166,7 +168,7 @@ public class ResourceManager : IResourceManager
         if (!CollectionNodePools.Load(CollectionNodePoolsFile))
             return false;
 
-        if (!CollectionNodeSpawns.Load(CollectionNodeSpawnsFile))
+        if (!CollectionNodeSpawns.Load(CollectionNodeSpawnsDirectory))
             return false;
 
         foreach (var collection in Collections.Values)
@@ -190,9 +192,10 @@ public class ResourceManager : IResourceManager
 
         foreach (var spawn in CollectionNodeSpawns.Values)
         {
-            if (!CollectionNodePools.ContainsKey(spawn.Pool))
+            if (!CollectionNodePools.TryGetValue(spawn.Pool, out var pool) ||
+                pool.ZoneDefinitionId != spawn.ZoneDefinitionId)
             {
-                _logger.LogError("Collection node spawn {id} references unknown pool {pool}.", spawn.Id, spawn.Pool);
+                _logger.LogError("Collection node spawn {id} references an unknown pool or mismatched zone.", spawn.Id);
                 return false;
             }
         }
@@ -272,6 +275,14 @@ public class ResourceManager : IResourceManager
         if (e.FullPath.EndsWith(".tmp", StringComparison.OrdinalIgnoreCase) || !File.Exists(e.FullPath))
             return;
 
+        var directoryPath = Path.GetDirectoryName(e.FullPath);
+        var isTopLevelResource = string.Equals(directoryPath, BaseDirectory, StringComparison.OrdinalIgnoreCase);
+        var isCollectionNodeSpawn = string.Equals(
+            directoryPath, CollectionNodeSpawnsDirectory, StringComparison.OrdinalIgnoreCase);
+
+        if (!isTopLevelResource && !isCollectionNodeSpawn)
+            return;
+
         try
         {
             if (File.GetAttributes(e.FullPath).HasFlag(FileAttributes.Directory))
@@ -301,8 +312,9 @@ public class ResourceManager : IResourceManager
                 loaded = CollectionNodePools.Load(CollectionNodePoolsFile);
             else if (e.FullPath == CollectionNodeTypesFile)
                 loaded = CollectionNodeTypes.Load(CollectionNodeTypesFile);
-            else if (e.FullPath == CollectionNodeSpawnsFile)
-                loaded = CollectionNodeSpawns.Load(CollectionNodeSpawnsFile);
+            else if (isCollectionNodeSpawn &&
+                string.Equals(Path.GetExtension(e.FullPath), ".json", StringComparison.OrdinalIgnoreCase))
+                loaded = CollectionNodeSpawns.Load(CollectionNodeSpawnsDirectory);
             else if (e.FullPath == ItemClassesFile)
                 loaded = ItemClasses.Load(ItemClassesFile);
             else if (e.FullPath == ItemCategoriesFile)

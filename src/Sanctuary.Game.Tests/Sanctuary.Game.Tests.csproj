@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <None Include="..\Resources\CollectionNodePools.json" Link="Resources\CollectionNodePools.json" CopyToOutputDirectory="PreserveNewest" />
-    <None Include="..\Resources\CollectionNodeSpawns.json" Link="Resources\CollectionNodeSpawns.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\Resources\CollectionNodeSpawns\*.json" Link="Resources\CollectionNodeSpawns\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\Resources\CollectionNodeTypes.json" Link="Resources\CollectionNodeTypes.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 

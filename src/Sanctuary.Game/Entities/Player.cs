@@ -360,6 +360,25 @@ public sealed class Player : ClientPcData, IEntity
             VisibleNpcs.TryRemove(npc.Guid, out _);
     }
 
+    public void OnRemoveVisibleNpcGracefully(Npc npc, bool animate, int delay, int effectDelay,
+        int compositeEffectId, int duration)
+    {
+        if (npc is Mount)
+            return;
+
+        SendTunneled(new PlayerUpdatePacketRemovePlayerGracefully
+        {
+            Guid = npc.Guid,
+            Animate = animate,
+            Delay = delay,
+            EffectDelay = effectDelay,
+            CompositeEffectId = compositeEffectId,
+            Duration = duration
+        });
+
+        VisibleNpcs.TryRemove(npc.Guid, out _);
+    }
+
     public void OnRemoveVisiblePlayers(params IEnumerable<Player> players)
     {
         foreach (var player in players)

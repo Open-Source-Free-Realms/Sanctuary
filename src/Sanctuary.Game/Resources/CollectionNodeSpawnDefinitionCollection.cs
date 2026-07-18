@@ -16,41 +16,66 @@ public sealed class CollectionNodeSpawnDefinitionCollection : ObservableConcurre
 {
     private readonly ILogger _logger;
     private readonly object _writeLock = new();
-    private string? _filePath;
+    private string? _directoryPath;
 
     public CollectionNodeSpawnDefinitionCollection(ILogger logger)
     {
         _logger = logger;
     }
 
-    public bool Load(string filePath)
+    public bool Load(string directoryPath)
     {
-        if (!File.Exists(filePath))
+        if (!Directory.Exists(directoryPath))
         {
-            _logger.LogError("Failed to find file \"{file}\"", filePath);
+            _logger.LogError("Failed to find directory \"{directory}\"", directoryPath);
             return false;
         }
 
         try
         {
-            using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            var entries = JsonSerializer.Deserialize<List<CollectionNodeSpawnDefinition>>(stream, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
+            var files = Directory.GetFiles(directoryPath, "*.json", SearchOption.TopDirectoryOnly);
 
-            if (entries is null || entries.Any(entry => entry.Id <= 0 || string.IsNullOrWhiteSpace(entry.Pool) ||
-                entry.Position.Length != 3) ||
-                entries.Select(entry => entry.Id).Distinct().Count() != entries.Count)
+            if (files.Length == 0)
             {
-                _logger.LogError("Invalid collection node spawns in \"{file}\".", filePath);
+                _logger.LogError("No collection node spawn files found in \"{directory}\".", directoryPath);
                 return false;
             }
 
-            var loaded = entries.ToDictionary(entry => entry.Id);
+            var loaded = new Dictionary<int, CollectionNodeSpawnDefinition>();
 
-            foreach (var entry in loaded.Values)
-                entry.Pool = entry.Pool.Trim().ToLowerInvariant();
+            foreach (var filePath in files.Order())
+            {
+                if (!int.TryParse(Path.GetFileNameWithoutExtension(filePath), out var zoneDefinitionId) ||
+                    zoneDefinitionId <= 0)
+                {
+                    _logger.LogError("Collection node spawn file \"{file}\" is not named for a valid zone id.", filePath);
+                    return false;
+                }
+
+                using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                var entries = JsonSerializer.Deserialize<List<CollectionNodeSpawnDefinition>>(stream,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (entries is null || entries.Any(entry => entry.Id <= 0 || string.IsNullOrWhiteSpace(entry.Pool) ||
+                    entry.Position.Length != 3 || entry.Position.Any(value => !float.IsFinite(value)) ||
+                    !float.IsFinite(entry.Heading)))
+                {
+                    _logger.LogError("Invalid collection node spawns in \"{file}\".", filePath);
+                    return false;
+                }
+
+                foreach (var entry in entries)
+                {
+                    entry.Pool = entry.Pool.Trim().ToLowerInvariant();
+                    entry.ZoneDefinitionId = zoneDefinitionId;
+
+                    if (!loaded.TryAdd(entry.Id, entry))
+                    {
+                        _logger.LogError("Duplicate collection node spawn id {id} in \"{file}\".", entry.Id, filePath);
+                        return false;
+                    }
+                }
+            }
 
             lock (_writeLock)
             {
@@ -60,19 +85,20 @@ public sealed class CollectionNodeSpawnDefinitionCollection : ObservableConcurre
                 foreach (var id in Keys.Where(id => !loaded.ContainsKey(id)).ToArray())
                     Remove(id);
 
-                _filePath = filePath;
+                _directoryPath = directoryPath;
             }
 
             return true;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to parse file \"{file}\".", filePath);
+            _logger.LogError(ex, "Failed to load collection node spawns from \"{directory}\".", directoryPath);
             return false;
         }
     }
 
-    public bool TryAddPersistent(string pool, Vector4 position, float heading, out CollectionNodeSpawnDefinition definition)
+    public bool TryAddPersistent(string pool, int zoneDefinitionId, Vector4 position, float heading,
+        out CollectionNodeSpawnDefinition definition)
     {
         lock (_writeLock)
         {
@@ -81,13 +107,14 @@ public sealed class CollectionNodeSpawnDefinitionCollection : ObservableConcurre
                 Id = Count == 0 ? 1 : Keys.Max() + 1,
                 Pool = pool,
                 Position = [position.X, position.Y, position.Z],
-                Heading = heading
+                Heading = heading,
+                ZoneDefinitionId = zoneDefinitionId
             };
 
-            if (!TryAdd(definition.Id, definition))
+            if (zoneDefinitionId <= 0 || !TryAdd(definition.Id, definition))
                 return false;
 
-            if (Save())
+            if (Save(zoneDefinitionId))
                 return true;
 
             Remove(definition.Id);
@@ -102,7 +129,7 @@ public sealed class CollectionNodeSpawnDefinitionCollection : ObservableConcurre
             if (!TryGetValue(id, out var definition) || !Remove(id))
                 return false;
 
-            if (Save())
+            if (Save(definition.ZoneDefinitionId))
                 return true;
 
             TryAdd(id, definition);
@@ -110,26 +137,28 @@ public sealed class CollectionNodeSpawnDefinitionCollection : ObservableConcurre
         }
     }
 
-    private bool Save()
+    private bool Save(int zoneDefinitionId)
     {
-        if (_filePath is null)
+        if (_directoryPath is null)
             return false;
+
+        var filePath = Path.Combine(_directoryPath, $"{zoneDefinitionId}.json");
 
         try
         {
-            var json = JsonSerializer.Serialize(Values.OrderBy(entry => entry.Id), new JsonSerializerOptions
-            {
-                WriteIndented = true
-            });
+            var entries = Values
+                .Where(entry => entry.ZoneDefinitionId == zoneDefinitionId)
+                .OrderBy(entry => entry.Id);
+            var json = JsonSerializer.Serialize(entries, new JsonSerializerOptions { WriteIndented = true });
 
-            var temporaryPath = _filePath + ".tmp";
+            var temporaryPath = filePath + ".tmp";
             File.WriteAllText(temporaryPath, json + Environment.NewLine);
-            File.Move(temporaryPath, _filePath, true);
+            File.Move(temporaryPath, filePath, true);
             return true;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to save collection node spawns to \"{file}\".", _filePath);
+            _logger.LogError(ex, "Failed to save collection node spawns to \"{file}\".", filePath);
             return false;
         }
     }

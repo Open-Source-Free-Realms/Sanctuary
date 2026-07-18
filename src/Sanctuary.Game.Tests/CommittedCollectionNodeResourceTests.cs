@@ -22,7 +22,7 @@ public sealed class CommittedCollectionNodeResourceTests
         var types = new CollectionNodeTypeDefinitionCollection(NullLogger.Instance);
 
         Assert.IsTrue(pools.Load(Path.Combine(resourceDirectory, "CollectionNodePools.json")));
-        Assert.IsTrue(spawns.Load(Path.Combine(resourceDirectory, "CollectionNodeSpawns.json")));
+        Assert.IsTrue(spawns.Load(Path.Combine(resourceDirectory, "CollectionNodeSpawns")));
         Assert.IsTrue(types.Load(Path.Combine(resourceDirectory, "CollectionNodeTypes.json")));
 
         var commonPool = pools["briarwood-mushrooms"];
@@ -36,6 +36,8 @@ public sealed class CommittedCollectionNodeResourceTests
         var rareSpawns = spawns.Values.Where(spawn => spawn.Pool == rarePool.Key).ToArray();
         Assert.AreEqual(66, commonSpawns.Length);
         Assert.AreEqual(10, rareSpawns.Length);
+        Assert.IsTrue(spawns.Values.All(spawn =>
+            pools.TryGetValue(spawn.Pool, out var pool) && pool.ZoneDefinitionId == spawn.ZoneDefinitionId));
 
         var commonDrops = types[commonPool.NodeType].DropTable.Select(drop => drop.ItemDefinitionId).ToHashSet();
         var rareDrops = types[rarePool.NodeType].DropTable.Select(drop => drop.ItemDefinitionId).ToHashSet();
