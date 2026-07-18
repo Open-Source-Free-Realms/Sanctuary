@@ -35,6 +35,7 @@ public abstract class BaseZone : IZone, IDisposable
     private readonly ConcurrentDictionary<ulong, Npc> _npcs = new();
     private readonly ConcurrentDictionary<ulong, Player> _players = new();
     private readonly ConcurrentDictionary<ulong, IEntity> _entities = new();
+    private readonly object _collectionNodeLock = new();
 
     private const int FrameRate = 10;
     private const float TickRate = 1000f / FrameRate;
@@ -44,6 +45,7 @@ public abstract class BaseZone : IZone, IDisposable
     private readonly PeriodicTimer _updateEverySecondTimer = new(TimeSpan.FromSeconds(1));
 
     public int Id { get; init; }
+    public int DefinitionId => _zoneDefinition.Id;
     public string Name => _zoneDefinition.Name;
 
     public Vector4 SpawnPosition => _zoneDefinition.SpawnPosition;
@@ -155,6 +157,154 @@ public abstract class BaseZone : IZone, IDisposable
         npc.UpdatePosition(definition.Position, definition.Rotation);
 
         return true;
+    }
+
+    public bool TryActivateCollectionNodeSpawn(CollectionNodeSpawnDefinition spawnDefinition,
+        [MaybeNullWhen(false)] out CollectionNode node)
+    {
+        lock (_collectionNodeLock)
+        {
+            node = null;
+
+            if (!_resourceManager.CollectionNodeSpawns.ContainsKey(spawnDefinition.Id) ||
+                !_resourceManager.CollectionNodePools.TryGetValue(spawnDefinition.Pool, out var poolDefinition) ||
+                poolDefinition.ZoneDefinitionId != DefinitionId ||
+                !_resourceManager.CollectionNodeTypes.TryGetValue(poolDefinition.NodeType, out var typeDefinition) ||
+                _npcs.Values.OfType<CollectionNode>().Any(active => active.SpawnDefinition.Id == spawnDefinition.Id))
+            {
+                return false;
+            }
+
+            var hardPointCount = _resourceManager.CollectionNodeSpawns.Values.Count(spawn => spawn.Pool == poolDefinition.Key);
+            var activeCount = _npcs.Values.OfType<CollectionNode>().Count(active => active.PoolDefinition.Key == poolDefinition.Key);
+
+            if (activeCount >= poolDefinition.GetTargetActiveCount(hardPointCount))
+                return false;
+
+            return TryCreateCollectionNode(typeDefinition, poolDefinition, spawnDefinition, out node);
+        }
+    }
+
+    protected int ActivateCollectionNodePools()
+    {
+        var activated = 0;
+        var pools = _resourceManager.CollectionNodePools.Values
+            .Where(pool => pool.ZoneDefinitionId == DefinitionId)
+            .ToArray();
+
+        foreach (var pool in pools)
+            activated += RefillCollectionNodePool(pool, int.MaxValue);
+
+        _logger.LogInformation("Activated {count} collection node(s) across {poolCount} pool(s).",
+            activated, pools.Length);
+
+        return activated;
+    }
+
+    public int ReconcileCollectionNodePool(string poolKey)
+    {
+        if (!_resourceManager.CollectionNodePools.TryGetValue(poolKey, out var poolDefinition))
+            return 0;
+
+        lock (_collectionNodeLock)
+        {
+            var activeNodes = _npcs.Values
+                .OfType<CollectionNode>()
+                .Where(node => node.PoolDefinition.Key == poolDefinition.Key)
+                .ToList();
+            var hardPointCount = _resourceManager.CollectionNodeSpawns.Values.Count(spawn => spawn.Pool == poolDefinition.Key);
+            var targetActiveCount = poolDefinition.GetTargetActiveCount(hardPointCount);
+
+            while (activeNodes.Count > targetActiveCount)
+            {
+                var index = Random.Shared.Next(activeNodes.Count);
+                activeNodes[index].Dispose();
+                activeNodes.RemoveAt(index);
+            }
+
+            RefillCollectionNodePool(poolDefinition, int.MaxValue);
+            return _npcs.Values.OfType<CollectionNode>().Count(node => node.PoolDefinition.Key == poolDefinition.Key);
+        }
+    }
+
+    internal void ScheduleCollectionNodePoolRefill(string poolKey, int collectedHardPointId)
+    {
+        _ = RefillCollectionNodePoolAsync(poolKey, collectedHardPointId);
+    }
+
+    private bool TryCreateCollectionNode(CollectionNodeTypeDefinition typeDefinition,
+        CollectionNodePoolDefinition poolDefinition, CollectionNodeSpawnDefinition spawnDefinition,
+        [MaybeNullWhen(false)] out CollectionNode node)
+    {
+        node = new CollectionNode(this, typeDefinition, poolDefinition, spawnDefinition)
+        {
+            Guid = _nextNpcGuid++,
+            Name = typeDefinition.Name,
+            ModelId = typeDefinition.ModelId,
+            Scale = typeDefinition.Scale,
+            CompositeEffectId = typeDefinition.CompositeEffectId,
+            InteractRange = typeDefinition.InteractRange,
+            CursorId = typeDefinition.CursorId,
+            Static = true,
+            Visible = true
+        };
+
+        if (!_npcs.TryAdd(node.Guid, node) || !_entities.TryAdd(node.Guid, node))
+            return false;
+
+        node.UpdatePosition(spawnDefinition.SpawnPosition, spawnDefinition.SpawnRotation);
+        return true;
+    }
+
+    private int RefillCollectionNodePool(CollectionNodePoolDefinition poolDefinition, int maximumToActivate,
+        int? avoidHardPointId = null)
+    {
+        lock (_collectionNodeLock)
+        {
+            if (_cancellationTokenSource.IsCancellationRequested || poolDefinition.ZoneDefinitionId != DefinitionId ||
+                !_resourceManager.CollectionNodeTypes.TryGetValue(poolDefinition.NodeType, out var typeDefinition))
+            {
+                return 0;
+            }
+
+            var activeNodes = _npcs.Values
+                .OfType<CollectionNode>()
+                .Where(node => node.PoolDefinition.Key == poolDefinition.Key)
+                .ToArray();
+            var activeHardPointIds = activeNodes
+                .Select(node => node.SpawnDefinition.Id)
+                .ToHashSet();
+            var selected = poolDefinition.SelectSpawnsToActivate(
+                _resourceManager.CollectionNodeSpawns.Values, activeHardPointIds, maximumToActivate, Random.Shared,
+                avoidHardPointId);
+            var activated = 0;
+
+            foreach (var spawn in selected)
+            {
+                if (TryCreateCollectionNode(typeDefinition, poolDefinition, spawn, out _))
+                    activated++;
+            }
+
+            return activated;
+        }
+    }
+
+    private async Task RefillCollectionNodePoolAsync(string poolKey, int collectedHardPointId)
+    {
+        if (!_resourceManager.CollectionNodePools.TryGetValue(poolKey, out var poolDefinition))
+            return;
+
+        try
+        {
+            await Task.Delay(TimeSpan.FromSeconds(poolDefinition.RespawnSeconds), _cancellationTokenSource.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        if (_resourceManager.CollectionNodePools.TryGetValue(poolKey, out poolDefinition))
+            RefillCollectionNodePool(poolDefinition, 1, collectedHardPointId);
     }
 
     protected void SpawnNpcs()

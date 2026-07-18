@@ -537,6 +537,14 @@ public class GatewayConnection : UdpConnection
 
     public void SendSelfToClient()
     {
+        var ownedItemDefinitionIds = Player.Items
+            .Select(item => item.Definition)
+            .ToHashSet();
+
+        // TODO: Include persisted non-inventory progress here when direct collections such as
+        // adventure coins have a database representation.
+        Player.Collections = _resourceManager.Collections.CreateClientCollections(Player.Guid, ownedItemDefinitionIds);
+
         var packetSendSelfToClient = new PacketSendSelfToClient();
 
         packetSendSelfToClient.Payload = Player.Serialize();

@@ -29,6 +29,7 @@ public sealed class StartingZone : BaseZone
         _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
 
         SpawnNpcs();
+        ActivateCollectionNodePools();
     }
 
     #region Client Is Ready

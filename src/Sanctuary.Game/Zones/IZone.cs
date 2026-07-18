@@ -11,6 +11,7 @@ namespace Sanctuary.Game.Zones;
 public interface IZone
 {
     int Id { get; }
+    int DefinitionId { get; }
     string Name { get; }
 
     #region Events
@@ -34,6 +35,9 @@ public interface IZone
 
     bool TryCreateNpc([MaybeNullWhen(false)] out Npc npc);
     bool TryCreateNpc(NpcDefinition definition, [MaybeNullWhen(false)] out Npc npc);
+    bool TryActivateCollectionNodeSpawn(CollectionNodeSpawnDefinition spawnDefinition,
+        [MaybeNullWhen(false)] out CollectionNode node);
+    int ReconcileCollectionNodePool(string poolKey);
     bool TryCreateMount(Player rider, MountDefinition definition, [MaybeNullWhen(false)] out Mount mount);
     bool TryCreatePlayer(ulong guid, UdpConnection connection, [MaybeNullWhen(false)] out Player player);
 
