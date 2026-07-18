@@ -9,17 +9,27 @@ public class Ability : ISerializableType
     // 2 - Item
     // 3 - AbilityDefinition
     public int Type;
+
     public int Unknown2;
+
     public int ManaCost;
+
     public int ItemDefinitionId;
+
     public int IconId;
     public int NameId;
+
     public int Unknown7;
     public int Unknown8;
     public int Unknown9;
+
     public int AbilityDefinitionId;
+
     public int Unknown11;
-    public bool Unknown12;
+
+    public bool ForceDismount;
+
+    public static Ability Empty = new();
 
     public void Serialize(PacketWriter writer)
     {
@@ -40,11 +50,15 @@ public class Ability : ISerializableType
 
         writer.Write(IconId);
         writer.Write(NameId);
+
         writer.Write(Unknown7);
         writer.Write(Unknown8);
         writer.Write(Unknown9);
+
         writer.Write(AbilityDefinitionId);
+
         writer.Write(Unknown11);
-        writer.Write(Unknown12);
+
+        writer.Write(ForceDismount);
     }
 }
