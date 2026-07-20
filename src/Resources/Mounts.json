@@ -478,6 +478,30 @@
     }
   },
   {
+    "Comment": "Lawn Chair",
+    "Id": 13460,
+    "NameId": 442689,
+    "ImageSetId": 8456,
+    "TextureAlias": "lawnchair-treelogo",
+    "TintAlias": "dyetint",
+    "ModelId": 4439,
+    "Stats": {
+      "MaxMovementSpeed": 0
+    }
+  },
+  {
+    "Comment": "Chrome Drake",
+    "Id": 13583,
+    "NameId": 442331,
+    "ImageSetId": 8406,
+    "TextureAlias": "drake-chrome-mount",
+    "IsUpgradable": true,
+    "ModelId": 4217,
+    "Stats": {
+      "MaxMovementSpeed": 12.5
+    }
+  },
+  {
     "Comment": "Stormy Hoverboard",
     "Id": 697,
     "NameId": 6230,
