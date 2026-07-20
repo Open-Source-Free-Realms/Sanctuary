@@ -11,7 +11,7 @@ namespace Sanctuary.Game.Tests;
 public sealed class ResourceManagerTests
 {
     [TestMethod]
-    public void FileSystemWatcherChange_IgnoresDeletedTemporaryFile()
+    public void FileSystemWatcherChange_IgnoresAtomicSaveTemporaryFileAfterMove()
     {
         Directory.CreateDirectory(ResourceManager.BaseDirectory);
         var resourceManager = new ResourceManager(NullLogger<ResourceManager>.Instance);
@@ -54,6 +54,7 @@ public sealed class ResourceManagerTests
             var handler = typeof(ResourceManager).GetMethod(
                 "_fileSystemWatcher_Changed",
                 BindingFlags.Instance | BindingFlags.NonPublic);
+            // Persistent resource saves may move the temporary file before its watcher callback runs.
             var eventArgs = new FileSystemEventArgs(
                 WatcherChangeTypes.Changed,
                 zoneDirectory,

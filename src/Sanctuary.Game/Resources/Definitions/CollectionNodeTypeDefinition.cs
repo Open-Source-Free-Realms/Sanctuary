@@ -18,6 +18,11 @@ public sealed class CollectionNodeTypeDefinition
 
     public int TotalDropWeight => DropTable.Sum(drop => drop.Weight);
 
+    /// <summary>
+    /// Selects the drop whose weighted range contains the supplied roll.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException">The roll is outside the drop table's weighted range.</exception>
+    /// <exception cref="InvalidOperationException">The drop table does not contain a matching entry.</exception>
     public CollectionNodeDropDefinition SelectDrop(int roll)
     {
         if (roll < 0 || roll >= TotalDropWeight)

@@ -122,7 +122,7 @@ public sealed class CollectionNodePoolDefinitionTests
             .ToArray();
         IReadOnlySet<int> activeIds = new HashSet<int> { 2 };
 
-        var selected = pool.SelectSpawnsToActivate(hardPoints, activeIds, int.MaxValue, new Random(7));
+        var selected = pool.SelectSpawnsToActivate(hardPoints, activeIds, int.MaxValue);
 
         Assert.AreEqual(2, selected.Count);
         Assert.IsFalse(selected.Any(spawn => activeIds.Contains(spawn.Id)));
@@ -141,7 +141,7 @@ public sealed class CollectionNodePoolDefinitionTests
             });
 
         var selected = pool.SelectSpawnsToActivate(
-            hardPoints, new HashSet<int>(), maximumToActivate: 1, new Random(7));
+            hardPoints, new HashSet<int>(), maximumToActivate: 1);
 
         Assert.AreEqual(1, selected.Count);
     }
@@ -158,7 +158,7 @@ public sealed class CollectionNodePoolDefinitionTests
             });
 
         var selected = pool.SelectSpawnsToActivate(
-            hardPoints, new HashSet<int>(), maximumToActivate: 1, new Random(7), avoidHardPointId: 2);
+            hardPoints, new HashSet<int>(), maximumToActivate: 1, avoidHardPointId: 2);
 
         Assert.AreEqual(1, selected.Count);
         Assert.AreNotEqual(2, selected[0].Id);
@@ -178,7 +178,7 @@ public sealed class CollectionNodePoolDefinitionTests
         };
 
         var selected = pool.SelectSpawnsToActivate(
-            hardPoints, new HashSet<int>(), maximumToActivate: 1, new Random(7), avoidHardPointId: 2);
+            hardPoints, new HashSet<int>(), maximumToActivate: 1, avoidHardPointId: 2);
 
         Assert.AreEqual(1, selected.Count);
         Assert.AreEqual(2, selected[0].Id);

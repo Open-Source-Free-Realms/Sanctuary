@@ -34,8 +34,7 @@ public static class PacketChatHandler
 
         var adminLogger = loggerFactory.CreateLogger("Admin");
 
-        var resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
-        ChatCommandRegistry.Initialize(_zoneManager, _dbContextFactory, resourceManager, adminLogger);
+        ChatCommandRegistry.Initialize(_zoneManager, _dbContextFactory, adminLogger);
     }
 
     private static void SendMuteNotice(GatewayConnection connection)
@@ -68,7 +67,7 @@ public static class PacketChatHandler
             _logger.LogWarning("Received {name} packet with null message. ( {packet} )", nameof(PacketChat), packet);
             return false;
         }
-
+        
         if (packet.Message.StartsWith("!admin"))
         {
             ChatCommandRegistry.HandleCommand(connection, packet.Message);

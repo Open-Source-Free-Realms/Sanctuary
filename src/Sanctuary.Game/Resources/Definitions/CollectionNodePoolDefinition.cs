@@ -12,6 +12,10 @@ public sealed class CollectionNodePoolDefinition
     public int MaxActiveNodes { get; set; }
     public int RespawnSeconds { get; set; } = 30;
 
+    /// <summary>
+    /// Gets the number of nodes that should be active for the supplied hardpoint count.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="hardPointCount"/> is negative.</exception>
     public int GetTargetActiveCount(int hardPointCount)
     {
         if (hardPointCount < 0)
@@ -21,13 +25,19 @@ public sealed class CollectionNodePoolDefinition
         return MaxActiveNodes == 0 ? hardPointCount : Math.Min(MaxActiveNodes, hardPointCount);
     }
 
+    /// <summary>
+    /// Randomly selects inactive hardpoints up to the pool's configured capacity.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">
+    /// <paramref name="hardPoints"/> or <paramref name="activeHardPointIds"/> is <see langword="null"/>.
+    /// </exception>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="maximumToActivate"/> is negative.</exception>
     public IReadOnlyList<CollectionNodeSpawnDefinition> SelectSpawnsToActivate(
         IEnumerable<CollectionNodeSpawnDefinition> hardPoints, IReadOnlySet<int> activeHardPointIds,
-        int maximumToActivate, Random random, int? avoidHardPointId = null)
+        int maximumToActivate, int? avoidHardPointId = null)
     {
         ArgumentNullException.ThrowIfNull(hardPoints);
         ArgumentNullException.ThrowIfNull(activeHardPointIds);
-        ArgumentNullException.ThrowIfNull(random);
 
         if (maximumToActivate < 0)
             throw new ArgumentOutOfRangeException(nameof(maximumToActivate));
@@ -46,7 +56,7 @@ public sealed class CollectionNodePoolDefinition
 
         while (selected.Count < selectionCount && candidates.Count > 0)
         {
-            var index = random.Next(candidates.Count);
+            var index = Random.Shared.Next(candidates.Count);
             selected.Add(candidates[index]);
             candidates.RemoveAt(index);
         }

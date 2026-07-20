@@ -34,14 +34,16 @@ public sealed class CollectionNode : Npc
 
     public void CompleteCollection()
     {
+        Zone.CompleteCollectionNode(this);
+    }
+
+    internal void DisposeAfterCollection()
+    {
         DisposeGracefully(
             animate: false,
             delay: 0,
             effectDelay: 0,
             compositeEffectId: 0,
             duration: 0);
-
-        if (Zone is BaseZone zone)
-            zone.ScheduleCollectionNodePoolRefill(PoolDefinition.Key, SpawnDefinition.Id);
     }
 }

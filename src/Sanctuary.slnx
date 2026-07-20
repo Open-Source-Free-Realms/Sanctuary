@@ -7,9 +7,7 @@
   </Folder>
   <Folder Name="/Network/">
     <Project Path="Sanctuary.Packet.Common/Sanctuary.Packet.Common.csproj" />
-    <Project Path="Sanctuary.Packet.Common.Tests/Sanctuary.Packet.Common.Tests.csproj" />
     <Project Path="Sanctuary.Packet/Sanctuary.Packet.csproj" />
-    <Project Path="Sanctuary.Packet.Tests/Sanctuary.Packet.Tests.csproj" />
     <Project Path="Sanctuary.UdpLibrary.Tests/Sanctuary.UdpLibrary.Tests.csproj" />
     <Project Path="Sanctuary.UdpLibrary/Sanctuary.UdpLibrary.csproj" />
   </Folder>

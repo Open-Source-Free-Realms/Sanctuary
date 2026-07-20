@@ -35,9 +35,17 @@ public interface IZone
 
     bool TryCreateNpc([MaybeNullWhen(false)] out Npc npc);
     bool TryCreateNpc(NpcDefinition definition, [MaybeNullWhen(false)] out Npc npc);
-    bool TryActivateCollectionNodeSpawn(CollectionNodeSpawnDefinition spawnDefinition,
-        [MaybeNullWhen(false)] out CollectionNode node);
-    int ReconcileCollectionNodePool(string poolKey);
+    IReadOnlyList<CollectionNodePoolStatus> GetCollectionNodePoolStatuses();
+    IReadOnlyList<CollectionNodeSpawnStatus> GetCollectionNodeSpawnStatuses(string? poolKey = null);
+    bool TryPlaceCollectionNodeSpawn(string poolKey, Vector4 position, float heading,
+        [MaybeNullWhen(false)] out CollectionNodeSpawnDefinition spawn, out bool activated);
+    bool TryConfigureCollectionNodePool(string poolKey, int maxActiveNodes, int respawnSeconds,
+        out int activeCount, out int targetActiveCount);
+    bool TryRemoveCollectionNodeSpawn(int id,
+        [MaybeNullWhen(false)] out CollectionNodeSpawnDefinition removedSpawn);
+    bool TryRemoveNearestCollectionNodeSpawn(Vector4 position, float radius,
+        [MaybeNullWhen(false)] out CollectionNodeSpawnDefinition removedSpawn);
+    void CompleteCollectionNode(CollectionNode node);
     bool TryCreateMount(Player rider, MountDefinition definition, [MaybeNullWhen(false)] out Mount mount);
     bool TryCreatePlayer(ulong guid, UdpConnection connection, [MaybeNullWhen(false)] out Player player);
 
