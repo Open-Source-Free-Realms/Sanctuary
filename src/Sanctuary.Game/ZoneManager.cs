@@ -91,7 +91,7 @@ public class ZoneManager : IZoneManager
             Id = _uniqueId++
         };
 
-        // zone.OnStart();
+        zone.OnStart();
 
         return _zones.TryAdd(zone.Id, zone);
     }

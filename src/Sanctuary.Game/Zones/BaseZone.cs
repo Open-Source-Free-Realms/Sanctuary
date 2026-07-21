@@ -15,6 +15,7 @@ using Microsoft.Extensions.Logging;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Zones;
+using Sanctuary.Scripting;
 using Sanctuary.UdpLibrary;
 
 namespace Sanctuary.Game.Zones;
@@ -45,12 +46,15 @@ public abstract class BaseZone : IZone, IDisposable
 
     public int Id { get; init; }
     public string Name => _zoneDefinition.Name;
+    public ILogger Logger => _logger;
 
     public Vector4 SpawnPosition => _zoneDefinition.SpawnPosition;
     public Quaternion SpawnRotation => _zoneDefinition.SpawnRotation;
 
     public IEnumerable<Npc> Npcs => _npcs.Values;
     public IEnumerable<Player> Players => _players.Values;
+
+    private ScriptContext? _scriptContext;
 
     protected BaseZone(BaseZoneDefinition zoneDefinition, IServiceProvider serviceProvider)
     {
@@ -60,6 +64,10 @@ public abstract class BaseZone : IZone, IDisposable
         var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
 
         _logger = loggerFactory.CreateLogger($"Zone {Name} ({Id})");
+
+        var scriptManager = serviceProvider.GetRequiredService<IScriptManager>();
+
+        _scriptContext = scriptManager.GetContextForZone(this);
 
         _tiles = GenerateTiles();
 
@@ -74,6 +82,12 @@ public abstract class BaseZone : IZone, IDisposable
     }
 
     #region Events
+
+    public virtual void OnStart()
+    {
+        // fire and forget. safe since CallFunctionAsync does not throw.
+        _ = _scriptContext?.CallFunctionAsync("onStart", this).AsTask();
+    }
 
     public virtual void OnClientIsReady(Player player)
     {
