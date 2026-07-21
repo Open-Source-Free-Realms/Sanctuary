@@ -43,5 +43,6 @@
   </Folder>
   <Project Path="Sanctuary.Core/Sanctuary.Core.csproj" />
   <Project Path="Sanctuary.Game/Sanctuary.Game.csproj" />
+  <Project Path="Sanctuary.Scripting/Sanctuary.Scripting.csproj" />
   <Project Path="Sanctuary.WebAPI/Sanctuary.WebAPI.csproj" />
 </Solution>
