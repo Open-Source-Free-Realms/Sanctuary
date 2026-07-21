@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Sanctuary.Core\Sanctuary.Core.csproj" />
     <ProjectReference Include="..\Sanctuary.Database\Sanctuary.Database.csproj" />
     <ProjectReference Include="..\Sanctuary.Database.MySql\Sanctuary.Database.MySql.csproj" />
     <ProjectReference Include="..\Sanctuary.Database.Sqlite\Sanctuary.Database.Sqlite.csproj" />

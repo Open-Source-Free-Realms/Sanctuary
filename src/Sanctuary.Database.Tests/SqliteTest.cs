@@ -1,45 +1,33 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using Sanctuary.Database.Sqlite;
-
 
 namespace Sanctuary.Database.Tests;
 
 [TestClass]
-public class SqliteTest
+public class SqliteTest : DatabaseTestBase
 {
-    private DatabaseContext _context = null!;
+    public TestContext TestContext { get; set; }
 
-    [TestInitialize]
-    public void Setup()
+    protected override void Configure(IConfigurationBuilder configurationBuilder)
     {
-        var databaseOptions = new DatabaseOptions
+        configurationBuilder.AddInMemoryCollection(new Dictionary<string, string?>
         {
-            Provider = DatabaseProvider.Sqlite,
-            ConnectionString = "Data Source=:memory:"
-        };
-
-        var builder = new DbContextOptionsBuilder<SqliteDatabaseContext>();
-
-        SqliteDatabaseFactory.CreateInstance(builder, databaseOptions);
-
-        _context = new SqliteDatabaseContext(builder.Options);
-    }
-
-    [TestCleanup]
-    public void Cleanup()
-    {
-        Assert.IsTrue(_context.Database.EnsureDeleted());
-
-        _context.Dispose();
+            ["Database:Provider"] = "Sqlite",
+            ["Database:ConnectionString"] = "Data Source=:memory:"
+        });
     }
 
     [TestMethod]
-    public void IsValid()
+    public async Task IsValidAsync()
     {
-        _context.Database.Migrate();
+        await using var dbContext = await CreateDbContextAsync(TestContext.CancellationToken);
 
-        Assert.IsTrue(_context.Database.CanConnect());
+        await dbContext.Database.MigrateAsync(TestContext.CancellationToken);
+
+        Assert.IsTrue(await dbContext.Database.CanConnectAsync(TestContext.CancellationToken));
     }
 }
