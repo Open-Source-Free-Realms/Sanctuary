@@ -1,45 +1,34 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
-using Sanctuary.Database.MySql;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Sanctuary.Database.Tests;
 
 [TestClass]
-public class MySqlTest
+public class MySqlTest : DatabaseTestBase
 {
-    private DatabaseContext _context = null!;
+    public TestContext TestContext { get; set; }
 
-    [TestInitialize]
-    public void Setup()
+    protected override void Configure(IConfigurationBuilder configurationBuilder)
     {
-        var databaseOptions = new DatabaseOptions
+        configurationBuilder.AddInMemoryCollection(new Dictionary<string, string?>
         {
-            Provider = DatabaseProvider.MySql,
-            ConnectionString = "server=127.0.0.1;port=3306;uid=user;pwd=password;database=sanctuary_test",
-            VersionString = "11.6.0-MariaDB"
-        };
-
-        var builder = new DbContextOptionsBuilder<MySqlDatabaseContext>();
-
-        MySqlDatabaseFactory.CreateInstance(builder, databaseOptions);
-
-        _context = new MySqlDatabaseContext(builder.Options);
-    }
-
-    [TestCleanup]
-    public void Cleanup()
-    {
-        Assert.IsTrue(_context.Database.EnsureDeleted());
-
-        _context.Dispose();
+            ["Database:Provider"] = "MySql",
+            ["Database:ConnectionString"] = "server=127.0.0.1;port=3306;uid=user;pwd=password;database=sanctuary_test",
+            ["Database:VersionString"] = "11.6.0-MariaDB"
+        });
     }
 
     [TestMethod]
-    public void IsValid()
+    public async Task IsValidAsync()
     {
-        _context.Database.Migrate();
+        await using var dbContext = await CreateDbContextAsync(TestContext.CancellationToken);
 
-        Assert.IsTrue(_context.Database.CanConnect());
+        await dbContext.Database.MigrateAsync(TestContext.CancellationToken);
+
+        Assert.IsTrue(await dbContext.Database.CanConnectAsync(TestContext.CancellationToken));
     }
 }
