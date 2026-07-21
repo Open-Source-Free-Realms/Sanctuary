@@ -4,15 +4,10 @@ using Lua;
 
 namespace Sanctuary.Scripting;
 
-internal sealed class ScriptableZone : ILuaUserData
+internal sealed class ScriptableZone(IScriptZone zone) : ILuaUserData
 {
-    private readonly IScriptZone _zone;
+    private readonly IScriptZone _zone = zone;
     private LuaTable? _metatable;
-
-    public ScriptableZone(IScriptZone zone)
-    {
-        _zone = zone;
-    }
 
     public LuaTable? Metatable
     {
@@ -32,6 +27,8 @@ internal sealed class ScriptableZone : ILuaUserData
             {
                 "id" => new LuaValue(_zone.Id),
                 "name" => new LuaValue(_zone.Name),
+                "spawn_npc" => SpawnNpcFunction,
+                "spawn_npc_with_guid" => SpawnNpcWithGuidFunction,
                 _ => LuaValue.Nil
             };
 
@@ -40,4 +37,31 @@ internal sealed class ScriptableZone : ILuaUserData
 
         return metatable;
     }
+
+    private LuaFunction SpawnNpcFunction => new("spawn_npc", (context, cancellationToken) =>
+    {
+        var npcId = context.GetArgument<int>(0);
+        var x = context.GetArgument<float>(1);
+        var y = context.GetArgument<float>(2);
+        var z = context.GetArgument<float>(3);
+        var heading = context.GetArgument<float>(4);
+
+        var success = _zone.TrySpawnNpc(npcId, null, x, y, z, heading);
+
+        return new ValueTask<int>(context.Return(success));
+    });
+
+    private LuaFunction SpawnNpcWithGuidFunction => new ("spawn_npc_with_guid", (context, cancellationToken) =>
+    {
+        var npcId = context.GetArgument<int>(0);
+        var npcGuid = context.GetArgument<ulong>(1);
+        var x = context.GetArgument<float>(2);
+        var y = context.GetArgument<float>(3);
+        var z = context.GetArgument<float>(4);
+        var heading = context.GetArgument<float>(5);
+
+        var success = _zone.TrySpawnNpc(npcId, npcGuid, x, y, z, heading);
+
+        return new ValueTask<int>(context.Return(success));
+    });
 }

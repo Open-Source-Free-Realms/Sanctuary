@@ -99,6 +99,42 @@ public abstract class BaseZone : IZone, IDisposable
 
     #endregion
 
+    #region Scripting
+
+    public bool TrySpawnNpc(int npcId, ulong? npcGuid, float x, float y, float z, float heading)
+    {
+        if (npcGuid.HasValue)
+        {
+            if (_npcs.ContainsKey(npcGuid.Value))
+            {
+                _logger.LogWarning("Failed to spawn NPC {NpcId} with GUID {NpcGuid}: GUID already exists.", npcId, npcGuid.Value);
+                return false;
+            }
+        }
+
+        var definition = _resourceManager.Npcs.Values.FirstOrDefault(n => n.Id == npcId);
+        if (definition is null)
+        {
+            _logger.LogWarning("Failed to spawn NPC {NpcId}: No definition found.", npcId);
+            return false;
+        }
+
+        if (!TryCreateNpc(npcGuid, definition, out var npc))
+        {
+            _logger.LogWarning("Failed to spawn NPC {NpcId}: Could not create NPC instance.", npcId);
+            return false;
+        }
+
+        var position = new Vector4(x, y, z, 1f);
+        var rotation = new Quaternion(MathF.Sin(heading), 0f, MathF.Cos(heading), 0f);
+
+        npc.UpdatePosition(position, rotation);
+
+        return true;
+    }
+
+    #endregion
+
     #region Entities
 
     public bool TryGetNpc(ulong guid, [MaybeNullWhen(false)] out Npc npc)
@@ -126,67 +162,36 @@ public abstract class BaseZone : IZone, IDisposable
         return _players.TryAdd(player.Guid, player) && _entities.TryAdd(player.Guid, player);
     }
 
-    public bool TryCreateNpc([MaybeNullWhen(false)] out Npc npc)
+    public bool TryCreateNpc(ulong? guid, [MaybeNullWhen(false)] out Npc npc)
     {
         npc = new Npc(this)
         {
-            Guid = _nextNpcGuid++
+            Guid = GetNpcGuid(guid)
         };
 
         return _npcs.TryAdd(npc.Guid, npc) && _entities.TryAdd(npc.Guid, npc);
     }
 
-    public bool TryCreateNpc(NpcDefinition definition, [MaybeNullWhen(false)] out Npc npc)
+    public bool TryCreateNpc(ulong? guid, NpcDefinition definition, [MaybeNullWhen(false)] out Npc npc)
     {
         var scale = 1f;
 
         if (_resourceManager.Models.TryGetValue(definition.ModelId, out var model) && model.Scale != 0f)
             scale = model.Scale;
 
-        var guid = NpcBaseGuid + (ulong)definition.Id;
-
         npc = new Npc(this)
         {
-            Guid = guid,
+            Guid = GetNpcGuid(guid),
             NameId = definition.NameId,
             Name = definition.Name,
             ModelId = definition.ModelId,
             TextureAlias = definition.TextureAlias,
             Scale = scale,
-            Static = definition.Static,
+            Static = true,
             Visible = true
         };
 
-        if (!_npcs.TryAdd(npc.Guid, npc) || !_entities.TryAdd(npc.Guid, npc))
-        {
-            return false;
-        }
-
-        // Keep the dynamic NPC GUID space above the statically assigned GUIDs
-        if (guid >= _nextNpcGuid)
-            _nextNpcGuid = guid + 1;
-
-        npc.UpdatePosition(definition.Position, definition.Rotation);
-
         return true;
-    }
-
-    protected void SpawnNpcs()
-    {
-        var count = 0;
-
-        foreach (var definition in _resourceManager.Npcs.Values)
-        {
-            if (!TryCreateNpc(definition, out _))
-            {
-                _logger.LogWarning("Failed to spawn NPC {id}.", definition.Id);
-                continue;
-            }
-
-            count++;
-        }
-
-        _logger.LogInformation("Spawned {count} NPC(s).", count);
     }
 
     public bool TryCreateMount(Player rider, MountDefinition definition, [MaybeNullWhen(false)] out Mount mount)
@@ -479,6 +484,17 @@ public abstract class BaseZone : IZone, IDisposable
     }
 
     #endregion
+
+    private ulong GetNpcGuid(ulong? guid)
+    {
+        if (guid.HasValue)
+        {
+            _nextNpcGuid = Math.Max(_nextNpcGuid, guid.Value + 1);
+            return guid.Value;
+        }
+
+        return _nextNpcGuid++;
+    }
 
     public void Dispose()
     {

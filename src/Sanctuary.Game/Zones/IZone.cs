@@ -31,8 +31,8 @@ public interface IZone : IScriptZone
     bool TryAddMount(Mount mount);
     bool TryAddPlayer(Player player);
 
-    bool TryCreateNpc([MaybeNullWhen(false)] out Npc npc);
-    bool TryCreateNpc(NpcDefinition definition, [MaybeNullWhen(false)] out Npc npc);
+    bool TryCreateNpc(ulong? guid, [MaybeNullWhen(false)] out Npc npc);
+    bool TryCreateNpc(ulong? guid, NpcDefinition definition, [MaybeNullWhen(false)] out Npc npc);
     bool TryCreateMount(Player rider, MountDefinition definition, [MaybeNullWhen(false)] out Mount mount);
     bool TryCreatePlayer(ulong guid, UdpConnection connection, [MaybeNullWhen(false)] out Player player);
 
