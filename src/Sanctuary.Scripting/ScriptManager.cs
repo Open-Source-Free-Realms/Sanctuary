@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,9 +12,9 @@ namespace Sanctuary.Scripting;
 
 public class ScriptManager : IScriptManager
 {
-    private const string BaseDirectory = "Scripts";
+    private static readonly string BaseDirectory = ResolveScriptsDirectory();
 
-    private static readonly string ZoneScriptsDirectory = Path.Combine(BaseDirectory, "Zone");
+    internal static readonly string ZoneScriptsDirectory = Path.Combine(BaseDirectory, "Zone");
 
     private readonly ILogger _logger;
     private readonly LuaState _luaState;
@@ -22,6 +23,20 @@ public class ScriptManager : IScriptManager
     {
         _logger = loggerFactory.CreateLogger<ScriptManager>();
         _luaState = LuaState.Create();
+    }
+
+    private static string ResolveScriptsDirectory()
+    {
+        // Walk up the current working directory.
+        for (var dir = new DirectoryInfo(AppContext.BaseDirectory); dir is not null; dir = dir.Parent)
+        {
+            var candidate = Path.Combine(dir.FullName, "Scripts");
+            if (Directory.Exists(candidate))
+                return candidate;
+        }
+
+        // Nothing found; default to alongside the binary.
+        return Path.Combine(AppContext.BaseDirectory, "Scripts");
     }
 
     public bool Load()
@@ -33,7 +48,7 @@ public class ScriptManager : IScriptManager
         return true;
     }
 
-    async ValueTask<LuaTable> LoadIsolatedAsync(string path)
+    internal async ValueTask<LuaTable> LoadInstanceAsync(string path)
     {
         var env = new LuaTable
         {
@@ -47,7 +62,7 @@ public class ScriptManager : IScriptManager
         return env;
     }
 
-    public ScriptContext? GetContextForZone(IScriptZone zone)
+    public async ValueTask<ScriptContext?> GetContextForZoneAsync(IScriptZone zone)
     {
         var scriptFilePath = Path.Combine(ZoneScriptsDirectory, $"{zone.Name}.lua");
 
@@ -57,13 +72,23 @@ public class ScriptManager : IScriptManager
             return null;
         }
 
-        // To avoid bubbling async all the way up the zone construction chain,
-        // we just block on the call here. We will still have the actual context methods
-        // be async so we can take advantage of async/await in the scripts themselves.
-        var env = LoadIsolatedAsync(scriptFilePath).GetAwaiter().GetResult();
+        try
+        {
+            var env = await LoadInstanceAsync(scriptFilePath);
 
-        var zoneUserData = new ScriptableZone(zone);
+            var zoneUserData = new ScriptableZone(zone);
 
-        return new ScriptContext(zone.Logger, _luaState, env, zoneUserData);
+            return new ScriptContext(zone.Logger, _luaState, env, zoneUserData);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to load script for zone '{ZoneName}'", zone.Name);
+            return null;
+        }
+    }
+
+    public ScriptContext? GetContextForZone(IScriptZone zone)
+    {
+        return GetContextForZoneAsync(zone).AsTask().GetAwaiter().GetResult();
     }
 }
