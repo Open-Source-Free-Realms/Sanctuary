@@ -103,6 +103,7 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
         var dbCharacter = dbContext.Characters
             .Include(x => x.Items)
             .Include(x => x.Mounts)
+            .AsSplitQuery()
             .SingleOrDefault(x => x.Id == GuidHelper.GetPlayerId(connection.Player.Guid));
 
         if (dbCharacter is null)
