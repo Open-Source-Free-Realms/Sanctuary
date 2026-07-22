@@ -27,8 +27,8 @@ internal sealed class ScriptableZone(IScriptZone zone) : ILuaUserData
             {
                 "id" => new LuaValue(_zone.Id),
                 "name" => new LuaValue(_zone.Name),
-                "spawn_npc" => SpawnNpcFunction,
-                "spawn_npc_with_guid" => SpawnNpcWithGuidFunction,
+                "spawnNpc" => SpawnNpcFunction,
+                "spawnNpcWithGuid" => SpawnNpcWithGuidFunction,
                 _ => LuaValue.Nil
             };
 
@@ -38,7 +38,7 @@ internal sealed class ScriptableZone(IScriptZone zone) : ILuaUserData
         return metatable;
     }
 
-    private LuaFunction SpawnNpcFunction => new("spawn_npc", (context, cancellationToken) =>
+    private LuaFunction SpawnNpcFunction => new("spawnNpc", (context, cancellationToken) =>
     {
         var npcId = context.GetArgument<int>(0);
         var x = context.GetArgument<float>(1);
@@ -51,7 +51,7 @@ internal sealed class ScriptableZone(IScriptZone zone) : ILuaUserData
         return new ValueTask<int>(context.Return(success));
     });
 
-    private LuaFunction SpawnNpcWithGuidFunction => new ("spawn_npc_with_guid", (context, cancellationToken) =>
+    private LuaFunction SpawnNpcWithGuidFunction => new ("spawnNpcWithGuid", (context, cancellationToken) =>
     {
         var npcId = context.GetArgument<int>(0);
         var npcGuid = context.GetArgument<ulong>(1);
