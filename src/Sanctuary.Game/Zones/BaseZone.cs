@@ -85,8 +85,13 @@ public abstract class BaseZone : IZone, IDisposable
 
     public virtual void OnStart()
     {
-        // fire and forget. safe since CallFunctionAsync does not throw.
-        _ = _scriptContext?.CallFunctionAsync("onStart", this).AsTask();
+        var onStartFn = _scriptContext?.GetFunction("onStart");
+
+        if (onStartFn is not null)
+        {
+            // fire and forget. safe since CallFunctionAsync does not throw.
+            _ = onStartFn.CallAsMethodAsync().AsTask();
+        }
     }
 
     public virtual void OnClientIsReady(Player player)

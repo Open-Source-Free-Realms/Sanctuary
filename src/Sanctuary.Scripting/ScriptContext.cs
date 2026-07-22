@@ -1,4 +1,3 @@
-using System;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,17 +9,17 @@ namespace Sanctuary.Scripting;
 
 public class ScriptContext
 {
-    private readonly ILogger _logger;
-    private readonly LuaState _state;
-    private readonly LuaTable _environment;
-    private readonly ILuaUserData _zoneUserData;
+    internal readonly ILogger _logger;
+    internal readonly LuaTable _environment;
+    internal readonly LuaState _state;
+    internal readonly ILuaUserData? _userData;
 
-    public ScriptContext(ILogger logger, LuaState state, LuaTable environment, ILuaUserData zoneUserData)
+    public ScriptContext(ILogger logger, LuaState state, LuaTable environment, ILuaUserData? userData = null)
     {
         _logger = logger;
         _state = state;
         _environment = environment;
-        _zoneUserData = zoneUserData;
+        _userData = userData;
 
         // Override `print` to log to our logger instead of stdout.
         _environment["print"] = new LuaFunction("print", (context, cancellationToken) =>
@@ -41,41 +40,26 @@ public class ScriptContext
         });
     }
 
-    public async ValueTask CallFunctionAsync(string functionName, params object?[] args)
+    public ScriptFunction? GetFunction(string functionName)
     {
-        if (!_environment.TryGetValue(functionName, out var function))
+        if (!_environment.TryGetValue(functionName, out var function) || function.Type != LuaValueType.Function)
         {
-            _logger.LogWarning("Function '{FunctionName}' not found in script context.", functionName);
-            return;
+            return null;
         }
 
-        var luaArgs = new LuaValue[args.Length];
-
-        for (var i = 0; i < args.Length; i++)
-            luaArgs[i] = ToLuaValue(args[i]);
-
-        try
-        {
-            await _state.CallAsync(function, luaArgs);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error occurred while calling function '{FunctionName}' in script context.", functionName);
-        }
+        return new ScriptFunction(this, function, functionName);
     }
 
-    private LuaValue ToLuaValue(object? arg) => arg switch
+    public async ValueTask<object?[]?> CallFunctionAsync(string functionName, params object?[] args)
     {
-        null => LuaValue.Nil,
-        LuaValue value => value,
-        IScriptZone => new LuaValue(_zoneUserData),
-        ILuaUserData userData => new LuaValue(userData),
-        string s => s,
-        bool b => b,
-        int i => i,
-        long l => l,
-        float f => f,
-        double d => d,
-        _ => throw new ArgumentException($"Unsupported script argument type '{arg.GetType()}'.", nameof(arg))
-    };
+        var function = GetFunction(functionName);
+
+        if (function is null)
+        {
+            _logger.LogWarning("Function '{FunctionName}' not found in script context.", functionName);
+            return null;
+        }
+
+        return await function.CallAsync(args);
+    }
 }
