@@ -246,17 +246,20 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
 
                 pendingUpdates.Add(() =>
                 {
-                    connection.Player.Mounts.Add(new PacketMountInfo
+                    if (!connection.Player.Mounts.Any(x => x.Definition == mountDef.Id && x.TintId == orderDetailTint))
                     {
-                        Id = savedMount.Id,
-                        Definition = mountDef.Id,
-                        NameId = mountDef.NameId,
-                        ImageSetId = mountDef.ImageSetId,
-                        TintId = orderDetailTint,
-                        MembersOnly = mountDef.MembersOnly,
-                        IsUpgradable = mountDef.IsUpgradable,
-                        IsUpgraded = savedMount.IsUpgraded
-                    });
+                        connection.Player.Mounts.Add(new PacketMountInfo
+                        {
+                            Id = savedMount.Id,
+                            Definition = mountDef.Id,
+                            NameId = mountDef.NameId,
+                            ImageSetId = mountDef.ImageSetId,
+                            TintId = orderDetailTint,
+                            MembersOnly = mountDef.MembersOnly,
+                            IsUpgradable = mountDef.IsUpgradable,
+                            IsUpgraded = savedMount.IsUpgraded
+                        });
+                    }
 
                     var packetMountList = new PacketMountList
                     {
