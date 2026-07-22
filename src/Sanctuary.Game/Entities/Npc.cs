@@ -2,14 +2,18 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
+using System.Threading.Tasks;
+
+using Microsoft.Extensions.Logging;
 
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
+using Sanctuary.Scripting;
 
 namespace Sanctuary.Game.Entities;
 
-public class Npc : IEntity
+public class Npc : IScriptNpc, IEntity
 {
     public ulong Guid { get; init; }
 
@@ -25,6 +29,7 @@ public class Npc : IEntity
     public ZoneTile ZoneTile { get; protected set; } = ZoneTile.Empty;
     public ConcurrentDictionary<ulong, Npc> VisibleNpcs { get; } = [];
     public ConcurrentDictionary<ulong, Player> VisiblePlayers { get; } = [];
+    public ILogger Logger => Zone.Logger;
 
     public int NameId { get; set; }
     public string? Name { get; set; }
@@ -68,7 +73,7 @@ public class Npc : IEntity
 
     public List<CharacterAttachmentData> Attachments { get; set; } = [];
 
-    public bool Static { get; set; }
+    public ScriptContext? ScriptContext { get; set; }
 
     public Npc(IZone zone)
     {
@@ -109,12 +114,20 @@ public class Npc : IEntity
 
     #region Update
 
-    public virtual void UpdateEveryTick()
+    public virtual async Task UpdateEveryTick()
     {
+        var onTickFn = ScriptContext?.GetFunction("onTick");
+
+        if (onTickFn is not null)
+            await onTickFn.CallAsMethodAsync();
     }
 
-    public virtual void UpdateEverySecond()
+    public virtual async Task UpdateEverySecond()
     {
+        var onSecondFn = ScriptContext?.GetFunction("onSecond");
+
+        if (onSecondFn is not null)
+            await onSecondFn.CallAsMethodAsync();
     }
 
     public void UpdatePosition(Vector4 position, Quaternion rotation, bool updateZoneArea = true)
@@ -304,6 +317,16 @@ public class Npc : IEntity
         return !(left == right);
     }
 
+    #endregion
+
+    #region Scripting
+
+    public void Say(string message)
+    {
+        // TODO real dialog bubble
+        Zone.Logger.LogInformation("{Name} says: {Message}", Name, message);
+    }
+    
     #endregion
 
     public virtual void Dispose()

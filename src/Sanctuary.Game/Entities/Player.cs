@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
+using System.Threading.Tasks;
 
 using Sanctuary.Core.Collections;
 using Sanctuary.Core.IO;
@@ -136,12 +137,14 @@ public sealed class Player : ClientPcData, IEntity
 
     #region Update
 
-    public void UpdateEveryTick()
+    public Task UpdateEveryTick()
     {
+        return Task.CompletedTask;
     }
 
-    public void UpdateEverySecond()
+    public Task UpdateEverySecond()
     {
+        return Task.CompletedTask;
     }
 
     public void UpdatePosition(Vector4 position, Quaternion rotation, bool updateZoneArea = true)

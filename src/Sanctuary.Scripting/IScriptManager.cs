@@ -5,4 +5,6 @@ public interface IScriptManager
     bool Load();
 
     ScriptContext? GetContextForZone(IScriptZone zone);
+
+    ScriptContext? GetContextForNpc(IScriptNpc npc, string scriptName);
 }

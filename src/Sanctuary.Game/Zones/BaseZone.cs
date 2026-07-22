@@ -25,6 +25,7 @@ public abstract class BaseZone : IZone, IDisposable
 {
     private readonly ILogger _logger;
     private readonly IResourceManager _resourceManager;
+    private readonly IScriptManager _scriptManager;
     private readonly BaseZoneDefinition _zoneDefinition;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
@@ -65,9 +66,9 @@ public abstract class BaseZone : IZone, IDisposable
 
         _logger = loggerFactory.CreateLogger($"Zone {Name} ({Id})");
 
-        var scriptManager = serviceProvider.GetRequiredService<IScriptManager>();
+        _scriptManager = serviceProvider.GetRequiredService<IScriptManager>();
 
-        _scriptContext = scriptManager.GetContextForZone(this);
+        _scriptContext = _scriptManager.GetContextForZone(this);
 
         _tiles = GenerateTiles();
 
@@ -192,11 +193,15 @@ public abstract class BaseZone : IZone, IDisposable
             ModelId = definition.ModelId,
             TextureAlias = definition.TextureAlias,
             Scale = scale,
-            Static = true,
             Visible = true
         };
 
-        return true;
+        if (definition.ScriptName is not null)
+        {
+            npc.ScriptContext = _scriptManager.GetContextForNpc(npc, definition.ScriptName);
+        }
+
+        return _npcs.TryAdd(npc.Guid, npc) && _entities.TryAdd(npc.Guid, npc);
     }
 
     public bool TryCreateMount(Player rider, MountDefinition definition, [MaybeNullWhen(false)] out Mount mount)
@@ -454,10 +459,7 @@ public abstract class BaseZone : IZone, IDisposable
             {
                 foreach (var entity in _entities)
                 {
-                    if (entity.Value is Npc { Static: true })
-                        continue;
-
-                    entity.Value.UpdateEveryTick();
+                    await entity.Value.UpdateEveryTick();
                 }
             }
             catch (Exception ex)
@@ -475,10 +477,7 @@ public abstract class BaseZone : IZone, IDisposable
             {
                 foreach (var entity in _entities)
                 {
-                    if (entity.Value is Npc { Static: true })
-                        continue;
-
-                    entity.Value.UpdateEverySecond();
+                    await entity.Value.UpdateEverySecond();
                 }
             }
             catch (Exception ex)

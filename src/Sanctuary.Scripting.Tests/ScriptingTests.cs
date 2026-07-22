@@ -42,6 +42,17 @@ public class ScriptingTests
         }
     }
 
+    [TestMethod]
+    public async Task AllNpcScriptsValid()
+    {
+        var npcScriptsDirectory = ScriptManager.NpcScriptsDirectory;
+        var luaFiles = Directory.GetFiles(npcScriptsDirectory, "*.lua");
+        foreach (var luaFile in luaFiles)
+        {
+            _ = await _scriptManager.LoadInstanceAsync(luaFile);
+        }
+    }
+
     [TestCleanup]
     public void Cleanup()
     {

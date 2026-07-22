@@ -13,8 +13,8 @@ namespace Sanctuary.Scripting;
 public class ScriptManager : IScriptManager
 {
     private static readonly string BaseDirectory = ResolveScriptsDirectory();
-
     internal static readonly string ZoneScriptsDirectory = Path.Combine(BaseDirectory, "Zone");
+    internal static readonly string NpcScriptsDirectory = Path.Combine(BaseDirectory, "Npc");
 
     private readonly ILogger _logger;
     private readonly LuaState _luaState;
@@ -87,8 +87,38 @@ public class ScriptManager : IScriptManager
         }
     }
 
+    public async ValueTask<ScriptContext?> GetContextForNpcAsync(IScriptNpc npc, string scriptName)
+    {
+        var scriptFilePath = Path.Combine(NpcScriptsDirectory, $"{scriptName}.lua");
+
+        if (!File.Exists(scriptFilePath))
+        {
+            _logger.LogWarning("Script '{ScriptName}' for NPC '{NpcName}' not found (looking in '{ScriptFilePath}').", scriptName, npc.Name, scriptFilePath);
+            return null;
+        }
+
+        try
+        {
+            var env = await LoadInstanceAsync(scriptFilePath);
+
+            var npcUserData = new ScriptableNpc(npc);
+
+            return new ScriptContext(npc.Logger, _luaState, env, npcUserData);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to load script for NPC '{NpcName}'", npc.Name);
+            return null;
+        }
+    }
+
     public ScriptContext? GetContextForZone(IScriptZone zone)
     {
         return GetContextForZoneAsync(zone).AsTask().GetAwaiter().GetResult();
+    }
+
+    public ScriptContext? GetContextForNpc(IScriptNpc npc, string scriptName)
+    {
+        return GetContextForNpcAsync(npc, scriptName).AsTask().GetAwaiter().GetResult();
     }
 }
