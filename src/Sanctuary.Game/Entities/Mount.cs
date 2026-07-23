@@ -4,6 +4,7 @@ using System.Numerics;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
+using Sanctuary.Scripting;
 
 namespace Sanctuary.Game.Entities;
 
@@ -15,7 +16,7 @@ public class Mount : Npc
     public int Seat { get; set; }
     public int QueuePosition { get; set; }
 
-    public Mount(IZone zone, Player rider, MountDefinition definition) : base(zone)
+    public Mount(IZone zone, IScriptManager scriptManager, Player rider, MountDefinition definition) : base(zone, scriptManager)
     {
         Rider = rider;
         Definition = definition;

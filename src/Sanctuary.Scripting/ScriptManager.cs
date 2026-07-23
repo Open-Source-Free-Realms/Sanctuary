@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 using Microsoft.Extensions.Logging;
 
@@ -18,6 +19,9 @@ public class ScriptManager : IScriptManager
 
     private readonly ILogger _logger;
     private readonly LuaState _luaState;
+
+    private readonly ConcurrentDictionary<IScriptZone, ScriptContext> _zoneContexts = new();
+    private readonly ConcurrentDictionary<(IScriptNpc, string), ScriptContext> _npcContexts = new();
 
     public ScriptManager(ILoggerFactory loggerFactory)
     {
@@ -64,6 +68,11 @@ public class ScriptManager : IScriptManager
 
     public async ValueTask<ScriptContext?> GetContextForZoneAsync(IScriptZone zone)
     {
+        if (_zoneContexts.TryGetValue(zone, out var existingContext))
+        {
+            return existingContext;
+        }
+
         var scriptFilePath = Path.Combine(ZoneScriptsDirectory, $"{zone.Name}.lua");
 
         if (!File.Exists(scriptFilePath))
@@ -78,7 +87,9 @@ public class ScriptManager : IScriptManager
 
             var zoneUserData = new ScriptableZone(zone);
 
-            return new ScriptContext(zone.Logger, _luaState, env, zoneUserData);
+            var context = new ScriptContext(zone.Logger, _luaState, env, zoneUserData);
+            _zoneContexts[zone] = context;
+            return context;
         }
         catch (Exception ex)
         {
@@ -87,8 +98,23 @@ public class ScriptManager : IScriptManager
         }
     }
 
-    public async ValueTask<ScriptContext?> GetContextForNpcAsync(IScriptNpc npc, string scriptName)
+    public async ValueTask<ScriptContext?> GetContextForNpcAsync(IScriptNpc npc)
     {
+        if (string.IsNullOrWhiteSpace(npc.ScriptName))
+        {
+            return null;
+        }
+
+        var scriptName = npc.ScriptName;
+
+        // Context is keyed by both the NPC *and* the script name, so a change in the script name yields a new context.
+        var contextKey = (npc, scriptName);
+
+        if (_npcContexts.TryGetValue(contextKey, out var existingContext))
+        {
+            return existingContext;
+        }
+
         var scriptFilePath = Path.Combine(NpcScriptsDirectory, $"{scriptName}.lua");
 
         if (!File.Exists(scriptFilePath))
@@ -103,7 +129,9 @@ public class ScriptManager : IScriptManager
 
             var npcUserData = new ScriptableNpc(npc);
 
-            return new ScriptContext(npc.Logger, _luaState, env, npcUserData);
+            var context = new ScriptContext(npc.Logger, _luaState, env, npcUserData);
+            _npcContexts[contextKey] = context;
+            return context;
         }
         catch (Exception ex)
         {
@@ -117,8 +145,8 @@ public class ScriptManager : IScriptManager
         return GetContextForZoneAsync(zone).AsTask().GetAwaiter().GetResult();
     }
 
-    public ScriptContext? GetContextForNpc(IScriptNpc npc, string scriptName)
+    public ScriptContext? GetContextForNpc(IScriptNpc npc)
     {
-        return GetContextForNpcAsync(npc, scriptName).AsTask().GetAwaiter().GetResult();
+        return GetContextForNpcAsync(npc).AsTask().GetAwaiter().GetResult();
     }
 }

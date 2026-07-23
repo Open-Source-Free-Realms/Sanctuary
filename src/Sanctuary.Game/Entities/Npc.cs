@@ -74,11 +74,16 @@ public class Npc : IScriptNpc, IEntity
 
     public List<CharacterAttachmentData> Attachments { get; set; } = [];
 
-    public ScriptContext? ScriptContext { get; set; }
+    public string? ScriptName { get; set; }
 
-    public Npc(IZone zone)
+    private readonly IScriptManager _scriptManager;
+
+    private ScriptContext? ScriptContext => _scriptManager.GetContextForNpc(this);
+
+    public Npc(IZone zone, IScriptManager scriptManager)
     {
         Zone = zone;
+        _scriptManager = scriptManager;
     }
 
     #region Events

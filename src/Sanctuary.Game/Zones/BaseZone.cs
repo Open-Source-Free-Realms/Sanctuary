@@ -55,7 +55,7 @@ public abstract class BaseZone : IZone, IDisposable
     public IEnumerable<Npc> Npcs => _npcs.Values;
     public IEnumerable<Player> Players => _players.Values;
 
-    private ScriptContext? _scriptContext;
+    private ScriptContext? ScriptContext => _scriptManager.GetContextForZone(this);
 
     protected BaseZone(BaseZoneDefinition zoneDefinition, IServiceProvider serviceProvider)
     {
@@ -67,8 +67,6 @@ public abstract class BaseZone : IZone, IDisposable
         _logger = loggerFactory.CreateLogger($"Zone {Name} ({Id})");
 
         _scriptManager = serviceProvider.GetRequiredService<IScriptManager>();
-
-        _scriptContext = _scriptManager.GetContextForZone(this);
 
         _tiles = GenerateTiles();
 
@@ -86,7 +84,7 @@ public abstract class BaseZone : IZone, IDisposable
 
     public virtual void OnStart()
     {
-        var onStartFn = _scriptContext?.GetFunction("onStart");
+        var onStartFn = ScriptContext?.GetFunction("onStart");
 
         if (onStartFn is not null)
         {
@@ -170,7 +168,7 @@ public abstract class BaseZone : IZone, IDisposable
 
     public bool TryCreateNpc(ulong? guid, [MaybeNullWhen(false)] out Npc npc)
     {
-        npc = new Npc(this)
+        npc = new Npc(this, _scriptManager)
         {
             Guid = GetNpcGuid(guid)
         };
@@ -185,7 +183,7 @@ public abstract class BaseZone : IZone, IDisposable
         if (_resourceManager.Models.TryGetValue(definition.ModelId, out var model) && model.Scale != 0f)
             scale = model.Scale;
 
-        npc = new Npc(this)
+        npc = new Npc(this, _scriptManager)
         {
             Guid = GetNpcGuid(guid),
             NameId = definition.NameId,
@@ -193,20 +191,16 @@ public abstract class BaseZone : IZone, IDisposable
             ModelId = definition.ModelId,
             TextureAlias = definition.TextureAlias,
             Scale = scale,
+            ScriptName = definition.ScriptName,
             Visible = true
         };
-
-        if (definition.ScriptName is not null)
-        {
-            npc.ScriptContext = _scriptManager.GetContextForNpc(npc, definition.ScriptName);
-        }
 
         return _npcs.TryAdd(npc.Guid, npc) && _entities.TryAdd(npc.Guid, npc);
     }
 
     public bool TryCreateMount(Player rider, MountDefinition definition, [MaybeNullWhen(false)] out Mount mount)
     {
-        mount = new Mount(this, rider, definition)
+        mount = new Mount(this, _scriptManager, rider, definition)
         {
             Guid = _nextNpcGuid++
         };
