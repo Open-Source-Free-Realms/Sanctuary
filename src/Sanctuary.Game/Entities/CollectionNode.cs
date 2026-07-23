@@ -40,10 +40,10 @@ public sealed class CollectionNode : Npc
     internal void DisposeAfterCollection()
     {
         DisposeGracefully(
-            animate: false,
+            animate: true,
             delay: 0,
             effectDelay: 0,
             compositeEffectId: 0,
-            duration: 0);
+            duration: 1000);
     }
 }
