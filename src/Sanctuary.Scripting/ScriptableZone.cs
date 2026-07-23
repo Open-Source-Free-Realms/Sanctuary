@@ -20,9 +20,16 @@ internal sealed class ScriptableZone(IScriptZone zone) : ILuaUserData
         var z = context.GetArgument<float>(4);
         var heading = context.GetArgument<float>(5);
 
-        var success = self._zone.TrySpawnNpc(npcId, null, x, y, z, heading);
+        if (!self._zone.TrySpawnNpc(npcId, null, x, y, z, heading, out var npc))
+        {
+            return new ValueTask<int>(context.Return(LuaValue.Nil));
+        }
 
-        return new ValueTask<int>(context.Return(success));
+        var userData = new ScriptableNpc(npc);
+
+        var handle = new LuaValue(userData);
+
+        return new ValueTask<int>(context.Return(handle));
     });
 
     private static readonly LuaFunction SpawnNpcWithGuidFunction = new("spawnNpcWithGuid", static (context, cancellationToken) =>
@@ -36,9 +43,16 @@ internal sealed class ScriptableZone(IScriptZone zone) : ILuaUserData
         var z = context.GetArgument<float>(5);
         var heading = context.GetArgument<float>(6);
 
-        var success = self._zone.TrySpawnNpc(npcId, npcGuid, x, y, z, heading);
+        if (!self._zone.TrySpawnNpc(npcId, npcGuid, x, y, z, heading, out var npc))
+        {
+            return new ValueTask<int>(context.Return(LuaValue.Nil));
+        }
 
-        return new ValueTask<int>(context.Return(success));
+        var userData = new ScriptableNpc(npc);
+
+        var handle = new LuaValue(userData);
+
+        return new ValueTask<int>(context.Return(handle));
     });
 
     private static readonly LuaTable SharedMetatable = BuildMetatable();

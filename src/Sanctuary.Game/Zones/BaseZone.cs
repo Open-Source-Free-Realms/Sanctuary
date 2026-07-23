@@ -112,8 +112,10 @@ public abstract class BaseZone : IZone, IDisposable
 
     #region Scripting
 
-    public bool TrySpawnNpc(int npcId, ulong? npcGuid, float x, float y, float z, float heading)
+    public bool TrySpawnNpc(int npcId, ulong? npcGuid, float x, float y, float z, float heading, [MaybeNullWhen(false)] out IScriptNpc npc)
     {
+        npc = null;
+
         if (npcGuid.HasValue)
         {
             if (_npcs.ContainsKey(npcGuid.Value))
@@ -130,7 +132,7 @@ public abstract class BaseZone : IZone, IDisposable
             return false;
         }
 
-        if (!TryCreateNpc(npcGuid, definition, out var npc))
+        if (!TryCreateNpc(npcGuid, definition, out var spawnedNpc))
         {
             _logger.LogWarning("Failed to spawn NPC {NpcId}: Could not create NPC instance.", npcId);
             return false;
@@ -139,8 +141,9 @@ public abstract class BaseZone : IZone, IDisposable
         var position = new Vector4(x, y, z, 1f);
         var rotation = new Quaternion(MathF.Sin(heading), 0f, MathF.Cos(heading), 0f);
 
-        npc.UpdatePosition(position, rotation);
+        spawnedNpc.UpdatePosition(position, rotation);
 
+        npc = spawnedNpc;
         return true;
     }
 
