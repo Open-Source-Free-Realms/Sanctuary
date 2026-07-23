@@ -328,7 +328,7 @@ public class ClientPcData
 
     public List<ProfileTypeEntry> ProfileTypes = new();
 
-    // public List<Collections> Collections = new();
+    public List<ClientCollection> Collections = new();
 
     public List<ClientItem> Items = new();
 
@@ -504,7 +504,7 @@ public class ClientPcData
 
         writer.Write(ProfileTypes);
 
-        writer.Write(0); // TODO Collections
+        writer.Write(Collections);
 
         writer.Write(Items);
 

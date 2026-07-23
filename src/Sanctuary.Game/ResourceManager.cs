@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Linq;
 
 using Microsoft.Extensions.Logging;
 
@@ -22,6 +24,10 @@ public class ResourceManager : IResourceManager
     public static readonly string ModelsFile = Path.Combine(BaseDirectory, "Models.txt");
 
     public static readonly string ClientItemDefinitionsFile = Path.Combine(BaseDirectory, "ClientItemDefinitions.json");
+    public static readonly string CollectionsFile = Path.Combine(BaseDirectory, "Collections.json");
+    public static readonly string CollectionNodePoolsFile = Path.Combine(BaseDirectory, "CollectionNodePools.json");
+    public static readonly string CollectionNodeTypesFile = Path.Combine(BaseDirectory, "CollectionNodeTypes.json");
+    public static readonly string CollectionNodeSpawnsDirectory = Path.Combine(BaseDirectory, "CollectionNodeSpawns");
 
     public static readonly string CoinStoreItemsFile = Path.Combine(BaseDirectory, "CoinStoreItems.json");
 
@@ -54,6 +60,10 @@ public class ResourceManager : IResourceManager
     public ModelDefinitionCollection Models { get; }
 
     public ClientItemDefinitionCollection ClientItemDefinitions { get; }
+    public CollectionDefinitionCollection Collections { get; }
+    public CollectionNodePoolDefinitionCollection CollectionNodePools { get; }
+    public CollectionNodeTypeDefinitionCollection CollectionNodeTypes { get; }
+    public CollectionNodeSpawnDefinitionCollection CollectionNodeSpawns { get; }
 
     public CoinStoreItemCollection CoinStoreItems { get; }
 
@@ -79,7 +89,10 @@ public class ResourceManager : IResourceManager
     public ResourceManager(ILogger<ResourceManager> logger)
     {
         _logger = logger;
-        _fileSystemWatcher = new(BaseDirectory);
+        _fileSystemWatcher = new(BaseDirectory)
+        {
+            IncludeSubdirectories = true
+        };
 
         _fileSystemWatcher.Changed += _fileSystemWatcher_Changed;
         _fileSystemWatcher.EnableRaisingEvents = true;
@@ -93,6 +106,10 @@ public class ResourceManager : IResourceManager
         Models = new(_logger);
 
         ClientItemDefinitions = new(_logger);
+        Collections = new(_logger);
+        CollectionNodePools = new(_logger);
+        CollectionNodeTypes = new(_logger);
+        CollectionNodeSpawns = new(_logger);
 
         CoinStoreItems = new(_logger);
 
@@ -142,6 +159,56 @@ public class ResourceManager : IResourceManager
         if (!ClientItemDefinitions.Load(ClientItemDefinitionsFile))
             return false;
 
+        if (!Collections.Load(CollectionsFile))
+            return false;
+
+        if (!CollectionNodeTypes.Load(CollectionNodeTypesFile))
+            return false;
+
+        if (!CollectionNodePools.Load(CollectionNodePoolsFile))
+            return false;
+
+        if (!CollectionNodeSpawns.Load(CollectionNodeSpawnsDirectory))
+            return false;
+
+        foreach (var collection in Collections.Values)
+        {
+            if (collection.Entries.Any(entry => !ClientItemDefinitions.ContainsKey(entry.ItemDefinitionId)))
+            {
+                _logger.LogError("Collection {id} references an unknown item definition.", collection.Id);
+                return false;
+            }
+        }
+
+        foreach (var type in CollectionNodeTypes.Values)
+        {
+            if (!Models.ContainsKey(type.ModelId) ||
+                type.DropTable.Any(drop => !ClientItemDefinitions.ContainsKey(drop.ItemDefinitionId)))
+            {
+                _logger.LogError("Collection node type {type} has an invalid model or drop reference.", type.Key);
+                return false;
+            }
+        }
+
+        foreach (var spawn in CollectionNodeSpawns.Values)
+        {
+            if (!CollectionNodePools.TryGetValue(spawn.Pool, out var pool) ||
+                pool.ZoneDefinitionId != spawn.ZoneDefinitionId)
+            {
+                _logger.LogError("Collection node spawn {id} references an unknown pool or mismatched zone.", spawn.Id);
+                return false;
+            }
+        }
+
+        foreach (var pool in CollectionNodePools.Values)
+        {
+            if (!CollectionNodeTypes.ContainsKey(pool.NodeType))
+            {
+                _logger.LogError("Collection node pool {pool} references an unknown node type.", pool.Key);
+                return false;
+            }
+        }
+
         if (!CoinStoreItems.Load(CoinStoreItemsFile))
             return false;
 
@@ -169,6 +236,16 @@ public class ResourceManager : IResourceManager
         if (!Zones.Load(ZonesDirectory))
             return false;
 
+        foreach (var pool in CollectionNodePools.Values)
+        {
+            if (!Zones.ContainsKey(pool.ZoneDefinitionId))
+            {
+                _logger.LogError("Collection node pool {pool} references unknown zone {zone}.",
+                    pool.Key, pool.ZoneDefinitionId);
+                return false;
+            }
+        }
+
         if (!Houses.Load(HousesFile))
             return false;
 
@@ -195,6 +272,18 @@ public class ResourceManager : IResourceManager
 
     private void _fileSystemWatcher_Changed(object sender, FileSystemEventArgs e)
     {
+        if (e.FullPath.EndsWith(".tmp", StringComparison.OrdinalIgnoreCase) || !File.Exists(e.FullPath))
+            return;
+
+        var directoryPath = Path.GetDirectoryName(e.FullPath);
+        var isTopLevelResource = string.Equals(directoryPath, BaseDirectory, StringComparison.OrdinalIgnoreCase);
+        var collectionNodeSpawnPrefix = CollectionNodeSpawnsDirectory + Path.DirectorySeparatorChar;
+        var isCollectionNodeSpawn = directoryPath is not null &&
+            directoryPath.StartsWith(collectionNodeSpawnPrefix, StringComparison.OrdinalIgnoreCase);
+
+        if (!isTopLevelResource && !isCollectionNodeSpawn)
+            return;
+
         try
         {
             if (File.GetAttributes(e.FullPath).HasFlag(FileAttributes.Directory))
@@ -218,6 +307,15 @@ public class ResourceManager : IResourceManager
                 loaded = Models.Load(ModelsFile);
             else if (e.FullPath == ClientItemDefinitionsFile)
                 loaded = ClientItemDefinitions.Load(ClientItemDefinitionsFile);
+            else if (e.FullPath == CollectionsFile)
+                loaded = Collections.Load(CollectionsFile);
+            else if (e.FullPath == CollectionNodePoolsFile)
+                loaded = CollectionNodePools.Load(CollectionNodePoolsFile);
+            else if (e.FullPath == CollectionNodeTypesFile)
+                loaded = CollectionNodeTypes.Load(CollectionNodeTypesFile);
+            else if (isCollectionNodeSpawn &&
+                string.Equals(Path.GetExtension(e.FullPath), ".json", StringComparison.OrdinalIgnoreCase))
+                loaded = CollectionNodeSpawns.Load(CollectionNodeSpawnsDirectory);
             else if (e.FullPath == ItemClassesFile)
                 loaded = ItemClasses.Load(ItemClassesFile);
             else if (e.FullPath == ItemCategoriesFile)
@@ -255,6 +353,10 @@ public class ResourceManager : IResourceManager
 
             if (!loaded)
                 _logger.LogError("Error loading modified file. File: {filepath}", e.FullPath);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error handling modified file. File: {filepath}", e.FullPath);
         }
         finally
         {

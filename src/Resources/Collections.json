@@ -1,0 +1,22 @@
+[
+  {
+    "Id": 17054,
+    "CategoryId": 10,
+    "DescriptionId": 17055,
+    "Type": 3,
+    "IconId": 2124,
+    "IconTintId": 92,
+    "HeaderMetadata": 9,
+    "RewardMetadata": 11,
+    "Entries": [
+      { "Id": 41, "NameId": 17056, "IconId": 2124, "IconTintId": 99, "ItemDefinitionId": 11081 },
+      { "Id": 42, "NameId": 17057, "IconId": 2124, "IconTintId": 96, "ItemDefinitionId": 11082 },
+      { "Id": 43, "NameId": 17058, "IconId": 2124, "IconTintId": 112, "ItemDefinitionId": 11083 },
+      { "Id": 44, "NameId": 17059, "IconId": 2124, "IconTintId": 100, "ItemDefinitionId": 11084 },
+      { "Id": 45, "NameId": 17060, "IconId": 2124, "IconTintId": 92, "ItemDefinitionId": 11085 },
+      { "Id": 46, "NameId": 17061, "IconId": 2124, "IconTintId": 104, "ItemDefinitionId": 11086 },
+      { "Id": 47, "NameId": 17062, "IconId": 2124, "IconTintId": 109, "ItemDefinitionId": 11087 },
+      { "Id": 48, "NameId": 17063, "IconId": 2124, "IconTintId": 101, "ItemDefinitionId": 11088 }
+    ]
+  }
+]

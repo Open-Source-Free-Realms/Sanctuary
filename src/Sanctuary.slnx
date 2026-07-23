@@ -14,6 +14,11 @@
   <Folder Name="/Resources/">
     <File Path="Resources/ClientItemDefinitions.json" />
     <File Path="Resources/CoinStoreItems.json" />
+    <File Path="Resources/CollectionNodeSpawns/1/briarwood-mushrooms.json" />
+    <File Path="Resources/CollectionNodeSpawns/1/briarwood-mushrooms-rare.json" />
+    <File Path="Resources/CollectionNodePools.json" />
+    <File Path="Resources/CollectionNodeTypes.json" />
+    <File Path="Resources/Collections.json" />
     <File Path="Resources/ItemCategories.txt" />
     <File Path="Resources/ItemCategoryGroups.txt" />
     <File Path="Resources/ItemClasses.txt" />
@@ -43,6 +48,7 @@
   </Folder>
   <Project Path="Sanctuary.Core/Sanctuary.Core.csproj" />
   <Project Path="Sanctuary.Game/Sanctuary.Game.csproj" />
+  <Project Path="Sanctuary.Game.Tests/Sanctuary.Game.Tests.csproj" />
   <Project Path="Sanctuary.Scripting/Sanctuary.Scripting.csproj" />
   <Project Path="Sanctuary.Scripting.Tests/Sanctuary.Scripting.Tests.csproj" />
   <Project Path="Sanctuary.WebAPI/Sanctuary.WebAPI.csproj" />
