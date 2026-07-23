@@ -7,4 +7,5 @@ public class TransformAbilityDefinition
     public int DurationMs { get; set; }
     public int CooldownMs { get; set; }
     public int CompositeEffectId { get; set; }
+    public string? Comment { get; set; }
 }
