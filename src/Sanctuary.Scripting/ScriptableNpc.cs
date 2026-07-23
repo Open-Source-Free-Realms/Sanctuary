@@ -14,11 +14,20 @@ internal sealed class ScriptableNpc(IScriptNpc npc) : ILuaUserData
 
     private static readonly LuaFunction SayFunction = new("say", static (context, cancellationToken) =>
     {
-        // Argument 0 is the NPC itself (self), passed automatically by `npc:say(...)`.
         var self = context.GetArgument<ScriptableNpc>(0);
         var message = context.GetArgument<string>(1);
 
         self._npc.Say(message);
+
+        return new ValueTask<int>(context.Return());
+    });
+
+    private static readonly LuaFunction SayLocalizedFunction = new("sayLocalized", static (context, cancellationToken) =>
+    {
+        var self = context.GetArgument<ScriptableNpc>(0);
+        var stringId = context.GetArgument<int>(1);
+
+        self._npc.SayLocalized(stringId);
 
         return new ValueTask<int>(context.Return());
     });
@@ -42,6 +51,7 @@ internal sealed class ScriptableNpc(IScriptNpc npc) : ILuaUserData
                 "guid" => new LuaValue(self._npc.Guid),
                 "name" => new LuaValue(self._npc.Name ?? ""),
                 "say" => SayFunction,
+                "sayLocalized" => SayLocalizedFunction,
                 _ => LuaValue.Nil
             };
 

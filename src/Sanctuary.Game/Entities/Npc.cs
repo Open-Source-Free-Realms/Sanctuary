@@ -335,6 +335,18 @@ public class Npc : IScriptNpc, IEntity
         foreach (var visiblePlayer in VisiblePlayers)
             visiblePlayer.Value.SendTunneled(packet);
     }
+
+    public void SayLocalized(int stringId)
+    {
+        var packet = new ChatPacketFromStringId
+        {
+            SpeakerGuid = Guid,
+            StringId = stringId
+        };
+
+        foreach (var visiblePlayer in VisiblePlayers)
+            visiblePlayer.Value.SendTunneled(packet);
+    }
     
     #endregion
 

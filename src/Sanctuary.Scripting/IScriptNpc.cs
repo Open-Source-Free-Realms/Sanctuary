@@ -9,4 +9,5 @@ public interface IScriptNpc
     public ILogger Logger { get; }
 
     void Say(string message);
+    void SayLocalized(int stringId);
 }
