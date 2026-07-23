@@ -10,6 +10,7 @@ using Sanctuary.Game;
 using Sanctuary.Game.Entities;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Chat;
+using Sanctuary.Scripting;
 
 namespace Sanctuary.Gateway.Handlers;
 
@@ -28,6 +29,7 @@ public static class ChatCommandRegistry
 {
     private static IZoneManager _zoneManager = null!;
     private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
+    private static IScriptManager _scriptManager = null!;
     private static ILogger _adminLogger = null!;
 
     private static readonly Dictionary<string, ChatCommandDefinition> Commands = new Dictionary<string, ChatCommandDefinition>
@@ -38,13 +40,15 @@ public static class ChatCommandRegistry
         ["unmute"] = new ChatCommandDefinition(ChatCommandRole.Mod, "!admin unmute [player]", Unmute),
         ["promote"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin promote [player]", Promote),
         ["demote"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin demote [player]", Demote),
+        ["reload"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin reload", Reload),
         ["help"] = new ChatCommandDefinition(ChatCommandRole.Mod, "!admin help", Help),
     };
 
-    public static void Initialize(IZoneManager zoneManager, IDbContextFactory<DatabaseContext> dbContextFactory, ILogger adminLogger)
+    public static void Initialize(IZoneManager zoneManager, IDbContextFactory<DatabaseContext> dbContextFactory, IScriptManager scriptManager, ILogger adminLogger)
     {
         _zoneManager = zoneManager;
         _dbContextFactory = dbContextFactory;
+        _scriptManager = scriptManager;
         _adminLogger = adminLogger;
     }
 
@@ -341,6 +345,19 @@ public static class ChatCommandRegistry
         }
 
         SetMod(connection, string.Join(' ', args), false);
+    }
+
+    private static void Reload(GatewayConnection connection, string[] args)
+    {
+        if (GetPlayerRole(connection.Player) < ChatCommandRole.Admin)
+        {
+            SendSystemMessage(connection, "You don't have permission to use this command.");
+            return;
+        }
+
+        _scriptManager.Reload();
+
+        SendSystemMessage(connection, "All scripts have been reloaded.");
     }
 
     private static void Help(GatewayConnection connection, string[] args)

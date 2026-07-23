@@ -12,6 +12,7 @@ using Sanctuary.Game.Entities;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 using Sanctuary.Packet.Common.Chat;
+using Sanctuary.Scripting;
 
 namespace Sanctuary.Gateway.Handlers;
 
@@ -32,9 +33,11 @@ public static class PacketChatHandler
         _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
         _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
 
+        var scriptManager = serviceProvider.GetRequiredService<IScriptManager>();
+
         var adminLogger = loggerFactory.CreateLogger("Admin");
 
-        ChatCommandRegistry.Initialize(_zoneManager, _dbContextFactory, adminLogger);
+        ChatCommandRegistry.Initialize(_zoneManager, _dbContextFactory, scriptManager, adminLogger);
     }
 
     private static void SendMuteNotice(GatewayConnection connection)
