@@ -16,6 +16,9 @@ public class Npc : IEntity
     public Vector4 Position { get; private set; }
     public Quaternion Rotation { get; private set; }
 
+    public Vector4 SpawnPosition { get; set; }
+    public Quaternion SpawnRotation { get; set; }
+
     public bool Visible { get; set; }
 
     public IZone Zone { get; set; }

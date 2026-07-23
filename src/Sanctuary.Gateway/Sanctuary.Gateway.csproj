@@ -21,6 +21,7 @@
     <ProjectReference Include="..\Sanctuary.Database\Sanctuary.Database.csproj" />
     <ProjectReference Include="..\Sanctuary.Game\Sanctuary.Game.csproj" />
     <ProjectReference Include="..\Sanctuary.Packet\Sanctuary.Packet.csproj" />
+    <ProjectReference Include="..\Sanctuary.Scripting\Sanctuary.Scripting.csproj"/>
     <ProjectReference Include="..\Sanctuary.UdpLibrary\Sanctuary.UdpLibrary.csproj" />
   </ItemGroup>
 

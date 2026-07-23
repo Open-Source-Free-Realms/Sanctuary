@@ -6,6 +6,7 @@
   <ItemGroup>
     <PackageVersion Include="BCrypt.Net-Next" Version="4.2.0" />
     <PackageVersion Include="Collections.Pooled" Version="2.0.0-preview.27" />
+    <PackageVersion Include="LuaCSharp" Version="0.5.5" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.17" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.17" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.17" />
