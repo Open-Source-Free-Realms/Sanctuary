@@ -1,13 +1,11 @@
 using System;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 
 using Microsoft.Extensions.Logging;
 
 using Lua;
-using Lua.Standard;
 
 namespace Sanctuary.Scripting;
 
@@ -18,7 +16,7 @@ public class ScriptManager : IScriptManager
     internal static readonly string NpcScriptsDirectory = Path.Combine(BaseDirectory, "Npc");
 
     private readonly ILogger _logger;
-    private readonly LuaState _luaState;
+    private readonly ScriptRuntime _runtime = new();
 
     private readonly ConcurrentDictionary<IScriptZone, ScriptContext> _zoneContexts = new();
     private readonly ConcurrentDictionary<(IScriptNpc, string), ScriptContext> _npcContexts = new();
@@ -26,7 +24,6 @@ public class ScriptManager : IScriptManager
     public ScriptManager(ILoggerFactory loggerFactory)
     {
         _logger = loggerFactory.CreateLogger<ScriptManager>();
-        _luaState = LuaState.Create();
     }
 
     private static string ResolveScriptsDirectory()
@@ -45,11 +42,23 @@ public class ScriptManager : IScriptManager
 
     public bool Load()
     {
-        _logger.LogInformation("Initializing Lua engine...");
+        _logger.LogDebug("Initializing Lua engine...");
 
-        _luaState.OpenStandardLibraries();
+        _runtime.OpenStandardLibraries();
+
+        _logger.LogInformation("Lua engine initialized");
 
         return true;
+    }
+
+    public void Reload()
+    {
+        _logger.LogDebug("Reloading scripts...");
+
+        _zoneContexts.Clear();
+        _npcContexts.Clear();
+
+        _logger.LogInformation("Scripts reloaded");
     }
 
     internal async ValueTask<LuaTable> LoadInstanceAsync(string path)
@@ -59,10 +68,10 @@ public class ScriptManager : IScriptManager
             Metatable = new LuaTable()
         };
 
-        env.Metatable["__index"] = _luaState.Environment; // read access to Lua std lib
+        env.Metatable["__index"] = _runtime.Environment; // read access to Lua std lib
 
-        var closure = await _luaState.LoadFileAsync(path, "bt", env, CancellationToken.None);
-        await _luaState.ExecuteAsync(closure);
+        await _runtime.ExecuteFileAsync(path, env);
+
         return env;
     }
 
@@ -87,7 +96,7 @@ public class ScriptManager : IScriptManager
 
             var zoneUserData = new ScriptableZone(zone);
 
-            var context = new ScriptContext(zone.Logger, _luaState, env, zoneUserData);
+            var context = new ScriptContext(_runtime, zone.Logger, env, zoneUserData);
             _zoneContexts[zone] = context;
             return context;
         }
@@ -129,7 +138,7 @@ public class ScriptManager : IScriptManager
 
             var npcUserData = new ScriptableNpc(npc);
 
-            var context = new ScriptContext(npc.Logger, _luaState, env, npcUserData);
+            var context = new ScriptContext(_runtime, npc.Logger, env, npcUserData);
             _npcContexts[contextKey] = context;
             return context;
         }

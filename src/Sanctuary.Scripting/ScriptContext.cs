@@ -9,17 +9,18 @@ namespace Sanctuary.Scripting;
 
 public class ScriptContext
 {
-    internal readonly ILogger _logger;
-    internal readonly LuaTable _environment;
-    internal readonly LuaState _state;
-    internal readonly ILuaUserData? _userData;
+    private readonly ScriptRuntime _runtime;
+    private readonly ILogger _logger;
+    private readonly LuaTable _environment;
 
-    public ScriptContext(ILogger logger, LuaState state, LuaTable environment, ILuaUserData? userData = null)
+    internal ILuaUserData? UserData { get; }
+
+    internal ScriptContext(ScriptRuntime runtime, ILogger logger, LuaTable environment, ILuaUserData? userData = null)
     {
+        _runtime = runtime;
         _logger = logger;
-        _state = state;
         _environment = environment;
-        _userData = userData;
+        UserData = userData;
 
         // Override `print` to log to our logger instead of stdout.
         _environment["print"] = new LuaFunction("print", (context, cancellationToken) =>
@@ -47,19 +48,6 @@ public class ScriptContext
             return null;
         }
 
-        return new ScriptFunction(this, function, functionName);
-    }
-
-    public async ValueTask<object?[]?> CallFunctionAsync(string functionName, params object?[] args)
-    {
-        var function = GetFunction(functionName);
-
-        if (function is null)
-        {
-            _logger.LogWarning("Function '{FunctionName}' not found in script context.", functionName);
-            return null;
-        }
-
-        return await function.CallAsync(args);
+        return new ScriptFunction(_runtime, _logger, UserData, function, functionName);
     }
 }

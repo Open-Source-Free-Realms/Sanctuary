@@ -8,11 +8,22 @@ using Lua;
 
 namespace Sanctuary.Scripting;
 
-public class ScriptFunction(ScriptContext context, LuaValue function, string functionName)
+public class ScriptFunction
 {
-    private readonly ScriptContext _context = context;
-    private readonly LuaValue _function = function;
-    private readonly string _functionName = functionName;
+    private readonly ScriptRuntime _runtime;
+    private readonly ILogger _logger;
+    private readonly ILuaUserData? _self;
+    private readonly LuaValue _function;
+    private readonly string _functionName;
+
+    internal ScriptFunction(ScriptRuntime runtime, ILogger logger, ILuaUserData? self, LuaValue function, string functionName)
+    {
+        _runtime = runtime;
+        _logger = logger;
+        _self = self;
+        _function = function;
+        _functionName = functionName;
+    }
 
     public async ValueTask<object?[]?> CallAsync(params object?[] args)
     {
@@ -28,7 +39,7 @@ public class ScriptFunction(ScriptContext context, LuaValue function, string fun
     {
         var luaArgs = new LuaValue[args.Length + 1];
 
-        luaArgs[0] = ToLuaValue(_context._userData);
+        luaArgs[0] = ToLuaValue(_self);
 
         for (var i = 0; i < args.Length; i++)
             luaArgs[i + 1] = ToLuaValue(args[i]);
@@ -40,12 +51,12 @@ public class ScriptFunction(ScriptContext context, LuaValue function, string fun
     {
         try
         {
-            var results = await _context._state.CallAsync(_function, args);
+            var results = await _runtime.CallAsync(_function, args);
             return [.. results.Select(FromLuaValue)];
         }
         catch (Exception ex)
         {
-            _context._logger.LogError(ex, "Error occurred while calling function '{FunctionName}' in script context.", _functionName);
+            _logger.LogError(ex, "Error occurred while calling function '{FunctionName}' in script context.", _functionName);
             return null;
         }
     }
