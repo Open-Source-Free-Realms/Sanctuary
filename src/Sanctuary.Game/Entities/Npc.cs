@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
+using Sanctuary.Packet.Common.Chat;
 using Sanctuary.Scripting;
 
 namespace Sanctuary.Game.Entities;
@@ -323,8 +324,16 @@ public class Npc : IScriptNpc, IEntity
 
     public void Say(string message)
     {
-        // TODO real dialog bubble
-        Zone.Logger.LogInformation("{Name} says: {Message}", Name, message);
+        var packet = new PacketChat
+        {
+            Channel = ChatChannel.WorldSay,
+            FromGuid = Guid,
+            FromName = new NameData { FirstName = Name ?? string.Empty },
+            Message = message
+        };
+
+        foreach (var visiblePlayer in VisiblePlayers)
+            visiblePlayer.Value.SendTunneled(packet);
     }
     
     #endregion
