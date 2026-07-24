@@ -94,7 +94,7 @@ public class ScriptManager : IScriptManager
         {
             var env = await LoadInstanceAsync(scriptFilePath);
 
-            var zoneUserData = new ScriptableZone(zone);
+            var zoneUserData = ScriptableZone.GetOrCreate(zone);
 
             var context = new ScriptContext(_runtime, zone.Logger, env, zoneUserData);
             _zoneContexts[zone] = context;
@@ -136,7 +136,7 @@ public class ScriptManager : IScriptManager
         {
             var env = await LoadInstanceAsync(scriptFilePath);
 
-            var npcUserData = new ScriptableNpc(npc);
+            var npcUserData = ScriptableNpc.GetOrCreate(npc);
 
             var context = new ScriptContext(_runtime, npc.Logger, env, npcUserData);
             _npcContexts[contextKey] = context;

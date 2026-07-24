@@ -327,6 +327,9 @@ public class Npc : IScriptNpc, IEntity
 
     #region Scripting
 
+    // Explicit interface implementation needed here to avoid exposing all of IZone to the scripting layer.
+    IScriptZone IScriptNpc.Zone => Zone;
+
     public void Say(string message)
     {
         var packet = new PacketChat

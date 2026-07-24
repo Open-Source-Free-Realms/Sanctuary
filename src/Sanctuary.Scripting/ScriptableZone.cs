@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 using Lua;
@@ -9,6 +10,11 @@ internal sealed class ScriptableZone(IScriptZone zone) : ILuaUserData
     private IScriptZone _zone => zone;
 
     public LuaTable? Metatable { get; set; } = SharedMetatable;
+
+    // We weakly cache the wrappers so that we don't have to manually evict them when zones are unloaded.
+    private static readonly ConditionalWeakTable<IScriptZone, ScriptableZone> Cache = new();
+    public static ScriptableZone GetOrCreate(IScriptZone zone)
+        => Cache.GetValue(zone, static z => new ScriptableZone(z));
 
     private static readonly LuaFunction SpawnNpcFunction = new("spawnNpc", static (context, cancellationToken) =>
     {
@@ -25,7 +31,7 @@ internal sealed class ScriptableZone(IScriptZone zone) : ILuaUserData
             return new ValueTask<int>(context.Return(LuaValue.Nil));
         }
 
-        var userData = new ScriptableNpc(npc);
+        var userData = ScriptableNpc.GetOrCreate(npc);
 
         var handle = new LuaValue(userData);
 
@@ -48,7 +54,7 @@ internal sealed class ScriptableZone(IScriptZone zone) : ILuaUserData
             return new ValueTask<int>(context.Return(LuaValue.Nil));
         }
 
-        var userData = new ScriptableNpc(npc);
+        var userData = ScriptableNpc.GetOrCreate(npc);
 
         var handle = new LuaValue(userData);
 

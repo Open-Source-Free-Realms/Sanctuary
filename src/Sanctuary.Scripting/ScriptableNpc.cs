@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 using Lua;
@@ -9,6 +10,11 @@ internal sealed class ScriptableNpc(IScriptNpc npc) : ILuaUserData
     private IScriptNpc _npc => npc;
 
     public LuaTable? Metatable { get; set; } = SharedMetatable;
+
+    // We weakly cache the wrappers so that we don't have to manually evict them when zones are unloaded.
+    private static readonly ConditionalWeakTable<IScriptNpc, ScriptableNpc> Cache = new();
+    public static ScriptableNpc GetOrCreate(IScriptNpc npc)
+        => Cache.GetValue(npc, static n => new ScriptableNpc(n));
 
     #region API
 
@@ -50,6 +56,7 @@ internal sealed class ScriptableNpc(IScriptNpc npc) : ILuaUserData
             {
                 "guid" => new LuaValue(self._npc.Guid),
                 "name" => new LuaValue(self._npc.Name ?? ""),
+                "zone" => new LuaValue(ScriptableZone.GetOrCreate(self._npc.Zone)),
                 "say" => SayFunction,
                 "sayLocalized" => SayLocalizedFunction,
                 _ => LuaValue.Nil
