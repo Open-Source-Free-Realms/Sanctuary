@@ -1,4 +1,46 @@
 services:
+  sanctuary.mysql:
+    image: mariadb:10.5
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-sanctuary}
+      MYSQL_USER: ${MYSQL_USER:-sanctuary}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-sanctuary}
+    ports:
+      - "3306:3306"
+    volumes:
+      - ../../database:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  sanctuary.webapi:
+    image: ${DOCKER_REGISTRY-}sanctuary-webapi
+    build:
+      context: ../
+      dockerfile: Docker/Sanctuary.WebAPI.dockerfile
+    restart: unless-stopped
+    ports:
+      - "20040:20040"
+    volumes: &common-volumes
+      - ../../logs:/app/Logs
+      - ../../src/Resources:/app/Resources
+      - ../../src/Scripts:/app/Scripts
+    environment: &common-env
+      - Database__Provider=0 # MySql (MariaDB uses the same provider)
+      - Database__VersionString=10.5.29-mariadb
+      - Database__ConnectionString=Server=sanctuary.mysql;Port=3306;Database=${MYSQL_DATABASE:-sanctuary};User=${MYSQL_USER:-sanctuary};Password=${MYSQL_PASSWORD:-sanctuary};
+      - Server__LoginGatewayAddress=sanctuary.login:20041
+      - Server__ServerAddress=localhost:20260 # replace 'localhost' with your public IP or domain name
+      - Urls=http://0.0.0.0:20040
+    depends_on:
+      sanctuary.mysql:
+        condition: service_healthy
+
   sanctuary.gateway:
     image: ${DOCKER_REGISTRY-}sanctuary-gateway
     build:
@@ -7,16 +49,11 @@ services:
     restart: unless-stopped
     ports:
       - "20260:20260/udp"
-    volumes: &common-volumes
-      - logs:/app/Logs
-      - ./Resources:/app/Resources
-      - ./.local_data:/data
-    environment: &common-env
-      - Database__Provider=1 # SQLite
-      - Database__VersionString=3.0.0-sqlite
-      - Database__ConnectionString=Data Source=/data/sanctuary.db;
-      - Server__LoginGatewayAddress=sanctuary.login:20041
+    volumes: *common-volumes
+    environment: *common-env
     depends_on:
+      sanctuary.mysql:
+        condition: service_healthy
       sanctuary.login:
         condition: service_started
 
@@ -31,6 +68,6 @@ services:
       - "20042:20042/udp"
     volumes: *common-volumes
     environment: *common-env
-
-volumes:
-  logs:
+    depends_on:
+      sanctuary.mysql:
+        condition: service_healthy
