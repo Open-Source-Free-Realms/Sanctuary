@@ -10,7 +10,7 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - ../../database:/var/lib/mysql
+      - db:/var/lib/mysql
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s
@@ -71,3 +71,6 @@ services:
     depends_on:
       sanctuary.mysql:
         condition: service_healthy
+
+volumes:
+  db:
