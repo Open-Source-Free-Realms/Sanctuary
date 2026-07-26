@@ -70,6 +70,12 @@ public class Npc : IEntity
 
     public bool Static { get; set; }
 
+    // TODO: Is this safe, scalable and okay for many, many NPCs? I (Alko) should think
+    // more about this, but leaving it for now.
+    public Queue<Vector3> Waypoints { get; set; } = new();
+    public const float StoppingTolerance { get; set; } = 1.5f;
+    private const float TickDeltaSeconds = 0.1f;
+
     public Npc(IZone zone)
     {
         Zone = zone;
@@ -111,6 +117,39 @@ public class Npc : IEntity
 
     public virtual void UpdateEveryTick()
     {
+        if (this.Waypoints.Count == 0)
+        {
+            return;
+        }
+
+
+        // NOTE: I (Alko) am not super duper familiar with how game engine physics affects NPC
+        // movements. If path following is complete garbage for some reason (I doubt it will be)
+        // come back and here and break out some basic robotics algorithms.
+        var targetPosition = this.Waypoints.Peek();
+        var currentPosition = new Vector3(this.Position.X, this.Position.Y, this.Position.Z);
+        var toTarget = targetPosition - currentPosition;
+
+
+        var distance = toTarget.Length();
+        var direction = toTarget.Normalize()
+
+        if (distance <= this.StoppingTolerance) {
+            Waypoints.Dequeue();
+            return;
+        }
+
+        var step = direction * this.Speed * this.TickDeltaSeconds;
+        if (step.Length() > distance)
+        {
+            step = toTarget;
+        }
+
+        var newPosition = currentPosition + step;
+        var newOrientation = Quaternion.CreateFromYawPitchRoll(MathF.Atan2(direction.X, direction.Z), 0f, 0f);
+        
+        UpdatePosition(new Vector4(newPosition, 1f), rotation);
+        BroadcastPosition();
     }
 
     public virtual void UpdateEverySecond()
@@ -330,5 +369,39 @@ public class Npc : IEntity
         ZoneTile.Entities.Remove(Guid, out _);
 
         Zone.TryRemoveNpc(Guid);
+    }
+
+    public void MoveTo(Vector3 destination)
+    {
+        if (Zone.Pathfinder is null)
+        {
+            return;
+        }
+
+        var currentPosition = new Vector3(Position.X, Position.Y, Position.Z);
+        var path = Zone.Pathfinder.FindPath(currentPosition, destination);
+
+        Waypoints = new Queue<Vector3>();
+        foreach (var node in path)
+        {
+            Waypoints.Enqueue(node.Position);
+        }
+    }
+
+    private void BroadcastPosition()
+    {
+        var packet = new PlayerUpdatePacketUpdatePosition
+        {
+            Guid = this.Guid,
+            Position = this.Position,
+            Rotation = this.Rotation,
+            State = 1,
+            Unknown = 0
+        };
+
+        foreach (var visiblePlayer in VisiblePlayers)
+        {
+            visiblePlayer.Value.SendTunneled(packet);
+        }
     }
 }

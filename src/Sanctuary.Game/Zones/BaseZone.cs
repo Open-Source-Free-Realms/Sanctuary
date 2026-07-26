@@ -61,6 +61,8 @@ public abstract class BaseZone : IZone, IDisposable
 
     private ScriptContext? _scriptContext;
 
+    public Pathfinder? Pathfinder { get; }
+
     protected BaseZone(BaseZoneDefinition zoneDefinition, IServiceProvider serviceProvider)
     {
         _zoneDefinition = zoneDefinition;
@@ -84,6 +86,12 @@ public abstract class BaseZone : IZone, IDisposable
 
         Task.Factory.StartNew(UpdateEveryTickAsync, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         Task.Factory.StartNew(UpdateEverySecondAsync, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        
+        // Just in case we don't actually have the `.map` file for a particular zone.
+        if (resourceManager.Maps.TryGetValue(Name, out var mapGraph))
+            Pathfinder = new Pathfinder(mapGraph.Nodes, logger);
+        else
+            Pathfinder = null;
     }
 
     #region Events

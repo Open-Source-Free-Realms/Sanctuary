@@ -6,6 +6,7 @@ using Sanctuary.Game.Entities;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Scripting;
 using Sanctuary.UdpLibrary;
+using Sanctuary.Game.Pathfinding;
 
 namespace Sanctuary.Game.Zones;
 
@@ -59,4 +60,6 @@ public interface IZone : IScriptZone
     void UpdateEntityZoneTile(IEntity entity, ZoneTile from, ZoneTile to);
 
     #endregion
+
+    Pathfinder? Pathfinder { get; }
 }
