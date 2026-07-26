@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Numerics;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,6 +13,7 @@ using Sanctuary.Game.Entities;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 using Sanctuary.Packet.Common.Chat;
+using Sanctuary.Gateway.Helpers;
 
 namespace Sanctuary.Gateway.Handlers;
 
@@ -67,12 +69,27 @@ public static class PacketChatHandler
             _logger.LogWarning("Received {name} packet with null message. ( {packet} )", nameof(PacketChat), packet);
             return false;
         }
+
+        if (packet.Message.StartsWith("!navto"))
+        {
+            var args = packet.Message.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            NavTo(connection, args);
+            return true;
+        }
+
+        if (packet.Message.StartsWith("!pos"))
+        {
+            Position(connection, Array.Empty<string>());
+            return true;
+        }
         
         if (packet.Message.StartsWith("!admin"))
         {
             ChatCommandRegistry.HandleCommand(connection, packet.Message);
             return true;
         }
+
+        
 
         if (connection.Player.IsMuted())
         {
@@ -181,5 +198,53 @@ public static class PacketChatHandler
         }
 
         return true;
+    }
+
+
+    private static void NavTo(GatewayConnection connection, string[] args)
+    {
+        if (args.Length != 4 ||
+            !float.TryParse(args[1], out var x) ||
+            !float.TryParse(args[2], out var y) ||
+            !float.TryParse(args[3], out var z))
+        {
+            ChatHelper.SendSystemMessage(connection, "Usage: !navto [x] [y] [z]");
+            return;
+        }
+
+        var player = connection.Player;
+
+        if (!player.Zone.TryCreateNpc(null, out var npc))
+        {
+            ChatHelper.SendSystemMessage(connection, "Failed to spawn a test NPC.");
+            return;
+        }
+
+        npc.NameId = 437129;
+        npc.ModelId = 3927;
+        npc.Scale = 1f;
+        npc.Disposition = 0;
+        npc.HideNamePlate = false;
+        npc.MovementType = 2;
+
+        npc.Visible = true;
+        npc.UpdatePosition(player.Position, player.Rotation);
+
+        npc.MoveTo(new Vector3(x, y, z));
+
+        _logger.LogInformation("NavTo test spawn requested by {Player} to ({X}, {Y}, {Z})", player.Name, x, y, z);
+        ChatHelper.SendSystemMessage(connection, $"Spawned NPC {npc.Guid} moving to ({x:0.0}, {y:0.0}, {z:0.0}).");
+    }
+
+    private static void Position(GatewayConnection connection, string[] args)
+    {
+        var player = connection.Player;
+        var position = player.Position;
+
+        _logger.LogInformation(
+            "POSITION | Player: {Name} | Zone: {Zone} | Position: ({X:F3}, {Y:F3}, {Z:F3})",
+            player.Name, player.Zone.Name, position.X, position.Y, position.Z);
+
+        ChatHelper.SendSystemMessage(connection, $"Position: ({position.X:F2}, {position.Y:F2}, {position.Z:F2})");
     }
 }

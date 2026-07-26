@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
 
 using NLog.Extensions.Logging;
 
@@ -71,5 +72,20 @@ app.UseHttpLogging();
 
 app.MapAuthEndpoints();
 app.MapPortraitEndpoints();
+
+app.MapGet("/ServerManifest.xml", () =>
+{
+    var xml = """
+        <?xml version="1.0" encoding="utf-8"?>
+        <ServerManifest version="2">
+            <Name>Local Dev Server</Name>
+            <Description>Local Sanctuary test server</Description>
+            <WebApiUrl>http://127.0.0.1:20040</WebApiUrl>
+            <LoginServer>127.0.0.1:20042</LoginServer>
+        </ServerManifest>
+        """;
+
+    return Results.Content(xml, "application/xml");
+});
 
 app.Run();

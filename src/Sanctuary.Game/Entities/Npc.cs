@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
+using System;
 
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
@@ -73,8 +74,13 @@ public class Npc : IEntity
     // TODO: Is this safe, scalable and okay for many, many NPCs? I (Alko) should think
     // more about this, but leaving it for now.
     public Queue<Vector3> Waypoints { get; set; } = new();
-    public const float StoppingTolerance { get; set; } = 1.5f;
+    
     private const float TickDeltaSeconds = 0.1f;
+
+    // TODO: maybe keeping this constant is a bad idea... 
+    // Could be different for all NPCs, fix this before the PR goes in.
+    public const float StoppingTolerance = 1.5f; 
+    public const float Speed = 7.5f;
 
     public Npc(IZone zone)
     {
@@ -132,14 +138,14 @@ public class Npc : IEntity
 
 
         var distance = toTarget.Length();
-        var direction = toTarget.Normalize()
+        var direction = Vector3.Normalize(toTarget);
 
-        if (distance <= this.StoppingTolerance) {
+        if (distance <= StoppingTolerance) {
             Waypoints.Dequeue();
             return;
         }
 
-        var step = direction * this.Speed * this.TickDeltaSeconds;
+        var step = direction * Speed * TickDeltaSeconds;
         if (step.Length() > distance)
         {
             step = toTarget;
@@ -148,7 +154,7 @@ public class Npc : IEntity
         var newPosition = currentPosition + step;
         var newOrientation = Quaternion.CreateFromYawPitchRoll(MathF.Atan2(direction.X, direction.Z), 0f, 0f);
         
-        UpdatePosition(new Vector4(newPosition, 1f), rotation);
+        UpdatePosition(new Vector4(newPosition, 1f), newOrientation);
         BroadcastPosition();
     }
 
@@ -231,8 +237,8 @@ public class Npc : IEntity
 
             TerrainObjectId = TerrainObjectId,
 
-            Speed = default,
-
+            Speed = Speed,
+            
             Unknown28 = default,
 
             InteractRange = InteractRange,
@@ -371,7 +377,7 @@ public class Npc : IEntity
         Zone.TryRemoveNpc(Guid);
     }
 
-    public void MoveTo(Vector3 destination)
+    public void MoveTo(Vector3 goalPosition)
     {
         if (Zone.Pathfinder is null)
         {
@@ -379,13 +385,32 @@ public class Npc : IEntity
         }
 
         var currentPosition = new Vector3(Position.X, Position.Y, Position.Z);
-        var path = Zone.Pathfinder.FindPath(currentPosition, destination);
+
+        // NOTE: This is garbage and shouldn't be a hardcoded constant here.
+        // Should figure out how to handle cases where the destination is close enough
+        // Perhaps this just goes in as an argument and can optionally be set.
+        // That, or a boolean that says "hey idc about following a pre-determined path,
+        // just move me to where I want directly". 
+        // Other option is to get the navmesh graph stuff going so that we can finer
+        // pathfinding.
+        const float DirectMoveThreshold = 20f;
+
+        if (Vector3.Distance(currentPosition, goalPosition) <= DirectMoveThreshold)
+        {
+            Waypoints = new Queue<Vector3>();
+            Waypoints.Enqueue(goalPosition);
+            return;
+        }
+
+        var path = Zone.Pathfinder.FindPath(currentPosition, goalPosition);
 
         Waypoints = new Queue<Vector3>();
         foreach (var node in path)
         {
             Waypoints.Enqueue(node.Position);
         }
+
+        Waypoints.Enqueue(goalPosition);
     }
 
     private void BroadcastPosition()

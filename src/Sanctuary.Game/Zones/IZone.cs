@@ -61,5 +61,5 @@ public interface IZone : IScriptZone
 
     #endregion
 
-    Pathfinder? Pathfinder { get; }
+    Pathfinder<MapNode>? Pathfinder { get; }
 }

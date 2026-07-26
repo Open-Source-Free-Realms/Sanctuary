@@ -17,6 +17,7 @@ using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Zones;
 using Sanctuary.Scripting;
 using Sanctuary.UdpLibrary;
+using Sanctuary.Game.Pathfinding;
 
 namespace Sanctuary.Game.Zones;
 
@@ -61,7 +62,7 @@ public abstract class BaseZone : IZone, IDisposable
 
     private ScriptContext? _scriptContext;
 
-    public Pathfinder? Pathfinder { get; }
+    public Pathfinder<MapNode>? Pathfinder { get; }
 
     protected BaseZone(BaseZoneDefinition zoneDefinition, IServiceProvider serviceProvider)
     {
@@ -88,8 +89,8 @@ public abstract class BaseZone : IZone, IDisposable
         Task.Factory.StartNew(UpdateEverySecondAsync, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         
         // Just in case we don't actually have the `.map` file for a particular zone.
-        if (resourceManager.Maps.TryGetValue(Name, out var mapGraph))
-            Pathfinder = new Pathfinder(mapGraph.Nodes, logger);
+        if (_resourceManager.Maps.TryGetValue(Name, out var mapGraph))
+            Pathfinder = new Pathfinder<MapNode>(mapGraph.Nodes, _logger);
         else
             Pathfinder = null;
     }

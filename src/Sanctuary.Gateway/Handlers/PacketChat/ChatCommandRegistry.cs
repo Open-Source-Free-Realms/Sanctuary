@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -596,4 +597,6 @@ public static class ChatCommandRegistry
             detail is null ? string.Empty : $", {detail}"
         );
     }
+
+
 }

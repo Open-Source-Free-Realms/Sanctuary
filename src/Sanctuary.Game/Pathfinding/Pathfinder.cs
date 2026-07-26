@@ -5,18 +5,18 @@ using Microsoft.Extensions.Logging;
 
 namespace Sanctuary.Game.Pathfinding;
 
-public class Pathfinder
+public class Pathfinder<TNode> where TNode : IPathNode
 {
-    private readonly IReadOnlyDictionary<int, IPathNode> _nodes;
+    private readonly IReadOnlyDictionary<int, TNode> _nodes;
     private readonly ILogger _logger;
 
-    public Pathfinder(IReadOnlyDictionary<int, IPathNode> nodes, ILogger logger)
+    public Pathfinder(IReadOnlyDictionary<int, TNode> nodes, ILogger logger)
     {
         this._nodes = nodes;
         this._logger = logger;
     }
 
-    public List<IPathNode> FindPath(Vector3 startPosition, Vector3 goalPosition) {
+    public List<TNode> FindPath(Vector3 startPosition, Vector3 goalPosition) {
         var startNode = this.FindClosestNode(startPosition);
         var goalNode = this.FindClosestNode(goalPosition);
 
@@ -105,7 +105,7 @@ public class Pathfinder
             _logger.LogWarning(
                 "No path found between node {StartNodeId} and node {GoalNodeId}.",
                 startNode.Id, goalNode.Id);
-            return new List<IPathNode>();
+            return new List<TNode>();
         }
 
         var path = this.ReconstructPath(
@@ -122,7 +122,7 @@ public class Pathfinder
         return path; 
     }
 
-    private IPathNode FindClosestNode(Vector3 position) 
+    private TNode FindClosestNode(Vector3 position) 
     {
         // TODO: This is linear and probably fine for small graphs, but if we ever do
         // things with large navmesh graphs, we might need to make this more efficient!
@@ -150,7 +150,7 @@ public class Pathfinder
         Dictionary<int, float> gScores,
         Dictionary<int, float> otherGScores,
         Dictionary<int, int> cameFrom,
-        IPathNode targetNode)
+        TNode targetNode)
     {
         if (!queue.TryDequeue(out var currentNodeId, out _))
             return null;
@@ -187,10 +187,10 @@ public class Pathfinder
         return meetingCandidate;
     }
     
-    private List<IPathNode> ReconstructPath(
-        IPathNode startNode,
-        IPathNode goalNode,
-        IPathNode meetingNode,
+    private List<TNode> ReconstructPath(
+        TNode startNode,
+        TNode goalNode,
+        TNode meetingNode,
         Dictionary<int, int> forwardCameFrom,
         Dictionary<int, int> backwardCameFrom)
     {
@@ -199,7 +199,7 @@ public class Pathfinder
 
         var backwardPath = WalkChain(backwardCameFrom, meetingNode.Id, goalNode.Id);
 
-        var path = new List<IPathNode>(forwardPath);
+        var path = new List<TNode>(forwardPath);
 
         // NOTE: We don't want to double count the meeting node here.
         path.AddRange(backwardPath.GetRange(1, backwardPath.Count - 1));
@@ -207,9 +207,9 @@ public class Pathfinder
         return path;
     }
 
-    private List<IPathNode> WalkChain(Dictionary<int, int> cameFrom, int fromId, int toId)
+    private List<TNode> WalkChain(Dictionary<int, int> cameFrom, int fromId, int toId)
     {
-        var path = new List<IPathNode> { _nodes[fromId] };
+        var path = new List<TNode> { _nodes[fromId] };
 
         var currentId = fromId;
         while (currentId != toId)
@@ -221,7 +221,7 @@ public class Pathfinder
         return path;
     }
 
-    private float Heuristic(IPathNode node, IPathNode goalNode)
+    private float Heuristic(TNode node, TNode goalNode)
     {
         return Vector3.Distance(node.Position, goalNode.Position);
     }
