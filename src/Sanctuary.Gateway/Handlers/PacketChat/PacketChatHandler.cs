@@ -82,14 +82,27 @@ public static class PacketChatHandler
             Position(connection, Array.Empty<string>());
             return true;
         }
-        
+
+        if (packet.Message.StartsWith("!tp"))
+        {
+            var args = packet.Message.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            Teleport(connection, args);
+            return true;
+        }
+
+        if (packet.Message.StartsWith("!chase"))
+        {
+            SpawnChasingNpc(connection);
+            return true;
+        }
+
         if (packet.Message.StartsWith("!admin"))
         {
             ChatCommandRegistry.HandleCommand(connection, packet.Message);
             return true;
         }
 
-        
+
 
         if (connection.Player.IsMuted())
         {
@@ -246,5 +259,57 @@ public static class PacketChatHandler
             player.Name, player.Zone.Name, position.X, position.Y, position.Z);
 
         ChatHelper.SendSystemMessage(connection, $"Position: ({position.X:F2}, {position.Y:F2}, {position.Z:F2})");
+    }
+
+    private static void Teleport(GatewayConnection connection, string[] args)
+    {
+        if (args.Length != 4 ||
+            !float.TryParse(args[1], out var x) ||
+            !float.TryParse(args[2], out var y) ||
+            !float.TryParse(args[3], out var z))
+        {
+            ChatHelper.SendSystemMessage(connection, "Usage: !tp [x] [y] [z]");
+            return;
+        }
+
+        var player = connection.Player;
+        var position = new Vector4(x, y, z, 1f);
+
+        player.UpdatePosition(position, player.Rotation);
+
+        var clientUpdatePacketUpdateLocation = new ClientUpdatePacketUpdateLocation
+        {
+            Position = position,
+            Rotation = player.Rotation,
+            Teleport = true
+        };
+
+        connection.SendTunneled(clientUpdatePacketUpdateLocation);
+    }
+
+    private static void SpawnChasingNpc(GatewayConnection connection)
+    {
+        var player = connection.Player;
+
+        if (!player.Zone.TryCreateNpc(null, out var npc))
+        {
+            ChatHelper.SendSystemMessage(connection, "Failed to spawn a test NPC.");
+            return;
+        }
+
+        npc.NameId = 437129;
+        npc.ModelId = 3927;
+        npc.Scale = 1f;
+        npc.Disposition = 0;
+        npc.HideNamePlate = false;
+        npc.MovementType = 2;
+
+        npc.Visible = true;
+        npc.UpdatePosition(player.Position, player.Rotation);
+
+        npc.Chase(player);
+
+        _logger.LogInformation("Spawned chasing NPC {Guid} targeting {Player}", npc.Guid, player.Name);
+        ChatHelper.SendSystemMessage(connection, $"Spawned NPC {npc.Guid} chasing you.");
     }
 }

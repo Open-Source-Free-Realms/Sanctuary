@@ -7,8 +7,10 @@ using System;
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
+using Sanctuary.Game.Pathfinding;
 
 namespace Sanctuary.Game.Entities;
+
 
 public class Npc : IEntity
 {
@@ -74,13 +76,16 @@ public class Npc : IEntity
     // TODO: Is this safe, scalable and okay for many, many NPCs? I (Alko) should think
     // more about this, but leaving it for now.
     public Queue<Vector3> Waypoints { get; set; } = new();
-    
+
     private const float TickDeltaSeconds = 0.1f;
 
     // TODO: maybe keeping this constant is a bad idea... 
     // Could be different for all NPCs, fix this before the PR goes in.
-    public const float StoppingTolerance = 1.5f; 
-    public const float Speed = 7.5f;
+    public const float NodeTolerance = 0.5f;
+    public const float Speed = 6.25f;
+
+    public MovementGoal? Goal { get; set; }
+    private List<MapNode> _lastComputedPath = new();
 
     public Npc(IZone zone)
     {
@@ -128,7 +133,6 @@ public class Npc : IEntity
             return;
         }
 
-
         // NOTE: I (Alko) am not super duper familiar with how game engine physics affects NPC
         // movements. If path following is complete garbage for some reason (I doubt it will be)
         // come back and here and break out some basic robotics algorithms.
@@ -140,8 +144,11 @@ public class Npc : IEntity
         var distance = toTarget.Length();
         var direction = Vector3.Normalize(toTarget);
 
-        if (distance <= StoppingTolerance) {
+        if (distance <= NodeTolerance)
+        {
             Waypoints.Dequeue();
+            if (Waypoints.Count == 0 && Goal?.ClearOnArrival == true)
+                Goal = null;
             return;
         }
 
@@ -153,13 +160,14 @@ public class Npc : IEntity
 
         var newPosition = currentPosition + step;
         var newOrientation = Quaternion.CreateFromYawPitchRoll(MathF.Atan2(direction.X, direction.Z), 0f, 0f);
-        
+
         UpdatePosition(new Vector4(newPosition, 1f), newOrientation);
         BroadcastPosition();
     }
 
     public virtual void UpdateEverySecond()
     {
+        RecomputePath();
     }
 
     public void UpdatePosition(Vector4 position, Quaternion rotation, bool updateZoneArea = true)
@@ -238,7 +246,7 @@ public class Npc : IEntity
             TerrainObjectId = TerrainObjectId,
 
             Speed = Speed,
-            
+
             Unknown28 = default,
 
             InteractRange = InteractRange,
@@ -379,36 +387,53 @@ public class Npc : IEntity
 
     public void MoveTo(Vector3 goalPosition)
     {
-        if (Zone.Pathfinder is null)
-        {
+        Goal = new MovementGoal.FixedPosition(goalPosition);
+        RecomputePath();
+    }
+
+    public void Chase(Player player)
+    {
+        Goal = new MovementGoal.ChaseEntity(player);
+        RecomputePath();
+    }
+
+    public void StopMoving()
+    {
+        Goal = null;
+        Waypoints = new Queue<Vector3>();
+    }
+
+    private void RecomputePath()
+    {
+
+
+        if (Goal is null || Zone.Pathfinder is null)
             return;
-        }
 
-        var currentPosition = new Vector3(Position.X, Position.Y, Position.Z);
+        var currentPosition = Waypoints.Count > 0
+            ? Waypoints.Peek()
+            : new Vector3(Position.X, Position.Y, Position.Z);
 
-        // NOTE: This is garbage and shouldn't be a hardcoded constant here.
-        // Should figure out how to handle cases where the destination is close enough
-        // Perhaps this just goes in as an argument and can optionally be set.
-        // That, or a boolean that says "hey idc about following a pre-determined path,
-        // just move me to where I want directly". 
-        // Other option is to get the navmesh graph stuff going so that we can finer
-        // pathfinding.
-        const float DirectMoveThreshold = 20f;
+        var goalPosition = Goal.GetPosition();
+        var path = Zone.Pathfinder.FindPath(currentPosition, goalPosition);
 
-        if (Vector3.Distance(currentPosition, goalPosition) <= DirectMoveThreshold)
+        if (IsSimilarPath(_lastComputedPath, path))
+            return;
+
+        _lastComputedPath = path;
+
+        Waypoints = new Queue<Vector3>();
+
+        // NOTE: This may not be stable in practice. We might want to detour to the nearest
+        // node in some cases, but until we get navmesh graphs, I think this will be fine.
+        if (path.Count <= 1)
         {
-            Waypoints = new Queue<Vector3>();
             Waypoints.Enqueue(goalPosition);
             return;
         }
 
-        var path = Zone.Pathfinder.FindPath(currentPosition, goalPosition);
-
-        Waypoints = new Queue<Vector3>();
         foreach (var node in path)
-        {
             Waypoints.Enqueue(node.Position);
-        }
 
         Waypoints.Enqueue(goalPosition);
     }
@@ -428,5 +453,21 @@ public class Npc : IEntity
         {
             visiblePlayer.Value.SendTunneled(packet);
         }
+    }
+
+    private static bool IsSimilarPath(List<MapNode> oldPath, List<MapNode> newPath)
+    {
+        if (oldPath.Count == 0 || newPath.Count == 0)
+            return false;
+
+        var overlap = Math.Min(oldPath.Count, newPath.Count);
+
+        for (var i = 1; i <= overlap; i++)
+        {
+            if (oldPath[^i].Id != newPath[^i].Id)
+                return false;
+        }
+
+        return true;
     }
 }
