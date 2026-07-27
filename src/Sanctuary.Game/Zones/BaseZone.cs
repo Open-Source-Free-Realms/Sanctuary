@@ -60,8 +60,6 @@ public abstract class BaseZone : IZone, IDisposable
     public IEnumerable<Npc> Npcs => _npcs.Values;
     public IEnumerable<Player> Players => _players.Values;
 
-    private ScriptContext ScriptContext => GetOrCreateScriptContext();
-
     protected BaseZone(BaseZoneDefinition zoneDefinition, IServiceProvider serviceProvider)
     {
         _zoneDefinition = zoneDefinition;
@@ -90,7 +88,7 @@ public abstract class BaseZone : IZone, IDisposable
     public virtual void OnStart()
     {
         // fire and forget. safe since CallAsMethodAsync does not throw.
-        _ = ScriptContext.GetEvent("onStart").CallAsMethodAsync().AsTask();
+        _ = GetOrCreateScriptContext().GetEvent("onStart").CallAsMethodAsync().AsTask();
 
         ActivateCollectionNodePools();
     }
@@ -105,7 +103,7 @@ public abstract class BaseZone : IZone, IDisposable
 
     #endregion
 
-    private ScriptContext GetOrCreateScriptContext()
+    public ScriptContext GetOrCreateScriptContext()
     {
         if (_scriptManager.GetContextForZone(this, out var context))
         {
@@ -117,7 +115,13 @@ public abstract class BaseZone : IZone, IDisposable
         return context;
     }
 
-    #region Scripting
+    public bool TryAddScript(string scriptName)
+    {
+        // TODO: zones currently only support one, self-named script
+        return false;
+    }
+
+    #region Scripting API
 
     public bool TrySpawnNpc(int npcId, ulong? npcGuid, float x, float y, float z, float heading, [MaybeNullWhen(false)] out IScriptNpc npc)
     {

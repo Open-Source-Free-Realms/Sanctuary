@@ -1,10 +1,8 @@
 using Microsoft.Extensions.Logging;
 
-using Sanctuary.Core.Collections;
-
 namespace Sanctuary.Scripting;
 
-public interface IScriptNpc
+public interface IScriptNpc : IScript
 {
     public ulong Guid { get; init; }
     public string? Name { get; set; }

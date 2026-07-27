@@ -79,8 +79,6 @@ public class Npc : IScriptNpc, IEntity
     private readonly IScriptManager _scriptManager;
     private ConcurrentSet<string> _scripts { get; } = [];
 
-    private ScriptContext ScriptContext => GetOrCreateScriptContext();
-
     public Npc(IZone zone, IScriptManager scriptManager)
     {
         Zone = zone;
@@ -123,12 +121,12 @@ public class Npc : IScriptNpc, IEntity
 
     public virtual async Task UpdateEveryTick()
     {
-        await ScriptContext.GetEvent("onTick").CallAsMethodAsync();
+        await GetOrCreateScriptContext().GetEvent("onTick").CallAsMethodAsync();
     }
 
     public virtual async Task UpdateEverySecond()
     {
-        await ScriptContext.GetEvent("onSecond").CallAsMethodAsync();
+        await GetOrCreateScriptContext().GetEvent("onSecond").CallAsMethodAsync();
     }
 
     public void UpdatePosition(Vector4 position, Quaternion rotation, bool updateZoneArea = true)
@@ -320,7 +318,7 @@ public class Npc : IScriptNpc, IEntity
 
     #endregion
 
-    private ScriptContext GetOrCreateScriptContext()
+    public ScriptContext GetOrCreateScriptContext()
     {
         if (_scriptManager.GetContextForNpc(this, out var context))
         {
@@ -334,11 +332,13 @@ public class Npc : IScriptNpc, IEntity
 
     public bool TryAddScript(string scriptName)
     {
+        var context = GetOrCreateScriptContext();
+
         if (!_scripts.TryAdd(scriptName))
             return false;
 
         // Fire and forget. safe since LoadScriptAsync does not throw.
-        _ = ScriptContext.LoadScriptAsync("Npc", scriptName).AsTask();
+        _ = context.LoadScriptAsync("Npc", scriptName).AsTask();
 
         return true;
     }

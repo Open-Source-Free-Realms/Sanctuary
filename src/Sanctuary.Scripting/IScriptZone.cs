@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Sanctuary.Scripting;
 
-public interface IScriptZone
+public interface IScriptZone : IScript
 {
     int Id { get; }
     string Name { get; }

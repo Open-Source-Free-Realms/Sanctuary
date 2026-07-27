@@ -47,11 +47,10 @@ public class ScriptingTests
 
         var zoneScriptsDirectory = ScriptManager.GetScriptsDirectory("Zone");
         var luaFiles = Directory.GetFiles(zoneScriptsDirectory, "*.lua");
-
         foreach (var luaFile in luaFiles)
         {
             _logger.LogInformation("Loading script: {ScriptFilePath}", luaFile);
-            _ = await context!.LoadScriptAsync("Zone", Path.GetFileName(luaFile));
+            _ = await context!.LoadScriptAsync(luaFile);
         }
     }
 
@@ -67,7 +66,7 @@ public class ScriptingTests
         foreach (var luaFile in luaFiles)
         {
             _logger.LogInformation("Loading script: {ScriptFilePath}", luaFile);
-            _ = await context!.LoadScriptAsync("Npc", Path.GetFileName(luaFile));
+            _ = await context!.LoadScriptAsync(luaFile);
         }
     }
 
