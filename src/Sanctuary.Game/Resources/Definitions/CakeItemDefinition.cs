@@ -18,8 +18,6 @@ public class CakeItemDefinition
 
     // BossCake
     public int[] TransformAbilityIds { get; set; } = [];
-
-    public string? Comment { get; set; }
 }
 
 public enum CakeItemType

@@ -6,5 +6,4 @@ public class FoodEffectDefinition
     public int CompositeEffectId { get; set; }
     public int QuickChatId { get; set; }
     public int EffectDelayMs { get; set; }
-    public string? Comment { get; set; }
 }
