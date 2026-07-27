@@ -128,6 +128,9 @@ public class Npc : IEntity
 
     public virtual void UpdateEveryTick()
     {
+        // TODO: Perhaps all of this logic should live elsewhere and just get called here.
+        // Feels like this is just bloating a function that is fairly importable.
+
         if (this.Waypoints.Count == 0)
         {
             return;
@@ -167,6 +170,8 @@ public class Npc : IEntity
 
     public virtual void UpdateEverySecond()
     {
+        // TODO: How well does this scale? Do we eventually want concurrency/parallelization (didn't really
+        // look and see if something like that is already handeled at the higher-level).
         RecomputePath();
     }
 
@@ -393,14 +398,8 @@ public class Npc : IEntity
 
     public void Chase(Player player)
     {
-        Goal = new MovementGoal.ChaseEntity(player);
-        RecomputePath();
-    }
-
-    public void StopMoving()
-    {
-        Goal = null;
-        Waypoints = new Queue<Vector3>();
+        // TODO: not stable
+        throw new NotSupportedException("NPC chasing is not yet ready.");
     }
 
     private void RecomputePath()

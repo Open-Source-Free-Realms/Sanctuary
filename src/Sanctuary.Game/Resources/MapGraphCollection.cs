@@ -7,18 +7,13 @@ using Sanctuary.Game.Pathfinding;
 
 namespace Sanctuary.Game.Resources;
 
+// Another "vibe-coded" file. Going to leave the basic parts of the summary here
+// - Alko
 
 /// <summary>
 /// Loaded ".map" waypoint graphs, keyed by zone name (the filename
 /// without extension - e.g. "bw_tanglewood_fort" from
 /// "bw_tanglewood_fort.map").
-///
-/// Unlike zones/items/most other resources, most zones do NOT have a
-/// .map file yet, and that's expected, not an error - pathfinding via
-/// this system is an optional, supplementary capability some zones
-/// have and most don't (yet). Load() is deliberately more lenient than
-/// ZoneDefinitionCollection's: a missing Maps directory, or a zone
-/// with no corresponding .map file, is not a startup-blocking failure.
 /// </summary>
 public class MapGraphCollection : ObservableConcurrentDictionary<string, MapGraph>
 {
