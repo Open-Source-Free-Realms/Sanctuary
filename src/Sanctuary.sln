@@ -29,6 +29,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Resources", "Resources", "{
 	ProjectSection(SolutionItems) = preProject
 		Resources\ClientItemDefinitions.json = Resources\ClientItemDefinitions.json
 		Resources\CoinStoreItems.json = Resources\CoinStoreItems.json
+		Resources\Consumables.json = Resources\Consumables.json
 		Resources\ItemCategories.txt = Resources\ItemCategories.txt
 		Resources\ItemCategoryGroups.txt = Resources\ItemCategoryGroups.txt
 		Resources\ItemClasses.txt = Resources\ItemClasses.txt
