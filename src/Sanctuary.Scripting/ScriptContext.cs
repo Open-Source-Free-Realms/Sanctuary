@@ -122,6 +122,11 @@ public class ScriptContext
         }
     }
 
+    public bool LoadScript(string scriptFilePath)
+    {
+        return LoadScriptAsync(scriptFilePath).AsTask().GetAwaiter().GetResult();
+    }
+
     public ScriptFunction? GetFunction(string functionName)
     {
         // Highest priority first; return the first script that currently defines the function.

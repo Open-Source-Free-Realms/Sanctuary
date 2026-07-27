@@ -89,12 +89,10 @@ public abstract class BaseZone : IZone, IDisposable
 
     public virtual void OnStart()
     {
-        var context = ScriptContext;
-
-        if (context is not null)
+        if (ScriptContext is not null && ScriptContext.LoadScript(Name))
         {
             // fire and forget. safe since CallAsMethodAsync does not throw.
-            _ = context.GetEvent("onStart").CallAsMethodAsync().AsTask();
+            _ = ScriptContext.GetEvent("onStart").CallAsMethodAsync().AsTask();
         }
 
         ActivateCollectionNodePools();
