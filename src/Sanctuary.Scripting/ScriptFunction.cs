@@ -13,30 +13,38 @@ public class ScriptFunction
     private readonly ScriptRuntime _runtime;
     private readonly ILogger _logger;
     private readonly ILuaUserData? _self;
-    private readonly LuaValue _function;
+    private readonly LuaTable _environment;
     private readonly string _functionName;
 
-    internal ScriptFunction(ScriptRuntime runtime, ILogger logger, ILuaUserData? self, LuaValue function, string functionName)
+    internal ScriptFunction(ScriptRuntime runtime, ILogger logger, ILuaUserData? self, LuaTable environment, string functionName)
     {
         _runtime = runtime;
         _logger = logger;
         _self = self;
-        _function = function;
+        _environment = environment;
         _functionName = functionName;
     }
 
     public async ValueTask<object?[]?> CallAsync(params object?[] args)
     {
+        // Resolve the function from its environment at call time so scripts can reassign it at runtime.
+        if (!TryResolve(out var function))
+            return null;
+
         var luaArgs = new LuaValue[args.Length];
 
         for (var i = 0; i < args.Length; i++)
             luaArgs[i] = ToLuaValue(args[i]);
 
-        return await CallAsync(luaArgs);
+        return await CallAsync(function, luaArgs);
     }
 
     public async ValueTask<object?[]?> CallAsMethodAsync(params object?[] args)
     {
+        // Resolve the function from its environment at call time so scripts can reassign it at runtime.
+        if (!TryResolve(out var function))
+            return null;
+
         var luaArgs = new LuaValue[args.Length + 1];
 
         luaArgs[0] = ToLuaValue(_self);
@@ -44,14 +52,19 @@ public class ScriptFunction
         for (var i = 0; i < args.Length; i++)
             luaArgs[i + 1] = ToLuaValue(args[i]);
 
-        return await CallAsync(luaArgs);
+        return await CallAsync(function, luaArgs);
     }
 
-    private async ValueTask<object?[]?> CallAsync(params LuaValue[] args)
+    private bool TryResolve(out LuaValue function)
+    {
+        return _environment.TryGetValue(_functionName, out function) && function.Type == LuaValueType.Function;
+    }
+
+    private async ValueTask<object?[]?> CallAsync(LuaValue function, LuaValue[] args)
     {
         try
         {
-            var results = await _runtime.CallAsync(_function, args);
+            var results = await _runtime.CallAsync(function, args);
             return [.. results.Select(FromLuaValue)];
         }
         catch (Exception ex)

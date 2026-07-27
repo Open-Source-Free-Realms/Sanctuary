@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
+using Sanctuary.Core.Collections;
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -74,7 +75,7 @@ public class Npc : IScriptNpc, IEntity
 
     public List<CharacterAttachmentData> Attachments { get; set; } = [];
 
-    public string? ScriptName { get; set; }
+    public ConcurrentSet<string> Scripts { get; set; } = [];
 
     private readonly IScriptManager _scriptManager;
 
@@ -122,18 +123,18 @@ public class Npc : IScriptNpc, IEntity
 
     public virtual async Task UpdateEveryTick()
     {
-        var onTickFn = ScriptContext?.GetFunction("onTick");
+        var context = ScriptContext;
 
-        if (onTickFn is not null)
-            await onTickFn.CallAsMethodAsync();
+        if (context is not null)
+            await context.GetEvent("onTick").CallAsMethodAsync();
     }
 
     public virtual async Task UpdateEverySecond()
     {
-        var onSecondFn = ScriptContext?.GetFunction("onSecond");
+        var context = ScriptContext;
 
-        if (onSecondFn is not null)
-            await onSecondFn.CallAsMethodAsync();
+        if (context is not null)
+            await context.GetEvent("onSecond").CallAsMethodAsync();
     }
 
     public void UpdatePosition(Vector4 position, Quaternion rotation, bool updateZoneArea = true)

@@ -4847,7 +4847,9 @@
     "Name": "Samantha",
     "ModelId": 958,
     "ModelFileName": "fairy_f_merigold.agr",
-    "ScriptName": "welcomer"
+    "Scripts": [
+      "welcomer"
+    ]
   },
   {
     "Id": 2046,

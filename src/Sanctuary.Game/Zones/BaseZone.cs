@@ -89,12 +89,12 @@ public abstract class BaseZone : IZone, IDisposable
 
     public virtual void OnStart()
     {
-        var onStartFn = ScriptContext?.GetFunction("onStart");
+        var context = ScriptContext;
 
-        if (onStartFn is not null)
+        if (context is not null)
         {
-            // fire and forget. safe since CallFunctionAsync does not throw.
-            _ = onStartFn.CallAsMethodAsync().AsTask();
+            // fire and forget. safe since CallAsMethodAsync does not throw.
+            _ = context.GetEvent("onStart").CallAsMethodAsync().AsTask();
         }
 
         ActivateCollectionNodePools();
@@ -201,9 +201,11 @@ public abstract class BaseZone : IZone, IDisposable
             ModelId = definition.ModelId,
             TextureAlias = definition.TextureAlias,
             Scale = scale,
-            ScriptName = definition.ScriptName,
             Visible = true
         };
+
+        foreach (var script in definition.Scripts ?? [])
+            npc.Scripts.TryAdd(script);
 
         return _npcs.TryAdd(npc.Guid, npc) && _entities.TryAdd(npc.Guid, npc);
     }

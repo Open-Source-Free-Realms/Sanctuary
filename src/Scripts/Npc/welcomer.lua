@@ -1,3 +1,5 @@
+---@priority 1
+
 local counter = 1
 
 function onSecond(npc)

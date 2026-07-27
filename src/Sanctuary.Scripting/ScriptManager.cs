@@ -19,7 +19,7 @@ public class ScriptManager : IScriptManager
     private readonly ScriptRuntime _runtime = new();
 
     private readonly ConcurrentDictionary<IScriptZone, ScriptContext> _zoneContexts = new();
-    private readonly ConcurrentDictionary<(IScriptNpc, string), ScriptContext> _npcContexts = new();
+    private readonly ConcurrentDictionary<IScriptNpc, ScriptContext> _npcContexts = new();
 
     public ScriptManager(ILoggerFactory loggerFactory)
     {
@@ -61,7 +61,7 @@ public class ScriptManager : IScriptManager
         _logger.LogInformation("Scripts reloaded");
     }
 
-    internal async ValueTask<LuaTable> LoadInstanceAsync(string path)
+    internal async ValueTask<LuaTable> CreateEnvAsync()
     {
         var env = new LuaTable
         {
@@ -69,8 +69,6 @@ public class ScriptManager : IScriptManager
         };
 
         env.Metatable["__index"] = _runtime.Environment; // read access to Lua std lib
-
-        await _runtime.ExecuteFileAsync(path, env);
 
         return env;
     }
@@ -92,7 +90,7 @@ public class ScriptManager : IScriptManager
 
         try
         {
-            var env = await LoadInstanceAsync(scriptFilePath);
+            var env = await CreateEnvAsync();
 
             var zoneUserData = ScriptableZone.GetOrCreate(zone);
 
@@ -109,37 +107,14 @@ public class ScriptManager : IScriptManager
 
     public async ValueTask<ScriptContext?> GetContextForNpcAsync(IScriptNpc npc)
     {
-        if (string.IsNullOrWhiteSpace(npc.ScriptName))
-        {
-            return null;
-        }
-
-        var scriptName = npc.ScriptName;
-
-        // Context is keyed by both the NPC *and* the script name, so a change in the script name yields a new context.
-        var contextKey = (npc, scriptName);
-
-        if (_npcContexts.TryGetValue(contextKey, out var existingContext))
-        {
-            return existingContext;
-        }
-
-        var scriptFilePath = Path.Combine(NpcScriptsDirectory, $"{scriptName}.lua");
-
-        if (!File.Exists(scriptFilePath))
-        {
-            _logger.LogWarning("Script '{ScriptName}' for NPC '{NpcName}' not found (looking in '{ScriptFilePath}').", scriptName, npc.Name, scriptFilePath);
-            return null;
-        }
-
         try
         {
-            var env = await LoadInstanceAsync(scriptFilePath);
+            var env = await CreateEnvAsync();
 
             var npcUserData = ScriptableNpc.GetOrCreate(npc);
 
             var context = new ScriptContext(_runtime, npc.Logger, env, npcUserData);
-            _npcContexts[contextKey] = context;
+            _npcContexts[npc] = context;
             return context;
         }
         catch (Exception ex)
