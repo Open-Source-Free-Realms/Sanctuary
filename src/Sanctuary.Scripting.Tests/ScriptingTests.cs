@@ -45,12 +45,13 @@ public class ScriptingTests
         var mockZone = new MockScriptZone(_logger);
         _scriptManager.GetContextForZone(mockZone, out var context);
 
-        var zoneScriptsDirectory = ScriptManager.ZoneScriptsDirectory;
+        var zoneScriptsDirectory = ScriptManager.GetScriptsDirectory("Zone");
         var luaFiles = Directory.GetFiles(zoneScriptsDirectory, "*.lua");
+
         foreach (var luaFile in luaFiles)
         {
             _logger.LogInformation("Loading script: {ScriptFilePath}", luaFile);
-            _ = await context!.LoadScriptAsync(luaFile);
+            _ = await context!.LoadScriptAsync("Zone", Path.GetFileName(luaFile));
         }
     }
 
@@ -61,12 +62,12 @@ public class ScriptingTests
         var mockNpc = new MockScriptNpc(mockZone);
         _scriptManager.GetContextForNpc(mockNpc, out var context);
 
-        var npcScriptsDirectory = ScriptManager.NpcScriptsDirectory;
+        var npcScriptsDirectory = ScriptManager.GetScriptsDirectory("Npc");
         var luaFiles = Directory.GetFiles(npcScriptsDirectory, "*.lua");
         foreach (var luaFile in luaFiles)
         {
             _logger.LogInformation("Loading script: {ScriptFilePath}", luaFile);
-            _ = await context!.LoadScriptAsync(luaFile);
+            _ = await context!.LoadScriptAsync("Npc", Path.GetFileName(luaFile));
         }
     }
 

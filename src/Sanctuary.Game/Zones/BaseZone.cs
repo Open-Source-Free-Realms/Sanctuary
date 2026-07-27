@@ -89,11 +89,8 @@ public abstract class BaseZone : IZone, IDisposable
 
     public virtual void OnStart()
     {
-        if (ScriptContext.LoadScript(Name))
-        {
-            // fire and forget. safe since CallAsMethodAsync does not throw.
-            _ = ScriptContext.GetEvent("onStart").CallAsMethodAsync().AsTask();
-        }
+        // fire and forget. safe since CallAsMethodAsync does not throw.
+        _ = ScriptContext.GetEvent("onStart").CallAsMethodAsync().AsTask();
 
         ActivateCollectionNodePools();
     }
@@ -114,7 +111,7 @@ public abstract class BaseZone : IZone, IDisposable
         {
             // Fresh context. Attach self-named script (all zones support right now).
             // Fire and forget. safe since LoadScriptAsync does not throw.
-            _ = context.LoadScriptAsync(Name).AsTask();
+            _ = context.LoadScriptAsync("Zone", Name).AsTask();
         }
 
         return context;

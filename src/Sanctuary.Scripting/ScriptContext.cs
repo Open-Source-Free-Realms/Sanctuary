@@ -62,7 +62,14 @@ public class ScriptContext
         });
     }
 
-    public async ValueTask<bool> LoadScriptAsync(string scriptFilePath)
+    public async ValueTask<bool> LoadScriptAsync(string scriptCategory, string scriptName)
+    {
+        var scriptFilePath = Path.Combine(ScriptManager.GetScriptsDirectory(scriptCategory), scriptName + ".lua");
+
+        return await LoadScriptAsync(scriptFilePath);
+    }
+
+    internal async ValueTask<bool> LoadScriptAsync(string scriptFilePath)
     {
         const string PriorityAnnotation = "---@priority ";
 
@@ -122,9 +129,9 @@ public class ScriptContext
         }
     }
 
-    public bool LoadScript(string scriptFilePath)
+    public bool LoadScript(string scriptCategory, string scriptName)
     {
-        return LoadScriptAsync(scriptFilePath).AsTask().GetAwaiter().GetResult();
+        return LoadScriptAsync(scriptCategory, scriptName).AsTask().GetAwaiter().GetResult();
     }
 
     public ScriptFunction? GetFunction(string functionName)

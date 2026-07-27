@@ -338,7 +338,7 @@ public class Npc : IScriptNpc, IEntity
             return false;
 
         // Fire and forget. safe since LoadScriptAsync does not throw.
-        _ = ScriptContext.LoadScriptAsync(scriptName).AsTask();
+        _ = ScriptContext.LoadScriptAsync("Npc", scriptName).AsTask();
 
         return true;
     }

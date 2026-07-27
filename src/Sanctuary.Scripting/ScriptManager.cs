@@ -12,8 +12,6 @@ namespace Sanctuary.Scripting;
 public class ScriptManager : IScriptManager
 {
     private static readonly string BaseDirectory = ResolveScriptsDirectory();
-    internal static readonly string ZoneScriptsDirectory = Path.Combine(BaseDirectory, "Zone");
-    internal static readonly string NpcScriptsDirectory = Path.Combine(BaseDirectory, "Npc");
 
     private readonly ILogger _logger;
     private readonly ScriptRuntime _runtime = new();
@@ -25,6 +23,8 @@ public class ScriptManager : IScriptManager
     {
         _logger = loggerFactory.CreateLogger<ScriptManager>();
     }
+
+    public static string GetScriptsDirectory(string category) => Path.Combine(BaseDirectory, category);
 
     private static string ResolveScriptsDirectory()
     {
