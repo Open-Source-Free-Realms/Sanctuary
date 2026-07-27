@@ -80,14 +80,6 @@ public class ScriptManager : IScriptManager
             return existingContext;
         }
 
-        var scriptFilePath = Path.Combine(ZoneScriptsDirectory, $"{zone.Name}.lua");
-
-        if (!File.Exists(scriptFilePath))
-        {
-            _logger.LogWarning("No script found for zone '{ZoneName}' (looking in '{ScriptFilePath}').", zone.Name, scriptFilePath);
-            return null;
-        }
-
         try
         {
             var env = await CreateEnvAsync();
@@ -107,6 +99,11 @@ public class ScriptManager : IScriptManager
 
     public async ValueTask<ScriptContext?> GetContextForNpcAsync(IScriptNpc npc)
     {
+        if (_npcContexts.TryGetValue(npc, out var existingContext))
+        {
+            return existingContext;
+        }
+
         try
         {
             var env = await CreateEnvAsync();
