@@ -3,7 +3,6 @@
   <PropertyGroup>
     <Nullable>enable</Nullable>
     <TargetFramework>$(TargetFramework)</TargetFramework>
-    <UserSecretsId>8697c0a4-eace-4a2f-8f40-e0eb5b4081e4</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
