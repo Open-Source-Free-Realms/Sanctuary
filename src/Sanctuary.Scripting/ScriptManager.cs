@@ -16,8 +16,7 @@ public class ScriptManager : IScriptManager
     private readonly ILogger _logger;
     private readonly ScriptRuntime _runtime = new();
 
-    private readonly ConcurrentDictionary<IScriptZone, ScriptContext> _zoneContexts = new();
-    private readonly ConcurrentDictionary<IScriptNpc, ScriptContext> _npcContexts = new();
+    private readonly ConcurrentDictionary<IScript, ScriptContext> _contexts = new();
 
     public ScriptManager(ILoggerFactory loggerFactory)
     {
@@ -55,8 +54,7 @@ public class ScriptManager : IScriptManager
     {
         _logger.LogDebug("Reloading scripts...");
 
-        _zoneContexts.Clear();
-        _npcContexts.Clear();
+        _contexts.Clear();
 
         _logger.LogInformation("Scripts reloaded");
     }
@@ -73,9 +71,14 @@ public class ScriptManager : IScriptManager
         return env;
     }
 
+    public bool DeleteContext(IScript script)
+    {
+        return _contexts.TryRemove(script, out _);
+    }
+
     public bool GetContextForZone(IScriptZone zone, out ScriptContext context)
     {
-        if (_zoneContexts.TryGetValue(zone, out var existingContext))
+        if (_contexts.TryGetValue(zone, out var existingContext))
         {
             context = existingContext;
             return false;
@@ -86,13 +89,13 @@ public class ScriptManager : IScriptManager
         var zoneUserData = ScriptableZone.GetOrCreate(zone);
 
         context = new ScriptContext(_runtime, zone.Logger, env, zoneUserData);
-        _zoneContexts[zone] = context;
+        _contexts[zone] = context;
         return true;
     }
 
     public bool GetContextForNpc(IScriptNpc npc, out ScriptContext context)
     {
-        if (_npcContexts.TryGetValue(npc, out var existingContext))
+        if (_contexts.TryGetValue(npc, out var existingContext))
         {
             context = existingContext;
             return false;
@@ -103,7 +106,7 @@ public class ScriptManager : IScriptManager
         var npcUserData = ScriptableNpc.GetOrCreate(npc);
 
         context = new ScriptContext(_runtime, npc.Logger, env, npcUserData);
-        _npcContexts[npc] = context;
+        _contexts[npc] = context;
         return true;
     }
 }

@@ -43,6 +43,8 @@ public static class ChatCommandRegistry
         ["demote"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin demote [player]", Demote),
         ["reload"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin reload", Reload),
         ["help"] = new ChatCommandDefinition(ChatCommandRole.Mod, "!admin help", Help),
+        ["addscript"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin addscript [scriptName]", AddScript),
+        ["removescript"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin removescript [scriptName]", RemoveScript),
         ["collection"] = new ChatCommandDefinition(ChatCommandRole.Admin,
             "!admin collection <pools|configure [pool] [maxActive] [respawnSeconds]|place [pool]|remove [radius|#id]|list [pool] [page]>", Collection),
     };
@@ -361,6 +363,64 @@ public static class ChatCommandRegistry
         _scriptManager.Reload();
 
         SendSystemMessage(connection, "All scripts have been reloaded.");
+    }
+
+    private static void AddScript(GatewayConnection connection, string[] args)
+    {
+        if (args.Length < 1)
+        {
+            SendSystemMessage(connection, $"Usage: {Commands["addscript"].Usage}");
+            return;
+        }
+
+        string scriptName = args[0];
+
+        var nearestNpc = connection.Player.Zone.Npcs
+            .OrderBy(npc => System.Numerics.Vector4.Distance(npc.Position, connection.Player.Position))
+            .FirstOrDefault();
+
+        if (nearestNpc is null)
+        {
+            SendSystemMessage(connection, "No NPCs found in the zone to add a script to.");
+            return;
+        }
+
+        if (!nearestNpc.TryAddScript(scriptName))
+        {
+            SendSystemMessage(connection, $"Failed to add script {scriptName} to NPC {nearestNpc.Name}.");
+            return;
+        }
+
+        SendSystemMessage(connection, $"Successfully added script {scriptName} to NPC {nearestNpc.Name}.");
+    }
+
+    private static void RemoveScript(GatewayConnection connection, string[] args)
+    {
+        if (args.Length < 1)
+        {
+            SendSystemMessage(connection, $"Usage: {Commands["removescript"].Usage}");
+            return;
+        }
+
+        string scriptName = args[0];
+
+        var nearestNpc = connection.Player.Zone.Npcs
+            .OrderBy(npc => System.Numerics.Vector4.Distance(npc.Position, connection.Player.Position))
+            .FirstOrDefault();
+
+        if (nearestNpc is null)
+        {
+            SendSystemMessage(connection, "No NPCs found in the zone to remove a script from.");
+            return;
+        }
+
+        if (!nearestNpc.TryRemoveScript(scriptName))
+        {
+            SendSystemMessage(connection, $"Failed to remove script {scriptName} from NPC {nearestNpc.Name}.");
+            return;
+        }
+
+        SendSystemMessage(connection, $"Successfully removed script {scriptName} from NPC {nearestNpc.Name}.");
     }
 
     private static void Help(GatewayConnection connection, string[] args)

@@ -318,13 +318,15 @@ public class Npc : IScriptNpc, IEntity
 
     #endregion
 
+    #region IScript
+
     public ScriptContext GetOrCreateScriptContext()
     {
         if (_scriptManager.GetContextForNpc(this, out var context))
         {
             // Fresh context. Load all attached scripts into it.
             foreach (var scriptName in _scripts)
-                TryAddScript(scriptName);
+                context.LoadScriptInBackground("Npc", scriptName);
         }
 
         return context;
@@ -337,11 +339,22 @@ public class Npc : IScriptNpc, IEntity
         if (!_scripts.TryAdd(scriptName))
             return false;
 
-        // Fire and forget. safe since LoadScriptAsync does not throw.
-        _ = context.LoadScriptAsync("Npc", scriptName).AsTask();
+        context.LoadScriptInBackground("Npc", scriptName);
 
         return true;
     }
+
+    public bool TryRemoveScript(string scriptName)
+    {
+        if (!_scripts.TryRemove(scriptName))
+            return false;
+
+        // No way to unload a script; need to delete the entire context.
+        // Next time it is created, the removed script will not be loaded.
+        return _scriptManager.DeleteContext(this);
+    }
+
+    #endregion
 
     #region Scripting API
 

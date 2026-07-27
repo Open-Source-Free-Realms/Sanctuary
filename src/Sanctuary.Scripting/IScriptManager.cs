@@ -6,6 +6,8 @@ public interface IScriptManager
 
     void Reload();
 
+    bool DeleteContext(IScript script);
+
     bool GetContextForZone(IScriptZone zone, out ScriptContext context);
 
     bool GetContextForNpc(IScriptNpc npc, out ScriptContext context);

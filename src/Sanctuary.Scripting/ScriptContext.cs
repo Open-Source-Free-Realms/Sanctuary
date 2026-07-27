@@ -134,6 +134,12 @@ public class ScriptContext
         return LoadScriptAsync(scriptCategory, scriptName).AsTask().GetAwaiter().GetResult();
     }
 
+    public void LoadScriptInBackground(string scriptCategory, string scriptName)
+    {
+        // Fire and forget; safe since LoadScriptAsync does not throw.
+        _ = LoadScriptAsync(scriptCategory, scriptName).AsTask();
+    }
+
     public ScriptFunction? GetFunction(string functionName)
     {
         // Highest priority first; return the first script that currently defines the function.

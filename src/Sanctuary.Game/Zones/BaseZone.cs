@@ -103,6 +103,8 @@ public abstract class BaseZone : IZone, IDisposable
 
     #endregion
 
+    #region IScript
+
     public ScriptContext GetOrCreateScriptContext()
     {
         if (_scriptManager.GetContextForZone(this, out var context))
@@ -120,6 +122,14 @@ public abstract class BaseZone : IZone, IDisposable
         // TODO: zones currently only support one, self-named script
         return false;
     }
+
+    public bool TryRemoveScript(string scriptName)
+    {
+        // TODO: zones currently only support one, self-named script
+        return false;
+    }
+
+    #endregion
 
     #region Scripting API
 
