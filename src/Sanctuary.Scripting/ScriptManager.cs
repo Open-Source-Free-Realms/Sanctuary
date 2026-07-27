@@ -61,7 +61,7 @@ public class ScriptManager : IScriptManager
         _logger.LogInformation("Scripts reloaded");
     }
 
-    internal async ValueTask<LuaTable> CreateEnvAsync()
+    internal LuaTable CreateEnv()
     {
         var env = new LuaTable
         {
@@ -73,61 +73,37 @@ public class ScriptManager : IScriptManager
         return env;
     }
 
-    public async ValueTask<ScriptContext?> GetContextForZoneAsync(IScriptZone zone)
+    public bool GetContextForZone(IScriptZone zone, out ScriptContext context)
     {
         if (_zoneContexts.TryGetValue(zone, out var existingContext))
         {
-            return existingContext;
+            context = existingContext;
+            return false;
         }
 
-        try
-        {
-            var env = await CreateEnvAsync();
+        var env = CreateEnv();
 
-            var zoneUserData = ScriptableZone.GetOrCreate(zone);
+        var zoneUserData = ScriptableZone.GetOrCreate(zone);
 
-            var context = new ScriptContext(_runtime, zone.Logger, env, zoneUserData);
-            _zoneContexts[zone] = context;
-            return context;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to load script for zone '{ZoneName}'", zone.Name);
-            return null;
-        }
+        context = new ScriptContext(_runtime, zone.Logger, env, zoneUserData);
+        _zoneContexts[zone] = context;
+        return true;
     }
 
-    public async ValueTask<ScriptContext?> GetContextForNpcAsync(IScriptNpc npc)
+    public bool GetContextForNpc(IScriptNpc npc, out ScriptContext context)
     {
         if (_npcContexts.TryGetValue(npc, out var existingContext))
         {
-            return existingContext;
+            context = existingContext;
+            return false;
         }
 
-        try
-        {
-            var env = await CreateEnvAsync();
+        var env = CreateEnv();
 
-            var npcUserData = ScriptableNpc.GetOrCreate(npc);
+        var npcUserData = ScriptableNpc.GetOrCreate(npc);
 
-            var context = new ScriptContext(_runtime, npc.Logger, env, npcUserData);
-            _npcContexts[npc] = context;
-            return context;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to load script for NPC '{NpcName}'", npc.Name);
-            return null;
-        }
-    }
-
-    public ScriptContext? GetContextForZone(IScriptZone zone)
-    {
-        return GetContextForZoneAsync(zone).AsTask().GetAwaiter().GetResult();
-    }
-
-    public ScriptContext? GetContextForNpc(IScriptNpc npc)
-    {
-        return GetContextForNpcAsync(npc).AsTask().GetAwaiter().GetResult();
+        context = new ScriptContext(_runtime, npc.Logger, env, npcUserData);
+        _npcContexts[npc] = context;
+        return true;
     }
 }

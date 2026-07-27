@@ -8,7 +8,6 @@ public interface IScriptNpc
 {
     public ulong Guid { get; init; }
     public string? Name { get; set; }
-    public ConcurrentSet<string> Scripts { get; set; }
     public ILogger Logger { get; }
     public IScriptZone Zone { get; }
 

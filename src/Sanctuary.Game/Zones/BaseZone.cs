@@ -60,7 +60,7 @@ public abstract class BaseZone : IZone, IDisposable
     public IEnumerable<Npc> Npcs => _npcs.Values;
     public IEnumerable<Player> Players => _players.Values;
 
-    private ScriptContext? ScriptContext => _scriptManager.GetContextForZone(this);
+    private ScriptContext ScriptContext => GetOrCreateScriptContext();
 
     protected BaseZone(BaseZoneDefinition zoneDefinition, IServiceProvider serviceProvider)
     {
@@ -89,7 +89,7 @@ public abstract class BaseZone : IZone, IDisposable
 
     public virtual void OnStart()
     {
-        if (ScriptContext is not null && ScriptContext.LoadScript(Name))
+        if (ScriptContext.LoadScript(Name))
         {
             // fire and forget. safe since CallAsMethodAsync does not throw.
             _ = ScriptContext.GetEvent("onStart").CallAsMethodAsync().AsTask();
@@ -107,6 +107,18 @@ public abstract class BaseZone : IZone, IDisposable
     }
 
     #endregion
+
+    private ScriptContext GetOrCreateScriptContext()
+    {
+        if (_scriptManager.GetContextForZone(this, out var context))
+        {
+            // Fresh context. Attach self-named script (all zones support right now).
+            // Fire and forget. safe since LoadScriptAsync does not throw.
+            _ = context.LoadScriptAsync(Name).AsTask();
+        }
+
+        return context;
+    }
 
     #region Scripting
 
@@ -202,10 +214,19 @@ public abstract class BaseZone : IZone, IDisposable
             Visible = true
         };
 
-        foreach (var script in definition.Scripts ?? [])
-            npc.Scripts.TryAdd(script);
+        if (!_npcs.TryAdd(npc.Guid, npc) || !_entities.TryAdd(npc.Guid, npc))
+        {
+            npc = null;
+            return false;
+        }
 
-        return _npcs.TryAdd(npc.Guid, npc) && _entities.TryAdd(npc.Guid, npc);
+        foreach (var script in definition.Scripts ?? [])
+        {
+            if (!npc.TryAddScript(script))
+                _logger.LogWarning("NPC {NpcName} ({NpcGuid}) already has script {Script}", npc.Name, npc.Guid, script);
+        }
+
+        return true;
     }
 
     public IReadOnlyList<CollectionNodePoolStatus> GetCollectionNodePoolStatuses()

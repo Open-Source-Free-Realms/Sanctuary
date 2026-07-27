@@ -75,11 +75,11 @@ public class Npc : IScriptNpc, IEntity
 
     public List<CharacterAttachmentData> Attachments { get; set; } = [];
 
-    public ConcurrentSet<string> Scripts { get; set; } = [];
 
     private readonly IScriptManager _scriptManager;
+    private ConcurrentSet<string> _scripts { get; } = [];
 
-    private ScriptContext? ScriptContext => _scriptManager.GetContextForNpc(this);
+    private ScriptContext ScriptContext => GetOrCreateScriptContext();
 
     public Npc(IZone zone, IScriptManager scriptManager)
     {
@@ -123,18 +123,12 @@ public class Npc : IScriptNpc, IEntity
 
     public virtual async Task UpdateEveryTick()
     {
-        var context = ScriptContext;
-
-        if (context is not null)
-            await context.GetEvent("onTick").CallAsMethodAsync();
+        await ScriptContext.GetEvent("onTick").CallAsMethodAsync();
     }
 
     public virtual async Task UpdateEverySecond()
     {
-        var context = ScriptContext;
-
-        if (context is not null)
-            await context.GetEvent("onSecond").CallAsMethodAsync();
+        await ScriptContext.GetEvent("onSecond").CallAsMethodAsync();
     }
 
     public void UpdatePosition(Vector4 position, Quaternion rotation, bool updateZoneArea = true)
@@ -326,7 +320,30 @@ public class Npc : IScriptNpc, IEntity
 
     #endregion
 
-    #region Scripting
+    private ScriptContext GetOrCreateScriptContext()
+    {
+        if (_scriptManager.GetContextForNpc(this, out var context))
+        {
+            // Fresh context. Load all attached scripts into it.
+            foreach (var scriptName in _scripts)
+                TryAddScript(scriptName);
+        }
+
+        return context;
+    }
+
+    public bool TryAddScript(string scriptName)
+    {
+        if (!_scripts.TryAdd(scriptName))
+            return false;
+
+        // Fire and forget. safe since LoadScriptAsync does not throw.
+        _ = ScriptContext.LoadScriptAsync(scriptName).AsTask();
+
+        return true;
+    }
+
+    #region Scripting API
 
     // Explicit interface implementation needed here to avoid exposing all of IZone to the scripting layer.
     IScriptZone IScriptNpc.Zone => Zone;
