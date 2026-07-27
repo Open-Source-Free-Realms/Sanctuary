@@ -110,8 +110,8 @@ public abstract class BaseZone : IZone, IDisposable
         if (_scriptManager.GetContextForZone(this, out var context))
         {
             // Fresh context. Attach self-named script (all zones support right now).
-            // Fire and forget. safe since LoadScriptAsync does not throw.
-            _ = context.LoadScriptAsync("Zone", Name).AsTask();
+            // This needs to block so that the script is loaded before any events are fired.
+            context.LoadScript("Zone", Name);
         }
 
         return context;
