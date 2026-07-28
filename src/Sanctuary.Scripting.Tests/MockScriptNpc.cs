@@ -14,12 +14,27 @@ internal class MockScriptNpc(IScriptableZone _zone) : IScriptableNpc
 
     public IScriptableZone Zone => _zone;
 
+    public ScriptContext GetOrCreateScriptContext()
+    {
+        throw new System.NotImplementedException();
+    }
+
     public void Say(string message)
     {
         throw new System.NotImplementedException();
     }
 
     public void SayLocalized(int stringId)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public bool TryAddScript(string scriptName)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public bool TryRemoveScript(string scriptName)
     {
         throw new System.NotImplementedException();
     }
