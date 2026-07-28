@@ -93,8 +93,14 @@ public class ScriptManager : IScriptManager
             _ => throw new NotSupportedException($"No script wrapper for {scriptable.GetType().Name}.")
         };
 
-        context = new ScriptContext(_runtime, scriptable.Logger, env, userData);
-        _contexts[scriptable] = context;
-        return true;
+        var newContext = new ScriptContext(_runtime, scriptable.Logger, env, userData);
+
+        // GetOrAdd is atomic, so if another thread is creating a context for the same object
+        // at the same time, we'll get the existing one instead of overwriting it.
+        context = _contexts.GetOrAdd(scriptable, newContext);
+
+        var fresh = context == newContext;
+
+        return fresh;
     }
 }

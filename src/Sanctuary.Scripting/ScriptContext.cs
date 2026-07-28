@@ -65,6 +65,12 @@ public class ScriptContext
 
     public async ValueTask<bool> LoadScriptAsync(string scriptCategory, string scriptName)
     {
+        if (Path.GetFileName(scriptName) != scriptName)
+        {
+            _logger.LogWarning("Script name {ScriptName} contains invalid characters; skipping", scriptName);
+            return false;
+        }
+
         var scriptFilePath = Path.Combine(ScriptManager.GetScriptsDirectory(scriptCategory), scriptName + ".lua");
 
         return await LoadScriptAsync(scriptFilePath);

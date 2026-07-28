@@ -31,11 +31,7 @@ public class ScriptingTests
 
         _logger = _serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Tests");
         _scriptManager = _serviceProvider.GetRequiredService<ScriptManager>();
-    }
 
-    [TestMethod]
-    public void InitSucceeds()
-    {
         _scriptManager.Load();
     }
 
@@ -49,8 +45,8 @@ public class ScriptingTests
         var luaFiles = Directory.GetFiles(zoneScriptsDirectory, "*.lua");
         foreach (var luaFile in luaFiles)
         {
-            _logger.LogInformation("Loading script: {ScriptFilePath}", luaFile);
-            _ = await context!.LoadScriptAsync(luaFile);
+            _logger.LogInformation("Loading zone script: {ScriptFilePath}", luaFile);
+            Assert.IsTrue(await context.LoadScriptAsync(luaFile), "Failed to load zone script: {ScriptFilePath}", luaFile);
         }
     }
 
@@ -65,8 +61,8 @@ public class ScriptingTests
         var luaFiles = Directory.GetFiles(npcScriptsDirectory, "*.lua");
         foreach (var luaFile in luaFiles)
         {
-            _logger.LogInformation("Loading script: {ScriptFilePath}", luaFile);
-            _ = await context!.LoadScriptAsync(luaFile);
+            _logger.LogInformation("Loading NPC script: {ScriptFilePath}", luaFile);
+            Assert.IsTrue(await context.LoadScriptAsync(luaFile), "Failed to load NPC script: {ScriptFilePath}", luaFile);
         }
     }
 
