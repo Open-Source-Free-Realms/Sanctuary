@@ -422,7 +422,7 @@ public static class ChatCommandRegistry
             return;
         }
 
-        string targetType = args[0].ToLower();
+        string targetType = args[0].ToLowerInvariant();
         string scriptName = args[1];
 
         switch (targetType)
