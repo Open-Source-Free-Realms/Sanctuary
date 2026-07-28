@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Text;
@@ -164,12 +165,16 @@ public class ScriptContext
     private ScriptEvent BuildEvent(string functionName)
     {
         var environments = _environments;
-        var functions = new ScriptFunction[environments.Count];
+        var functions = new List<ScriptFunction>();
 
-        var index = 0;
         foreach (var environment in environments.Values)
         {
-            functions[index++] = new ScriptFunction(_runtime, _logger, UserData, environment, functionName);
+            // Only include scripts that actually define the handler, so HasHandlers stays accurate
+            // and we don't resolve missing functions on every invocation.
+            if (environment.TryGetValue(functionName, out var function) && function.Type == LuaValueType.Function)
+            {
+                functions.Add(new ScriptFunction(_runtime, _logger, UserData, environment, functionName));
+            }
         }
 
         return new ScriptEvent(functions);

@@ -121,12 +121,14 @@ public class Npc : IScriptableNpc, IEntity
 
     public virtual async Task UpdateEveryTick()
     {
-        await GetOrCreateScriptContext().GetEvent("onTick").CallAsMethodAsync();
+        if (!_scripts.IsEmpty)
+            await GetOrCreateScriptContext().GetEvent("onTick").CallAsMethodAsync();
     }
 
     public virtual async Task UpdateEverySecond()
     {
-        await GetOrCreateScriptContext().GetEvent("onSecond").CallAsMethodAsync();
+        if (!_scripts.IsEmpty)
+            await GetOrCreateScriptContext().GetEvent("onSecond").CallAsMethodAsync();
     }
 
     public void UpdatePosition(Vector4 position, Quaternion rotation, bool updateZoneArea = true)
@@ -396,6 +398,8 @@ public class Npc : IScriptableNpc, IEntity
             visiblePlayer.Value.OnRemoveVisibleNpcs([this]);
 
         RemoveFromZone();
+
+        _scriptManager.DeleteContext(this);
     }
 
     protected void DisposeGracefully(bool animate, int delay, int effectDelay, int compositeEffectId, int duration)
