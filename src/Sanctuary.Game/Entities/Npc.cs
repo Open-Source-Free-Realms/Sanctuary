@@ -318,7 +318,7 @@ public class Npc : IScriptableNpc, IEntity
 
     #endregion
 
-    #region IScript
+    #region IScriptable
 
     public ScriptContext GetOrCreateScriptContext()
     {

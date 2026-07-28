@@ -43,8 +43,8 @@ public static class ChatCommandRegistry
         ["demote"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin demote [player]", Demote),
         ["reload"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin reload", Reload),
         ["help"] = new ChatCommandDefinition(ChatCommandRole.Mod, "!admin help", Help),
-        ["addscript"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin addscript [scriptName]", AddScript),
-        ["removescript"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin removescript [scriptName]", RemoveScript),
+        ["addscript"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin addscript <zone|npc> [scriptName]", AddScript),
+        ["removescript"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin removescript <zone|npc> [scriptName]", RemoveScript),
         ["collection"] = new ChatCommandDefinition(ChatCommandRole.Admin,
             "!admin collection <pools|configure [pool] [maxActive] [respawnSeconds]|place [pool]|remove [radius|#id]|list [pool] [page]>", Collection),
     };
@@ -367,60 +367,99 @@ public static class ChatCommandRegistry
 
     private static void AddScript(GatewayConnection connection, string[] args)
     {
-        if (args.Length < 1)
+        if (args.Length < 2)
         {
             SendSystemMessage(connection, $"Usage: {Commands["addscript"].Usage}");
             return;
         }
 
-        string scriptName = args[0];
+        string targetType = args[0].ToLower();
+        string scriptName = args[1];
 
-        var nearestNpc = connection.Player.Zone.Npcs
-            .OrderBy(npc => System.Numerics.Vector4.Distance(npc.Position, connection.Player.Position))
-            .FirstOrDefault();
-
-        if (nearestNpc is null)
+        switch (targetType)
         {
-            SendSystemMessage(connection, "No NPCs found in the zone to add a script to.");
-            return;
-        }
+        case "zone":
+            if (connection.Player.Zone.TryAddScript(scriptName))
+            {
+                SendSystemMessage(connection, $"Successfully added script {scriptName} to zone {connection.Player.Zone.Name}.");
+            }
+            else
+            {
+                SendSystemMessage(connection, $"Script {scriptName} is already added to zone {connection.Player.Zone.Name}.");
+            }
+            break;
+        case "npc":
+            var nearestNpc = connection.Player.Zone.Npcs
+                .OrderBy(npc => System.Numerics.Vector4.Distance(npc.Position, connection.Player.Position))
+                .FirstOrDefault();
 
-        if (!nearestNpc.TryAddScript(scriptName))
-        {
-            SendSystemMessage(connection, $"Failed to add script {scriptName} to NPC {nearestNpc.Name}.");
-            return;
-        }
+            if (nearestNpc is null)
+            {
+                SendSystemMessage(connection, "No NPCs found in the zone to add a script to.");
+                return;
+            }
 
-        SendSystemMessage(connection, $"Successfully added script {scriptName} to NPC {nearestNpc.Name}.");
+            if (nearestNpc.TryAddScript(scriptName))
+            {
+                SendSystemMessage(connection, $"Successfully added script {scriptName} to NPC {nearestNpc.Name}.");
+            }
+            else
+            {
+                SendSystemMessage(connection, $"Script {scriptName} is already added to NPC {nearestNpc.Name}.");
+            }
+            break;
+        default:
+            SendSystemMessage(connection, $"Unknown target type: {targetType}. Valid types are 'zone' and 'npc'.");
+            break;
+        }
     }
 
     private static void RemoveScript(GatewayConnection connection, string[] args)
     {
-        if (args.Length < 1)
+        if (args.Length < 2)
         {
             SendSystemMessage(connection, $"Usage: {Commands["removescript"].Usage}");
             return;
         }
 
-        string scriptName = args[0];
+        string targetType = args[0].ToLower();
+        string scriptName = args[1];
 
-        var nearestNpc = connection.Player.Zone.Npcs
-            .OrderBy(npc => System.Numerics.Vector4.Distance(npc.Position, connection.Player.Position))
-            .FirstOrDefault();
-
-        if (nearestNpc is null)
+        switch (targetType)
         {
-            SendSystemMessage(connection, "No NPCs found in the zone to remove a script from.");
-            return;
-        }
+            case "zone":
+                if (connection.Player.Zone.TryRemoveScript(scriptName))
+                {
+                    SendSystemMessage(connection, $"Successfully removed script {scriptName} from zone {connection.Player.Zone.Name}.");
+                }
+                else
+                {
+                    SendSystemMessage(connection, $"Failed to remove script {scriptName} from zone {connection.Player.Zone.Name}.");
+                }
+                break;
+            case "npc":
+                var nearestNpc = connection.Player.Zone.Npcs
+                    .OrderBy(npc => System.Numerics.Vector4.Distance(npc.Position, connection.Player.Position))
+                    .FirstOrDefault();
 
-        if (!nearestNpc.TryRemoveScript(scriptName))
-        {
-            SendSystemMessage(connection, $"Failed to remove script {scriptName} from NPC {nearestNpc.Name}.");
-            return;
-        }
+                if (nearestNpc is null)
+                {
+                    SendSystemMessage(connection, "No NPCs found in the zone to remove a script from.");
+                    return;
+                }
 
-        SendSystemMessage(connection, $"Successfully removed script {scriptName} from NPC {nearestNpc.Name}.");
+                if (!nearestNpc.TryRemoveScript(scriptName))
+                {
+                    SendSystemMessage(connection, $"Failed to remove script {scriptName} from NPC {nearestNpc.Name}.");
+                    return;
+                }
+
+                SendSystemMessage(connection, $"Successfully removed script {scriptName} from NPC {nearestNpc.Name}.");
+                break;
+            default:
+                SendSystemMessage(connection, $"Unknown target type: {targetType}. Valid types are 'zone' and 'npc'.");
+                break;
+        }
     }
 
     private static void Help(GatewayConnection connection, string[] args)

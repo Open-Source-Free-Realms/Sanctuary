@@ -119,6 +119,8 @@ public class ScriptContext
 
             // Events need to be rebuilt since the script introduces a new environment
             _events.Clear();
+
+            _logger.LogDebug("Loaded script {ScriptFilePath} with priority {Priority}", scriptFilePath, scriptPriority);
             
             return true;
         }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -12,6 +11,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using Sanctuary.Core.Collections;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Zones;
@@ -39,6 +39,7 @@ public abstract class BaseZone : IZone, IDisposable
     private readonly ConcurrentDictionary<ulong, IEntity> _entities = new();
     private readonly object _collectionNodeLock = new();
     private readonly PriorityQueue<CollectionNodePoolRefill, long> _collectionNodeRefills = new();
+    private readonly ConcurrentSet<string> _scripts = new();
 
     private const int FrameRate = 10;
     private const float TickRate = 1000f / FrameRate;
@@ -70,6 +71,9 @@ public abstract class BaseZone : IZone, IDisposable
         _logger = loggerFactory.CreateLogger($"Zone {Name} ({Id})");
 
         _scriptManager = serviceProvider.GetRequiredService<IScriptManager>();
+
+        foreach (var script in _zoneDefinition.Scripts ?? [])
+            _scripts.TryAdd(script);
 
         _tiles = GenerateTiles();
 
@@ -103,15 +107,16 @@ public abstract class BaseZone : IZone, IDisposable
 
     #endregion
 
-    #region IScript
+    #region IScriptable
 
     public ScriptContext GetOrCreateScriptContext()
     {
         if (_scriptManager.GetOrCreateContext(this, out var context))
         {
-            // Fresh context. Attach self-named script (all zones support right now).
-            // This needs to block so that the script is loaded before any events are fired.
-            context.LoadScript("Zone", Name);
+            // Fresh context. Attach all scripts defined in the zone definition.
+            // We can't use `LoadScriptInBackground` here because we need to ensure that any `onStart` handlers are fully loaded.
+            foreach (var script in _scripts)
+                context.LoadScript("Zone", script);
         }
 
         return context;
@@ -119,14 +124,24 @@ public abstract class BaseZone : IZone, IDisposable
 
     public bool TryAddScript(string scriptName)
     {
-        // TODO: zones currently only support one, self-named script
-        return false;
+        var context = GetOrCreateScriptContext();
+
+        if (!_scripts.TryAdd(scriptName))
+            return false;
+
+        context.LoadScriptInBackground("Zone", scriptName);
+
+        return true;
     }
 
     public bool TryRemoveScript(string scriptName)
     {
-        // TODO: zones currently only support one, self-named script
-        return false;
+        if (!_scripts.TryRemove(scriptName))
+            return false;
+
+        // No way to unload a script; need to delete the entire context.
+        // Next time it is created, the removed script will not be loaded.
+        return _scriptManager.DeleteContext(this);
     }
 
     #endregion
