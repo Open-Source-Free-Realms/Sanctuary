@@ -76,9 +76,9 @@ public class ScriptManager : IScriptManager
         return _contexts.TryRemove(script, out _);
     }
 
-    public bool GetContextForZone(IScriptZone zone, out ScriptContext context)
+    public bool GetOrCreateContext(IScript script, out ScriptContext context)
     {
-        if (_contexts.TryGetValue(zone, out var existingContext))
+        if (_contexts.TryGetValue(script, out var existingContext))
         {
             context = existingContext;
             return false;
@@ -86,27 +86,15 @@ public class ScriptManager : IScriptManager
 
         var env = CreateEnv();
 
-        var zoneUserData = ScriptableZone.GetOrCreate(zone);
-
-        context = new ScriptContext(_runtime, zone.Logger, env, zoneUserData);
-        _contexts[zone] = context;
-        return true;
-    }
-
-    public bool GetContextForNpc(IScriptNpc npc, out ScriptContext context)
-    {
-        if (_contexts.TryGetValue(npc, out var existingContext))
+        ILuaUserData userData = script switch
         {
-            context = existingContext;
-            return false;
-        }
+            IScriptZone zone => ScriptableZone.GetOrCreate(zone),
+            IScriptNpc npc => ScriptableNpc.GetOrCreate(npc),
+            _ => throw new NotSupportedException($"No scriptable wrapper for {script.GetType().Name}.")
+        };
 
-        var env = CreateEnv();
-
-        var npcUserData = ScriptableNpc.GetOrCreate(npc);
-
-        context = new ScriptContext(_runtime, npc.Logger, env, npcUserData);
-        _contexts[npc] = context;
+        context = new ScriptContext(_runtime, script.Logger, env, userData);
+        _contexts[script] = context;
         return true;
     }
 }

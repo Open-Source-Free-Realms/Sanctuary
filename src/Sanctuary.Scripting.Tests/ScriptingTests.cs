@@ -43,7 +43,7 @@ public class ScriptingTests
     public async Task AllZoneScriptsValid()
     {
         var mockZone = new MockScriptZone(_logger);
-        _scriptManager.GetContextForZone(mockZone, out var context);
+        _scriptManager.GetOrCreateContext(mockZone, out var context);
 
         var zoneScriptsDirectory = ScriptManager.GetScriptsDirectory("Zone");
         var luaFiles = Directory.GetFiles(zoneScriptsDirectory, "*.lua");
@@ -59,7 +59,7 @@ public class ScriptingTests
     {
         var mockZone = new MockScriptZone(_logger);
         var mockNpc = new MockScriptNpc(mockZone);
-        _scriptManager.GetContextForNpc(mockNpc, out var context);
+        _scriptManager.GetOrCreateContext(mockNpc, out var context);
 
         var npcScriptsDirectory = ScriptManager.GetScriptsDirectory("Npc");
         var luaFiles = Directory.GetFiles(npcScriptsDirectory, "*.lua");

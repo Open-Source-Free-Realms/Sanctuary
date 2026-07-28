@@ -107,7 +107,7 @@ public abstract class BaseZone : IZone, IDisposable
 
     public ScriptContext GetOrCreateScriptContext()
     {
-        if (_scriptManager.GetContextForZone(this, out var context))
+        if (_scriptManager.GetOrCreateContext(this, out var context))
         {
             // Fresh context. Attach self-named script (all zones support right now).
             // This needs to block so that the script is loaded before any events are fired.

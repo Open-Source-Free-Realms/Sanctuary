@@ -322,7 +322,7 @@ public class Npc : IScriptNpc, IEntity
 
     public ScriptContext GetOrCreateScriptContext()
     {
-        if (_scriptManager.GetContextForNpc(this, out var context))
+        if (_scriptManager.GetOrCreateContext(this, out var context))
         {
             // Fresh context. Load all attached scripts into it.
             foreach (var scriptName in _scripts)

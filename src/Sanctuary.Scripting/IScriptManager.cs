@@ -8,7 +8,5 @@ public interface IScriptManager
 
     bool DeleteContext(IScript script);
 
-    bool GetContextForZone(IScriptZone zone, out ScriptContext context);
-
-    bool GetContextForNpc(IScriptNpc npc, out ScriptContext context);
+    bool GetOrCreateContext(IScript script, out ScriptContext context);
 }
