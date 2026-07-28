@@ -43,8 +43,8 @@ public static class ChatCommandRegistry
         ["demote"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin demote [player]", Demote),
         ["reload"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin reload", Reload),
         ["help"] = new ChatCommandDefinition(ChatCommandRole.Mod, "!admin help", Help),
-        ["addscript"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin addscript <zone|npc> [scriptName]", AddScript),
-        ["removescript"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin removescript <zone|npc> [scriptName]", RemoveScript),
+        ["addscript"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin addscript <zone|npc> <scriptName>", AddScript),
+        ["removescript"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin removescript <zone|npc> <scriptName>", RemoveScript),
         ["collection"] = new ChatCommandDefinition(ChatCommandRole.Admin,
             "!admin collection <pools|configure [pool] [maxActive] [respawnSeconds]|place [pool]|remove [radius|#id]|list [pool] [page]>", Collection),
     };
@@ -373,7 +373,7 @@ public static class ChatCommandRegistry
             return;
         }
 
-        string targetType = args[0].ToLower();
+        string targetType = args[0].ToLowerInvariant();
         string scriptName = args[1];
 
         switch (targetType)

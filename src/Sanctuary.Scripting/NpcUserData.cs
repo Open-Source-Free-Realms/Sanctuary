@@ -11,7 +11,7 @@ internal sealed class NpcUserData(IScriptableNpc npc) : ILuaUserData
 
     public LuaTable? Metatable { get; set; } = SharedMetatable;
 
-    // We weakly cache the wrappers so that we don't have to manually evict them when zones are unloaded.
+    // We weakly cache the wrappers so that we don't have to manually evict them when NPCs are unloaded.
     private static readonly ConditionalWeakTable<IScriptableNpc, NpcUserData> Cache = new();
     public static NpcUserData GetOrCreate(IScriptableNpc npc)
         => Cache.GetValue(npc, static n => new NpcUserData(n));

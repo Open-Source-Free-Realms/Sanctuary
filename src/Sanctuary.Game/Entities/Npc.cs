@@ -351,7 +351,8 @@ public class Npc : IScriptableNpc, IEntity
 
         // No way to unload a script; need to delete the entire context.
         // Next time it is created, the removed script will not be loaded.
-        return _scriptManager.DeleteContext(this);
+        _scriptManager.DeleteContext(this);
+        return true;
     }
 
     #endregion
