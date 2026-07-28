@@ -15,7 +15,7 @@ using Sanctuary.Scripting;
 
 namespace Sanctuary.Game.Entities;
 
-public class Npc : IScriptNpc, IEntity
+public class Npc : IScriptableNpc, IEntity
 {
     public ulong Guid { get; init; }
 
@@ -359,7 +359,7 @@ public class Npc : IScriptNpc, IEntity
     #region Scripting API
 
     // Explicit interface implementation needed here to avoid exposing all of IZone to the scripting layer.
-    IScriptZone IScriptNpc.Zone => Zone;
+    IScriptableZone IScriptableNpc.Zone => Zone;
 
     public void Say(string message)
     {

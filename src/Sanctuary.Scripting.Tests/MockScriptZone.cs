@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Sanctuary.Scripting.Tests;
 
-internal class MockScriptZone(ILogger _logger) : IScriptZone
+internal class MockScriptZone(ILogger _logger) : IScriptableZone
 {
     public int Id => 0;
 
@@ -12,7 +12,7 @@ internal class MockScriptZone(ILogger _logger) : IScriptZone
 
     public ILogger Logger { get; } = _logger;
 
-    public bool TrySpawnNpc(int npcId, ulong? npcGuid, float x, float y, float z, float heading, [MaybeNullWhen(false)] out IScriptNpc npc)
+    public bool TrySpawnNpc(int npcId, ulong? npcGuid, float x, float y, float z, float heading, [MaybeNullWhen(false)] out IScriptableNpc npc)
     {
         throw new System.NotImplementedException();
     }

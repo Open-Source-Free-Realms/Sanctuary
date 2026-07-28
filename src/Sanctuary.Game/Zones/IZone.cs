@@ -9,7 +9,7 @@ using Sanctuary.UdpLibrary;
 
 namespace Sanctuary.Game.Zones;
 
-public interface IZone : IScriptZone
+public interface IZone : IScriptableZone
 {
     int DefinitionId { get; }
     #region Events

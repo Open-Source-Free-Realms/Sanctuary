@@ -6,7 +6,7 @@ public interface IScriptManager
 
     void Reload();
 
-    bool DeleteContext(IScript script);
+    bool DeleteContext(IScriptable scriptable);
 
-    bool GetOrCreateContext(IScript script, out ScriptContext context);
+    bool GetOrCreateContext(IScriptable scriptable, out ScriptContext context);
 }

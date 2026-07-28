@@ -5,20 +5,20 @@ using Lua;
 
 namespace Sanctuary.Scripting;
 
-internal sealed class ScriptableZone(IScriptZone zone) : ILuaUserData
+internal sealed class ZoneUserData(IScriptableZone zone) : ILuaUserData
 {
-    private IScriptZone _zone => zone;
+    private IScriptableZone _zone => zone;
 
     public LuaTable? Metatable { get; set; } = SharedMetatable;
 
     // We weakly cache the wrappers so that we don't have to manually evict them when zones are unloaded.
-    private static readonly ConditionalWeakTable<IScriptZone, ScriptableZone> Cache = new();
-    public static ScriptableZone GetOrCreate(IScriptZone zone)
-        => Cache.GetValue(zone, static z => new ScriptableZone(z));
+    private static readonly ConditionalWeakTable<IScriptableZone, ZoneUserData> Cache = new();
+    public static ZoneUserData GetOrCreate(IScriptableZone zone)
+        => Cache.GetValue(zone, static z => new ZoneUserData(z));
 
     private static readonly LuaFunction SpawnNpcFunction = new("spawnNpc", static (context, cancellationToken) =>
     {
-        var self = context.GetArgument<ScriptableZone>(0);
+        var self = context.GetArgument<ZoneUserData>(0);
 
         var npcId = context.GetArgument<int>(1);
         var x = context.GetArgument<float>(2);
@@ -31,7 +31,7 @@ internal sealed class ScriptableZone(IScriptZone zone) : ILuaUserData
             return new ValueTask<int>(context.Return(LuaValue.Nil));
         }
 
-        var userData = ScriptableNpc.GetOrCreate(npc);
+        var userData = NpcUserData.GetOrCreate(npc);
 
         var handle = new LuaValue(userData);
 
@@ -40,7 +40,7 @@ internal sealed class ScriptableZone(IScriptZone zone) : ILuaUserData
 
     private static readonly LuaFunction SpawnNpcWithGuidFunction = new("spawnNpcWithGuid", static (context, cancellationToken) =>
     {
-        var self = context.GetArgument<ScriptableZone>(0);
+        var self = context.GetArgument<ZoneUserData>(0);
 
         var npcId = context.GetArgument<int>(1);
         var npcGuid = context.GetArgument<ulong>(2);
@@ -54,7 +54,7 @@ internal sealed class ScriptableZone(IScriptZone zone) : ILuaUserData
             return new ValueTask<int>(context.Return(LuaValue.Nil));
         }
 
-        var userData = ScriptableNpc.GetOrCreate(npc);
+        var userData = NpcUserData.GetOrCreate(npc);
 
         var handle = new LuaValue(userData);
 
@@ -69,7 +69,7 @@ internal sealed class ScriptableZone(IScriptZone zone) : ILuaUserData
 
         metatable["__index"] = new LuaFunction("__index", static (context, cancellationToken) =>
         {
-            var self = context.GetArgument<ScriptableZone>(0);
+            var self = context.GetArgument<ZoneUserData>(0);
 
             var key = context.GetArgument<string>(1);
 

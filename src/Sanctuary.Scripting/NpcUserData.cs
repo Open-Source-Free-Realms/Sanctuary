@@ -5,22 +5,22 @@ using Lua;
 
 namespace Sanctuary.Scripting;
 
-internal sealed class ScriptableNpc(IScriptNpc npc) : ILuaUserData
+internal sealed class NpcUserData(IScriptableNpc npc) : ILuaUserData
 {
-    private IScriptNpc _npc => npc;
+    private IScriptableNpc _npc => npc;
 
     public LuaTable? Metatable { get; set; } = SharedMetatable;
 
     // We weakly cache the wrappers so that we don't have to manually evict them when zones are unloaded.
-    private static readonly ConditionalWeakTable<IScriptNpc, ScriptableNpc> Cache = new();
-    public static ScriptableNpc GetOrCreate(IScriptNpc npc)
-        => Cache.GetValue(npc, static n => new ScriptableNpc(n));
+    private static readonly ConditionalWeakTable<IScriptableNpc, NpcUserData> Cache = new();
+    public static NpcUserData GetOrCreate(IScriptableNpc npc)
+        => Cache.GetValue(npc, static n => new NpcUserData(n));
 
     #region API
 
     private static readonly LuaFunction SayFunction = new("say", static (context, cancellationToken) =>
     {
-        var self = context.GetArgument<ScriptableNpc>(0);
+        var self = context.GetArgument<NpcUserData>(0);
         var message = context.GetArgument<string>(1);
 
         self._npc.Say(message);
@@ -30,7 +30,7 @@ internal sealed class ScriptableNpc(IScriptNpc npc) : ILuaUserData
 
     private static readonly LuaFunction SayLocalizedFunction = new("sayLocalized", static (context, cancellationToken) =>
     {
-        var self = context.GetArgument<ScriptableNpc>(0);
+        var self = context.GetArgument<NpcUserData>(0);
         var stringId = context.GetArgument<int>(1);
 
         self._npc.SayLocalized(stringId);
@@ -49,14 +49,14 @@ internal sealed class ScriptableNpc(IScriptNpc npc) : ILuaUserData
         metatable["__index"] = new LuaFunction("__index", static (context, cancellationToken) =>
         {
             // Argument 0 is the NPC userdata being indexed; argument 1 is the key.
-            var self = context.GetArgument<ScriptableNpc>(0);
+            var self = context.GetArgument<NpcUserData>(0);
             var key = context.GetArgument<string>(1);
 
             var result = key switch
             {
                 "guid" => new LuaValue(self._npc.Guid),
                 "name" => new LuaValue(self._npc.Name ?? ""),
-                "zone" => new LuaValue(ScriptableZone.GetOrCreate(self._npc.Zone)),
+                "zone" => new LuaValue(ZoneUserData.GetOrCreate(self._npc.Zone)),
                 "say" => SayFunction,
                 "sayLocalized" => SayLocalizedFunction,
                 _ => LuaValue.Nil

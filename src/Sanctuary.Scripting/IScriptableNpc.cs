@@ -1,10 +1,10 @@
 namespace Sanctuary.Scripting;
 
-public interface IScriptNpc : IScript
+public interface IScriptableNpc : IScriptable
 {
     public ulong Guid { get; init; }
     public string? Name { get; set; }
-    public IScriptZone Zone { get; }
+    public IScriptableZone Zone { get; }
 
     void Say(string message);
     void SayLocalized(int stringId);

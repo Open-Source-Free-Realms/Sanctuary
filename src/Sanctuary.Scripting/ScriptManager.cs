@@ -16,7 +16,7 @@ public class ScriptManager : IScriptManager
     private readonly ILogger _logger;
     private readonly ScriptRuntime _runtime = new();
 
-    private readonly ConcurrentDictionary<IScript, ScriptContext> _contexts = new();
+    private readonly ConcurrentDictionary<IScriptable, ScriptContext> _contexts = new();
 
     public ScriptManager(ILoggerFactory loggerFactory)
     {
@@ -71,14 +71,14 @@ public class ScriptManager : IScriptManager
         return env;
     }
 
-    public bool DeleteContext(IScript script)
+    public bool DeleteContext(IScriptable scriptable)
     {
-        return _contexts.TryRemove(script, out _);
+        return _contexts.TryRemove(scriptable, out _);
     }
 
-    public bool GetOrCreateContext(IScript script, out ScriptContext context)
+    public bool GetOrCreateContext(IScriptable scriptable, out ScriptContext context)
     {
-        if (_contexts.TryGetValue(script, out var existingContext))
+        if (_contexts.TryGetValue(scriptable, out var existingContext))
         {
             context = existingContext;
             return false;
@@ -86,15 +86,15 @@ public class ScriptManager : IScriptManager
 
         var env = CreateEnv();
 
-        ILuaUserData userData = script switch
+        ILuaUserData userData = scriptable switch
         {
-            IScriptZone zone => ScriptableZone.GetOrCreate(zone),
-            IScriptNpc npc => ScriptableNpc.GetOrCreate(npc),
-            _ => throw new NotSupportedException($"No scriptable wrapper for {script.GetType().Name}.")
+            IScriptableZone zone => ZoneUserData.GetOrCreate(zone),
+            IScriptableNpc npc => NpcUserData.GetOrCreate(npc),
+            _ => throw new NotSupportedException($"No script wrapper for {scriptable.GetType().Name}.")
         };
 
-        context = new ScriptContext(_runtime, script.Logger, env, userData);
-        _contexts[script] = context;
+        context = new ScriptContext(_runtime, scriptable.Logger, env, userData);
+        _contexts[scriptable] = context;
         return true;
     }
 }

@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Sanctuary.Scripting;
 
-public interface IScript
+public interface IScriptable
 {
     ILogger Logger { get; }
 

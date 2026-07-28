@@ -4,7 +4,7 @@ using Sanctuary.Core.Collections;
 
 namespace Sanctuary.Scripting.Tests;
 
-internal class MockScriptNpc(IScriptZone _zone) : IScriptNpc
+internal class MockScriptNpc(IScriptableZone _zone) : IScriptableNpc
 {
     public ulong Guid { get => 0; init => throw new System.NotImplementedException(); }
     public string? Name { get => "MockNpc"; set => throw new System.NotImplementedException(); }
@@ -12,7 +12,7 @@ internal class MockScriptNpc(IScriptZone _zone) : IScriptNpc
 
     public ILogger Logger { get; } = _zone.Logger;
 
-    public IScriptZone Zone => _zone;
+    public IScriptableZone Zone => _zone;
 
     public void Say(string message)
     {

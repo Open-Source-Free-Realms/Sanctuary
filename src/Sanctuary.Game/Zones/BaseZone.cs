@@ -133,7 +133,7 @@ public abstract class BaseZone : IZone, IDisposable
 
     #region Scripting API
 
-    public bool TrySpawnNpc(int npcId, ulong? npcGuid, float x, float y, float z, float heading, [MaybeNullWhen(false)] out IScriptNpc npc)
+    public bool TrySpawnNpc(int npcId, ulong? npcGuid, float x, float y, float z, float heading, [MaybeNullWhen(false)] out IScriptableNpc npc)
     {
         npc = null;
 
