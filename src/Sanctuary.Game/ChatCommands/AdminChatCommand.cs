@@ -35,7 +35,7 @@ public class AdminChatCommand : IChatCommand
             return false;
 
         var subCommand = args[0].ToLower();
-        var target = args[1];
+        var target = string.Join(' ', args[1..]);
 
         switch (subCommand)
         {
@@ -64,7 +64,7 @@ public class AdminChatCommand : IChatCommand
 
     private void SetMod(Player invoker, string targetName, bool isMod)
     {
-        var dbContext = _dbContextFactory.CreateDbContext();
+        using DatabaseContext dbContext = _dbContextFactory.CreateDbContext();
 
         var target = dbContext.Characters.SingleOrDefault(character => character.FullName == targetName);
 
