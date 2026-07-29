@@ -35,8 +35,6 @@ public static class ChatCommandRegistry
         ["unban"] = new ChatCommandDefinition(ChatCommandRole.Mod, "!admin unban [player]", Unban),
         ["mute"] = new ChatCommandDefinition(ChatCommandRole.Mod, "!admin mute [player] [minutes]", Mute),
         ["unmute"] = new ChatCommandDefinition(ChatCommandRole.Mod, "!admin unmute [player]", Unmute),
-        ["promote"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin promote [player]", Promote),
-        ["demote"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin demote [player]", Demote),
     };
 
     public static void Initialize(IZoneManager zoneManager, IDbContextFactory<DatabaseContext> dbContextFactory, ILogger adminLogger)
@@ -284,61 +282,6 @@ public static class ChatCommandRegistry
         LogAction(connection, "Unmute", targetName);
 
         SendSystemMessage(connection, $"{targetName} has been unmuted.");
-    }
-
-    private static void SetMod(GatewayConnection connection, string targetName, bool isMod)
-    {
-        if (GetPlayerRole(connection.Player) < ChatCommandRole.Admin)
-        {
-            SendSystemMessage(connection, "You don't have permission to use this command.");
-            return;
-        }
-
-        using DatabaseContext dbContext = _dbContextFactory.CreateDbContext();
-
-        var target = dbContext.Characters.SingleOrDefault(character => character.FullName == targetName);
-
-        if (target is null)
-        {
-            SendSystemMessage(connection, $"No player named \"{targetName}\" was found.");
-            return;
-        }
-
-        dbContext.Users
-            .Where(user => user.Id == target.UserId)
-            .ExecuteUpdate(user => user.SetProperty(u => u.IsMod, isMod));
-
-        if (_zoneManager.TryGetPlayer(targetName, out var targetPlayer))
-            targetPlayer.IsMod = isMod;
-
-        LogAction(connection, isMod ? "Promote" : "Demote", targetName);
-
-        SendSystemMessage(connection, isMod
-            ? $"{targetName} has been promoted to moderator."
-            : $"{targetName} has been demoted from moderator.");
-    }
-
-    private static void Promote(GatewayConnection connection, string[] args)
-    {
-        if (args.Length < 1)
-        {
-            SendSystemMessage(connection, $"Usage: {Commands["promote"].Usage}");
-            return;
-        }
-
-        string parsedTargetName = string.Join(' ', args);
-        SetMod(connection, parsedTargetName, true);
-    }
-
-    private static void Demote(GatewayConnection connection, string[] args)
-    {
-        if (args.Length < 1)
-        {
-            SendSystemMessage(connection, $"Usage: {Commands["demote"].Usage}");
-            return;
-        }
-
-        SetMod(connection, string.Join(' ', args), false);
     }
 
     private static void SendSystemMessage(GatewayConnection connection, string message)
