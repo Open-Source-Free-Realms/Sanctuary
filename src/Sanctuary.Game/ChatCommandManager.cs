@@ -7,6 +7,7 @@ using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using Sanctuary.Game.ChatCommands;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
 

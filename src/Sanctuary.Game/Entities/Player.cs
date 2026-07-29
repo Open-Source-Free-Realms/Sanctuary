@@ -8,7 +8,7 @@ using System.Numerics;
 
 using Sanctuary.Core.Collections;
 using Sanctuary.Core.IO;
-using Sanctuary.Game.Commands;
+using Sanctuary.Game.ChatCommands;
 using Sanctuary.Game.Interactions;
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;

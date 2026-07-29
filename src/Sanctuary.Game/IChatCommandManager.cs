@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 
-using Microsoft.Extensions.Logging;
-
+using Sanctuary.Game.ChatCommands;
 using Sanctuary.Game.Entities;
 
 namespace Sanctuary.Game;

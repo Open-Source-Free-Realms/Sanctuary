@@ -3,7 +3,7 @@ using System.Linq;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
 
-namespace Sanctuary.Game.Commands;
+namespace Sanctuary.Game.ChatCommands;
 
 public class HelpChatCommand : IChatCommand
 {

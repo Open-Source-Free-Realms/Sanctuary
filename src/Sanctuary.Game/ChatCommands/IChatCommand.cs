@@ -1,5 +1,7 @@
 using Sanctuary.Game.Entities;
 
+namespace Sanctuary.Game.ChatCommands;
+
 public enum ChatCommandRole
 {
     Player = 0,
