@@ -48,7 +48,7 @@ public class ChatCommandManager : IChatCommandManager
 
             ArgumentNullException.ThrowIfNull(commandInstance);
 
-            if (!_commands.TryAdd(commandInstance.KeyWord, commandInstance))
+            if (!_commands.TryAdd(commandInstance.KeyWord.ToLowerInvariant(), commandInstance))
             {
                 _logger.LogWarning("Failed to add chat command: {prefix}{command}", Prefix, commandInstance.KeyWord);
                 return false;
@@ -62,14 +62,14 @@ public class ChatCommandManager : IChatCommandManager
 
     public bool TryHandle(Player invoker, string command)
     {
-        var tokens = command.Split(" ");
+        var tokens = command.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
         if (tokens.Length == 0)
             return false;
 
         var keyWord = tokens[0][Prefix.Length..];
 
-        if (!_commands.TryGetValue(keyWord, out var cmd))
+        if (!_commands.TryGetValue(keyWord.ToLowerInvariant(), out var cmd))
             return false;
 
         if (invoker.ChatCommandRole < cmd.RequiredRole)
