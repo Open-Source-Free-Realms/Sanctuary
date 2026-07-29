@@ -37,7 +37,6 @@ public static class ChatCommandRegistry
         ["unmute"] = new ChatCommandDefinition(ChatCommandRole.Mod, "!admin unmute [player]", Unmute),
         ["promote"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin promote [player]", Promote),
         ["demote"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin demote [player]", Demote),
-        ["help"] = new ChatCommandDefinition(ChatCommandRole.Mod, "!admin help", Help),
         ["collection"] = new ChatCommandDefinition(ChatCommandRole.Admin,
             "!admin collection <pools|configure [pool] [maxActive] [respawnSeconds]|place [pool]|remove [radius|#id]|list [pool] [page]>", Collection),
     };
@@ -342,24 +341,6 @@ public static class ChatCommandRegistry
         }
 
         SetMod(connection, string.Join(' ', args), false);
-    }
-
-    private static void Help(GatewayConnection connection, string[] args)
-    {
-        ChatCommandRole role = GetPlayerRole(connection.Player);
-
-        string[] usages = Commands.Values
-            .Where(command => role >= command.RequiredRole)
-            .OrderBy(command => command.Usage)
-            .Select(command => command.Usage)
-            .ToArray();
-
-        string fullHelpString = "";
-        foreach (var usage in usages)
-        {
-            fullHelpString += usage + "\n";
-        }
-        SendSystemMessage(connection, fullHelpString);
     }
 
     private static void Collection(GatewayConnection connection, string[] args)
