@@ -17,5 +17,11 @@ public interface IChatCommandView
 
 public interface IChatCommand : IChatCommandView
 {
+    /// <summary>
+    /// Handles the chat command.
+    /// </summary>
+    /// <param name="invoker">The player who invoked the command.</param>
+    /// <param name="args">The arguments passed to the command.</param>
+    /// <returns>True if the command was well-formed; otherwise, false.</returns>
     bool Handle(Player invoker, string[] args);
 }

@@ -1,4 +1,7 @@
 using System.Collections.ObjectModel;
+
+using Microsoft.Extensions.Logging;
+
 using Sanctuary.Game.Entities;
 
 namespace Sanctuary.Game;
@@ -12,4 +15,6 @@ public interface IChatCommandManager
     bool Load();
 
     bool TryHandle(Player invoker, string command);
+
+    void LogAction(IChatCommand command, Player invoker, string action, string? targetName, string? detail);
 }

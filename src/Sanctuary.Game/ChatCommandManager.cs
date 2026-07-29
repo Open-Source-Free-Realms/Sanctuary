@@ -15,6 +15,7 @@ namespace Sanctuary.Game;
 public class ChatCommandManager : IChatCommandManager
 {
     private readonly ILogger _logger;
+    private readonly ILogger _auditLogger;
     private readonly IServiceProvider _serviceProvider;
     private readonly ConcurrentDictionary<string, IChatCommand> _commands = [];
 
@@ -23,6 +24,7 @@ public class ChatCommandManager : IChatCommandManager
         var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
 
         _logger = loggerFactory.CreateLogger<ChatCommandManager>();
+        _auditLogger = loggerFactory.CreateLogger("Audit");
         _serviceProvider = serviceProvider;
     }
 
@@ -62,6 +64,9 @@ public class ChatCommandManager : IChatCommandManager
     {
         var tokens = command.Split(" ");
 
+        if (tokens.Length == 0)
+            return false;
+
         var keyWord = tokens[0][Prefix.Length..];
 
         if (!_commands.TryGetValue(keyWord, out var cmd))
@@ -79,5 +84,17 @@ public class ChatCommandManager : IChatCommandManager
             ChatHelper.SendSystemMessage(invoker, $"Usage: {Prefix}{cmd.KeyWord} {cmd.Usage}");
 
         return true;
+    }
+
+    public void LogAction(IChatCommand command, Player invoker, string action, string? targetName, string? detail)
+    {
+        _auditLogger.LogInformation("{Command}|{Action}|Actor: \"{ActorName}\" ({ActorGuid}){Target}{Detail}",
+            command.KeyWord,
+            action,
+            invoker.Name,
+            invoker.Guid,
+            targetName is null ? string.Empty : $", Target: \"{targetName}\"",
+            detail is null ? string.Empty : $", {detail}"
+        );
     }
 }
