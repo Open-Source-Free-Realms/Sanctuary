@@ -5,10 +5,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Game;
-using Sanctuary.Game.Entities;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 using Sanctuary.Packet.Common.Chat;
@@ -33,10 +32,6 @@ public static class PacketChatHandler
         _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
         _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
         _chatCommandManager = serviceProvider.GetRequiredService<IChatCommandManager>();
-
-        var adminLogger = loggerFactory.CreateLogger("Admin");
-
-        ChatCommandRegistry.Initialize(_zoneManager, _dbContextFactory, adminLogger);
     }
 
     private static void SendMuteNotice(GatewayConnection connection)
@@ -70,14 +65,14 @@ public static class PacketChatHandler
             return false;
         }
         
-        if (packet.Message.StartsWith(_chatCommandManager.Prefix) && _chatCommandManager.TryHandle(connection.Player, packet.Message))
+        if (packet.Message.StartsWith(_chatCommandManager.Prefix))
         {
-            return true;
-        }
+            if (!_chatCommandManager.TryHandle(connection.Player, packet.Message))
+            {
+                var errorMessage = $"Unknown chat command: {packet.Message}\nTry {_chatCommandManager.Prefix}help";
+                ChatHelper.SendSystemMessage(connection.Player, errorMessage);
+            }
 
-        if (packet.Message.StartsWith("!admin"))
-        {
-            ChatCommandRegistry.HandleCommand(connection, packet.Message);
             return true;
         }
 
