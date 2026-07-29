@@ -8,9 +8,7 @@ using Microsoft.Extensions.Logging;
 using Sanctuary.Database;
 using Sanctuary.Game;
 using Sanctuary.Game.Entities;
-using Sanctuary.Gateway.Helpers;
-using Sanctuary.Packet;
-using Sanctuary.Packet.Common.Chat;
+using Sanctuary.Game.Helpers;
 
 namespace Sanctuary.Gateway.Handlers;
 
@@ -583,7 +581,7 @@ public static class ChatCommandRegistry
 
     private static void SendSystemMessage(GatewayConnection connection, string message)
     {
-        ChatHelper.SendSystemMessage(connection, message);
+        ChatHelper.SendSystemMessage(connection.Player, message);
     }
 
     private static void LogAction(GatewayConnection connection, string action, string targetName, string? detail = null)

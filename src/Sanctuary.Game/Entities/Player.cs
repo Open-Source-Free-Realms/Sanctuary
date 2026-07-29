@@ -8,6 +8,7 @@ using System.Numerics;
 
 using Sanctuary.Core.Collections;
 using Sanctuary.Core.IO;
+using Sanctuary.Game.Commands;
 using Sanctuary.Game.Interactions;
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
@@ -38,6 +39,7 @@ public sealed class Player : ClientPcData, IEntity
 
     public bool IsAdmin { get; set; }
     public bool IsMod { get; set; }
+    public ChatCommandRole ChatCommandRole => GetChatCommandRole();
     public DateTimeOffset? MutedUntil { get; set; }
 
     public ClientPcProfile ActiveProfile =>
@@ -552,6 +554,17 @@ public sealed class Player : ClientPcData, IEntity
         }
 
         return packet;
+    }
+
+    private ChatCommandRole GetChatCommandRole()
+    {
+        if (IsAdmin)
+            return ChatCommandRole.Admin;
+
+        if (IsMod)
+            return ChatCommandRole.Mod;
+
+        return ChatCommandRole.Player;
     }
 
     #region Equatable

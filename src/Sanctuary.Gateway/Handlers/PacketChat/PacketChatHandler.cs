@@ -22,6 +22,7 @@ public static class PacketChatHandler
     private static ILogger _chatLogger = null!;
     private static IZoneManager _zoneManager = null!;
     private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
+    private static IChatCommandManager _chatCommandManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -31,6 +32,7 @@ public static class PacketChatHandler
 
         _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
         _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
+        _chatCommandManager = serviceProvider.GetRequiredService<IChatCommandManager>();
 
         var adminLogger = loggerFactory.CreateLogger("Admin");
 
@@ -68,6 +70,11 @@ public static class PacketChatHandler
             return false;
         }
         
+        if (packet.Message.StartsWith(_chatCommandManager.Prefix) && _chatCommandManager.TryHandle(connection.Player, packet.Message))
+        {
+            return true;
+        }
+
         if (packet.Message.StartsWith("!admin"))
         {
             ChatCommandRegistry.HandleCommand(connection, packet.Message);
