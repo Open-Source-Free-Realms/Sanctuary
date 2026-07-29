@@ -17,6 +17,9 @@ public class Npc : IEntity
     public Vector4 Position { get; private set; }
     public Quaternion Rotation { get; private set; }
 
+    public Vector4 SpawnPosition { get; set; }
+    public Quaternion SpawnRotation { get; set; }
+
     public bool Visible { get; set; }
 
     public IZone Zone { get; set; }
@@ -314,6 +317,22 @@ public class Npc : IEntity
         foreach (var visiblePlayer in VisiblePlayers)
             visiblePlayer.Value.OnRemoveVisibleNpcs([this]);
 
+        RemoveFromZone();
+    }
+
+    protected void DisposeGracefully(bool animate, int delay, int effectDelay, int compositeEffectId, int duration)
+    {
+        foreach (var visiblePlayer in VisiblePlayers)
+        {
+            visiblePlayer.Value.OnRemoveVisibleNpcGracefully(
+                this, animate, delay, effectDelay, compositeEffectId, duration);
+        }
+
+        RemoveFromZone();
+    }
+
+    private void RemoveFromZone()
+    {
         ZoneTile.Entities.Remove(Guid, out _);
 
         Zone.TryRemoveNpc(Guid);

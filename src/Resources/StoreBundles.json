@@ -29965,20 +29965,48 @@
         "MembersOnlyPrice":  1
     },
     {
+        "Comment":  "Chrome Drake",
+        "LaunchTime":  "2011-01-10T08:00:00+00:00",
+        "ExpireTime":  "2090-01-01T08:00:00+00:00",
+        "Image":  {
+                      "Image":  "8406"
+                  },
+        "Entries":  [
+                        {
+                            "Quantity":  1,
+                            "GameItemId":  4929,
+                            "MarketingItemId":  79454
+                        }
+                    ],
+        "Id":  452525,
+        "NameId":  442331,
+        "DescriptionId":  439599,
+        "Status":  1,
+        "CurrencyType":  1,
+        "Price":  1,
+        "AltCurrencyPrice":  1,
+        "StoreId":  1,
+        "CategoryGroupId":  267,
+        "CategoryDisplayOrder":  1208000,
+        "DiscountType":  213,
+        "SkuId":  1,
+        "MemberDiscount":  10,
+        "MembersOnlyPrice":  1
+    },
+    {
         "Comment":  "Lawn Chair",
-        "LaunchTime":  "2013-05-21T07:00:00+00:00",
-        "ExpireTime":  "2040-08-15T07:00:00+00:00",
+        "LaunchTime":  "2010-12-15T08:00:00+00:00",
+        "ExpireTime":  "2090-01-01T08:00:00+00:00",
         "Image":  {
                       "Image":  "8456",
-                      "Tint":  "233"
+                      "Tint":  "100"
                   },
         "TintGroup":  "2",
         "Entries":  [
                         {
                             "Quantity":  1,
-                            "GameItemId":  5593,
-                            "MarketingItemId":  78399,
-                            "ImageTintOverride":  "233"
+                            "GameItemId":  4898,
+                            "MarketingItemId":  79410
                         }
                     ],
         "Id":  5603,

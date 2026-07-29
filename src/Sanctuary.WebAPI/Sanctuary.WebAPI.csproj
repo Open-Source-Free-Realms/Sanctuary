@@ -2,16 +2,12 @@
 
   <PropertyGroup>
     <Nullable>enable</Nullable>
+    <UserSecretsId>osfr-sanctuary</UserSecretsId>
     <TargetFramework>$(TargetFramework)</TargetFramework>
-    <UserSecretsId>aed3c099-1a23-4fa7-9463-6be2285f3e79</UserSecretsId>
-    <BaseOutputPath>$(SolutionDir)bin</BaseOutputPath>
-    <RunWorkingDirectory>$(SolutionDir)bin\$(Configuration)</RunWorkingDirectory>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="MiniValidation" />
-
     <PackageReference Include="BCrypt.Net-Next" />
 
     <PackageReference Include="SixLabors.ImageSharp" />
@@ -22,7 +18,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Sanctuary.Core\Sanctuary.Core.csproj" />
-    <ProjectReference Include="..\Sanctuary.Database\Sanctuary.Database.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)'=='Release'">
+    <None Remove="NLog.Development.config" />
+    <Content Remove="NLog.Development.config" />
+    <None Remove="appsettings.Development.json" />
+    <Content Remove="appsettings.Development.json" />
   </ItemGroup>
 
 </Project>

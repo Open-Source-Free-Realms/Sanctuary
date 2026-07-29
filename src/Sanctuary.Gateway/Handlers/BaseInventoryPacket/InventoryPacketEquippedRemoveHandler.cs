@@ -47,7 +47,7 @@ public static class InventoryPacketEquippedRemoveHandler
             return true;
         }
 
-        if (!profile.Items.Remove(packet.Slot, out var profileItem))
+        if (!profile.Items.TryGetValue(packet.Slot, out var profileItem))
         {
             _logger.LogWarning("User tried to unequip empty slot. {slot}", packet.Slot);
             return true;
@@ -67,6 +67,42 @@ public static class InventoryPacketEquippedRemoveHandler
             return true;
         }
 
+        if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out var itemClass))
+        {
+            _logger.LogWarning("User tried to equip unknown item class. {id} {definition}", profileItem.Id, clientItemDefinition.Class);
+            return true;
+        }
+
+        using var dbContext = _dbContextFactory.CreateDbContext();
+
+        var dbProfile = dbContext.Profiles
+            .Include(x => x.Items)
+            .SingleOrDefault(x => x.CharacterId == GuidHelper.GetPlayerId(connection.Player.Guid) && x.Id == packet.ProfileId);
+
+        if (dbProfile is null)
+        {
+            _logger.LogWarning("Invalid database profile.");
+            return true;
+        }
+
+        var dbItem = dbProfile.Items.SingleOrDefault(x => x.CharacterId == GuidHelper.GetPlayerId(connection.Player.Guid) && x.Id == profileItem.Id);
+
+        if (dbItem is null)
+        {
+            _logger.LogWarning("Invalid database item.");
+            return true;
+        }
+
+        dbProfile.Items.Remove(dbItem);
+
+        if (dbContext.SaveChanges() <= 0)
+        {
+            _logger.LogWarning("Failed to save to database.");
+            return true;
+        }
+
+        profile.Items.Remove(packet.Slot);
+
         var clientUpdatePacketUnequipSlot = new ClientUpdatePacketUnequipSlot();
 
         clientUpdatePacketUnequipSlot.Slot = packet.Slot;
@@ -83,12 +119,6 @@ public static class InventoryPacketEquippedRemoveHandler
         playerUpdatePacketEquipItemChange.Attachment.Slot = packet.Slot;
 
         playerUpdatePacketEquipItemChange.ProfileId = packet.ProfileId;
-
-        if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out var itemClass))
-        {
-            _logger.LogWarning("User tried to equip unknown item class. {id} {definition}", profileItem.Id, clientItemDefinition.Class);
-            return true;
-        }
 
         playerUpdatePacketEquipItemChange.WieldType = itemClass.WieldType;
 
@@ -125,34 +155,6 @@ public static class InventoryPacketEquippedRemoveHandler
                     connection.Player.SendTunneledToVisible(playerUpdatePacketEquipItemChange, true);
                 }
             }
-        }
-
-        using var dbContext = _dbContextFactory.CreateDbContext();
-
-        var dbProfile = dbContext.Profiles
-            .Include(x => x.Items)
-            .SingleOrDefault(x => x.CharacterId == GuidHelper.GetPlayerId(connection.Player.Guid) && x.Id == packet.ProfileId);
-
-        if (dbProfile is null)
-        {
-            _logger.LogWarning("Invalid database profile.");
-            return true;
-        }
-
-        var dbItem = dbProfile.Items.SingleOrDefault(x => x.CharacterId == GuidHelper.GetPlayerId(connection.Player.Guid) && x.Id == profileItem.Id);
-
-        if (dbItem is null)
-        {
-            _logger.LogWarning("Invalid database item.");
-            return true;
-        }
-
-        dbProfile.Items.Remove(dbItem);
-
-        if (dbContext.SaveChanges() <= 0)
-        {
-            _logger.LogWarning("Failed to save to database.");
-            return true;
         }
 
         return true;

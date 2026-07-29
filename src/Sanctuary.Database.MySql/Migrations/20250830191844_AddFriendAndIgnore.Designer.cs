@@ -5,13 +5,13 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Sanctuary.Database;
+using Sanctuary.Database.MySql;
 
 #nullable disable
 
 namespace Sanctuary.Database.MySql.Migrations
 {
-    [DbContext(typeof(DatabaseContext))]
+    [DbContext(typeof(MySqlDatabaseContext))]
     [Migration("20250830191844_AddFriendAndIgnore")]
     partial class AddFriendAndIgnore
     {

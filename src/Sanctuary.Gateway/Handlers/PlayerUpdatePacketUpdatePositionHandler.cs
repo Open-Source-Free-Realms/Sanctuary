@@ -29,6 +29,8 @@ public static class PlayerUpdatePacketUpdatePositionHandler
 
         // _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(PlayerUpdatePacketUpdatePosition), packet);
 
+        packet.Guid = connection.Player.Guid;
+
         connection.Player.UpdatePosition(packet.Position, packet.Rotation);
 
         connection.Player.SendTunneledToVisible(packet);

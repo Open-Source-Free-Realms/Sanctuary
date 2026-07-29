@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Sanctuary.Database;
+using Sanctuary.Database.MySql;
 
 #nullable disable
 
 namespace Sanctuary.Database.MySql.Migrations
 {
-    [DbContext(typeof(DatabaseContext))]
+    [DbContext(typeof(MySqlDatabaseContext))]
     partial class DatabaseContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

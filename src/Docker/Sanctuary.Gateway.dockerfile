@@ -8,10 +8,10 @@ WORKDIR /src
 COPY . /src
 RUN dotnet build "Sanctuary.Gateway/Sanctuary.Gateway.csproj" -c $BUILD_CONFIGURATION
 RUN dotnet build "Sanctuary.Database.MySql/Sanctuary.Database.MySql.csproj" -c $BUILD_CONFIGURATION
-RUN dotnet build "Sanctuary.Database.SqLite/Sanctuary.Database.Sqlite.csproj" -c $BUILD_CONFIGURATION
+RUN dotnet build "Sanctuary.Database.Sqlite/Sanctuary.Database.Sqlite.csproj" -c $BUILD_CONFIGURATION
 
 FROM base AS final
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /app
-COPY --from=build /src/**/bin/$BUILD_CONFIGURATION .
+COPY --from=build /src/**/bin/$BUILD_CONFIGURATION/net9.0 .
 ENTRYPOINT ["dotnet", "Sanctuary.Gateway.dll"]

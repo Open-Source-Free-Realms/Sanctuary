@@ -3,10 +3,8 @@
   <PropertyGroup>
     <Nullable>enable</Nullable>
     <OutputType>Exe</OutputType>
+    <UserSecretsId>osfr-sanctuary</UserSecretsId>
     <TargetFramework>$(TargetFramework)</TargetFramework>
-    <UserSecretsId>5e8f08a4-8f06-49c6-a685-3e1cb2a8a9ea</UserSecretsId>
-    <BaseOutputPath>$(SolutionDir)bin</BaseOutputPath>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <ContainerDevelopmentMode>Regular</ContainerDevelopmentMode>
   </PropertyGroup>
@@ -37,6 +35,11 @@
       <DependentUpon>NLog.config</DependentUpon>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)'=='Release'">
+    <None Remove="NLog.Development.config" />
+    <Content Remove="NLog.Development.config" />
   </ItemGroup>
 
   <Target Name="CopyResources" AfterTargets="PostBuildEvent">

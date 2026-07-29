@@ -1,0 +1,34 @@
+[
+  {
+    "Key": "mushrooms",
+    "Name": "Mushrooms",
+    "ModelId": 249,
+    "Scale": 1.0,
+    "CompositeEffectId": 5742,
+    "InteractRange": 12,
+    "CursorId": 18,
+    "PlacementYOffset": -0.05,
+    "DropTable": [
+      { "ItemDefinitionId": 11082, "Weight": 100 },
+      { "ItemDefinitionId": 11083, "Weight": 100 },
+      { "ItemDefinitionId": 11084, "Weight": 100 },
+      { "ItemDefinitionId": 11086, "Weight": 100 },
+      { "ItemDefinitionId": 11087, "Weight": 100 },
+      { "ItemDefinitionId": 11088, "Weight": 100 }
+    ]
+  },
+  {
+    "Key": "rare-mushrooms",
+    "Name": "Rare Mushrooms",
+    "ModelId": 674,
+    "Scale": 1.0,
+    "CompositeEffectId": 5740,
+    "InteractRange": 12,
+    "CursorId": 18,
+    "PlacementYOffset": -0.05,
+    "DropTable": [
+      { "ItemDefinitionId": 11081, "Weight": 100 },
+      { "ItemDefinitionId": 11085, "Weight": 100 }
+    ]
+  }
+]

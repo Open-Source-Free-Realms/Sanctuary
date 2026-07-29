@@ -1,8 +1,13 @@
-﻿namespace Sanctuary.Core.Configuration;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Sanctuary.Core.Configuration;
 
 public sealed class LoginServerOptions : ServerOptions
 {
+    [Required]
     public required int LoginGatewayPort { get; set; }
+
+    [Required]
     public required string LoginGatewayChallenge { get; set; }
 
     /// <summary>
@@ -11,6 +16,8 @@ public sealed class LoginServerOptions : ServerOptions
     public bool IsLocked { get; set; }
 
     public int DefaultTitleId { get; set; }
+
+    [Required]
     public required int DefaultProfileId { get; set; }
 
     public int StartingCoins { get; set; }

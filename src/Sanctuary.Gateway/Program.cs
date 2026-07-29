@@ -9,9 +9,11 @@ using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
 
 using Sanctuary.Core.Configuration;
+using Sanctuary.Core.Extensions;
 using Sanctuary.Database;
 using Sanctuary.Game;
 using Sanctuary.Gateway;
+using Sanctuary.Scripting;
 using Sanctuary.UdpLibrary.Configuration;
 using Sanctuary.UdpLibrary.Enumerations;
 
@@ -95,6 +97,7 @@ builder.ConfigureServices((hostBuilderContext, serviceCollection) =>
     // Managers
     serviceCollection.AddSingleton<IZoneManager, ZoneManager>();
     serviceCollection.AddSingleton<IResourceManager, ResourceManager>();
+    serviceCollection.AddSingleton<IScriptManager, ScriptManager>();
     serviceCollection.AddSingleton<IInteractionManager, InteractionManager>();
 });
 

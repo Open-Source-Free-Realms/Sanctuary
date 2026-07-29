@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Sanctuary.Database;
 using Sanctuary.Game;
 using Sanctuary.Game.Entities;
+using Sanctuary.Gateway.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Chat;
 
@@ -39,6 +40,8 @@ public static class ChatCommandRegistry
         ["promote"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin promote [player]", Promote),
         ["demote"] = new ChatCommandDefinition(ChatCommandRole.Admin, "!admin demote [player]", Demote),
         ["help"] = new ChatCommandDefinition(ChatCommandRole.Mod, "!admin help", Help),
+        ["collection"] = new ChatCommandDefinition(ChatCommandRole.Admin,
+            "!admin collection <pools|configure [pool] [maxActive] [respawnSeconds]|place [pool]|remove [radius|#id]|list [pool] [page]>", Collection),
     };
 
     public static void Initialize(IZoneManager zoneManager, IDbContextFactory<DatabaseContext> dbContextFactory, ILogger adminLogger)
@@ -361,17 +364,226 @@ public static class ChatCommandRegistry
         SendSystemMessage(connection, fullHelpString);
     }
 
+    private static void Collection(GatewayConnection connection, string[] args)
+    {
+        if (args.Length == 0)
+        {
+            SendSystemMessage(connection, $"Usage: {Commands["collection"].Usage}");
+            return;
+        }
+
+        switch (args[0].ToLowerInvariant())
+        {
+            case "place":
+                PlaceCollectionNode(connection, args[1..]);
+                break;
+            case "pools":
+                ListCollectionNodePools(connection);
+                break;
+            case "configure":
+                ConfigureCollectionNodePool(connection, args[1..]);
+                break;
+            case "remove":
+                RemoveCollectionNode(connection, args[1..]);
+                break;
+            case "list":
+                ListCollectionNodes(connection, args[1..]);
+                break;
+            default:
+                SendSystemMessage(connection, $"Usage: {Commands["collection"].Usage}");
+                break;
+        }
+    }
+
+    private static void PlaceCollectionNode(GatewayConnection connection, string[] args)
+    {
+        var pools = connection.Player.Zone.GetCollectionNodePoolStatuses();
+        var pool = args.Length == 1
+            ? pools.FirstOrDefault(candidate => candidate.Key == args[0].ToLowerInvariant())
+            : null;
+
+        if (pool is null)
+        {
+            var available = string.Join(", ", pools.Select(candidate => candidate.Key));
+            SendSystemMessage(connection, $"Unknown collection node pool. Available: {available}");
+            return;
+        }
+
+        var heading = MathF.Atan2(connection.Player.Rotation.X, connection.Player.Rotation.Z);
+
+        if (!connection.Player.Zone.TryPlaceCollectionNodeSpawn(
+            pool.Key, connection.Player.Position, heading, out var spawn, out var activated))
+        {
+            SendSystemMessage(connection, "The collection node could not be saved.");
+            return;
+        }
+
+        LogAction(connection, "Place collection node", $"{pool.Key} #{spawn.Id}");
+        SendSystemMessage(connection, $"Saved {pool.Key} hard point #{spawn.Id}; " +
+            (activated ? "activated now." : "inactive because the pool is at capacity."));
+    }
+
+    private static void ConfigureCollectionNodePool(GatewayConnection connection, string[] args)
+    {
+        var pools = connection.Player.Zone.GetCollectionNodePoolStatuses();
+        var pool = args.Length > 0
+            ? pools.FirstOrDefault(candidate => candidate.Key == args[0].ToLowerInvariant())
+            : null;
+
+        if (args.Length != 3 ||
+            pool is null ||
+            !int.TryParse(args[1], out var maxActiveNodes) || maxActiveNodes < 0 ||
+            !int.TryParse(args[2], out var respawnSeconds) || respawnSeconds is < 1 or > 86400)
+        {
+            SendSystemMessage(connection,
+                "Usage: !admin collection configure [pool] [maxActive: 0+] [respawnSeconds: 1-86400]");
+            return;
+        }
+
+        if (!connection.Player.Zone.TryConfigureCollectionNodePool(
+            pool.Key, maxActiveNodes, respawnSeconds, out var activeCount, out var target))
+        {
+            SendSystemMessage(connection, "The collection node pool could not be saved.");
+            return;
+        }
+
+        LogAction(connection, "Configure collection node pool", pool.Key,
+            $"maxActive={maxActiveNodes}, respawnSeconds={respawnSeconds}");
+        SendSystemMessage(connection,
+            $"Configured {pool.Key}: {activeCount}/{target} active, respawn {respawnSeconds}s.");
+    }
+
+    private static void RemoveCollectionNode(GatewayConnection connection, string[] args)
+    {
+        if (args.Length > 1)
+        {
+            SendSystemMessage(connection, "Usage: !admin collection remove [radius|#id]");
+            return;
+        }
+
+        if (args.Length == 1 && args[0].StartsWith('#'))
+        {
+            RemoveCollectionNodeById(connection, args[0]);
+            return;
+        }
+
+        var radius = 10f;
+
+        if (args.Length > 0 && (!float.TryParse(args[0], out radius) || radius <= 0 || radius > 100))
+        {
+            SendSystemMessage(connection, "Removal radius must be between 0 and 100.");
+            return;
+        }
+
+        if (!connection.Player.Zone.TryRemoveNearestCollectionNodeSpawn(
+            connection.Player.Position, radius, out var removedSpawn))
+        {
+            SendSystemMessage(connection, $"No persistent collection node found within {radius:0.#} units.");
+            return;
+        }
+
+        LogAction(connection, "Remove collection node", $"{removedSpawn.Pool} #{removedSpawn.Id}");
+        SendSystemMessage(connection, $"Removed {removedSpawn.Pool} hard point #{removedSpawn.Id}.");
+    }
+
+    private static void RemoveCollectionNodeById(GatewayConnection connection, string idArgument)
+    {
+        if (!int.TryParse(idArgument.AsSpan(1), out var id))
+        {
+            SendSystemMessage(connection, $"Unknown collection node id {idArgument} in this zone.");
+            return;
+        }
+
+        if (!connection.Player.Zone.TryRemoveCollectionNodeSpawn(id, out var removedSpawn))
+        {
+            SendSystemMessage(connection, "The collection node could not be removed from storage.");
+            return;
+        }
+
+        LogAction(connection, "Remove collection node", $"{removedSpawn.Pool} #{id}");
+        SendSystemMessage(connection, $"Removed {removedSpawn.Pool} hard point #{id}.");
+    }
+
+    private static void ListCollectionNodes(GatewayConnection connection, string[] args)
+    {
+        const int PageSize = 10;
+        string? poolFilter = null;
+        var page = 1;
+
+        if (args.Length > 2)
+        {
+            SendSystemMessage(connection, "Usage: !admin collection list [pool] [page]");
+            return;
+        }
+
+        if (args.Length > 0 && int.TryParse(args[0], out page))
+        {
+            if (args.Length > 1)
+            {
+                SendSystemMessage(connection, "Usage: !admin collection list [pool] [page]");
+                return;
+            }
+        }
+        else if (args.Length > 0)
+        {
+            poolFilter = args[0].ToLowerInvariant();
+
+            if (!connection.Player.Zone.GetCollectionNodePoolStatuses().Any(pool => pool.Key == poolFilter))
+            {
+                SendSystemMessage(connection, $"Unknown collection node pool {poolFilter}.");
+                return;
+            }
+
+            page = 1;
+
+            if (args.Length > 1 && !int.TryParse(args[1], out page))
+            {
+                SendSystemMessage(connection, "Usage: !admin collection list [pool] [page]");
+                return;
+            }
+        }
+
+        if (page < 1)
+        {
+            SendSystemMessage(connection, "Page must be a positive number.");
+            return;
+        }
+
+        var query = connection.Player.Zone.GetCollectionNodeSpawnStatuses(poolFilter);
+        var total = query.Count;
+        var entries = query
+            .OrderBy(spawn => spawn.Id)
+            .Skip((page - 1) * PageSize)
+            .Take(PageSize)
+            .Select(spawn => $"#{spawn.Id} {spawn.Pool} {(spawn.Active ? "active" : "inactive")} " +
+                $"({spawn.Position.X:0.0}, {spawn.Position.Y:0.0}, {spawn.Position.Z:0.0})")
+            .ToArray();
+
+        if (entries.Length == 0)
+        {
+            SendSystemMessage(connection, total == 0 ? "No persistent collection nodes." : $"No collection nodes on page {page}.");
+            return;
+        }
+
+        var pageCount = (total + PageSize - 1) / PageSize;
+        SendSystemMessage(connection, $"Collection nodes page {page}/{pageCount}:\n{string.Join("\n", entries)}");
+    }
+
+    private static void ListCollectionNodePools(GatewayConnection connection)
+    {
+        var entries = connection.Player.Zone.GetCollectionNodePoolStatuses()
+            .Select(pool => $"{pool.Key}: {pool.ActiveCount}/{pool.TargetActiveCount} active, " +
+                $"{pool.HardPointCount} points, {pool.RespawnSeconds}s, type {pool.NodeType}")
+            .ToArray();
+
+        SendSystemMessage(connection, entries.Length == 0
+            ? "No collection node pools are configured for this zone."
+            : string.Join("\n", entries));
+    }
+
     private static void SendSystemMessage(GatewayConnection connection, string message)
     {
-        PacketChat packet = new PacketChat
-        {
-            Channel = ChatChannel.System,
-            FromName = connection.Player.Name,
-            ToName = connection.Player.Name,
-            Message = message
-        };
-
-        connection.Player.SendTunneled(packet);
+        ChatHelper.SendSystemMessage(connection, message);
     }
 
     private static void LogAction(GatewayConnection connection, string action, string targetName, string? detail = null)
