@@ -1,19 +1,26 @@
 using Sanctuary.Game.ChatCommands;
 using Sanctuary.Game.Entities;
 using Sanctuary.Packet;
-using Sanctuary.Packet.Common.Chat;
 
 namespace Sanctuary.Game.Helpers;
 
 public static class ChatHelper
 {
-    public static void SendSystemMessage(Player player, string message)
+    public static void SendSystemMessage(Player player, string message, bool formatted = false)
     {
         player.SendTunneled(new ChatPacketDebugChat
         {
             PrintToChat = true,
-            Message = message
+            Message = formatted ? message : EscapeMarkup(message)
         });
+    }
+
+    private static string EscapeMarkup(string message)
+    {
+        return message
+            .Replace("&", "&amp;")
+            .Replace("<", "&lt;")
+            .Replace(">", "&gt;");
     }
 
     public static ChatCommandRole GetRoleFromFlags(bool isAdmin, bool isMod)
