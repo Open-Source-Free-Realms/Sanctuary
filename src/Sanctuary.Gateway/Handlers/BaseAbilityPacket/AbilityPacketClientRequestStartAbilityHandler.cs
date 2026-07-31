@@ -519,7 +519,7 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             }
 
             // Rotate to the next dance when due. Only flag a change when the id actually
-            // differs, so single-dance boomboxes don't restart the crowd every rotation.
+            // differs, so multi-dance boomboxes don't restart the crowd every rotation.
             var animChanged = false;
 
             if (sinceSwitch >= SwitchMs)
@@ -528,7 +528,10 @@ public static class AbilityPacketClientRequestStartAbilityHandler
                 sequenceIndex++;
                 sinceSwitch = 0;
 
-                if (selected != previousAnim)
+                // A single-clip sequence (Totem, Realms Roll) never "changes" id, but the client
+                // doesn't loop it forever on its own - it needs a fresh trigger every rotation or it
+                // just stops after one play-through.
+                if (selected != previousAnim || danceSequence.Length <= 1)
                 {
                     currentAnim = selected;
                     previousAnim = selected;
