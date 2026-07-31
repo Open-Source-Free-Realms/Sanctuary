@@ -198,7 +198,7 @@ public abstract class BaseZone : IZone, IDisposable
             Visible = true
         };
 
-        return true;
+        return _npcs.TryAdd(npc.Guid, npc) && _entities.TryAdd(npc.Guid, npc);
     }
 
     public IReadOnlyList<CollectionNodePoolStatus> GetCollectionNodePoolStatuses()

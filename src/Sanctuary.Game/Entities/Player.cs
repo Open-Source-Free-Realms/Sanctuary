@@ -8,6 +8,8 @@ using System.Numerics;
 
 using Sanctuary.Core.Collections;
 using Sanctuary.Core.IO;
+using Sanctuary.Game.ChatCommands;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Interactions;
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
@@ -38,6 +40,7 @@ public sealed class Player : ClientPcData, IEntity
 
     public bool IsAdmin { get; set; }
     public bool IsMod { get; set; }
+    public ChatCommandRole ChatCommandRole => ChatHelper.GetRoleFromFlags(IsAdmin, IsMod);
     public DateTimeOffset? MutedUntil { get; set; }
 
     public ClientPcProfile ActiveProfile =>
