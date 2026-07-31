@@ -13,4 +13,6 @@ public class ConsumableDefinitions
     public List<TransformAbilityDefinition> Transformations { get; set; } = new();
 
     public List<RandomTransformFoodDefinition> RandomTransformFoods { get; set; } = new();
+
+    public List<PartyFavorDefinition> PartyFavors { get; set; } = new();
 }

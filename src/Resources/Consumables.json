@@ -141,5 +141,16 @@
     { "AbilityId": 4371, "ModelId": 1944, "DurationMs": 30000, "CooldownMs": 10000, "CompositeEffectId": 21, "Comment": "Boss Cake - Abominable Snowman" },
     { "AbilityId": 4372, "ModelId": 1702, "DurationMs": 30000, "CooldownMs": 10000, "CompositeEffectId": 21, "Comment": "Boss Cake - Pumpkin Prince" },
     { "AbilityId": 4373, "ModelId": 22,   "DurationMs": 30000, "CooldownMs": 10000, "CompositeEffectId": 21, "Comment": "Boss Cake - Cakenstein" }
+  ],
+
+  "PartyFavors": [
+    { "ItemId": 62516, "EffectId": 15825, "Comment": "Blue Silly String Can" },
+    { "ItemId": 67961, "EffectId": 15818, "Comment": "Red Silly String Can" },
+    { "ItemId": 67962, "EffectId": 15826, "Comment": "Green Silly String Can" },
+    { "ItemId": 67963, "EffectId": 15827, "Comment": "Orange Silly String Can" },
+    { "ItemId": 67964, "EffectId": 15828, "Comment": "Yellow Silly String Can" },
+    { "ItemId": 68909, "EffectId": 15818, "Comment": "Red Silly String Can" },
+    { "ItemId": 68910, "EffectId": 15826, "Comment": "Green Silly String Can" },
+    { "ItemId": 68911, "EffectId": 15828, "Comment": "Yellow Silly String Can" }
   ]
 }

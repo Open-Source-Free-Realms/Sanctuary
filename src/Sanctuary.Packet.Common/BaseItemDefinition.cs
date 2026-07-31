@@ -4,10 +4,6 @@ namespace Sanctuary.Packet.Common;
 
 public class BaseItemDefinition : ISerializableType
 {
-    // Server-side only, never on the wire - ClientItemDefinitions.json's own "Comment" field (the
-    // item's real internal name, e.g. "Blue Silly String Can"), used to identify items by keyword.
-    public string Comment { get; set; } = "";
-
     public int Id { get; set; }
 
     /// <summary>

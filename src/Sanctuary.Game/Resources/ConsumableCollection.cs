@@ -19,6 +19,7 @@ public class ConsumableCollection
     public ObservableConcurrentDictionary<int, FoodEffectDefinition> FoodEffects { get; } = new();
     public ObservableConcurrentDictionary<int, TransformAbilityDefinition> Transformations { get; } = new();
     public ObservableConcurrentDictionary<int, RandomTransformFoodDefinition> RandomTransformFoods { get; } = new();
+    public ObservableConcurrentDictionary<int, PartyFavorDefinition> PartyFavors { get; } = new();
 
     public ConsumableCollection(ILogger logger)
     {
@@ -101,6 +102,16 @@ public class ConsumableCollection
                 }
             }
             _logger.LogInformation("Loaded {count} RandomTransformFood definitions.", RandomTransformFoods.Count);
+
+            foreach (var entry in consumables.PartyFavors)
+            {
+                if (!PartyFavors.TryAdd(entry.ItemId, entry))
+                {
+                    _logger.LogWarning("Failed to add PartyFavor entry. ItemId={id} \"{file}\"", entry.ItemId, filePath);
+                    return false;
+                }
+            }
+            _logger.LogInformation("Loaded {count} PartyFavor definitions.", PartyFavors.Count);
         }
         catch (Exception ex)
         {

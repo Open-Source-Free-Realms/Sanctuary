@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +12,6 @@ using Sanctuary.Core.Helpers;
 using Sanctuary.Core.IO;
 using Sanctuary.Database;
 using Sanctuary.Game;
-using Sanctuary.Game.Consumables;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Zones;
@@ -93,9 +91,9 @@ public static class AbilityPacketClientRequestStartAbilityHandler
         if (_resourceManager.Consumables.Cakes.TryGetValue(itemDefinition.Id, out var cakeDefinition))
             return HandleCake(connection, packet.Data.Slot, clientItem, itemDefinition, cakeDefinition);
 
-        // Silly String cans (CategoryId 29 - see SillyStringAbilities) - sprays the nearest other player.
-        if (itemDefinition.CategoryId == 29 && SillyStringAbilities.TryResolve(itemDefinition.Comment, out var sillyStringEffectId))
-            return HandleSillyString(connection, packet.Data.Slot, clientItem, itemDefinition, sillyStringEffectId);
+        // Party favors (Silly String, etc.) - sprays the nearest other player.
+        if (_resourceManager.Consumables.PartyFavors.TryGetValue(itemDefinition.Id, out var partyFavor))
+            return HandleSillyString(connection, packet.Data.Slot, clientItem, itemDefinition, partyFavor);
 
         // Random-transform foods (e.g. Jack-O-Lantern) roll one of their listed
         // transformations instead of using the item's fixed ability id.
@@ -144,22 +142,35 @@ public static class AbilityPacketClientRequestStartAbilityHandler
         return true;
     }
 
-    // emo_spraycan (id 3351) - bound on both genders, though the client reuses the "point" gesture clip.
-    private const int SillyStringAnimationId = 3351;
-    private const float SillyStringGestureSeconds = 1.5f;
-
-    // Tag-based loop, not the effect's own 5s default lifetime - free to run longer.
-    private const float SillyStringEffectSeconds = 20f;
-
-    private const float SillyStringRange = 12f;
-    private const float SillyStringRangeSquared = SillyStringRange * SillyStringRange;
-    private const int SillyStringIdleAnimId = 1;
-    private const int SillyStringCooldownMs = 3000;
-
     // Who each player last sprayed, so it doesn't just soak the same nearest victim every time.
     private static readonly ConcurrentDictionary<ulong, ulong> _lastSillyStringTarget = new();
 
-    private static bool HandleSillyString(GatewayConnection connection, int slot, ClientItem clientItem, ClientItemDefinition itemDefinition, int effectId)
+    // Nearest other player to "from" within range, excluding excludeGuid if given. Shared so other
+    // abilities can reuse it instead of re-rolling their own distance search.
+    private static Player? FindNearestPlayer(IZone zone, Player from, float range, ulong excludeGuid = 0)
+    {
+        Player? nearest = null;
+        var best2 = range * range;
+
+        foreach (var candidate in zone.Players)
+        {
+            if (candidate.Guid == from.Guid || candidate.Guid == excludeGuid)
+                continue;
+
+            var dx = candidate.Position.X - from.Position.X;
+            var dz = candidate.Position.Z - from.Position.Z;
+            var d2 = dx * dx + dz * dz;
+            if (d2 >= best2)
+                continue;
+
+            best2 = d2;
+            nearest = candidate;
+        }
+
+        return nearest;
+    }
+
+    private static bool HandleSillyString(GatewayConnection connection, int slot, ClientItem clientItem, ClientItemDefinition itemDefinition, PartyFavorDefinition favor)
     {
         var player = connection.Player;
         var zone = player.Zone;
@@ -167,39 +178,11 @@ public static class AbilityPacketClientRequestStartAbilityHandler
         if (IsOnCooldown(player.Guid, itemDefinition.Id))
             return SendFailure(connection);
 
-        // Nearest other player in range, skipping last time's target unless they're the only one around.
+        // Skip whoever was sprayed last time, unless they're the only one around.
         _lastSillyStringTarget.TryGetValue(player.Guid, out var lastTargetGuid);
 
-        Player? target = null;
-        Player? fallbackTarget = null;
-        var best2 = SillyStringRangeSquared;
-        var bestFallback2 = SillyStringRangeSquared;
-
-        foreach (var candidate in zone.Players)
-        {
-            if (candidate.Guid == player.Guid)
-                continue;
-
-            var dx = candidate.Position.X - player.Position.X;
-            var dz = candidate.Position.Z - player.Position.Z;
-            var d2 = dx * dx + dz * dz;
-            if (d2 >= SillyStringRangeSquared)
-                continue;
-
-            if (d2 < bestFallback2)
-            {
-                bestFallback2 = d2;
-                fallbackTarget = candidate;
-            }
-
-            if (candidate.Guid == lastTargetGuid || d2 >= best2)
-                continue;
-
-            best2 = d2;
-            target = candidate;
-        }
-
-        target ??= fallbackTarget;
+        var target = FindNearestPlayer(zone, player, favor.Range, lastTargetGuid)
+            ?? FindNearestPlayer(zone, player, favor.Range);
 
         if (target is null)
             return SendFailure(connection); // nobody nearby to spray
@@ -211,7 +194,7 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             recipients.Add(visiblePlayer);
 
         var sync = new PlayerUpdatePacketSetSynchronizedAnimations();
-        sync.Animations.Add(new PlayerUpdatePacketSetSynchronizedAnimations.Animation { Guid = player.Guid, AnimationId = SillyStringAnimationId });
+        sync.Animations.Add(new PlayerUpdatePacketSetSynchronizedAnimations.Animation { Guid = player.Guid, AnimationId = favor.AnimationId });
 
         foreach (var recipient in recipients)
             recipient.SendTunneled(sync);
@@ -222,34 +205,28 @@ public static class AbilityPacketClientRequestStartAbilityHandler
         {
             Guid = target.Guid,
             TagId = tagId,
-            CompositeEffectId = effectId,
+            CompositeEffectId = favor.EffectId,
             SourceGuid = player.Guid,
         };
 
         foreach (var recipient in recipients)
             recipient.SendTunneled(beam);
 
-        _logger.LogInformation("Silly String: {who} sprayed {target}.", player.Name, target.Name);
+        _logger.LogTrace("Silly String: {who} sprayed {target}.", player.Name, target.Name);
 
-        _ = Task.Run(async () =>
+        // Ticked from Player.UpdateEveryTick's delayed-packet queue - no background tasks/threads.
+        player.SendTunneledToVisibleDelayed(new PlayerUpdatePacketSetAnimation
         {
-            await Task.Delay((int)(SillyStringGestureSeconds * 1000));
+            Guid = player.Guid,
+            AnimationId = BoomboxIdleAnimId,
+            Flags = 1
+        }, (int)(favor.GestureSeconds * 1000), sendToSelf: true);
 
-            player.SendTunneledToVisible(new PlayerUpdatePacketSetAnimation
-            {
-                Guid = player.Guid,
-                AnimationId = SillyStringIdleAnimId,
-                Flags = 1
-            }, sendToSelf: true);
+        player.SendTunneledToVisibleDelayed(
+            new PlayerUpdatePacketRemoveEffectTagCompositeEffect { Guid = target.Guid, TagId = tagId },
+            (int)(favor.EffectSeconds * 1000), sendToSelf: true);
 
-            await Task.Delay((int)((SillyStringEffectSeconds - SillyStringGestureSeconds) * 1000));
-
-            var stop = new PlayerUpdatePacketRemoveEffectTagCompositeEffect { Guid = target.Guid, TagId = tagId };
-            foreach (var recipient in recipients)
-                recipient.SendTunneled(stop);
-        });
-
-        StartCooldown(player.Guid, itemDefinition.Id, SillyStringCooldownMs);
+        StartCooldown(player.Guid, itemDefinition.Id, favor.CooldownMs);
 
         var count = clientItem.Count;
         var hasItemLeft = !itemDefinition.SingleUse || count > 1;
@@ -259,7 +236,7 @@ public static class AbilityPacketClientRequestStartAbilityHandler
 
         if (hasItemLeft)
             player.StartActionBarCooldown(2, slot, itemDefinition.Icon.Id, itemDefinition.NameId,
-                itemDefinition.SingleUse ? count - 1 : count, SillyStringCooldownMs, IconTintId(clientItem, itemDefinition));
+                itemDefinition.SingleUse ? count - 1 : count, favor.CooldownMs, IconTintId(clientItem, itemDefinition));
 
         return true;
     }
