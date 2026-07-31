@@ -456,6 +456,28 @@ public static class AbilityPacketClientRequestStartAbilityHandler
         foreach (var player in poofRecipients)
             player.SendTunneled(poofEffect);
 
+        // The AddNpc-embedded CompositeEffectId above is enough for players who become visible to the
+        // boombox AFTER spawn (they get it fresh off their own AddNpc), but for players already visible
+        // right now it sits dormant until something else happens to re-trigger it - the same "sound is
+        // really delayed" gap /testeffect's own comment already worked around ("Also send a
+        // PlayCompositeEffect packet to trigger the effect immediately"). Fire it explicitly, same
+        // recipients as the poof, so the song starts the instant the boombox lands instead of lagging
+        // behind the model/dance.
+        if (effectId != 0)
+        {
+            var songEffect = new PlayerUpdatePacketPlayCompositeEffect
+            {
+                Guid = boomboxNpc.Guid,
+                CompositeEffectId = effectId,
+                Position = spawnPosition,
+                EffectDelay = 0,
+                Clear = false
+            };
+
+            foreach (var player in poofRecipients)
+                player.SendTunneled(songEffect);
+        }
+
         StartDanceLoop(startingZone, boomboxNpc, spawnPosition, danceSequence);
     }
 
