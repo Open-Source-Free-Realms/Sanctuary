@@ -329,8 +329,9 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             connection.Player.Items.Remove(clientItem);
             connection.SendTunneled(new ClientUpdatePacketItemDelete { ItemGuid = clientItem.Id });
 
-            // Otherwise the still-ticking cooldown re-sends this slot as non-empty a second later.
-            connection.Player.CancelActionBarCooldown(2, actionBarSlot);
+            // Otherwise a still-pending cooldown re-enable (StartActionBarCooldown, scheduled for later)
+            // fires after this and un-deletes the slot.
+            connection.Player.CancelScheduledSlotPacket(2, actionBarSlot);
 
             var slotPacket = new ClientUpdatePacketUpdateActionBarSlot { Data = { Id = 2, Slot = actionBarSlot } };
             slotPacket.Slot.IsEmpty = true;

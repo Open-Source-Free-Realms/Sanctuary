@@ -63,10 +63,19 @@ public sealed class Player : ClientPcData, IEntity
     public DateTimeOffset? TemporaryAppearanceExpiresAt { get; set; }
     private int _temporaryAppearanceEffectId;
 
-    private record PendingCooldown(int ActionBarId, int SlotIndex, int IconId, int IconTintId, int NameId, int Count, int CooldownMs, DateTimeOffset StartedAt);
-    private readonly ConcurrentDictionary<(int, int), PendingCooldown> _pendingCooldowns = new();
-
     private readonly ConcurrentQueue<(DateTimeOffset SendAt, ISerializablePacket Packet, bool SendToSelf)> _delayedPackets = new();
+
+    // One scheduled personal-UI packet per action bar slot (the cooldown re-enable) - keyed, not queued,
+    // so a slot that gets emptied before its cooldown naturally expires (last item consumed) can cancel
+    // its own pending re-enable instead of it firing later and silently un-deleting the slot.
+    private readonly ConcurrentDictionary<(int, int), (DateTimeOffset SendAt, ISerializablePacket Packet)> _delayedSlotPackets = new();
+
+    public void ScheduleSlotPacket(int actionBarId, int slotIndex, ISerializablePacket packet, int delayMs)
+    {
+        _delayedSlotPackets[(actionBarId, slotIndex)] = (DateTimeOffset.UtcNow.AddMilliseconds(delayMs), packet);
+    }
+
+    public void CancelScheduledSlotPacket(int actionBarId, int slotIndex) => _delayedSlotPackets.TryRemove((actionBarId, slotIndex), out _);
 
     public Vector4 StartingZonePosition { get; set; }
     public Quaternion StartingZoneRotation { get; set; }
@@ -165,47 +174,48 @@ public sealed class Player : ClientPcData, IEntity
             if (_delayedPackets.TryDequeue(out delayed))
                 SendTunneledToVisible(delayed.Packet, delayed.SendToSelf);
         }
+
+        var now = DateTimeOffset.UtcNow;
+        foreach (var (key, scheduled) in _delayedSlotPackets)
+        {
+            if (scheduled.SendAt > now)
+                continue;
+
+            if (_delayedSlotPackets.TryRemove(key, out var removed))
+                SendTunneled(removed.Packet);
+        }
     }
 
     public void UpdateEverySecond()
     {
-        var now = DateTimeOffset.UtcNow;
-        foreach (var (key, cooldown) in _pendingCooldowns)
-        {
-            int elapsed = (int)(now - cooldown.StartedAt).TotalMilliseconds;
-            bool expired = elapsed >= cooldown.CooldownMs;
-            SendTunneled(BuildCooldownSlotPacket(cooldown, expired ? cooldown.CooldownMs : elapsed, expired));
-            if (expired)
-                _pendingCooldowns.TryRemove(key, out _);
-        }
     }
 
+    // Live-confirmed (2026-07-31): the client animates the cooldown sweep itself from TotalRefreshTime -
+    // no per-second resend needed for that. But it does NOT re-enable the slot for input on its own once
+    // the sweep finishes ("sweep animates but after the sweep I cannot use the ability again") - that
+    // needs one explicit packet once the cooldown is actually over. So: one packet now, one packet
+    // scheduled for later - not the old repeating-every-second loop, and not silence either.
     public void StartActionBarCooldown(int actionBarId, int slotIndex, int iconId, int nameId, int count, int cooldownMs, int iconTintId = 0)
     {
-        var cooldown = new PendingCooldown(actionBarId, slotIndex, iconId, iconTintId, nameId, count, cooldownMs, DateTimeOffset.UtcNow);
-        _pendingCooldowns[(actionBarId, slotIndex)] = cooldown;
-        SendTunneled(BuildCooldownSlotPacket(cooldown, 0, false));
+        SendTunneled(BuildActionBarSlotPacket(actionBarId, slotIndex, iconId, iconTintId, nameId, count, cooldownMs, enabled: false, elapsed: 0));
+        ScheduleSlotPacket(actionBarId, slotIndex, BuildActionBarSlotPacket(actionBarId, slotIndex, iconId, iconTintId, nameId, count, cooldownMs, enabled: true, elapsed: cooldownMs), cooldownMs);
     }
 
-    // Cancels a registered cooldown early - needed when the slot's item gets deleted, otherwise the
-    // next tick re-sends it as still present.
-    public void CancelActionBarCooldown(int actionBarId, int slotIndex) => _pendingCooldowns.TryRemove((actionBarId, slotIndex), out _);
-
-    private static ClientUpdatePacketUpdateActionBarSlot BuildCooldownSlotPacket(PendingCooldown cooldown, int elapsed, bool enabled)
+    private static ClientUpdatePacketUpdateActionBarSlot BuildActionBarSlotPacket(int actionBarId, int slotIndex, int iconId, int iconTintId, int nameId, int count, int cooldownMs, bool enabled, int elapsed)
     {
-        var packet = new ClientUpdatePacketUpdateActionBarSlot { Data = { Id = cooldown.ActionBarId, Slot = cooldown.SlotIndex } };
+        var packet = new ClientUpdatePacketUpdateActionBarSlot { Data = { Id = actionBarId, Slot = slotIndex } };
         packet.Slot.IsEmpty = false;
-        packet.Slot.IconId = cooldown.IconId;
-        packet.Slot.IconTintId = cooldown.IconTintId;
-        packet.Slot.NameId = cooldown.NameId;
+        packet.Slot.IconId = iconId;
+        packet.Slot.IconTintId = iconTintId;
+        packet.Slot.NameId = nameId;
         packet.Slot.Unknown5 = 1;
         packet.Slot.Unknown6 = 4;
         packet.Slot.Unknown7 = 15;
         packet.Slot.Enabled = enabled;
         packet.Slot.Unknown10 = elapsed;
-        packet.Slot.TotalRefreshTime = cooldown.CooldownMs;
+        packet.Slot.TotalRefreshTime = cooldownMs;
         packet.Slot.Unknown12 = elapsed;
-        packet.Slot.Quantity = cooldown.Count;
+        packet.Slot.Quantity = count;
         packet.Slot.ForceDismount = true;
         packet.Slot.Unknown15 = elapsed;
         return packet;
