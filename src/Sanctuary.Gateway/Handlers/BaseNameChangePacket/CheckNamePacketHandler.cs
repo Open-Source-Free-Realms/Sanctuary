@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Game;
+using Sanctuary.Gateway.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -60,6 +61,7 @@ public static class CheckNamePacketHandler
         checkNameResponsePacket.Result = packet.Type switch
         {
             NameChangeType.Character => OnCheckCharacterName(connection, packet),
+            NameChangeType.Guild => OnCheckGuildName(connection, packet),
             _ => CheckNameResponse.Invalid
         };
 
@@ -106,6 +108,31 @@ public static class CheckNamePacketHandler
         var taken = dbContext.Characters.Any(x => x.FirstName == packet.Name.FirstName && x.LastName == packet.Name.LastName);
 
         if (taken)
+            return CheckNameResponse.Taken;
+
+        return CheckNameResponse.Available;
+    }
+
+    private static CheckNameResponse OnCheckGuildName(GatewayConnection connection, CheckNamePacket packet)
+    {
+        var guildName = GuildHelper.NormalizeName(packet.Name.FullName);
+
+        switch (GuildHelper.ValidateName(guildName))
+        {
+            case GuildNameValidationResult.IncorrectLength:
+                return CheckNameResponse.IncorrectLength;
+            case GuildNameValidationResult.IllegalCharacters:
+                return CheckNameResponse.IllegalCharacters;
+        }
+
+        if (GuildHelper.IsProfane(guildName, _resourceManager.NameFilter))
+            return CheckNameResponse.Profane;
+
+        using var dbContext = _dbContextFactory.CreateDbContext();
+
+        var currentGuildGuid = connection.Player.GuildData?.Guid ?? 0;
+
+        if (GuildHelper.IsNameTaken(dbContext, currentGuildGuid, guildName))
             return CheckNameResponse.Taken;
 
         return CheckNameResponse.Available;

@@ -103,6 +103,9 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.Property<int>("Gender")
                         .HasColumnType("int");
 
+                    b.Property<ulong?>("GuildMemberId")
+                        .HasColumnType("bigint unsigned");
+
                     b.Property<string>("Hair")
                         .IsRequired()
                         .HasColumnType("longtext");
@@ -178,6 +181,11 @@ namespace Sanctuary.Database.MySql.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("FullName");
+
+                    b.HasIndex("GuildMemberId")
+                        .IsUnique();
+
                     b.HasIndex("UserId");
 
                     b.ToTable("Characters");
@@ -201,6 +209,60 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.HasIndex("CharacterId");
 
                     b.ToTable("Friends");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbGuild", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint unsigned");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<ulong>("Id"));
+
+                    b.Property<DateTimeOffset>("Created")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<int>("MaxMembers")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(100);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Guilds");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbGuildMember", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .HasColumnType("bigint unsigned");
+
+                    b.Property<ulong>("GuildId")
+                        .HasColumnType("bigint unsigned");
+
+                    b.Property<DateTimeOffset>("Joined")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GuildId");
+
+                    b.ToTable("GuildMembers");
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbIgnore", b =>
@@ -407,11 +469,18 @@ namespace Sanctuary.Database.MySql.Migrations
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbCharacter", b =>
                 {
+                    b.HasOne("Sanctuary.Database.Entities.DbGuildMember", "GuildMember")
+                        .WithOne("Character")
+                        .HasForeignKey("Sanctuary.Database.Entities.DbCharacter", "GuildMemberId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("Sanctuary.Database.Entities.DbUser", "User")
                         .WithMany("Characters")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("GuildMember");
 
                     b.Navigation("User");
                 });
@@ -433,6 +502,17 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.Navigation("Character");
 
                     b.Navigation("FriendCharacter");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbGuildMember", b =>
+                {
+                    b.HasOne("Sanctuary.Database.Entities.DbGuild", "Guild")
+                        .WithMany("Members")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Guild");
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbIgnore", b =>
@@ -511,6 +591,17 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.Navigation("Profiles");
 
                     b.Navigation("Titles");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbGuild", b =>
+                {
+                    b.Navigation("Members");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbGuildMember", b =>
+                {
+                    b.Navigation("Character")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbUser", b =>
