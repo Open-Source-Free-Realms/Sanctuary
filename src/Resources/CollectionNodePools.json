@@ -1,0 +1,16 @@
+[
+  {
+    "Key": "briarwood-mushrooms",
+    "ZoneDefinitionId": 1,
+    "NodeType": "mushrooms",
+    "MaxActiveNodes": 12,
+    "RespawnSeconds": 60
+  },
+  {
+    "Key": "briarwood-mushrooms-rare",
+    "ZoneDefinitionId": 1,
+    "NodeType": "rare-mushrooms",
+    "MaxActiveNodes": 2,
+    "RespawnSeconds": 300
+  }
+]

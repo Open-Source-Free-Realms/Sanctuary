@@ -4,6 +4,10 @@ namespace Sanctuary.Core.Configuration;
 
 public sealed class GatewayServerOptions : ServerOptions
 {
+    /// <summary>
+    /// The environment identifier reported to the client.
+    /// Use <c>intl</c> when configuring a Chinese client.
+    /// </summary>
     /// <example>live</example>
     [Required]
     public required string Environment { get; set; }

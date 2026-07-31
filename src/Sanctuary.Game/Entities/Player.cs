@@ -8,6 +8,8 @@ using System.Numerics;
 
 using Sanctuary.Core.Collections;
 using Sanctuary.Core.IO;
+using Sanctuary.Game.ChatCommands;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Interactions;
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
@@ -38,6 +40,7 @@ public sealed class Player : ClientPcData, IEntity
 
     public bool IsAdmin { get; set; }
     public bool IsMod { get; set; }
+    public ChatCommandRole ChatCommandRole => ChatHelper.GetRoleFromFlags(IsAdmin, IsMod);
     public DateTimeOffset? MutedUntil { get; set; }
 
     public ClientPcProfile ActiveProfile =>
@@ -49,11 +52,14 @@ public sealed class Player : ClientPcData, IEntity
     public List<IgnoreData> Ignores { get; set; } = [];
 
     public ConcurrentSet<ulong> IncomingFriendRequests { get; } = [];
+    public ConcurrentSet<ulong> IncomingGuildInvites { get; } = [];
 
     public ConcurrentDictionary<ChatChannel, bool> ChatChannelStatus { get; set; } = [];
 
     public int StationCash { get; set; }
     public List<CoinStoreTransactionRecord> CoinStoreTransactions { get; set; } = [];
+
+    public GuildData? GuildData { get; set; }
 
     public int TimezoneOffset { get; set; }
 
@@ -130,6 +136,36 @@ public sealed class Player : ClientPcData, IEntity
     public void Disconnect()
     {
         _connection.Disconnect();
+    }
+
+    public void Dismount()
+    {
+        if (Mount is null)
+            return;
+
+        SendTunneledToVisible(new PacketDismountResponse
+        {
+            RiderGuid = Guid,
+            CompositeEffectId = 0
+        }, sendToSelf: true);
+
+        UpdateCharacterStats(
+            CharacterStats.MaxMovementSpeed.Set(8f),
+            CharacterStats.GlideEnabled.Set(0),
+            CharacterStats.JumpHeight.Set(0f));
+
+        SendTunneledToVisible(new PlayerUpdatePacketRemovePlayerGracefully
+        {
+            Guid = Mount.Guid,
+            Animate = false,
+            Delay = 0,
+            EffectDelay = 0,
+            CompositeEffectId = 46,
+            Duration = 1000
+        }, sendToSelf: true);
+
+        Mount.Dispose();
+        Mount = null;
     }
 
     #endregion
@@ -360,6 +396,25 @@ public sealed class Player : ClientPcData, IEntity
             VisibleNpcs.TryRemove(npc.Guid, out _);
     }
 
+    public void OnRemoveVisibleNpcGracefully(Npc npc, bool animate, int delay, int effectDelay,
+        int compositeEffectId, int duration)
+    {
+        if (npc is Mount)
+            return;
+
+        SendTunneled(new PlayerUpdatePacketRemovePlayerGracefully
+        {
+            Guid = npc.Guid,
+            Animate = animate,
+            Delay = delay,
+            EffectDelay = effectDelay,
+            CompositeEffectId = compositeEffectId,
+            Duration = duration
+        });
+
+        VisibleNpcs.TryRemove(npc.Guid, out _);
+    }
+
     public void OnRemoveVisiblePlayers(params IEnumerable<Player> players)
     {
         foreach (var player in players)
@@ -399,6 +454,9 @@ public sealed class Player : ClientPcData, IEntity
         {
             commandPacketInteractionList.List.Interactions.Add(IgnoreInteraction.Data);
         }
+
+        if (GuildData is null && GuildInviteInteraction.CanInvite(player))
+            commandPacketInteractionList.List.Interactions.Add(GuildInviteInteraction.Data);
 
         player.SendTunneled(commandPacketInteractionList);
     }
@@ -531,6 +589,9 @@ public sealed class Player : ClientPcData, IEntity
 
             packet.NameVerticalOffset = Mount.Definition.NameVerticalOffset;
         }
+
+        if (GuildData is not null)
+            packet.Guilds.Add(0, GuildData.Guid);
 
         return packet;
     }

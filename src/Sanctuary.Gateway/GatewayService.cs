@@ -11,6 +11,7 @@ using Sanctuary.Core.Configuration;
 using Sanctuary.Database;
 using Sanctuary.Game;
 using Sanctuary.Packet.Common.Extensions;
+using Sanctuary.Scripting;
 using Sanctuary.UdpLibrary.Enumerations;
 
 namespace Sanctuary.Gateway;
@@ -24,7 +25,9 @@ public class GatewayService : BackgroundService
     private readonly GatewayServerOptions _options;
     private readonly IServiceProvider _serviceProvider;
     private readonly IResourceManager _resourceManager;
+    private readonly IScriptManager _scriptManager;
     private readonly IInteractionManager _interactionManager;
+    private readonly IChatCommandManager _chatCommandManager;
     private readonly IHostApplicationLifetime _hostApplicationLifetime;
     private readonly IDbContextFactory<DatabaseContext> _dbContextFactory;
 
@@ -36,7 +39,9 @@ public class GatewayService : BackgroundService
         IZoneManager zoneManager,
         IServiceProvider serviceProvider,
         IResourceManager resourceManager,
+        IScriptManager scriptManager,
         IInteractionManager interactionManager,
+        IChatCommandManager ChatCommandManager,
         IDbContextFactory<DatabaseContext> dbContextFactory,
         IHostApplicationLifetime hostApplicationLifetime)
     {
@@ -47,7 +52,9 @@ public class GatewayService : BackgroundService
         _zoneManager = zoneManager;
         _serviceProvider = serviceProvider;
         _resourceManager = resourceManager;
+        _scriptManager = scriptManager;
         _interactionManager = interactionManager;
+        _chatCommandManager = ChatCommandManager;
         _dbContextFactory = dbContextFactory;
         _hostApplicationLifetime = hostApplicationLifetime;
     }
@@ -83,6 +90,16 @@ public class GatewayService : BackgroundService
             return Task.CompletedTask;
         }
 
+        // Load scripts.
+        if (!_scriptManager.Load())
+        {
+            _logger.LogCritical("Cannot start {server}, failed to load scripts.", nameof(GatewayServer));
+
+            _hostApplicationLifetime.StopApplication();
+
+            return Task.CompletedTask;
+        }
+
         // Load zones.
         if (!_zoneManager.Load())
         {
@@ -97,6 +114,16 @@ public class GatewayService : BackgroundService
         if (!_interactionManager.Load())
         {
             _logger.LogCritical("Cannot start {server}, failed to load interactions.", nameof(GatewayServer));
+
+            _hostApplicationLifetime.StopApplication();
+
+            return Task.CompletedTask;
+        }
+
+        // Load commands.
+        if (!_chatCommandManager.Load())
+        {
+            _logger.LogCritical("Cannot start {server}, failed to load commands.", nameof(GatewayServer));
 
             _hostApplicationLifetime.StopApplication();
 

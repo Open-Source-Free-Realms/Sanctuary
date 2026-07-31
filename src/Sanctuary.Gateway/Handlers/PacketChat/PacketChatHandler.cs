@@ -5,10 +5,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Game;
-using Sanctuary.Game.Entities;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 using Sanctuary.Packet.Common.Chat;
@@ -22,6 +21,7 @@ public static class PacketChatHandler
     private static ILogger _chatLogger = null!;
     private static IZoneManager _zoneManager = null!;
     private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
+    private static IChatCommandManager _chatCommandManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -31,10 +31,7 @@ public static class PacketChatHandler
 
         _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
         _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
-
-        var adminLogger = loggerFactory.CreateLogger("Admin");
-
-        ChatCommandRegistry.Initialize(_zoneManager, _dbContextFactory, adminLogger);
+        _chatCommandManager = serviceProvider.GetRequiredService<IChatCommandManager>();
     }
 
     private static void SendMuteNotice(GatewayConnection connection)
@@ -68,9 +65,14 @@ public static class PacketChatHandler
             return false;
         }
         
-        if (packet.Message.StartsWith("!admin"))
+        if (packet.Message.StartsWith(_chatCommandManager.Prefix))
         {
-            ChatCommandRegistry.HandleCommand(connection, packet.Message);
+            if (!_chatCommandManager.TryHandle(connection.Player, packet.Message))
+            {
+                var errorMessage = $"Unknown chat command: {packet.Message}\nTry {_chatCommandManager.Prefix}help";
+                ChatHelper.SendSystemMessage(connection.Player, errorMessage);
+            }
+
             return true;
         }
 
@@ -97,8 +99,10 @@ public static class PacketChatHandler
                             packet.Message
                         );
 
-                        if (!toPlayer.Ignores.Any(x => x.Guid == connection.Player.Guid))
-                            toPlayer.SendTunneled(packet);
+                        if (toPlayer.Ignores.Any(x => x.Guid == connection.Player.Guid))
+                            break;
+
+                        toPlayer.SendTunneled(packet);
 
                         var tellEchoPacket = new TellEchoPacket();
 
@@ -152,6 +156,33 @@ public static class PacketChatHandler
                             continue;
 
                         visiblePlayer.Value.SendTunneled(packet);
+                    }
+                }
+                break;
+
+            case ChatChannel.GuildSay:
+                {
+                    if (connection.Player.GuildData is null)
+                        break;
+
+                    packet.GuildGuid = connection.Player.GuildData.Guid;
+
+                    _chatLogger.LogInformation("GuildSay|GuildGuid: {GuildGuid}, From: \"{FromName}\" ({FromGuid}), Msg: \"{Message}\"",
+                        packet.GuildGuid,
+                        packet.FromName,
+                        packet.FromGuid,
+                        packet.Message
+                    );
+
+                    foreach (var member in connection.Player.GuildData.Members.Values)
+                    {
+                        if (!_zoneManager.TryGetPlayer(member.Guid, out var guildPlayer))
+                            continue;
+
+                        if (guildPlayer.Guid != connection.Player.Guid && guildPlayer.Ignores.Any(x => x.Guid == connection.Player.Guid))
+                            continue;
+
+                        guildPlayer.SendTunneled(packet);
                     }
                 }
                 break;

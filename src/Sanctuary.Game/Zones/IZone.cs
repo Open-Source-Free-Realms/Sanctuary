@@ -4,17 +4,17 @@ using System.Numerics;
 
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Resources.Definitions;
+using Sanctuary.Scripting;
 using Sanctuary.UdpLibrary;
 
 namespace Sanctuary.Game.Zones;
 
-public interface IZone
+public interface IZone : IScriptZone
 {
-    int Id { get; }
-    string Name { get; }
-
+    int DefinitionId { get; }
     #region Events
 
+    void OnStart();
     void OnClientIsReady(Player entity);
     void OnClientFinishedLoading(Player entity);
 
@@ -32,8 +32,19 @@ public interface IZone
     bool TryAddMount(Mount mount);
     bool TryAddPlayer(Player player);
 
-    bool TryCreateNpc([MaybeNullWhen(false)] out Npc npc);
-    bool TryCreateNpc(NpcDefinition definition, [MaybeNullWhen(false)] out Npc npc);
+    bool TryCreateNpc(ulong? guid, [MaybeNullWhen(false)] out Npc npc);
+    bool TryCreateNpc(ulong? guid, NpcDefinition definition, [MaybeNullWhen(false)] out Npc npc);
+    IReadOnlyList<CollectionNodePoolStatus> GetCollectionNodePoolStatuses();
+    IReadOnlyList<CollectionNodeSpawnStatus> GetCollectionNodeSpawnStatuses(string? poolKey = null);
+    bool TryPlaceCollectionNodeSpawn(string poolKey, Vector4 position, float heading,
+        [MaybeNullWhen(false)] out CollectionNodeSpawnDefinition spawn, out bool activated);
+    bool TryConfigureCollectionNodePool(string poolKey, int maxActiveNodes, int respawnSeconds,
+        out int activeCount, out int targetActiveCount);
+    bool TryRemoveCollectionNodeSpawn(int id,
+        [MaybeNullWhen(false)] out CollectionNodeSpawnDefinition removedSpawn);
+    bool TryRemoveNearestCollectionNodeSpawn(Vector4 position, float radius,
+        [MaybeNullWhen(false)] out CollectionNodeSpawnDefinition removedSpawn);
+    void CompleteCollectionNode(CollectionNode node);
     bool TryCreateMount(Player rider, MountDefinition definition, [MaybeNullWhen(false)] out Mount mount);
     bool TryCreatePlayer(ulong guid, UdpConnection connection, [MaybeNullWhen(false)] out Player player);
 

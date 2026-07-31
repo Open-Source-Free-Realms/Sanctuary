@@ -79,6 +79,8 @@ public class GatewayConnection : UdpConnection
 
         SendFriendOffline();
 
+        SendGuildMemberOffline();
+
         _loginClient.SendCharacterLogout(GuidHelper.GetPlayerId(Player.Guid));
 
         SavePlayerToDatabase();
@@ -423,6 +425,52 @@ public class GatewayConnection : UdpConnection
 
         Player.StationCash = dbCharacter.StationCash;
 
+        if (dbCharacter.GuildMember?.Guild is { } dbGuild)
+        {
+            var guildData = new GuildData
+            {
+                Guid = dbGuild.Id,
+
+                Name = dbGuild.Name,
+
+                CanRenameGuild = true,
+
+                MaxMembers = dbGuild.MaxMembers
+            };
+
+            foreach (var dbGuildMember in dbGuild.Members)
+            {
+                var memberGuid = GuidHelper.GetPlayerGuid(dbGuildMember.Id);
+
+                var guildMember = new GuildMember
+                {
+                    Guid = memberGuid,
+
+                    Role = dbGuildMember.Role,
+
+                    Name =
+                    {
+                        FirstName = dbGuildMember.Character.FirstName,
+                        LastName = dbGuildMember.Character.LastName ?? string.Empty
+                    }
+                };
+
+                if (_zoneManager.TryGetPlayer(memberGuid, out var memberPlayer))
+                {
+                    guildMember.Online = true;
+
+                    guildMember.WorldId = memberPlayer.Zone.Id;
+
+                    guildMember.ProfileId = memberPlayer.ActiveProfileId;
+                    guildMember.ProfileRank = memberPlayer.ActiveProfile.Rank;
+                }
+
+                guildData.Members.Add(memberGuid, guildMember);
+            }
+
+            player.GuildData = guildData;
+        }
+
         return true;
     }
 
@@ -537,6 +585,14 @@ public class GatewayConnection : UdpConnection
 
     public void SendSelfToClient()
     {
+        var ownedItemDefinitionIds = Player.Items
+            .Select(item => item.Definition)
+            .ToHashSet();
+
+        // TODO: Include persisted non-inventory progress here when direct collections such as
+        // adventure coins have a database representation.
+        Player.Collections = _resourceManager.Collections.CreateClientCollections(Player.Guid, ownedItemDefinitionIds);
+
         var packetSendSelfToClient = new PacketSendSelfToClient();
 
         packetSendSelfToClient.Payload = Player.Serialize();
@@ -563,6 +619,52 @@ public class GatewayConnection : UdpConnection
             otherFriendPlayer.Online = false;
 
             friendPlayer.SendTunneled(friendOfflinePacket);
+        }
+    }
+
+    public void SendGuildMemberOffline()
+    {
+        if (Player.GuildData is null)
+            return;
+
+        if (!Player.GuildData.Members.TryGetValue(Player.Guid, out var playerGuildMember))
+            return;
+
+        var guildMemberStatusUpdatePacket = new GuildMemberStatusUpdatePacket
+        {
+            GuildGuid = Player.GuildData.Guid,
+            MemberGuid = Player.Guid,
+
+            Name = Player.Name,
+            Role = playerGuildMember.Role,
+            Online = false,
+            Type = 6,
+            WorldId = 0,
+            ProfileId = Player.ActiveProfileId,
+            ProfileRank = Player.ActiveProfile.Rank
+        };
+
+        foreach (var guildMember in Player.GuildData.Members)
+        {
+            if (guildMember.Key == Player.Guid)
+                continue;
+
+            if (!_zoneManager.TryGetPlayer(guildMember.Key, out var guildPlayer))
+                continue;
+
+            if (guildPlayer.GuildData is null)
+                continue;
+
+            if (guildPlayer.GuildData.Members.TryGetValue(Player.Guid, out var onlineMember))
+            {
+                onlineMember.Online = false;
+                onlineMember.Role = playerGuildMember.Role;
+                onlineMember.WorldId = 0;
+                onlineMember.ProfileId = Player.ActiveProfileId;
+                onlineMember.ProfileRank = Player.ActiveProfile.Rank;
+            }
+
+            guildPlayer.SendTunneled(guildMemberStatusUpdatePacket);
         }
     }
 
