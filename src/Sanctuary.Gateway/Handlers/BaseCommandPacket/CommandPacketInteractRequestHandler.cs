@@ -67,6 +67,8 @@ public static class CommandPacketInteractRequestHandler
         if (!node.TryReserve())
             return true;
 
+        connection.Player.Dismount();
+
         var itemPersisted = false;
         var nodeCompleted = false;
 
