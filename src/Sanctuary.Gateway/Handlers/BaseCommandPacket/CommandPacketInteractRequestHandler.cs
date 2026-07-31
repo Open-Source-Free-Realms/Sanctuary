@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
@@ -12,6 +13,7 @@ using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game;
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -84,6 +86,20 @@ public static class CommandPacketInteractRequestHandler
                 return true;
             }
 
+            var ownedItemDefinitionIds = connection.Player.Items
+                .Select(item => item.Definition)
+                .ToHashSet();
+            var collectionMatch = _resourceManager.Collections.Values
+                .SelectMany(definition => definition.Entries.Select((entry, index) => new
+                {
+                    Definition = definition,
+                    Entry = entry,
+                    Index = index
+                }))
+                .FirstOrDefault(match => match.Entry.ItemDefinitionId == itemDefinitionId);
+            var collectionWasStarted = collectionMatch?.Definition.IsStarted(ownedItemDefinitionIds) ?? false;
+            var collectionEntryWasCollected = ownedItemDefinitionIds.Contains(itemDefinitionId);
+
             var characterId = GuidHelper.GetPlayerId(connection.Player.Guid);
 
             using var dbContext = _dbContextFactory.CreateDbContext();
@@ -155,13 +171,24 @@ public static class CommandPacketInteractRequestHandler
                 });
             }
 
+            ownedItemDefinitionIds.Add(itemDefinitionId);
+
             node.CompleteCollection();
             nodeCompleted = true;
 
-            // The delta packet is not fully decoded. The authoritative self packet is
-            // capture-validated and refreshes an already-open collection panel.
-            connection.SendSelfToClient();
-            SendCollectionRewardToast(connection, clientItem, itemDefinition, node);
+            if (collectionMatch is not null && !collectionEntryWasCollected)
+            {
+                if (collectionWasStarted)
+                {
+                    SendCollectionEntryUpdate(connection, collectionMatch.Definition,
+                        collectionMatch.Entry, collectionMatch.Index);
+                }
+                else
+                {
+                    SendCollectionStart(connection, collectionMatch.Definition, ownedItemDefinitionIds);
+                }
+            }
+
             return true;
         }
         catch (Exception ex)
@@ -177,25 +204,32 @@ public static class CommandPacketInteractRequestHandler
         }
     }
 
-    private static void SendCollectionRewardToast(GatewayConnection connection, ClientItem clientItem,
-        ClientItemDefinition itemDefinition, CollectionNode node)
+    private static void SendCollectionStart(GatewayConnection connection, CollectionDefinition definition,
+        IReadOnlySet<int> ownedItemDefinitionIds)
     {
-        var notificationId = Environment.TickCount & int.MaxValue;
+        var collection = definition.CreateClientCollection(connection.Player.Guid, ownedItemDefinitionIds);
 
-        connection.SendTunneled(new RewardBundlePacket
+        using var writer = new PacketWriter();
+        collection.Serialize(writer);
+
+        connection.SendTunneled(new ClientUpdatePacketCollectionStart { Payload = writer.Buffer });
+    }
+
+    private static void SendCollectionEntryUpdate(GatewayConnection connection, CollectionDefinition definition,
+        CollectionEntryDefinition entryDefinition, int index)
+    {
+        var entry = definition.CreateClientCollectionEntry(entryDefinition, index, true);
+
+        connection.SendTunneled(new ClientUpdatePacketCollectionAddEntry
         {
-            SourceGuid = node.Guid ^ (uint)notificationId,
-            PlayerGuid = connection.Player.Guid,
-            IconId = itemDefinition.Icon.Id,
-            NameId = itemDefinition.NameId,
-            Quantity = 1,
-            EntryIconId = itemDefinition.Icon.Id,
-            EntryNameId = itemDefinition.NameId,
-            EntryQuantity = 1,
-            ItemDefinitionId = clientItem.Definition,
-            Tint = clientItem.Tint,
-            ItemGuid = notificationId,
-            EntryUnknown5 = itemDefinition.DescriptionId
+            DefinitionId = entry.DefinitionId,
+            IconId = entry.IconId,
+            IconTintId = entry.IconTintId,
+            NameId = entry.NameId,
+            CollectionId = entry.CollectionId,
+            Index = entry.Index,
+            Unknown = entry.Unknown,
+            Collected = entry.Collected
         });
     }
 }

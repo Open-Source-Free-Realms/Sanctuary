@@ -80,7 +80,8 @@ public sealed class CollectionDefinitionCollection : ObservableConcurrentDiction
 
         foreach (var definition in definitions)
         {
-            if (definition.Id <= 0 || definition.CategoryId <= 0 || definition.Entries.Count == 0)
+            if (definition.Id <= 0 || definition.NameId <= 0 || definition.CategoryId <= 0 ||
+                definition.Entries.Count == 0)
             {
                 _logger.LogError("Collection {id} has invalid required data in \"{file}\".", definition.Id, filePath);
                 return false;
