@@ -1,4 +1,4 @@
-namespace Sanctuary.Game.Combat;
+namespace Sanctuary.Game.Consumables;
 
 // Silly String cans (ClientItemDefinitions.json CategoryId 29) - sprays the nearest other player.
 // Effect ids are real, from ActorCompositeEffectDefinitions.xml's PFX_silly-string_beam_<color>_p2p family.

@@ -13,7 +13,7 @@ using Sanctuary.Core.Helpers;
 using Sanctuary.Core.IO;
 using Sanctuary.Database;
 using Sanctuary.Game;
-using Sanctuary.Game.Combat;
+using Sanctuary.Game.Consumables;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Zones;
