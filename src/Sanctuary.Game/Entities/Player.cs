@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 
 using Sanctuary.Core.Collections;
 using Sanctuary.Core.IO;
+using Sanctuary.Game.ChatCommands;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Interactions;
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
@@ -39,6 +41,7 @@ public sealed class Player : ClientPcData, IEntity
 
     public bool IsAdmin { get; set; }
     public bool IsMod { get; set; }
+    public ChatCommandRole ChatCommandRole => ChatHelper.GetRoleFromFlags(IsAdmin, IsMod);
     public DateTimeOffset? MutedUntil { get; set; }
 
     public ClientPcProfile ActiveProfile =>
@@ -131,6 +134,36 @@ public sealed class Player : ClientPcData, IEntity
     public void Disconnect()
     {
         _connection.Disconnect();
+    }
+
+    public void Dismount()
+    {
+        if (Mount is null)
+            return;
+
+        SendTunneledToVisible(new PacketDismountResponse
+        {
+            RiderGuid = Guid,
+            CompositeEffectId = 0
+        }, sendToSelf: true);
+
+        UpdateCharacterStats(
+            CharacterStats.MaxMovementSpeed.Set(8f),
+            CharacterStats.GlideEnabled.Set(0),
+            CharacterStats.JumpHeight.Set(0f));
+
+        SendTunneledToVisible(new PlayerUpdatePacketRemovePlayerGracefully
+        {
+            Guid = Mount.Guid,
+            Animate = false,
+            Delay = 0,
+            EffectDelay = 0,
+            CompositeEffectId = 46,
+            Duration = 1000
+        }, sendToSelf: true);
+
+        Mount.Dispose();
+        Mount = null;
     }
 
     #endregion
