@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,6 +13,7 @@ using Sanctuary.Core.Helpers;
 using Sanctuary.Core.IO;
 using Sanctuary.Database;
 using Sanctuary.Game;
+using Sanctuary.Game.Combat;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Zones;
@@ -91,6 +93,10 @@ public static class AbilityPacketClientRequestStartAbilityHandler
         if (_resourceManager.Consumables.Cakes.TryGetValue(itemDefinition.Id, out var cakeDefinition))
             return HandleCake(connection, packet.Data.Slot, clientItem, itemDefinition, cakeDefinition);
 
+        // Silly String cans (CategoryId 29 - see SillyStringAbilities) - sprays the nearest other player.
+        if (itemDefinition.CategoryId == 29 && SillyStringAbilities.TryResolve(itemDefinition.Comment, out var sillyStringEffectId))
+            return HandleSillyString(connection, packet.Data.Slot, clientItem, itemDefinition, sillyStringEffectId);
+
         // Random-transform foods (e.g. Jack-O-Lantern) roll one of their listed
         // transformations instead of using the item's fixed ability id.
         var transformAbilityId = itemDefinition.ActivatableAbilityId;
@@ -134,6 +140,126 @@ public static class AbilityPacketClientRequestStartAbilityHandler
 
         StartCooldown(connection.Player.Guid, itemDefinition.Id, cakeDefinition.CooldownMs);
         connection.Player.StartActionBarCooldown(2, slot, itemDefinition.Icon.Id, itemDefinition.NameId, clientItem.Count, cakeDefinition.CooldownMs);
+
+        return true;
+    }
+
+    // emo_spraycan (id 3351) - bound on both genders, though the client reuses the "point" gesture clip.
+    private const int SillyStringAnimationId = 3351;
+    private const float SillyStringGestureSeconds = 1.5f;
+
+    // Tag-based loop, not the effect's own 5s default lifetime - free to run longer.
+    private const float SillyStringEffectSeconds = 20f;
+
+    private const float SillyStringRange = 12f;
+    private const float SillyStringRangeSquared = SillyStringRange * SillyStringRange;
+    private const int SillyStringIdleAnimId = 1;
+    private const int SillyStringCooldownMs = 3000;
+
+    // Who each player last sprayed, so it doesn't just soak the same nearest victim every time.
+    private static readonly ConcurrentDictionary<ulong, ulong> _lastSillyStringTarget = new();
+
+    private static bool HandleSillyString(GatewayConnection connection, int slot, ClientItem clientItem, ClientItemDefinition itemDefinition, int effectId)
+    {
+        var player = connection.Player;
+        var zone = player.Zone;
+
+        if (IsOnCooldown(player.Guid, itemDefinition.Id))
+            return SendFailure(connection);
+
+        // Nearest other player in range, skipping last time's target unless they're the only one around.
+        _lastSillyStringTarget.TryGetValue(player.Guid, out var lastTargetGuid);
+
+        Player? target = null;
+        Player? fallbackTarget = null;
+        var best2 = SillyStringRangeSquared;
+        var bestFallback2 = SillyStringRangeSquared;
+
+        foreach (var candidate in zone.Players)
+        {
+            if (candidate.Guid == player.Guid)
+                continue;
+
+            var dx = candidate.Position.X - player.Position.X;
+            var dz = candidate.Position.Z - player.Position.Z;
+            var d2 = dx * dx + dz * dz;
+            if (d2 >= SillyStringRangeSquared)
+                continue;
+
+            if (d2 < bestFallback2)
+            {
+                bestFallback2 = d2;
+                fallbackTarget = candidate;
+            }
+
+            if (candidate.Guid == lastTargetGuid || d2 >= best2)
+                continue;
+
+            best2 = d2;
+            target = candidate;
+        }
+
+        target ??= fallbackTarget;
+
+        if (target is null)
+            return SendFailure(connection); // nobody nearby to spray
+
+        _lastSillyStringTarget[player.Guid] = target.Guid;
+
+        var recipients = new HashSet<Player> { player };
+        foreach (var visiblePlayer in player.VisiblePlayers.Values)
+            recipients.Add(visiblePlayer);
+
+        var sync = new PlayerUpdatePacketSetSynchronizedAnimations();
+        sync.Animations.Add(new PlayerUpdatePacketSetSynchronizedAnimations.Animation { Guid = player.Guid, AnimationId = SillyStringAnimationId });
+
+        foreach (var recipient in recipients)
+            recipient.SendTunneled(sync);
+
+        var tagId = System.Threading.Interlocked.Increment(ref _castFxTagCounter);
+
+        var beam = new PlayerUpdatePacketAddEffectTagCompositeEffect
+        {
+            Guid = target.Guid,
+            TagId = tagId,
+            CompositeEffectId = effectId,
+            SourceGuid = player.Guid,
+        };
+
+        foreach (var recipient in recipients)
+            recipient.SendTunneled(beam);
+
+        _logger.LogInformation("Silly String: {who} sprayed {target}.", player.Name, target.Name);
+
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay((int)(SillyStringGestureSeconds * 1000));
+
+            player.SendTunneledToVisible(new PlayerUpdatePacketSetAnimation
+            {
+                Guid = player.Guid,
+                AnimationId = SillyStringIdleAnimId,
+                Flags = 1
+            }, sendToSelf: true);
+
+            await Task.Delay((int)((SillyStringEffectSeconds - SillyStringGestureSeconds) * 1000));
+
+            var stop = new PlayerUpdatePacketRemoveEffectTagCompositeEffect { Guid = target.Guid, TagId = tagId };
+            foreach (var recipient in recipients)
+                recipient.SendTunneled(stop);
+        });
+
+        StartCooldown(player.Guid, itemDefinition.Id, SillyStringCooldownMs);
+
+        var count = clientItem.Count;
+        var hasItemLeft = !itemDefinition.SingleUse || count > 1;
+
+        if (itemDefinition.SingleUse)
+            ConsumeItem(connection, clientItem, itemDefinition, slot);
+
+        if (hasItemLeft)
+            player.StartActionBarCooldown(2, slot, itemDefinition.Icon.Id, itemDefinition.NameId,
+                itemDefinition.SingleUse ? count - 1 : count, SillyStringCooldownMs, IconTintId(clientItem, itemDefinition));
 
         return true;
     }
@@ -197,6 +323,10 @@ public static class AbilityPacketClientRequestStartAbilityHandler
         cooldowns[itemDefinitionId] = DateTimeOffset.UtcNow.AddMilliseconds(cooldownMs);
     }
 
+    // Color-variant items (the 5 Silly String Can colors) share one Icon.Id and differ only by TintId.
+    private static int IconTintId(ClientItem clientItem, ClientItemDefinition itemDefinition) =>
+        clientItem.Tint == 0 ? itemDefinition.Icon.TintId : clientItem.Tint;
+
     private static bool ConsumeItem(GatewayConnection connection, ClientItem clientItem, ClientItemDefinition clientItemDefinition, int actionBarSlot)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
@@ -222,6 +352,9 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             connection.Player.Items.Remove(clientItem);
             connection.SendTunneled(new ClientUpdatePacketItemDelete { ItemGuid = clientItem.Id });
 
+            // Otherwise the still-ticking cooldown re-sends this slot as non-empty a second later.
+            connection.Player.CancelActionBarCooldown(2, actionBarSlot);
+
             var slotPacket = new ClientUpdatePacketUpdateActionBarSlot { Data = { Id = 2, Slot = actionBarSlot } };
             slotPacket.Slot.IsEmpty = true;
 
@@ -246,6 +379,7 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             var slotPacket = new ClientUpdatePacketUpdateActionBarSlot { Data = { Id = 2, Slot = actionBarSlot } };
             slotPacket.Slot.IsEmpty = false;
             slotPacket.Slot.IconId = clientItemDefinition.Icon.Id;
+            slotPacket.Slot.IconTintId = IconTintId(clientItem, clientItemDefinition);
             slotPacket.Slot.NameId = clientItemDefinition.NameId;
             slotPacket.Slot.Unknown5 = 1;
             slotPacket.Slot.Unknown6 = 4;

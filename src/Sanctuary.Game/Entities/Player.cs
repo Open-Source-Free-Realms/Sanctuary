@@ -63,7 +63,7 @@ public sealed class Player : ClientPcData, IEntity
     public DateTimeOffset? TemporaryAppearanceExpiresAt { get; set; }
     private int _temporaryAppearanceEffectId;
 
-    private record PendingCooldown(int ActionBarId, int SlotIndex, int IconId, int NameId, int Count, int CooldownMs, DateTimeOffset StartedAt);
+    private record PendingCooldown(int ActionBarId, int SlotIndex, int IconId, int IconTintId, int NameId, int Count, int CooldownMs, DateTimeOffset StartedAt);
     private readonly ConcurrentDictionary<(int, int), PendingCooldown> _pendingCooldowns = new();
 
     private readonly ConcurrentQueue<(DateTimeOffset SendAt, ISerializablePacket Packet, bool SendToSelf)> _delayedPackets = new();
@@ -180,18 +180,23 @@ public sealed class Player : ClientPcData, IEntity
         }
     }
 
-    public void StartActionBarCooldown(int actionBarId, int slotIndex, int iconId, int nameId, int count, int cooldownMs)
+    public void StartActionBarCooldown(int actionBarId, int slotIndex, int iconId, int nameId, int count, int cooldownMs, int iconTintId = 0)
     {
-        var cooldown = new PendingCooldown(actionBarId, slotIndex, iconId, nameId, count, cooldownMs, DateTimeOffset.UtcNow);
+        var cooldown = new PendingCooldown(actionBarId, slotIndex, iconId, iconTintId, nameId, count, cooldownMs, DateTimeOffset.UtcNow);
         _pendingCooldowns[(actionBarId, slotIndex)] = cooldown;
         SendTunneled(BuildCooldownSlotPacket(cooldown, 0, false));
     }
+
+    // Cancels a registered cooldown early - needed when the slot's item gets deleted, otherwise the
+    // next tick re-sends it as still present.
+    public void CancelActionBarCooldown(int actionBarId, int slotIndex) => _pendingCooldowns.TryRemove((actionBarId, slotIndex), out _);
 
     private static ClientUpdatePacketUpdateActionBarSlot BuildCooldownSlotPacket(PendingCooldown cooldown, int elapsed, bool enabled)
     {
         var packet = new ClientUpdatePacketUpdateActionBarSlot { Data = { Id = cooldown.ActionBarId, Slot = cooldown.SlotIndex } };
         packet.Slot.IsEmpty = false;
         packet.Slot.IconId = cooldown.IconId;
+        packet.Slot.IconTintId = cooldown.IconTintId;
         packet.Slot.NameId = cooldown.NameId;
         packet.Slot.Unknown5 = 1;
         packet.Slot.Unknown6 = 4;

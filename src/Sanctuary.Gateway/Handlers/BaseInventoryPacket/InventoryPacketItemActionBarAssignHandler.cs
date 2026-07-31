@@ -79,9 +79,13 @@ public static class InventoryPacketItemActionBarAssignHandler
             return true;
         }
 
+        // Color-variant items share one Icon.Id and differ only by TintId.
+        var iconTintId = clientItem.Tint == 0 ? clientItemDefinition.Icon.TintId : clientItem.Tint;
+
         clientUpdatePacketUpdateActionBarSlot.Slot.IsEmpty = false;
 
         clientUpdatePacketUpdateActionBarSlot.Slot.IconId = clientItemDefinition.Icon.Id;
+        clientUpdatePacketUpdateActionBarSlot.Slot.IconTintId = iconTintId;
         clientUpdatePacketUpdateActionBarSlot.Slot.NameId = clientItemDefinition.NameId;
 
         clientUpdatePacketUpdateActionBarSlot.Slot.Unknown5 = 1;
@@ -100,6 +104,7 @@ public static class InventoryPacketItemActionBarAssignHandler
         {
             IsEmpty = false,
             IconId = clientItemDefinition.Icon.Id,
+            IconTintId = iconTintId,
             NameId = clientItemDefinition.NameId,
             Unknown5 = 1,
             Unknown6 = 4,
