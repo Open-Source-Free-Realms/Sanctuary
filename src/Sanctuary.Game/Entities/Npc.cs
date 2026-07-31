@@ -396,12 +396,6 @@ public class Npc : IEntity
         RecomputePath();
     }
 
-    public void Chase(Player player)
-    {
-        // TODO: not stable
-        throw new NotSupportedException("NPC chasing is not yet ready.");
-    }
-
     private void RecomputePath()
     {
 

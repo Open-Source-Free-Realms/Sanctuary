@@ -1,7 +1,8 @@
 using System.Numerics;
 
-using Sanctuary.Game.Entities;
 
+// TODO: implement a `ChaseEntity`.
+// - Alko
 public abstract record MovementGoal
 {
     public abstract Vector3 GetPosition();
@@ -12,12 +13,5 @@ public abstract record MovementGoal
     {
         public override Vector3 GetPosition() => Position;
         public override bool ClearOnArrival => true;
-    }
-
-    public sealed record ChaseEntity(Player Target) : MovementGoal
-    {
-        public override Vector3 GetPosition() =>
-            new(Target.Position.X, Target.Position.Y, Target.Position.Z);
-        public override bool ClearOnArrival => false;
     }
 }

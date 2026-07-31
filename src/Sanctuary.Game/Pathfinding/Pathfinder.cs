@@ -16,7 +16,8 @@ public class Pathfinder<TNode> where TNode : IPathNode
         this._logger = logger;
     }
 
-    public List<TNode> FindPath(Vector3 startPosition, Vector3 goalPosition) {
+    public List<TNode> FindPath(Vector3 startPosition, Vector3 goalPosition)
+    {
         var startNode = this.FindClosestNode(startPosition);
         var goalNode = this.FindClosestNode(goalPosition);
 
@@ -28,11 +29,12 @@ public class Pathfinder<TNode> where TNode : IPathNode
         int? meetingNodeId = null;
 
 
-        // NOTE: this was ported from a Python implementation that I (Alko) have.
+        // NOTE: this was ported from a Python implementation that I have.
         // Apparently, `heapq` and PriorityQueue have difference tie breaker 
         // behavior. This shouldn't affect the validity of the solution, but if
         // anyone ever gets their hands on the Python version for validation, it may 
         // not be 1:1.
+        // - Alko
         var forwardQueue = new PriorityQueue<int, float>();
         var forwardGScores = new Dictionary<int, float>();
         var forwardCameFrom = new Dictionary<int, int>();
@@ -66,7 +68,7 @@ public class Pathfinder<TNode> where TNode : IPathNode
             // We'll start by expanding the smaller cost first. Not sure if this
             // will really improve efficiency that much in practice.
             (float Cost, int NodeId)? meetingCandidate;
-            if (forwardFScore <= backwardFScore) 
+            if (forwardFScore <= backwardFScore)
             {
                 meetingCandidate = this.Expand(
                     forwardQueue,
@@ -76,8 +78,8 @@ public class Pathfinder<TNode> where TNode : IPathNode
                     forwardCameFrom,
                     goalNode
                 );
-            } 
-            else 
+            }
+            else
             {
                 meetingCandidate = this.Expand(
                     backwardQueue,
@@ -101,7 +103,8 @@ public class Pathfinder<TNode> where TNode : IPathNode
             }
         }
 
-        if (meetingNodeId is null) {
+        if (meetingNodeId is null)
+        {
             _logger.LogWarning(
                 "No path found between node {StartNodeId} and node {GoalNodeId}.",
                 startNode.Id, goalNode.Id);
@@ -119,10 +122,10 @@ public class Pathfinder<TNode> where TNode : IPathNode
         _logger.LogInformation(
             "Path found: {NodeCount} nodes, cost {Cost:F1}.",
             path.Count, bestCost);
-        return path; 
+        return path;
     }
 
-    private TNode FindClosestNode(Vector3 position) 
+    private TNode FindClosestNode(Vector3 position)
     {
         // TODO: This is linear and probably fine for small graphs, but if we ever do
         // things with large navmesh graphs, we might need to make this more efficient!
@@ -131,17 +134,17 @@ public class Pathfinder<TNode> where TNode : IPathNode
         var closestId = 0;
 
         foreach (var (id, node) in this._nodes)
+        {
+            var difference = position - node.Position;
+            var distSquared = difference.LengthSquared();
+            if (distSquared < minDistSquared)
             {
-                var difference = position - node.Position;
-                var distSquared = difference.LengthSquared();
-                if (distSquared < minDistSquared)
-                {
-                    closestId = id;
-                    minDistSquared = distSquared;
-                }
+                closestId = id;
+                minDistSquared = distSquared;
             }
+        }
 
-        return this._nodes[closestId]; 
+        return this._nodes[closestId];
     }
 
     private (float Cost, int NodeId)? Expand(
@@ -186,7 +189,7 @@ public class Pathfinder<TNode> where TNode : IPathNode
 
         return meetingCandidate;
     }
-    
+
     private List<TNode> ReconstructPath(
         TNode startNode,
         TNode goalNode,
