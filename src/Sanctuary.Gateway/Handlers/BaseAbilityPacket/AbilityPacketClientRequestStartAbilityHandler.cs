@@ -35,9 +35,12 @@ public static class AbilityPacketClientRequestStartAbilityHandler
     private const int BoomboxIdleAnimId = 1;
 
     // How long a boombox stays out, which is also its use cooldown.
-    private const int BoomboxDurationMs = 120_000;
+    private const int BoomboxDurationMs = 180_000;
 
     private const int FoodEffectCooldownMs = 120_000;
+
+    // Unique tag ids for the boombox's looping song effect.
+    private static int _castFxTagCounter = 5000;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -456,32 +459,29 @@ public static class AbilityPacketClientRequestStartAbilityHandler
         foreach (var player in poofRecipients)
             player.SendTunneled(poofEffect);
 
-        // The AddNpc-embedded CompositeEffectId above is enough for players who become visible to the
-        // boombox AFTER spawn (they get it fresh off their own AddNpc), but for players already visible
-        // right now it sits dormant until something else happens to re-trigger it - the same "sound is
-        // really delayed" gap /testeffect's own comment already worked around ("Also send a
-        // PlayCompositeEffect packet to trigger the effect immediately"). Fire it explicitly, same
-        // recipients as the poof, so the song starts the instant the boombox lands instead of lagging
-        // behind the model/dance.
+        // Tag-attach the song so it plays right away and we can stop it cleanly on despawn.
+        var songTagId = 0;
+
         if (effectId != 0)
         {
-            var songEffect = new PlayerUpdatePacketPlayCompositeEffect
+            songTagId = System.Threading.Interlocked.Increment(ref _castFxTagCounter);
+
+            var songEffect = new PlayerUpdatePacketAddEffectTagCompositeEffect
             {
                 Guid = boomboxNpc.Guid,
+                TagId = songTagId,
                 CompositeEffectId = effectId,
-                Position = spawnPosition,
-                EffectDelay = 0,
-                Clear = false
+                SourceGuid = boomboxNpc.Guid,
             };
 
             foreach (var player in poofRecipients)
                 player.SendTunneled(songEffect);
         }
 
-        StartDanceLoop(startingZone, boomboxNpc, spawnPosition, danceSequence);
+        StartDanceLoop(startingZone, boomboxNpc, spawnPosition, danceSequence, songTagId, effectId);
     }
 
-    private static void StartDanceLoop(StartingZone startingZone, Npc boomboxNpc, Vector4 spawnPosition, int[] danceSequence)
+    private static void StartDanceLoop(StartingZone startingZone, Npc boomboxNpc, Vector4 spawnPosition, int[] danceSequence, int songTagId, int effectId)
     {
         const float BoomboxRangeInMeters = 15.0f;
         const int SwitchMs = 4000;
@@ -501,6 +501,18 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             {
                 foreach (var player in startingZone.Players.Where(p => dancing.Contains(p.Guid)))
                     StopDancing(player);
+
+                if (songTagId != 0)
+                {
+                    var stopSong = new PlayerUpdatePacketRemoveEffectTagCompositeEffect
+                    {
+                        Guid = boomboxNpc.Guid,
+                        TagId = songTagId,
+                    };
+
+                    foreach (var player in startingZone.Players)
+                        player.SendTunneled(stopSong);
+                }
 
                 DespawnNpc(boomboxNpc, 21);
                 return;
@@ -542,6 +554,21 @@ public static class AbilityPacketClientRequestStartAbilityHandler
                 SyncDance(inRange, currentAnim);
             else if (newcomers.Count > 0)
                 SyncDance(newcomers, currentAnim);
+
+            // Newcomers need the song re-sent too, same as the dance sync above.
+            if (songTagId != 0 && newcomers.Count > 0)
+            {
+                var songEffect = new PlayerUpdatePacketAddEffectTagCompositeEffect
+                {
+                    Guid = boomboxNpc.Guid,
+                    TagId = songTagId,
+                    CompositeEffectId = effectId,
+                    SourceGuid = boomboxNpc.Guid,
+                };
+
+                foreach (var player in newcomers)
+                    player.SendTunneled(songEffect);
+            }
 
             elapsedMs += 1000;
             sinceSwitch += 1000;
