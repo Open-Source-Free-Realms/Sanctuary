@@ -146,7 +146,7 @@ public sealed class Player : ClientPcData, IEntity
         SendTunneledToVisible(new PacketDismountResponse
         {
             RiderGuid = Guid,
-            CompositeEffectId = 0
+            CompositeEffectId = 46
         }, sendToSelf: true);
 
         UpdateCharacterStats(
@@ -164,7 +164,7 @@ public sealed class Player : ClientPcData, IEntity
             Duration = 1000
         }, sendToSelf: true);
 
-        Mount.Dispose();
+        Mount.DisposeGracefully(true, 0, 0, 46, 1000);
         Mount = null;
     }
 
