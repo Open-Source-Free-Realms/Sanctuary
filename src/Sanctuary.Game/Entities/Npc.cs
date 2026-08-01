@@ -314,7 +314,7 @@ public class Npc : IEntity
         RemoveFromZone();
     }
 
-    protected void DisposeGracefully(bool animate, int delay, int effectDelay, int compositeEffectId, int duration)
+    public virtual void DisposeGracefully(bool animate, int delay, int effectDelay, int compositeEffectId, int duration)
     {
         foreach (var visiblePlayer in VisiblePlayers)
         {

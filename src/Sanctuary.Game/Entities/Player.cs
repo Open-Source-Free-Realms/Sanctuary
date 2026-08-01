@@ -164,7 +164,7 @@ public sealed class Player : ClientPcData, IEntity
             Duration = 1000
         }, sendToSelf: true);
 
-        Mount.DisposeGracefully(true, 0, 0, 46, 1000);
+        Mount.DisposeGracefully(false, 0, 0, 46, 1000);
         Mount = null;
     }
 
