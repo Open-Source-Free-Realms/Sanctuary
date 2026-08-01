@@ -196,7 +196,7 @@ public static class PacketLoginHandler
 
         connection.SendSelfToClient();
 
-        _logger.LogInformation("{address} successfully logged in with character {characterId}.", connection.EndPoint.Address, character.Id);
+        _logger.LogInformation("{address} successfully logged in with character {name} ({id}).", connection.EndPoint.Address, character.FullName, character.Id);
 
         return true;
     }
