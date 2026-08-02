@@ -16,6 +16,10 @@ public class Pathfinder<TNode> where TNode : IPathNode
         this._logger = logger;
     }
 
+    // Runs bi-directional A* to compute the path between two positions. 
+    // NOTE: positions need not be a part of the graph. This introduces potential
+    // limitations if there is an obstacle between the given position and its closest
+    // node. This cannot be fixed without a navmesh/more detailed structure.
     public List<TNode> FindPath(Vector3 startPosition, Vector3 goalPosition)
     {
         var startNode = this.FindClosestNode(startPosition);

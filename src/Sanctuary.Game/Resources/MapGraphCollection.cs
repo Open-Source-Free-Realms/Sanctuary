@@ -7,8 +7,6 @@ using Sanctuary.Game.Pathfinding;
 
 namespace Sanctuary.Game.Resources;
 
-// Another "vibe-coded" file. Going to leave the basic parts of the summary here
-// - Alko
 
 /// <summary>
 /// Loaded ".map" waypoint graphs, keyed by zone name (the filename

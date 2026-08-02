@@ -73,10 +73,6 @@ public class Npc : IEntity
 
     public bool Static { get; set; }
 
-    // TODO: Is this safe, scalable and okay for many, many NPCs? I (Alko) should think
-    // more about this, but leaving it for now.
-    public Queue<Vector3> Waypoints { get; set; } = new();
-
     private const float TickDeltaSeconds = 0.1f;
 
     // TODO: maybe keeping this constant is a bad idea... 
@@ -84,8 +80,14 @@ public class Npc : IEntity
     public const float NodeTolerance = 0.5f;
     public const float Speed = 6.25f;
 
-    public MovementGoal? Goal { get; set; }
-    private List<MapNode> _lastComputedPath = new();
+    private readonly Path _path = new();
+
+    // NOTE: This will be lazily initialized. For one, if a zone does not contain
+    // a coresponding '.map' file, it will just stay 'null'. Moreover, if 
+    // one just wants the NPC to move directly to a point with no pathfinding,
+    // this will stay 'null'. A new 'PathBuilder' is created only when pathfinding
+    // is asked for.
+    private PathBuilder? _pathBuilder;
 
     public Npc(IZone zone)
     {
@@ -128,51 +130,19 @@ public class Npc : IEntity
 
     public virtual void UpdateEveryTick()
     {
-        // TODO: Perhaps all of this logic should live elsewhere and just get called here.
-        // Feels like this is just bloating a function that is fairly importable.
+        var currentPosition = new Vector3(Position.X, Position.Y, Position.Z);
+        var result = PathFollower.Advance(_path, currentPosition, Speed, NodeTolerance, TickDeltaSeconds);
 
-        if (this.Waypoints.Count == 0)
+        if (result.Moved)
         {
-            return;
+            UpdatePosition(new Vector4(result.NewPosition, 1f), result.NewRotation!.Value);
+            BroadcastPosition();
         }
-
-        // NOTE: I (Alko) am not super duper familiar with how game engine physics affects NPC
-        // movements. If path following is complete garbage for some reason (I doubt it will be)
-        // come back and here and break out some basic robotics algorithms.
-        var targetPosition = this.Waypoints.Peek();
-        var currentPosition = new Vector3(this.Position.X, this.Position.Y, this.Position.Z);
-        var toTarget = targetPosition - currentPosition;
-
-
-        var distance = toTarget.Length();
-        var direction = Vector3.Normalize(toTarget);
-
-        if (distance <= NodeTolerance)
-        {
-            Waypoints.Dequeue();
-            if (Waypoints.Count == 0 && Goal?.ClearOnArrival == true)
-                Goal = null;
-            return;
-        }
-
-        var step = direction * Speed * TickDeltaSeconds;
-        if (step.Length() > distance)
-        {
-            step = toTarget;
-        }
-
-        var newPosition = currentPosition + step;
-        var newOrientation = Quaternion.CreateFromYawPitchRoll(MathF.Atan2(direction.X, direction.Z), 0f, 0f);
-
-        UpdatePosition(new Vector4(newPosition, 1f), newOrientation);
-        BroadcastPosition();
     }
 
     public virtual void UpdateEverySecond()
     {
-        // TODO: How well does this scale? Do we eventually want concurrency/parallelization (didn't really
-        // look and see if something like that is already handeled at the higher-level).
-        RecomputePath();
+
     }
 
     public void UpdatePosition(Vector4 position, Quaternion rotation, bool updateZoneArea = true)
@@ -390,54 +360,31 @@ public class Npc : IEntity
         Zone.TryRemoveNpc(Guid);
     }
 
-    public void MoveTo(Vector3 goalPosition)
+    public void MoveTo(Vector3 goalPosition, bool direct = false)
     {
-        Goal = new MovementGoal.FixedPosition(goalPosition);
-        RecomputePath();
-    }
-
-    private void RecomputePath()
-    {
-
-
-        if (Goal is null || Zone.Pathfinder is null)
-            return;
-
-        var currentPosition = Waypoints.Count > 0
-            ? Waypoints.Peek()
-            : new Vector3(Position.X, Position.Y, Position.Z);
-
-        var goalPosition = Goal.GetPosition();
-        var path = Zone.Pathfinder.FindPath(currentPosition, goalPosition);
-
-        if (IsSimilarPath(_lastComputedPath, path))
-            return;
-
-        _lastComputedPath = path;
-
-        Waypoints = new Queue<Vector3>();
-
-        // NOTE: This may not be stable in practice. We might want to detour to the nearest
-        // node in some cases, but until we get navmesh graphs, I think this will be fine.
-        if (path.Count <= 1)
+        if (direct || Zone.Pathfinder is null)
         {
-            Waypoints.Enqueue(goalPosition);
+            var waypoints = new Queue<Vector3>();
+            waypoints.Enqueue(goalPosition);
+            _path.Set(waypoints);
             return;
         }
 
-        foreach (var node in path)
-            Waypoints.Enqueue(node.Position);
+        _pathBuilder ??= new PathBuilder(Zone.Pathfinder);
 
-        Waypoints.Enqueue(goalPosition);
+        var currentPosition = new Vector3(Position.X, Position.Y, Position.Z);
+        var newWaypoints = _pathBuilder.TryRecompute(currentPosition, goalPosition);
+        if (newWaypoints is not null)
+            _path.Set(newWaypoints);
     }
 
     private void BroadcastPosition()
     {
         var packet = new PlayerUpdatePacketUpdatePosition
         {
-            Guid = this.Guid,
-            Position = this.Position,
-            Rotation = this.Rotation,
+            Guid = Guid,
+            Position = Position,
+            Rotation = Rotation,
             State = 1,
             Unknown = 0
         };
@@ -446,21 +393,5 @@ public class Npc : IEntity
         {
             visiblePlayer.Value.SendTunneled(packet);
         }
-    }
-
-    private static bool IsSimilarPath(List<MapNode> oldPath, List<MapNode> newPath)
-    {
-        if (oldPath.Count == 0 || newPath.Count == 0)
-            return false;
-
-        var overlap = Math.Min(oldPath.Count, newPath.Count);
-
-        for (var i = 1; i <= overlap; i++)
-        {
-            if (oldPath[^i].Id != newPath[^i].Id)
-                return false;
-        }
-
-        return true;
     }
 }
