@@ -26,6 +26,8 @@ public interface IZone : IScriptZone
     IEnumerable<Npc> Npcs { get; }
     IEnumerable<Player> Players { get; }
 
+    float TickDeltaSeconds { get; }
+
     bool TryGetNpc(ulong guid, [MaybeNullWhen(false)] out Npc npc);
     bool TryGetPlayer(ulong guid, [MaybeNullWhen(false)] out Player player);
     bool TryGetEntity(ulong guid, [MaybeNullWhen(false)] out IEntity entity);
@@ -51,6 +53,8 @@ public interface IZone : IScriptZone
 
     bool TryRemoveNpc(ulong guid);
     bool TryRemovePlayer(ulong guid);
+
+
 
     #endregion
 

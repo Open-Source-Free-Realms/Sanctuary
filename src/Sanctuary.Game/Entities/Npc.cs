@@ -73,12 +73,9 @@ public class Npc : IEntity
 
     public bool Static { get; set; }
 
-    private const float TickDeltaSeconds = 0.1f;
 
-    // TODO: maybe keeping this constant is a bad idea... 
-    // Could be different for all NPCs, fix this before the PR goes in.
-    public const float NodeTolerance = 0.5f;
-    public const float Speed = 6.25f;
+    public float WaypointTolerance;
+    public required float Speed;
 
     private readonly Path _path = new();
 
@@ -131,7 +128,7 @@ public class Npc : IEntity
     public virtual void UpdateEveryTick()
     {
         var currentPosition = new Vector3(Position.X, Position.Y, Position.Z);
-        var result = PathFollower.Advance(_path, currentPosition, Speed, NodeTolerance, TickDeltaSeconds);
+        var result = PathFollower.Advance(_path, currentPosition, Speed, WaypointTolerance, Zone.TickDeltaSeconds);
 
         if (result.Moved)
         {
