@@ -94,8 +94,6 @@ public abstract class BaseZone : IZone, IDisposable
         // Just in case we don't actually have the `.map` file for a particular zone.
         if (_resourceManager.Maps.TryGetValue(Name, out var mapGraph))
             Pathfinder = new Pathfinder<MapNode>(mapGraph.Nodes, _logger);
-        else
-            Pathfinder = null;
     }
 
     #region Events
