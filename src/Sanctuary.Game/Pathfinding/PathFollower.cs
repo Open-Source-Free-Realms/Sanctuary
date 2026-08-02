@@ -9,7 +9,7 @@ public static class PathFollower
 {
     public readonly record struct AdvanceResult(bool Moved, Vector3 NewPosition, Quaternion? NewRotation, bool Arrived);
 
-    public static AdvanceResult Advance(Path path, Vector3 currentPosition, float speed, float tolerance, float deltaSeconds)
+    public static AdvanceResult Advance(PathState path, Vector3 currentPosition, float speed, float tolerance, float deltaSeconds)
     {
 
         if (!path.TryGetCurrentTarget(out var targetPosition))

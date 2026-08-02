@@ -74,10 +74,10 @@ public class Npc : IEntity
     public bool Static { get; set; }
 
 
-    public float WaypointTolerance;
-    public required float Speed;
+    public float WaypointTolerance { get; set; } = 0f;
+    public float Speed { get; set; }
 
-    private readonly Path _path = new();
+    private readonly PathState _path = new();
 
     // NOTE: This will be lazily initialized. For one, if a zone does not contain
     // a coresponding '.map' file, it will just stay 'null'. Moreover, if 

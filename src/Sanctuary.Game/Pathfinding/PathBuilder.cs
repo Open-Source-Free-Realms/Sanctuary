@@ -28,6 +28,8 @@ public class PathBuilder
         foreach (var node in path)
             waypoints.Enqueue(node.Position);
 
+        waypoints.Enqueue(goalPosition);
+
         return waypoints;
     }
 

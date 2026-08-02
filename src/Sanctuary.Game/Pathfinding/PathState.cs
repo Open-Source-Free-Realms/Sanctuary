@@ -4,7 +4,7 @@ using System.Numerics;
 namespace Sanctuary.Game.Pathfinding;
 
 
-public sealed class Path
+public sealed class PathState
 {
     private readonly object _lock = new();
     private Queue<Vector3> _waypoints = new();
