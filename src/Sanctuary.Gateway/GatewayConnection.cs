@@ -79,6 +79,8 @@ public class GatewayConnection : UdpConnection
 
         SendFriendOffline();
 
+        SendGuildMemberOffline();
+
         _loginClient.SendCharacterLogout(GuidHelper.GetPlayerId(Player.Guid));
 
         SavePlayerToDatabase();
@@ -105,13 +107,31 @@ public class GatewayConnection : UdpConnection
         if (!reader.TryRead(out short opCode))
             return;
 
-        var handled = opCode switch
+        bool handled;
+
+        // The try-catch here only applies to release mode, where we don't want an unhandled
+        // exception in a single packet to crash the entire server.
+        // Crashing is fine in debug mode; that way it's not missed and we can fix it properly.
+
+#if !DEBUG
+        try
         {
-            PacketLogin.OpCode => PacketLoginHandler.HandlePacket(this, data),
-            PacketTunneledClientPacket.OpCode => PacketTunneledClientPacketHandler.HandlePacket(this, data),
-            PacketTunneledClientWorldPacket.OpCode => PacketTunneledClientWorldPacketHandler.HandlePacket(this, data),
-            _ => false
-        };
+#endif
+            handled = opCode switch
+            {
+                PacketLogin.OpCode => PacketLoginHandler.HandlePacket(this, data),
+                PacketTunneledClientPacket.OpCode => PacketTunneledClientPacketHandler.HandlePacket(this, data),
+                PacketTunneledClientWorldPacket.OpCode => PacketTunneledClientWorldPacketHandler.HandlePacket(this, data),
+                _ => false
+            };
+#if !DEBUG
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "{connection} threw an unhandled exception while handling packet. ( OpCode: {opcode}, Data: {data} )", this, opCode, Convert.ToHexString(data));
+            return;
+        }
+#endif
 
 #if DEBUG
         if (!handled)
@@ -423,6 +443,52 @@ public class GatewayConnection : UdpConnection
 
         Player.StationCash = dbCharacter.StationCash;
 
+        if (dbCharacter.GuildMember?.Guild is { } dbGuild)
+        {
+            var guildData = new GuildData
+            {
+                Guid = dbGuild.Id,
+
+                Name = dbGuild.Name,
+
+                CanRenameGuild = true,
+
+                MaxMembers = dbGuild.MaxMembers
+            };
+
+            foreach (var dbGuildMember in dbGuild.Members)
+            {
+                var memberGuid = GuidHelper.GetPlayerGuid(dbGuildMember.Id);
+
+                var guildMember = new GuildMember
+                {
+                    Guid = memberGuid,
+
+                    Role = dbGuildMember.Role,
+
+                    Name =
+                    {
+                        FirstName = dbGuildMember.Character.FirstName,
+                        LastName = dbGuildMember.Character.LastName ?? string.Empty
+                    }
+                };
+
+                if (_zoneManager.TryGetPlayer(memberGuid, out var memberPlayer))
+                {
+                    guildMember.Online = true;
+
+                    guildMember.WorldId = memberPlayer.Zone.Id;
+
+                    guildMember.ProfileId = memberPlayer.ActiveProfileId;
+                    guildMember.ProfileRank = memberPlayer.ActiveProfile.Rank;
+                }
+
+                guildData.Members.Add(memberGuid, guildMember);
+            }
+
+            player.GuildData = guildData;
+        }
+
         return true;
     }
 
@@ -571,6 +637,52 @@ public class GatewayConnection : UdpConnection
             otherFriendPlayer.Online = false;
 
             friendPlayer.SendTunneled(friendOfflinePacket);
+        }
+    }
+
+    public void SendGuildMemberOffline()
+    {
+        if (Player.GuildData is null)
+            return;
+
+        if (!Player.GuildData.Members.TryGetValue(Player.Guid, out var playerGuildMember))
+            return;
+
+        var guildMemberStatusUpdatePacket = new GuildMemberStatusUpdatePacket
+        {
+            GuildGuid = Player.GuildData.Guid,
+            MemberGuid = Player.Guid,
+
+            Name = Player.Name,
+            Role = playerGuildMember.Role,
+            Online = false,
+            Type = 6,
+            WorldId = 0,
+            ProfileId = Player.ActiveProfileId,
+            ProfileRank = Player.ActiveProfile.Rank
+        };
+
+        foreach (var guildMember in Player.GuildData.Members)
+        {
+            if (guildMember.Key == Player.Guid)
+                continue;
+
+            if (!_zoneManager.TryGetPlayer(guildMember.Key, out var guildPlayer))
+                continue;
+
+            if (guildPlayer.GuildData is null)
+                continue;
+
+            if (guildPlayer.GuildData.Members.TryGetValue(Player.Guid, out var onlineMember))
+            {
+                onlineMember.Online = false;
+                onlineMember.Role = playerGuildMember.Role;
+                onlineMember.WorldId = 0;
+                onlineMember.ProfileId = Player.ActiveProfileId;
+                onlineMember.ProfileRank = Player.ActiveProfile.Rank;
+            }
+
+            guildPlayer.SendTunneled(guildMemberStatusUpdatePacket);
         }
     }
 

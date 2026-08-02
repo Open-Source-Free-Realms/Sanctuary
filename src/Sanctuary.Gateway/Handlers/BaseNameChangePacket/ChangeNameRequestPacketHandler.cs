@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Game;
+using Sanctuary.Gateway.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -42,17 +43,32 @@ public static class ChangeNameRequestPacketHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(ChangeNameRequestPacket), packet);
 
-        if (connection.Player.Guid != packet.Guid)
+        var nameChangeResponsePacket = new NameChangeResponsePacket
         {
-            _logger.LogError("Invalid player guid. {guid}", packet.Guid);
+            Type = packet.Type,
+            Guid = packet.Guid,
+            Name = packet.Name
+        };
+
+        if (packet.Type == NameChangeType.Guild)
+        {
+            nameChangeResponsePacket.Result = OnChangeGuildName(connection, packet);
+
+            connection.SendTunneled(nameChangeResponsePacket);
+
             return true;
         }
 
-        var nameChangeResponsePacket = new NameChangeResponsePacket();
+        if (connection.Player.Guid != packet.Guid)
+        {
+            _logger.LogError("Invalid player guid. {guid}", packet.Guid);
 
-        nameChangeResponsePacket.Type = packet.Type;
-        nameChangeResponsePacket.Guid = packet.Guid;
-        nameChangeResponsePacket.Name = packet.Name;
+            nameChangeResponsePacket.Result = ChangeNameResponse.Error;
+
+            connection.SendTunneled(nameChangeResponsePacket);
+
+            return true;
+        }
 
         nameChangeResponsePacket.Result = packet.Type switch
         {
@@ -130,6 +146,36 @@ public static class ChangeNameRequestPacketHandler
 
             friendPlayer.SendTunneled(friendRenamePacket);
         }
+
+        return ChangeNameResponse.Pending;
+    }
+
+    private static ChangeNameResponse OnChangeGuildName(GatewayConnection connection, ChangeNameRequestPacket packet)
+    {
+        if (connection.Player.GuildData is null)
+            return ChangeNameResponse.Error;
+
+        var guildGuid = connection.Player.GuildData.Guid;
+        var guildName = GuildHelper.NormalizeName(packet.Name.FullName);
+
+        if (!GuildHelper.IsValidName(guildName))
+            return ChangeNameResponse.Error;
+
+        if (GuildHelper.IsProfane(guildName, _resourceManager.NameFilter))
+            return ChangeNameResponse.Error;
+
+        using var dbContext = _dbContextFactory.CreateDbContext();
+
+        var role = GuildHelper.GetMemberRole(dbContext, guildGuid, connection.Player.Guid);
+
+        if (!GuildHelper.IsLeaderRole(role))
+            return ChangeNameResponse.Error;
+
+        if (GuildHelper.IsNameTaken(dbContext, guildGuid, guildName))
+            return ChangeNameResponse.Error;
+
+        if (!GuildHelper.ApplyRename(_zoneManager, dbContext, connection, guildGuid, guildName, out _))
+            return ChangeNameResponse.Error;
 
         return ChangeNameResponse.Pending;
     }

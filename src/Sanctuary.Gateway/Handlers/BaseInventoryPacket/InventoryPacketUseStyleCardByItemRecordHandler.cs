@@ -30,7 +30,7 @@ public static class InventoryPacketUseStyleCardByItemRecordHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(InventoryPacketUseStyleCardByItemRecord), packet);
 
-        var clientItem = connection.Player.Items.SingleOrDefault(x => x.Definition == packet.ItemDefinitionId);
+        var clientItem = connection.Player.Items.FirstOrDefault(x => x.Definition == packet.ItemDefinitionId);
 
         if (clientItem is null)
         {

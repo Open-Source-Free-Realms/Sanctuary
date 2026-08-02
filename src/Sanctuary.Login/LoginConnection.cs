@@ -71,17 +71,35 @@ public class LoginConnection : UdpConnection
             return;
         }
 
-        var handled = opCode switch
+        bool handled;
+
+        // The try-catch here only applies to release mode, where we don't want an unhandled
+        // exception in a single packet to crash the entire server.
+        // Crashing is fine in debug mode; that way it's not missed and we can fix it properly.
+
+#if !DEBUG
+        try
         {
-            LoginRequest.OpCode => LoginRequestHandler.HandlePacket(this, data),
-            CharacterCreateRequest.OpCode => CharacterCreateRequestHandler.HandlePacket(this, data),
-            CharacterLoginRequest.OpCode => CharacterLoginRequestHandler.HandlePacket(this, data),
-            CharacterDeleteRequest.OpCode => CharacterDeleteRequestHandler.HandlePacket(this, data),
-            CharacterSelectInfoRequest.OpCode => CharacterSelectInfoRequestHandler.HandlePacket(this),
-            ServerListRequest.OpCode => ServerListRequestHandler.HandlePacket(this),
-            TunnelAppPacketClientToServer.OpCode => TunnelAppPacketClientToServerHandler.HandlePacket(this, data),
-            _ => false
-        };
+#endif
+            handled = opCode switch
+            {
+                LoginRequest.OpCode => LoginRequestHandler.HandlePacket(this, data),
+                CharacterCreateRequest.OpCode => CharacterCreateRequestHandler.HandlePacket(this, data),
+                CharacterLoginRequest.OpCode => CharacterLoginRequestHandler.HandlePacket(this, data),
+                CharacterDeleteRequest.OpCode => CharacterDeleteRequestHandler.HandlePacket(this, data),
+                CharacterSelectInfoRequest.OpCode => CharacterSelectInfoRequestHandler.HandlePacket(this),
+                ServerListRequest.OpCode => ServerListRequestHandler.HandlePacket(this),
+                TunnelAppPacketClientToServer.OpCode => TunnelAppPacketClientToServerHandler.HandlePacket(this, data),
+                _ => false
+            };
+#if !DEBUG
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "{connection} threw an unhandled exception while handling packet. ( OpCode: {opcode}, Data: {data} )", this, opCode, Convert.ToHexString(data));
+            return;
+        }
+#endif
 
 #if DEBUG
         if (!handled)
