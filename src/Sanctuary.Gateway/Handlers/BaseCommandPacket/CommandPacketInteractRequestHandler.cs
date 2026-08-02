@@ -12,6 +12,7 @@ using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game;
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Quests;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -24,6 +25,7 @@ public static class CommandPacketInteractRequestHandler
     private static ILogger _logger = null!;
     private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
     private static IResourceManager _resourceManager = null!;
+    private static IQuestManager _questManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -31,6 +33,7 @@ public static class CommandPacketInteractRequestHandler
         _logger = loggerFactory.CreateLogger(nameof(CommandPacketInteractRequestHandler));
         _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
         _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
+        _questManager = serviceProvider.GetRequiredService<IQuestManager>();
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -48,6 +51,22 @@ public static class CommandPacketInteractRequestHandler
 
         if (entity is CollectionNode collectionNode)
             return HandleCollectionNode(connection, collectionNode);
+
+        // Collect-goal pickups (spawned from a quest's CollectSpawns) credit the goal on click.
+        if (entity is Npc collectNpc && _resourceManager.Quests.Collectibles.ContainsKey(collectNpc.Guid))
+        {
+            _questManager.OnCollectInteract(connection.Player, collectNpc);
+            return true;
+        }
+
+        // Quest givers / turn-in targets route to the quest manager (offer, advance, or turn in).
+        if (entity is Npc npc && _questManager.IsQuestNpc(npc.Guid))
+        {
+            connection.Player.LastInteractNpcGuid = npc.Guid;
+            connection.Player.LastInteractAt = DateTime.UtcNow;
+            _questManager.OnNpcInteract(connection.Player, npc);
+            return true;
+        }
 
         entity.OnInteract(connection.Player);
         return true;

@@ -54,6 +54,49 @@ public sealed class Player : ClientPcData, IEntity
     public ConcurrentSet<ulong> IncomingFriendRequests { get; } = [];
     public ConcurrentSet<ulong> IncomingGuildInvites { get; } = [];
 
+    // --- Quests ---
+
+    // Database character id, used to persist quest state (DbCharacterQuest).
+    public ulong CharacterId { get; set; }
+
+    // The NPC the player most recently interacted with, and when (gates quest offer/turn-in).
+    public ulong LastInteractNpcGuid { get; set; }
+    public DateTime LastInteractAt { get; set; }
+
+    // When the player last accepted a quest; used to ignore a stray abandon fired right after accept.
+    public DateTime LastQuestAcceptedAt { get; set; }
+
+    // QuestId -> completed. Presence in the map means the quest has been accepted.
+    public Dictionary<int, bool> Quests { get; } = new();
+
+    // QuestId -> goals completed so far (goals tick off in order).
+    public Dictionary<int, int> QuestGoalProgress { get; } = new();
+
+    // QuestId -> collect count for the active Collect goal (in-memory; a relog restarts it).
+    public Dictionary<int, int> QuestCollectProgress { get; } = new();
+
+    // Collect pickups this player has already gathered (shared world objects, hidden per-player).
+    public HashSet<ulong> CollectedPickups { get; } = new();
+
+    // The quest currently tracked (the objective arrow points at this quest). 0 = none.
+    public int ActiveQuestId { get; set; }
+
+    // Quest turn-in finalization, invoked once when the client confirms the end screen.
+    public System.Action? PendingQuestEndAction { get; set; }
+
+    // Sends a "+XP" popup for the active profile (visual only - this codebase has no job-leveling
+    // system yet, so there's no level bar to actually advance).
+    public void AwardXp(int xp)
+    {
+        SendTunneled(new ClientUpdatePacketUpdateProfileExperience
+        {
+            ProfileId = ActiveProfileId,
+            XpGained = xp,
+            TotalXpInLevel = 0,
+            CurrentLevel = 0
+        });
+    }
+
     public ConcurrentDictionary<ChatChannel, bool> ChatChannelStatus { get; set; } = [];
 
     public int StationCash { get; set; }
@@ -345,10 +388,22 @@ public sealed class Player : ClientPcData, IEntity
 
         foreach (var npc in npcs)
         {
-            if (npc.Notification is null)
-                continue;
-
-            playerUpdatePacketAddNotifications.Notifications.Add(npc.Notification);
+            // Quest badges ("!" offer / "?" turn-in) are per-player, so they override the NPC's static
+            // Notification (e.g. a vendor badge) rather than being set on the shared entity.
+            var questImageId = GetNotificationImageId(npc);
+            if (questImageId != 0)
+            {
+                playerUpdatePacketAddNotifications.Notifications.Add(new NotificationInfo
+                {
+                    Guid = npc.Guid,
+                    IconId = questImageId,
+                    NameId = npc.NameId
+                });
+            }
+            else if (npc.Notification is not null)
+            {
+                playerUpdatePacketAddNotifications.Notifications.Add(npc.Notification);
+            }
         }
 
         if (playerUpdatePacketAddNotifications.Notifications.Count > 0)
@@ -356,6 +411,34 @@ public sealed class Player : ClientPcData, IEntity
 
         foreach (var npc in npcs)
             VisibleNpcs.TryAdd(npc.Guid, npc);
+    }
+
+    // Quest badges are per-player (unlike vendor badges, which are static on the Npc entity), since they
+    // depend on this player's own quest progress. "!" if the NPC gives a quest the player can currently
+    // take, "?" if the player has an active quest that turns in here, else the NPC's own static badge.
+    public int GetNotificationImageId(Npc npc)
+    {
+        var quests = _resourceManager.Quests;
+
+        if (quests.ByGiver.TryGetValue(npc.Guid, out var giverQuestIds))
+        {
+            foreach (var questId in giverQuestIds)
+            {
+                if (quests.TryGet(questId, out var quest) && quest.IsOfferableFor(Quests))
+                    return quest.NotificationAvailable;
+            }
+        }
+
+        if (quests.ByTarget.TryGetValue(npc.Guid, out var targetQuestIds))
+        {
+            foreach (var questId in targetQuestIds)
+            {
+                if (Quests.TryGetValue(questId, out var completed) && !completed && quests.TryGet(questId, out var quest))
+                    return quest.NotificationActive;
+            }
+        }
+
+        return npc.Notification?.IconId ?? 0;
     }
 
     public void OnAddVisiblePlayers(params IEnumerable<Player> players)

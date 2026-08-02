@@ -50,6 +50,7 @@ public class ResourceManager : IResourceManager
     public static readonly string PointOfInterestsFile = Path.Combine(BaseDirectory, "PointOfInterests.json");
     public static readonly string NpcsFile = Path.Combine(BaseDirectory, "Npcs.json");
     public static readonly string NameFilterFile = Path.Combine(BaseDirectory, "NameFilter.txt");
+    public static readonly string QuestsFile = Path.Combine(BaseDirectory, "Quests.json");
 
     public IdToStringLookup HairMappings { get; }
     public IdToStringLookup HeadMappings { get; }
@@ -85,6 +86,7 @@ public class ResourceManager : IResourceManager
     public PointOfInterestDefinitionCollection PointOfInterests { get; }
     public NpcDefinitionCollection Npcs { get; }
     public NameFilterCollection NameFilter { get; }
+    public QuestDefinitionCollection Quests { get; }
 
     public ResourceManager(ILogger<ResourceManager> logger)
     {
@@ -131,6 +133,7 @@ public class ResourceManager : IResourceManager
         PointOfInterests = new(_logger);
         Npcs = new(_logger);
         NameFilter = new(_logger);
+        Quests = new(_logger);
     }
 
     public bool Load()
@@ -267,6 +270,9 @@ public class ResourceManager : IResourceManager
         if (!Npcs.Load(NpcsFile))
             return false;
 
+        if (!Quests.Load(QuestsFile))
+            return false;
+
         return true;
     }
 
@@ -348,6 +354,8 @@ public class ResourceManager : IResourceManager
                 loaded = Npcs.Load(NpcsFile);
             else if (e.FullPath == NameFilterFile)
                 loaded = NameFilter.Load(NameFilterFile);
+            else if (e.FullPath == QuestsFile)
+                loaded = Quests.Load(QuestsFile);
             else
                 _logger.LogWarning("Unknown file changed. File: {filepath}", e.FullPath);
 

@@ -234,6 +234,17 @@ public class GatewayConnection : UdpConnection
 
         Player.Coins = dbCharacter.Coins;
 
+        Player.CharacterId = dbCharacter.Id;
+
+        foreach (var dbQuest in dbCharacter.Quests)
+        {
+            Player.Quests[dbQuest.QuestId] = dbQuest.Completed;
+            if (dbQuest.GoalProgress > 0)
+                Player.QuestGoalProgress[dbQuest.QuestId] = dbQuest.GoalProgress;
+            if (dbQuest.GoalCount > 0)
+                Player.QuestCollectProgress[dbQuest.QuestId] = dbQuest.GoalCount;
+        }
+
         Player.Birthday = dbCharacter.Created;
         Player.PlayTime = dbCharacter.PlayTime;
 
