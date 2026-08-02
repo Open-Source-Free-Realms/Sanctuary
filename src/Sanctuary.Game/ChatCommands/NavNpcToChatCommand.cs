@@ -14,7 +14,7 @@ public class NavNpcToChatCommand : IChatCommand
     public string Usage => "<x> <y> <z> [direct]";
     public string Description => "Spawns a test NPC at your location and sends it walking to the given position. Optionally pass 'direct' to skip pathfinding.";
 
-    public ChatCommandRole RequiredRole => ChatCommandRole.Player;
+    public ChatCommandRole RequiredRole => ChatCommandRole.Admin;
 
     public NavNpcToChatCommand(IChatCommandManager chatCommandManager)
     {
