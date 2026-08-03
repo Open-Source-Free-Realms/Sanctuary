@@ -261,17 +261,22 @@ public sealed class QuestManager : IQuestManager
         }
     }
 
-    // Persists the active Collect goal's in-progress count (DbCharacterQuest.GoalCount).
-    private void PersistCollectCount(Player player, int questId, int count)
+    // Loads a player's DbCharacterQuest row, applies the mutation, and saves - the shared shape behind
+    // every quest progress write (collect count, goal progress, completion).
+    private void UpdateCharacterQuest(Player player, int questId, Action<DbCharacterQuest> update)
     {
         using var db = _dbContextFactory.CreateDbContext();
         var dbQuest = db.CharacterQuests.FirstOrDefault(x => x.QuestId == questId && x.CharacterId == player.CharacterId);
-        if (dbQuest is not null)
-        {
-            dbQuest.GoalCount = count;
-            db.SaveChanges();
-        }
+        if (dbQuest is null)
+            return;
+
+        update(dbQuest);
+        db.SaveChanges();
     }
+
+    // Persists the active Collect goal's in-progress count (DbCharacterQuest.GoalCount).
+    private void PersistCollectCount(Player player, int questId, int count)
+        => UpdateCharacterQuest(player, questId, q => q.GoalCount = count);
 
     // Re-sends this quest's collectible pickups to the player so any hidden in a prior attempt reappear and
     // are clickable again: AddNpc (re-adds the model; a no-op for one still showing) PLUS an NpcRelevance
@@ -340,8 +345,7 @@ public sealed class QuestManager : IQuestManager
         // reaccept would leave fewer than RequiredCount pickups and the goal could never finish.
         RespawnQuestCollectibles(player, questId);
 
-        RefreshQuestNotification(player, quest.GiverGuid);
-        RefreshQuestNotification(player, quest.TargetGuid);
+        RefreshQuestNotifications(player, quest);
 
         // Finalize the interaction so the offer camera doesn't stay frozen on the giver (sub-opcode 29
         // recomputes the camera + dispatches QuestStartHandler:DismissEndScreen).
@@ -358,16 +362,7 @@ public sealed class QuestManager : IQuestManager
 
         player.Quests[questId] = true;
         player.QuestCollectProgress.Remove(questId);
-
-        using (var db = _dbContextFactory.CreateDbContext())
-        {
-            var dbQuest = db.CharacterQuests.FirstOrDefault(x => x.QuestId == questId && x.CharacterId == player.CharacterId);
-            if (dbQuest is not null)
-            {
-                dbQuest.Completed = true;
-                db.SaveChanges();
-            }
-        }
+        UpdateCharacterQuest(player, questId, q => q.Completed = true);
 
         player.SendTunneled(new QuestCompletePacket { QuestId = questId });
 
@@ -383,8 +378,7 @@ public sealed class QuestManager : IQuestManager
         GrantReward(player, quest);
 
         // Clear the badges on both quest NPCs.
-        RefreshQuestNotification(player, quest.GiverGuid);
-        RefreshQuestNotification(player, quest.TargetGuid);
+        RefreshQuestNotifications(player, quest);
 
         // The next quest in the chain becomes offerable automatically (IsOfferable checks the prereq);
         // refresh its giver's badge so the "!" appears without a relog if that NPC is already spawned.
@@ -432,8 +426,7 @@ public sealed class QuestManager : IQuestManager
         // Tell the client to remove the quest from the Hero's Journal, then restore the giver's "!".
         player.SendTunneled(new QuestAbandonedPacket { QuestId = questId });
 
-        RefreshQuestNotification(player, quest.GiverGuid);
-        RefreshQuestNotification(player, quest.TargetGuid);
+        RefreshQuestNotifications(player, quest);
 
         // Remove the now-dangling tracker arrow / mini-map indicator (re-point at another active quest, or clear).
         RefreshObjectiveTarget(player);
@@ -452,15 +445,7 @@ public sealed class QuestManager : IQuestManager
             var goals = quest.EffectiveGoals;
 
             if (done < goals.Count)
-            {
-                player.SendTunneled(new QuestObjectiveActivatedPacket
-                {
-                    QuestId = questId,
-                    ObjectiveId = goals[done].NameId,
-                    RequiredCount = goals[done].RequiredCount,
-                    Unknown2 = false
-                });
-            }
+                SendObjectiveActivated(player, questId, goals[done]);
 
             // Point the tracker/breadcrumb at the active goal's target.
             SendObjectiveForGoal(player, quest, done);
@@ -501,6 +486,13 @@ public sealed class QuestManager : IQuestManager
             player.SendTunneled(new AdventurersJournalQuestUpdatePacket { QuestStates = states });
     }
 
+    // Refreshes both the giver's and target's badge - most quest state changes touch both at once.
+    private void RefreshQuestNotifications(Player player, QuestDefinition quest)
+    {
+        RefreshQuestNotification(player, quest.GiverGuid);
+        RefreshQuestNotification(player, quest.TargetGuid);
+    }
+
     public void RefreshQuestNotification(Player player, ulong npcGuid)
     {
         if (npcGuid == 0 || !player.Zone.TryGetNpc(npcGuid, out var npc))
@@ -539,12 +531,12 @@ public sealed class QuestManager : IQuestManager
         player.SendTunneled(new QuestInfoPacket
         {
             QuestId = quest.QuestId,
-            // The patched SWF routes the offer's TitleId arg (reg4) into NPCText (the top speech), so the
-            // giver's spoken dialogue goes here for the retail look.
+            // TitleId drives the visible NPCText bubble and, on a stock client, also writes to the chat
+            // log - none of the 4 unknown fields below toggle that off (Unknown7 = members-only gate,
+            // Unknown10/11 = no visible effect, Unknown12 = accept-only/no decline button).
             TitleId = quest.GiverDialogueId,
             DescriptionId = quest.DescriptionId,
-            // The collapsed details-box line: the QUEST NAME, retail-style ("Welcome to Seaside").
-            // Feeding the objective sentence here (as before) left the offer with no visible title.
+            // The collapsed details-box line: the quest name, retail-style ("Welcome to Seaside").
             HelperTextId = quest.TitleId,
             IconId = quest.IconId,
             Unknown6 = quest.ObjectiveDescriptionId, // offer "Goals" list
@@ -604,16 +596,11 @@ public sealed class QuestManager : IQuestManager
         player.QuestGoalProgress[quest.QuestId] = done;
 
         // Persist progress so a relog mid-quest resumes on the right goal.
-        using (var db = _dbContextFactory.CreateDbContext())
+        UpdateCharacterQuest(player, quest.QuestId, q =>
         {
-            var dbQuest = db.CharacterQuests.FirstOrDefault(x => x.QuestId == quest.QuestId && x.CharacterId == player.CharacterId);
-            if (dbQuest is not null)
-            {
-                dbQuest.GoalProgress = done;
-                dbQuest.GoalCount = 0; // moving to the next goal - clear any collect count from the finished one
-                db.SaveChanges();
-            }
-        }
+            q.GoalProgress = done;
+            q.GoalCount = 0; // moving to the next goal - clear any collect count from the finished one
+        });
 
         if (done >= goals.Count)
         {
@@ -632,13 +619,7 @@ public sealed class QuestManager : IQuestManager
             ObjectiveDescriptionId = goals[done].NameId,
             ObjectiveField2 = goals[done].DescriptionId != 0 ? goals[done].DescriptionId : goals[done].NameId
         });
-        player.SendTunneled(new QuestObjectiveActivatedPacket
-        {
-            QuestId = quest.QuestId,
-            ObjectiveId = goals[done].NameId,
-            RequiredCount = goals[done].RequiredCount,
-            Unknown2 = false
-        });
+        SendObjectiveActivated(player, quest.QuestId, goals[done]);
         SendObjectiveForGoal(player, quest, done);
 
         // Mid-quest reply bubble - only TalkToNpc goals get one, since they complete AT an NPC. Kill/
@@ -784,14 +765,7 @@ public sealed class QuestManager : IQuestManager
         if (done < goals.Count)
         {
             var activeGoal = goals[done];
-
-            player.SendTunneled(new QuestObjectiveActivatedPacket
-            {
-                QuestId = quest.QuestId,
-                ObjectiveId = activeGoal.NameId,
-                RequiredCount = activeGoal.RequiredCount,
-                Unknown2 = false
-            });
+            SendObjectiveActivated(player, quest.QuestId, activeGoal);
 
             // If it's a count goal (Collect/Kill) with restored progress (relog mid-count), show the current
             // count so the tracker reads e.g. 3/8 instead of 0/8. Activated only sets the "required" half.
@@ -811,6 +785,17 @@ public sealed class QuestManager : IQuestManager
 
         // Point the tracker + "Take Me There" breadcrumb at the active goal's target NPC.
         SendObjectiveForGoal(player, quest, done);
+    }
+
+    private static void SendObjectiveActivated(Player player, int questId, QuestGoal goal)
+    {
+        player.SendTunneled(new QuestObjectiveActivatedPacket
+        {
+            QuestId = questId,
+            ObjectiveId = goal.NameId,
+            RequiredCount = goal.RequiredCount,
+            Unknown2 = false
+        });
     }
 
     // The NPC guid the goal at goalIndex points at: the goal's own TargetGuid, or the
