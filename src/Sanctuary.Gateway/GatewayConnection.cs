@@ -107,13 +107,31 @@ public class GatewayConnection : UdpConnection
         if (!reader.TryRead(out short opCode))
             return;
 
-        var handled = opCode switch
+        bool handled;
+
+        // The try-catch here only applies to release mode, where we don't want an unhandled
+        // exception in a single packet to crash the entire server.
+        // Crashing is fine in debug mode; that way it's not missed and we can fix it properly.
+
+#if !DEBUG
+        try
         {
-            PacketLogin.OpCode => PacketLoginHandler.HandlePacket(this, data),
-            PacketTunneledClientPacket.OpCode => PacketTunneledClientPacketHandler.HandlePacket(this, data),
-            PacketTunneledClientWorldPacket.OpCode => PacketTunneledClientWorldPacketHandler.HandlePacket(this, data),
-            _ => false
-        };
+#endif
+            handled = opCode switch
+            {
+                PacketLogin.OpCode => PacketLoginHandler.HandlePacket(this, data),
+                PacketTunneledClientPacket.OpCode => PacketTunneledClientPacketHandler.HandlePacket(this, data),
+                PacketTunneledClientWorldPacket.OpCode => PacketTunneledClientWorldPacketHandler.HandlePacket(this, data),
+                _ => false
+            };
+#if !DEBUG
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "{connection} threw an unhandled exception while handling packet. ( OpCode: {opcode}, Data: {data} )", this, opCode, Convert.ToHexString(data));
+            return;
+        }
+#endif
 
 #if DEBUG
         if (!handled)
