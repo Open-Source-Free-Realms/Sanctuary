@@ -2,11 +2,9 @@ using System.Collections.Generic;
 
 namespace Sanctuary.Game.Resources.Definitions;
 
-// How a QuestGoal is completed. Drives which server event ticks the goal off.
-// TalkToNpc, Collect and ReachLocation are wired. Kill and EncounterComplete are defined and have
-// QuestManager methods ready (OnNpcKilled / OnEncounterComplete) but nothing calls them yet - this
-// codebase has no combat/NPC-death or battle-instance system for them to hook into. Quests using
-// these two types can be accepted but won't be completable until that lands separately.
+// How a QuestGoal is completed. TalkToNpc, Collect and ReachLocation are wired. Kill and
+// EncounterComplete have QuestManager methods ready (OnNpcKilled / OnEncounterComplete) but nothing
+// calls them yet - this branch has no combat/battle-instance system to hook them into.
 public enum QuestGoalType
 {
     // Completes when the player interacts with TargetGuid.
@@ -50,17 +48,16 @@ public class QuestGoal
     // How this goal completes.
     public QuestGoalType Type { get; set; } = QuestGoalType.TalkToNpc;
 
-    // For TalkToNpc: the NPC guid the player must interact with to
-    // complete this goal. 0 falls back to the quest's TargetGuid (the turn-in NPC).
+    // For TalkToNpc: the NPC guid the player must interact with. 0 falls back to the quest's
+    // TargetGuid (the turn-in NPC).
     public ulong TargetGuid { get; set; }
 
-    // For count goals (Collect/Kill): how many
-    // of the thing are required. 0 falls back to CollectSpawns.Count (collect them all).
-    // The tracker renders "current/required" as the player collects.
+    // For count goals (Collect/Kill): how many are required. 0 falls back to CollectSpawns.Count
+    // (collect them all). The tracker renders "current/required" as the player collects.
     public int RequiredCount { get; set; }
 
-    // For Collect: the model (Models.txt id) each collectible world object
-    // uses - e.g. 93 = bw_collectible_mushrooms_01. Spawned as interactable pickups the player clicks.
+    // For Collect: the model (Models.txt id) each collectible world object uses - e.g. 93 =
+    // bw_collectible_mushrooms_01. Spawned as interactable pickups the player clicks.
     public int CollectModelId { get; set; }
 
     // For Collect: the collectible's hover/name text id (Global.Text).
@@ -84,8 +81,8 @@ public class QuestGoal
                 yield return id;
     }
 
-    // For EncounterComplete: the activity/encounter id (e.g. 174 =
-    // Frostfang Growler arena) that completes this goal when the player wins it.
+    // For EncounterComplete: the activity/encounter id (e.g. 174 = Frostfang Growler arena) that
+    // completes this goal when the player wins it.
     public int EncounterId { get; set; }
 
     // For Collect: world positions ([x, y, z] each) where the collectible

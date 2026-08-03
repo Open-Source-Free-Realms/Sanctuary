@@ -2,15 +2,9 @@ using System.Collections.Generic;
 
 namespace Sanctuary.Game.Resources.Definitions;
 
-// Data-driven definition of a quest, loaded from Resources/Quests.json. This models the
-// "talk to an NPC" quest shape FR's early quests use (a giver hands out the quest, the player
-// talks to a target NPC, and turns it in there): one giver, one target/turn-in, one objective,
-// a coin/star reward, and optional chain links. Everything the old hardcoded IntroduceYourselfQuest
-// constants held now lives here so new quests are a JSON entry instead of new code.
-// Text ids are SOE T4 localization ids (resolved client-side as "Global.Text.<id>").
-// Richer objective types (kill/collect/reach) and multi-step objectives are a future extension -
-// they need per-objective progress state (player state + DB), which the single-objective flow here
-// doesn't require.
+// A quest, loaded from Resources/Quests.json. Everything the old hardcoded IntroduceYourselfQuest
+// constants held now lives here, so a new quest is a JSON entry instead of new code. Text ids are SOE
+// T4 localization ids (resolved client-side as "Global.Text.<id>").
 public class QuestDefinition
 {
     public int QuestId { get; set; }

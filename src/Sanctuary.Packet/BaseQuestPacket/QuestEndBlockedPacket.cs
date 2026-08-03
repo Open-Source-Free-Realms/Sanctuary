@@ -5,11 +5,9 @@ namespace Sanctuary.Packet;
 // Server -> client plain message popup (case 16: FUN_00c7cd40 -> FUN_00c7b3b0 -> FUN_00c7ad30).
 // The client resolves TextId as a Global.Text (T4) id and shows it in a standalone
 // MessageWindow (Lua "MessageWindow:SetText" then "MessageWindow:Show") - NOT the quest journal or
-// the quest-complete end screen. Retail uses this for "quest end blocked" notices; we reuse it as a
-// lightweight "an NPC says something" popup for mid-quest goal steps (e.g. talking to Shakey to
-// advance "Call the Crew!"), where the full end screen would be wrong - it appends a duplicate
-// journal entry (the QuestAdd handler always constructs a new row) and injects the line into the
-// "Show Details" box.
+// the quest-complete end screen. Retail uses this for "quest end blocked" notices. Not currently sent
+// anywhere - the mid-quest reply bubble ended up using CommandPacketShowDialog instead - but the wire
+// format below is real, so it's here if a plain popup is ever needed.
 // After the 6-byte header the deserializer reads, in order:
 //   8 bytes -> obj+0x10/+0x14  (NPC guid, read as one pair - the speaker)
 //   int     -> obj+0x18        (TextId - resolved via Global.Text and shown in the window)

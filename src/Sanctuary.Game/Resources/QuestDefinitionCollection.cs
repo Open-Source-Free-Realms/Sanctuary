@@ -11,9 +11,8 @@ using Sanctuary.Game.Resources.Definitions;
 
 namespace Sanctuary.Game.Resources;
 
-// One collectible pickup to spawn for a Collect goal: a world object (interactable NPC) the player clicks
-// to gather. Its guid is assigned at load time and maps back to (quest, goal) via
-// Collectibles.
+// One collectible pickup to spawn for a Collect goal: a world object (interactable NPC) the player
+// clicks to gather. Its guid is assigned at load time and maps back to (quest, goal) via Collectibles.
 public sealed class CollectibleSpawn
 {
     public ulong Guid { get; init; }

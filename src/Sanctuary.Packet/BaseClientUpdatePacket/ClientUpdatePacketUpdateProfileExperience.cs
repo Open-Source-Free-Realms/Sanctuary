@@ -7,16 +7,9 @@ public class ClientUpdatePacketUpdateProfileExperience : BaseClientUpdatePacket,
 {
     public new const short OpCode = 14;
 
-    // Profile/Job ID that gained XP.
     public int ProfileId;
-
-    // XP gained this update.
     public int XpGained;
-
-    // Total XP progress within current level (0-100 percent).
-    public int TotalXpInLevel;
-
-    // Current level of the profile.
+    public int TotalXpInLevel; // 0-100 percent
     public int CurrentLevel;
 
     public ClientUpdatePacketUpdateProfileExperience() : base(OpCode)

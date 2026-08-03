@@ -490,7 +490,6 @@ public sealed class QuestManager : IQuestManager
     // (FUN_00a44020): a quest id being PRESENT in this map marks it completed in the journal (the value
     // is only used for ordering), so we send every completed quest id. Sent on login + after each
     // completion. Harmless for quests that aren't journal stickers - the client just ignores unknown ids.
-    //
     private void SendJournalQuestStates(Player player)
     {
         var states = new Dictionary<int, int>();
@@ -642,15 +641,11 @@ public sealed class QuestManager : IQuestManager
         });
         SendObjectiveForGoal(player, quest, done);
 
-        // Mid-quest NPC reply via the stock conversation dialog (CommandPacketShowDialog, 26/3): a speech
-        // bubble with a green-check response button, HTML-rendered (colored <font> tags show), NO details
-        // box, NO journal touch (so no duplicate). Camera focuses the NPC (CameraFocusParam) and restores
-        // on the button click (client sends 26/6 -> BaseCommandPacketHandler replies with EndDialog).
-        // ONLY TalkToNpc goals complete AT an NPC, so only they get the bubble: Kill/Collect/
-        // EncounterComplete goals fire from field events, their DialogueId is the giver's MID-GOAL
-        // reminder line, and popping it at the trigger moment reads wrong (at the arena win, Gerold's
-        // "I can still hear those Frostfang Growlers howling..." looked like another wave inbound)
-        // while camera-focusing an NPC who may not even be in the player's zone.
+        // Mid-quest reply bubble - only TalkToNpc goals get one, since they complete AT an NPC. Kill/
+        // Collect/EncounterComplete fire from field events with no NPC to camera-focus, and their
+        // DialogueId is just the giver's mid-goal reminder line - popping it at the trigger moment reads
+        // wrong (at an arena win, Gerold's "still hear those Growlers howling" line looked like another
+        // wave incoming).
         var completedGoal = goals[goalIndex];
         if (completedGoal.DialogueId != 0 && completedGoal.Type == QuestGoalType.TalkToNpc)
         {
@@ -711,15 +706,11 @@ public sealed class QuestManager : IQuestManager
         player.PendingQuestEndAction = () => CompleteQuest(player, quest.QuestId);
     }
 
-    // The journal/tracker entry. HelperTextId (client QuestData column 10) is read by the end
-    // screen's speech bubble on a patched client (ScriptsBase.bin points ShowEndScreen's SetNPCDialog
-    // at column 10 instead of DescriptionId, decoupling it from the journal) - but on a STOCK/retail
-    // client, column 10 is also what the quest-helper TRACKER widget reads natively as its header
-    // while the quest is active (disassembly of the unmodified bytecode confirmed this). So this value
-    // must stay short while the quest is in progress: SendActiveState passes ObjectiveDescriptionId
-    // (retail-safe), not the long TurnInDialogueId. The actual turn-in bubble doesn't depend on this at
-    // all - the end screen reads QuestEndPacket's own TitleId field directly (see TurnIn()), on both
-    // patched and stock clients, so it stays correct regardless of what's sent here.
+    // HelperTextId (QuestData column 10) does double duty: a patched client reads it as the end-screen
+    // bubble text, but a STOCK client reads the same column as the tracker widget's header WHILE the
+    // quest is active (confirmed via disassembly). So it has to stay short here - pass
+    // ObjectiveDescriptionId, not the long TurnInDialogueId. The turn-in bubble itself doesn't care what's
+    // sent here either way - it reads QuestEndPacket's own TitleId instead (see TurnIn()).
     private static void SendQuestAdd(Player player, QuestDefinition quest, int helperTextId, float completedPercentage = 0f)
     {
         player.SendTunneled(new QuestAddPacket

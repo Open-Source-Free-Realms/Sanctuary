@@ -37,15 +37,10 @@ public static class BaseQuestPacketHandler
         };
     }
 
-    // The player clicked "Complete" on the quest end screen (sent after we deliver QuestEndPacket).
-    // That end screen hides the HUD until the server acknowledges; restore the HUD + camera with the
-    // same command the quest-accept flow uses (sub-opcode 29 -> client FUN_00a99220 ->
-    // QuestStartHandler:DismissEndScreen). The reward/completion state was already applied server-side
-    // when the player interacted with the turn-in NPC, so this handler only finalizes the UI.
+    // Player clicked "Complete" on the end screen: run the pending reward/completion, then restore the
+    // HUD the end screen hid (same sub-opcode 29 command the accept flow uses).
     private static bool HandleQuestEndReply(GatewayConnection connection)
     {
-        // Player confirmed on the end screen - finalize the quest (grant reward + celebration, mark
-        // complete, clear badges) now, then restore the HUD the end screen hid.
         var pending = connection.Player.PendingQuestEndAction;
         connection.Player.PendingQuestEndAction = null;
         pending?.Invoke();
