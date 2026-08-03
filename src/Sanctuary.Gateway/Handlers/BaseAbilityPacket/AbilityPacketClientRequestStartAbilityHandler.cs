@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,8 +11,7 @@ using Sanctuary.Core.IO;
 using Sanctuary.Database;
 using Sanctuary.Game;
 using Sanctuary.Game.Entities;
-using Sanctuary.Game.Resources.Definitions;
-using Sanctuary.Game.Zones;
+using Sanctuary.Gateway.Handlers.Abilities;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -25,22 +22,28 @@ namespace Sanctuary.Gateway.Handlers;
 [PacketHandler]
 public static class AbilityPacketClientRequestStartAbilityHandler
 {
-    private static ILogger _logger = null!;
-    private static IResourceManager _resourceManager = null!;
+    // internal so the ability classes below can use these too.
+    internal static ILogger _logger = null!;
+    internal static IResourceManager _resourceManager = null!;
     private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
 
     private static readonly ConcurrentDictionary<ulong, ConcurrentDictionary<int, DateTimeOffset>> _itemCooldowns = new();
 
     // Back to the normal standing idle after a boombox dance.
-    private const int BoomboxIdleAnimId = 1;
+    internal const int BoomboxIdleAnimId = 1;
 
-    // How long a boombox stays out, which is also its use cooldown.
-    private const int BoomboxDurationMs = 180_000;
+    // Unique tag ids for looping effects (boombox song, silly string beam).
+    internal static int _castFxTagCounter = 5000;
 
-    private const int FoodEffectCooldownMs = 120_000;
-
-    // Unique tag ids for the boombox's looping song effect.
-    private static int _castFxTagCounter = 5000;
+    // Tries each ability in order; first match handles it.
+    private static readonly IConsumableAbility[] _consumableAbilities =
+    [
+        new BoomboxAbility(),
+        new CakeAbility(),
+        new SillyStringAbility(),
+        new TransformFoodAbility(),
+        new FoodEffectAbility(),
+    ];
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -85,28 +88,12 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             itemDefinition.ActivatableAbilityId == 0)
             return SendFailure(connection);
 
-        if (_resourceManager.Consumables.Boomboxes.ContainsKey(itemDefinition.Id))
-            return HandleBoombox(connection, packet.Data.Slot, clientItem, itemDefinition);
-
-        if (_resourceManager.Consumables.Cakes.TryGetValue(itemDefinition.Id, out var cakeDefinition))
-            return HandleCake(connection, packet.Data.Slot, clientItem, itemDefinition, cakeDefinition);
-
-        // Party favors (Silly String, etc.) - sprays the nearest other player.
-        if (_resourceManager.Consumables.PartyFavors.TryGetValue(itemDefinition.Id, out var partyFavor))
-            return HandleSillyString(connection, packet.Data.Slot, clientItem, itemDefinition, partyFavor);
-
-        // Random-transform foods (e.g. Jack-O-Lantern) roll one of their listed
-        // transformations instead of using the item's fixed ability id.
-        var transformAbilityId = itemDefinition.ActivatableAbilityId;
-
-        if (_resourceManager.Consumables.RandomTransformFoods.TryGetValue(itemDefinition.Id, out var randomFood) && randomFood.TransformAbilityIds.Length > 0)
-            transformAbilityId = randomFood.TransformAbilityIds[Random.Shared.Next(randomFood.TransformAbilityIds.Length)];
-
-        if (_resourceManager.Consumables.Transformations.TryGetValue(transformAbilityId, out var transform))
-            return HandleTransformFood(connection, packet.Data.Slot, clientItem, itemDefinition, transform);
-
-        if (_resourceManager.Consumables.FoodEffects.ContainsKey(itemDefinition.ActivatableAbilityId))
-            return HandleFoodEffect(connection, packet.Data.Slot, clientItem, itemDefinition);
+        // Anything unrecognized falls through to the generic case below.
+        foreach (var ability in _consumableAbilities)
+        {
+            if (ability.Matches(itemDefinition))
+                return ability.Handle(connection, packet, packet.Data.Slot, clientItem, itemDefinition);
+        }
 
         TriggerAbilityEffect(connection, itemDefinition);
 
@@ -116,184 +103,14 @@ public static class AbilityPacketClientRequestStartAbilityHandler
         return true;
     }
 
-    private static bool HandleBoombox(GatewayConnection connection, int slot, ClientItem clientItem, ClientItemDefinition itemDefinition)
-    {
-        if (IsOnCooldown(connection.Player.Guid, itemDefinition.Id))
-            return SendFailure(connection);
-
-        SpawnBoomboxNpc(connection, itemDefinition);
-
-        StartCooldown(connection.Player.Guid, itemDefinition.Id, BoomboxDurationMs);
-        connection.Player.StartActionBarCooldown(2, slot, itemDefinition.Icon.Id, itemDefinition.NameId, clientItem.Count, BoomboxDurationMs);
-
-        return true;
-    }
-
-    private static bool HandleCake(GatewayConnection connection, int slot, ClientItem clientItem, ClientItemDefinition itemDefinition, CakeItemDefinition cakeDefinition)
-    {
-        if (IsOnCooldown(connection.Player.Guid, itemDefinition.Id))
-            return SendFailure(connection);
-
-        SpawnCakeNpc(connection, cakeDefinition);
-
-        StartCooldown(connection.Player.Guid, itemDefinition.Id, cakeDefinition.CooldownMs);
-        connection.Player.StartActionBarCooldown(2, slot, itemDefinition.Icon.Id, itemDefinition.NameId, clientItem.Count, cakeDefinition.CooldownMs);
-
-        return true;
-    }
-
-    // Who each player last sprayed, so it doesn't just soak the same nearest victim every time.
-    private static readonly ConcurrentDictionary<ulong, ulong> _lastSillyStringTarget = new();
-
-    // Nearest other player to "from" within range, excluding excludeGuid if given. Shared so other
-    // abilities can reuse it instead of re-rolling their own distance search.
-    private static Player? FindNearestPlayer(IZone zone, Player from, float range, ulong excludeGuid = 0)
-    {
-        Player? nearest = null;
-        var best2 = range * range;
-
-        foreach (var candidate in zone.Players)
-        {
-            if (candidate.Guid == from.Guid || candidate.Guid == excludeGuid)
-                continue;
-
-            var dx = candidate.Position.X - from.Position.X;
-            var dz = candidate.Position.Z - from.Position.Z;
-            var d2 = dx * dx + dz * dz;
-            if (d2 >= best2)
-                continue;
-
-            best2 = d2;
-            nearest = candidate;
-        }
-
-        return nearest;
-    }
-
-    private static bool HandleSillyString(GatewayConnection connection, int slot, ClientItem clientItem, ClientItemDefinition itemDefinition, PartyFavorDefinition favor)
-    {
-        var player = connection.Player;
-        var zone = player.Zone;
-
-        if (IsOnCooldown(player.Guid, itemDefinition.Id))
-            return SendFailure(connection);
-
-        // Skip whoever was sprayed last time, unless they're the only one around.
-        _lastSillyStringTarget.TryGetValue(player.Guid, out var lastTargetGuid);
-
-        var target = FindNearestPlayer(zone, player, favor.Range, lastTargetGuid)
-            ?? FindNearestPlayer(zone, player, favor.Range);
-
-        if (target is null)
-            return SendFailure(connection); // nobody nearby to spray
-
-        _lastSillyStringTarget[player.Guid] = target.Guid;
-
-        var recipients = new HashSet<Player> { player };
-        foreach (var visiblePlayer in player.VisiblePlayers.Values)
-            recipients.Add(visiblePlayer);
-
-        var sync = new PlayerUpdatePacketSetSynchronizedAnimations();
-        sync.Animations.Add(new PlayerUpdatePacketSetSynchronizedAnimations.Animation { Guid = player.Guid, AnimationId = favor.AnimationId });
-
-        foreach (var recipient in recipients)
-            recipient.SendTunneled(sync);
-
-        var tagId = System.Threading.Interlocked.Increment(ref _castFxTagCounter);
-
-        var beam = new PlayerUpdatePacketAddEffectTagCompositeEffect
-        {
-            Guid = target.Guid,
-            TagId = tagId,
-            CompositeEffectId = favor.EffectId,
-            SourceGuid = player.Guid,
-        };
-
-        foreach (var recipient in recipients)
-            recipient.SendTunneled(beam);
-
-        _logger.LogTrace("Silly String: {who} sprayed {target}.", player.Name, target.Name);
-
-        // Ticked from Player.UpdateEveryTick's delayed-packet queue - no background tasks/threads.
-        player.SendTunneledToVisibleDelayed(new PlayerUpdatePacketSetAnimation
-        {
-            Guid = player.Guid,
-            AnimationId = BoomboxIdleAnimId,
-            Flags = 1
-        }, (int)(favor.GestureSeconds * 1000), sendToSelf: true);
-
-        player.SendTunneledToVisibleDelayed(
-            new PlayerUpdatePacketRemoveEffectTagCompositeEffect { Guid = target.Guid, TagId = tagId },
-            (int)(favor.EffectSeconds * 1000), sendToSelf: true);
-
-        StartCooldown(player.Guid, itemDefinition.Id, favor.CooldownMs);
-
-        var count = clientItem.Count;
-        var hasItemLeft = !itemDefinition.SingleUse || count > 1;
-
-        if (itemDefinition.SingleUse)
-            ConsumeItem(connection, clientItem, itemDefinition, slot);
-
-        if (hasItemLeft)
-            player.StartActionBarCooldown(2, slot, itemDefinition.Icon.Id, itemDefinition.NameId,
-                itemDefinition.SingleUse ? count - 1 : count, favor.CooldownMs, IconTintId(clientItem, itemDefinition));
-
-        return true;
-    }
-
-    private static bool HandleTransformFood(GatewayConnection connection, int slot, ClientItem clientItem, ClientItemDefinition itemDefinition, TransformAbilityDefinition transform)
-    {
-        if (IsOnCooldown(connection.Player.Guid, itemDefinition.Id))
-            return SendFailure(connection);
-
-        if (connection.Player.TemporaryAppearance != 0)
-            return SendFailure(connection);
-
-        connection.Player.ApplyTemporaryAppearance(transform.ModelId, transform.DurationMs, transform.CompositeEffectId);
-
-        StartCooldown(connection.Player.Guid, itemDefinition.Id, transform.CooldownMs);
-
-        var count = clientItem.Count;
-
-        if (itemDefinition.SingleUse)
-            ConsumeItem(connection, clientItem, itemDefinition, slot);
-
-        if (count > 1)
-            connection.Player.StartActionBarCooldown(2, slot, itemDefinition.Icon.Id, itemDefinition.NameId, count - 1, transform.CooldownMs);
-
-        return true;
-    }
-
-    private static bool HandleFoodEffect(GatewayConnection connection, int slot, ClientItem clientItem, ClientItemDefinition itemDefinition)
-    {
-        if (IsOnCooldown(connection.Player.Guid, itemDefinition.Id))
-            return SendFailure(connection);
-
-        StartCooldown(connection.Player.Guid, itemDefinition.Id, FoodEffectCooldownMs);
-
-        TriggerAbilityEffect(connection, itemDefinition);
-
-        var count = clientItem.Count;
-        var hasItemLeft = !itemDefinition.SingleUse || count > 1;
-
-        if (itemDefinition.SingleUse)
-            ConsumeItem(connection, clientItem, itemDefinition, slot);
-
-        if (hasItemLeft)
-            connection.Player.StartActionBarCooldown(2, slot, itemDefinition.Icon.Id, itemDefinition.NameId,
-                itemDefinition.SingleUse ? count - 1 : count, FoodEffectCooldownMs);
-
-        return true;
-    }
-
-    private static bool IsOnCooldown(ulong playerGuid, int itemDefinitionId)
+    internal static bool IsOnCooldown(ulong playerGuid, int itemDefinitionId)
     {
         return _itemCooldowns.TryGetValue(playerGuid, out var cooldowns) &&
                cooldowns.TryGetValue(itemDefinitionId, out var expiry) &&
                DateTimeOffset.UtcNow < expiry;
     }
 
-    private static void StartCooldown(ulong playerGuid, int itemDefinitionId, int cooldownMs)
+    internal static void StartCooldown(ulong playerGuid, int itemDefinitionId, int cooldownMs)
     {
         var cooldowns = _itemCooldowns.GetOrAdd(playerGuid, _ => new ConcurrentDictionary<int, DateTimeOffset>());
 
@@ -301,10 +118,10 @@ public static class AbilityPacketClientRequestStartAbilityHandler
     }
 
     // Color-variant items (the 5 Silly String Can colors) share one Icon.Id and differ only by TintId.
-    private static int IconTintId(ClientItem clientItem, ClientItemDefinition itemDefinition) =>
+    internal static int IconTintId(ClientItem clientItem, ClientItemDefinition itemDefinition) =>
         clientItem.Tint == 0 ? itemDefinition.Icon.TintId : clientItem.Tint;
 
-    private static bool ConsumeItem(GatewayConnection connection, ClientItem clientItem, ClientItemDefinition clientItemDefinition, int actionBarSlot)
+    internal static bool ConsumeItem(GatewayConnection connection, ClientItem clientItem, ClientItemDefinition clientItemDefinition, int actionBarSlot)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
 
@@ -375,7 +192,7 @@ public static class AbilityPacketClientRequestStartAbilityHandler
         return true;
     }
 
-    private static void TriggerAbilityEffect(GatewayConnection connection, ClientItemDefinition clientItemDefinition)
+    internal static void TriggerAbilityEffect(GatewayConnection connection, ClientItemDefinition clientItemDefinition)
     {
         _resourceManager.Consumables.FoodEffects.TryGetValue(clientItemDefinition.ActivatableAbilityId, out var foodEffect);
 
@@ -412,315 +229,7 @@ public static class AbilityPacketClientRequestStartAbilityHandler
         }
     }
 
-    private static void SpawnCakeNpc(GatewayConnection connection, CakeItemDefinition cakeDefinition)
-    {
-        if (connection.Player.Zone is not StartingZone startingZone)
-            return;
-
-        if (!startingZone.TryCreateNpc(out var cakeNpc))
-            return;
-
-        cakeNpc.NameId = cakeDefinition.NameId;
-        cakeNpc.ModelId = cakeDefinition.ModelId;
-        cakeNpc.TextureAlias = "";
-        cakeNpc.TintAlias = "";
-        cakeNpc.Scale = 1.0f;
-        cakeNpc.Animation = cakeDefinition.Animation;
-        cakeNpc.HideNamePlate = false;
-        cakeNpc.IsInteractable = true;
-        cakeNpc.CursorId = (byte)cakeDefinition.CursorId;
-
-        var forwardDirection = Vector3.Transform(new Vector3(0, 0, 1), connection.Player.Rotation);
-        var spawnPosition = new Vector4(
-            connection.Player.Position.X + forwardDirection.X * 1.5f,
-            connection.Player.Position.Y + forwardDirection.Y * 1.5f,
-            connection.Player.Position.Z + forwardDirection.Z * 1.5f,
-            connection.Player.Position.W
-        );
-
-        cakeNpc.Visible = true;
-        cakeNpc.UpdatePosition(spawnPosition, connection.Player.Rotation);
-
-        if (cakeDefinition.Type == CakeItemType.BossCake)
-        {
-            cakeNpc.InteractAction = player =>
-            {
-                var abilityId = cakeDefinition.TransformAbilityIds[Random.Shared.Next(cakeDefinition.TransformAbilityIds.Length)];
-
-                if (_resourceManager.Consumables.Transformations.TryGetValue(abilityId, out var transform))
-                    player.ApplyTemporaryAppearance(transform.ModelId, transform.DurationMs, transform.CompositeEffectId);
-            };
-        }
-        else
-        {
-            var scareReadyTime = DateTimeOffset.MinValue;
-
-            cakeNpc.InteractAction = player =>
-            {
-                if (DateTimeOffset.UtcNow < scareReadyTime)
-                    return;
-
-                scareReadyTime = DateTimeOffset.UtcNow.AddMilliseconds(cakeDefinition.ScareCooldownMs);
-
-                // Every scare group and transform is equally likely.
-                var roll = Random.Shared.Next(cakeDefinition.ScareGroups.Length + cakeDefinition.TransformAbilityIds.Length);
-
-                if (roll < cakeDefinition.ScareGroups.Length)
-                {
-                    foreach (var effectId in cakeDefinition.ScareGroups[roll])
-                    {
-                        player.SendTunneledToVisible(new PlayerUpdatePacketPlayCompositeEffect
-                        {
-                            Guid = cakeNpc.Guid,
-                            CompositeEffectId = effectId,
-                            Position = cakeNpc.Position,
-                            Clear = true
-                        }, true);
-                    }
-                }
-                else
-                {
-                    var abilityId = cakeDefinition.TransformAbilityIds[roll - cakeDefinition.ScareGroups.Length];
-
-                    if (_resourceManager.Consumables.Transformations.TryGetValue(abilityId, out var transform))
-                        player.ApplyTemporaryAppearance(transform.ModelId, transform.DurationMs, transform.CompositeEffectId);
-                }
-            };
-        }
-
-        var poofEffect = new PlayerUpdatePacketPlayCompositeEffect
-        {
-            Guid = cakeNpc.Guid,
-            CompositeEffectId = cakeDefinition.SpawnPoofEffectId,
-            Position = spawnPosition,
-            Clear = false
-        };
-
-        connection.Player.SendTunneled(poofEffect);
-        connection.Player.OnAddVisibleNpcs([cakeNpc]);
-
-        foreach (var player in connection.Player.VisiblePlayers.Values)
-        {
-            player.SendTunneled(poofEffect);
-            player.OnAddVisibleNpcs([cakeNpc]);
-        }
-
-        var despawnTime = DateTimeOffset.UtcNow.AddMilliseconds(cakeDefinition.LifetimeMs);
-
-        cakeNpc.UpdateEverySecondAction = () =>
-        {
-            if (DateTimeOffset.UtcNow >= despawnTime)
-                DespawnNpc(cakeNpc, cakeDefinition.SpawnPoofEffectId);
-        };
-    }
-
-    private static void SpawnBoomboxNpc(GatewayConnection connection, ClientItemDefinition itemDefinition)
-    {
-        if (connection.Player.Zone is not StartingZone startingZone)
-            return;
-
-        if (!startingZone.TryCreateNpc(out var boomboxNpc))
-            return;
-
-        _resourceManager.Consumables.Boomboxes.TryGetValue(itemDefinition.Id, out var boomboxDefinition);
-
-        var modelId = boomboxDefinition?.ModelId ?? 1062;
-        var effectId = boomboxDefinition?.EffectId ?? 0;
-        var danceSequence = boomboxDefinition?.DanceSequence ?? [3501, 3502, 3503, 3504, 3505];
-
-        boomboxNpc.NameId = 0;
-        boomboxNpc.ModelId = modelId;
-        boomboxNpc.Name = "Boombox";
-        boomboxNpc.TextureAlias = itemDefinition.TextureAlias ?? "";
-        boomboxNpc.TintAlias = itemDefinition.TintAlias ?? "";
-        boomboxNpc.Scale = 1.0f;
-        boomboxNpc.Animation = 2100; // Bouncing animation
-        boomboxNpc.CompositeEffectId = effectId; // Owned by the entity, so the client stops it on RemovePlayer
-        boomboxNpc.HideNamePlate = true;
-        boomboxNpc.IsInteractable = false;
-
-        var leftDirection = Vector3.Transform(new Vector3(-1, 0, 0), connection.Player.Rotation);
-        var spawnPosition = new Vector4(
-            connection.Player.Position.X + leftDirection.X * 2.0f,
-            connection.Player.Position.Y + leftDirection.Y * 2.0f,
-            connection.Player.Position.Z + leftDirection.Z * 2.0f,
-            connection.Player.Position.W
-        );
-
-        // Visible must be set before UpdatePosition so the zone tile system sends AddNpc to players in range.
-        boomboxNpc.Visible = true;
-        boomboxNpc.UpdatePosition(spawnPosition, connection.Player.Rotation);
-
-        var poofEffect = new PlayerUpdatePacketPlayCompositeEffect
-        {
-            Guid = boomboxNpc.Guid,
-            CompositeEffectId = 21, // PFX_smoke_black_explosion
-            Position = spawnPosition,
-            Clear = false
-        };
-
-        var poofRecipients = boomboxNpc.VisiblePlayers.Values.ToList();
-
-        if (!boomboxNpc.VisiblePlayers.ContainsKey(connection.Player.Guid))
-        {
-            // Spawner is outside zone tile range, send the packets manually.
-            connection.Player.SendTunneled(boomboxNpc.GetAddNpcPacket());
-            poofRecipients.Insert(0, connection.Player);
-        }
-
-        foreach (var player in poofRecipients)
-            player.SendTunneled(poofEffect);
-
-        // Tag-attach the song so it plays right away and we can stop it cleanly on despawn.
-        var songTagId = 0;
-
-        if (effectId != 0)
-        {
-            songTagId = System.Threading.Interlocked.Increment(ref _castFxTagCounter);
-
-            var songEffect = new PlayerUpdatePacketAddEffectTagCompositeEffect
-            {
-                Guid = boomboxNpc.Guid,
-                TagId = songTagId,
-                CompositeEffectId = effectId,
-                SourceGuid = boomboxNpc.Guid,
-            };
-
-            foreach (var player in poofRecipients)
-                player.SendTunneled(songEffect);
-        }
-
-        StartDanceLoop(startingZone, boomboxNpc, spawnPosition, danceSequence, songTagId, effectId);
-    }
-
-    private static void StartDanceLoop(StartingZone startingZone, Npc boomboxNpc, Vector4 spawnPosition, int[] danceSequence, int songTagId, int effectId)
-    {
-        const float BoomboxRangeInMeters = 15.0f;
-        const int SwitchMs = 4000;
-
-        var danceCenter = new Vector3(spawnPosition.X, spawnPosition.Y, spawnPosition.Z);
-
-        var dancing = new HashSet<ulong>();
-        var elapsedMs = 0;
-        var sinceSwitch = SwitchMs; // so a dance starts on the first tick
-        var sequenceIndex = 0;
-        var previousAnim = -1;
-        var currentAnim = 0;
-
-        boomboxNpc.UpdateEverySecondAction = () =>
-        {
-            if (elapsedMs >= BoomboxDurationMs)
-            {
-                foreach (var player in startingZone.Players.Where(p => dancing.Contains(p.Guid)))
-                    StopDancing(player);
-
-                if (songTagId != 0)
-                {
-                    var stopSong = new PlayerUpdatePacketRemoveEffectTagCompositeEffect
-                    {
-                        Guid = boomboxNpc.Guid,
-                        TagId = songTagId,
-                    };
-
-                    foreach (var player in startingZone.Players)
-                        player.SendTunneled(stopSong);
-                }
-
-                DespawnNpc(boomboxNpc, 21);
-                return;
-            }
-
-            // Rotate to the next dance when due. Only flag a change when the id actually
-            // differs, so multi-dance boomboxes don't restart the crowd every rotation.
-            var animChanged = false;
-
-            if (sinceSwitch >= SwitchMs)
-            {
-                var selected = danceSequence.Length > 0 ? danceSequence[sequenceIndex % danceSequence.Length] : 3501;
-                sequenceIndex++;
-                sinceSwitch = 0;
-
-                // A single-clip sequence (Totem, Realms Roll) never "changes" id, but the client
-                // doesn't loop it forever on its own - it needs a fresh trigger every rotation or it
-                // just stops after one play-through.
-                if (selected != previousAnim || danceSequence.Length <= 1)
-                {
-                    currentAnim = selected;
-                    previousAnim = selected;
-                    animChanged = true;
-                }
-            }
-
-            var players = startingZone.Players.ToList();
-            var inRange = players.Where(p =>
-                Vector3.Distance(new Vector3(p.Position.X, p.Position.Y, p.Position.Z), danceCenter) <= BoomboxRangeInMeters)
-                .ToList();
-            var inRangeGuids = inRange.Select(p => p.Guid).ToHashSet();
-
-            foreach (var player in players.Where(p => dancing.Contains(p.Guid) && !inRangeGuids.Contains(p.Guid)))
-                StopDancing(player);
-
-            var newcomers = inRange.Where(p => !dancing.Contains(p.Guid)).ToList();
-            dancing = inRangeGuids;
-
-            // On a rotation, re-sync the whole crowd so it stays phase-locked. Otherwise just
-            // start late arrivals on the current dance without hitching everyone else.
-            if (animChanged)
-                SyncDance(inRange, currentAnim);
-            else if (newcomers.Count > 0)
-                SyncDance(newcomers, currentAnim);
-
-            // Newcomers need the song re-sent too, same as the dance sync above.
-            if (songTagId != 0 && newcomers.Count > 0)
-            {
-                var songEffect = new PlayerUpdatePacketAddEffectTagCompositeEffect
-                {
-                    Guid = boomboxNpc.Guid,
-                    TagId = songTagId,
-                    CompositeEffectId = effectId,
-                    SourceGuid = boomboxNpc.Guid,
-                };
-
-                foreach (var player in newcomers)
-                    player.SendTunneled(songEffect);
-            }
-
-            elapsedMs += 1000;
-            sinceSwitch += 1000;
-        };
-    }
-
-    private static void SyncDance(List<Player> targets, int animationId)
-    {
-        if (targets.Count == 0)
-            return;
-
-        var sync = new PlayerUpdatePacketSetSynchronizedAnimations();
-
-        foreach (var player in targets)
-            sync.Animations.Add(new PlayerUpdatePacketSetSynchronizedAnimations.Animation { Guid = player.Guid, AnimationId = animationId });
-
-        var recipients = new HashSet<Player>(targets);
-
-        foreach (var player in targets)
-            foreach (var visiblePlayer in player.VisiblePlayers.Values)
-                recipients.Add(visiblePlayer);
-
-        foreach (var recipient in recipients)
-            recipient.SendTunneled(sync);
-    }
-
-    private static void StopDancing(Player player)
-    {
-        player.SendTunneledToVisible(new PlayerUpdatePacketSetAnimation
-        {
-            Guid = player.Guid,
-            AnimationId = BoomboxIdleAnimId,
-            Flags = 1
-        }, true);
-    }
-
-    private static void DespawnNpc(Npc npc, int effectId)
+    internal static void DespawnNpc(Npc npc, int effectId)
     {
         var removePacket = new PlayerUpdatePacketRemovePlayerGracefully
         {
@@ -738,7 +247,7 @@ public static class AbilityPacketClientRequestStartAbilityHandler
         npc.Dispose();
     }
 
-    private static bool SendFailure(GatewayConnection connection)
+    internal static bool SendFailure(GatewayConnection connection)
     {
         connection.SendTunneled(new AbilityPacketFailed { StringId = 3079 });
 
