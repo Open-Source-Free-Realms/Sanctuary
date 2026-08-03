@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -1192,9 +1192,17 @@ public sealed class StartingZone : BaseZone
 
         var packetInGamePurchaseStoreBundleCategories = new PacketInGamePurchaseStoreBundleCategories();
 
-        packetInGamePurchaseStoreBundleCategories.CategoryTree.Categories = _resourceManager.StoreBundleCategories.ToDictionary();
-
-        player.SendTunneled(packetInGamePurchaseStoreBundleCategories);
+        var categoriesDict = _resourceManager.StoreBundleCategories.ToDictionary(
+            kvp => kvp.Key,
+            kvp => new Sanctuary.Packet.Common.GameCommerce.StoreBundleCategoryNode
+            {
+                Id = kvp.Value.Id,
+                NameId = kvp.Value.NameId,
+                Image = kvp.Value.Image,
+                ParentId = kvp.Value.ParentId,
+                DisplayOrder = kvp.Value.DisplayOrder,
+                Count = kvp.Value.Count
+            });
 
         if (_resourceManager.Stores.TryGetValue(1, out var mainStore))
         {
@@ -1212,10 +1220,31 @@ public sealed class StartingZone : BaseZone
                 var valid = storeBundle.Entries.All(x => _resourceManager.ClientItemDefinitions.ContainsKey(x.MarketingItemId));
 
                 if (valid)
+                {
                     packetInGamePurchaseStoreBundles.Store.Bundles.Add(storeBundle.Id, storeBundle);
+
+                    if (_resourceManager.StoreBundleCategoryGroups.TryGetValue(storeBundle.CategoryGroupId, out var categoryGroup))
+                    {
+                        foreach (var catId in categoryGroup.CategoryIds)
+                        {
+                            if (categoriesDict.TryGetValue(catId, out var catNode))
+                            {
+                                catNode.Count++;
+                            }
+                        }
+                    }
+                }
             }
 
+            packetInGamePurchaseStoreBundleCategories.CategoryTree.Categories = categoriesDict;
+            player.SendTunneled(packetInGamePurchaseStoreBundleCategories);
+
             player.SendTunneled(packetInGamePurchaseStoreBundles);
+        }
+        else
+        {
+            packetInGamePurchaseStoreBundleCategories.CategoryTree.Categories = categoriesDict;
+            player.SendTunneled(packetInGamePurchaseStoreBundleCategories);
         }
 
         var packetInGamePurchaseStoreBundleGroups = new PacketInGamePurchaseStoreBundleGroups();
