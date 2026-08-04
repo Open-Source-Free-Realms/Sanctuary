@@ -4,24 +4,7 @@ using Sanctuary.Core.IO;
 
 namespace Sanctuary.Packet;
 
-// Server -> client: the NPC conversation dialog - a speech bubble that renders the NPC's dialogue
-// (as HTML, so localization <font color> tags DO show, unlike the plain quest fields) with a
-// list of response buttons ("You got it!", etc.). This is the retail "talk to an NPC" UI, distinct
-// from the quest offer/end screens; we use it for mid-quest goal steps (e.g. Shakey advancing "Call
-// the Crew!").
-// Opcode 26 sub 3 (BaseCommandPacket header = short OpCode + short SubOpCode). Wire layout traced
-// from the client deserializer FUN_00a9ef10 (reached via the 26/3 handler FUN_00aa12e0); the display
-// is FUN_009f5ae0. Field offsets are into the client's dialog struct; read order on the wire is:
-//   int   DialogueTextId   (+0x10) - resolved via Global.Text and shown as the bubble body
-//   int   TitleTextId      (+0x14) - secondary text id (name/title); 0 = none
-//   ulong NpcGuid          (+0x18/+0x1c) - the speaking NPC (portrait / camera focus)
-//   bool  (+0x2c)
-//   float (+0x30, NaN-checked)
-//   response list          (+0x20, FUN_00a9d760): int Count, then Count nodes, each 5 ints
-//                          (node+0x08, +0x0c, +0x10 = button label text id, +0x14, +0x18)
-//   float[4] (+0x40) / float[4] (+0x50) / bool (+0x60) / float[4] (+0x70)
-//   float (+0x80, NaN) / bool (+0x84) / bool (+0x85) / bool (+0x86) / float (+0x88, NaN) / int (+0x8c)
-// The deserializer requires the buffer to be exactly consumed. Floats sent as 0 (not NaN).
+// Server -> client NPC conversation dialog (speech bubble + response buttons), rendered as HTML. Opcode 26 sub 3; wire layout traced from client deserializer FUN_00a9ef10, field offsets below are into the client's dialog struct.
 public class CommandPacketShowDialog : BaseCommandPacket, ISerializablePacket
 {
     public new const short OpCode = 3;
@@ -41,9 +24,7 @@ public class CommandPacketShowDialog : BaseCommandPacket, ISerializablePacket
     public int TitleTextId;       // +0x14
     public ulong NpcGuid;         // +0x18/+0x1c
 
-    // +0x30 float: passed with NpcGuid to the camera-focus routine FUN_008d2ba0 (traced) - the
-    // zoom/blend parameter for framing the speaking NPC. 0 left the framing broken; a real value
-    // (e.g. 1.0) is needed. Exact scale TBD in-game.
+    // +0x30 float: camera-focus zoom/blend param (FUN_008d2ba0) - 0 leaves framing broken, needs a real value.
     public float CameraFocusParam = 1f;
 
     public readonly List<Response> Responses = new();

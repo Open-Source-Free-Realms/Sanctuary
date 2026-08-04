@@ -18,14 +18,7 @@ public class RewardBundleItem
     public int Count = 1;
 }
 
-// Writes a RewardBundleBase (client reader FUN_008e7930) - the shared reward blob embedded in the
-// quest offer (QuestInfoPacket), turn-in (QuestEndPacket) and the 50/1 celebration (RewardBundlePacket).
-// Beyond the fixed coins(+0x50)/stars(+0x48) scalars it carries a length-prefixed list of typed
-// entries. Item rewards are RewardBundleEntryItem (type 1); the reward preview's PopulateRewards Lua
-// reads them from the "BaseClient.Quest.Reward.Entries" data source and calls AddRewardItem with
-// name = field @0x10, icon = field @0x04, count = field @0x20 (all live-confirmed via probes).
-// The bundle's leading @0x74 byte is left false, so the item entry's optional trailing @0x44 int is
-// absent (icon lives in @0x04, so the "extended" form isn't needed).
+// Writes a RewardBundleBase (client reader FUN_008e7930) - the shared reward blob embedded in the quest offer, turn-in, and the 50/1 celebration. The leading @0x74 byte is left false, so item entries omit the optional @0x44 int.
 public static class RewardBundleSerializer
 {
     public static void Write(PacketWriter writer, int coins, int experience, IReadOnlyList<RewardBundleItem>? items = null)

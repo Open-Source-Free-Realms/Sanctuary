@@ -9,9 +9,7 @@ using Sanctuary.Packet.Common.Attributes;
 
 namespace Sanctuary.Gateway.Handlers;
 
-// Opcode 47 (BaseUiPacket / "Task" family). Not fully reverse-engineered yet - only sub-opcodes
-// 12 (SelectQuestPacket) and 13 (SelectedQuestLockedPacket) have real packet classes; everything
-// else just gets logged so nothing drops invisibly.
+// Opcode 47 (BaseUiPacket / "Task" family) - only sub-opcodes 12 and 13 have real packet classes; the rest are just logged.
 [PacketHandler]
 public static class BaseUiPacketHandler
 {

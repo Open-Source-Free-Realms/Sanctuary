@@ -108,12 +108,8 @@ public abstract class BaseZone : IZone, IDisposable
         _ = _scriptContext?.CallFunctionAsync("onStart", this).AsTask();
     }
 
-    // Quest Collect-goal pickups (Quests.json CollectSpawns) are plain world objects with a guid
-    // assigned at resource-load time (QuestDefinitionCollection.Collectibles/CollectibleSpawns) - unlike
-    // the Lua-scripted world NPCs, nothing else ever turns that data into an actual zone entity. Exposed
-    // to the zone script (spawnQuestCollectibles) rather than called automatically here, so population
-    // consistently happens through onStart like every other spawn in this zone. Without a call to this,
-    // QuestManager.NearestUncollectedPickup's TryGetNpc lookup always misses and the pickups never appear.
+    // Spawns Quests.json Collect-goal pickups; must be called from the zone script's onStart
+    // (spawnQuestCollectibles) or the pickups never appear.
     public int SpawnQuestCollectibles()
     {
         var count = 0;

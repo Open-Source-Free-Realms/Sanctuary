@@ -27,9 +27,7 @@ public static class QuestAbandonedPacketHandler
             return false;
         }
 
-        // Incoming 49/6 is not something the retail client sends (the journal "Drop Quest" arrives as
-        // CommandPacketQuestAbandon 26/23 instead - see CommandPacketQuestAbandonHandler). Kept only
-        // as a defensive no-op acknowledgement in case a client echoes it.
+        // Not sent by the retail client (journal "Drop Quest" uses CommandPacketQuestAbandon 26/23 instead) - kept as a defensive no-op.
         _logger.LogTrace("QuestAbandonedPacket (49/6) received: QuestId={q}", packet.QuestId);
         return true;
     }

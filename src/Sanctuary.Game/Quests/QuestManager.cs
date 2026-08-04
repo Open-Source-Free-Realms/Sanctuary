@@ -17,9 +17,7 @@ using Sanctuary.Packet.Common;
 
 namespace Sanctuary.Game.Quests;
 
-// Data-driven implementation of IQuestManager. Every packet sequence here is the one
-// the previously-hardcoded "Introduce Yourself" flow used (verified in-game); only the source of the
-// values changed - they now come from the QuestDefinition instead of constants.
+// Data-driven implementation of IQuestManager; packet sequences match the previously-hardcoded flow, only the value source changed.
 public sealed class QuestManager : IQuestManager
 {
     private readonly IResourceManager _resourceManager;
@@ -58,15 +56,10 @@ public sealed class QuestManager : IQuestManager
     {
         var quests = _resourceManager.Quests;
 
-        // 1. Goal progression / turn-in: is this NPC the target of the ACTIVE goal of a quest the player
-        // has active (accepted, not yet completed)? Talking to it ticks that goal off; the last goal hands
-        // the quest in (end screen). Multi-goal quests can point intermediate goals at different NPCs, so we
-        // check each active quest's current goal rather than only the quest's turn-in NPC.
+        // 1. Goal progression/turn-in: check each active quest's current goal target, not just the quest's turn-in NPC (multi-goal quests can point intermediate goals elsewhere).
         foreach (var (_, activeQuest, done, goal) in ActiveGoals(player))
         {
-            // A Collect goal advances only via OnCollectInteract. Since it has no NPC target,
-            // GoalTargetGuid would fall back to the quest's turn-in NPC - talking to it must NOT tick
-            // the goal off (that would bypass the objective), so skip it here.
+            // Collect goals only advance via OnCollectInteract; skip here so talking to the turn-in NPC (GoalTargetGuid's fallback) doesn't bypass the objective.
             if (goal.Type == QuestGoalType.Collect)
                 continue;
 
@@ -94,9 +87,7 @@ public sealed class QuestManager : IQuestManager
     // Composite effect played on a collectible when picked up (PFX_sparkles-swirl_gold_treasure-reward).
     private const int CollectPickupEffect = 5386;
 
-    // A collectible pickup was clicked. Credits the quest's active Collect goal (one per distinct pickup),
-    // hides the pickup for this player, animates the tracker counter, and completes the goal - advancing to
-    // the return step - once RequiredCount is reached.
+    // Credits a Collect pickup click toward the goal's RequiredCount; completes the goal once reached.
     public void OnCollectInteract(Player player, Npc npc)
     {
         if (!_resourceManager.Quests.Collectibles.TryGetValue(npc.Guid, out var loc))
@@ -167,9 +158,7 @@ public sealed class QuestManager : IQuestManager
         }
     }
 
-    // The player moved. Completes the active ReachLocation goal (Type=1) of any in-progress quest
-    // when the player is within the goal's radius (2D X/Z). Runs on every client position update
-    // (~10-20 Hz), so it early-outs everything that isn't an active reach goal.
+    // Runs on every position update (~10-20 Hz); completes the active ReachLocation goal when the player is within its radius (2D X/Z).
     public void OnPlayerMoved(Player player)
     {
         foreach (var (questId, quest, done, goal) in ActiveGoals(player))
@@ -204,9 +193,7 @@ public sealed class QuestManager : IQuestManager
     private void PersistCollectCount(Player player, int questId, int count)
         => UpdateCharacterQuest(player, questId, q => q.GoalCount = count);
 
-    // Persists which quest is tracked (DbCharacterQuest.IsActive) so it survives a relog - at most one
-    // row per character is true. Without this, ActiveQuestId silently reset to 0 on every reconnect and
-    // the tracker fell back to whichever quest happened to be first with 2+ quests active.
+    // Persists the tracked quest (IsActive) so relog doesn't silently reset ActiveQuestId to the first active quest.
     private void PersistActiveQuest(Player player, int questId)
     {
         using var db = _dbContextFactory.CreateDbContext();
@@ -215,11 +202,7 @@ public sealed class QuestManager : IQuestManager
         db.SaveChanges();
     }
 
-    // Re-sends this quest's collectible pickups to the player so any hidden in a prior attempt reappear and
-    // are clickable again: AddNpc (re-adds the model; a no-op for one still showing) PLUS an NpcRelevance
-    // entry - that relevance packet, not just AddNpc's IsInteractable flag, is what registers a pickup as
-    // interactable client-side (this is how zone-entry wires them up). NB: no RemovePlayer first - a
-    // remove+re-add of the same guid races and can leave the pickup gone.
+    // Re-adds this quest's pickups; NpcRelevance (not just AddNpc) is what makes them interactable client-side, and skipping RemovePlayer avoids a remove+re-add race.
     private void RespawnQuestCollectibles(Player player, int questId)
     {
         var relevance = new PlayerUpdatePacketNpcRelevance();
@@ -283,9 +266,7 @@ public sealed class QuestManager : IQuestManager
 
         SendActiveState(player, quest);
 
-        // Restore this quest's collectible pickups for the player: any collected in a PRIOR attempt were
-        // hidden with RemovePlayer (which persists until relog), so without this a collect-then-abandon-then-
-        // reaccept would leave fewer than RequiredCount pickups and the goal could never finish.
+        // Re-shows pickups hidden by a prior attempt - without this, collect-abandon-reaccept would leave too few pickups to ever finish the goal.
         RespawnQuestCollectibles(player, questId);
 
         RefreshQuestNotifications(player, quest);
@@ -415,10 +396,7 @@ public sealed class QuestManager : IQuestManager
         SendJournalQuestStates(player);
     }
 
-    // Pushes the storybook Adventurer's Journal quest-state map (op209/2 QuestUpdate). RE-verified
-    // (FUN_00a44020): a quest id being PRESENT in this map marks it completed in the journal (the value
-    // is only used for ordering), so we send every completed quest id. Sent on login + after each
-    // completion. Harmless for quests that aren't journal stickers - the client just ignores unknown ids.
+    // op209/2 QuestUpdate: a quest id's PRESENCE marks it completed in the journal (value is just ordering) - RE-verified via FUN_00a44020.
     private void SendJournalQuestStates(Player player)
     {
         var states = new Dictionary<int, int>();
@@ -430,9 +408,7 @@ public sealed class QuestManager : IQuestManager
             player.SendTunneled(new AdventurersJournalQuestUpdatePacket { QuestStates = states });
     }
 
-    // Refreshes both the giver's and target's badge, plus any mutually-exclusive quest's badges
-    // (ExcludesQuestIds) - accepting/completing/abandoning this quest can flip whether those are
-    // offerable too, and their badge wouldn't otherwise catch up until some unrelated event.
+    // Also refreshes mutually-exclusive quests' badges (ExcludesQuestIds), since this quest's state change can flip whether those are offerable.
     private void RefreshQuestNotifications(Player player, QuestDefinition quest)
     {
         RefreshQuestNotification(player, quest.GiverGuid);
@@ -504,9 +480,7 @@ public sealed class QuestManager : IQuestManager
         player.SendTunneled(new QuestInfoPacket
         {
             QuestId = quest.QuestId,
-            // TitleId drives the visible NPCText bubble and, on a stock client, also writes to the chat
-            // log - none of the 4 unknown fields below toggle that off (Unknown7 = members-only gate,
-            // Unknown10/11 = no visible effect, Unknown12 = accept-only/no decline button).
+            // TitleId drives the NPCText bubble (and chat log on stock client); Unknown7=members-only gate, Unknown10/11=no effect, Unknown12=accept-only/no decline.
             TitleId = quest.GiverDialogueId,
             DescriptionId = quest.DescriptionId,
             // The collapsed details-box line: the quest name, retail-style ("Welcome to Seaside").
@@ -524,9 +498,7 @@ public sealed class QuestManager : IQuestManager
         });
     }
 
-    // Resolves a quest's RewardItems def ids into reward-preview entries
-    // (icon + name + count) by looking up each item's ClientItemDefinition. Shown as icons in the offer
-    // and turn-in "Show Details" panels.
+    // Resolves RewardItems def ids into reward-preview entries for the offer/turn-in "Show Details" panels.
     private List<RewardBundleItem> BuildRewardItems(QuestDefinition quest)
     {
         var items = new List<RewardBundleItem>();
@@ -545,16 +517,12 @@ public sealed class QuestManager : IQuestManager
         return items;
     }
 
-    // Ticks off the goal at goalIndex: sends the objective checkmark, advances the
-    // player's progress, then either activates+retargets the next goal or, when this was the last goal,
-    // hands the quest in (reward + end screen). Goals complete in order.
+    // Ticks off goalIndex, then activates the next goal or hands in the quest if it was the last one.
     private void CompleteGoal(Player player, QuestDefinition quest, int goalIndex)
     {
         var goals = quest.EffectiveGoals;
 
-        // The final goal ticks SILENTLY (checkmark, no "Goal Complete!" banner): the "Quest Completed!" banner
-        // fires right after on turn-in, and two banners back-to-back make the second wait on the first's
-        // animation. Intermediate goals still banner normally.
+        // Final goal ticks silently (no banner) so it doesn't queue behind the "Quest Completed!" banner that follows on turn-in.
         bool isFinalGoal = goalIndex + 1 >= goals.Count;
 
         player.SendTunneled(new QuestObjectiveCompletePacket
@@ -582,9 +550,7 @@ public sealed class QuestManager : IQuestManager
             return;
         }
 
-        // More goals to go: REVEAL the next goal's row now (progressive, retail-style — the helper
-        // shows completed rows plus the CURRENT one, never the quest's whole future checklist),
-        // then activate it and re-point the tracker/breadcrumb at its target.
+        // Reveal the next goal's row now (progressive, retail-style: shows completed + current only), then activate it and re-point the tracker.
         player.SendTunneled(new QuestObjectiveAddedPacket
         {
             QuestId = quest.QuestId,
@@ -595,9 +561,7 @@ public sealed class QuestManager : IQuestManager
         SendObjectiveActivated(player, quest.QuestId, goals[done]);
         SendObjectiveForGoal(player, quest, done);
 
-        // Mid-quest reply bubble - only TalkToNpc goals get one, since they complete AT an NPC. Other
-        // goal types fire from field events with no NPC to camera-focus, and their DialogueId is just
-        // the giver's mid-goal reminder line - popping it at the trigger moment would read wrong.
+        // Only TalkToNpc goals get a reply bubble - other goal types fire from field events with no NPC to camera-focus.
         var completedGoal = goals[goalIndex];
         if (completedGoal.DialogueId != 0 && completedGoal.Type == QuestGoalType.TalkToNpc)
         {
@@ -632,21 +596,14 @@ public sealed class QuestManager : IQuestManager
     // goal's checkmark is already sent by CompleteGoal before this is called.
     private void TurnIn(Player player, QuestDefinition quest)
     {
-        // No QuestAdd re-send here: the end screen's bubble reads QuestEndPacket's own TitleId field
-        // below, not QuestData at all, so nothing needs refreshing. Re-sending QuestAdd would APPEND a
-        // duplicate journal row (the client never dedupes) that completion then can't fully clear -
-        // the bug that left finished quests in the journal.
+        // No QuestAdd re-send here - it would APPEND a duplicate journal row (client never dedupes), which was a bug that left finished quests stuck in the journal.
         player.SendTunneled(new QuestEndPacket
         {
             // Camera focus = the LAST goal's NPC (where hand-in happens). For single-goal quests this is
             // quest.TargetGuid; for multi-goal it's the final goal's target (e.g. back at the giver).
             NpcGuid = GoalTargetGuid(quest, quest.EffectiveGoals.Count - 1),
             QuestId = quest.QuestId,
-            // With the ScriptsBase details-split applied, the end screen's speech bubble reads
-            // SetNPCDialog(showEndText), and showEndText is fed by THIS packet's TitleId field (verified
-            // in-game: the bubble showed whatever went here). So put the turn-in DIALOGUE here. The panel
-            // title + "Show Details" description come from QuestData columns 1/2 (set by SendActiveState:
-            // col1=TitleId title, col2=ObjectiveDescriptionId objective), independent of this packet.
+            // showEndText (end-screen bubble) is fed by THIS packet's TitleId; panel title/description come from QuestData cols 1/2 via SendActiveState, independently.
             TitleId = quest.TurnInDialogueId, // -> showEndText -> speech bubble = the NPC's turn-in line
             DescriptionId = quest.TitleId,    // -> showEndId (not rendered as text); harmless
             RewardCoins = quest.RewardCoins,
@@ -658,22 +615,14 @@ public sealed class QuestManager : IQuestManager
         player.PendingQuestEndAction = () => CompleteQuest(player, quest.QuestId);
     }
 
-    // HelperTextId (QuestData column 10) does double duty: a patched client reads it as the end-screen
-    // bubble text, but a STOCK client reads the same column as the tracker widget's header WHILE the
-    // quest is active (confirmed via disassembly). So it has to stay short here - pass
-    // ObjectiveDescriptionId, not the long TurnInDialogueId. The turn-in bubble itself doesn't care what's
-    // sent here either way - it reads QuestEndPacket's own TitleId instead (see TurnIn()).
+    // HelperTextId (QuestData col 10) is read as the tracker header on a stock client while active, so pass ObjectiveDescriptionId here, not the long TurnInDialogueId.
     private static void SendQuestAdd(Player player, QuestDefinition quest, int helperTextId, float completedPercentage = 0f)
     {
         player.SendTunneled(new QuestAddPacket
         {
             QuestId = quest.QuestId,
             TitleId = quest.TitleId,
-            // DescriptionId (client QuestData col 2) feeds BOTH the on-screen tracker's header line AND the
-            // StoryBook journal's right-page description. Use the objective ("Introduce yourself to X in Y")
-            // so the tracker header reads as the objective; the shorter sub-goal ("Talk to X") is the goal
-            // row (QuestObjectiveAddedPacket, from the goal's NameId). They share this one client slot, so
-            // the journal description shows the objective too rather than the longer flavour DescriptionId.
+            // DescriptionId (QuestData col 2) feeds both the tracker header and journal description, so use the objective text, not the goal's shorter row text.
             DescriptionId = quest.ObjectiveDescriptionId,
             HelperTextId = helperTextId,
             MembersOnly = false,
@@ -691,11 +640,7 @@ public sealed class QuestManager : IQuestManager
         int alreadyDone = player.QuestGoalProgress.TryGetValue(quest.QuestId, out var p) ? p : 0;
         SendQuestAdd(player, quest, quest.ObjectiveDescriptionId, (float)alreadyDone / quest.EffectiveGoals.Count);
 
-        // PROGRESSIVE REVEAL: objective rows exist only for goals already completed plus the ACTIVE
-        // one — the helper shows where you've been and what's next, never the quest's whole future
-        // checklist (the retail shape: Tides of Change opens showing just "Talk to Mayor Gilly").
-        // CompleteGoal adds each subsequent row at the moment it activates; this relog replay
-        // rebuilds the same visible set.
+        // Progressive reveal: only completed + active goal rows are shown (retail shape); this rebuilds that same visible set on relog.
         var goals = quest.EffectiveGoals;
         int done = player.QuestGoalProgress.TryGetValue(quest.QuestId, out var progress) ? progress : 0;
         int lastVisible = System.Math.Min(done, goals.Count - 1);
@@ -705,12 +650,7 @@ public sealed class QuestManager : IQuestManager
             player.SendTunneled(new QuestObjectiveAddedPacket
             {
                 QuestId = quest.QuestId,
-                // Body int0 is the objective's IDENTITY (the client hashes rows by it - traced
-                // FUN_00bab950: row+0xf0 = int0) AND its name text id; Activated/Complete find the row
-                // by sending the same value as ObjectiveId. Goal NameIds must therefore be unique
-                // within a quest. (A raw index here broke everything: id 0 rendered as
-                // "<STRING 0 NOT FOUND>" and the Activated/Complete lookups missed, so checkmarks and
-                // goal advance never showed client-side.)
+                // Body int0 is the row's identity (client hashes by it, traced FUN_00bab950) and its name text id, so goal NameIds must be unique within a quest - a raw index here previously broke checkmarks/advance client-side.
                 ObjectiveNameId = goals[i].NameId,
                 // The tracker goal row renders from body int1 ("Talk to Shakey").
                 ObjectiveDescriptionId = goals[i].NameId,
@@ -785,9 +725,7 @@ public sealed class QuestManager : IQuestManager
     {
         var goals = quest.EffectiveGoals;
 
-        // A Collect goal has no fixed NPC: point at the NEAREST pickup this player hasn't taken yet, so
-        // the marker/breadcrumb leads to the tools. Any pickup credits the goal (it's a counter), so
-        // this is guidance only - the player can grab whichever they find first.
+        // Collect goals have no fixed NPC - point at the nearest uncollected pickup as guidance only (any pickup credits the goal).
         if (goalIndex >= 0 && goalIndex < goals.Count
             && goals[goalIndex].Type == QuestGoalType.Collect)
         {
@@ -862,9 +800,7 @@ public sealed class QuestManager : IQuestManager
         SendObjectiveTarget(player, ResolveGoalTargetGuid(player, quest, goalIndex));
     }
 
-    // Sends the ObjectiveTargetUpdatePacket that drives the tracker arrow, mini-map indicator and the
-    // "Take Me There" green breadcrumb trail. Target is the given NPC guid (the active goal's NPC); if it
-    // isn't spawned in the player's current zone we send nothing (no destination to point at).
+    // Drives the tracker arrow/mini-map/"Take Me There" breadcrumb for the given NPC; sends nothing if it isn't spawned in the player's zone.
     private void SendObjectiveTarget(Player player, ulong targetGuid)
     {
         if (targetGuid == 0 || !player.Zone.TryGetNpc(targetGuid, out var target))
@@ -892,9 +828,7 @@ public sealed class QuestManager : IQuestManager
         });
     }
 
-    // Re-points the objective tracker/mini-map indicator at a still-active quest whose target NPC is
-    // present, or clears it entirely (Active=false) when no trackable quest remains. Call after a quest
-    // leaves the active set (abandon/complete) so a dangling indicator doesn't stay on screen.
+    // Re-points the tracker at a still-trackable quest, or clears it (Active=false); call after a quest leaves the active set.
     public void RefreshObjectiveTarget(Player player)
     {
         if (TryGetTrackedGoal(player, out var quest, out var goalIndex))
@@ -934,9 +868,7 @@ public sealed class QuestManager : IQuestManager
         return false;
     }
 
-    // The quest + active goal the tracker/mini-map/Take Me There should follow: the player's selected
-    // ActiveQuestId when it's still active and trackable in this zone; otherwise the first active quest
-    // with a trackable goal. False when nothing is trackable.
+    // Follows the player's selected ActiveQuestId when trackable, else falls back to the first trackable active quest.
     private bool TryGetTrackedGoal(Player player, out QuestDefinition quest, out int goalIndex)
     {
         // Prefer the quest the player actually has selected - the whole point of "make active" is that the
@@ -1033,9 +965,7 @@ public sealed class QuestManager : IQuestManager
         }
     }
 
-    // Grants one of definitionId to the player: stacks it in the DB (by definition +
-    // tint), mirrors it into the in-memory inventory, and tells the client (ItemAdd for a new item, or
-    // ItemUpdate for an incremented stack). Mirrors the coin-store grant path.
+    // Grants one of definitionId: stacks in DB by definition+tint, mirrors into memory, and sends ItemAdd/ItemUpdate. Mirrors the coin-store grant path.
     private void GrantItem(Player player, int definitionId)
     {
         if (!_resourceManager.ClientItemDefinitions.TryGetValue(definitionId, out var itemDef))

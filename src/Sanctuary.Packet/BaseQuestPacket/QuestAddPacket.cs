@@ -2,16 +2,7 @@ using Sanctuary.Core.IO;
 
 namespace Sanctuary.Packet;
 
-// Field layout traced from the client's real deserializer: sub_C7CCD0 -> sub_C7CC80 ->
-// ClientQuestData::sub_93C840 (the bulk of the fields), then one more trailing bool read
-// directly in sub_C7CC80 after ClientQuestData ends. This supersedes an earlier guessed
-// layout that had a spurious extra bool before TimeStarted, was missing two bools
-// (GAP_3_ClientQuestData and ClientQuestData::m_bUnknown), wrote RewardBundleBase as a
-// count-prefixed list instead of its real 18 fixed fields, and appended three extraneous
-// strings that don't exist in the real format at all.
-// The Objectives list (read via sub_92B050, not yet traced) is written as an empty
-// count-prefixed list here since objectives are added separately via
-// QuestObjectiveAddedPacket/QuestObjectiveActivatedPacket right after this packet.
+// Objectives list is written empty here; objectives are added separately via QuestObjectiveAddedPacket.
 public class QuestAddPacket : BaseQuestPacket, ISerializablePacket
 {
     public const int SubOpCode = 3;
@@ -27,9 +18,8 @@ public class QuestAddPacket : BaseQuestPacket, ISerializablePacket
     public int IconId;
     public bool SystemQuest;
 
-    // Optional single inline objective (sub_92B050 list). When set, the quest is created WITH an
-    // objective loaded into ClientQuestData, which the client needs before the objective can be tracked
-    // + the breadcrumb activated. Leaving IncludeObjective false keeps the old empty-list behaviour.
+    // Optional inline objective (sub_92B050 list); when set, the objective is loaded into
+    // ClientQuestData up front so it can be tracked and its breadcrumb activated immediately.
     public bool IncludeObjective;
     public int ObjectiveId;            // per-entry leading int (sub_92B050 local_4)
     public int ObjectiveNameId;        // body int0

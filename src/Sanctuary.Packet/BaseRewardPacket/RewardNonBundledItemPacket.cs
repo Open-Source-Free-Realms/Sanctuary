@@ -2,16 +2,7 @@ using Sanctuary.Core.IO;
 
 namespace Sanctuary.Packet;
 
-// Server -> client "you earned an item" reward celebration (opcode 50 / sub-opcode 2). Sibling of
-// RewardBundlePacket (50/1, coins/stars) in the reward-celebration dispatcher (FUN_00b8a640 case 2);
-// case 2 deserializes via FUN_00b891f0 then shows a single item reward using the "RewardPatternOne"
-// fly-in layout (display FUN_00b899f0, which looks the item up by definition id).
-// Wire (FUN_00b891f0 read order): short OpCode(50) + byte SubOpCode(2) [3-byte header], then six
-// int32s = 27 bytes total. Confirmed in-game:
-//   +0x1c = ItemDefinitionId (the item shown, looked up in the client item-definition hash)
-//   +0x30 = Quantity (the "received N" count in the popup)
-// The remaining four ints (+0x20, the nested +0x28/+0x2c, +0x34) aren't needed for a simple item
-// grant and are sent as 0 (likely tint / item guid / reward-context, unused here).
+// Server -> client "you earned an item" reward celebration (opcode 50 / sub 2), sibling of RewardBundlePacket (50/1). Wire order from FUN_00b891f0: header + six int32s; only +0x1c (ItemDefinitionId) and +0x30 (Quantity) are used, the rest are sent as 0.
 public class RewardNonBundledItemPacket : ISerializablePacket
 {
     public const short OpCode = 50;

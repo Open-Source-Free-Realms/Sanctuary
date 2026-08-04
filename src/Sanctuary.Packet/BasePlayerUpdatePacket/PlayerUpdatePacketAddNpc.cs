@@ -157,9 +157,7 @@ public class PlayerUpdatePacketAddNpc : BasePlayerUpdatePacket, ISerializablePac
 
     public int ActiveProfile;
 
-    // The NPC's notification badge (e.g. quest "!"/"?") - main's client-facing field name. Static
-    // vendor badges would bake straight in here; quest badges are per-player, so Player.OnAddVisibleNpcs
-    // overrides this per-recipient instead of ever setting it on the shared Npc entity.
+    // The NPC's notification badge (e.g. quest "!"/"?"); per-player badges are set via Player.OnAddVisibleNpcs instead, not on the shared Npc entity.
     public int NotificationImageSetId;
     public int Unknown68;
 

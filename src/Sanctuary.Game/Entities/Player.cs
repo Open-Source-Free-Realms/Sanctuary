@@ -33,18 +33,16 @@ public sealed class Player : ClientPcData, IEntity
     public ConcurrentDictionary<ulong, Npc> VisibleNpcs { get; } = [];
     public ConcurrentDictionary<ulong, Player> VisiblePlayers { get; } = [];
 
-    // "Take Me There" session state (see ClientPathBasePacketHandler) - is an auto-walk active, and
-    // where it's headed, so a passive trail refresh can tell if the objective changed mid-walk.
+    // "Take Me There" auto-walk state (see ClientPathBasePacketHandler); lets a passive trail refresh
+    // detect if the objective changed mid-walk.
     public bool TakeMeThereActive { get; set; }
     public Vector4 TakeMeThereDestination { get; set; }
 
-    // Caches the last route so repeated passive trail-refresh requests don't re-run A* every time -
-    // PathBuilder.TryRecompute returns null when the route is basically unchanged.
+    // Caches the last route so repeated passive trail-refresh requests don't re-run A* every time.
     private PathBuilder? _pathBuilder;
     private List<Vector4>? _lastComputedPath;
 
-    // Route for "Take Me There" via the zone's Pathfinder. Null if the zone has no .map file and
-    // nothing's been computed yet - caller falls back to a straight line.
+    // Route for "Take Me There" via the zone's Pathfinder; null falls back to a straight line.
     public List<Vector4>? TryGetPath(Vector3 start, Vector3 destination)
     {
         if (Zone.Pathfinder is null)
@@ -392,9 +390,8 @@ public sealed class Player : ClientPcData, IEntity
 
             var playerUpdatePacketAddNpc = npc.GetAddNpcPacket();
 
-            // The badge ("!"/"?") is driven by the AddNpc packet's own NotificationImageSetId field, not
-            // just the separate NotificationInfo packet below - quest badges are per-player, so this has
-            // to be overridden per-recipient here rather than ever set on the shared Npc entity.
+            // AddNpc's own NotificationImageSetId also needs the per-player quest badge, not just the
+            // NotificationInfo packet below.
             playerUpdatePacketAddNpc.NotificationImageSetId = GetNotificationImageId(npc);
 
             SendTunneled(playerUpdatePacketAddNpc);
@@ -422,8 +419,7 @@ public sealed class Player : ClientPcData, IEntity
 
         foreach (var npc in npcs)
         {
-            // Quest badges ("!" offer / "?" turn-in) are per-player, so they override the NPC's static
-            // Notification (e.g. a vendor badge) rather than being set on the shared entity.
+            // Per-player quest badge overrides the NPC's static Notification (e.g. a vendor badge).
             var questImageId = GetNotificationImageId(npc);
             if (questImageId != 0)
             {
@@ -449,9 +445,8 @@ public sealed class Player : ClientPcData, IEntity
             VisibleNpcs.TryAdd(npc.Guid, npc);
     }
 
-    // Quest badges are per-player (unlike vendor badges, which are static on the Npc entity), since they
-    // depend on this player's own quest progress. "!" if the NPC gives a quest the player can currently
-    // take, "?" if the player has an active quest that turns in here, else the NPC's own static badge.
+    // Per-player quest badge: "!" if a quest here is offerable, "?" if an active quest turns in here,
+    // else the NPC's static badge.
     public int GetNotificationImageId(Npc npc)
     {
         var quests = _resourceManager.Quests;

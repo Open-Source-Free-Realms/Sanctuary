@@ -8,10 +8,7 @@ using Sanctuary.Packet.Common.Attributes;
 
 namespace Sanctuary.Gateway.Handlers;
 
-// Purely informational (see SelectedQuestLockedPacket.cs) - the client reports its own locked/unlocked
-// read on the currently-displayed quest, edge-triggered on change, no reply expected. Logged for
-// visibility (useful if it ever disagrees with our own PrerequisiteQuestId gating - that would mean
-// the client and server have drifted on what's actually offerable) rather than acted on.
+// Purely informational: the client's own locked/unlocked read on the tracked quest, edge-triggered, no reply expected - logged in case it ever drifts from our PrerequisiteQuestId gating.
 [PacketHandler]
 public static class SelectedQuestLockedPacketHandler
 {

@@ -9,9 +9,7 @@ using Sanctuary.Packet.Common.Attributes;
 
 namespace Sanctuary.Gateway.Handlers;
 
-// The journal "Drop Quest" (red X) button. The client sends CommandPacketQuestAbandon
-// (BaseCommandPacket opcode 26, sub-opcode 23) with the quest id it wants to drop; the quest manager
-// removes it and tells the client to clear the journal entry.
+// Journal "Drop Quest" button: CommandPacketQuestAbandon (opcode 26, sub-opcode 23) carries the quest id to remove.
 [PacketHandler]
 public static class CommandPacketQuestAbandonHandler
 {

@@ -2,10 +2,7 @@ using Sanctuary.Core.IO;
 
 namespace Sanctuary.Packet.Common;
 
-// RE'd 2026-07-02 for the Frostfang Growler's combat-encounter badge (op35/sub10 AddNotifications,
-// byte-exact vs a real 2014 capture): Combat=true is the short 14-byte form (Guid, Combat, Type,
-// Unknown10) used for the red crossed-swords badge; Combat=false is the full form used for other
-// notification types (e.g. quest "!"/"?"), field names best-effort beyond what the capture confirmed.
+// op35/sub10 AddNotifications, byte-exact vs a real 2014 capture: Combat=true is the short 14-byte form (red crossed-swords badge); Combat=false is the full form used for other notification types (e.g. quest "!"/"?").
 public class NotificationInfo : ISerializableType
 {
     public ulong Guid { get; set; }

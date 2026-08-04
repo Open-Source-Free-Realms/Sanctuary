@@ -5,11 +5,7 @@ using Sanctuary.Core.IO;
 
 namespace Sanctuary.Packet;
 
-// One prize row inside a RewardBundle. The client surfaces these in TWO places, both fed from the SAME
-// preview bundle (decompiled UI Lua): the NPC-talk offer popup's prize list (MinigameStartScreen reads
-// "BaseClient.MiniGame.RewardPreview.Entries", shows up to 4 NON-hidden rows) and the victory score
-// screen's LOOT WHEEL slices (ScoreScreen:PopulateLootWheel reads the same DS). Hidden=true rows are
-// skipped by the popup list but still land in the DS (and still render as wheel slices).
+// One prize row inside a RewardBundle; feeds both the NPC-offer popup and the loot-wheel slices (Hidden rows skip the popup but still render as wheel slices).
 public sealed class RewardEntry
 {
     public int Type = 1;        // REWARDBUNDLE_TYPE: 1=ITEM
@@ -21,28 +17,14 @@ public sealed class RewardEntry
     public int ItemDefId;       // wire Param1 = the ClientItemDefinitions item id ("Item Id" DS column)
     public int Param2;
 
-    // Optional per-entry INVENTORY item guid tail (the player's item row id, not the def id).
-    // IDA-verified 2026-07-04: the bundle's LEAD BYTE (not entry U9) gates these — the bundle reader
-    // (sub_8E7930) pushes it into every entry, and RewardBundleEntryItem then reads a 4-byte ItemGuid
-    // after the base. The live post-wheel grant display (RewardBundlePacket idx 38142) used this.
+    // Optional per-entry inventory item guid (player's item row id, not def id); presence is gated by the bundle's lead byte, not entry U9 (sub_8E7930).
     public int? TailItemGuid;
 
-    // SERVER-SIDE ONLY (never put on the wire, never sent to the client — the client resolves NameId
-    // itself). The item's plain real name, for building the blue "You receive 1 X" toast text server-side
-    // (see BaseMiniGamePacketHandler.HandleLootWheelStopped / EncounterArenaZone.GrantBonusGoalReward) -
-    // ClientItemDefinition has no loaded name/comment field we could look this up from at runtime.
+    // Server-side only, never sent on the wire - the item's plain name, used to build the "You receive 1 X" toast text.
     public string DisplayName = "";
 }
 
-// Shared RewardBundleBase serializer — wire format ground-truthed against the real 04-01 packets AND the
-// client readers (drafts/reward-bundle-format.md has the full decode):
-//   byte U1 ("entries carry ItemGuid tails") · int32 ×9 U2..U10 (U2=Num Coins, U3=Experience — the
-//   IDA-verified RewardDataSource columns; U8=1.0f in every live bundle) · int32 ×2 pairA · int32 ×2 pairB ·
-//   int32 U13 (icon override; -1 = defer to entry[0]) · int32 U14 (name override; -1 = entry[0]) ·
-//   int32 entryCount · entries · int32 U15.
-//   Entry: int32 type · byte Hidden · int32 IconId · int32 TintId · int32 NameId · int32 Quantity ·
-//   int32 Param1(item def id) · int32 Param2 · string · int32 U8("Item Text Color") ·
-//   byte U9("Members Only") · [int32 ItemGuid iff bundle U1].
+// Shared RewardBundleBase serializer - wire format ground-truthed against real 04-01 packets and the client readers (see drafts/reward-bundle-format.md for the full decode).
 public static class RewardBundle
 {
     public static void Write(PacketWriter writer, IReadOnlyList<RewardEntry> entries,

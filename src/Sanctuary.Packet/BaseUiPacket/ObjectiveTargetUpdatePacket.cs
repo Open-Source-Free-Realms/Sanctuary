@@ -2,20 +2,7 @@ using Sanctuary.Core.IO;
 
 namespace Sanctuary.Packet;
 
-// Server -> client. Sets the "current objective target" the client uses to draw the tracker arrow,
-// the mini-map indicator, and - crucially - the "Take Me There" button + green breadcrumb trail on the
-// floor. The client keeps a single active target (ObjectiveTargetDataSource); sending this replaces it.
-// Wire format reverse-engineered from the client deserializer FUN_00a8b440 (opcode 47, sub-opcode 14):
-//   bool  Active           - if false the packet ends here and the client clears its target
-//   float LocationX        - 2D map X   (client field +0x10)
-//   float LocationZ        - 2D map Z   (client field +0x14)
-//   int   ZoneId           - area id of the target (+0x18); a change in these three fires the recompute
-//   ulong Guid             - target entity guid (+0x20)
-//   int   NameId           - (+0x28) display-name id; the setter FUN_00cb85b0 resolves it to the label
-//                            shown on the tracker/mini-map. 0/invalid -> "Default Housing NPC" fallback.
-//   float PositionX/Y/Z/W  - full 3D target position, read as a Vector4 with NaN guards (+0x30)
-//   int   ScreenAngle      - (+0x40) trailing field; 0 is accepted
-// The deserializer requires the buffer to be fully consumed, so the field count/size must match exactly.
+// Server -> client. Sets the "current objective target" driving the tracker arrow, mini-map indicator, and "Take Me There" breadcrumb trail. Wire format from client deserializer FUN_00a8b440 (opcode 47, sub 14); Active=false ends the packet early and clears the client's target.
 public class ObjectiveTargetUpdatePacket : BaseUiPacket, ISerializablePacket
 {
     public new const byte OpCode = 14;

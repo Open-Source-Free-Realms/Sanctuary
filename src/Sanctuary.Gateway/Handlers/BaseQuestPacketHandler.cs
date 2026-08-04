@@ -37,15 +37,10 @@ public static class BaseQuestPacketHandler
         };
     }
 
-    // Global.Text id for the QuestEndBlockedPacket popup shown on a stray/duplicate "Complete" click.
-    // Placeholder - not verified against a real client text dump, so it may render blank or wrong
-    // until someone confirms the actual id.
+    // Global.Text id for QuestEndBlockedPacket - placeholder, not verified against a real client text dump.
     private const int QuestEndBlockedTextId = 0;
 
-    // Player clicked "Complete" on the end screen: run the pending reward/completion, then restore the
-    // HUD the end screen hid (same sub-opcode 29 command the accept flow uses). If there's no pending
-    // action - a stray double-click, or a relog wiped it mid-end-screen - there's nothing to complete,
-    // so tell the player instead of silently doing nothing.
+    // "Complete" clicked on the end screen: run the pending completion, or tell the player if there's none (stray double-click / relog wiped it).
     private static bool HandleQuestEndReply(GatewayConnection connection)
     {
         var pending = connection.Player.PendingQuestEndAction;

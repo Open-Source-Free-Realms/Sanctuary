@@ -12,10 +12,7 @@ using Sanctuary.Packet.Common.Attributes;
 
 namespace Sanctuary.Gateway.Handlers;
 
-// Opcode 98 - the "Take Me There" path family. On a ClientPathRequestPacket (sub 1, sent when the button
-// is clicked) we reply with a ClientPathReplyPacket (sub 2) whose waypoint list the client turns into the
-// green breadcrumb trail + auto-walk. The path runs from the client's start position to the tracked
-// quest's target NPC (falling back to the client-provided end point).
+// Opcode 98 sub 1: "Take Me There" - replies with the waypoint path to the tracked quest's target NPC (or the client's end point).
 [PacketHandler]
 public static class ClientPathBasePacketHandler
 {
@@ -44,13 +41,10 @@ public static class ClientPathBasePacketHandler
         };
     }
 
-    // "Arrived" radius for auto-walk session cancellation - close enough that the player would naturally
-    // interact with the target NPC, so keeps resending an auto-walk becomes pointless/annoying.
+    // Auto-walk cancels once the player is within this distance of the target.
     private const float ArrivalDistance = 8f;
 
-    // How far the resolved destination can drift between refreshes before we treat it as a genuinely
-    // DIFFERENT objective (a manual re-track) rather than the same tracked NPC/kill-goal wandering a
-    // little. A real goal switch shows up as one big jump on the very next refresh after it happens.
+    // Destination drift beyond this between refreshes is treated as a real objective change, not the same target wandering.
     private const float DestinationChangeThreshold = 40f;
 
     private static bool HandlePathRequest(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -70,9 +64,7 @@ public static class ClientPathBasePacketHandler
 
         var path = BuildPath(player, request.Start, destination);
 
-        // The reply's ResultType routes it to a different client controller: 1 = the breadcrumb trail
-        // (renders the green line), 2 = the character auto-move (pushes the path into the ProxiedCharacter's
-        // movement so it actually walks).
+        // ResultType 1 = breadcrumb trail render, 2 = character auto-move.
         var trail = new ClientPathReplyPacket { RequestId = request.RequestId, ResultType = 1 };
         trail.Path.AddRange(path);
         player.SendTunneled(trail);
@@ -85,10 +77,7 @@ public static class ClientPathBasePacketHandler
         }
         else if (player.TakeMeThereActive)
         {
-            // Passive refresh mid-session (the client sends these automatically as the player moves).
-            // Only keep resending the walk while it's still the SAME objective and we haven't arrived -
-            // otherwise this is exactly the "wander off on its own" bug the Mode-2-only gate used to
-            // prevent, just re-triggered continuously instead of once.
+            // Passive refresh: only keep auto-walking while it's the same objective and not yet arrived.
             var start3 = new Vector3(request.Start.X, request.Start.Y, request.Start.Z);
             var dest3 = new Vector3(destination.X, destination.Y, destination.Z);
             var lastDest3 = new Vector3(player.TakeMeThereDestination.X, player.TakeMeThereDestination.Y, player.TakeMeThereDestination.Z);
@@ -109,9 +98,7 @@ public static class ClientPathBasePacketHandler
         return true;
     }
 
-    // Builds the path the client walks, via the zone's Pathfinder<MapNode> (Sanctuary.Game.Pathfinding,
-    // real .map waypoint data - see Player.TryGetPath). Falls back to a straight line when the zone has
-    // no .map file, or the graph can't connect start/destination (disconnected components).
+    // Uses the zone's .map waypoint graph (Player.TryGetPath); falls back to a straight line if unavailable.
     private static List<Vector4> BuildPath(Sanctuary.Game.Entities.Player player, Vector4 start, Vector4 destination)
     {
         var start3 = new Vector3(start.X, start.Y, start.Z);

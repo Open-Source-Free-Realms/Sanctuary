@@ -8,12 +8,7 @@ using Sanctuary.Packet.Common.Attributes;
 
 namespace Sanctuary.Gateway.Handlers;
 
-// The player clicked a response button on a CommandPacketShowDialog (currently only the mid-quest
-// "You got it!" reply bubble, see QuestManager.CompleteGoal). Reply with CommandPacketEndDialog to tear
-// down just the conversation dialog/camera focus - NOT CommandPacketQuestDialogComplete, which is
-// specific to the quest start/end screen and additionally fires "QuestStartHandler:DismissEndScreen";
-// sending that here tore down UI that was never open and left the client's HUD/movement locked.
-// Without this handler PacketDialogResponse was silently dropped and the camera stayed locked on the NPC.
+// Reply to a CommandPacketShowDialog click with CommandPacketEndDialog (not CommandPacketQuestDialogComplete, which targets the quest start/end screen and would leave HUD/movement locked here).
 [PacketHandler]
 public static class PacketDialogResponseHandler
 {

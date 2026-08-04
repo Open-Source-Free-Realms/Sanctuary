@@ -4,10 +4,7 @@ using Sanctuary.Core.IO;
 
 namespace Sanctuary.Packet;
 
-// Client -> server: reply to CommandPacketShowDialog when the player clicks one of its response
-// buttons. Opcode 26 sub 6 (BaseCommandPacket header). Confirmed live against the client: clicking
-// "You got it!" (the mid-quest reply bubble's Response.Id = 1, see CommandPacketShowDialog.cs) sends
-// exactly short OpCode(26) + short SubOpCode(6) + int ResponseId, 8 bytes, buffer exactly consumed.
+// Client -> server: reply to CommandPacketShowDialog when the player clicks a response button. Opcode 26 sub 6, payload is a single int ResponseId (confirmed live).
 public class PacketDialogResponse : BaseCommandPacket, IDeserializable<PacketDialogResponse>
 {
     public new const short OpCode = 6;

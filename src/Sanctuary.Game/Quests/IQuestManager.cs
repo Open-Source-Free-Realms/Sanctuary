@@ -4,10 +4,7 @@ using Sanctuary.Game.Entities;
 
 namespace Sanctuary.Game.Quests;
 
-// Data-driven quest engine. Drives the whole quest lifecycle (offer, accept, objective/turn-in,
-// complete, abandon, make-active, relog repopulation, world badges) from the quest definitions in
-// Quests, so adding a quest is a Quests.json entry rather than code.
-// A DI singleton; every method takes the acting player, so it holds no per-player state itself.
+// Data-driven quest engine driving the quest lifecycle from Quests.json; a stateless DI singleton.
 public interface IQuestManager
 {
     // True if the NPC gives or is a target of any quest (used to wire its interaction).

@@ -94,9 +94,7 @@ public class QuestDefinitionCollection
                 if (quest.TargetGuid != 0)
                     ByTarget.GetOrAdd(quest.TargetGuid, _ => new List<int>()).Add(quest.QuestId);
 
-                // Index every goal's target NPC too, so multi-goal quests can point intermediate goals at
-                // NPCs that aren't the giver/turn-in - otherwise those NPCs wouldn't get a quest interaction
-                // (IsQuestNpc gates the interact action at spawn on ByGiver/ByTarget).
+                // Index every goal's target NPC too, so intermediate goal NPCs also get IsQuestNpc wired.
                 var goalNameIds = new HashSet<int>();
                 foreach (var goal in quest.EffectiveGoals)
                 {
@@ -104,14 +102,12 @@ public class QuestDefinitionCollection
                         && !ByTarget.GetOrAdd(goal.TargetGuid, _ => new List<int>()).Contains(quest.QuestId))
                         ByTarget[goal.TargetGuid].Add(quest.QuestId);
 
-                    // Goal NameIds double as the client's objective identity (QuestObjectiveAdded body
-                    // int0 -> row hash key) - a duplicate makes goals indistinguishable client-side.
+                    // Goal NameIds double as the client's objective identity; duplicates collide client-side.
                     if (!goalNameIds.Add(goal.NameId))
                         _logger.LogWarning("Quest {id}: duplicate goal NameId {nameId} - goals will collide client-side (checkmarks/advance won't render correctly).", quest.QuestId, goal.NameId);
                 }
 
-                // Assign world guids to each Collect goal's pickups and index them back to (quest, goal), so
-                // interacting with a pickup credits the right goal. Goals index matches EffectiveGoals.
+                // Assign world guids to each Collect goal's pickups and index them back to (quest, goal).
                 var effective = quest.EffectiveGoals;
                 for (int gi = 0; gi < effective.Count; gi++)
                 {
