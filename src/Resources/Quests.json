@@ -17,7 +17,8 @@
     "PrerequisiteQuestId": 0,
     "NextQuestId": 1801,
     "NotificationAvailable": 2,
-    "NotificationActive": 6
+    "NotificationActive": 6,
+    "ExcludesQuestIds": [2564]
   },
   {
     "Comment": "Call the Crew",
@@ -71,7 +72,8 @@
     "PrerequisiteQuestId": 0,
     "NextQuestId": 0,
     "NotificationAvailable": 2,
-    "NotificationActive": 6
+    "NotificationActive": 6,
+    "ExcludesQuestIds": [2563]
   },
   {
     "Comment": "Nomi's Little Brother",

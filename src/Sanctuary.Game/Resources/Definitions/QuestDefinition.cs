@@ -43,6 +43,13 @@ public class QuestDefinition
     public int PrerequisiteQuestId { get; set; }    // 0 = none; must be completed before this is offered
     public int NextQuestId { get; set; }            // 0 = none; becomes offerable once this completes
 
+    // Other quest ids that block this one from being offered while active OR completed - e.g. the two
+    // race-specific "Introduce Yourself" quests (2563/2564), where a player only ever gets one. List
+    // both ways (each quest excludes the other) so the check is symmetric regardless of which was taken
+    // first. Abandoning the taken quest removes it from player.Quests entirely, so the exclusion clears
+    // and either quest becomes offerable again - no separate "reset" logic needed.
+    public List<int> ExcludesQuestIds { get; set; } = new();
+
     // World notification-badge icon ids.
     public int NotificationAvailable { get; set; } = 2; // "!" exclamation (quest available)
     public int NotificationActive { get; set; } = 6;    // "?" question mark (quest in progress / turn-in)
@@ -91,6 +98,10 @@ public class QuestDefinition
 
         if (PrerequisiteQuestId != 0)
             return playerQuests.TryGetValue(PrerequisiteQuestId, out var prerequisiteDone) && prerequisiteDone;
+
+        foreach (var excludedId in ExcludesQuestIds)
+            if (playerQuests.ContainsKey(excludedId))
+                return false; // active or completed - mutually exclusive with this one
 
         return true;
     }

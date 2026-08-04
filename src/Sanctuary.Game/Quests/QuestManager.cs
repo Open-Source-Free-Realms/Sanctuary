@@ -486,11 +486,23 @@ public sealed class QuestManager : IQuestManager
             player.SendTunneled(new AdventurersJournalQuestUpdatePacket { QuestStates = states });
     }
 
-    // Refreshes both the giver's and target's badge - most quest state changes touch both at once.
+    // Refreshes both the giver's and target's badge - most quest state changes touch both at once. Also
+    // refreshes any mutually-exclusive quest's badges (ExcludesQuestIds): accepting/completing/abandoning
+    // this quest can flip whether those are offerable too, and without this their giver's "!" would only
+    // catch up on some unrelated event (relog, walking out of and back into range).
     private void RefreshQuestNotifications(Player player, QuestDefinition quest)
     {
         RefreshQuestNotification(player, quest.GiverGuid);
         RefreshQuestNotification(player, quest.TargetGuid);
+
+        foreach (var excludedId in quest.ExcludesQuestIds)
+        {
+            if (!_resourceManager.Quests.TryGet(excludedId, out var excludedQuest))
+                continue;
+
+            RefreshQuestNotification(player, excludedQuest.GiverGuid);
+            RefreshQuestNotification(player, excludedQuest.TargetGuid);
+        }
     }
 
     public void RefreshQuestNotification(Player player, ulong npcGuid)
@@ -513,16 +525,29 @@ public sealed class QuestManager : IQuestManager
             player.SendTunneled(relevance);
         }
 
-        // No dedicated remove packet here - clear an existing badge by resending it disabled.
-        var notifications = new PlayerUpdatePacketAddNotifications();
-        notifications.Notifications.Add(new NotificationInfo
+        if (imageId == 0)
         {
-            Guid = npc.Guid,
-            IconId = imageId,
-            NameId = npc.NameId,
-            Enabled = imageId != 0
+            // No badge to show anymore (e.g. the quest was abandoned) - the retail-verified
+            // NotificationInfo format has no "disabled" flag to resend, so clearing an existing badge
+            // means the dedicated remove packet instead.
+            player.SendTunneled(new PlayerUpdatePacketRemoveNotifications { Guids = { npc.Guid } });
+            return;
+        }
+
+        player.SendTunneled(new PlayerUpdatePacketAddNotifications
+        {
+            Notifications =
+            {
+                new NotificationInfo
+                {
+                    Guid = npc.Guid,
+                    Combat = false,
+                    ImageId = imageId,
+                    NameId = npc.NameId,
+                    SubTextId = npc.SubTextNameId,
+                }
+            }
         });
-        player.SendTunneled(notifications);
     }
 
     // Sends the quest offer popup (QuestInfoPacket) for the giver NPC.

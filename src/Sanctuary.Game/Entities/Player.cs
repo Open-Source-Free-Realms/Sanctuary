@@ -363,7 +363,14 @@ public sealed class Player : ClientPcData, IEntity
             if (npc is Mount)
                 continue;
 
-            SendTunneled(npc.GetAddNpcPacket());
+            var playerUpdatePacketAddNpc = npc.GetAddNpcPacket();
+
+            // The badge ("!"/"?") is driven by the AddNpc packet's own NotificationImageSetId field, not
+            // just the separate NotificationInfo packet below - quest badges are per-player, so this has
+            // to be overridden per-recipient here rather than ever set on the shared Npc entity.
+            playerUpdatePacketAddNpc.NotificationImageSetId = GetNotificationImageId(npc);
+
+            SendTunneled(playerUpdatePacketAddNpc);
         }
 
         var playerUpdatePacketNpcRelevance = new PlayerUpdatePacketNpcRelevance();
@@ -396,8 +403,10 @@ public sealed class Player : ClientPcData, IEntity
                 playerUpdatePacketAddNotifications.Notifications.Add(new NotificationInfo
                 {
                     Guid = npc.Guid,
-                    IconId = questImageId,
-                    NameId = npc.NameId
+                    Combat = false,
+                    ImageId = questImageId,
+                    NameId = npc.NameId,
+                    SubTextId = npc.SubTextNameId,
                 });
             }
             else if (npc.Notification is not null)
@@ -438,7 +447,7 @@ public sealed class Player : ClientPcData, IEntity
             }
         }
 
-        return npc.Notification?.IconId ?? 0;
+        return npc.Notification?.ImageId ?? 0;
     }
 
     public void OnAddVisiblePlayers(params IEnumerable<Player> players)
