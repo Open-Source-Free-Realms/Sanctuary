@@ -4252,4 +4252,8 @@ function onStart(zone)
     zone.spawnNpcWithGuid(33065, 100000033065, -1933.945, -42.42532, -193.6308, 3.090386)
     zone.spawnNpcWithGuid(33066, 100000033066, -1933.945, -42.42532, -193.6308, 3.090386)
     zone.spawnNpcWithGuid(33081, 100000033081, -1933.191, -43.63443, -133.8725, 1.370251)
+
+    -- Quest Collect-goal pickups (Quests.json CollectSpawns), spawned in bulk from quest data
+    -- rather than one call per pickup.
+    zone.spawnQuestCollectibles()
 end

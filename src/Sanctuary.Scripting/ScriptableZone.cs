@@ -29,6 +29,7 @@ internal sealed class ScriptableZone(IScriptZone zone) : ILuaUserData
                 "name" => new LuaValue(_zone.Name),
                 "spawnNpc" => SpawnNpcFunction,
                 "spawnNpcWithGuid" => SpawnNpcWithGuidFunction,
+                "spawnQuestCollectibles" => SpawnQuestCollectiblesFunction,
                 _ => LuaValue.Nil
             };
 
@@ -63,5 +64,12 @@ internal sealed class ScriptableZone(IScriptZone zone) : ILuaUserData
         var success = _zone.TrySpawnNpc(npcId, npcGuid, x, y, z, heading);
 
         return new ValueTask<int>(context.Return(success));
+    });
+
+    private LuaFunction SpawnQuestCollectiblesFunction => new("spawnQuestCollectibles", (context, cancellationToken) =>
+    {
+        var count = _zone.SpawnQuestCollectibles();
+
+        return new ValueTask<int>(context.Return(count));
     });
 }

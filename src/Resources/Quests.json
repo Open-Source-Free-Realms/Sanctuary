@@ -151,39 +151,6 @@
     ]
   },
   {
-    "Comment": "Ninja: That's the Spirit",
-    "QuestId": 31442,
-    "TitleId": 78865,
-    "DescriptionId": 101371,
-    "GiverDialogueId": 78864,
-    "ObjectiveDescriptionId": 78866,
-    "SubGoalId": 90465,
-    "TargetDialogueId": 78867,
-    "IconId": 43278,
-    "GiverGuid": 100000001557,
-    "TargetGuid": 100000001557,
-    "RewardCoins": 0,
-    "RewardExperience": 88,
-    "RewardItems": [76216],
-    "PrerequisiteQuestId": 0,
-    "NextQuestId": 0,
-    "NotificationAvailable": 2,
-    "NotificationActive": 6,
-    "Goals": [
-      {
-        "NameId": 90465,
-        "DialogueId": 420695,
-        "Type": 4,
-        "EncounterId": 146
-      },
-      {
-        "NameId": 388222,
-        "DialogueId": 78867,
-        "TargetGuid": 100000001557
-      }
-    ]
-  },
-  {
     "Comment": "Brawler: Restless Rumors",
     "QuestId": 104146,
     "TitleId": 104146,
@@ -199,46 +166,13 @@
     "RewardExperience": 20,
     "RewardItems": [],
     "PrerequisiteQuestId": 0,
-    "NextQuestId": 104150,
+    "NextQuestId": 104154,
     "NotificationAvailable": 2,
     "NotificationActive": 6,
     "Goals": [
       {
         "NameId": 115619,
         "DialogueId": 104148,
-        "TargetGuid": 100000033082
-      }
-    ]
-  },
-  {
-    "Comment": "Brawler: Growler Encroachment",
-    "QuestId": 104150,
-    "TitleId": 104150,
-    "DescriptionId": 104171,
-    "GiverDialogueId": 104149,
-    "ObjectiveDescriptionId": 115484,
-    "SubGoalId": 104176,
-    "TargetDialogueId": 104152,
-    "IconId": 43278,
-    "GiverGuid": 100000033082,
-    "TargetGuid": 100000033082,
-    "RewardCoins": 15,
-    "RewardExperience": 50,
-    "RewardItems": [75858],
-    "PrerequisiteQuestId": 104146,
-    "NextQuestId": 104154,
-    "NotificationAvailable": 2,
-    "NotificationActive": 6,
-    "Goals": [
-      {
-        "NameId": 104176,
-        "DialogueId": 115352,
-        "Type": 4,
-        "EncounterId": 174
-      },
-      {
-        "NameId": 115624,
-        "DialogueId": 104152,
         "TargetGuid": 100000033082
       }
     ]
@@ -258,7 +192,7 @@
     "RewardCoins": 15,
     "RewardExperience": 63,
     "RewardItems": [75855],
-    "PrerequisiteQuestId": 104150,
+    "PrerequisiteQuestId": 104146,
     "NextQuestId": 0,
     "NotificationAvailable": 2,
     "NotificationActive": 6,
@@ -345,40 +279,6 @@
     ]
   },
   {
-    "Comment": "Bixie Skirmish",
-    "QuestId": 3012,
-    "TitleId": 441670,
-    "DescriptionId": 441671,
-    "GiverDialogueId": 441669,
-    "ObjectiveDescriptionId": 441756,
-    "SubGoalId": 441759,
-    "TargetDialogueId": 441672,
-    "IconId": 43278,
-    "GiverGuid": 100000040001,
-    "TargetGuid": 100000040001,
-    "RewardCoins": 44,
-    "RewardExperience": 150,
-    "RewardItems": [],
-    "PrerequisiteQuestId": 0,
-    "NextQuestId": 0,
-    "NotificationAvailable": 2,
-    "NotificationActive": 6,
-    "Goals": [
-      {
-        "NameId": 441759,
-        "Type": 3,
-        "KillNpcNameId": 440711,
-        "KillNpcNameIds": [442610, 442609],
-        "RequiredCount": 9
-      },
-      {
-        "NameId": 441765,
-        "DialogueId": 441672,
-        "TargetGuid": 100000040001
-      }
-    ]
-  },
-  {
     "Comment": "Welcome to Seaside",
     "QuestId": 3020,
     "TitleId": 93283,
@@ -449,39 +349,6 @@
     ]
   },
   {
-    "Comment": "Fishy Business",
-    "QuestId": 3030,
-    "TitleId": 38043,
-    "DescriptionId": 116708,
-    "GiverDialogueId": 38045,
-    "ObjectiveDescriptionId": 116708,
-    "SubGoalId": 71413,
-    "TargetDialogueId": 2145,
-    "IconId": 43278,
-    "GiverGuid": 100000003380,
-    "TargetGuid": 100000003380,
-    "RewardCoins": 7,
-    "RewardExperience": 90,
-    "RewardItems": [],
-    "PrerequisiteQuestId": 0,
-    "NextQuestId": 3031,
-    "NotificationAvailable": 2,
-    "NotificationActive": 6,
-    "Goals": [
-      {
-        "NameId": 71413,
-        "Type": 3,
-        "KillNpcNameId": 41955,
-        "RequiredCount": 1
-      },
-      {
-        "NameId": 38127,
-        "DialogueId": 2145,
-        "TargetGuid": 100000003380
-      }
-    ]
-  },
-  {
     "Comment": "Purr...fect Secret",
     "QuestId": 3031,
     "TitleId": 389700,
@@ -496,7 +363,7 @@
     "RewardCoins": 2,
     "RewardExperience": 90,
     "RewardItems": [],
-    "PrerequisiteQuestId": 3030,
+    "PrerequisiteQuestId": 0,
     "NextQuestId": 0,
     "NotificationAvailable": 2,
     "NotificationActive": 6,
@@ -767,105 +634,6 @@
         "NameId": 70291,
         "DialogueId": 70202,
         "TargetGuid": 100000003145
-      }
-    ]
-  },
-  {
-    "Comment": "Archer: Pondblaster Target Practice",
-    "QuestId": 3050,
-    "TitleId": 383045,
-    "DescriptionId": 383046,
-    "GiverDialogueId": 383044,
-    "ObjectiveDescriptionId": 383049,
-    "SubGoalId": 93145,
-    "TargetDialogueId": 383047,
-    "IconId": 43278,
-    "GiverGuid": 100000002501,
-    "TargetGuid": 100000002501,
-    "RewardCoins": 40,
-    "RewardExperience": 150,
-    "RewardItems": [],
-    "PrerequisiteQuestId": 0,
-    "NextQuestId": 0,
-    "NotificationAvailable": 2,
-    "NotificationActive": 6,
-    "Goals": [
-      {
-        "NameId": 93145,
-        "Type": 3,
-        "KillNpcNameId": 95047,
-        "RequiredCount": 12
-      },
-      {
-        "NameId": 383054,
-        "DialogueId": 383047,
-        "TargetGuid": 100000002501
-      }
-    ]
-  },
-  {
-    "Comment": "Bixies Gone Bad",
-    "QuestId": 15335,
-    "TitleId": 15335,
-    "DescriptionId": 15336,
-    "GiverDialogueId": 15888,
-    "ObjectiveDescriptionId": 15339,
-    "SubGoalId": 15883,
-    "TargetDialogueId": 15339,
-    "IconId": 43278,
-    "GiverGuid": 100000004513,
-    "TargetGuid": 100000004513,
-    "RewardCoins": 90,
-    "RewardExperience": 0,
-    "RewardItems": [],
-    "PrerequisiteQuestId": 0,
-    "NextQuestId": 0,
-    "NotificationAvailable": 2,
-    "NotificationActive": 6,
-    "Goals": [
-      {
-        "NameId": 15883,
-        "DialogueId": 417250,
-        "Type": 4,
-        "EncounterId": 37
-      },
-      {
-        "NameId": 37595,
-        "DialogueId": 15339,
-        "TargetGuid": 100000004513
-      }
-    ]
-  },
-  {
-    "Comment": "Ninja: Strike from the Shadows",
-    "QuestId": 78853,
-    "TitleId": 78853,
-    "DescriptionId": 139483,
-    "GiverDialogueId": 78852,
-    "ObjectiveDescriptionId": 139483,
-    "SubGoalId": 90440,
-    "TargetDialogueId": 139527,
-    "IconId": 43278,
-    "GiverGuid": 100000001557,
-    "TargetGuid": 100000001557,
-    "RewardCoins": 0,
-    "RewardExperience": 125,
-    "RewardItems": [75390, 76210],
-    "PrerequisiteQuestId": 0,
-    "NextQuestId": 0,
-    "NotificationAvailable": 2,
-    "NotificationActive": 6,
-    "Goals": [
-      {
-        "NameId": 90440,
-        "DialogueId": 78852,
-        "Type": 4,
-        "EncounterId": 118
-      },
-      {
-        "NameId": 388222,
-        "DialogueId": 139527,
-        "TargetGuid": 100000001557
       }
     ]
   }

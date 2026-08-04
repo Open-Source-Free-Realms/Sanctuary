@@ -9,9 +9,9 @@ using Sanctuary.Packet.Common.Attributes;
 
 namespace Sanctuary.Gateway.Handlers;
 
-// Opcode 47 (BaseUiPacket / "Task" family). Only SelectQuestPacket (sub 12, "Make Quest Active") is
-// wired; SelectedQuestLockedPacket (sub 13, fires unprompted on every login) and everything else are
-// just logged so we can see what the client sends without guessing at the format blind.
+// Opcode 47 (BaseUiPacket / "Task" family). Not fully reverse-engineered yet - only sub-opcodes
+// 12 (SelectQuestPacket) and 13 (SelectedQuestLockedPacket) have real packet classes; everything
+// else just gets logged so nothing drops invisibly.
 [PacketHandler]
 public static class BaseUiPacketHandler
 {
@@ -37,9 +37,8 @@ public static class BaseUiPacketHandler
         {
             case SelectQuestPacket.OpCode:
                 return SelectQuestPacketHandler.HandlePacket(connection, fullBuffer);
-            case 13: // SelectedQuestLockedPacket
-                _logger.LogInformation("SelectedQuestLockedPacket from {name}. Payload: {data}", connection.Player.Name, Convert.ToHexString(reader.RemainingSpan));
-                return false;
+            case SelectedQuestLockedPacket.OpCode:
+                return SelectedQuestLockedPacketHandler.HandlePacket(connection, fullBuffer);
             case 6: // SelectTaskRequest - fired by the objective-helper "SelectedTask(guid)" FR_event.
                 _logger.LogInformation("SelectTaskRequest from {name}. Payload: {data}", connection.Player.Name, Convert.ToHexString(reader.RemainingSpan));
                 return false;
