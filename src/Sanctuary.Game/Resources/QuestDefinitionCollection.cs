@@ -42,10 +42,6 @@ public class QuestDefinitionCollection
     // Every collectible pickup to spawn in the world (across all Collect goals of all quests).
     public List<CollectibleSpawn> CollectibleSpawns { get; } = new();
 
-    // NameIds counted by any Kill goal. Not consumed yet - see QuestGoalType.Kill; a future combat
-    // system would use this to know which world NPCs to spawn as attackable hostiles.
-    public HashSet<int> KillTargetNameIds { get; } = new();
-
     // Collectible guids live well above the NPC range (NpcGuidBase 100000000000 + id) to avoid collision.
     private const ulong CollectibleGuidBase = 700000000000UL;
     private ulong _nextCollectibleGuid = CollectibleGuidBase;
@@ -120,11 +116,6 @@ public class QuestDefinitionCollection
                 for (int gi = 0; gi < effective.Count; gi++)
                 {
                     var goal = effective[gi];
-
-                    // Kill goals: remember every counted NPC NameId (see KillTargetNameIds).
-                    if (goal.Type == QuestGoalType.Kill)
-                        foreach (var killNameId in goal.AllKillNameIds())
-                            KillTargetNameIds.Add(killNameId);
 
                     if (goal.Type != QuestGoalType.Collect)
                         continue;

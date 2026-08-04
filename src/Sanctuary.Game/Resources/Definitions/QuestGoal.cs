@@ -2,9 +2,7 @@ using System.Collections.Generic;
 
 namespace Sanctuary.Game.Resources.Definitions;
 
-// How a QuestGoal is completed. TalkToNpc, Collect and ReachLocation are wired. Kill and
-// EncounterComplete have QuestManager methods ready (OnNpcKilled / OnEncounterComplete) but nothing
-// calls them yet - this branch has no combat/battle-instance system to hook them into.
+// How a QuestGoal is completed.
 public enum QuestGoalType
 {
     // Completes when the player interacts with TargetGuid.
@@ -16,14 +14,6 @@ public enum QuestGoalType
 
     // Completes when the player has gathered RequiredCount pickups.
     Collect = 2,
-
-    // Completes when the player has defeated RequiredCount NPCs whose NameId matches
-    // KillNpcNameId. Not wired yet - see the type-level note above.
-    Kill = 3,
-
-    // Completes when the player wins the battle-instance encounter whose activity id matches
-    // EncounterId. Not wired yet - see the type-level note above.
-    EncounterComplete = 4,
 }
 
 // One goal (checklist row) within a quest. Each goal becomes a client objective row
@@ -52,8 +42,8 @@ public class QuestGoal
     // TargetGuid (the turn-in NPC).
     public ulong TargetGuid { get; set; }
 
-    // For count goals (Collect/Kill): how many are required. 0 falls back to CollectSpawns.Count
-    // (collect them all). The tracker renders "current/required" as the player collects.
+    // For Collect: how many pickups are required. 0 falls back to CollectSpawns.Count (collect them
+    // all). The tracker renders "current/required" as the player collects.
     public int RequiredCount { get; set; }
 
     // For Collect: the model (Models.txt id) each collectible world object uses - e.g. 93 =
@@ -62,28 +52,6 @@ public class QuestGoal
 
     // For Collect: the collectible's hover/name text id (Global.Text).
     public int CollectNameId { get; set; }
-
-    // For Kill: the NameId of the NPCs this goal counts (e.g. 76190 "Tormented Spirit").
-    public int KillNpcNameId { get; set; }
-
-    // For Kill: OPTIONAL additional NameIds that also credit this goal — for hunts where several
-    // NPC variants share a camp (Bixie Skirmish counts Soldiers, Guardians, and Magi alike). Combined
-    // with KillNpcNameId.
-    public List<int> KillNpcNameIds { get; set; } = new();
-
-    // All NameIds this Kill goal credits (the single id + the list, whichever are set).
-    public IEnumerable<int> AllKillNameIds()
-    {
-        if (KillNpcNameId != 0)
-            yield return KillNpcNameId;
-        foreach (var id in KillNpcNameIds)
-            if (id != 0 && id != KillNpcNameId)
-                yield return id;
-    }
-
-    // For EncounterComplete: the activity/encounter id (e.g. 174 = Frostfang Growler arena) that
-    // completes this goal when the player wins it.
-    public int EncounterId { get; set; }
 
     // For Collect: world positions ([x, y, z] each) where the collectible
     // pickups spawn. Interacting with one credits the goal; at RequiredCount the goal ticks

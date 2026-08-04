@@ -2,7 +2,7 @@
 
 Quests are entirely data-driven: everything from goals to rewards to NPC gating lives in
 [`Quests.json`](Quests.json). Adding a quest means adding a JSON entry - no C# code changes
-required, unless the goal type you need isn't wired yet (see [Goal types](#goal-types) below).
+required.
 
 `Quests.json` is loaded once at startup by `QuestDefinitionCollection.Load` (called from
 `ResourceManager`) into `src/Sanctuary.Game/Resources/Definitions/QuestDefinition.cs` /
@@ -76,16 +76,14 @@ done. Each goal becomes its own tracker row.
 
 ## Goal types
 
-| Type | Value | Completes when... | Wired? |
-|---|---|---|---|
-| `TalkToNpc` | 0 | player interacts with `TargetGuid` | Yes |
-| `ReachLocation` | 1 | player gets within `ReachRadius` (default 12) of `ReachPosition`, checked on every position update (2D, X/Z only) | Yes |
-| `Collect` | 2 | player gathers `RequiredCount` pickups from `CollectSpawns` | Yes |
-| `Kill` | 3 | player defeats `RequiredCount` NPCs matching `KillNpcNameId`/`KillNpcNameIds` | **No** - `QuestManager.OnNpcKilled` exists but nothing calls it (no combat system on this branch) |
-| `EncounterComplete` | 4 | player wins the battle instance matching `EncounterId` | **No** - same reason as `Kill` |
+| Type | Value | Completes when... |
+|---|---|---|
+| `TalkToNpc` | 0 | player interacts with `TargetGuid` |
+| `ReachLocation` | 1 | player gets within `ReachRadius` (default 12) of `ReachPosition`, checked on every position update (2D, X/Z only) |
+| `Collect` | 2 | player gathers `RequiredCount` pickups from `CollectSpawns` |
 
-Don't ship a quest using `Kill` or `EncounterComplete` goals right now - a player who accepts one
-has no way to ever complete it.
+That's the full set - this branch has no combat system, so there's no Kill/hunt or
+battle-instance-encounter goal type. Don't add one without also building what would drive it.
 
 ### ReachLocation example
 
@@ -166,6 +164,5 @@ adding quests to `Quests.json` is purely additive and needs no EF Core migration
    mutually exclusive with another quest.
 5. If it has a `Collect` goal, make sure the zone's Lua script calls
    `zone.spawnQuestCollectibles()` from `onStart`.
-6. Avoid `Kill`/`EncounterComplete` goals until a combat system exists to drive them.
-7. Build, spawn any test NPCs with `/npc spawn`, and walk through accept -> goals -> turn-in
+6. Build, spawn any test NPCs with `/npc spawn`, and walk through accept -> goals -> turn-in
    in-client.

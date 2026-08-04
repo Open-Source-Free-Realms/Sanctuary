@@ -20,15 +20,6 @@ public interface IQuestManager
     // Collect goal's count and, at the required count, tick the goal off and advance to the return step.
     void OnCollectInteract(Player player, Npc npc);
 
-    // Player killed an NPC: credit the active Kill goal of any in-progress quest whose
-    // KillNpcNameId matches the NPC's NameId.
-    void OnNpcKilled(Player player, Npc npc);
-
-    // Player won a battle-instance encounter: complete the active EncounterComplete goal of any
-    // in-progress quest whose EncounterId matches.
-    // This is what makes a dungeon count as a quest objective.
-    void OnEncounterComplete(Player player, int encounterId);
-
     // Player position changed: complete the active ReachLocation goal of any in-progress quest
     // whose ReachPosition is within ReachRadius (2D). Called from the position-update handler.
     void OnPlayerMoved(Player player);

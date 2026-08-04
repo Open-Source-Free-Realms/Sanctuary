@@ -37,7 +37,7 @@ public sealed class QuestManager : IQuestManager
         => _resourceManager.Quests.ByGiver.ContainsKey(npcGuid) || _resourceManager.Quests.ByTarget.ContainsKey(npcGuid);
 
     // Every in-progress quest's current goal, paired with its quest and index. Shared by the goal-event
-    // handlers below (interact/kill/move/encounter) so each only has to filter by QuestGoalType.
+    // handlers below (interact/collect/move) so each only has to filter by QuestGoalType.
     private IEnumerable<(int QuestId, QuestDefinition Quest, int GoalIndex, QuestGoal Goal)> ActiveGoals(Player player)
     {
         foreach (var (questId, completed) in player.Quests)
@@ -64,11 +64,10 @@ public sealed class QuestManager : IQuestManager
         // check each active quest's current goal rather than only the quest's turn-in NPC.
         foreach (var (_, activeQuest, done, goal) in ActiveGoals(player))
         {
-            // Collect/Kill/EncounterComplete goals advance only by their own events (OnCollectInteract /
-            // OnNpcKilled / OnEncounterComplete). Since they have no NPC target, GoalTargetGuid would fall
-            // back to the quest's turn-in NPC - talking to it must NOT tick the goal off (that would bypass
-            // the objective), so skip them here.
-            if (goal.Type is QuestGoalType.Collect or QuestGoalType.Kill or QuestGoalType.EncounterComplete)
+            // A Collect goal advances only via OnCollectInteract. Since it has no NPC target,
+            // GoalTargetGuid would fall back to the quest's turn-in NPC - talking to it must NOT tick
+            // the goal off (that would bypass the objective), so skip it here.
+            if (goal.Type == QuestGoalType.Collect)
                 continue;
 
             if (GoalTargetGuid(activeQuest, done) == npc.Guid)
@@ -168,53 +167,6 @@ public sealed class QuestManager : IQuestManager
         }
     }
 
-    // An NPC died at the player's hands. Credits the active Kill goal (Type=3) of any in-progress quest
-    // whose KillNpcNameId matches the victim's NameId, animating the tracker's
-    // "current/required" counter and completing the goal at RequiredCount.
-    // Mirrors OnCollectInteract (same per-quest count storage + persistence).
-    public void OnNpcKilled(Player player, Npc npc)
-    {
-        if (npc.NameId == 0)
-            return;
-
-        foreach (var (questId, quest, done, goal) in ActiveGoals(player))
-        {
-            if (goal.Type != QuestGoalType.Kill || !goal.AllKillNameIds().Contains(npc.NameId))
-                continue;
-
-            int required = goal.RequiredCount > 0 ? goal.RequiredCount : 1;
-            int count = (player.QuestCollectProgress.TryGetValue(questId, out var c) ? c : 0) + 1;
-
-            if (count >= required)
-            {
-                player.QuestCollectProgress.Remove(questId);
-                // Final kill -> tick the goal's checkmark and advance to the return step. Same completion
-                // path as talk-to-NPC and collect goals.
-                CompleteGoal(player, quest, done);
-            }
-            else
-            {
-                player.QuestCollectProgress[questId] = count;
-                player.SendTunneled(new QuestObjectiveUpdatePacket
-                {
-                    QuestId = questId,
-                    ObjectiveId = goal.NameId,
-                    CurrentCount = count,
-                    CompletedPercentage = (float)count / required
-                });
-
-                // Persist so a relog mid-hunt resumes at this count.
-                PersistCollectCount(player, questId, count);
-
-                // Re-aim the arrow/breadcrumb at the NEAREST remaining kill target - without this it
-                // stays pinned on the NPC that just died.
-                RefreshObjectiveTarget(player);
-            }
-
-            return; // one kill credits one goal
-        }
-    }
-
     // The player moved. Completes the active ReachLocation goal (Type=1) of any in-progress quest
     // when the player is within the goal's radius (2D X/Z). Runs on every client position update
     // (~10-20 Hz), so it early-outs everything that isn't an active reach goal.
@@ -232,21 +184,6 @@ public sealed class QuestManager : IQuestManager
                 continue;
 
             CompleteGoal(player, quest, done);
-        }
-    }
-
-    // The player won a battle-instance encounter. Completes the active EncounterComplete goal (Type=4)
-    // of any in-progress quest whose EncounterId matches - i.e. the dungeon was
-    // this quest's objective. Advances to the next goal (usually "return to the giver").
-    public void OnEncounterComplete(Player player, int encounterId)
-    {
-        foreach (var (questId, quest, done, goal) in ActiveGoals(player))
-        {
-            if (goal.Type != QuestGoalType.EncounterComplete || goal.EncounterId != encounterId)
-                continue;
-
-            CompleteGoal(player, quest, done);
-            return; // one win credits one goal
         }
     }
 
@@ -640,11 +577,9 @@ public sealed class QuestManager : IQuestManager
         SendObjectiveActivated(player, quest.QuestId, goals[done]);
         SendObjectiveForGoal(player, quest, done);
 
-        // Mid-quest reply bubble - only TalkToNpc goals get one, since they complete AT an NPC. Kill/
-        // Collect/EncounterComplete fire from field events with no NPC to camera-focus, and their
-        // DialogueId is just the giver's mid-goal reminder line - popping it at the trigger moment reads
-        // wrong (at an arena win, Gerold's "still hear those Growlers howling" line looked like another
-        // wave incoming).
+        // Mid-quest reply bubble - only TalkToNpc goals get one, since they complete AT an NPC. Other
+        // goal types fire from field events with no NPC to camera-focus, and their DialogueId is just
+        // the giver's mid-goal reminder line - popping it at the trigger moment would read wrong.
         var completedGoal = goals[goalIndex];
         if (completedGoal.DialogueId != 0 && completedGoal.Type == QuestGoalType.TalkToNpc)
         {
@@ -785,9 +720,9 @@ public sealed class QuestManager : IQuestManager
             var activeGoal = goals[done];
             SendObjectiveActivated(player, quest.QuestId, activeGoal);
 
-            // If it's a count goal (Collect/Kill) with restored progress (relog mid-count), show the current
-            // count so the tracker reads e.g. 3/8 instead of 0/8. Activated only sets the "required" half.
-            if (activeGoal.Type is QuestGoalType.Collect or QuestGoalType.Kill
+            // If it's a Collect goal with restored progress (relog mid-count), show the current count
+            // so the tracker reads e.g. 3/8 instead of 0/8. Activated only sets the "required" half.
+            if (activeGoal.Type == QuestGoalType.Collect
                 && player.QuestCollectProgress.TryGetValue(quest.QuestId, out var collected) && collected > 0)
             {
                 int req = activeGoal.RequiredCount > 0 ? activeGoal.RequiredCount : activeGoal.CollectSpawns.Count;
@@ -827,27 +762,14 @@ public sealed class QuestManager : IQuestManager
     }
 
     // Player-aware objective target: the NPC the tracker arrow / "Take Me There" breadcrumb should point
-    // at for the active goal. EncounterComplete has no target here - it needs a combat/dungeon system to
-    // resolve its world entrance, which this codebase doesn't have yet (see QuestGoalType.EncounterComplete).
+    // at for the active goal.
     private ulong ResolveGoalTargetGuid(Player player, QuestDefinition quest, int goalIndex)
     {
         var goals = quest.EffectiveGoals;
 
-        // A Kill goal has no fixed NPC: fall back to the NEAREST still-living kill target. (The static
-        // fallback resolved to quest.TargetGuid = the GIVER, which aimed the player back at the quest
-        // NPC with no clue where the enemies were.) The visible indicator for Kill goals is the AREA
-        // pin built by SendObjectiveForGoal; this guid path serves the walk-to/pathfinding consumers.
-        if (goalIndex >= 0 && goalIndex < goals.Count
-            && goals[goalIndex].Type == QuestGoalType.Kill)
-        {
-            var nearest = NearestLivingKillTarget(player, goals[goalIndex]);
-            if (nearest is not null)
-                return nearest.Guid;
-        }
-
-        // A Collect goal has no fixed NPC either: point at the NEAREST pickup this player hasn't taken
-        // yet, so the marker/breadcrumb leads to the tools. Any pickup credits the goal (it's a counter),
-        // so this is guidance only - the player can grab whichever they find first.
+        // A Collect goal has no fixed NPC: point at the NEAREST pickup this player hasn't taken yet, so
+        // the marker/breadcrumb leads to the tools. Any pickup credits the goal (it's a counter), so
+        // this is guidance only - the player can grab whichever they find first.
         if (goalIndex >= 0 && goalIndex < goals.Count
             && goals[goalIndex].Type == QuestGoalType.Collect)
         {
@@ -885,66 +807,8 @@ public sealed class QuestManager : IQuestManager
         return nearest;
     }
 
-    // Nearest still-living NPC that credits the given Kill goal, or null when none remain in this zone.
-    private static Npc? NearestLivingKillTarget(Player player, QuestGoal goal)
-    {
-        var ids = goal.AllKillNameIds().ToHashSet();
-        if (ids.Count == 0)
-            return null;
-
-        Npc? nearest = null;
-        var best = float.MaxValue;
-        foreach (var npc in player.Zone.Npcs)
-        {
-            if (!ids.Contains(npc.NameId))
-                continue;
-            var dx = npc.Position.X - player.Position.X;
-            var dz = npc.Position.Z - player.Position.Z;
-            var d2 = dx * dx + dz * dz;
-            if (d2 < best)
-            {
-                best = d2;
-                nearest = npc;
-            }
-        }
-        return nearest;
-    }
-
-    // The hunt AREA for a Kill goal = centroid of its living targets. Label = the primary kill NPC's
-    // NameId so the indicator reads e.g. "Bixie Soldier".
-    private static bool TryGetKillArea(Player player, QuestGoal goal, out Vector4 center, out int labelNameId)
-    {
-        center = default;
-        labelNameId = 0;
-        var ids = goal.AllKillNameIds().ToHashSet();
-        if (ids.Count == 0)
-            return false;
-
-        float sx = 0, sy = 0, sz = 0;
-        int n = 0;
-        foreach (var npc in player.Zone.Npcs)
-        {
-            if (!ids.Contains(npc.NameId))
-                continue;
-            sx += npc.Position.X;
-            sy += npc.Position.Y;
-            sz += npc.Position.Z;
-            n++;
-            if (labelNameId == 0)
-                labelNameId = npc.NameId;
-        }
-        if (n == 0)
-            return false;
-
-        center = new Vector4(sx / n, sy / n, sz / n, 1f);
-        if (goal.KillNpcNameId != 0)
-            labelNameId = goal.KillNpcNameId;
-        return true;
-    }
-
-    // Goal-aware objective indicator: a Kill goal marks the hunt AREA (centroid of its living targets,
-    // Guid 0 - the retail "go to this area" pin, so the marker doesn't single out one highlighted
-    // enemy); every other goal type points at its target NPC.
+    // Goal-aware objective indicator: ReachLocation pins its destination; every other goal type points
+    // at its target NPC.
     private void SendObjectiveForGoal(Player player, QuestDefinition quest, int goalIndex)
     {
         var goals = quest.EffectiveGoals;
@@ -972,30 +836,6 @@ public sealed class QuestManager : IQuestManager
                 PositionX = reachPos.X,
                 PositionY = reachPos.Y,
                 PositionZ = reachPos.Z,
-                PositionW = 1f
-            });
-            return;
-        }
-
-        if (goalIndex >= 0 && goalIndex < goals.Count
-            && goals[goalIndex].Type == QuestGoalType.Kill
-            && TryGetKillArea(player, goals[goalIndex], out var center, out var labelNameId))
-        {
-            var zoneAreaId = player.Zone is StartingZone startingZone
-                ? startingZone.GetZoneAreaId(center)
-                : player.Zone.Id;
-
-            player.SendTunneled(new ObjectiveTargetUpdatePacket
-            {
-                Active = true,
-                LocationX = center.X,
-                LocationZ = center.Z,
-                ZoneId = zoneAreaId,
-                Guid = 0, // no NPC: a location pin, not an entity arrow
-                NameId = labelNameId,
-                PositionX = center.X,
-                PositionY = center.Y,
-                PositionZ = center.Z,
                 PositionW = 1f
             });
             return;
@@ -1064,15 +904,6 @@ public sealed class QuestManager : IQuestManager
                 return true;
             }
 
-            // Kill goal: walk to the CLOSEST living enemy (the area centroid can be empty air in the
-            // middle of a camp).
-            if (onGoal && goals[goalIndex].Type == QuestGoalType.Kill
-                && NearestLivingKillTarget(player, goals[goalIndex]) is { } enemy)
-            {
-                targetPosition = new Vector3(enemy.Position.X, enemy.Position.Y, enemy.Position.Z);
-                return true;
-            }
-
             var guid = ResolveGoalTargetGuid(player, quest, goalIndex);
             if (guid != 0 && player.Zone.TryGetNpc(guid, out var target))
             {
@@ -1112,9 +943,8 @@ public sealed class QuestManager : IQuestManager
         return false;
     }
 
-    // The active goal of questId when it can be tracked from the player's current zone: a Kill goal
-    // needs at least one living counted enemy here; every other goal type needs its resolved target
-    // NPC spawned here.
+    // The active goal of questId when it can be tracked from the player's current zone: every goal type
+    // needs its resolved target NPC spawned here (Reach goals are always trackable - see below).
     private bool TryGetTrackableGoal(Player player, int questId, out QuestDefinition quest, out int goalIndex)
     {
         quest = null!;
@@ -1124,15 +954,6 @@ public sealed class QuestManager : IQuestManager
 
         int done = player.QuestGoalProgress.TryGetValue(questId, out var progress) ? progress : 0;
         var goals = q.EffectiveGoals;
-
-        if (done >= 0 && done < goals.Count && goals[done].Type == QuestGoalType.Kill)
-        {
-            if (NearestLivingKillTarget(player, goals[done]) is null)
-                return false;
-            quest = q;
-            goalIndex = done;
-            return true;
-        }
 
         // Reach goals are always trackable — the destination is a fixed world position.
         if (done >= 0 && done < goals.Count
