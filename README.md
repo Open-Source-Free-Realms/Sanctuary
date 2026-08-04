@@ -180,10 +180,9 @@ _For more examples, please refer to the [Documentation](https://github.com/Open-
 <!-- ROADMAP -->
 ## Roadmap
 
-- [ ] Feature 1
-- [ ] Feature 2
-- [ ] Feature 3
-    - [ ] Nested Feature
+- [x] Quest system (accept/track/turn-in, TalkToNpc/ReachLocation/Collect goals, mutual exclusion)
+- [x] "Take Me There" pathfinding (auto-walk to the tracked objective)
+- [ ] Combat
 
 See the [open issues](https://github.com/Open-Source-Free-Realms/Sanctuary/issues) for a full list of proposed features (and known issues).
 

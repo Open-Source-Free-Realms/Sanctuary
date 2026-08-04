@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Pathfinding;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Scripting;
 using Sanctuary.UdpLibrary;
@@ -24,6 +25,9 @@ public interface IZone : IScriptZone
 
     IEnumerable<Npc> Npcs { get; }
     IEnumerable<Player> Players { get; }
+
+    float TickDeltaSeconds { get; }
+    Pathfinder<MapNode>? Pathfinder { get; }
 
     bool TryGetNpc(ulong guid, [MaybeNullWhen(false)] out Npc npc);
     bool TryGetPlayer(ulong guid, [MaybeNullWhen(false)] out Player player);

@@ -43,11 +43,9 @@ public class QuestDefinition
     public int PrerequisiteQuestId { get; set; }    // 0 = none; must be completed before this is offered
     public int NextQuestId { get; set; }            // 0 = none; becomes offerable once this completes
 
-    // Other quest ids that block this one from being offered while active OR completed - e.g. the two
-    // race-specific "Introduce Yourself" quests (2563/2564), where a player only ever gets one. List
-    // both ways (each quest excludes the other) so the check is symmetric regardless of which was taken
-    // first. Abandoning the taken quest removes it from player.Quests entirely, so the exclusion clears
-    // and either quest becomes offerable again - no separate "reset" logic needed.
+    // Other quest ids that block this one while active or completed - e.g. the two race-specific
+    // "Introduce Yourself" quests, where a player only ever gets one. List both ways. Abandoning
+    // clears player.Quests, so the exclusion lifts on its own - no separate reset needed.
     public List<int> ExcludesQuestIds { get; set; } = new();
 
     // World notification-badge icon ids.

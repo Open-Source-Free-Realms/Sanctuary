@@ -486,10 +486,9 @@ public sealed class QuestManager : IQuestManager
             player.SendTunneled(new AdventurersJournalQuestUpdatePacket { QuestStates = states });
     }
 
-    // Refreshes both the giver's and target's badge - most quest state changes touch both at once. Also
-    // refreshes any mutually-exclusive quest's badges (ExcludesQuestIds): accepting/completing/abandoning
-    // this quest can flip whether those are offerable too, and without this their giver's "!" would only
-    // catch up on some unrelated event (relog, walking out of and back into range).
+    // Refreshes both the giver's and target's badge, plus any mutually-exclusive quest's badges
+    // (ExcludesQuestIds) - accepting/completing/abandoning this quest can flip whether those are
+    // offerable too, and their badge wouldn't otherwise catch up until some unrelated event.
     private void RefreshQuestNotifications(Player player, QuestDefinition quest)
     {
         RefreshQuestNotification(player, quest.GiverGuid);
@@ -512,6 +511,14 @@ public sealed class QuestManager : IQuestManager
 
         var imageId = player.GetNotificationImageId(npc);
 
+        // A plain AddNpc resend does NOT live-update an already-spawned NPC's world badge (confirmed
+        // live) - remove the NPC and re-add it with the updated NotificationImageSetId instead.
+        player.SendTunneled(new PlayerUpdatePacketRemovePlayer { Guid = npc.Guid });
+
+        var addNpcPacket = npc.GetAddNpcPacket();
+        addNpcPacket.NotificationImageSetId = imageId;
+        player.SendTunneled(addNpcPacket);
+
         if (npc.CursorId != 0)
         {
             var relevance = new PlayerUpdatePacketNpcRelevance();
@@ -527,9 +534,6 @@ public sealed class QuestManager : IQuestManager
 
         if (imageId == 0)
         {
-            // No badge to show anymore (e.g. the quest was abandoned) - the retail-verified
-            // NotificationInfo format has no "disabled" flag to resend, so clearing an existing badge
-            // means the dedicated remove packet instead.
             player.SendTunneled(new PlayerUpdatePacketRemoveNotifications { Guids = { npc.Guid } });
             return;
         }

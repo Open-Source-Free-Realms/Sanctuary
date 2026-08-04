@@ -51,6 +51,7 @@ public class ResourceManager : IResourceManager
     public static readonly string NpcsFile = Path.Combine(BaseDirectory, "Npcs.json");
     public static readonly string NameFilterFile = Path.Combine(BaseDirectory, "NameFilter.txt");
     public static readonly string QuestsFile = Path.Combine(BaseDirectory, "Quests.json");
+    public static readonly string MapsDirectory = Path.Combine(BaseDirectory, "Maps");
 
     public IdToStringLookup HairMappings { get; }
     public IdToStringLookup HeadMappings { get; }
@@ -87,6 +88,7 @@ public class ResourceManager : IResourceManager
     public NpcDefinitionCollection Npcs { get; }
     public NameFilterCollection NameFilter { get; }
     public QuestDefinitionCollection Quests { get; }
+    public MapGraphCollection Maps { get; }
 
     public ResourceManager(ILogger<ResourceManager> logger)
     {
@@ -134,6 +136,7 @@ public class ResourceManager : IResourceManager
         Npcs = new(_logger);
         NameFilter = new(_logger);
         Quests = new(_logger);
+        Maps = new(_logger);
     }
 
     public bool Load()
@@ -271,6 +274,9 @@ public class ResourceManager : IResourceManager
             return false;
 
         if (!Quests.Load(QuestsFile))
+            return false;
+
+        if (!Maps.Load(MapsDirectory))
             return false;
 
         return true;
