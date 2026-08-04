@@ -50,25 +50,8 @@ public class QuestObjectiveAddedPacket : BaseQuestPacket, ISerializablePacket
         writer.Write(ObjectiveField2); // int
         writer.Write(false); // bool
 
-        // RewardBundleBase (FUN_008e7930) - 18 fixed fields, 69 bytes (mirrors QuestAddPacket)
-        writer.Write(false); // +0x74 bool
-        writer.Write(0); // +0x50 int
-        writer.Write(0); // +0x48 int
-        writer.Write(0); // +0x4C int
-        writer.Write(0); // +0x54 int
-        writer.Write(0); // +0x6C int
-        writer.Write(0); // +0x70 int
-        writer.Write(0f); // +0x78 float
-        writer.Write(0); // +0x5C int
-        writer.Write(0); // +0x60 int
-        writer.Write(0); // guid pair 1, low
-        writer.Write(0); // guid pair 1, high
-        writer.Write(0); // guid pair 2, low
-        writer.Write(0); // guid pair 2, high
-        writer.Write(0); // +0x64 int
-        writer.Write(0); // +0x68 int
-        writer.Write(0); // discarded temp int
-        writer.Write(0); // +0x58 int (final RewardBundle field)
+        // RewardBundleBase (FUN_008e7930) - empty (mirrors QuestAddPacket).
+        RewardBundleSerializer.Write(writer, 0, 0);
 
         // trailing objective fields
         writer.Write(0); // int

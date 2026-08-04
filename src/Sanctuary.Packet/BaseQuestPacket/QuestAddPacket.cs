@@ -56,25 +56,9 @@ public class QuestAddPacket : BaseQuestPacket, ISerializablePacket
         writer.Write(false); // GAP_3_ClientQuestData[0] bool
         writer.Write(CompletedPercentage);
 
-        // RewardBundleBase (RewardBundleBase::sub_8E7930's read order) - 18 fixed fields, no lists
-        writer.Write(false); // +0x74 bool
-        writer.Write(0); // +0x50 int
-        writer.Write(0); // +0x48 int
-        writer.Write(0); // +0x4C int
-        writer.Write(0); // +0x54 int
-        writer.Write(0); // +0x6C int
-        writer.Write(0); // +0x70 int
-        writer.Write(0f); // +0x78 float
-        writer.Write(0); // +0x5C int
-        writer.Write(0); // +0x60 int
-        writer.Write(0); // guid pair 1, low
-        writer.Write(0); // guid pair 1, high
-        writer.Write(0); // guid pair 2, low
-        writer.Write(0); // guid pair 2, high
-        writer.Write(0); // +0x64 int (via FUN_008c9d20)
-        writer.Write(0); // +0x68 int (via FUN_008c9d20)
-        writer.Write(0); // discarded temp int (via FUN_008c9d20) - still consumed on the wire
-        writer.Write(0); // +0x58 int (final RewardBundleBase field)
+        // RewardBundleBase (RewardBundleBase::sub_8E7930's read order) - empty; the real reward bundle
+        // is sent separately via QuestInfoPacket (offer) / QuestEndPacket (turn-in).
+        RewardBundleSerializer.Write(writer, 0, 0);
 
         // Objectives list (sub_92B050): count, then per entry [int leadingId + sub_8FD770 103-byte body].
         if (IncludeObjective)
@@ -89,11 +73,8 @@ public class QuestAddPacket : BaseQuestPacket, ISerializablePacket
             writer.Write(ObjectiveField2);        // int2
             writer.Write(false);                  // bool
 
-            // RewardBundleBase (sub_8E7930) - 18 fixed fields, 69 bytes.
-            writer.Write(false); writer.Write(0); writer.Write(0); writer.Write(0); writer.Write(0);
-            writer.Write(0); writer.Write(0); writer.Write(0f); writer.Write(0); writer.Write(0);
-            writer.Write(0); writer.Write(0); writer.Write(0); writer.Write(0); writer.Write(0);
-            writer.Write(0); writer.Write(0); writer.Write(0);
+            // RewardBundleBase (sub_8E7930) - empty, same as above.
+            RewardBundleSerializer.Write(writer, 0, 0);
 
             // trailing objective fields: int, int, int, int, bool, int
             writer.Write(0); writer.Write(0); writer.Write(0); writer.Write(0); writer.Write(false); writer.Write(0);
