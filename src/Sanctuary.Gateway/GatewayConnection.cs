@@ -261,6 +261,8 @@ public class GatewayConnection : UdpConnection
                 Player.QuestGoalProgress[dbQuest.QuestId] = dbQuest.GoalProgress;
             if (dbQuest.GoalCount > 0)
                 Player.QuestCollectProgress[dbQuest.QuestId] = dbQuest.GoalCount;
+            if (dbQuest.IsActive)
+                Player.ActiveQuestId = dbQuest.QuestId;
         }
 
         Player.Birthday = dbCharacter.Created;

@@ -204,6 +204,17 @@ public sealed class QuestManager : IQuestManager
     private void PersistCollectCount(Player player, int questId, int count)
         => UpdateCharacterQuest(player, questId, q => q.GoalCount = count);
 
+    // Persists which quest is tracked (DbCharacterQuest.IsActive) so it survives a relog - at most one
+    // row per character is true. Without this, ActiveQuestId silently reset to 0 on every reconnect and
+    // the tracker fell back to whichever quest happened to be first with 2+ quests active.
+    private void PersistActiveQuest(Player player, int questId)
+    {
+        using var db = _dbContextFactory.CreateDbContext();
+        foreach (var dbQuest in db.CharacterQuests.Where(q => q.CharacterId == player.CharacterId))
+            dbQuest.IsActive = dbQuest.QuestId == questId;
+        db.SaveChanges();
+    }
+
     // Re-sends this quest's collectible pickups to the player so any hidden in a prior attempt reappear and
     // are clickable again: AddNpc (re-adds the model; a no-op for one still showing) PLUS an NpcRelevance
     // entry - that relevance packet, not just AddNpc's IsInteractable flag, is what registers a pickup as
@@ -255,11 +266,17 @@ public sealed class QuestManager : IQuestManager
 
         using (var db = _dbContextFactory.CreateDbContext())
         {
+            // A freshly accepted quest becomes the tracked one - clear IsActive off every other quest
+            // this character has so at most one row stays true.
+            foreach (var existing in db.CharacterQuests.Where(q => q.CharacterId == player.CharacterId))
+                existing.IsActive = false;
+
             db.CharacterQuests.Add(new DbCharacterQuest
             {
                 QuestId = questId,
                 CharacterId = player.CharacterId,
-                Completed = false
+                Completed = false,
+                IsActive = true
             });
             db.SaveChanges();
         }
@@ -366,6 +383,7 @@ public sealed class QuestManager : IQuestManager
         if (player.Quests.TryGetValue(questId, out var completed) && !completed)
         {
             player.ActiveQuestId = questId; // this is now the tracked quest for the arrow + "Take Me There"
+            PersistActiveQuest(player, questId);
 
             int done = player.QuestGoalProgress.TryGetValue(questId, out var progress) ? progress : 0;
             var goals = quest.EffectiveGoals;

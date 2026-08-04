@@ -17,4 +17,9 @@ public class DbCharacterQuest
     // 0..RequiredCount). Lets a partially-collected goal resume after relog instead of restarting at 0.
     // 0 for non-collect goals.
     public int GoalCount { get; set; }
+
+    // Whether this is the character's tracked quest (the arrow/breadcrumb + "Take Me There" target). At
+    // most one row per character is true. Without this, ActiveQuestId reset to 0 on every relog, so with
+    // 2+ quests active the tracker silently fell back to whichever quest happened to be first.
+    public bool IsActive { get; set; }
 }
