@@ -2,13 +2,16 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
+using System;
 
 using Sanctuary.Game.Pathfinding;
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
+using Sanctuary.Game.Pathfinding;
 
 namespace Sanctuary.Game.Entities;
+
 
 public class Npc : IEntity
 {
@@ -130,6 +133,7 @@ public class Npc : IEntity
 
     public virtual void UpdateEverySecond()
     {
+
     }
 
     public void UpdatePosition(Vector4 position, Quaternion rotation, bool updateZoneArea = true)

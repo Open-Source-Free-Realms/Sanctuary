@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 
 namespace Sanctuary.Game.Pathfinding;
+
 
 public static class PathFollower
 {
@@ -18,7 +20,7 @@ public static class PathFollower
 
 
         // This logic here is pretty simple: if we're within a tolerance of the waypoint,
-        // 'path.Advance' will pop the waypoint.
+        // 'path.Advance' will pop the waypoint. 
         if (distance <= tolerance)
         {
             path.Advance();
@@ -34,7 +36,7 @@ public static class PathFollower
 
         // NOTE: FreeRealms conventions is y-up. Movement is typically mostly in the xy-plane
         // in my field, so just adding this here in case anyone else comes across a potentially
-        // "unconventional" coordinate frame definition.
+        // "unconventional" coordinate frame definition. 
         var newRotation = Quaternion.CreateFromYawPitchRoll(MathF.Atan2(direction.X, direction.Z), 0f, 0f);
 
         return new AdvanceResult(true, newPosition, newRotation, false);

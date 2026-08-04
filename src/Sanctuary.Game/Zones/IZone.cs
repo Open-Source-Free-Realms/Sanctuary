@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
@@ -27,7 +27,6 @@ public interface IZone : IScriptZone
     IEnumerable<Player> Players { get; }
 
     float TickDeltaSeconds { get; }
-    Pathfinder<MapNode>? Pathfinder { get; }
 
     bool TryGetNpc(ulong guid, [MaybeNullWhen(false)] out Npc npc);
     bool TryGetPlayer(ulong guid, [MaybeNullWhen(false)] out Player player);
@@ -63,4 +62,6 @@ public interface IZone : IScriptZone
     void UpdateEntityZoneTile(IEntity entity, ZoneTile from, ZoneTile to);
 
     #endregion
+
+    Pathfinder<MapNode>? Pathfinder { get; }
 }

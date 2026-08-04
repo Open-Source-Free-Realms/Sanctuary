@@ -4,6 +4,7 @@ using System.Numerics;
 
 namespace Sanctuary.Game.Pathfinding;
 
+
 public class PathBuilder
 {
     private readonly Pathfinder<MapNode> _pathfinder;

@@ -3,6 +3,7 @@ using System.Numerics;
 
 namespace Sanctuary.Game.Pathfinding;
 
+
 public sealed class PathState
 {
     private readonly object _lock = new();
