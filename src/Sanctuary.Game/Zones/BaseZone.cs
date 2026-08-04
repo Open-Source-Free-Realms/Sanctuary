@@ -17,6 +17,7 @@ using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Zones;
 using Sanctuary.Scripting;
 using Sanctuary.UdpLibrary;
+using Sanctuary.Game.Pathfinding;
 
 namespace Sanctuary.Game.Zones;
 
@@ -41,6 +42,9 @@ public abstract class BaseZone : IZone, IDisposable
 
     private const int FrameRate = 10;
     private const float TickRate = 1000f / FrameRate;
+
+    public float TickDeltaSeconds => 1f / FrameRate;
+
     private const ulong NpcBaseGuid = 100_000_000_000u;
 
     private readonly record struct CollectionNodePoolRefill(string PoolKey, int CollectedHardPointId);
@@ -60,6 +64,8 @@ public abstract class BaseZone : IZone, IDisposable
     public IEnumerable<Player> Players => _players.Values;
 
     private ScriptContext? _scriptContext;
+
+    public Pathfinder<MapNode>? Pathfinder { get; }
 
     protected BaseZone(BaseZoneDefinition zoneDefinition, IServiceProvider serviceProvider)
     {
@@ -84,6 +90,10 @@ public abstract class BaseZone : IZone, IDisposable
 
         Task.Factory.StartNew(UpdateEveryTickAsync, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         Task.Factory.StartNew(UpdateEverySecondAsync, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+
+        // Just in case we don't actually have the `.map` file for a particular zone.
+        if (_resourceManager.Maps.TryGetValue(Name, out var mapGraph))
+            Pathfinder = new Pathfinder<MapNode>(mapGraph.Nodes, _logger);
     }
 
     #region Events
