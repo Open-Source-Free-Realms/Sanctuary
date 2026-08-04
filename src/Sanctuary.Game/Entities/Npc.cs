@@ -79,11 +79,6 @@ public class Npc : IEntity
 
     private readonly PathState _path = new();
 
-    // NOTE: This will be lazily initialized. For one, if a zone does not contain
-    // a coresponding '.map' file, it will just stay 'null'. Moreover, if 
-    // one just wants the NPC to move directly to a point with no pathfinding,
-    // this will stay 'null'. A new 'PathBuilder' is created only when pathfinding
-    // is asked for.
     private PathBuilder? _pathBuilder;
 
     public Npc(IZone zone)
@@ -133,7 +128,6 @@ public class Npc : IEntity
         if (result.Moved)
         {
             UpdatePosition(new Vector4(result.NewPosition, 1f), result.NewRotation!.Value);
-            BroadcastPosition();
         }
     }
 
@@ -150,6 +144,20 @@ public class Npc : IEntity
         if (Visible)
         {
             UpdateZoneTile();
+        }
+
+        var packet = new PlayerUpdatePacketUpdatePosition
+        {
+            Guid = Guid,
+            Position = position,
+            Rotation = rotation,
+            State = 1,
+            Unknown = 0
+        };
+
+        foreach (var visiblePlayer in VisiblePlayers)
+        {
+            visiblePlayer.Value.SendTunneled(packet);
         }
     }
 
@@ -373,22 +381,5 @@ public class Npc : IEntity
         var newWaypoints = _pathBuilder.TryRecompute(currentPosition, goalPosition);
         if (newWaypoints is not null)
             _path.Set(newWaypoints);
-    }
-
-    private void BroadcastPosition()
-    {
-        var packet = new PlayerUpdatePacketUpdatePosition
-        {
-            Guid = Guid,
-            Position = Position,
-            Rotation = Rotation,
-            State = 1,
-            Unknown = 0
-        };
-
-        foreach (var visiblePlayer in VisiblePlayers)
-        {
-            visiblePlayer.Value.SendTunneled(packet);
-        }
     }
 }

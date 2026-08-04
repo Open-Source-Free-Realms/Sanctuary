@@ -7,10 +7,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Sanctuary.Game.Pathfinding;
 
-// NOTE: This file was pretty much mostly vibe-coded and verified with some local
-// Python tests (that performed equivalent operations). I'm going to leave leave
-// this summary here because it may be useful - Alko.
-
 /// <summary>
 /// Loads the ".map" waypoint graph binary format (a native Free Realms
 /// asset format, unrelated to Unity/ForgeLightToolkit).
