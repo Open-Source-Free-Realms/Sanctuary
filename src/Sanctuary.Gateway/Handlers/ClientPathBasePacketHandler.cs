@@ -106,9 +106,6 @@ public static class ClientPathBasePacketHandler
             player.SendTunneled(walk);
         }
 
-        _logger.LogInformation("[Path] {kind} for {name}: {a} -> {b} ({n} nodes){active}",
-            request.Mode == 2 ? "Take-Me-There walk" : "trail refresh", player.Name, request.Start, destination, path.Count,
-            player.TakeMeThereActive ? " [session active]" : "");
         return true;
     }
 

@@ -125,9 +125,6 @@ public sealed class QuestManager : IQuestManager
 
         int count = (player.QuestCollectProgress.TryGetValue(questId, out var c) ? c : 0) + 1;
 
-        _logger.LogInformation("Collect: quest={quest} goal={goal} pickup={guid} -> {count}/{required}",
-            questId, goalIndex, npc.Guid, count, required);
-
         // Gold sparkle "reward" burst where the pickup is - immediate visual feedback that the collect
         // registered (plays before the removal so the effect's source actor still exists).
         player.SendTunneledToVisible(new PlayerUpdatePacketPlayCompositeEffect
@@ -188,9 +185,6 @@ public sealed class QuestManager : IQuestManager
             int required = goal.RequiredCount > 0 ? goal.RequiredCount : 1;
             int count = (player.QuestCollectProgress.TryGetValue(questId, out var c) ? c : 0) + 1;
 
-            _logger.LogInformation("Kill goal: quest={quest} goal={goal} victim nameId={nameId} -> {count}/{required}",
-                questId, done, npc.NameId, count, required);
-
             if (count >= required)
             {
                 player.QuestCollectProgress.Remove(questId);
@@ -237,8 +231,6 @@ public sealed class QuestManager : IQuestManager
             if (dx * dx + dz * dz > radius * radius)
                 continue;
 
-            _logger.LogInformation("Reach goal: quest={quest} goal={goal} reached at ({x:F0},{z:F0})",
-                questId, done, player.Position.X, player.Position.Z);
             CompleteGoal(player, quest, done);
         }
     }
@@ -252,9 +244,6 @@ public sealed class QuestManager : IQuestManager
         {
             if (goal.Type != QuestGoalType.EncounterComplete || goal.EncounterId != encounterId)
                 continue;
-
-            _logger.LogInformation("Encounter goal: quest={quest} goal={goal} encounter={enc} completed.",
-                questId, done, encounterId);
 
             CompleteGoal(player, quest, done);
             return; // one win credits one goal
