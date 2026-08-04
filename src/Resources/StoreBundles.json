@@ -39093,6 +39093,62 @@
         "MembersOnlyPrice":  1
     },
     {
+        "Comment":  "Jack-O-Lantern",
+        "LaunchTime":  "2009-05-01T07:00:00+00:00",
+        "ExpireTime":  "2090-01-01T08:00:00+00:00",
+        "Image":  {
+                      "Image":  "4562"
+                  },
+        "Entries":  [
+                        {
+                            "Quantity":  1,
+                            "GameItemId":  69828,
+                            "MarketingItemId":  69828
+                        }
+                    ],
+        "Id":  100081,
+        "NameId":  16635,
+        "DescriptionId":  16648,
+        "Status":  1,
+        "CurrencyType":  1,
+        "Price":  1,
+        "AltCurrencyPrice":  1,
+        "StoreId":  1,
+        "CategoryGroupId":  42,
+        "DiscountType":  100,
+        "SkuId":  1,
+        "MemberDiscount":  10,
+        "MembersOnlyPrice":  1
+    },
+    {
+        "Comment":  "Scaredy Cake",
+        "LaunchTime":  "2009-05-01T07:00:00+00:00",
+        "ExpireTime":  "2090-01-01T08:00:00+00:00",
+        "Image":  {
+                      "Image":  "2869"
+                  },
+        "Entries":  [
+                        {
+                            "Quantity":  1,
+                            "GameItemId":  17597,
+                            "MarketingItemId":  17597
+                        }
+                    ],
+        "Id":  100082,
+        "NameId":  16634,
+        "DescriptionId":  16647,
+        "Status":  1,
+        "CurrencyType":  1,
+        "Price":  1,
+        "AltCurrencyPrice":  1,
+        "StoreId":  1,
+        "CategoryGroupId":  42,
+        "DiscountType":  100,
+        "SkuId":  1,
+        "MemberDiscount":  10,
+        "MembersOnlyPrice":  1
+    },
+    {
         "Comment":  "Lovelectric Boombox",
         "LaunchTime":  "2009-05-01T07:00:00+00:00",
         "ExpireTime":  "2090-01-01T08:00:00+00:00",

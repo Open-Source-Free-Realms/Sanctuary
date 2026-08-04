@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
@@ -52,6 +53,9 @@ public class Npc : IEntity
     /// </summary>
     public int Disposition { get; set; } = 1;
 
+    public Action<Player>? InteractAction { get; set; }
+    public Action? UpdateEverySecondAction { get; set; }
+
     public int Animation { get; set; } = 1;
 
     public int CompositeEffectId { get; set; }
@@ -90,6 +94,7 @@ public class Npc : IEntity
 
     public void OnInteract(Player player)
     {
+        InteractAction?.Invoke(player);
     }
 
     public virtual void OnAddVisibleNpcs(params IEnumerable<Npc> npcs)
@@ -133,7 +138,7 @@ public class Npc : IEntity
 
     public virtual void UpdateEverySecond()
     {
-
+        UpdateEverySecondAction?.Invoke();
     }
 
     public void UpdatePosition(Vector4 position, Quaternion rotation, bool updateZoneArea = true)
