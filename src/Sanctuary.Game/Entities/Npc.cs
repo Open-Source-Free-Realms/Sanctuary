@@ -8,7 +8,6 @@ using Sanctuary.Game.Pathfinding;
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
-using Sanctuary.Game.Pathfinding;
 
 namespace Sanctuary.Game.Entities;
 
