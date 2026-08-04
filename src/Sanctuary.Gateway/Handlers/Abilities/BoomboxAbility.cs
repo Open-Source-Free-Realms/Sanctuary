@@ -189,7 +189,12 @@ public sealed class BoomboxAbility : IConsumableAbility
             else if (newcomers.Count > 0)
                 SyncDance(newcomers, currentAnim);
 
-            // Newcomers need the song re-sent too, same as the dance sync above.
+            // Newcomers need the song re-sent too, same as the dance sync above. Unlike the dance sync
+            // (targets the PLAYER's own guid, always known client-side), this packet targets the
+            // boombox NPC's guid - if a teleported player's zone-tile visibility for that NPC hasn't
+            // caught up yet, the client silently drops it as an unknown entity and never plays the
+            // song. Guard it the same way the spawn-time send already does: make sure they actually
+            // have AddNpc for the boombox before attaching an effect to it.
             if (songTagId != 0 && newcomers.Count > 0)
             {
                 var songEffect = new PlayerUpdatePacketAddEffectTagCompositeEffect
@@ -201,7 +206,12 @@ public sealed class BoomboxAbility : IConsumableAbility
                 };
 
                 foreach (var player in newcomers)
+                {
+                    if (!boomboxNpc.VisiblePlayers.ContainsKey(player.Guid))
+                        player.SendTunneled(boomboxNpc.GetAddNpcPacket());
+
                     player.SendTunneled(songEffect);
+                }
             }
 
             elapsedMs += 1000;
