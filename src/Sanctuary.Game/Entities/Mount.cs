@@ -16,7 +16,7 @@ public class Mount : Npc
     public int Seat { get; set; }
     public int QueuePosition { get; set; }
 
-    public Mount(IZone zone, IScriptManager scriptManager, Player rider, MountDefinition definition) : base(zone, scriptManager)
+    public Mount(IZone zone, Player rider, MountDefinition definition) : base(zone)
     {
         Rider = rider;
         Definition = definition;

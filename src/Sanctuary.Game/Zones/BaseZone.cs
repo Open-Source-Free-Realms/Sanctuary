@@ -65,6 +65,8 @@ public abstract class BaseZone : IZone, IDisposable
     public IEnumerable<Npc> Npcs => _npcs.Values;
     public IEnumerable<Player> Players => _players.Values;
 
+    public IScriptManager ScriptManager => _scriptManager;
+
     public Pathfinder<MapNode>? Pathfinder { get; }
 
     protected BaseZone(BaseZoneDefinition zoneDefinition, IServiceProvider serviceProvider)
@@ -225,7 +227,7 @@ public abstract class BaseZone : IZone, IDisposable
 
     public bool TryCreateNpc(ulong? guid, [MaybeNullWhen(false)] out Npc npc)
     {
-        npc = new Npc(this, _scriptManager)
+        npc = new Npc(this)
         {
             Guid = GetNpcGuid(guid)
         };
@@ -240,7 +242,7 @@ public abstract class BaseZone : IZone, IDisposable
         if (_resourceManager.Models.TryGetValue(definition.ModelId, out var model) && model.Scale != 0f)
             scale = model.Scale;
 
-        npc = new Npc(this, _scriptManager)
+        npc = new Npc(this)
         {
             Guid = GetNpcGuid(guid),
             NameId = definition.NameId,
@@ -516,7 +518,7 @@ public abstract class BaseZone : IZone, IDisposable
         CollectionNodePoolDefinition poolDefinition, CollectionNodeSpawnDefinition spawnDefinition,
         [MaybeNullWhen(false)] out CollectionNode node)
     {
-        node = new CollectionNode(this, _scriptManager, typeDefinition, poolDefinition, spawnDefinition)
+        node = new CollectionNode(this, typeDefinition, poolDefinition, spawnDefinition)
         {
             Guid = _nextNpcGuid++,
             Name = typeDefinition.Name,
@@ -585,7 +587,7 @@ public abstract class BaseZone : IZone, IDisposable
 
     public bool TryCreateMount(Player rider, MountDefinition definition, [MaybeNullWhen(false)] out Mount mount)
     {
-        mount = new Mount(this, _scriptManager, rider, definition)
+        mount = new Mount(this, rider, definition)
         {
             Guid = _nextNpcGuid++
         };

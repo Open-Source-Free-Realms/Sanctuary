@@ -78,7 +78,6 @@ public class Npc : IScriptableNpc, IEntity
     public List<CharacterAttachmentData> Attachments { get; set; } = [];
 
 
-    private readonly IScriptManager _scriptManager;
     private ConcurrentSet<string> _scripts { get; } = [];
 
     public float WaypointTolerance { get; set; } = 0f;
@@ -88,10 +87,9 @@ public class Npc : IScriptableNpc, IEntity
 
     private PathBuilder? _pathBuilder;
 
-    public Npc(IZone zone, IScriptManager scriptManager)
+    public Npc(IZone zone)
     {
         Zone = zone;
-        _scriptManager = scriptManager;
     }
 
     #region Events
@@ -355,7 +353,7 @@ public class Npc : IScriptableNpc, IEntity
 
     public ScriptContext GetOrCreateScriptContext()
     {
-        if (_scriptManager.GetOrCreateContext(this, out var context))
+        if (Zone.ScriptManager.GetOrCreateContext(this, out var context))
         {
             // Fresh context. Load all attached scripts into it.
             foreach (var scriptName in _scripts)
@@ -384,7 +382,7 @@ public class Npc : IScriptableNpc, IEntity
 
         // No way to unload a script; need to delete the entire context.
         // Next time it is created, the removed script will not be loaded.
-        _scriptManager.DeleteContext(this);
+        Zone.ScriptManager.DeleteContext(this);
         return true;
     }
 
@@ -430,7 +428,7 @@ public class Npc : IScriptableNpc, IEntity
 
         RemoveFromZone();
 
-        _scriptManager.DeleteContext(this);
+        Zone.ScriptManager.DeleteContext(this);
     }
 
     protected void DisposeGracefully(bool animate, int delay, int effectDelay, int compositeEffectId, int duration)

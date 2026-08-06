@@ -4,6 +4,8 @@ namespace Sanctuary.Scripting;
 
 public interface IScriptableZone : IScriptable
 {
+    IScriptManager ScriptManager { get; }
+
     int Id { get; }
     string Name { get; }
 

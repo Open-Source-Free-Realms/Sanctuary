@@ -14,9 +14,9 @@ public sealed class CollectionNode : Npc
     public CollectionNodePoolDefinition PoolDefinition { get; }
     public CollectionNodeSpawnDefinition SpawnDefinition { get; }
 
-    public CollectionNode(IZone zone, IScriptManager scriptManager, CollectionNodeTypeDefinition typeDefinition, CollectionNodePoolDefinition poolDefinition,
+    public CollectionNode(IZone zone, CollectionNodeTypeDefinition typeDefinition, CollectionNodePoolDefinition poolDefinition,
         CollectionNodeSpawnDefinition spawnDefinition)
-        : base(zone, scriptManager)
+        : base(zone)
     {
         TypeDefinition = typeDefinition;
         PoolDefinition = poolDefinition;
