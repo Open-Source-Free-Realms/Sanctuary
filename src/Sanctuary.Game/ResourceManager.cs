@@ -50,6 +50,7 @@ public class ResourceManager : IResourceManager
     public static readonly string PointOfInterestsFile = Path.Combine(BaseDirectory, "PointOfInterests.json");
     public static readonly string NpcsFile = Path.Combine(BaseDirectory, "Npcs.json");
     public static readonly string NameFilterFile = Path.Combine(BaseDirectory, "NameFilter.txt");
+    public static readonly string MapsDirectory = Path.Combine(BaseDirectory, "Maps");
 
     public IdToStringLookup HairMappings { get; }
     public IdToStringLookup HeadMappings { get; }
@@ -85,6 +86,7 @@ public class ResourceManager : IResourceManager
     public PointOfInterestDefinitionCollection PointOfInterests { get; }
     public NpcDefinitionCollection Npcs { get; }
     public NameFilterCollection NameFilter { get; }
+    public MapGraphCollection Maps { get; }
 
     public ResourceManager(ILogger<ResourceManager> logger)
     {
@@ -131,6 +133,7 @@ public class ResourceManager : IResourceManager
         PointOfInterests = new(_logger);
         Npcs = new(_logger);
         NameFilter = new(_logger);
+        Maps = new(_logger);
     }
 
     public bool Load()
@@ -265,6 +268,9 @@ public class ResourceManager : IResourceManager
             return false;
 
         if (!Npcs.Load(NpcsFile))
+            return false;
+
+        if (!Maps.Load(MapsDirectory))
             return false;
 
         return true;

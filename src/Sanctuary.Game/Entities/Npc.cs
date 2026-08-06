@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Collections;
+using Sanctuary.Game.Pathfinding;
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -14,6 +15,7 @@ using Sanctuary.Packet.Common.Chat;
 using Sanctuary.Scripting;
 
 namespace Sanctuary.Game.Entities;
+
 
 public class Npc : IScriptableNpc, IEntity
 {
@@ -79,6 +81,13 @@ public class Npc : IScriptableNpc, IEntity
     private readonly IScriptManager _scriptManager;
     private ConcurrentSet<string> _scripts { get; } = [];
 
+    public float WaypointTolerance { get; set; } = 0f;
+    public float Speed { get; set; }
+
+    private readonly PathState _path = new();
+
+    private PathBuilder? _pathBuilder;
+
     public Npc(IZone zone, IScriptManager scriptManager)
     {
         Zone = zone;
@@ -123,6 +132,14 @@ public class Npc : IScriptableNpc, IEntity
     {
         if (!_scripts.IsEmpty)
             await GetOrCreateScriptContext().GetEvent("onTick").CallAsMethodAsync();
+
+        var currentPosition = new Vector3(Position.X, Position.Y, Position.Z);
+        var result = PathFollower.Advance(_path, currentPosition, Speed, WaypointTolerance, Zone.TickDeltaSeconds);
+
+        if (result.Moved)
+        {
+            UpdatePosition(new Vector4(result.NewPosition, 1f), result.NewRotation!.Value);
+        }
     }
 
     public virtual async Task UpdateEverySecond()
@@ -139,6 +156,20 @@ public class Npc : IScriptableNpc, IEntity
         if (Visible)
         {
             UpdateZoneTile();
+        }
+
+        var packet = new PlayerUpdatePacketUpdatePosition
+        {
+            Guid = Guid,
+            Position = position,
+            Rotation = rotation,
+            State = 1,
+            Unknown = 0
+        };
+
+        foreach (var visiblePlayer in VisiblePlayers)
+        {
+            visiblePlayer.Value.SendTunneled(packet);
         }
     }
 
@@ -206,7 +237,7 @@ public class Npc : IScriptableNpc, IEntity
 
             TerrainObjectId = TerrainObjectId,
 
-            Speed = default,
+            Speed = Speed,
 
             Unknown28 = default,
 
@@ -418,5 +449,23 @@ public class Npc : IScriptableNpc, IEntity
         ZoneTile.Entities.Remove(Guid, out _);
 
         Zone.TryRemoveNpc(Guid);
+    }
+
+    public void MoveTo(Vector3 goalPosition, bool direct = false)
+    {
+        if (direct || Zone.Pathfinder is null)
+        {
+            var waypoints = new Queue<Vector3>();
+            waypoints.Enqueue(goalPosition);
+            _path.Set(waypoints);
+            return;
+        }
+
+        _pathBuilder ??= new PathBuilder(Zone.Pathfinder);
+
+        var currentPosition = new Vector3(Position.X, Position.Y, Position.Z);
+        var newWaypoints = _pathBuilder.TryRecompute(currentPosition, goalPosition);
+        if (newWaypoints is not null)
+            _path.Set(newWaypoints);
     }
 }

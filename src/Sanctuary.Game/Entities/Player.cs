@@ -53,11 +53,14 @@ public sealed class Player : ClientPcData, IEntity
     public List<IgnoreData> Ignores { get; set; } = [];
 
     public ConcurrentSet<ulong> IncomingFriendRequests { get; } = [];
+    public ConcurrentSet<ulong> IncomingGuildInvites { get; } = [];
 
     public ConcurrentDictionary<ChatChannel, bool> ChatChannelStatus { get; set; } = [];
 
     public int StationCash { get; set; }
     public List<CoinStoreTransactionRecord> CoinStoreTransactions { get; set; } = [];
+
+    public GuildData? GuildData { get; set; }
 
     public int TimezoneOffset { get; set; }
 
@@ -455,6 +458,9 @@ public sealed class Player : ClientPcData, IEntity
             commandPacketInteractionList.List.Interactions.Add(IgnoreInteraction.Data);
         }
 
+        if (GuildData is null && GuildInviteInteraction.CanInvite(player))
+            commandPacketInteractionList.List.Interactions.Add(GuildInviteInteraction.Data);
+
         player.SendTunneled(commandPacketInteractionList);
     }
 
@@ -586,6 +592,9 @@ public sealed class Player : ClientPcData, IEntity
 
             packet.NameVerticalOffset = Mount.Definition.NameVerticalOffset;
         }
+
+        if (GuildData is not null)
+            packet.Guilds.Add(0, GuildData.Guid);
 
         return packet;
     }

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Packet;
+using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
 
 namespace Sanctuary.Login.Handlers;
@@ -60,34 +61,79 @@ public static class CharacterDeleteRequestHandler
             return true;
         }
 
-        try
+        var strategy = dbContext.Database.CreateExecutionStrategy();
+        var committed = strategy.Execute(() =>
         {
-            // Delete references first to avoid foreign key constraint violations.
-            var characterId = character.Id;
+            using var transaction = dbContext.Database.BeginTransaction();
 
-            var friends = dbContext.Friends.Where(f =>
-                f.CharacterId == characterId || f.FriendCharacterId == characterId);
-
-            var ignores = dbContext.Ignores.Where(i =>
-                i.CharacterId == characterId || i.IgnoreCharacterId == characterId);
-
-            dbContext.Friends.RemoveRange(friends);
-            dbContext.Ignores.RemoveRange(ignores);
-            dbContext.Remove(character);
-
-            if (dbContext.SaveChanges() == 0)
+            try
             {
-                characterDeleteReply.Status = 2;
+                var guildMember = dbContext.GuildMembers
+                    .AsNoTracking()
+                    .SingleOrDefault(x => x.Id == character.Id);
 
-                connection.Send(characterDeleteReply);
+                if (guildMember is not null)
+                {
+                    character.GuildMemberId = null;
 
-                return true;
+                    var deletedGuildMember = dbContext.GuildMembers
+                        .Where(x => x.Id == character.Id)
+                        .ExecuteDelete();
+
+                    if (deletedGuildMember <= 0)
+                        return false;
+
+                    var hasMembers = dbContext.GuildMembers.Any(x => x.GuildId == guildMember.GuildId);
+                    if (!hasMembers)
+                    {
+                        dbContext.Guilds
+                            .Where(x => x.Id == guildMember.GuildId)
+                            .ExecuteDelete();
+                    }
+                    else if (guildMember.Role == GuildRole.Leader.Id
+                             && !dbContext.GuildMembers.Any(x => x.GuildId == guildMember.GuildId && x.Role == GuildRole.Leader.Id))
+                    {
+                        var newLeader = dbContext.GuildMembers
+                            .Where(x => x.GuildId == guildMember.GuildId)
+                            .OrderBy(x => x.Role)
+                            .ThenBy(x => x.Joined)
+                            .ThenBy(x => x.Id)
+                            .FirstOrDefault();
+
+                        if (newLeader is not null)
+                            newLeader.Role = GuildRole.Leader.Id;
+                    }
+                }
+
+                // Delete references first to avoid foreign key constraint violations.
+                var characterId = character.Id;
+
+                var friends = dbContext.Friends.Where(f =>
+                    f.CharacterId == characterId || f.FriendCharacterId == characterId);
+
+                var ignores = dbContext.Ignores.Where(i =>
+                    i.CharacterId == characterId || i.IgnoreCharacterId == characterId);
+
+                dbContext.Friends.RemoveRange(friends);
+                dbContext.Ignores.RemoveRange(ignores);
+                dbContext.Remove(character);
+
+                if (dbContext.SaveChanges() == 0)
+                    return false;
             }
-        }
-        catch (DbUpdateException ex)
-        {
-            _logger.LogError(ex, "Failed to delete character {CharacterId}.", character.Id);
+            catch (DbUpdateException ex)
+            {
+                _logger.LogError(ex, "Failed to delete character {CharacterId}.", character.Id);
 
+                return false;
+            }
+
+            transaction.Commit();
+            return true;
+        });
+
+        if (!committed)
+        {
             characterDeleteReply.Status = 2;
 
             connection.Send(characterDeleteReply);
