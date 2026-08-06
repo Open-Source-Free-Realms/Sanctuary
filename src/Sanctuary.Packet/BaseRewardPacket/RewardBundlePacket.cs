@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 using Sanctuary.Core.IO;
 
 namespace Sanctuary.Packet;
@@ -6,9 +8,8 @@ public class RewardBundlePacket : BaseRewardPacket, ISerializablePacket
 {
     public new const byte OpCode = 1;
 
-    // The coin shop's item-received flow provided the behavioral reference for this packet.
-    // Keeping it generic allows collections, combat, quests, and other reward sources to reuse it.
-    // Defaults reproduce the runtime-validated single-item reward notification.
+    // The coin shop provided the original item-entry capture. The entry list and item
+    // subtype shape were recovered from the client's reward bundle implementation.
     public bool Success = true;
     public int Unknown1;
     public int RewardKind;
@@ -25,21 +26,8 @@ public class RewardBundlePacket : BaseRewardPacket, ISerializablePacket
 
     public int IconId;
     public int NameId;
-    public int Quantity = 1;
-    public int Unknown8 = 1;
-
-    public byte EntryType;
-    public int EntryIconId;
-    public int EntryUnknown;
-    public int EntryNameId;
-    public int EntryQuantity = 1;
-    public int ItemDefinitionId;
-    public int Tint;
-    public int EntryUnknown2;
-    public int EntryUnknown3;
-    public byte EntryUnknown4;
-    public int ItemGuid;
-    public int EntryUnknown5;
+    public List<RewardBundleEntry> Entries { get; } = [];
+    public int Unknown8;
 
     public RewardBundlePacket() : base(OpCode)
     {
@@ -65,20 +53,12 @@ public class RewardBundlePacket : BaseRewardPacket, ISerializablePacket
         writer.Write(PlayerGuid);
         writer.Write(IconId);
         writer.Write(NameId);
-        writer.Write(Quantity);
+        writer.Write(Entries.Count);
+
+        foreach (var entry in Entries)
+            entry.Serialize(writer);
+
         writer.Write(Unknown8);
-        writer.Write(EntryType);
-        writer.Write(EntryIconId);
-        writer.Write(EntryUnknown);
-        writer.Write(EntryNameId);
-        writer.Write(EntryQuantity);
-        writer.Write(ItemDefinitionId);
-        writer.Write(Tint);
-        writer.Write(EntryUnknown2);
-        writer.Write(EntryUnknown3);
-        writer.Write(EntryUnknown4);
-        writer.Write(ItemGuid);
-        writer.Write(EntryUnknown5);
 
         return writer.Buffer;
     }
