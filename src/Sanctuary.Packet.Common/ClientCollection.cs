@@ -6,10 +6,10 @@ namespace Sanctuary.Packet.Common;
 
 public sealed class ClientCollection : ISerializableType
 {
-    public int CategoryId;
     public int Id;
+    public int NameId;
     public int DescriptionId;
-    public int Type;
+    public int CategoryId;
     public int IconId;
     public int IconTintId;
 
@@ -50,10 +50,10 @@ public sealed class ClientCollection : ISerializableType
 
     public void Serialize(PacketWriter writer)
     {
-        writer.Write(CategoryId);
         writer.Write(Id);
+        writer.Write(NameId);
         writer.Write(DescriptionId);
-        writer.Write(Type);
+        writer.Write(CategoryId);
         writer.Write(IconId);
         writer.Write(IconTintId);
 

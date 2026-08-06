@@ -138,36 +138,6 @@ public sealed class Player : ClientPcData, IEntity
         _connection.Disconnect();
     }
 
-    public void Dismount()
-    {
-        if (Mount is null)
-            return;
-
-        SendTunneledToVisible(new PacketDismountResponse
-        {
-            RiderGuid = Guid,
-            CompositeEffectId = 0
-        }, sendToSelf: true);
-
-        UpdateCharacterStats(
-            CharacterStats.MaxMovementSpeed.Set(8f),
-            CharacterStats.GlideEnabled.Set(0),
-            CharacterStats.JumpHeight.Set(0f));
-
-        SendTunneledToVisible(new PlayerUpdatePacketRemovePlayerGracefully
-        {
-            Guid = Mount.Guid,
-            Animate = false,
-            Delay = 0,
-            EffectDelay = 0,
-            CompositeEffectId = 46,
-            Duration = 1000
-        }, sendToSelf: true);
-
-        Mount.Dispose();
-        Mount = null;
-    }
-
     #endregion
 
     #region Update

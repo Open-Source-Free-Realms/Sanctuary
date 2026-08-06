@@ -14,8 +14,9 @@ public sealed class CollectionDefinitionTests
     {
         var definition = new CollectionDefinition
         {
-            Id = 17054,
-            CategoryId = 10,
+            Id = 10,
+            NameId = 17054,
+            CategoryId = 3,
             Entries =
             [
                 new CollectionEntryDefinition { Id = 41, ItemDefinitionId = 11081 },
@@ -27,8 +28,12 @@ public sealed class CollectionDefinitionTests
         var clientCollection = definition.CreateClientCollection(123, ownedItems);
 
         Assert.IsTrue(definition.IsStarted(ownedItems));
+        Assert.AreEqual(10, clientCollection.Id);
+        Assert.AreEqual(17054, clientCollection.NameId);
+        Assert.AreEqual(3, clientCollection.CategoryId);
         Assert.IsFalse(clientCollection.Entries[0].Collected);
         Assert.IsTrue(clientCollection.Entries[1].Collected);
+        Assert.AreEqual(10, clientCollection.Entries[1].CollectionId);
         Assert.AreEqual(123ul, clientCollection.PlayerGuid);
     }
 }
