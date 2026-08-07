@@ -184,20 +184,23 @@ public static class CommandPacketInteractRequestHandler
     {
         var notificationId = Environment.TickCount & int.MaxValue;
 
-        connection.SendTunneled(new RewardBundlePacket
+        var packet = new RewardBundlePacket
         {
-            SourceGuid = node.Guid ^ (uint)notificationId,
-            PlayerGuid = connection.Player.Guid,
+            Unknown8 = itemDefinition.DescriptionId
+        };
+        packet.RewardBundle.SourceGuid = node.Guid ^ (uint)notificationId;
+        packet.RewardBundle.PlayerGuid = connection.Player.Guid;
+        packet.RewardBundle.IconId = itemDefinition.Icon.Id;
+        packet.RewardBundle.NameId = itemDefinition.NameId;
+        packet.RewardBundle.Entries.Add(new RewardBundleEntryItem
+        {
             IconId = itemDefinition.Icon.Id,
             NameId = itemDefinition.NameId,
-            Quantity = 1,
-            EntryIconId = itemDefinition.Icon.Id,
-            EntryNameId = itemDefinition.NameId,
-            EntryQuantity = 1,
-            ItemDefinitionId = clientItem.Definition,
+            DefinitionId = clientItem.Definition,
             Tint = clientItem.Tint,
-            ItemGuid = notificationId,
-            EntryUnknown5 = itemDefinition.DescriptionId
+            ItemGuid = clientItem.Id
         });
+
+        connection.SendTunneled(packet);
     }
 }
