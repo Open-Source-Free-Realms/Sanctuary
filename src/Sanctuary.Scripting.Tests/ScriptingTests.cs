@@ -43,11 +43,19 @@ public class ScriptingTests
 
         var zoneScriptsDirectory = Path.Combine(ScriptManager.BaseDirectory, "Zone");
         var luaFiles = Directory.GetFiles(zoneScriptsDirectory, "*.lua");
+
+        var allSucceeded = true;
         foreach (var luaFile in luaFiles)
         {
             _logger.LogInformation("Loading zone script: {ScriptFilePath}", luaFile);
-            Assert.IsTrue(await context.LoadScriptAsync(luaFile), "Failed to load zone script: {ScriptFilePath}", luaFile);
+            var succeeded = await context.LoadScriptAsync(luaFile);
+            if (!succeeded)
+            {
+                _logger.LogError("Failed to load zone script: {ScriptFilePath}", luaFile);
+                allSucceeded = false;
+            }
         }
+        Assert.IsTrue(allSucceeded, "One or more zone scripts failed to load.");
     }
 
     [TestMethod]
@@ -59,11 +67,19 @@ public class ScriptingTests
 
         var npcScriptsDirectory = Path.Combine(ScriptManager.BaseDirectory, "Npc");
         var luaFiles = Directory.GetFiles(npcScriptsDirectory, "*.lua");
+
+        var allSucceeded = true;
         foreach (var luaFile in luaFiles)
         {
             _logger.LogInformation("Loading NPC script: {ScriptFilePath}", luaFile);
-            Assert.IsTrue(await context.LoadScriptAsync(luaFile), "Failed to load NPC script: {ScriptFilePath}", luaFile);
+            var succeeded = await context.LoadScriptAsync(luaFile);
+            if (!succeeded)
+            {
+                _logger.LogError("Failed to load NPC script: {ScriptFilePath}", luaFile);
+                allSucceeded = false;
+            }
         }
+        Assert.IsTrue(allSucceeded, "One or more NPC scripts failed to load.");
     }
 
     [TestCleanup]

@@ -897,5 +897,7 @@ public abstract class BaseZone : IZone, IDisposable
 
         _npcs.Clear();
         _players.Clear();
+
+        _scriptManager.DeleteContext(this);
     }
 }

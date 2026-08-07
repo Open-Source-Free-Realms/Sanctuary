@@ -153,9 +153,18 @@ public class ScriptContext
         if (!_eventCallbacks.TryGetValue(eventName, out var callbacks))
             return;
 
-        foreach (var handler in callbacks.Snapshot) try
+        foreach (var handler in callbacks.Snapshot)
         {
-            _ = _runtime.CallAsync(handler, _eventArguments);
+            // Fire and forget; safe since InvokeCallbackAsync does not throw.
+            _ = InvokeCallbackAsync(eventName, handler);
+        }
+    }
+
+    private async Task InvokeCallbackAsync(string eventName, LuaFunction handler)
+    {
+        try
+        {
+            await _runtime.CallAsync(handler, _eventArguments);
         }
         catch (Exception ex)
         {
