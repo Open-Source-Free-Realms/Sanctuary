@@ -1,6 +1,6 @@
 local counter = 1
 
-function onSecond(npc)
+local function onSecond(npc)
     counter = counter - 1
     if counter <= 0 then
         npc:sayLocalized(8130) -- "Welcome to Free Realms!"

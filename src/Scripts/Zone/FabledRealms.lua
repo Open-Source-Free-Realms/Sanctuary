@@ -1,4 +1,4 @@
-function spawnStaticNpcs(zone)
+local function spawnStaticNpcs(zone)
     zone:spawnNpcWithGuid(1186, 100000001186, -1295.67, -56.80742, 830.2055, 2.336771)
     zone:spawnNpcWithGuid(1190, 100000001190, -1476.039, -33.14938, 256.4301, -3.040664)
     zone:spawnNpcWithGuid(1198, 100000001198, -943.772, -44.57503, -1166.8, -2.912499)
