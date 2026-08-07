@@ -4,7 +4,6 @@ using System.Numerics;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
-using Sanctuary.Scripting;
 
 namespace Sanctuary.Game.Entities;
 

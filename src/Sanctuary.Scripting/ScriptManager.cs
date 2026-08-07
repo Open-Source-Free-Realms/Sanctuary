@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Threading.Tasks;
 using System.Collections.Concurrent;
 
 using Microsoft.Extensions.Logging;
@@ -11,7 +10,7 @@ namespace Sanctuary.Scripting;
 
 public class ScriptManager : IScriptManager
 {
-    private static readonly string BaseDirectory = ResolveScriptsDirectory();
+    internal static readonly string BaseDirectory = ResolveScriptsDirectory();
 
     private readonly ILogger _logger;
     private readonly ScriptRuntime _runtime = new();
@@ -22,8 +21,6 @@ public class ScriptManager : IScriptManager
     {
         _logger = loggerFactory.CreateLogger<ScriptManager>();
     }
-
-    public static string GetScriptsDirectory(string category) => Path.Combine(BaseDirectory, category);
 
     private static string ResolveScriptsDirectory()
     {

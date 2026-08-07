@@ -2,7 +2,6 @@ using System.Threading;
 
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Zones;
-using Sanctuary.Scripting;
 
 namespace Sanctuary.Game.Entities;
 

@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Threading;
@@ -103,8 +104,7 @@ public abstract class BaseZone : IZone, IDisposable
 
     public virtual void OnStart()
     {
-        // fire and forget. safe since CallAsMethodAsync does not throw.
-        _ = GetOrCreateScriptContext().GetEvent("onStart").CallAsMethodAsync().AsTask();
+        GetOrCreateScriptContext().FireEvent("start");
 
         ActivateCollectionNodePools();
     }
@@ -128,7 +128,7 @@ public abstract class BaseZone : IZone, IDisposable
             // Fresh context. Attach all scripts defined in the zone definition.
             // We can't use `LoadScriptInBackground` here because we need to ensure that any `onStart` handlers are fully loaded.
             foreach (var script in _scripts)
-                context.LoadScript("Zone", script);
+                context.LoadScript(Path.Combine("Zone", script + ".lua"));
         }
 
         return context;
@@ -141,7 +141,7 @@ public abstract class BaseZone : IZone, IDisposable
         if (!_scripts.TryAdd(scriptName))
             return false;
 
-        context.LoadScriptInBackground("Zone", scriptName);
+        context.LoadScriptInBackground(Path.Combine("Zone", scriptName + ".lua"));
 
         return true;
     }
@@ -842,7 +842,7 @@ public abstract class BaseZone : IZone, IDisposable
 
                 foreach (var entity in _entities)
                 {
-                    await entity.Value.UpdateEveryTick();
+                    entity.Value.UpdateEveryTick();
                 }
             }
             catch (Exception ex)
@@ -860,7 +860,7 @@ public abstract class BaseZone : IZone, IDisposable
             {
                 foreach (var entity in _entities)
                 {
-                    await entity.Value.UpdateEverySecond();
+                    entity.Value.UpdateEverySecond();
                 }
             }
             catch (Exception ex)

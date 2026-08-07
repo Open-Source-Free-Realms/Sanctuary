@@ -173,14 +173,12 @@ public sealed class Player : ClientPcData, IEntity
 
     #region Update
 
-    public Task UpdateEveryTick()
+    public void UpdateEveryTick()
     {
-        return Task.CompletedTask;
     }
 
-    public Task UpdateEverySecond()
+    public void UpdateEverySecond()
     {
-        return Task.CompletedTask;
     }
 
     public void UpdatePosition(Vector4 position, Quaternion rotation, bool updateZoneArea = true)

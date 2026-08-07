@@ -41,7 +41,7 @@ public class ScriptingTests
         var mockZone = new MockScriptZone(_logger);
         _scriptManager.GetOrCreateContext(mockZone, out var context);
 
-        var zoneScriptsDirectory = ScriptManager.GetScriptsDirectory("Zone");
+        var zoneScriptsDirectory = Path.Combine(ScriptManager.BaseDirectory, "Zone");
         var luaFiles = Directory.GetFiles(zoneScriptsDirectory, "*.lua");
         foreach (var luaFile in luaFiles)
         {
@@ -57,7 +57,7 @@ public class ScriptingTests
         var mockNpc = new MockScriptNpc(mockZone);
         _scriptManager.GetOrCreateContext(mockNpc, out var context);
 
-        var npcScriptsDirectory = ScriptManager.GetScriptsDirectory("Npc");
+        var npcScriptsDirectory = Path.Combine(ScriptManager.BaseDirectory, "Npc");
         var luaFiles = Directory.GetFiles(npcScriptsDirectory, "*.lua");
         foreach (var luaFile in luaFiles)
         {

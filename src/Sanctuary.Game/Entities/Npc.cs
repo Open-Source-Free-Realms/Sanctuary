@@ -1,8 +1,8 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Numerics;
-using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging;
 
@@ -126,10 +126,10 @@ public class Npc : IScriptableNpc, IEntity
 
     #region Update
 
-    public virtual async Task UpdateEveryTick()
+    public void UpdateEveryTick()
     {
         if (!_scripts.IsEmpty)
-            await GetOrCreateScriptContext().GetEvent("onTick").CallAsMethodAsync();
+            GetOrCreateScriptContext().FireEvent("tick");
 
         var currentPosition = new Vector3(Position.X, Position.Y, Position.Z);
         var result = PathFollower.Advance(_path, currentPosition, Speed, WaypointTolerance, Zone.TickDeltaSeconds);
@@ -140,10 +140,10 @@ public class Npc : IScriptableNpc, IEntity
         }
     }
 
-    public virtual async Task UpdateEverySecond()
+    public void UpdateEverySecond()
     {
         if (!_scripts.IsEmpty)
-            await GetOrCreateScriptContext().GetEvent("onSecond").CallAsMethodAsync();
+            GetOrCreateScriptContext().FireEvent("second");
     }
 
     public void UpdatePosition(Vector4 position, Quaternion rotation, bool updateZoneArea = true)
@@ -357,7 +357,7 @@ public class Npc : IScriptableNpc, IEntity
         {
             // Fresh context. Load all attached scripts into it.
             foreach (var scriptName in _scripts)
-                context.LoadScriptInBackground("Npc", scriptName);
+                context.LoadScriptInBackground(Path.Combine("Npc", scriptName + ".lua"));
         }
 
         return context;
@@ -370,7 +370,7 @@ public class Npc : IScriptableNpc, IEntity
         if (!_scripts.TryAdd(scriptName))
             return false;
 
-        context.LoadScriptInBackground("Npc", scriptName);
+        context.LoadScriptInBackground(Path.Combine("Npc", scriptName + ".lua"));
 
         return true;
     }

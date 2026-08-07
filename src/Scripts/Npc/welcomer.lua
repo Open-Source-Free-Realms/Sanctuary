@@ -1,5 +1,3 @@
----@priority 1
-
 local counter = 1
 
 function onSecond(npc)
@@ -9,3 +7,5 @@ function onSecond(npc)
         counter = math.random(10, 20)
     end
 end
+
+registerCallback("second", onSecond) -- Event name, callback

@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Numerics;
-using System.Threading.Tasks;
 
 using Sanctuary.Game.Zones;
 
@@ -36,8 +35,8 @@ public interface IEntity : IEquatable<IEntity>, IDisposable
     void UpdatePosition(Vector4 position, Quaternion rotation, bool updateZoneArea = true);
     void TeleportToZone(IZone zone, Vector4 position, Quaternion rotation);
 
-    Task UpdateEveryTick();
-    Task UpdateEverySecond();
+    void UpdateEveryTick();
+    void UpdateEverySecond();
 
     #endregion
 

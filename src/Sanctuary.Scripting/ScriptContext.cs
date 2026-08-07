@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,39 +8,25 @@ using Microsoft.Extensions.Logging;
 
 using Lua;
 
+using Sanctuary.Core.Collections;
+
 namespace Sanctuary.Scripting;
 
 public class ScriptContext
 {
-    private readonly record struct EnvironmentKey(string ScriptFilePath, int Priority) : IComparable<EnvironmentKey>
-    {
-        public int CompareTo(EnvironmentKey other)
-        {
-            // Descending priority; tie-break on path so distinct scripts stay unique keys.
-            var byPriority = other.Priority.CompareTo(Priority);
-            return byPriority != 0 ? byPriority : string.CompareOrdinal(ScriptFilePath, other.ScriptFilePath);
-        }
-    }
-
     private readonly ScriptRuntime _runtime;
     private readonly ILogger _logger;
     private readonly LuaTable _rootEnvironment;
-    private readonly ConcurrentDictionary<string, ScriptEvent> _events = [];
-
-    /// <summary>
-    /// Kept sorted by descending priority on insert, so handlers can be iterated in priority order.
-    /// </summary>
-    private ImmutableSortedDictionary<EnvironmentKey, LuaTable> _environments =
-        ImmutableSortedDictionary.Create<EnvironmentKey, LuaTable>();
-
-    internal ILuaUserData? UserData { get; }
+    private readonly LuaValue[] _eventArguments;
+    private readonly ConcurrentDictionary<string, LuaTable> _scriptEnvironments = new();
+    private readonly ConcurrentDictionary<string, ConcurrentGroupedSet<LuaTable, LuaFunction>> _eventCallbacks = new();
 
     internal ScriptContext(ScriptRuntime runtime, ILogger logger, LuaTable environment, ILuaUserData? userData = null)
     {
         _runtime = runtime;
         _logger = logger;
         _rootEnvironment = environment;
-        UserData = userData;
+        _eventArguments = userData is null ? [] : [new LuaValue(userData)];
 
         // Override `print` to log to our logger instead of stdout.
         _rootEnvironment["print"] = new LuaFunction("print", (context, cancellationToken) =>
@@ -63,23 +47,8 @@ public class ScriptContext
         });
     }
 
-    public async ValueTask<bool> LoadScriptAsync(string scriptCategory, string scriptName)
+    public async ValueTask<bool> LoadScriptAsync(string scriptRelativePath)
     {
-        if (Path.GetFileName(scriptName) != scriptName)
-        {
-            _logger.LogWarning("Script name {ScriptName} contains invalid characters; skipping", scriptName);
-            return false;
-        }
-
-        var scriptFilePath = Path.Combine(ScriptManager.GetScriptsDirectory(scriptCategory), scriptName + ".lua");
-
-        return await LoadScriptAsync(scriptFilePath);
-    }
-
-    internal async ValueTask<bool> LoadScriptAsync(string scriptFilePath)
-    {
-        const string PriorityAnnotation = "---@priority ";
-
         var scriptEnv = new LuaTable
         {
             Metatable = new LuaTable()
@@ -88,101 +57,103 @@ public class ScriptContext
         // Inherit from the root environment so scripts can share globals and libraries
         scriptEnv.Metatable["__index"] = _rootEnvironment;
 
+        if (!_scriptEnvironments.TryAdd(scriptRelativePath, scriptEnv))
+        {
+            _logger.LogWarning("Script {Script} was already loaded", scriptRelativePath);
+            return false;
+        }
+
+        // registerCallback(eventName, callback)
+        // registerCallback(eventName, priority, callback)
+        scriptEnv["registerCallback"] = new LuaFunction("registerCallback", (ctx, cancellationToken) =>
+        {
+            var eventName = ctx.GetArgument<string>(0);
+            var callback = ctx.GetArgument<LuaFunction>(1);
+
+            RegisterCallback(scriptEnv, eventName, callback);
+
+            return new ValueTask<int>(ctx.Return());
+        });
+
+        scriptEnv["unregisterCallback"] = new LuaFunction("unregisterCallback", (ctx, cancellationToken) =>
+        {
+            var eventName = ctx.GetArgument<string>(0);
+            var callback = ctx.GetArgument<LuaFunction>(1);
+
+            UnregisterCallback(scriptEnv, eventName, callback);
+
+            return new ValueTask<int>(ctx.Return());
+        });
+
+        var scriptFilePath = Path.Combine(ScriptManager.BaseDirectory, scriptRelativePath);
+
         try
         {
             await _runtime.ExecuteFileAsync(scriptFilePath, scriptEnv);
 
-            var scriptPriority = 0;
+            _logger.LogDebug("Loaded script {Script}", scriptRelativePath);
 
-            // Scan for script priority annotation
-            using (var reader = new StreamReader(scriptFilePath))
-            {
-                while (!reader.EndOfStream)
-                {
-                    var line = await reader.ReadLineAsync();
-
-                    if (line is null)
-                        break;
-
-                    if (line.StartsWith(PriorityAnnotation, StringComparison.OrdinalIgnoreCase))
-                    {
-                        var priorityString = line[PriorityAnnotation.Length..].Trim();
-
-                        if (int.TryParse(priorityString, out var parsedPriority))
-                        {
-                            scriptPriority = parsedPriority;
-                            break;
-                        }
-                        else
-                        {
-                            _logger.LogWarning("Invalid priority annotation in script {ScriptFilePath}: {Line}", scriptFilePath, line);
-                        }
-                    }
-                }
-            }
-
-            var environmentKey = new EnvironmentKey(scriptFilePath, scriptPriority);
-            ImmutableInterlocked.Update(ref _environments, environments => environments.SetItem(environmentKey, scriptEnv));
-
-            // Events need to be rebuilt since the script introduces a new environment
-            _events.Clear();
-
-            _logger.LogDebug("Loaded script {ScriptFilePath} with priority {Priority}", scriptFilePath, scriptPriority);
-            
             return true;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to load script {ScriptFilePath}", scriptFilePath);
+            _logger.LogError(ex, "Failed to load script {Script}", scriptRelativePath);
+
+            // Roll back the reservation and any handlers registered before the failure.
+            UnloadScript(scriptRelativePath);
+
             return false;
         }
     }
 
-    public bool LoadScript(string scriptCategory, string scriptName)
+    public bool LoadScript(string scriptName)
     {
-        return LoadScriptAsync(scriptCategory, scriptName).AsTask().GetAwaiter().GetResult();
+        return LoadScriptAsync(scriptName).AsTask().GetAwaiter().GetResult();
     }
 
-    public void LoadScriptInBackground(string scriptCategory, string scriptName)
+    public void LoadScriptInBackground(string scriptName)
     {
         // Fire and forget; safe since LoadScriptAsync does not throw.
-        _ = LoadScriptAsync(scriptCategory, scriptName).AsTask();
+        _ = LoadScriptAsync(scriptName);
     }
 
-    public ScriptFunction? GetFunction(string functionName)
+    public bool UnloadScript(string scriptName)
     {
-        // Highest priority first; return the first script that currently defines the function.
-        foreach (var environment in _environments.Values)
+        if (!_scriptEnvironments.TryRemove(scriptName, out var scriptEnv))
         {
-            if (environment.TryGetValue(functionName, out var function) && function.Type == LuaValueType.Function)
-            {
-                return new ScriptFunction(_runtime, _logger, UserData, environment, functionName);
-            }
+            _logger.LogWarning("Script {Script} was never loaded", scriptName);
+            return false;
         }
 
-        return null;
+        foreach (var handlers in _eventCallbacks.Values)
+            handlers.RemoveGroup(scriptEnv);
+
+        return true;
     }
 
-    public ScriptEvent GetEvent(string functionName)
+    internal void RegisterCallback(LuaTable environment, string eventName, LuaFunction callback)
     {
-        return _events.GetOrAdd(functionName, BuildEvent);
+        var handlers = _eventCallbacks.GetOrAdd(eventName, static _ => new());
+
+        if (!handlers.TryAdd(environment, callback))
+            _logger.LogWarning("Failed to register event handler for event {EventName}", eventName);
     }
 
-    private ScriptEvent BuildEvent(string functionName)
+    internal void UnregisterCallback(LuaTable environment, string eventName, LuaFunction callback)
     {
-        var environments = _environments;
-        var functions = new List<ScriptFunction>();
-
-        foreach (var environment in environments.Values)
+        if (!_eventCallbacks.TryGetValue(eventName, out var handlers) ||
+            !handlers.TryRemove(environment, callback))
         {
-            // Only include scripts that actually define the handler, so HasHandlers stays accurate
-            // and we don't resolve missing functions on every invocation.
-            if (environment.TryGetValue(functionName, out var function) && function.Type == LuaValueType.Function)
-            {
-                functions.Add(new ScriptFunction(_runtime, _logger, UserData, environment, functionName));
-            }
+            _logger.LogWarning("Failed to unregister event handler for event {EventName}", eventName);
         }
+    }
 
-        return new ScriptEvent(functions);
+    public void FireEvent(string eventName)
+    {
+        if (!_eventCallbacks.TryGetValue(eventName, out var handlers))
+            return;
+
+        foreach (var handler in handlers.Snapshot)
+            _ = _runtime.CallAsync(handler, _eventArguments);
     }
 }
