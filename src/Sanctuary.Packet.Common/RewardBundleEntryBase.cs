@@ -1,36 +1,35 @@
 using Sanctuary.Core.IO;
-using Sanctuary.Packet.Common;
 
-namespace Sanctuary.Packet;
+namespace Sanctuary.Packet.Common;
 
-public abstract class RewardBundleEntry
+public abstract class RewardBundleEntryBase
 {
     public abstract RewardBundleEntryType Type { get; }
 
-    public bool Unknown;
+    public bool IsHidden;
     public int IconId;
-    public int IconTintId;
+    public int TintId;
     public int NameId;
     public int Quantity = 1;
     public int DefinitionId;
     public int Tint;
-    public string Text = string.Empty;
-    public int Unknown2;
-    public bool Unknown3;
+    public string Description = string.Empty;
+    public int ItemTextColor;
+    public bool MembersOnly;
 
     internal void Serialize(PacketWriter writer)
     {
         writer.Write((int)Type);
-        writer.Write(Unknown);
+        writer.Write(IsHidden);
         writer.Write(IconId);
-        writer.Write(IconTintId);
+        writer.Write(TintId);
         writer.Write(NameId);
         writer.Write(Quantity);
         writer.Write(DefinitionId);
         writer.Write(Tint);
-        writer.Write(Text);
-        writer.Write(Unknown2);
-        writer.Write(Unknown3);
+        writer.Write(Description);
+        writer.Write(ItemTextColor);
+        writer.Write(MembersOnly);
 
         SerializeData(writer);
     }

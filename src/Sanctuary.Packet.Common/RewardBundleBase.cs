@@ -2,14 +2,11 @@ using System.Collections.Generic;
 
 using Sanctuary.Core.IO;
 
-namespace Sanctuary.Packet;
+namespace Sanctuary.Packet.Common;
 
-public class RewardBundlePacket : BaseRewardPacket, ISerializablePacket
+public sealed class RewardBundleBase : ISerializableType
 {
-    public new const byte OpCode = 1;
-
-    // The coin shop provided the original item-entry capture. The entry list and item
-    // subtype shape were recovered from the client's reward bundle implementation.
+    // This payload is shared by RewardBundlePacket and the reward embedded in client collection data.
     public bool Success = true;
     public int Unknown1;
     public int RewardKind;
@@ -26,19 +23,10 @@ public class RewardBundlePacket : BaseRewardPacket, ISerializablePacket
 
     public int IconId;
     public int NameId;
-    public List<RewardBundleEntry> Entries { get; } = [];
-    public int Unknown8;
+    public List<RewardBundleEntryBase> Entries { get; } = [];
 
-    public RewardBundlePacket() : base(OpCode)
+    public void Serialize(PacketWriter writer)
     {
-    }
-
-    public byte[] Serialize()
-    {
-        using var writer = new PacketWriter();
-
-        Write(writer);
-
         writer.Write(Success);
         writer.Write(Unknown1);
         writer.Write(RewardKind);
@@ -57,9 +45,5 @@ public class RewardBundlePacket : BaseRewardPacket, ISerializablePacket
 
         foreach (var entry in Entries)
             entry.Serialize(writer);
-
-        writer.Write(Unknown8);
-
-        return writer.Buffer;
     }
 }

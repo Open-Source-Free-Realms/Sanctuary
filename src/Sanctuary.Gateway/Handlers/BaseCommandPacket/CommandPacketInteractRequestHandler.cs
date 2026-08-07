@@ -186,13 +186,13 @@ public static class CommandPacketInteractRequestHandler
 
         var packet = new RewardBundlePacket
         {
-            SourceGuid = node.Guid ^ (uint)notificationId,
-            PlayerGuid = connection.Player.Guid,
-            IconId = itemDefinition.Icon.Id,
-            NameId = itemDefinition.NameId,
             Unknown8 = itemDefinition.DescriptionId
         };
-        packet.Entries.Add(new RewardBundleEntryItem
+        packet.RewardBundle.SourceGuid = node.Guid ^ (uint)notificationId;
+        packet.RewardBundle.PlayerGuid = connection.Player.Guid;
+        packet.RewardBundle.IconId = itemDefinition.Icon.Id;
+        packet.RewardBundle.NameId = itemDefinition.NameId;
+        packet.RewardBundle.Entries.Add(new RewardBundleEntryItem
         {
             IconId = itemDefinition.Icon.Id,
             NameId = itemDefinition.NameId,

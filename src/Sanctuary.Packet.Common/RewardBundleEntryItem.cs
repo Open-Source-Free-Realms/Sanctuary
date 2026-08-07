@@ -1,9 +1,8 @@
 using Sanctuary.Core.IO;
-using Sanctuary.Packet.Common;
 
-namespace Sanctuary.Packet;
+namespace Sanctuary.Packet.Common;
 
-public sealed class RewardBundleEntryItem : RewardBundleEntry
+public sealed class RewardBundleEntryItem : RewardBundleEntryBase
 {
     public override RewardBundleEntryType Type => RewardBundleEntryType.Item;
 
@@ -11,7 +10,7 @@ public sealed class RewardBundleEntryItem : RewardBundleEntry
 
     protected override void SerializeData(PacketWriter writer)
     {
-        // Success controls the client's subtype-data flag; it is not another wire field.
+        // The inherited common fields are serialized first; the item-specific payload is only its GUID.
         writer.Write(ItemGuid);
     }
 }
