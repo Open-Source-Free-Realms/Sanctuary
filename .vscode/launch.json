@@ -1,0 +1,69 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Login",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build Login",
+      "program": "${workspaceFolder}/src/Sanctuary.Login/bin/Debug/net9.0/Sanctuary.Login.dll",
+      "cwd": "${workspaceFolder}/src",
+      "console": "integratedTerminal",
+      "stopAtEntry": false,
+      "env": {
+        "Database__Provider": "Sqlite",
+        "Database__ConnectionString": "Data Source=${workspaceFolder}/sanctuary.db",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    {
+      "name": "Gateway",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build Gateway",
+      "program": "${workspaceFolder}/src/Sanctuary.Gateway/bin/Debug/net9.0/Sanctuary.Gateway.dll",
+      "cwd": "${workspaceFolder}/src",
+      "console": "integratedTerminal",
+      "stopAtEntry": false,
+      "env": {
+        "Database__Provider": "Sqlite",
+        "Database__ConnectionString": "Data Source=${workspaceFolder}/sanctuary.db",
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    {
+      "name": "WebAPI",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build WebAPI",
+      "program": "${workspaceFolder}/src/Sanctuary.WebAPI/bin/Debug/net9.0/Sanctuary.WebAPI.dll",
+      "cwd": "${workspaceFolder}/src",
+      "console": "integratedTerminal",
+      "stopAtEntry": false,
+      "env": {
+        "Database__Provider": "Sqlite",
+        "Database__ConnectionString": "Data Source=${workspaceFolder}/sanctuary.db",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Servers (Login + Gateway)",
+      "configurations": [
+        "Login",
+        "Gateway"
+      ],
+      "stopAll": true
+    },
+    {
+      "name": "Servers + WebAPI",
+      "configurations": [
+        "Login",
+        "Gateway",
+        "WebAPI"
+      ],
+      "stopAll": true
+    }
+  ]
+}

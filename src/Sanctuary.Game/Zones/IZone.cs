@@ -6,6 +6,7 @@ using Sanctuary.Game.Entities;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Scripting;
 using Sanctuary.UdpLibrary;
+using Sanctuary.Game.Pathfinding;
 
 namespace Sanctuary.Game.Zones;
 
@@ -24,6 +25,8 @@ public interface IZone : IScriptZone
 
     IEnumerable<Npc> Npcs { get; }
     IEnumerable<Player> Players { get; }
+
+    float TickDeltaSeconds { get; }
 
     bool TryGetNpc(ulong guid, [MaybeNullWhen(false)] out Npc npc);
     bool TryGetPlayer(ulong guid, [MaybeNullWhen(false)] out Player player);
@@ -51,6 +54,8 @@ public interface IZone : IScriptZone
     bool TryRemoveNpc(ulong guid);
     bool TryRemovePlayer(ulong guid);
 
+
+
     #endregion
 
     #region Zone System
@@ -59,4 +64,6 @@ public interface IZone : IScriptZone
     void UpdateEntityZoneTile(IEntity entity, ZoneTile from, ZoneTile to);
 
     #endregion
+
+    Pathfinder<MapNode>? Pathfinder { get; }
 }
