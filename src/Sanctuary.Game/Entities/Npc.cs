@@ -370,7 +370,9 @@ public class Npc : IScriptableNpc, IEntity
         if (!_scripts.TryAdd(scriptName))
             return false;
 
-        context.LoadScriptInBackground(Path.Combine("Npc", scriptName + ".lua"));
+        var scriptPath = Path.Combine("Npc", scriptName + ".lua");
+
+        context.LoadScriptInBackground(scriptPath);
 
         return true;
     }
@@ -380,10 +382,11 @@ public class Npc : IScriptableNpc, IEntity
         if (!_scripts.TryRemove(scriptName))
             return false;
 
-        // No way to unload a script; need to delete the entire context.
-        // Next time it is created, the removed script will not be loaded.
-        Zone.ScriptManager.DeleteContext(this);
-        return true;
+        var context = GetOrCreateScriptContext();
+
+        var scriptPath = Path.Combine("Npc", scriptName + ".lua");
+
+        return context.UnloadScript(scriptPath);
     }
 
     #endregion

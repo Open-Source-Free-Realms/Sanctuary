@@ -47,7 +47,7 @@ public class ScriptContext
         });
     }
 
-    public async ValueTask<bool> LoadScriptAsync(string scriptRelativePath)
+    public async ValueTask<bool> LoadScriptAsync(string scriptPath)
     {
         var scriptEnv = new LuaTable
         {
@@ -57,14 +57,13 @@ public class ScriptContext
         // Inherit from the root environment so scripts can share globals and libraries
         scriptEnv.Metatable["__index"] = _rootEnvironment;
 
-        if (!_scriptEnvironments.TryAdd(scriptRelativePath, scriptEnv))
+        if (!_scriptEnvironments.TryAdd(scriptPath, scriptEnv))
         {
-            _logger.LogWarning("Script {Script} was already loaded", scriptRelativePath);
+            _logger.LogWarning("Script {Script} was already loaded", scriptPath);
             return false;
         }
 
         // registerCallback(eventName, callback)
-        // registerCallback(eventName, priority, callback)
         scriptEnv["registerCallback"] = new LuaFunction("registerCallback", (ctx, cancellationToken) =>
         {
             var eventName = ctx.GetArgument<string>(0);
@@ -75,6 +74,7 @@ public class ScriptContext
             return new ValueTask<int>(ctx.Return());
         });
 
+        // unregisterCallback(eventName, callback)
         scriptEnv["unregisterCallback"] = new LuaFunction("unregisterCallback", (ctx, cancellationToken) =>
         {
             var eventName = ctx.GetArgument<string>(0);
@@ -85,22 +85,22 @@ public class ScriptContext
             return new ValueTask<int>(ctx.Return());
         });
 
-        var scriptFilePath = Path.Combine(ScriptManager.BaseDirectory, scriptRelativePath);
+        var scriptFullPath = Path.Combine(ScriptManager.BaseDirectory, scriptPath);
 
         try
         {
-            await _runtime.ExecuteFileAsync(scriptFilePath, scriptEnv);
+            await _runtime.ExecuteFileAsync(scriptFullPath, scriptEnv);
 
-            _logger.LogDebug("Loaded script {Script}", scriptRelativePath);
+            _logger.LogDebug("Loaded script {Script}", scriptPath);
 
             return true;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to load script {Script}", scriptRelativePath);
+            _logger.LogError(ex, "Failed to load script {Script}", scriptPath);
 
-            // Roll back the reservation and any handlers registered before the failure.
-            UnloadScript(scriptRelativePath);
+            // Roll back the reservation and any callbacks registered before the failure.
+            UnloadScript(scriptPath);
 
             return false;
         }
@@ -125,35 +125,41 @@ public class ScriptContext
             return false;
         }
 
-        foreach (var handlers in _eventCallbacks.Values)
-            handlers.RemoveGroup(scriptEnv);
+        foreach (var callbacks in _eventCallbacks.Values)
+            callbacks.RemoveGroup(scriptEnv);
 
         return true;
     }
 
     internal void RegisterCallback(LuaTable environment, string eventName, LuaFunction callback)
     {
-        var handlers = _eventCallbacks.GetOrAdd(eventName, static _ => new());
+        var callbacks = _eventCallbacks.GetOrAdd(eventName, static _ => new());
 
-        if (!handlers.TryAdd(environment, callback))
-            _logger.LogWarning("Failed to register event handler for event {EventName}", eventName);
+        if (!callbacks.TryAdd(environment, callback))
+            _logger.LogWarning("Failed to register callback for event {EventName}", eventName);
     }
 
     internal void UnregisterCallback(LuaTable environment, string eventName, LuaFunction callback)
     {
-        if (!_eventCallbacks.TryGetValue(eventName, out var handlers) ||
-            !handlers.TryRemove(environment, callback))
+        if (!_eventCallbacks.TryGetValue(eventName, out var callbacks) ||
+            !callbacks.TryRemove(environment, callback))
         {
-            _logger.LogWarning("Failed to unregister event handler for event {EventName}", eventName);
+            _logger.LogWarning("Failed to unregister callback for event {EventName}", eventName);
         }
     }
 
     public void FireEvent(string eventName)
     {
-        if (!_eventCallbacks.TryGetValue(eventName, out var handlers))
+        if (!_eventCallbacks.TryGetValue(eventName, out var callbacks))
             return;
 
-        foreach (var handler in handlers.Snapshot)
+        foreach (var handler in callbacks.Snapshot) try
+        {
             _ = _runtime.CallAsync(handler, _eventArguments);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Lua error during callback for event {EventName}", eventName);
+        }
     }
 }

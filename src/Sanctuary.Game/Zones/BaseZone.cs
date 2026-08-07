@@ -141,7 +141,9 @@ public abstract class BaseZone : IZone, IDisposable
         if (!_scripts.TryAdd(scriptName))
             return false;
 
-        context.LoadScriptInBackground(Path.Combine("Zone", scriptName + ".lua"));
+        var scriptPath = Path.Combine("Zone", scriptName + ".lua");
+
+        context.LoadScriptInBackground(scriptPath);
 
         return true;
     }
@@ -151,10 +153,11 @@ public abstract class BaseZone : IZone, IDisposable
         if (!_scripts.TryRemove(scriptName))
             return false;
 
-        // No way to unload a script; need to delete the entire context.
-        // Next time it is created, the removed script will not be loaded.
-        _scriptManager.DeleteContext(this);
-        return true;
+        var context = GetOrCreateScriptContext();
+
+        var scriptPath = Path.Combine("Zone", scriptName + ".lua");
+
+        return context.UnloadScript(scriptPath);
     }
 
     #endregion
