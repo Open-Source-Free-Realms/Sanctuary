@@ -17,6 +17,9 @@
     0.5531712,
     0.8330676
   ],
+  "Scripts": [
+    "FabledRealms"
+  ],
   "AreaDefinitions": [
     {
       "Id": 2,

@@ -10,7 +10,7 @@ using Sanctuary.Game.Pathfinding;
 
 namespace Sanctuary.Game.Zones;
 
-public interface IZone : IScriptZone
+public interface IZone : IScriptableZone
 {
     int DefinitionId { get; }
     #region Events
