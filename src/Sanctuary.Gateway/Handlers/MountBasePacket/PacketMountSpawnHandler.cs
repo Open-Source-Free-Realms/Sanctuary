@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Game;
-using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -93,20 +92,15 @@ public static class PacketMountSpawnHandler
 
         if (mountDefinition.IsUpgradable && mountInfo.IsUpgraded)
         {
-            mountStats = new MountDefinition.MountStats
-            {
-                MaxMovementSpeed = 12.5f,
+            mountStats.MaxMovementSpeed = 12.5f;
 
-                GlideDefaultForwardSpeed = 8f,
-                GlideMinForwardSpeed = 2f,
-                GlideMaxForwardSpeed = 18f,
-                GlideFallTime = 0.75f,
-                GlideFallSpeed = 4f,
-                GlideEnabled = 1,
-                GlideAccel = 4f,
-
-                JumpHeight = mountStats.JumpHeight
-            };
+            mountStats.GlideDefaultForwardSpeed = 8f;
+            mountStats.GlideMinForwardSpeed = 2f;
+            mountStats.GlideMaxForwardSpeed = 18f;
+            mountStats.GlideFallTime = 0.75f;
+            mountStats.GlideFallSpeed = 4f;
+            mountStats.GlideEnabled = 1;
+            mountStats.GlideAccel = 4f;
         }
 
         connection.Player.UpdateCharacterStats(
