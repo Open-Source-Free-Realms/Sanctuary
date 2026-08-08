@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Game;
+using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -50,6 +51,12 @@ public static class PacketMountSpawnHandler
         if (!_resourceManager.Mounts.TryGetValue(mountInfo.Definition, out var mountDefinition))
             return;
 
+        // Summoning while already riding used to overwrite Player.Mount and strand the
+        // previous one: still in the zone, still on everyone's screen, with nothing left
+        // pointing at it to ever clean it up. Buying from the store and hitting Use Now
+        // reaches here, so this was repeatable for as long as a player kept doing it.
+        connection.Player.Dismount();
+
         if (!connection.Player.Zone.TryCreateMount(connection.Player, mountDefinition, out var mount))
             return;
 
@@ -86,20 +93,25 @@ public static class PacketMountSpawnHandler
 
         connection.Player.SendTunneledToVisible(mountResponse, sendToSelf: true);
 
-        var mountStats = mountDefinition.Stats;
+        // The upgrade bonus used to be written straight into mountDefinition.Stats, which
+        // is the shared loaded resource rather than a per-spawn copy. One upgraded mount
+        // permanently promoted that definition for every player who summoned it after.
+        var mountStats = mountDefinition.IsUpgradable && mountInfo.IsUpgraded
+            ? new MountDefinition.MountStats
+            {
+                MaxMovementSpeed = 12.5f,
 
-        if (mountDefinition.IsUpgradable && mountInfo.IsUpgraded)
-        {
-            mountStats.MaxMovementSpeed = 12.5f;
+                GlideDefaultForwardSpeed = 8f,
+                GlideMinForwardSpeed = 2f,
+                GlideMaxForwardSpeed = 18f,
+                GlideFallTime = 0.75f,
+                GlideFallSpeed = 4f,
+                GlideEnabled = 1,
+                GlideAccel = 4f,
 
-            mountStats.GlideDefaultForwardSpeed = 8f;
-            mountStats.GlideMinForwardSpeed = 2f;
-            mountStats.GlideMaxForwardSpeed = 18f;
-            mountStats.GlideFallTime = 0.75f;
-            mountStats.GlideFallSpeed = 4f;
-            mountStats.GlideEnabled = 1;
-            mountStats.GlideAccel = 4f;
-        }
+                JumpHeight = mountDefinition.Stats.JumpHeight
+            }
+            : mountDefinition.Stats;
 
         connection.Player.UpdateCharacterStats(
             CharacterStats.MaxMovementSpeed.Set(mountStats.MaxMovementSpeed),
