@@ -51,10 +51,6 @@ public static class PacketMountSpawnHandler
         if (!_resourceManager.Mounts.TryGetValue(mountInfo.Definition, out var mountDefinition))
             return;
 
-        // Summoning while already riding used to overwrite Player.Mount and strand the
-        // previous one: still in the zone, still on everyone's screen, with nothing left
-        // pointing at it to ever clean it up. Buying from the store and hitting Use Now
-        // reaches here, so this was repeatable for as long as a player kept doing it.
         connection.Player.Dismount();
 
         if (!connection.Player.Zone.TryCreateMount(connection.Player, mountDefinition, out var mount))
@@ -93,11 +89,11 @@ public static class PacketMountSpawnHandler
 
         connection.Player.SendTunneledToVisible(mountResponse, sendToSelf: true);
 
-        // The upgrade bonus used to be written straight into mountDefinition.Stats, which
-        // is the shared loaded resource rather than a per-spawn copy. One upgraded mount
-        // permanently promoted that definition for every player who summoned it after.
-        var mountStats = mountDefinition.IsUpgradable && mountInfo.IsUpgraded
-            ? new MountDefinition.MountStats
+        var mountStats = mountDefinition.Stats;
+
+        if (mountDefinition.IsUpgradable && mountInfo.IsUpgraded)
+        {
+            mountStats = new MountDefinition.MountStats
             {
                 MaxMovementSpeed = 12.5f,
 
@@ -109,9 +105,9 @@ public static class PacketMountSpawnHandler
                 GlideEnabled = 1,
                 GlideAccel = 4f,
 
-                JumpHeight = mountDefinition.Stats.JumpHeight
-            }
-            : mountDefinition.Stats;
+                JumpHeight = mountStats.JumpHeight
+            };
+        }
 
         connection.Player.UpdateCharacterStats(
             CharacterStats.MaxMovementSpeed.Set(mountStats.MaxMovementSpeed),
