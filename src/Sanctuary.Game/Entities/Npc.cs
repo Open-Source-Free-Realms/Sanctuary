@@ -65,7 +65,7 @@ public class Npc : IScriptableNpc, IEntity
     public int InteractRange { get; set; } = 100;
     public bool IsInteractable { get; set; } = true;
 
-    public int MovementType { get; set; }
+    public int MovementType => 1;
 
     public int AreaDefinitionId { get; set; }
 
@@ -81,7 +81,7 @@ public class Npc : IScriptableNpc, IEntity
     private ConcurrentSet<string> _scripts { get; } = [];
 
     public float WaypointTolerance { get; set; } = 0f;
-    public float Speed { get; set; }
+    public float Speed { get; set; } = 6.25f;
 
     private readonly PathState _path = new();
 
@@ -396,6 +396,8 @@ public class Npc : IScriptableNpc, IEntity
     // Explicit interface implementation needed here to avoid exposing all of IZone to the scripting layer.
     IScriptableZone IScriptableNpc.Zone => Zone;
 
+    (float x, float y, float z) IScriptableNpc.Position => (Position.X, Position.Y, Position.Z);
+
     public void Say(string message)
     {
         var packet = new PacketChat
@@ -420,6 +422,11 @@ public class Npc : IScriptableNpc, IEntity
 
         foreach (var visiblePlayer in VisiblePlayers)
             visiblePlayer.Value.SendTunneled(packet);
+    }
+
+    public void MoveTo(float x, float y, float z, bool direct)
+    {
+        MoveTo(new Vector3(x, y, z), direct);
     }
     
     #endregion

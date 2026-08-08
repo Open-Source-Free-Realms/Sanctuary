@@ -38,6 +38,24 @@ internal sealed class NpcUserData(IScriptableNpc npc) : ILuaUserData
         return new ValueTask<int>(context.Return());
     });
 
+    private static readonly LuaFunction MoveToFunction = new("moveTo", static (context, cancellationToken) =>
+    {
+        var self = context.GetArgument<NpcUserData>(0);
+        var x = context.GetArgument<float>(1);
+        var y = context.GetArgument<float>(2);
+        var z = context.GetArgument<float>(3);
+        var direct = false;
+
+        if (context.ArgumentCount > 4)
+        {
+            direct = context.GetArgument<bool>(4);
+        }
+
+        self._npc.MoveTo(x, y, z, direct);
+
+        return new ValueTask<int>(context.Return());
+    });
+
     #endregion
 
     private static readonly LuaTable SharedMetatable = BuildMetatable();
@@ -57,8 +75,16 @@ internal sealed class NpcUserData(IScriptableNpc npc) : ILuaUserData
                 "guid" => new LuaValue(self._npc.Guid),
                 "name" => new LuaValue(self._npc.Name ?? ""),
                 "zone" => new LuaValue(ZoneUserData.GetOrCreate(self._npc.Zone)),
+                "position" => new LuaValue(new LuaTable
+                {
+                    ["x"] = self._npc.Position.x,
+                    ["y"] = self._npc.Position.y,
+                    ["z"] = self._npc.Position.z
+                }),
+                //
                 "say" => SayFunction,
                 "sayLocalized" => SayLocalizedFunction,
+                "moveTo" => MoveToFunction,
                 _ => LuaValue.Nil
             };
 
