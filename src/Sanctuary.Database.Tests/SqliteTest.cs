@@ -10,7 +10,7 @@ namespace Sanctuary.Database.Tests;
 [TestClass]
 public class SqliteTest : DatabaseTestBase
 {
-    public TestContext TestContext { get; set; }
+    public required TestContext TestContext { get; set; }
 
     protected override void Configure(IConfigurationBuilder configurationBuilder)
     {
