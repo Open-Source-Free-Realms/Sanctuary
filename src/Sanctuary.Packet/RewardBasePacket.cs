@@ -2,13 +2,13 @@ using Sanctuary.Core.IO;
 
 namespace Sanctuary.Packet;
 
-public class BaseRewardPacket
+public class RewardBasePacket
 {
     public const short OpCode = 50;
 
     private readonly byte _subOpCode;
 
-    public BaseRewardPacket(byte subOpCode)
+    public RewardBasePacket(byte subOpCode)
     {
         _subOpCode = subOpCode;
     }
