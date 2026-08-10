@@ -1,18 +1,23 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Numerics;
-using System;
 
+using Microsoft.Extensions.Logging;
+
+using Sanctuary.Core.Collections;
+using Sanctuary.Game.Pathfinding;
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
-using Sanctuary.Game.Pathfinding;
+using Sanctuary.Packet.Common.Chat;
+using Sanctuary.Scripting;
 
 namespace Sanctuary.Game.Entities;
 
 
-public class Npc : IEntity
+public class Npc : IScriptableNpc, IEntity
 {
     public ulong Guid { get; init; }
 
@@ -28,6 +33,8 @@ public class Npc : IEntity
     public ZoneTile ZoneTile { get; protected set; } = ZoneTile.Empty;
     public ConcurrentDictionary<ulong, Npc> VisibleNpcs { get; } = [];
     public ConcurrentDictionary<ulong, Player> VisiblePlayers { get; } = [];
+    public ILogger Logger => Zone.Logger;
+    public ScriptRuntime ScriptRuntime => Zone.ScriptRuntime;
 
     public int NameId { get; set; }
     public string? Name { get; set; }
@@ -59,7 +66,7 @@ public class Npc : IEntity
     public int InteractRange { get; set; } = 100;
     public bool IsInteractable { get; set; } = true;
 
-    public int MovementType { get; set; }
+    public int MovementType => 2;
 
     public int AreaDefinitionId { get; set; }
 
@@ -71,11 +78,11 @@ public class Npc : IEntity
 
     public List<CharacterAttachmentData> Attachments { get; set; } = [];
 
-    public bool Static { get; set; }
 
+    private ConcurrentSet<string> _scripts { get; } = [];
 
     public float WaypointTolerance { get; set; } = 0f;
-    public float Speed { get; set; }
+    public float Speed { get; set; } = 6.25f;
 
     private readonly PathState _path = new();
 
@@ -120,8 +127,11 @@ public class Npc : IEntity
 
     #region Update
 
-    public virtual void UpdateEveryTick()
+    public void UpdateEveryTick()
     {
+        if (!_scripts.IsEmpty)
+            GetOrCreateScriptContext().FireEvent("tick");
+
         var currentPosition = new Vector3(Position.X, Position.Y, Position.Z);
         var result = PathFollower.Advance(_path, currentPosition, Speed, WaypointTolerance, Zone.TickDeltaSeconds);
 
@@ -131,9 +141,10 @@ public class Npc : IEntity
         }
     }
 
-    public virtual void UpdateEverySecond()
+    public void UpdateEverySecond()
     {
-
+        if (!_scripts.IsEmpty)
+            GetOrCreateScriptContext().FireEvent("second");
     }
 
     public void UpdatePosition(Vector4 position, Quaternion rotation, bool updateZoneArea = true)
@@ -339,12 +350,96 @@ public class Npc : IEntity
 
     #endregion
 
+    #region IScriptable
+
+    public ScriptContext GetOrCreateScriptContext()
+    {
+        if (Zone.ScriptManager.GetOrCreateContext(this, out var context))
+        {
+            // Fresh context. Load all attached scripts into it.
+            foreach (var scriptName in _scripts)
+                context.LoadScriptInBackground(Path.Combine("Npc", scriptName + ".lua"));
+        }
+
+        return context;
+    }
+
+    public bool TryAddScript(string scriptName)
+    {
+        var context = GetOrCreateScriptContext();
+
+        if (!_scripts.TryAdd(scriptName))
+            return false;
+
+        var scriptPath = Path.Combine("Npc", scriptName + ".lua");
+
+        context.LoadScriptInBackground(scriptPath);
+
+        return true;
+    }
+
+    public bool TryRemoveScript(string scriptName)
+    {
+        if (!_scripts.TryRemove(scriptName))
+            return false;
+
+        var context = GetOrCreateScriptContext();
+
+        var scriptPath = Path.Combine("Npc", scriptName + ".lua");
+
+        return context.UnloadScript(scriptPath);
+    }
+
+    #endregion
+
+    #region Scripting API
+
+    // Explicit interface implementation needed here to avoid exposing all of IZone to the scripting layer.
+    IScriptableZone IScriptableNpc.Zone => Zone;
+
+    (float x, float y, float z) IScriptableNpc.Position => (Position.X, Position.Y, Position.Z);
+
+    public void Say(string message)
+    {
+        var packet = new PacketChat
+        {
+            Channel = ChatChannel.WorldSay,
+            FromGuid = Guid,
+            FromName = new NameData { FirstName = Name ?? string.Empty },
+            Message = message
+        };
+
+        foreach (var visiblePlayer in VisiblePlayers)
+            visiblePlayer.Value.SendTunneled(packet);
+    }
+
+    public void SayLocalized(int stringId)
+    {
+        var packet = new ChatPacketFromStringId
+        {
+            SpeakerGuid = Guid,
+            StringId = stringId
+        };
+
+        foreach (var visiblePlayer in VisiblePlayers)
+            visiblePlayer.Value.SendTunneled(packet);
+    }
+
+    public void MoveTo(float x, float y, float z, bool direct)
+    {
+        MoveTo(new Vector3(x, y, z), direct);
+    }
+    
+    #endregion
+
     public virtual void Dispose()
     {
         foreach (var visiblePlayer in VisiblePlayers)
             visiblePlayer.Value.OnRemoveVisibleNpcs([this]);
 
         RemoveFromZone();
+
+        Zone.ScriptManager.DeleteContext(this);
     }
 
     protected void DisposeGracefully(bool animate, int delay, int effectDelay, int compositeEffectId, int duration)

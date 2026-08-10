@@ -31,6 +31,10 @@ public static class ChatHelper
         if (isMod)
             return ChatCommandRole.Mod;
 
+#if DEBUG
+        return ChatCommandRole.Admin;
+#else
         return ChatCommandRole.Player;
+#endif
     }
 }

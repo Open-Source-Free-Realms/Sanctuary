@@ -11,6 +11,7 @@ using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 using Sanctuary.Packet.Common.Chat;
+using Sanctuary.Scripting;
 
 namespace Sanctuary.Gateway.Handlers;
 

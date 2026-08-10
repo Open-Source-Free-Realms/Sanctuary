@@ -4,5 +4,9 @@ public interface IScriptManager
 {
     bool Load();
 
-    ScriptContext? GetContextForZone(IScriptZone zone);
+    void Reload();
+
+    bool DeleteContext(IScriptable scriptable);
+
+    bool GetOrCreateContext(IScriptable scriptable, out ScriptContext context);
 }
