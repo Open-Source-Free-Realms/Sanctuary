@@ -66,7 +66,7 @@ public class Npc : IScriptableNpc, IEntity
     public int InteractRange { get; set; } = 100;
     public bool IsInteractable { get; set; } = true;
 
-    public int MovementType => 1;
+    public int MovementType => 2;
 
     public int AreaDefinitionId { get; set; }
 
