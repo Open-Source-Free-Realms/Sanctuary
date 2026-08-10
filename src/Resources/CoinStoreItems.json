@@ -294,7 +294,8 @@
   },
   {
     "Id": 208,
-    "CategoryId": 105
+    "CategoryId": 105,
+    "TintGroupId": 1
   },
   {
     "Id": 209,
@@ -333,7 +334,8 @@
   },
   {
     "Id": 219,
-    "CategoryId": 105
+    "CategoryId": 105,
+    "TintGroupId": 1
   },
   {
     "Id": 220,
@@ -389,7 +391,8 @@
   },
   {
     "Id": 233,
-    "CategoryId": 103
+    "CategoryId": 103,
+    "TintGroupId": 1
   },
   {
     "Id": 237,
@@ -19453,7 +19456,6 @@
     "CategoryId": 56,
     "TintGroupId": 2
   },
-
   {
     "Id": 17244,
     "CategoryId": 201
@@ -77582,19 +77584,19 @@
     "TintGroupId": 3
   },
   {
-    "Comment":"Skull Beanie and Shades",
+    "Comment": "Skull Beanie and Shades",
     "Id": 79496,
     "CategoryId": 101,
     "TintGroupId": 1
   },
   {
-    "Comment":"Skull Beanie and Shades",
+    "Comment": "Skull Beanie and Shades",
     "Id": 79497,
     "CategoryId": 101,
     "TintGroupId": 2
   },
   {
-    "Comment":"Skull Beanie and Shades",
+    "Comment": "Skull Beanie and Shades",
     "Id": 79498,
     "CategoryId": 101,
     "TintGroupId": 3
@@ -77669,5 +77671,240 @@
   },
   {
     "Id": 79454
+  },
+  {
+    "Id": 900001,
+    "CategoryId": 103,
+    "TintGroupId": 1
+  },
+  {
+    "Id": 900002,
+    "CategoryId": 105,
+    "TintGroupId": 1
+  },
+  {
+    "Id": 900003,
+    "CategoryId": 102,
+    "TintGroupId": 1
+  },
+  {
+    "Id": 900004,
+    "CategoryId": 101,
+    "TintGroupId": 2
+  },
+  {
+    "Id": 900005,
+    "CategoryId": 104,
+    "TintGroupId": 1
+  },
+  {
+    "Id": 900006,
+    "CategoryId": 106,
+    "TintGroupId": 1
+  },
+  {
+    "Id": 900007,
+    "CategoryId": 103,
+    "TintGroupId": 2
+  },
+  {
+    "Id": 900008,
+    "CategoryId": 105,
+    "TintGroupId": 2
+  },
+  {
+    "Id": 900009,
+    "CategoryId": 102,
+    "TintGroupId": 2
+  },
+  {
+    "Id": 900010,
+    "CategoryId": 101,
+    "TintGroupId": 2
+  },
+  {
+    "Id": 900011,
+    "CategoryId": 104,
+    "TintGroupId": 2
+  },
+  {
+    "Id": 900012,
+    "CategoryId": 106,
+    "TintGroupId": 2
+  },
+  {
+    "Id": 900013,
+    "CategoryId": 103,
+    "TintGroupId": 1
+  },
+  {
+    "Id": 900014,
+    "CategoryId": 105,
+    "TintGroupId": 1
+  },
+  {
+    "Id": 900015,
+    "CategoryId": 102,
+    "TintGroupId": 1
+  },
+  {
+    "Id": 900016,
+    "CategoryId": 101,
+    "TintGroupId": 2
+  },
+  {
+    "Id": 900017,
+    "CategoryId": 104,
+    "TintGroupId": 1
+  },
+  {
+    "Id": 900018,
+    "CategoryId": 106,
+    "TintGroupId": 1
+  },
+  {
+    "Id": 900019,
+    "CategoryId": 103,
+    "TintGroupId": 1
+  },
+  {
+    "Id": 900020,
+    "CategoryId": 105,
+    "TintGroupId": 1
+  },
+  {
+    "Id": 900021,
+    "CategoryId": 102,
+    "TintGroupId": 1
+  },
+  {
+    "Id": 900022,
+    "CategoryId": 104,
+    "TintGroupId": 1
+  },
+  {
+    "Id": 900023,
+    "CategoryId": 106,
+    "TintGroupId": 1
+  },
+  {
+    "Id": 900024,
+    "CategoryId": 101,
+    "TintGroupId": 2
+  },
+  {
+    "Id": 900025,
+    "CategoryId": 103,
+    "TintGroupId": 1
+  },
+  {
+    "Id": 900026,
+    "CategoryId": 105,
+    "TintGroupId": 1
+  },
+  {
+    "Id": 900027,
+    "CategoryId": 102,
+    "TintGroupId": 1
+  },
+  {
+    "Id": 900028,
+    "CategoryId": 101,
+    "TintGroupId": 1
+  },
+  {
+    "Id": 900029,
+    "CategoryId": 104,
+    "TintGroupId": 1
+  },
+  {
+    "Id": 900030,
+    "CategoryId": 106,
+    "TintGroupId": 1
+  },
+  {
+    "Id": 900031,
+    "CategoryId": 104,
+    "TintGroupId": 1
+  },
+  {
+    "Id": 900032,
+    "CategoryId": 103,
+    "TintGroupId": 1
+  },
+  {
+    "Id": 900033,
+    "CategoryId": 105,
+    "TintGroupId": 1
+  },
+  {
+    "Id": 900034,
+    "CategoryId": 102,
+    "TintGroupId": 1
+  },
+  {
+    "Id": 900035,
+    "CategoryId": 101,
+    "TintGroupId": 2
+  },
+  {
+    "Id": 900036,
+    "CategoryId": 104,
+    "TintGroupId": 1
+  },
+  {
+    "Id": 900037,
+    "CategoryId": 106,
+    "TintGroupId": 1
+  },
+  {
+    "Id": 900038,
+    "CategoryId": 103,
+    "TintGroupId": 2
+  },
+  {
+    "Id": 900039,
+    "CategoryId": 103,
+    "TintGroupId": 3
+  },
+  {
+    "Id": 900040,
+    "CategoryId": 105,
+    "TintGroupId": 2
+  },
+  {
+    "Id": 900041,
+    "CategoryId": 105,
+    "TintGroupId": 3
+  },
+  {
+    "Id": 900042,
+    "CategoryId": 105,
+    "TintGroupId": 2
+  },
+  {
+    "Id": 900043,
+    "CategoryId": 105,
+    "TintGroupId": 3
+  },
+  {
+    "Id": 900044,
+    "CategoryId": 101,
+    "TintGroupId": 2
+  },
+  {
+    "Id": 900045,
+    "CategoryId": 101,
+    "TintGroupId": 3
+  },
+  {
+    "Id": 900046,
+    "CategoryId": 101,
+    "TintGroupId": 1
+  },
+  {
+    "Id": 900047,
+    "CategoryId": 101,
+    "TintGroupId": 3
   }
 ]
