@@ -37,6 +37,7 @@ public interface IResourceManager
     PointOfInterestDefinitionCollection PointOfInterests { get; }
     NpcDefinitionCollection Npcs { get; }
     NameFilterCollection NameFilter { get; }
+    QuestDefinitionCollection Quests { get; }
     MapGraphCollection Maps { get; }
 
     bool Load();

@@ -1,0 +1,881 @@
+[
+  {
+    "Name": "Introduce Yourself",
+    "QuestId": 2563,
+    "TitleId": 94247,
+    "DescriptionId": 94360,
+    "GiverDialogueId": 94246,
+    "ObjectiveDescriptionId": 94248,
+    "SubGoalId": 94359,
+    "TargetDialogueId": 94388,
+    "IconId": 43278,
+    "GiverGuid": 100000002045,
+    "TargetGuid": 100000002049,
+    "RewardCoins": 30,
+    "RewardExperience": 60,
+    "RewardItems": [1180, 75110],
+    "PrerequisiteQuestId": 0,
+    "NextQuestId": 1801,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "ExcludesQuestIds": [2564]
+  },
+  {
+    "Name": "Call the Crew",
+    "QuestId": 1801,
+    "TitleId": 94255,
+    "DescriptionId": 94256,
+    "GiverDialogueId": 94254,
+    "ObjectiveDescriptionId": 100080,
+    "SubGoalId": 100103,
+    "TargetDialogueId": 94258,
+    "IconId": 43278,
+    "GiverGuid": 100000002049,
+    "TargetGuid": 100000003018,
+    "RewardCoins": 30,
+    "RewardExperience": 70,
+    "RewardItems": [8185, 3007, 2969],
+    "PrerequisiteQuestId": 2563,
+    "NextQuestId": 0,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "NameId": 100103,
+        "DescriptionId": 100104,
+        "DialogueId": 384144,
+        "TargetGuid": 100000003018
+      },
+      {
+        "NameId": 94511,
+        "DescriptionId": 94512,
+        "DialogueId": 94257,
+        "TargetGuid": 100000002049
+      }
+    ]
+  },
+  {
+    "Name": "Introduce Yourself",
+    "QuestId": 2564,
+    "TitleId": 94247,
+    "DescriptionId": 104099,
+    "GiverDialogueId": 104097,
+    "ObjectiveDescriptionId": 104099,
+    "SubGoalId": 115453,
+    "TargetDialogueId": 104100,
+    "IconId": 43278,
+    "GiverGuid": 100000002912,
+    "TargetGuid": 100000002889,
+    "RewardCoins": 30,
+    "RewardExperience": 60,
+    "RewardItems": [56774, 4011, 4045],
+    "PrerequisiteQuestId": 0,
+    "NextQuestId": 0,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "ExcludesQuestIds": [2563]
+  },
+  {
+    "Name": "Nomi's Little Brother",
+    "QuestId": 3001,
+    "TitleId": 46280,
+    "DescriptionId": 46621,
+    "GiverDialogueId": 46279,
+    "ObjectiveDescriptionId": 46621,
+    "SubGoalId": 46621,
+    "TargetDialogueId": 73239,
+    "IconId": 43278,
+    "GiverGuid": 100000002335,
+    "TargetGuid": 100000002335,
+    "RewardCoins": 20,
+    "RewardExperience": 50,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 0,
+    "NextQuestId": 3002,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "NameId": 46621,
+        "DialogueId": 140679,
+        "TargetGuid": 100000003016
+      },
+      {
+        "NameId": 74455,
+        "DialogueId": 73239,
+        "TargetGuid": 100000002335
+      }
+    ]
+  },
+  {
+    "Name": "Hasti's Homework Heist",
+    "QuestId": 3002,
+    "TitleId": 74437,
+    "DescriptionId": 74456,
+    "GiverDialogueId": 74436,
+    "ObjectiveDescriptionId": 74456,
+    "SubGoalId": 46489,
+    "TargetDialogueId": 72906,
+    "IconId": 43278,
+    "GiverGuid": 100000002335,
+    "TargetGuid": 100000002335,
+    "RewardCoins": 40,
+    "RewardExperience": 100,
+    "RewardItems": [69834],
+    "PrerequisiteQuestId": 3001,
+    "NextQuestId": 0,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "NameId": 46489,
+        "DescriptionId": 74456,
+        "Type": 2,
+        "RequiredCount": 8,
+        "CollectModelId": 584,
+        "CollectNameId": 74449,
+        "CollectSpawns": [
+          [-1090.0, 5.40, 384.0],
+          [-1072.0, 5.30, 348.0],
+          [-938.0, 4.75, 230.0],
+          [-1000.0, 6.40, 202.0],
+          [-1005.0, 6.40, 198.0],
+          [-1099.0, 5.19, 225.0],
+          [-1115.0, 5.17, 306.0],
+          [-1052.0, 4.63, 307.0]
+        ]
+      },
+      {
+        "NameId": 74455,
+        "DialogueId": 72906,
+        "TargetGuid": 100000002335
+      }
+    ]
+  },
+  {
+    "Name": "Brawler: Restless Rumors",
+    "QuestId": 104146,
+    "TitleId": 104146,
+    "DescriptionId": 104147,
+    "GiverDialogueId": 104145,
+    "ObjectiveDescriptionId": 104147,
+    "SubGoalId": 115619,
+    "TargetDialogueId": 104148,
+    "IconId": 43278,
+    "GiverGuid": 100000002912,
+    "TargetGuid": 100000033082,
+    "RewardCoins": 15,
+    "RewardExperience": 20,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 0,
+    "NextQuestId": 104154,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "NameId": 115619,
+        "DialogueId": 104148,
+        "TargetGuid": 100000033082
+      }
+    ]
+  },
+  {
+    "Name": "Brawler: The Growler Report",
+    "QuestId": 104154,
+    "TitleId": 104154,
+    "DescriptionId": 104155,
+    "GiverDialogueId": 104153,
+    "ObjectiveDescriptionId": 104155,
+    "SubGoalId": 104155,
+    "TargetDialogueId": 104156,
+    "IconId": 43278,
+    "GiverGuid": 100000033082,
+    "TargetGuid": 100000033083,
+    "RewardCoins": 15,
+    "RewardExperience": 63,
+    "RewardItems": [75855],
+    "PrerequisiteQuestId": 104146,
+    "NextQuestId": 0,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "NameId": 104155,
+        "DialogueId": 104156,
+        "TargetGuid": 100000033083
+      }
+    ]
+  },
+  {
+    "Name": "Looking for Lavender",
+    "QuestId": 3010,
+    "TitleId": 390787,
+    "DescriptionId": 390788,
+    "GiverDialogueId": 390786,
+    "ObjectiveDescriptionId": 390797,
+    "SubGoalId": 390798,
+    "TargetDialogueId": 390789,
+    "IconId": 43278,
+    "GiverGuid": 100000002419,
+    "TargetGuid": 100000002419,
+    "RewardCoins": 36,
+    "RewardExperience": 100,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 0,
+    "NextQuestId": 3011,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "NameId": 390798,
+        "DialogueId": 390817,
+        "TargetGuid": 100000040011
+      },
+      {
+        "NameId": 390800,
+        "DialogueId": 390820,
+        "TargetGuid": 100000040012
+      },
+      {
+        "NameId": 390802,
+        "DialogueId": 390822,
+        "TargetGuid": 100000002359
+      },
+      {
+        "NameId": 390804,
+        "DialogueId": 390789,
+        "TargetGuid": 100000002419
+      }
+    ]
+  },
+  {
+    "Name": "A Reliable Source",
+    "QuestId": 3011,
+    "TitleId": 390845,
+    "DescriptionId": 390846,
+    "GiverDialogueId": 390844,
+    "ObjectiveDescriptionId": 390849,
+    "SubGoalId": 390850,
+    "TargetDialogueId": 390847,
+    "IconId": 43278,
+    "GiverGuid": 100000002419,
+    "TargetGuid": 100000002419,
+    "RewardCoins": 24,
+    "RewardExperience": 80,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3010,
+    "NextQuestId": 0,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "NameId": 390850,
+        "DialogueId": 390855,
+        "TargetGuid": 100000001419
+      },
+      {
+        "NameId": 390804,
+        "DialogueId": 390847,
+        "TargetGuid": 100000002419
+      }
+    ]
+  },
+  {
+    "Name": "Welcome to Seaside",
+    "QuestId": 3020,
+    "TitleId": 93283,
+    "DescriptionId": 93284,
+    "GiverDialogueId": 93282,
+    "ObjectiveDescriptionId": 93291,
+    "SubGoalId": 93294,
+    "TargetDialogueId": 93335,
+    "IconId": 43278,
+    "GiverGuid": 100000001885,
+    "TargetGuid": 100000001748,
+    "RewardCoins": 30,
+    "RewardExperience": 80,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 0,
+    "NextQuestId": 3021,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "NameId": 93294,
+        "Type": 1,
+        "ReachPosition": [-690.38, 2.3, -1060.25],
+        "ReachRadius": 15
+      },
+      {
+        "NameId": 93310,
+        "DialogueId": 93316,
+        "TargetGuid": 100000001885
+      },
+      {
+        "NameId": 101743,
+        "DialogueId": 93335,
+        "TargetGuid": 100000001748
+      }
+    ]
+  },
+  {
+    "Name": "The Oldest Building",
+    "QuestId": 3021,
+    "TitleId": 93399,
+    "DescriptionId": 140222,
+    "GiverDialogueId": 93398,
+    "ObjectiveDescriptionId": 93400,
+    "SubGoalId": 93405,
+    "TargetDialogueId": 93401,
+    "IconId": 43278,
+    "GiverGuid": 100000001748,
+    "TargetGuid": 100000001748,
+    "RewardCoins": 30,
+    "RewardExperience": 80,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3020,
+    "NextQuestId": 0,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "NameId": 93405,
+        "DialogueId": 93409,
+        "TargetGuid": 100000001756
+      },
+      {
+        "NameId": 93407,
+        "DialogueId": 93401,
+        "TargetGuid": 100000001748
+      }
+    ]
+  },
+  {
+    "Name": "Purr...fect Secret",
+    "QuestId": 3031,
+    "TitleId": 389700,
+    "DescriptionId": 116709,
+    "GiverDialogueId": 38042,
+    "ObjectiveDescriptionId": 116709,
+    "SubGoalId": 389708,
+    "TargetDialogueId": 45612,
+    "IconId": 43278,
+    "GiverGuid": 100000003380,
+    "TargetGuid": 100000003380,
+    "RewardCoins": 2,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 0,
+    "NextQuestId": 0,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "NameId": 389708,
+        "DialogueId": 389904,
+        "TargetGuid": 100000040016
+      },
+      {
+        "NameId": 389709,
+        "DialogueId": 389905,
+        "TargetGuid": 100000040017
+      },
+      {
+        "NameId": 389710,
+        "DialogueId": 389910,
+        "TargetGuid": 100000040018
+      },
+      {
+        "NameId": 389712,
+        "DialogueId": 389911,
+        "TargetGuid": 100000040019
+      },
+      {
+        "NameId": 38127,
+        "DialogueId": 45612,
+        "TargetGuid": 100000003380
+      }
+    ]
+  },
+  {
+    "Name": "Who Done It?",
+    "QuestId": 3032,
+    "TitleId": 389951,
+    "DescriptionId": 389952,
+    "GiverDialogueId": 389950,
+    "ObjectiveDescriptionId": 389952,
+    "SubGoalId": 38049,
+    "TargetDialogueId": 389953,
+    "IconId": 43278,
+    "GiverGuid": 100000003380,
+    "TargetGuid": 100000003386,
+    "RewardCoins": 5,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3031,
+    "NextQuestId": 3033,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "NameId": 38049,
+        "DialogueId": 389967,
+        "TargetGuid": 100000003389
+      },
+      {
+        "NameId": 38051,
+        "DialogueId": 389970,
+        "TargetGuid": 100000003388
+      },
+      {
+        "NameId": 38053,
+        "DialogueId": 390019,
+        "TargetGuid": 100000003386
+      },
+      {
+        "NameId": 390017,
+        "DialogueId": 389953,
+        "TargetGuid": 100000003386
+      }
+    ]
+  },
+  {
+    "Name": "Making Amends",
+    "QuestId": 3033,
+    "TitleId": 3787,
+    "DescriptionId": 38144,
+    "GiverDialogueId": 38142,
+    "ObjectiveDescriptionId": 116723,
+    "SubGoalId": 38154,
+    "TargetDialogueId": 2134,
+    "IconId": 43278,
+    "GiverGuid": 100000003386,
+    "TargetGuid": 100000003379,
+    "RewardCoins": 2,
+    "RewardExperience": 80,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3032,
+    "NextQuestId": 0,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "NameId": 38154,
+        "DialogueId": 38163,
+        "TargetGuid": 100000003370
+      },
+      {
+        "NameId": 38156,
+        "DialogueId": 2134,
+        "TargetGuid": 100000003379
+      }
+    ]
+  },
+  {
+    "Name": "Lazy Trolls",
+    "QuestId": 3040,
+    "TitleId": 38385,
+    "DescriptionId": 38386,
+    "GiverDialogueId": 38384,
+    "ObjectiveDescriptionId": 38386,
+    "SubGoalId": 38393,
+    "TargetDialogueId": 9585,
+    "IconId": 43278,
+    "GiverGuid": 100000003145,
+    "TargetGuid": 100000003145,
+    "RewardCoins": 30,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 0,
+    "NextQuestId": 3041,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "NameId": 38393,
+        "DialogueId": 38511,
+        "TargetGuid": 100000003097
+      },
+      {
+        "NameId": 38400,
+        "DialogueId": 38402,
+        "TargetGuid": 100000003113
+      },
+      {
+        "NameId": 38442,
+        "DialogueId": 38511,
+        "TargetGuid": 100000003095
+      },
+      {
+        "NameId": 38515,
+        "DialogueId": 38530,
+        "TargetGuid": 100000003108
+      },
+      {
+        "NameId": 38518,
+        "DialogueId": 9585,
+        "TargetGuid": 100000003145
+      }
+    ]
+  },
+  {
+    "Name": "Question at the Quarry",
+    "QuestId": 3041,
+    "TitleId": 70107,
+    "DescriptionId": 70106,
+    "GiverDialogueId": 70102,
+    "ObjectiveDescriptionId": 70109,
+    "SubGoalId": 70110,
+    "TargetDialogueId": 70105,
+    "IconId": 43278,
+    "GiverGuid": 100000003145,
+    "TargetGuid": 100000003120,
+    "RewardCoins": 30,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3040,
+    "NextQuestId": 3042,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "NameId": 70110,
+        "DialogueId": 70105,
+        "TargetGuid": 100000003120
+      }
+    ]
+  },
+  {
+    "Name": "Tools for Smashing",
+    "QuestId": 3042,
+    "TitleId": 70218,
+    "DescriptionId": 70219,
+    "GiverDialogueId": 70299,
+    "ObjectiveDescriptionId": 70219,
+    "SubGoalId": 70221,
+    "TargetDialogueId": 70196,
+    "IconId": 43278,
+    "GiverGuid": 100000003120,
+    "TargetGuid": 100000003120,
+    "RewardCoins": 30,
+    "RewardExperience": 100,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3041,
+    "NextQuestId": 3043,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "NameId": 70221,
+        "Type": 2,
+        "RequiredCount": 5,
+        "CollectModelId": 197,
+        "CollectNameId": 2149,
+        "CollectSpawns": [
+          [-595.0, 1.0, 1225.0],
+          [-438.0, 4.0, 1186.0],
+          [-503.0, 1.0, 1078.0],
+          [-399.0, 5.0, 1092.0],
+          [-440.0, 1.0, 1310.0]
+        ]
+      },
+      {
+        "NameId": 70227,
+        "Type": 2,
+        "RequiredCount": 5,
+        "CollectModelId": 196,
+        "CollectNameId": 3307,
+        "CollectSpawns": [
+          [-608.0, 1.0, 1213.0],
+          [-425.0, 4.0, 1174.0],
+          [-491.0, 1.0, 1066.0],
+          [-387.0, 5.0, 1080.0],
+          [-428.0, 1.0, 1323.0]
+        ]
+      },
+      {
+        "NameId": 70230,
+        "DialogueId": 70196,
+        "TargetGuid": 100000003120
+      }
+    ]
+  },
+  {
+    "Name": "Box O' Rocks",
+    "QuestId": 3043,
+    "TitleId": 70201,
+    "DescriptionId": 70202,
+    "GiverDialogueId": 70505,
+    "ObjectiveDescriptionId": 70288,
+    "SubGoalId": 70289,
+    "TargetDialogueId": 70202,
+    "IconId": 43278,
+    "GiverGuid": 100000003120,
+    "TargetGuid": 100000003145,
+    "RewardCoins": 30,
+    "RewardExperience": 100,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3042,
+    "NextQuestId": 0,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "NameId": 70289,
+        "Type": 2,
+        "RequiredCount": 3,
+        "CollectModelId": 84,
+        "CollectNameId": 21364,
+        "CollectSpawns": [
+          [-535.0, 0.5, 1350.0],
+          [-550.0, 0.5, 1365.0],
+          [-525.0, 0.5, 1355.0]
+        ]
+      },
+      {
+        "NameId": 70291,
+        "DialogueId": 70202,
+        "TargetGuid": 100000003145
+      }
+    ]
+  },
+  {
+    "Name": "Feminine Touch - Yancy Gilbert surveys the girls of Seaside",
+    "QuestId": 3060,
+    "TitleId": 101400,
+    "DescriptionId": 101410,
+    "GiverDialogueId": 101408,
+    "ObjectiveDescriptionId": 101401,
+    "SubGoalId": 101402,
+    "TargetDialogueId": 101411,
+    "IconId": 43278,
+    "GiverGuid": 100000001964,
+    "TargetGuid": 100000001964,
+    "RewardCoins": 30,
+    "RewardExperience": 80,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 0,
+    "NextQuestId": 0,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "NameId": 101402,
+        "TargetGuid": 100000001777,
+        "Dialogue": [
+          { "TextId": 101412, "ResponseTextId": 101413 }
+        ]
+      },
+      {
+        "NameId": 101404,
+        "TargetGuid": 100000001758,
+        "Dialogue": [
+          { "TextId": 101414, "ResponseTextId": 101415 },
+          { "TextId": 101416, "ResponseTextId": 103597 }
+        ]
+      },
+      {
+        "NameId": 101406,
+        "DialogueId": 101411,
+        "TargetGuid": 100000001964
+      }
+    ]
+  },
+  {
+    "Name": "A Booming Problem - mine tin ore for Heddy Heathcliff's boom powder",
+    "QuestId": 3061,
+    "TitleId": 400355,
+    "DescriptionId": 400356,
+    "GiverDialogueId": 400433,
+    "ObjectiveDescriptionId": 400427,
+    "SubGoalId": 400357,
+    "TargetDialogueId": 400436,
+    "IconId": 43278,
+    "GiverGuid": 100000001925,
+    "TargetGuid": 100000001925,
+    "RewardCoins": 40,
+    "RewardExperience": 90,
+    "RewardItems": [15916],
+    "PrerequisiteQuestId": 0,
+    "NextQuestId": 0,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "NameId": 400357,
+        "Type": 2,
+        "RequiredCount": 5,
+        "CollectModelId": 611,
+        "CollectNameId": 21936,
+        "CollectSpawns": [
+          [-245.0, -29.09, -1166.0],
+          [-252.0, -30.24, -1173.0],
+          [-268.0, -21.43, -1159.0],
+          [-226.0, -24.65, -1151.0],
+          [-235.0, -30.5, -1183.0]
+        ]
+      },
+      {
+        "NameId": 400426,
+        "DialogueId": 400436,
+        "TargetGuid": 100000001925
+      }
+    ]
+  },
+  {
+    "Name": "The Party Pooper - cheer up Wugunbump at the Merry Vale chugawug camp",
+    "QuestId": 3070,
+    "TitleId": 385597,
+    "DescriptionId": 385598,
+    "GiverDialogueId": 385596,
+    "ObjectiveDescriptionId": 385601,
+    "SubGoalId": 385602,
+    "TargetDialogueId": 385599,
+    "IconId": 43278,
+    "GiverGuid": 100000002177,
+    "TargetGuid": 100000004355,
+    "RewardCoins": 6,
+    "RewardExperience": 60,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 0,
+    "NextQuestId": 3071,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "NameId": 385602,
+        "DescriptionId": 385603,
+        "DialogueId": 385599,
+        "TargetGuid": 100000004355
+      }
+    ]
+  },
+  {
+    "Name": "Suspicious Serenity - question the families of the missing Merry Vale children",
+    "QuestId": 3071,
+    "TitleId": 74199,
+    "DescriptionId": 74200,
+    "GiverDialogueId": 74198,
+    "ObjectiveDescriptionId": 74228,
+    "SubGoalId": 74204,
+    "TargetDialogueId": 74201,
+    "IconId": 43278,
+    "GiverGuid": 100000004355,
+    "TargetGuid": 100000004355,
+    "RewardCoins": 30,
+    "RewardExperience": 100,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3070,
+    "NextQuestId": 0,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "NameId": 74204,
+        "DescriptionId": 74205,
+        "DialogueId": 74217,
+        "TargetGuid": 100000002280
+      },
+      {
+        "NameId": 74206,
+        "DescriptionId": 74207,
+        "DialogueId": 74222,
+        "TargetGuid": 100000002222
+      },
+      {
+        "NameId": 74208,
+        "DescriptionId": 74209,
+        "DialogueId": 74214,
+        "TargetGuid": 100000002187
+      },
+      {
+        "NameId": 74210,
+        "DescriptionId": 74211,
+        "DialogueId": 74226,
+        "TargetGuid": 100000002185
+      },
+      {
+        "NameId": 74212,
+        "DescriptionId": 74213,
+        "DialogueId": 74201,
+        "TargetGuid": 100000004355
+      }
+    ]
+  },
+  {
+    "Name": "Aiding our Allies - Arch Druid Camellia sends you to Headmaster Merk in Sunstone Valley",
+    "QuestId": 3080,
+    "TitleId": 440466,
+    "DescriptionId": 440467,
+    "GiverDialogueId": 440465,
+    "ObjectiveDescriptionId": 440470,
+    "SubGoalId": 440471,
+    "TargetDialogueId": 440468,
+    "IconId": 43278,
+    "GiverGuid": 100000001454,
+    "TargetGuid": 100000003841,
+    "RewardCoins": 50,
+    "RewardExperience": 120,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 0,
+    "NextQuestId": 3081,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "NameId": 440471,
+        "DialogueId": 440468,
+        "TargetGuid": 100000003841
+      }
+    ]
+  },
+  {
+    "Name": "Sobering Homecoming - regroup the Freewheelers for Dorn Geargrinder",
+    "QuestId": 3081,
+    "TitleId": 438840,
+    "DescriptionId": 438841,
+    "GiverDialogueId": 438839,
+    "ObjectiveDescriptionId": 438900,
+    "SubGoalId": 438901,
+    "TargetDialogueId": 438842,
+    "IconId": 43278,
+    "GiverGuid": 100000003840,
+    "TargetGuid": 100000003840,
+    "RewardCoins": 50,
+    "RewardExperience": 140,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3080,
+    "NextQuestId": 0,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "NameId": 438901,
+        "TargetGuid": 100000003842,
+        "Dialogue": [
+          { "TextId": 438967, "ResponseTextId": 423585 }
+        ]
+      },
+      {
+        "NameId": 438499,
+        "TargetGuid": 100000003841,
+        "Dialogue": [
+          { "TextId": 438969, "ResponseTextId": 428407 }
+        ]
+      },
+      {
+        "NameId": 438985,
+        "RequiredCount": 3,
+        "TargetGuid": 100000040032,
+        "TargetGuids": [100000040033, 100000040034],
+        "TargetDialogueIds": [438971, 438973, 438975],
+        "TargetResponseIds": [438972, 438974, 8136]
+      },
+      {
+        "NameId": 437816,
+        "DialogueId": 438842,
+        "TargetGuid": 100000003840
+      }
+    ]
+  }
+]
