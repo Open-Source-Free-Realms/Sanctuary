@@ -15,6 +15,8 @@ internal class MockScriptZone(ILogger _logger) : IScriptableZone
 
     public ILogger Logger { get; } = _logger;
 
+    public ScriptRuntime ScriptRuntime { get; } = new ScriptRuntime(_logger);
+
     public ScriptContext GetOrCreateScriptContext()
     {
         throw new NotImplementedException();

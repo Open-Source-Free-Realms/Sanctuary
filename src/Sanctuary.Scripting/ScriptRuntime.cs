@@ -1,19 +1,40 @@
 using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.Extensions.Logging;
+
 using Lua;
 using Lua.Standard;
 
 namespace Sanctuary.Scripting;
 
-internal sealed class ScriptRuntime
+public sealed class ScriptRuntime
 {
-    private readonly LuaState _state = LuaState.Create();
+    private readonly LuaState _state;
     private readonly SemaphoreSlim _gate = new(1, 1);
 
-    public LuaTable Environment => _state.Environment;
+    public ScriptRuntime(ILogger logger)
+    {
+        logger.LogDebug("Initializing scripting...");
 
-    public void OpenStandardLibraries() => _state.OpenStandardLibraries();
+        _state = LuaState.Create();
+
+        _state.OpenStandardLibraries();
+
+        logger.LogInformation("Scripting initialized");
+    }
+
+    internal LuaTable CreateEnv()
+    {
+        var env = new LuaTable
+        {
+            Metatable = new LuaTable()
+        };
+
+        env.Metatable["__index"] = _state.Environment; // read access to Lua std lib
+
+        return env;
+    }
 
     public async ValueTask ExecuteFileAsync(string path, LuaTable environment, CancellationToken cancellationToken = default)
     {

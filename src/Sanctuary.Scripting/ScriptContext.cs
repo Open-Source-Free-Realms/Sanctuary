@@ -21,11 +21,11 @@ public class ScriptContext
     private readonly ConcurrentDictionary<string, LuaTable> _scriptEnvironments = new();
     private readonly ConcurrentDictionary<string, ConcurrentGroupedSet<LuaTable, LuaFunction>> _eventCallbacks = new();
 
-    internal ScriptContext(ScriptRuntime runtime, ILogger logger, LuaTable environment, ILuaUserData? userData = null)
+    internal ScriptContext(ScriptRuntime runtime, ILogger logger, ILuaUserData? userData = null)
     {
         _runtime = runtime;
         _logger = logger;
-        _rootEnvironment = environment;
+        _rootEnvironment = runtime.CreateEnv();
         _eventArguments = userData is null ? [] : [new LuaValue(userData)];
 
         // Override `print` to log to our logger instead of stdout.

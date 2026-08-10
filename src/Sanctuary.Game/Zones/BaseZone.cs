@@ -28,6 +28,7 @@ public abstract class BaseZone : IZone, IDisposable
     private readonly ILogger _logger;
     private readonly IResourceManager _resourceManager;
     private readonly IScriptManager _scriptManager;
+    private readonly ScriptRuntime _scriptRuntime;
     private readonly BaseZoneDefinition _zoneDefinition;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
@@ -67,6 +68,7 @@ public abstract class BaseZone : IZone, IDisposable
     public IEnumerable<Player> Players => _players.Values;
 
     public IScriptManager ScriptManager => _scriptManager;
+    public ScriptRuntime ScriptRuntime => _scriptRuntime;
 
     public Pathfinder<MapNode>? Pathfinder { get; }
 
@@ -80,6 +82,7 @@ public abstract class BaseZone : IZone, IDisposable
         _logger = loggerFactory.CreateLogger($"Zone {Name} ({Id})");
 
         _scriptManager = serviceProvider.GetRequiredService<IScriptManager>();
+        _scriptRuntime = new ScriptRuntime(_logger);
 
         foreach (var script in _zoneDefinition.Scripts ?? [])
             _scripts.TryAdd(script);

@@ -9,6 +9,7 @@ internal class MockScriptNpc(IScriptableZone _zone) : IScriptableNpc
     public ulong Guid { get => 0; init => throw new NotImplementedException(); }
     public string? Name { get => "MockNpc"; set => throw new NotImplementedException(); }
     public ILogger Logger { get; } = _zone.Logger;
+    public ScriptRuntime ScriptRuntime => _zone.ScriptRuntime;
     public IScriptableZone Zone => _zone;
     public (float x, float y, float z) Position => (0, 0, 0);
 

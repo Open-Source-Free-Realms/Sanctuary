@@ -6,6 +6,8 @@ public interface IScriptable
 {
     ILogger Logger { get; }
 
+    ScriptRuntime ScriptRuntime { get; }
+
     ScriptContext GetOrCreateScriptContext();
 
     bool TryAddScript(string scriptName);

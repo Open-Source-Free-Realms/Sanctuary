@@ -13,7 +13,6 @@ public class ScriptManager : IScriptManager
     internal static readonly string BaseDirectory = ResolveScriptsDirectory();
 
     private readonly ILogger _logger;
-    private readonly ScriptRuntime _runtime = new();
 
     private readonly ConcurrentDictionary<IScriptable, ScriptContext> _contexts = new();
 
@@ -38,10 +37,6 @@ public class ScriptManager : IScriptManager
 
     public bool Load()
     {
-        _logger.LogDebug("Initializing Lua engine...");
-
-        _runtime.OpenStandardLibraries();
-
         _logger.LogInformation("Lua engine initialized");
 
         return true;
@@ -54,18 +49,6 @@ public class ScriptManager : IScriptManager
         _contexts.Clear();
 
         _logger.LogInformation("Scripts reloaded");
-    }
-
-    internal LuaTable CreateEnv()
-    {
-        var env = new LuaTable
-        {
-            Metatable = new LuaTable()
-        };
-
-        env.Metatable["__index"] = _runtime.Environment; // read access to Lua std lib
-
-        return env;
     }
 
     public bool DeleteContext(IScriptable scriptable)
@@ -81,8 +64,6 @@ public class ScriptManager : IScriptManager
             return false;
         }
 
-        var env = CreateEnv();
-
         ILuaUserData userData = scriptable switch
         {
             IScriptableZone zone => ZoneUserData.GetOrCreate(zone),
@@ -90,7 +71,7 @@ public class ScriptManager : IScriptManager
             _ => throw new NotSupportedException($"No script wrapper for {scriptable.GetType().Name}.")
         };
 
-        var newContext = new ScriptContext(_runtime, scriptable.Logger, env, userData);
+        var newContext = new ScriptContext(scriptable.ScriptRuntime, scriptable.Logger, userData);
 
         // GetOrAdd is atomic, so if another thread is creating a context for the same object
         // at the same time, we'll get the existing one instead of overwriting it.

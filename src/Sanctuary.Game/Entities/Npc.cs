@@ -34,6 +34,7 @@ public class Npc : IScriptableNpc, IEntity
     public ConcurrentDictionary<ulong, Npc> VisibleNpcs { get; } = [];
     public ConcurrentDictionary<ulong, Player> VisiblePlayers { get; } = [];
     public ILogger Logger => Zone.Logger;
+    public ScriptRuntime ScriptRuntime => Zone.ScriptRuntime;
 
     public int NameId { get; set; }
     public string? Name { get; set; }
