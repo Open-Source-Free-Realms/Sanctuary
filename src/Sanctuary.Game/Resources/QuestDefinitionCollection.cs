@@ -2,7 +2,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using System.Numerics;
 using System.Text.Json;
 
 using Microsoft.Extensions.Logging;
@@ -11,37 +10,15 @@ using Sanctuary.Game.Resources.Definitions;
 
 namespace Sanctuary.Game.Resources;
 
-// One collectible pickup to spawn for a Collect goal. Guids are assigned at load time and map back to
-// (quest, goal) via Collectibles.
-public sealed class CollectibleSpawn
-{
-    public ulong Guid { get; init; }
-    public int ModelId { get; init; }
-    public int NameId { get; init; }
-    public Vector4 Position { get; init; }
-    public byte CursorId { get; init; }
-    public int InteractRange { get; init; }
-}
-
 public class QuestDefinitionCollection
 {
     private readonly ILogger _logger;
 
     public ConcurrentDictionary<int, QuestDefinition> Quests { get; } = new();
 
-    // NPC guid -> the quests it gives / is a talk-to or turn-in target for.
+    // NPC guid -> the quests it offers, and the quests it is a goal target or turn-in for.
     public ConcurrentDictionary<ulong, List<int>> ByGiver { get; } = new();
     public ConcurrentDictionary<ulong, List<int>> ByTarget { get; } = new();
-
-    // Pickup guid -> the (quest, goal) it credits.
-    public ConcurrentDictionary<ulong, (int QuestId, int GoalIndex)> Collectibles { get; } = new();
-
-    public List<CollectibleSpawn> CollectibleSpawns { get; } = [];
-
-    // Well above the NPC range (NpcGuidBase + id) so the two can't collide.
-    private const ulong CollectibleGuidBase = 700000000000UL;
-
-    private ulong _nextCollectibleGuid = CollectibleGuidBase;
 
     public QuestDefinitionCollection(ILogger logger)
     {
@@ -50,8 +27,6 @@ public class QuestDefinitionCollection
 
     public bool TryGet(int questId, out QuestDefinition definition) => Quests.TryGetValue(questId, out definition!);
 
-    // The tightest interact range any quest using this NPC asks for, since one NPC often serves several.
-    // False when it isn't a quest NPC, leaving the entity's own default alone.
     public bool TryGetNpcInteractRange(ulong npcGuid, out int interactRange)
     {
         interactRange = int.MaxValue;
@@ -104,6 +79,12 @@ public class QuestDefinitionCollection
 
             foreach (var entry in entries)
             {
+                if (entry.Goals.Count == 0)
+                {
+                    _logger.LogError("Quest {id} has no goals. \"{file}\"", entry.QuestId, filePath);
+                    return false;
+                }
+
                 if (!Quests.TryAdd(entry.QuestId, entry))
                 {
                     _logger.LogWarning("Failed to add entry. {id} \"{file}\"", entry.QuestId, filePath);
@@ -133,14 +114,11 @@ public class QuestDefinitionCollection
     private void IndexGoals(QuestDefinition quest, string filePath)
     {
         var goalNameIds = new HashSet<int>();
-        var goals = quest.EffectiveGoals;
 
-        for (var goalIndex = 0; goalIndex < goals.Count; goalIndex++)
+        foreach (var goal in quest.Goals)
         {
-            var goal = goals[goalIndex];
-
-            // Intermediate goals can point at NPCs that aren't the giver or turn-in target, and every NPC
-            // of a counted talk goal has to be clickable, so index them all.
+            // Intermediate goals can point at NPCs that are neither the giver nor the turn-in target, and
+            // every NPC of a counted talk goal has to be clickable, so index them all.
             foreach (var targetGuid in goal.AllTalkTargetGuids())
             {
                 var questIds = ByTarget.GetOrAdd(targetGuid, _ => []);
@@ -153,34 +131,8 @@ public class QuestDefinitionCollection
             if (!goalNameIds.Add(goal.NameId))
                 _logger.LogWarning("Duplicate goal NameId {nameId} on quest {id} in \"{file}\".", goal.NameId, quest.QuestId, filePath);
 
-            if (goal.Type != QuestGoalType.Collect)
-                continue;
-
-            if (goal.RequiredCount <= 0)
+            if (goal.Type == QuestGoalType.Collect && goal.RequiredCount <= 0)
                 goal.RequiredCount = goal.CollectSpawns.Count;
-
-            foreach (var position in goal.CollectSpawns)
-            {
-                if (position is null || position.Length < 3)
-                {
-                    _logger.LogWarning("Skipping malformed collect spawn on quest {id} in \"{file}\".", quest.QuestId, filePath);
-                    continue;
-                }
-
-                var guid = _nextCollectibleGuid++;
-
-                Collectibles[guid] = (quest.QuestId, goalIndex);
-
-                CollectibleSpawns.Add(new CollectibleSpawn
-                {
-                    Guid = guid,
-                    ModelId = goal.CollectModelId,
-                    NameId = goal.CollectNameId,
-                    Position = new Vector4(position[0], position[1], position[2], 1f),
-                    CursorId = goal.CollectCursorId,
-                    InteractRange = goal.CollectInteractRange
-                });
-            }
         }
     }
 }

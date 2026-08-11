@@ -12,7 +12,7 @@ using Sanctuary.Database.MySql;
 namespace Sanctuary.Database.MySql.Migrations
 {
     [DbContext(typeof(MySqlDatabaseContext))]
-    [Migration("20260810000000_AddCharacterQuests")]
+    [Migration("20260811000000_AddCharacterQuests")]
     partial class AddCharacterQuests
     {
         /// <inheritdoc />
@@ -55,6 +55,9 @@ namespace Sanctuary.Database.MySql.Migrations
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<ulong>("Id"));
 
                     b.Property<int>("ActiveProfileId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ActiveQuestId")
                         .HasColumnType("int");
 
                     b.Property<int?>("ActiveTitleId")
@@ -210,9 +213,6 @@ namespace Sanctuary.Database.MySql.Migrations
 
                     b.Property<int>("GoalProgress")
                         .HasColumnType("int");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)");
 
                     b.HasKey("QuestId", "CharacterId");
 

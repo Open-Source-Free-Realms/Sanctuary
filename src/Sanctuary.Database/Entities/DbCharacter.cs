@@ -63,6 +63,9 @@ public class DbCharacter
     public ulong? GuildMemberId { get; set; }
     public DbGuildMember? GuildMember { get; set; }
 
+    // The tracked quest, or null when none is.
+    public int? ActiveQuestId { get; set; }
+
     public ICollection<DbItem> Items { get; set; } = new HashSet<DbItem>();
     public ICollection<DbTitle> Titles { get; set; } = new HashSet<DbTitle>();
     public ICollection<DbMount> Mounts { get; set; } = new HashSet<DbMount>();

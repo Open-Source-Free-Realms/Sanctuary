@@ -54,6 +54,9 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.Property<int>("ActiveProfileId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("ActiveQuestId")
+                        .HasColumnType("int");
+
                     b.Property<int?>("ActiveTitleId")
                         .HasColumnType("int");
 
@@ -207,9 +210,6 @@ namespace Sanctuary.Database.MySql.Migrations
 
                     b.Property<int>("GoalProgress")
                         .HasColumnType("int");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("tinyint(1)");
 
                     b.HasKey("QuestId", "CharacterId");
 

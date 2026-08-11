@@ -11,7 +11,7 @@ using Sanctuary.Database.Sqlite;
 namespace Sanctuary.Database.Sqlite.Migrations
 {
     [DbContext(typeof(SqliteDatabaseContext))]
-    [Migration("20260810000000_AddCharacterQuests")]
+    [Migration("20260811000000_AddCharacterQuests")]
     partial class AddCharacterQuests
     {
         /// <inheritdoc />
@@ -48,6 +48,9 @@ namespace Sanctuary.Database.Sqlite.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("ActiveProfileId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("ActiveQuestId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("ActiveTitleId")
@@ -202,9 +205,6 @@ namespace Sanctuary.Database.Sqlite.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("GoalProgress")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsActive")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("QuestId", "CharacterId");

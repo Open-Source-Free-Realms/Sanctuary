@@ -47,6 +47,9 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     b.Property<int>("ActiveProfileId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("ActiveQuestId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int?>("ActiveTitleId")
                         .HasColumnType("INTEGER");
 
@@ -199,9 +202,6 @@ namespace Sanctuary.Database.Sqlite.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("GoalProgress")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsActive")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("QuestId", "CharacterId");

@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace Sanctuary.Database.Sqlite.Migrations
+namespace Sanctuary.Database.MySql.Migrations
 {
     /// <inheritdoc />
     public partial class AddCharacterQuests : Migration
@@ -10,16 +10,21 @@ namespace Sanctuary.Database.Sqlite.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AddColumn<int>(
+                name: "ActiveQuestId",
+                table: "Characters",
+                type: "int",
+                nullable: true);
+
             migrationBuilder.CreateTable(
                 name: "CharacterQuests",
                 columns: table => new
                 {
-                    QuestId = table.Column<int>(type: "INTEGER", nullable: false),
-                    CharacterId = table.Column<ulong>(type: "INTEGER", nullable: false),
-                    Completed = table.Column<bool>(type: "INTEGER", nullable: false),
-                    GoalProgress = table.Column<int>(type: "INTEGER", nullable: false),
-                    GoalCount = table.Column<int>(type: "INTEGER", nullable: false),
-                    IsActive = table.Column<bool>(type: "INTEGER", nullable: false)
+                    QuestId = table.Column<int>(type: "int", nullable: false),
+                    CharacterId = table.Column<ulong>(type: "bigint unsigned", nullable: false),
+                    Completed = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    GoalProgress = table.Column<int>(type: "int", nullable: false),
+                    GoalCount = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -30,7 +35,8 @@ namespace Sanctuary.Database.Sqlite.Migrations
                         principalTable: "Characters",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CharacterQuests_CharacterId",
@@ -43,6 +49,10 @@ namespace Sanctuary.Database.Sqlite.Migrations
         {
             migrationBuilder.DropTable(
                 name: "CharacterQuests");
+
+            migrationBuilder.DropColumn(
+                name: "ActiveQuestId",
+                table: "Characters");
         }
     }
 }
