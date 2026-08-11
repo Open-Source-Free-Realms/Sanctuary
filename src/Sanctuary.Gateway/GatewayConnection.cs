@@ -613,7 +613,23 @@ public class GatewayConnection : UdpConnection
 
         var packetSendSelfToClient = new PacketSendSelfToClient();
 
-        packetSendSelfToClient.Payload = Player.Serialize();
+        // Referees should always report themselves as the Referee profile (58), regardless
+        // of which job is actually active, so their own client shows the pink name from
+        // login onward instead of only after manually switching to the Referee job.
+        bool isReferee = Player.IsMod || Player.IsAdmin;
+        int realActiveProfileId = Player.ActiveProfileId;
+
+        if (isReferee)
+            Player.ActiveProfileId = 58;
+
+        try
+        {
+            packetSendSelfToClient.Payload = Player.Serialize();
+        }
+        finally
+        {
+            Player.ActiveProfileId = realActiveProfileId;
+        }
 
         SendTunneled(packetSendSelfToClient);
     }
