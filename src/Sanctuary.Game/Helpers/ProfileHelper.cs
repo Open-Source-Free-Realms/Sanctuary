@@ -1,16 +1,22 @@
 using System.Linq;
 
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+
+using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Packet.Common;
 
 namespace Sanctuary.Game.Helpers;
 
+public enum SpecialProfileIds
+{
+    Referee = 58,
+    // Enforcer = ??
+}
+
 public static class ProfileHelper
 {
-    /// <summary>
-    /// Grants a character the items listed in a profile's <see cref="ClientProfileData.DefaultItems"/>,
-    /// reusing any matching item the character already owns, and attaches them to the given profile.
-    /// </summary>
     public static void GrantDefaultItems(DbCharacter character, DbProfile dbProfile,
         ClientProfileData profileData, IResourceManager resourceManager)
     {
@@ -41,4 +47,62 @@ public static class ProfileHelper
             dbProfile.Items.Add(dbItem);
         }
     }
+
+    public static void AddSpecialProfile(DbCharacter character, DatabaseContext dbContext,
+        IResourceManager resourceManager, ILogger logger, SpecialProfileIds profileId)
+    {
+        int id = (int)profileId;
+
+        if (!resourceManager.Profiles.TryGetValue(id, out var profileData))
+        {
+            logger.LogWarning("Profile with ID {profileId} does not exist in the resource manager.", id);
+            return;
+        }
+
+        // Check if the character already has the profile
+        if (character.Profiles.Any(p => p.Id == id))
+        {
+            logger.LogInformation("Character {characterId} already has profile {profileId}.", character.Id, id);
+            return;
+        }
+
+        DbProfile newProfile = new DbProfile
+        {
+            CharacterId = character.Id,
+            Id = id,
+            Level = 20
+        };
+
+        var existingItemIds = character.Items.Select(x => x.Id).ToHashSet();
+
+        GrantDefaultItems(character, newProfile, profileData, resourceManager);
+        dbContext.Attach(character);
+
+        foreach (var item in character.Items)
+        {
+            if (!existingItemIds.Contains(item.Id))
+                dbContext.Entry(item).State = EntityState.Added;
+        }
+
+        dbContext.Entry(newProfile).State = EntityState.Added;
+
+        dbContext.SaveChanges();
+        character.Profiles.Add(newProfile);
+    }
+
+    public static void RemoveSpecialProfile(DbCharacter character, DatabaseContext dbContext, SpecialProfileIds profileId)
+    {
+        int id = (int)profileId;
+
+        dbContext.Profiles.Where(p => p.CharacterId == character.Id && p.Id == id).ExecuteDelete();
+        dbContext.SaveChanges();
+
+        var profileToRemove = character.Profiles.FirstOrDefault(p => p.Id == id);
+        if (profileToRemove != null)
+        {
+            character.Profiles.Remove(profileToRemove);
+        }
+    }
+    // void AddTitle();
+    // void RemoveTitle();
 }

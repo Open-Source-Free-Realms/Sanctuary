@@ -9,7 +9,6 @@ using Microsoft.Extensions.Options;
 using Sanctuary.Core.Configuration;
 using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
-using Sanctuary.Database.Entities;
 using Sanctuary.Game;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
@@ -39,60 +38,6 @@ public static class PacketLoginHandler
         var options = serviceProvider.GetRequiredService<IOptionsMonitor<GatewayServerOptions>>();
         _options = options.CurrentValue;
         options.OnChange(o => _options = o);
-    }
-
-    private static void AddRefereeToProfile(DbCharacter character, DatabaseContext dbContext)
-    {
-        const int refereeId = 58;
-        if (!_resourceManager.Profiles.TryGetValue(refereeId, out var refereeProfileData))
-        {
-            _logger.LogWarning("Referee profile with ID {refereeId} does not exist in the resource manager.", refereeId);
-            return;
-        }
-
-        // Check if the character already has the referee profile
-        if (character.Profiles.Any(p => p.Id == refereeId))
-        {
-            _logger.LogInformation("Character {characterId} already has the referee profile.", character.Id);
-            return;
-        }
-
-        DbProfile refereeProfile = new DbProfile
-        {
-            CharacterId = character.Id,
-            Id = refereeId,
-            Level = 20
-        };
-
-        var existingItemIds = character.Items.Select(x => x.Id).ToHashSet();
-
-        ProfileHelper.GrantDefaultItems(character, refereeProfile, refereeProfileData, _resourceManager);
-        dbContext.Attach(character);
-
-        foreach (var item in character.Items)
-        {
-            if (!existingItemIds.Contains(item.Id))
-                dbContext.Entry(item).State = EntityState.Added;
-        }
-
-        dbContext.Entry(refereeProfile).State = EntityState.Added;
-
-        dbContext.SaveChanges();
-        character.Profiles.Add(refereeProfile);
-        return;
-    }
-
-    private static void RemoveRefereeFromProfile(DbCharacter character, DatabaseContext dbContext)
-    {
-        const int refereeId = 58;
-        dbContext.Profiles.Where(p => p.CharacterId == character.Id && p.Id == refereeId).ExecuteDelete();
-        dbContext.SaveChanges();
-        var profileToRemove = character.Profiles.Where(p => p.CharacterId == character.Id && p.Id == refereeId)
-        .FirstOrDefault(p => p.Id == refereeId);
-        if (profileToRemove != null)
-        {
-            character.Profiles.Remove(profileToRemove);
-        }
     }
 
     public static bool HandlePacket(GatewayConnection connection, Span<byte> data)
@@ -211,15 +156,15 @@ public static class PacketLoginHandler
             }
         }
 
-        
-        if (character.User.IsMod || character.User.IsAdmin)
+        bool isReferee = character.User.IsMod || character.User.IsAdmin;
+        if (isReferee)
         {
-            AddRefereeToProfile(character, dbContext);
+            ProfileHelper.AddSpecialProfile(character, dbContext, _resourceManager, _logger, SpecialProfileIds.Referee);
         }
         else
         {
             // if user is no longer a mod, remove referee profile
-            RemoveRefereeFromProfile(character, dbContext);
+            ProfileHelper.RemoveSpecialProfile(character, dbContext, SpecialProfileIds.Referee);
         }
 #if !DEBUG
         var result = dbContext.Characters
