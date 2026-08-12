@@ -1884,23 +1884,5 @@
       421,
       429
     ]
-  },
-  {
-    "Comment": "Merchant",
-    "Id": 200,
-    "NameId": 0,
-    "DescriptionId": 0,
-    "Type": 1,
-    "Icon": 0,
-    "BadgeImageSet": 294,
-    "ButtonImageSet": 0,
-    "AbilityBgImageSet": 0,
-    "Hint": 0,
-    "MembersOnly": false,
-    "Trial": false,
-    "Unknown": 0,
-    "Unknown2": 0,
-    "ItemClasses": {},
-    "DefaultItems": []
   }
 ]
