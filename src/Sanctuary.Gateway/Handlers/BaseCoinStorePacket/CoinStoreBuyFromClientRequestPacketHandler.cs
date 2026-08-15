@@ -58,7 +58,9 @@ public static class CoinStoreBuyFromClientRequestPacketHandler
             return true;
         }
 
-        if (clientItem.Count < packet.Quantity)
+        var sellQuantity = packet.Quantity <= 0 ? clientItem.Count : packet.Quantity;
+
+        if (clientItem.Count < sellQuantity)
         {
             coinStoreTransactionCompletePacket.Result = 4;
 
@@ -98,14 +100,14 @@ public static class CoinStoreBuyFromClientRequestPacketHandler
 
         var dbItem = dbQuery.Item;
 
-        var deleteItem = clientItem.Count == packet.Quantity;
+        var deleteItem = clientItem.Count == sellQuantity;
 
         if (deleteItem)
             dbContext.Items.Remove(dbItem);
         else
-            dbItem.Count -= packet.Quantity;
+            dbItem.Count -= sellQuantity;
 
-        dbQuery.Character.Coins += clientItemDefinition.ResellValue * packet.Quantity;
+        dbQuery.Character.Coins += clientItemDefinition.ResellValue * sellQuantity;
 
         if (dbContext.SaveChanges() <= 0)
         {
@@ -163,7 +165,7 @@ public static class CoinStoreBuyFromClientRequestPacketHandler
         coinStoreTransactionCompletePacket.TransactionRecord.ItemRecord.Definition = clientItem.Definition;
         coinStoreTransactionCompletePacket.TransactionRecord.ItemRecord.Tint = clientItem.Tint;
 
-        coinStoreTransactionCompletePacket.TransactionRecord.Quantity = packet.Quantity;
+        coinStoreTransactionCompletePacket.TransactionRecord.Quantity = sellQuantity;
 
         connection.SendTunneled(coinStoreTransactionCompletePacket);
 
