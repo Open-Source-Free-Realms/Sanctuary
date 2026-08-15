@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
@@ -12,6 +13,7 @@ using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game;
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -67,8 +69,6 @@ public static class CommandPacketInteractRequestHandler
         if (!node.TryReserve())
             return true;
 
-        connection.Player.Dismount();
-
         var itemPersisted = false;
         var nodeCompleted = false;
 
@@ -85,6 +85,14 @@ public static class CommandPacketInteractRequestHandler
                 node.Release();
                 return true;
             }
+
+            var ownedItemDefinitionIds = connection.Player.Items
+                .Select(item => item.Definition)
+                .ToHashSet();
+            var collectionMatch = FindCollectionEntry(itemDefinitionId);
+            var collectionWasStarted = collectionMatch is not null &&
+                collectionMatch.Value.Definition.IsStarted(ownedItemDefinitionIds);
+            var collectionEntryWasCollected = ownedItemDefinitionIds.Contains(itemDefinitionId);
 
             var characterId = GuidHelper.GetPlayerId(connection.Player.Guid);
 
@@ -157,13 +165,24 @@ public static class CommandPacketInteractRequestHandler
                 });
             }
 
+            ownedItemDefinitionIds.Add(itemDefinitionId);
+
             node.CompleteCollection();
             nodeCompleted = true;
 
-            // The delta packet is not fully decoded. The authoritative self packet is
-            // capture-validated and refreshes an already-open collection panel.
-            connection.SendSelfToClient();
-            SendCollectionRewardToast(connection, clientItem, itemDefinition, node);
+            if (collectionMatch is not null && !collectionEntryWasCollected)
+            {
+                if (!collectionWasStarted)
+                    SendCollectionStart(connection, collectionMatch.Value.Definition, ownedItemDefinitionIds);
+
+                SendCollectionEntryUpdate(connection, collectionMatch.Value.Definition,
+                    collectionMatch.Value.Entry, collectionMatch.Value.Index);
+            }
+            else
+            {
+                SendCollectionRewardToast(connection, clientItem, itemDefinition, node);
+            }
+
             return true;
         }
         catch (Exception ex)
@@ -177,6 +196,51 @@ public static class CommandPacketInteractRequestHandler
 
             return false;
         }
+    }
+
+    private static CollectionEntryMatch? FindCollectionEntry(int itemDefinitionId)
+    {
+        foreach (var definition in _resourceManager.Collections.Values)
+        {
+            for (var index = 0; index < definition.Entries.Count; index++)
+            {
+                var entry = definition.Entries[index];
+
+                if (entry.ItemDefinitionId == itemDefinitionId)
+                    return new CollectionEntryMatch(definition, entry, index);
+            }
+        }
+
+        return null;
+    }
+
+    private static void SendCollectionStart(GatewayConnection connection, CollectionDefinition definition,
+        IReadOnlySet<int> ownedItemDefinitionIds)
+    {
+        var collection = definition.CreateClientCollection(connection.Player.Guid, ownedItemDefinitionIds);
+
+        using var writer = new PacketWriter();
+        collection.Serialize(writer);
+
+        connection.SendTunneled(new ClientUpdatePacketCollectionStart { Payload = writer.Buffer });
+    }
+
+    private static void SendCollectionEntryUpdate(GatewayConnection connection, CollectionDefinition definition,
+        CollectionEntryDefinition entryDefinition, int index)
+    {
+        var entry = definition.CreateClientCollectionEntry(entryDefinition, index, true);
+
+        connection.SendTunneled(new ClientUpdatePacketCollectionAddEntry
+        {
+            DefinitionId = entry.DefinitionId,
+            IconId = entry.IconId,
+            IconTintId = entry.IconTintId,
+            NameId = entry.NameId,
+            CollectionId = entry.CollectionId,
+            Index = entry.Index,
+            Unknown = entry.Unknown,
+            Collected = entry.Collected
+        });
     }
 
     private static void SendCollectionRewardToast(GatewayConnection connection, ClientItem clientItem,
@@ -203,4 +267,9 @@ public static class CommandPacketInteractRequestHandler
 
         connection.SendTunneled(packet);
     }
+
+    private readonly record struct CollectionEntryMatch(
+        CollectionDefinition Definition,
+        CollectionEntryDefinition Entry,
+        int Index);
 }
