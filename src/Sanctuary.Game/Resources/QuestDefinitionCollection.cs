@@ -37,8 +37,10 @@ public class QuestDefinitionCollection
                 continue;
 
             foreach (var questId in questIds)
-                if (TryGet(questId, out var quest) && quest.NpcInteractRange > 0)
-                    interactRange = Math.Min(interactRange, quest.NpcInteractRange);
+                if (TryGet(questId, out var quest))
+                    foreach (var goal in quest.Goals)
+                        if (goal.InteractRange > 0)
+                            interactRange = Math.Min(interactRange, goal.InteractRange);
         }
 
         if (interactRange == int.MaxValue)

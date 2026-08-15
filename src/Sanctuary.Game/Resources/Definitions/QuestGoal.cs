@@ -57,6 +57,11 @@ public sealed class QuestGoal
     // 0 = 12.
     public float ReachRadius { get; set; }
 
+    // Hover cursor and click distance for whatever this goal makes clickable: its NPCs, or its
+    // collect pickups. Per-goal, since a quest can mix a distant landmark with a close-up pickup.
+    public byte CursorId { get; set; } = 17;
+    public int InteractRange { get; set; } = 12;
+
     public bool IsCountedTalk => Type == QuestGoalType.TalkToNpc && RequiredCount > 1;
 
     public IEnumerable<ulong> AllTalkTargetGuids()

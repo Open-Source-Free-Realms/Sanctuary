@@ -43,10 +43,6 @@ public sealed class QuestDefinition
     public int NotificationAvailable { get; set; } = 2;
     public int NotificationActive { get; set; } = 6;
 
-    // 17 is the quest cursor.
-    public byte NpcCursorId { get; set; } = 17;
-    public int NpcInteractRange { get; set; } = 12;
-
     // The final goal's line, since a quest can end back at its giver.
     public int TurnInDialogueId => Goals.Count > 0 ? Goals[^1].DialogueId : 0;
 
