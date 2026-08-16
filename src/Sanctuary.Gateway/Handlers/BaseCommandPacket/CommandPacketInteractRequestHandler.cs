@@ -74,8 +74,7 @@ public static class CommandPacketInteractRequestHandler
 
         try
         {
-            var roll = Random.Shared.Next(node.TypeDefinition.TotalDropWeight);
-            var drop = node.TypeDefinition.SelectDrop(roll);
+            var drop = node.TypeDefinition.Table.SelectRandom();
             var itemDefinitionId = drop.ItemDefinitionId;
 
             if (!_resourceManager.ClientItemDefinitions.TryGetValue(itemDefinitionId, out var itemDefinition))
