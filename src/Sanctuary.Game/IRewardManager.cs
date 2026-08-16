@@ -9,7 +9,7 @@ public interface IRewardManager
 
     bool TryGrantReward(Player player, RewardDropDefinition drop, ulong sourceGuid = 0);
 
-    bool TryGrantItem(Player player, int itemDefinitionId, int tint, ulong sourceGuid = 0);
+    bool TryGrantItem(Player player, int itemDefinitionId, int tint, int quantity = 1, ulong sourceGuid = 0);
 
     bool TryGrantCurrency(Player player, CurrencyType currencyType, int amount);
 }

@@ -15,7 +15,8 @@
                         "TintId": 231,
                         "Weight": 1
                     }
-                ]
+                ],
+                "Quantity": 1
             },
             {
                 "RewardType": "Currency",

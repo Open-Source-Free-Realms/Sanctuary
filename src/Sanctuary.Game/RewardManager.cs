@@ -48,13 +48,13 @@ public class RewardManager : IRewardManager
         return drop switch
         {
             ItemRewardDropDefinition item => TryGrantItem(player, item.ItemDefinitionId,
-                item.TintTable?.SelectRandom().TintId ?? 0, sourceGuid),
+                item.TintTable?.SelectRandom().TintId ?? 0, item.Quantity, sourceGuid),
             CurrencyRewardDropDefinition currency => TryGrantCurrency(player, currency.CurrencyType, currency.Amount),
             _ => false
         };
     }
 
-    public bool TryGrantItem(Player player, int itemDefinitionId, int tint, ulong sourceGuid = 0)
+    public bool TryGrantItem(Player player, int itemDefinitionId, int tint, int quantity, ulong sourceGuid = 0)
     {
         // NOTE: I think similar logic lives in the shop + collections stuff. We should eventually extract
         // and generalize that to avoid repeats. 
@@ -82,7 +82,7 @@ public class RewardManager : IRewardManager
             {
                 Id = dbCharacter.Items.Select(item => item.Id).DefaultIfEmpty(0).Max() + 1,
                 Definition = itemDefinitionId,
-                Count = 1,
+                Count = quantity,
                 Tint = tint
             };
 
@@ -90,7 +90,7 @@ public class RewardManager : IRewardManager
         }
         else
         {
-            dbItem.Count++;
+            dbItem.Count += quantity;
         }
 
         if (dbContext.SaveChanges() <= 0)
@@ -126,7 +126,7 @@ public class RewardManager : IRewardManager
             });
         }
 
-        SendRewardToast(player, clientItem, itemDefinition, sourceGuid);
+        SendRewardToast(player, clientItem, itemDefinition, quantity, sourceGuid);
 
         return true;
     }
@@ -162,7 +162,7 @@ public class RewardManager : IRewardManager
         return true;
     }
 
-    private static void SendRewardToast(Player player, ClientItem clientItem, ClientItemDefinition itemDefinition, ulong sourceGuid)
+    private static void SendRewardToast(Player player, ClientItem clientItem, ClientItemDefinition itemDefinition, int quantity, ulong sourceGuid)
     {
         // TODO: Is there a coin/station cash toast? How about for other types of rewards..?
         var notificationId = Environment.TickCount & int.MaxValue;
@@ -181,6 +181,7 @@ public class RewardManager : IRewardManager
             NameId = itemDefinition.NameId,
             DefinitionId = clientItem.Definition,
             Tint = clientItem.Tint,
+            Quantity = quantity,
             ItemGuid = clientItem.Id
         });
 

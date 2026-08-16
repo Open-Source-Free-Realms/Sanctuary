@@ -49,7 +49,8 @@ public sealed class RewardTableDefinitionCollection : ObservableConcurrentDictio
             {
                 if (string.IsNullOrWhiteSpace(entry.Key) || entry.DropTable.Count == 0 ||
                     entry.DropTable.Any(drop => drop.Weight <= 0) ||
-                    entry.DropTable.OfType<CurrencyRewardDropDefinition>().Any(drop => !Enum.IsDefined(drop.CurrencyType)))
+                    entry.DropTable.OfType<CurrencyRewardDropDefinition>().Any(drop => !Enum.IsDefined(drop.CurrencyType)) ||
+                    entry.DropTable.OfType<ItemRewardDropDefinition>().Any(drop => drop.Quantity <= 0))
                 {
                     _logger.LogError("Invalid reward table in \"{file}\".", filePath);
                     return false;
