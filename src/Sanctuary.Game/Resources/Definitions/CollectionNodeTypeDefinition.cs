@@ -1,6 +1,6 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
+
+using Sanctuary.Core.Collections;
 
 namespace Sanctuary.Game.Resources.Definitions;
 
@@ -16,26 +16,6 @@ public sealed class CollectionNodeTypeDefinition
     public float PlacementYOffset { get; set; }
     public List<CollectionNodeDropDefinition> DropTable { get; set; } = [];
 
-    public int TotalDropWeight => DropTable.Sum(drop => drop.Weight);
-
-    /// <summary>
-    /// Selects the drop whose weighted range contains the supplied roll.
-    /// </summary>
-    /// <exception cref="ArgumentOutOfRangeException">The roll is outside the drop table's weighted range.</exception>
-    /// <exception cref="InvalidOperationException">The drop table does not contain a matching entry.</exception>
-    public CollectionNodeDropDefinition SelectDrop(int roll)
-    {
-        if (roll < 0 || roll >= TotalDropWeight)
-            throw new ArgumentOutOfRangeException(nameof(roll));
-
-        foreach (var drop in DropTable)
-        {
-            if (roll < drop.Weight)
-                return drop;
-
-            roll -= drop.Weight;
-        }
-
-        throw new InvalidOperationException("The collection node drop table is invalid.");
-    }
+    private WeightedDropTable<CollectionNodeDropDefinition>? _table;
+    public WeightedDropTable<CollectionNodeDropDefinition> Table => _table ??= new WeightedDropTable<CollectionNodeDropDefinition>(DropTable);
 }

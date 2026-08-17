@@ -1,0 +1,29 @@
+[
+    {
+        "Key": "dev-test-reward",
+        "DropTable": [
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 205,
+                "Weight": 1,
+                "Tints": [
+                    {
+                        "TintId": 227,
+                        "Weight": 1
+                    },
+                    {
+                        "TintId": 231,
+                        "Weight": 1
+                    }
+                ],
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Currency",
+                "CurrencyType": "Coins",
+                "Amount": 50,
+                "Weight": 1
+            }
+        ]
+    }
+]
