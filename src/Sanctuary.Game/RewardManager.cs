@@ -56,8 +56,9 @@ public class RewardManager : IRewardManager
 
     public bool TryGrantItem(Player player, int itemDefinitionId, int tint, int quantity, ulong sourceGuid = 0)
     {
-        // NOTE: I think similar logic lives in the shop + collections stuff. We should eventually extract
+        // TODO: I think similar logic lives in the shop + collections stuff. We should eventually extract
         // and generalize that to avoid repeats. 
+        // https://github.com/Open-Source-Free-Realms/Sanctuary/issues/114
         if (!_resourceManager.ClientItemDefinitions.TryGetValue(itemDefinitionId, out var itemDefinition))
         {
             _logger.LogError("Cannot grant unknown item definition {itemDefinitionId}.", itemDefinitionId);
