@@ -14,13 +14,13 @@ using Sanctuary.Packet.Common;
 
 namespace Sanctuary.Game.Zones;
 
-public sealed class StartingZone : BaseZone
+public sealed class WorldZone : BaseZone
 {
     private readonly IZoneManager _zoneManager;
     private readonly IResourceManager _resourceManager;
-    private readonly StartingZoneDefinition _zoneDefinition;
+    private readonly WorldZoneDefinition _zoneDefinition;
 
-    public StartingZone(StartingZoneDefinition zoneDefinition, IServiceProvider serviceProvider)
+    public WorldZone(WorldZoneDefinition zoneDefinition, IServiceProvider serviceProvider)
         : base(zoneDefinition, serviceProvider)
     {
         _zoneDefinition = zoneDefinition;

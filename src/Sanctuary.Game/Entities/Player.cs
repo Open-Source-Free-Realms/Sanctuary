@@ -214,7 +214,7 @@ public sealed class Player : ClientPcData, IEntity
         if (Zone == zone)
             return;
 
-        if (Zone is StartingZone)
+        if (Zone is WorldZone)
         {
             StartingZonePosition = Position;
             StartingZoneRotation = Rotation;
@@ -264,10 +264,10 @@ public sealed class Player : ClientPcData, IEntity
 
     private void UpdateZoneArea()
     {
-        if (Zone is not StartingZone startingZone)
+        if (Zone is not WorldZone worldZone)
             return;
 
-        var zoneAreaId = startingZone.GetZoneAreaId(Position);
+        var zoneAreaId = worldZone.GetZoneAreaId(Position);
 
         if (ZoneAreaId == zoneAreaId)
             return;

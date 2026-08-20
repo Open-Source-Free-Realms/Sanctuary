@@ -72,6 +72,8 @@ public abstract class BaseZone : IZone, IDisposable
 
     public Pathfinder<MapNode>? Pathfinder { get; }
 
+    public ulong? OwnerId { get; init; }
+
     protected BaseZone(BaseZoneDefinition zoneDefinition, IServiceProvider serviceProvider)
     {
         _zoneDefinition = zoneDefinition;

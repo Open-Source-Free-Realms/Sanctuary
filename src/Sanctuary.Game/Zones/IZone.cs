@@ -13,6 +13,9 @@ namespace Sanctuary.Game.Zones;
 public interface IZone : IScriptableZone
 {
     int DefinitionId { get; }
+
+    ulong? OwnerId { get; }
+
     #region Events
 
     void OnStart();
