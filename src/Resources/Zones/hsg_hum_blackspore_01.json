@@ -8,6 +8,7 @@
   "IconId": 33439,
   "StoreBundleId": 4709,
   "ItemDefinitionId": 11110,
+  "DirectorySnapshot": "blacksporeswamphouse_lot",
   "TileSize": 64,
   "StartLatitude": 0,
   "StartLongitude": 0,
@@ -22,5 +23,11 @@
   "SpawnRotation": [
     -1,
     0
+  ],
+  "BuildAreas": [
+    {
+      "Min": [516.3, -100, 514, 1],
+      "Max": [634.7, 90, 604, 1]
+    }
   ]
 }
