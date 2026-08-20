@@ -4,13 +4,11 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Database;
-using Sanctuary.Database.Entities;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Resources.Definitions.Zones;
 using Sanctuary.Game.Zones;
@@ -19,14 +17,6 @@ namespace Sanctuary.Game;
 
 public class ZoneManager : IZoneManager
 {
-    private sealed class ZoneCreationGate
-    {
-        public object StateLock { get; } = new();
-        public object CreationLock { get; } = new();
-        public int Users { get; set; }
-        public bool Removed { get; set; }
-    }
-
     private readonly ILogger _logger;
     private readonly IResourceManager _resourceManager;
     private readonly IServiceProvider _serviceProvider;
@@ -34,13 +24,22 @@ public class ZoneManager : IZoneManager
 
     private static int _uniqueId = 1;
 
-    private readonly ConcurrentDictionary<(int, ulong?), IZone> _zones = new();
-    private readonly ConcurrentDictionary<(int, ulong?), ZoneCreationGate> _zoneCreationLocks = new();
+    private readonly ConcurrentDictionary<(int, ulong?), Lazy<IZone?>> _zones = new();
 
     private const int StartingZoneDefinitionId = 1;
     public WorldZone StartingZone { get; private set; } = null!;
 
-    public IEnumerable<IZone> Zones => _zones.Values;
+    public IEnumerable<IZone> Zones
+    {
+        get
+        {
+            foreach (var zoneEntry in _zones.Values)
+            {
+                if (zoneEntry.IsValueCreated && zoneEntry.Value is { IsDisposed: false } zone)
+                    yield return zone;
+            }
+        }
+    }
 
     public ZoneManager(
         ILoggerFactory loggerFactory,
@@ -69,9 +68,9 @@ public class ZoneManager : IZoneManager
     {
         player = default;
 
-        foreach (var zone in _zones)
+        foreach (var zone in Zones)
         {
-            if (zone.Value.TryGetPlayer(guid, out player))
+            if (zone.TryGetPlayer(guid, out player))
                 return true;
         }
 
@@ -82,9 +81,9 @@ public class ZoneManager : IZoneManager
     {
         player = default;
 
-        foreach (var zone in _zones)
+        foreach (var zone in Zones)
         {
-            foreach (var zonePlayer in zone.Value.Players)
+            foreach (var zonePlayer in zone.Players)
             {
                 if (zonePlayer.Name.FullName == name)
                 {
@@ -99,140 +98,103 @@ public class ZoneManager : IZoneManager
 
     private bool TryCreateStartingZone(int definitionId, [MaybeNullWhen(false)] out WorldZone zone)
     {
-        zone = default;
-
-        if (!_resourceManager.Zones.TryGetValue(definitionId, out var zoneDefinition))
-            return false;
-
-        if (zoneDefinition is not WorldZoneDefinition worldZoneDefinition)
-            return false;
-
-        zone = new WorldZone(worldZoneDefinition, _serviceProvider)
+        if (TryGetOrCreateZoneInstance(definitionId, null, out var createdZone) && createdZone is WorldZone worldZone)
         {
-            Id = NextRuntimeId()
-        };
+            zone = worldZone;
+            return true;
+        }
 
-        zone.OnStart();
-        zone.CompleteInitialization();
-
-        return _zones.TryAdd((zone.DefinitionId, null), zone);
+        zone = null;
+        return false;
     }
 
     public bool TryGetOrCreateZoneInstance(int zoneDefinitionId, ulong? ownerId, [MaybeNullWhen(false)] out IZone zone)
     {
         var key = (zoneDefinitionId, ownerId);
 
-        if (TryGetActiveZone(key, out zone))
-            return true;
-
-        var creationGate = AcquireCreationGate(key);
-        try
-        {
-            lock (creationGate.CreationLock)
-            {
-                if (TryGetActiveZone(key, out zone))
-                    return true;
-
-                if (!_resourceManager.Zones.TryGetValue(zoneDefinitionId, out var zoneDefinition))
-                {
-                    zone = null;
-                    return false;
-                }
-
-                BaseZone? newZone = zoneDefinition switch
-                {
-                    WorldZoneDefinition worldZoneDefinition => new WorldZone(worldZoneDefinition, _serviceProvider)
-                    {
-                        Id = NextRuntimeId(),
-                        OwnerId = ownerId
-                    },
-                    HousingZoneDefinition housingZoneDefinition when ownerId is not null =>
-                        TryGetHousingZone(housingZoneDefinition, ownerId.Value, out var housingZone) ? housingZone : null,
-                    CombatZoneDefinition combatZoneDefinition when ownerId is not null => new CombatZone(combatZoneDefinition, _serviceProvider)
-                    {
-                        Id = NextRuntimeId(),
-                        OwnerId = ownerId
-                    },
-                    _ => null
-                };
-
-                if (newZone is null)
-                {
-                    zone = null;
-                    return false;
-                }
-
-                try
-                {
-                    newZone.OnStart();
-                    newZone.CompleteInitialization();
-                }
-                catch (Exception exception)
-                {
-                    _logger.LogError(exception, "Failed to initialize zone definition {DefinitionId} for owner {OwnerId}.", zoneDefinitionId, ownerId);
-                    newZone.Dispose();
-                    zone = null;
-                    return false;
-                }
-
-                if (newZone.IsDisposed || !_zones.TryAdd(key, newZone))
-                {
-                    newZone.Dispose();
-                    return TryGetActiveZone(key, out zone);
-                }
-
-                zone = newZone;
-                return true;
-            }
-        }
-        finally
-        {
-            ReleaseCreationGate(key, creationGate);
-        }
-    }
-
-    private ZoneCreationGate AcquireCreationGate((int, ulong?) key)
-    {
         while (true)
         {
-            var gate = _zoneCreationLocks.GetOrAdd(key, static _ => new ZoneCreationGate());
-            lock (gate.StateLock)
+            var zoneEntry = _zones.GetOrAdd(key, _ => new Lazy<IZone?>(
+                () => CreateZoneInstance(zoneDefinitionId, ownerId),
+                LazyThreadSafetyMode.ExecutionAndPublication));
+            IZone? activeZone;
+
+            try
             {
-                if (gate.Removed)
-                    continue;
-
-                gate.Users++;
-                return gate;
+                activeZone = zoneEntry.Value;
             }
-        }
-    }
+            catch (Exception exception)
+            {
+                TryRemoveZoneEntry(key, zoneEntry);
+                _logger.LogError(exception, "Failed to create zone definition {DefinitionId} for owner {OwnerId}.", zoneDefinitionId, ownerId);
+                zone = null;
+                return false;
+            }
 
-    private void ReleaseCreationGate((int, ulong?) key, ZoneCreationGate gate)
-    {
-        lock (gate.StateLock)
-        {
-            gate.Users--;
-            if (gate.Users != 0)
-                return;
+            if (activeZone is null)
+            {
+                TryRemoveZoneEntry(key, zoneEntry);
+                zone = null;
+                return false;
+            }
 
-            gate.Removed = true;
-            ((ICollection<KeyValuePair<(int, ulong?), ZoneCreationGate>>)_zoneCreationLocks)
-                .Remove(new(key, gate));
-        }
-    }
-
-    private bool TryGetActiveZone((int, ulong?) key, [MaybeNullWhen(false)] out IZone zone)
-    {
-        if (_zones.TryGetValue(key, out zone))
-        {
-            if (!zone.IsDisposed)
+            if (!activeZone.IsDisposed)
+            {
+                zone = activeZone;
                 return true;
+            }
 
-            ((ICollection<KeyValuePair<(int, ulong?), IZone>>)_zones).Remove(new(key, zone));
+            TryRemoveZoneEntry(key, zoneEntry);
         }
+    }
 
-        zone = null;
-        return false;
+    private IZone? CreateZoneInstance(int zoneDefinitionId, ulong? ownerId)
+    {
+        BaseZone? zone = null;
+
+        try
+        {
+            if (!_resourceManager.Zones.TryGetValue(zoneDefinitionId, out var zoneDefinition))
+                return null;
+
+            zone = zoneDefinition switch
+            {
+                WorldZoneDefinition worldZoneDefinition => new WorldZone(worldZoneDefinition, _serviceProvider)
+                {
+                    Id = NextRuntimeId(),
+                    OwnerId = ownerId
+                },
+                HousingZoneDefinition housingZoneDefinition when ownerId is not null =>
+                    TryGetHousingZone(housingZoneDefinition, ownerId.Value, out var housingZone) ? housingZone : null,
+                CombatZoneDefinition combatZoneDefinition when ownerId is not null =>
+                    new CombatZone(combatZoneDefinition, _serviceProvider)
+                    {
+                        Id = NextRuntimeId(),
+                        OwnerId = ownerId
+                    },
+                _ => null
+            };
+
+            if (zone is null)
+                return null;
+
+            zone.OnStart();
+            zone.CompleteInitialization();
+
+            return zone.IsDisposed ? null : zone;
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Failed to initialize zone definition {DefinitionId} for owner {OwnerId}.", zoneDefinitionId, ownerId);
+            zone?.Dispose();
+            return null;
+        }
+    }
+
+    private bool TryRemoveZoneEntry((int, ulong?) key, Lazy<IZone?> zoneEntry)
+    {
+        return ((ICollection<KeyValuePair<(int, ulong?), Lazy<IZone?>>>)_zones)
+            .Remove(new(key, zoneEntry));
     }
 
     private static int NextRuntimeId()
@@ -244,7 +206,11 @@ public class ZoneManager : IZoneManager
     {
         var key = (zone.DefinitionId, zone.OwnerId);
 
-        ((ICollection<KeyValuePair<(int, ulong?), IZone>>)_zones).Remove(new(key, zone));
+        if (_zones.TryGetValue(key, out var zoneEntry) && zoneEntry.IsValueCreated &&
+            ReferenceEquals(zoneEntry.Value, zone))
+        {
+            TryRemoveZoneEntry(key, zoneEntry);
+        }
     }
 
     private bool TryGetHousingZone(HousingZoneDefinition housingZoneDefinition, ulong ownerId,
@@ -269,42 +235,4 @@ public class ZoneManager : IZoneManager
         return true;
     }
 
-    public bool TryGrantHouse(int zoneDefinitionId, ulong ownerId)
-    {
-        if (!_resourceManager.Zones.TryGetValue(zoneDefinitionId, out var zoneDefinition) ||
-            zoneDefinition is not HousingZoneDefinition housingZoneDefinition)
-        {
-            return false;
-        }
-
-        using var dbContext = _dbContextFactory.CreateDbContext();
-
-        var dbHouse = dbContext.Houses.SingleOrDefault(house =>
-            house.CharacterId == ownerId && house.ZoneDefinitionId == housingZoneDefinition.Id);
-
-        if (dbHouse is not null)
-            return true;
-
-        dbHouse = new DbHouse
-        {
-            CharacterId = ownerId,
-            ZoneDefinitionId = housingZoneDefinition.Id
-        };
-
-        dbContext.Houses.Add(dbHouse);
-
-        try
-        {
-            if (dbContext.SaveChanges() <= 0)
-            {
-                _logger.LogWarning("Failed to create house for character {characterId}.", ownerId);
-                return false;
-            }
-        }
-        catch (DbUpdateException)
-        {
-        }
-
-        return true;
-    }
 }
