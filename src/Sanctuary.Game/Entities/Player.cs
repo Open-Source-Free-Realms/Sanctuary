@@ -225,60 +225,144 @@ public sealed class Player : ClientPcData, IEntity
             zone = freshZone;
         }
 
-        if (Zone is WorldZone)
+        if (zone is not BaseZone targetZone)
+            return false;
+
+        if (!targetZone.TryReservePlayer(Guid))
         {
-            StartingZonePosition = Position;
-            StartingZoneRotation = Rotation;
+            if (!_zoneManager.TryGetOrCreateZoneInstance(zone.DefinitionId, zone.OwnerId, out var freshZone) ||
+                freshZone is not BaseZone freshTargetZone ||
+                !freshTargetZone.TryReservePlayer(Guid))
+            {
+                return false;
+            }
+
+            zone = freshZone;
+            targetZone = freshTargetZone;
         }
 
-        // Alert/Remove visible entities
-        foreach (var visiblePlayer in VisiblePlayers)
-            visiblePlayer.Value.OnRemoveVisiblePlayers([this]);
-
-        OnRemoveVisibleNpcs(VisibleNpcs.Values);
-        OnRemoveVisiblePlayers(VisiblePlayers.Values);
-
-        ZoneTile.Entities.Remove(Guid, out _);
-
-        var oldZone = Zone;
-
-        oldZone.TryRemovePlayer(Guid);
-
-        // Add to new zone/zonetile
-
-        if (!zone.TryAddPlayer(this))
+        if (Zone is not BaseZone oldZone || !oldZone.TryReservePlayer(Guid))
         {
-            oldZone.TryAddPlayer(this);
+            targetZone.CancelPlayerReservation(Guid);
             return false;
         }
 
-        if (Mount is not null)
-            Mount.TeleportToZone(zone, position, rotation);
+        var targetReservationHeld = true;
+        var oldReservationHeld = true;
+        var oldZoneTile = ZoneTile;
+        var oldStateDetached = false;
+        var removedFromOld = false;
+        var addedToTarget = false;
+        var transferCommitted = false;
 
-        // Teleport to new zone
-
-        Visible = false;
-
-        Zone = zone;
-
-        ZoneTile = ZoneTile.Empty;
-
-        UpdatePosition(position, rotation);
-
-        var packetClientBeginZoning = new PacketClientBeginZoning
+        try
         {
-            Name = Zone.Name,
-            Position = position,
-            Rotation = rotation,
-            Sky = null,
-            Id = Zone.Id,
-            GeometryId = 214,
-            OverrideUpdateRadius = true
-        };
+            if (Zone is WorldZone)
+            {
+                StartingZonePosition = Position;
+                StartingZoneRotation = Rotation;
+            }
 
-        SendTunneled(packetClientBeginZoning);
+            oldStateDetached = true;
+            foreach (var visiblePlayer in VisiblePlayers)
+                visiblePlayer.Value.OnRemoveVisiblePlayers([this]);
 
-        return true;
+            OnRemoveVisibleNpcs(VisibleNpcs.Values);
+            OnRemoveVisiblePlayers(VisiblePlayers.Values);
+
+            ZoneTile.Entities.Remove(Guid, out _);
+
+            removedFromOld = oldZone.TryRemovePlayer(Guid);
+            if (!removedFromOld)
+            {
+                oldZone.UpdateEntityZoneTile(this, ZoneTile.Empty, oldZoneTile);
+                ZoneTile = oldZoneTile;
+                return false;
+            }
+
+            addedToTarget = zone.TryAddPlayer(this);
+            targetReservationHeld = false;
+
+            if (!addedToTarget)
+            {
+                Zone = oldZone;
+                var restoredToOldZone = oldZone.TryAddPlayer(this);
+                oldReservationHeld = false;
+
+                if (restoredToOldZone)
+                {
+                    oldZone.UpdateEntityZoneTile(this, ZoneTile.Empty, oldZoneTile);
+                    ZoneTile = oldZoneTile;
+                }
+
+                return false;
+            }
+
+            Visible = false;
+
+            Zone = zone;
+
+            ZoneTile = ZoneTile.Empty;
+            transferCommitted = true;
+
+            oldZone.CancelPlayerReservation(Guid);
+            oldReservationHeld = false;
+
+            UpdatePosition(position, rotation);
+
+            if (Mount is not null)
+                Mount.TeleportToZone(zone, position, rotation);
+
+            var packetClientBeginZoning = new PacketClientBeginZoning
+            {
+                Name = Zone.Name,
+                Position = position,
+                Rotation = rotation,
+                Sky = null,
+                Id = Zone.Id,
+                GeometryId = 214,
+                OverrideUpdateRadius = true
+            };
+
+            SendTunneled(packetClientBeginZoning);
+
+            return true;
+        }
+        catch
+        {
+            if (!transferCommitted)
+            {
+                if (addedToTarget || zone.TryGetPlayer(Guid, out _))
+                    zone.TryRemovePlayer(Guid);
+
+                if (oldStateDetached)
+                {
+                    Zone = oldZone;
+                    var restoredToOldZone = oldZone.TryGetPlayer(Guid, out _);
+                    if (!restoredToOldZone)
+                    {
+                        restoredToOldZone = oldZone.TryAddPlayer(this);
+                        oldReservationHeld = false;
+                    }
+
+                    if (restoredToOldZone)
+                    {
+                        oldZone.UpdateEntityZoneTile(this, ZoneTile.Empty, oldZoneTile);
+                        ZoneTile = oldZoneTile;
+                    }
+                }
+            }
+
+            throw;
+        }
+        finally
+        {
+            if (oldReservationHeld)
+                oldZone.CancelPlayerReservation(Guid);
+
+            if (targetReservationHeld)
+                targetZone.CancelPlayerReservation(Guid);
+        }
     }
 
     private void UpdateZoneArea()

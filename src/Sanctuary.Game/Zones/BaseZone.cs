@@ -36,7 +36,14 @@ public abstract class BaseZone : IZone, IDisposable
     private readonly ScriptRuntime _scriptRuntime;
     private readonly BaseZoneDefinition _zoneDefinition;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
+    private readonly CancellationToken _cancellationToken;
     private readonly object _lifecycleLock = new();
+    private long _initializedAt;
+    private bool _isInitialized;
+    private bool _hasAcceptedPlayer;
+    private int _disposeState;
+
+    private static readonly TimeSpan FirstEntryGrace = TimeSpan.FromSeconds(30);
 
     private const int VisibleTileRadius = 2;
     private readonly Dictionary<int, ZoneTile> _tiles;
@@ -46,6 +53,7 @@ public abstract class BaseZone : IZone, IDisposable
     private readonly ConcurrentDictionary<ulong, Npc> _npcs = new();
     private readonly ConcurrentDictionary<ulong, Player> _players = new();
     private readonly ConcurrentDictionary<ulong, IEntity> _entities = new();
+    private readonly HashSet<ulong> _playerReservations = [];
     private readonly object _collectionNodeLock = new();
     private readonly PriorityQueue<CollectionNodePoolRefill, long> _collectionNodeRefills = new();
     private readonly ConcurrentSet<string> _scripts = new();
@@ -80,10 +88,11 @@ public abstract class BaseZone : IZone, IDisposable
 
     public ulong? OwnerId { get; init; }
 
-    public bool IsDisposed => _cancellationTokenSource.IsCancellationRequested;
+    public bool IsDisposed => Volatile.Read(ref _disposeState) != 0;
 
     protected BaseZone(BaseZoneDefinition zoneDefinition, IServiceProvider serviceProvider)
     {
+        _cancellationToken = _cancellationTokenSource.Token;
         _zoneDefinition = zoneDefinition;
         _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
         _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
@@ -106,8 +115,8 @@ public abstract class BaseZone : IZone, IDisposable
             ArgumentNullException.ThrowIfNull(tile.Value.VisibleTiles);
         }
 
-        Task.Factory.StartNew(UpdateEveryTickAsync, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-        Task.Factory.StartNew(UpdateEverySecondAsync, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        Task.Factory.StartNew(UpdateEveryTickAsync, _cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        Task.Factory.StartNew(UpdateEverySecondAsync, _cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
         // Just in case we don't actually have the `.map` file for a particular zone.
         if (_resourceManager.Maps.TryGetValue(Name, out var mapGraph))
@@ -1505,10 +1514,45 @@ public abstract class BaseZone : IZone, IDisposable
         lock (_lifecycleLock)
         {
             if (IsDisposed)
+            {
+                _playerReservations.Remove(player.Guid);
+                return false;
+            }
+
+            if (!_players.TryAdd(player.Guid, player))
+            {
+                _playerReservations.Remove(player.Guid);
+                return false;
+            }
+
+            if (!_entities.TryAdd(player.Guid, player))
+            {
+                _players.TryRemove(player.Guid, out _);
+                _playerReservations.Remove(player.Guid);
+                return false;
+            }
+
+            _playerReservations.Remove(player.Guid);
+            _hasAcceptedPlayer = true;
+            return true;
+        }
+    }
+
+    internal bool TryReservePlayer(ulong guid)
+    {
+        lock (_lifecycleLock)
+        {
+            if (IsDisposed)
                 return false;
 
-            return _players.TryAdd(player.Guid, player) && _entities.TryAdd(player.Guid, player);
+            return _playerReservations.Add(guid);
         }
+    }
+
+    internal void CancelPlayerReservation(ulong guid)
+    {
+        lock (_lifecycleLock)
+            _playerReservations.Remove(guid);
     }
 
     public bool TryCreateNpc(ulong? guid, [MaybeNullWhen(false)] out Npc npc)
@@ -1828,7 +1872,7 @@ public abstract class BaseZone : IZone, IDisposable
     {
         lock (_collectionNodeLock)
         {
-            if (_cancellationTokenSource.IsCancellationRequested || poolDefinition.ZoneDefinitionId != DefinitionId ||
+            if (_cancellationToken.IsCancellationRequested || poolDefinition.ZoneDefinitionId != DefinitionId ||
                 !_resourceManager.CollectionNodeTypes.TryGetValue(poolDefinition.NodeType, out var typeDefinition))
             {
                 return 0;
@@ -1898,7 +1942,12 @@ public abstract class BaseZone : IZone, IDisposable
 
     public bool TryRemovePlayer(ulong guid)
     {
-        return _players.TryRemove(guid, out _) && _entities.TryRemove(guid, out _);
+        if (!_players.TryRemove(guid, out var player))
+            return false;
+
+        _entities.TryRemove(guid, out _);
+        OnPlayerRemoved(player);
+        return true;
     }
 
     #endregion
@@ -2120,7 +2169,7 @@ public abstract class BaseZone : IZone, IDisposable
 
     private async Task UpdateEveryTickAsync()
     {
-        while (await _updateEveryTickTimer.WaitForNextTickAsync() && !_cancellationTokenSource.Token.IsCancellationRequested)
+        while (await _updateEveryTickTimer.WaitForNextTickAsync() && !_cancellationToken.IsCancellationRequested)
         {
             try
             {
@@ -2140,7 +2189,7 @@ public abstract class BaseZone : IZone, IDisposable
 
     private async Task UpdateEverySecondAsync()
     {
-        while (await _updateEverySecondTimer.WaitForNextTickAsync() && !_cancellationTokenSource.Token.IsCancellationRequested)
+        while (await _updateEverySecondTimer.WaitForNextTickAsync() && !_cancellationToken.IsCancellationRequested)
         {
             try
             {
@@ -2174,14 +2223,40 @@ public abstract class BaseZone : IZone, IDisposable
 
     public void Dispose()
     {
-        // NOTE: We currently do not have a grace-period or timeout for this. This
-        // function WILL get called if no players exist in a zone (except for FabledRealms)
-        // which is the 'Starting Zone'. If things slow down, then this might get called
-        // before a player makes it in.
         lock (_lifecycleLock)
         {
-            _cancellationTokenSource.Cancel();
+            if (!TryBeginDispose())
+                return;
+        }
 
+        CompleteDispose();
+    }
+
+    private bool TryBeginDispose()
+    {
+        if (IsDisposed)
+            return false;
+
+        Volatile.Write(ref _disposeState, 1);
+        _cancellationTokenSource.Cancel();
+        _updateEveryTickTimer.Dispose();
+        _updateEverySecondTimer.Dispose();
+        return true;
+    }
+
+    private void CompleteDispose()
+    {
+        try
+        {
+            OnDisposing();
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Failed to dispose zone runtime for {ZoneName} ({ZoneId}).", Name, Id);
+        }
+
+        lock (_lifecycleLock)
+        {
             lock (_collectionNodeLock)
                 _collectionNodeRefills.Clear();
 
@@ -2189,9 +2264,14 @@ public abstract class BaseZone : IZone, IDisposable
 
             _npcs.Clear();
             _players.Clear();
+            _entities.Clear();
+            _playerReservations.Clear();
 
             _scriptManager.DeleteContext(this);
+            Volatile.Write(ref _disposeState, 2);
         }
+
+        _cancellationTokenSource.Dispose();
 
         _zoneManager.RemoveZoneInstance(this);
     }
@@ -2200,11 +2280,35 @@ public abstract class BaseZone : IZone, IDisposable
     {
         lock (_lifecycleLock)
         {
-            if (IsDisposed || !_players.IsEmpty)
+            if (IsDisposed || !_isInitialized || !_players.IsEmpty || _playerReservations.Count > 0 ||
+                (!_hasAcceptedPlayer && Stopwatch.GetElapsedTime(_initializedAt) < FirstEntryGrace))
                 return false;
 
-            Dispose();
-            return true;
+            if (!TryBeginDispose())
+                return false;
         }
+
+        CompleteDispose();
+        return true;
+    }
+
+    internal void CompleteInitialization()
+    {
+        lock (_lifecycleLock)
+        {
+            if (IsDisposed)
+                return;
+
+            _initializedAt = Stopwatch.GetTimestamp();
+            _isInitialized = true;
+        }
+    }
+
+    protected virtual void OnPlayerRemoved(Player player)
+    {
+    }
+
+    protected virtual void OnDisposing()
+    {
     }
 }
