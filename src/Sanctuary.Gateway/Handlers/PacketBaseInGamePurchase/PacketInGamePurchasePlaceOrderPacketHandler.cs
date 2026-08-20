@@ -11,6 +11,7 @@ using Sanctuary.Core.IO;
 using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game;
+using Sanctuary.Game.Resources.Definitions.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -74,6 +75,28 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
             return true;
         }
 
+        var housingZoneDefinition = _resourceManager.Zones.Values
+            .OfType<HousingZoneDefinition>()
+            .FirstOrDefault(definition => definition.StoreBundleId == appStoreBundleDefinition.Id);
+        var containsHouseItem = appStoreBundleDefinition.Entries.Any(entry =>
+            _resourceManager.ClientItemDefinitions.TryGetValue(entry.MarketingItemId, out var definition) &&
+            definition.Type == 16);
+
+        if ((containsHouseItem && housingZoneDefinition is null) ||
+            (housingZoneDefinition is not null &&
+                (orderDetail.Quantity != 1 ||
+                 appStoreBundleDefinition.Entries.Count != 1 ||
+                 appStoreBundleDefinition.Entries[0].MarketingItemId != housingZoneDefinition.ItemDefinitionId ||
+                 !_resourceManager.ClientItemDefinitions.TryGetValue(housingZoneDefinition.ItemDefinitionId, out var houseItemDefinition) ||
+                 houseItemDefinition.Type != 16)))
+        {
+            packetInGamePurchasePlaceOrderResponse.Result = 2;
+
+            connection.SendTunneled(packetInGamePurchasePlaceOrderResponse);
+
+            return true;
+        }
+
         if (!int.TryParse(orderDetail.Tint, out var orderDetailTint))
         {
             packetInGamePurchasePlaceOrderResponse.Result = 2;
@@ -88,6 +111,20 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
             : appStoreBundleDefinition.MemberDiscount;
 
         var totalCost = cost * orderDetail.Quantity;
+
+        if (housingZoneDefinition is not null)
+        {
+            var houseCost = connection.Player.MembershipStatus == 0
+                ? appStoreBundleDefinition.Price
+                : appStoreBundleDefinition.MembersOnlyPrice;
+
+            return PurchaseHouse(
+                connection,
+                packet,
+                housingZoneDefinition,
+                houseCost,
+                packetInGamePurchasePlaceOrderResponse);
+        }
 
         if (connection.Player.StationCash < totalCost)
         {
@@ -305,6 +342,95 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
         packetInGamePurchasePlaceOrderResponse.Total = totalCost;
 
         connection.SendTunneled(packetInGamePurchasePlaceOrderResponse);
+
+        return true;
+    }
+
+    private static bool PurchaseHouse(
+        GatewayConnection connection,
+        PacketInGamePurchasePlaceOrderPacket packet,
+        HousingZoneDefinition housingZoneDefinition,
+        int totalCost,
+        PacketInGamePurchasePlaceOrderResponse response)
+    {
+        if (totalCost < 0)
+        {
+            response.Result = 2;
+            connection.SendTunneled(response);
+            return true;
+        }
+
+        var characterId = GuidHelper.GetPlayerId(connection.Player.Guid);
+        var stationCash = 0;
+        var result = 2;
+
+        using var strategyContext = _dbContextFactory.CreateDbContext();
+        var strategy = strategyContext.Database.CreateExecutionStrategy();
+
+        try
+        {
+            result = strategy.Execute(() =>
+            {
+                using var dbContext = _dbContextFactory.CreateDbContext();
+                using var transaction = dbContext.Database.BeginTransaction();
+
+                if (dbContext.Houses.Any(house =>
+                        house.CharacterId == characterId &&
+                        house.ZoneDefinitionId == housingZoneDefinition.Id))
+                {
+                    return 2;
+                }
+
+                var updated = dbContext.Characters
+                    .Where(character =>
+                        character.Id == characterId &&
+                        character.StationCash >= totalCost)
+                    .ExecuteUpdate(setters => setters.SetProperty(
+                        character => character.StationCash,
+                        character => character.StationCash - totalCost));
+
+                if (updated != 1)
+                    return dbContext.Characters.Any(character => character.Id == characterId) ? 5 : 2;
+
+                dbContext.Houses.Add(new DbHouse
+                {
+                    CharacterId = characterId,
+                    ZoneDefinitionId = housingZoneDefinition.Id
+                });
+
+                if (dbContext.SaveChanges() <= 0)
+                    return 2;
+
+                stationCash = dbContext.Characters
+                    .Where(character => character.Id == characterId)
+                    .Select(character => character.StationCash)
+                    .Single();
+
+                transaction.Commit();
+                return 1;
+            });
+        }
+        catch (DbUpdateException)
+        {
+            result = 2;
+        }
+
+        if (result != 1)
+        {
+            response.Result = result;
+            connection.SendTunneled(response);
+            return true;
+        }
+
+        connection.Player.StationCash = stationCash;
+
+        response.Result = 1;
+        response.OrderTrackingId = packet.Order.OrderTrackingId;
+        response.OrderId = packet.Order.OrderTrackingId.ToString();
+        response.Total = totalCost;
+
+        connection.SendTunneled(response);
+        ClientHousingPacketRequestPlayerHousesHandler.SendHouseList(connection);
 
         return true;
     }

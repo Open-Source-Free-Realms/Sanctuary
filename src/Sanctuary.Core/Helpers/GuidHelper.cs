@@ -8,6 +8,7 @@ public static class GuidHelper
     private enum GuidType : byte
     {
         Player = 1,
+        House = 2,
 
         Max = 15
     }
@@ -20,6 +21,16 @@ public static class GuidHelper
     public static ulong GetPlayerId(ulong guid)
     {
         return GetId(GuidType.Player, guid);
+    }
+
+    public static ulong GetHouseGuid(ulong id)
+    {
+        return GetGuid(GuidType.House, id);
+    }
+
+    public static ulong GetHouseId(ulong guid)
+    {
+        return GetId(GuidType.House, guid);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
