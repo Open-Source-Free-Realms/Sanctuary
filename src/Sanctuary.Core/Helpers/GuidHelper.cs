@@ -9,6 +9,7 @@ public static class GuidHelper
     {
         Player = 1,
         House = 2,
+        Fixture = 3,
 
         Max = 15
     }
@@ -31,6 +32,16 @@ public static class GuidHelper
     public static ulong GetHouseId(ulong guid)
     {
         return GetId(GuidType.House, guid);
+    }
+
+    public static ulong GetFixtureGuid(ulong id)
+    {
+        return GetGuid(GuidType.Fixture, id);
+    }
+
+    public static ulong GetFixtureId(ulong guid)
+    {
+        return GetId(GuidType.Fixture, guid);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
