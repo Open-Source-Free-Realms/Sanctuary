@@ -65,8 +65,9 @@ public class Npc : IScriptableNpc, IEntity
 
     public int InteractRange { get; set; } = 100;
     public bool IsInteractable { get; set; } = true;
+    public bool CollisionEnabled { get; set; }
 
-    public int MovementType => 2;
+    public int MovementType { get; set; } = 2;
 
     public int AreaDefinitionId { get; set; }
 
@@ -149,13 +150,7 @@ public class Npc : IScriptableNpc, IEntity
 
     public void UpdatePosition(Vector4 position, Quaternion rotation, bool updateZoneArea = true)
     {
-        Position = position;
-        Rotation = rotation;
-
-        if (Visible)
-        {
-            UpdateZoneTile();
-        }
+        UpdatePositionWithoutBroadcast(position, rotation);
 
         var packet = new PlayerUpdatePacketUpdatePosition
         {
@@ -169,6 +164,17 @@ public class Npc : IScriptableNpc, IEntity
         foreach (var visiblePlayer in VisiblePlayers)
         {
             visiblePlayer.Value.SendTunneled(packet);
+        }
+    }
+
+    internal void UpdatePositionWithoutBroadcast(Vector4 position, Quaternion rotation)
+    {
+        Position = position;
+        Rotation = rotation;
+
+        if (Visible)
+        {
+            UpdateZoneTile();
         }
     }
 
@@ -261,7 +267,7 @@ public class Npc : IScriptableNpc, IEntity
             Unknown39 = default,
             Unknown40 = default,
             Unknown41 = default,
-            Unknown42 = default,
+            Unknown42 = CollisionEnabled,
 
             HasTilt = default,
 

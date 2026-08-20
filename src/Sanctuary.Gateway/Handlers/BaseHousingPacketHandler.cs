@@ -30,11 +30,19 @@ public static class BaseHousingPacketHandler
 
         return opCode switch
         {
+            ClientHousingPacketPlaceFixtureRequest.OpCode => ClientHousingPacketPlaceFixtureRequestHandler.HandlePacket(connection, reader.Span),
+            ClientHousingPacketPlaceFixture.OpCode => ClientHousingPacketPlaceFixtureHandler.HandlePacket(connection, reader.Span),
+            ClientHousingPacketPickupFixture.OpCode => ClientHousingPacketPickupFixtureHandler.HandlePacket(connection, reader.Span),
+            ClientHousingPacketPickupAllFixturesHandler.OpCode => ClientHousingPacketPickupAllFixturesHandler.HandlePacket(connection, reader.Span),
+            ClientHousingPacketSaveFixture.OpCode => ClientHousingPacketSaveFixtureHandler.HandlePacket(connection, reader.Span),
+            ClientHousingPacketSetEditMode.OpCode => ClientHousingPacketSetEditModeHandler.HandlePacket(connection, reader.Span),
             ClientHousingPacketLeaveHouse.OpCode => ClientHousingPacketLeaveHouseHandler.HandlePacket(connection, reader.Span),
             ClientHousingPacketRequestPlayerHouses.OpCode => ClientHousingPacketRequestPlayerHousesHandler.HandlePacket(connection, reader.Span),
-            ClientHousingPacketSetEditMode.OpCode => ClientHousingPacketSetEditModeHandler.HandlePacket(connection, reader.Span),
             ClientHousingPacketEnterRequest.OpCode => ClientHousingPacketEnterRequestHandler.HandlePacket(connection, reader.Span),
-            _ => true // housing not implemented
+            ClientHousingPacketRequestGrantHandler.OpCode => ClientHousingPacketRequestGrantHandler.HandlePacket(connection, reader.Span),
+            ClientHousingPacketApplyCustomizationToFixtureGroupAndType.OpCode => ClientHousingPacketApplyCustomizationToFixtureGroupAndTypeHandler.HandlePacket(connection, reader.Span),
+            ClientHousingPacketRemoveCustomizationFromFixtureGroupAndType.OpCode => ClientHousingPacketRemoveCustomizationFromFixtureGroupAndTypeHandler.HandlePacket(connection, reader.Span),
+            _ => false
         };
     }
 }

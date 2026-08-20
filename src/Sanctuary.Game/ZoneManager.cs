@@ -226,7 +226,7 @@ public class ZoneManager : IZoneManager
         if (dbHouse is null)
             return false;
 
-        zone = new HousingZone(housingZoneDefinition, _serviceProvider)
+        zone = new HousingZone(housingZoneDefinition, dbHouse.Id, _serviceProvider)
         {
             Id = NextRuntimeId(),
             OwnerId = ownerId
