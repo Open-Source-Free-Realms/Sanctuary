@@ -2,7 +2,7 @@
 
 namespace Sanctuary.Game.Resources.Definitions.Zones;
 
-public sealed class StartingZoneDefinition : BaseZoneDefinition
+public sealed class WorldZoneDefinition : BaseZoneDefinition
 {
     public List<ZoneAreaDefinition> AreaDefinitions { get; set; } = [];
 }

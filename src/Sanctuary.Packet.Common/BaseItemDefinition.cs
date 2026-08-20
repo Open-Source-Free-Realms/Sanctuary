@@ -4,6 +4,8 @@ namespace Sanctuary.Packet.Common;
 
 public class BaseItemDefinition : ISerializableType
 {
+    public string? Comment { get; set; }
+
     public int Id { get; set; }
 
     /// <summary>
