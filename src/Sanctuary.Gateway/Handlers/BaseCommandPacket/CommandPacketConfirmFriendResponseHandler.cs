@@ -62,27 +62,22 @@ public static class CommandPacketConfirmFriendResponseHandler
                 if (!OnAccept(player, connection.Player))
                     return true;
 
-                connection.Player.IncomingFriendRequests.TryRemove(packet.Guid);
-
                 friendMessagePacket.Type = FriendMessageType.FriendAddRequestAccepted;
                 break;
 
             case 1:
-                connection.Player.IncomingFriendRequests.TryRemove(packet.Guid);
                 friendMessagePacket.Type = FriendMessageType.FriendAddRequestDeclined;
                 break;
 
             case 2:
-                connection.Player.IncomingFriendRequests.TryRemove(packet.Guid);
                 friendMessagePacket.Type = FriendMessageType.FriendAddRequestTimedOut;
                 break;
 
             default:
-                break;
+                return true;
         }
 
-        if (friendMessagePacket.Type == default)
-            return true;
+        connection.Player.IncomingFriendRequests.TryRemove(packet.Guid);
 
         friendMessagePacket.Guid = connection.Player.Guid;
         friendMessagePacket.Name = connection.Player.Name;
