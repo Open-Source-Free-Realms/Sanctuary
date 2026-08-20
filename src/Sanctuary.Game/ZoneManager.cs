@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -27,6 +29,8 @@ public class ZoneManager : IZoneManager
 
     private const int StartingZoneDefinitionId = 1;
     public WorldZone StartingZone { get; private set; } = null!;
+
+    public IEnumerable<IZone> Zones => _zones.Values;
 
     public ZoneManager(
         ILoggerFactory loggerFactory,
@@ -103,10 +107,17 @@ public class ZoneManager : IZoneManager
         return _zones.TryAdd((zone.DefinitionId, null), zone);
     }
 
-    private bool TryGetOrCreateZoneInstance(int zoneDefinitionId, ulong ownerId, [MaybeNullWhen(false)] out IZone zone)
+    public bool TryGetOrCreateZoneInstance(int zoneDefinitionId, ulong? ownerId, [MaybeNullWhen(false)] out IZone zone)
     {
-        if (_zones.TryGetValue((zoneDefinitionId, ownerId), out zone))
-            return true;
+        var key = (zoneDefinitionId, ownerId);
+
+        if (_zones.TryGetValue(key, out zone))
+        {
+            if (!zone.IsDisposed)
+                return true;
+
+            ((ICollection<KeyValuePair<(int, ulong?), IZone>>)_zones).Remove(new(key, zone));
+        }
 
         if (!_resourceManager.Zones.TryGetValue(zoneDefinitionId, out var zoneDefinition))
         {
@@ -116,9 +127,14 @@ public class ZoneManager : IZoneManager
 
         BaseZone? newZone = zoneDefinition switch
         {
-            HousingZoneDefinition housingZoneDefinition =>
-                TryCreateHousingZone(housingZoneDefinition, ownerId, out var housingZone) ? housingZone : null,
-            CombatZoneDefinition combatZoneDefinition => new CombatZone(combatZoneDefinition, _serviceProvider)
+            WorldZoneDefinition worldZoneDefinition => new WorldZone(worldZoneDefinition, _serviceProvider)
+            {
+                Id = _uniqueId++,
+                OwnerId = ownerId
+            },
+            HousingZoneDefinition housingZoneDefinition when ownerId is not null =>
+                TryGetHousingZone(housingZoneDefinition, ownerId.Value, out var housingZone) ? housingZone : null,
+            CombatZoneDefinition combatZoneDefinition when ownerId is not null => new CombatZone(combatZoneDefinition, _serviceProvider)
             {
                 Id = _uniqueId++,
                 OwnerId = ownerId
@@ -136,10 +152,10 @@ public class ZoneManager : IZoneManager
         // pair - e.g. two party members both zoning into a not-yet-created dungeon at once. Whichever
         // TryAdd loses just discards its own zone (never started, so this is cheap) and hands back
         // whichever instance actually won.
-        if (!_zones.TryAdd((zoneDefinitionId, ownerId), newZone))
+        if (!_zones.TryAdd(key, newZone))
         {
             newZone.Dispose();
-            return _zones.TryGetValue((zoneDefinitionId, ownerId), out zone);
+            return _zones.TryGetValue(key, out zone);
         }
 
         newZone.OnStart();
@@ -147,7 +163,14 @@ public class ZoneManager : IZoneManager
         return true;
     }
 
-    private bool TryCreateHousingZone(HousingZoneDefinition housingZoneDefinition, ulong ownerId,
+    public void RemoveZoneInstance(IZone zone)
+    {
+        var key = (zone.DefinitionId, zone.OwnerId);
+
+        ((ICollection<KeyValuePair<(int, ulong?), IZone>>)_zones).Remove(new(key, zone));
+    }
+
+    private bool TryGetHousingZone(HousingZoneDefinition housingZoneDefinition, ulong ownerId,
         [MaybeNullWhen(false)] out HousingZone zone)
     {
         zone = null;
@@ -158,45 +181,52 @@ public class ZoneManager : IZoneManager
             house.CharacterId == ownerId && house.ZoneDefinitionId == housingZoneDefinition.Id);
 
         if (dbHouse is null)
-        {
-            dbHouse = new DbHouse
-            {
-                CharacterId = ownerId,
-                ZoneDefinitionId = housingZoneDefinition.Id
-            };
-
-            dbContext.Houses.Add(dbHouse);
-
-            try
-            {
-                if (dbContext.SaveChanges() <= 0)
-                {
-                    _logger.LogWarning("Failed to create house for character {characterId}.", ownerId);
-                    return false;
-                }
-            }
-            catch (DbUpdateException)
-            {
-                // Another request already created this house type for this character
-                // ((CharacterId, ZoneDefinitionId) is unique) between our SingleOrDefault check
-                // and this SaveChanges call. That's not a failure - just use the row that won.
-                dbContext.Entry(dbHouse).State = EntityState.Detached;
-                dbHouse = dbContext.Houses.SingleOrDefault(house =>
-                    house.CharacterId == ownerId && house.ZoneDefinitionId == housingZoneDefinition.Id);
-
-                if (dbHouse is null)
-                {
-                    _logger.LogWarning("Failed to create or recover house for character {characterId}.", ownerId);
-                    return false;
-                }
-            }
-        }
+            return false;
 
         zone = new HousingZone(housingZoneDefinition, _serviceProvider)
         {
             Id = _uniqueId++,
             OwnerId = ownerId
         };
+
+        return true;
+    }
+
+    public bool TryGrantHouse(int zoneDefinitionId, ulong ownerId)
+    {
+        if (!_resourceManager.Zones.TryGetValue(zoneDefinitionId, out var zoneDefinition) ||
+            zoneDefinition is not HousingZoneDefinition housingZoneDefinition)
+        {
+            return false;
+        }
+
+        using var dbContext = _dbContextFactory.CreateDbContext();
+
+        var dbHouse = dbContext.Houses.SingleOrDefault(house =>
+            house.CharacterId == ownerId && house.ZoneDefinitionId == housingZoneDefinition.Id);
+
+        if (dbHouse is not null)
+            return true;
+
+        dbHouse = new DbHouse
+        {
+            CharacterId = ownerId,
+            ZoneDefinitionId = housingZoneDefinition.Id
+        };
+
+        dbContext.Houses.Add(dbHouse);
+
+        try
+        {
+            if (dbContext.SaveChanges() <= 0)
+            {
+                _logger.LogWarning("Failed to create house for character {characterId}.", ownerId);
+                return false;
+            }
+        }
+        catch (DbUpdateException)
+        {
+        }
 
         return true;
     }

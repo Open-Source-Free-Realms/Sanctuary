@@ -16,6 +16,12 @@ public interface IZone : IScriptableZone
 
     ulong? OwnerId { get; }
 
+    Vector4 SpawnPosition { get; }
+    Quaternion SpawnRotation { get; }
+
+    bool IsDisposed { get; }
+    bool TryMarkDisposedIfEmpty();
+
     #region Events
 
     void OnStart();
