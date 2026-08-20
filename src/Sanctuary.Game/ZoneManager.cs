@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,14 @@ namespace Sanctuary.Game;
 
 public class ZoneManager : IZoneManager
 {
+    private sealed class ZoneCreationGate
+    {
+        public object StateLock { get; } = new();
+        public object CreationLock { get; } = new();
+        public int Users { get; set; }
+        public bool Removed { get; set; }
+    }
+
     private readonly ILogger _logger;
     private readonly IResourceManager _resourceManager;
     private readonly IServiceProvider _serviceProvider;
@@ -26,6 +35,7 @@ public class ZoneManager : IZoneManager
     private static int _uniqueId = 1;
 
     private readonly ConcurrentDictionary<(int, ulong?), IZone> _zones = new();
+    private readonly ConcurrentDictionary<(int, ulong?), ZoneCreationGate> _zoneCreationLocks = new();
 
     private const int StartingZoneDefinitionId = 1;
     public WorldZone StartingZone { get; private set; } = null!;
@@ -99,10 +109,11 @@ public class ZoneManager : IZoneManager
 
         zone = new WorldZone(worldZoneDefinition, _serviceProvider)
         {
-            Id = _uniqueId++
+            Id = NextRuntimeId()
         };
 
         zone.OnStart();
+        zone.CompleteInitialization();
 
         return _zones.TryAdd((zone.DefinitionId, null), zone);
     }
@@ -111,6 +122,107 @@ public class ZoneManager : IZoneManager
     {
         var key = (zoneDefinitionId, ownerId);
 
+        if (TryGetActiveZone(key, out zone))
+            return true;
+
+        var creationGate = AcquireCreationGate(key);
+        try
+        {
+            lock (creationGate.CreationLock)
+            {
+                if (TryGetActiveZone(key, out zone))
+                    return true;
+
+                if (!_resourceManager.Zones.TryGetValue(zoneDefinitionId, out var zoneDefinition))
+                {
+                    zone = null;
+                    return false;
+                }
+
+                BaseZone? newZone = zoneDefinition switch
+                {
+                    WorldZoneDefinition worldZoneDefinition => new WorldZone(worldZoneDefinition, _serviceProvider)
+                    {
+                        Id = NextRuntimeId(),
+                        OwnerId = ownerId
+                    },
+                    HousingZoneDefinition housingZoneDefinition when ownerId is not null =>
+                        TryGetHousingZone(housingZoneDefinition, ownerId.Value, out var housingZone) ? housingZone : null,
+                    CombatZoneDefinition combatZoneDefinition when ownerId is not null => new CombatZone(combatZoneDefinition, _serviceProvider)
+                    {
+                        Id = NextRuntimeId(),
+                        OwnerId = ownerId
+                    },
+                    _ => null
+                };
+
+                if (newZone is null)
+                {
+                    zone = null;
+                    return false;
+                }
+
+                try
+                {
+                    newZone.OnStart();
+                    newZone.CompleteInitialization();
+                }
+                catch (Exception exception)
+                {
+                    _logger.LogError(exception, "Failed to initialize zone definition {DefinitionId} for owner {OwnerId}.", zoneDefinitionId, ownerId);
+                    newZone.Dispose();
+                    zone = null;
+                    return false;
+                }
+
+                if (newZone.IsDisposed || !_zones.TryAdd(key, newZone))
+                {
+                    newZone.Dispose();
+                    return TryGetActiveZone(key, out zone);
+                }
+
+                zone = newZone;
+                return true;
+            }
+        }
+        finally
+        {
+            ReleaseCreationGate(key, creationGate);
+        }
+    }
+
+    private ZoneCreationGate AcquireCreationGate((int, ulong?) key)
+    {
+        while (true)
+        {
+            var gate = _zoneCreationLocks.GetOrAdd(key, static _ => new ZoneCreationGate());
+            lock (gate.StateLock)
+            {
+                if (gate.Removed)
+                    continue;
+
+                gate.Users++;
+                return gate;
+            }
+        }
+    }
+
+    private void ReleaseCreationGate((int, ulong?) key, ZoneCreationGate gate)
+    {
+        lock (gate.StateLock)
+        {
+            gate.Users--;
+            if (gate.Users != 0)
+                return;
+
+            gate.Removed = true;
+            ((ICollection<KeyValuePair<(int, ulong?), ZoneCreationGate>>)_zoneCreationLocks)
+                .Remove(new(key, gate));
+        }
+    }
+
+    private bool TryGetActiveZone((int, ulong?) key, [MaybeNullWhen(false)] out IZone zone)
+    {
         if (_zones.TryGetValue(key, out zone))
         {
             if (!zone.IsDisposed)
@@ -119,48 +231,13 @@ public class ZoneManager : IZoneManager
             ((ICollection<KeyValuePair<(int, ulong?), IZone>>)_zones).Remove(new(key, zone));
         }
 
-        if (!_resourceManager.Zones.TryGetValue(zoneDefinitionId, out var zoneDefinition))
-        {
-            zone = null;
-            return false;
-        }
+        zone = null;
+        return false;
+    }
 
-        BaseZone? newZone = zoneDefinition switch
-        {
-            WorldZoneDefinition worldZoneDefinition => new WorldZone(worldZoneDefinition, _serviceProvider)
-            {
-                Id = _uniqueId++,
-                OwnerId = ownerId
-            },
-            HousingZoneDefinition housingZoneDefinition when ownerId is not null =>
-                TryGetHousingZone(housingZoneDefinition, ownerId.Value, out var housingZone) ? housingZone : null,
-            CombatZoneDefinition combatZoneDefinition when ownerId is not null => new CombatZone(combatZoneDefinition, _serviceProvider)
-            {
-                Id = _uniqueId++,
-                OwnerId = ownerId
-            },
-            _ => null
-        };
-
-        if (newZone is null)
-        {
-            zone = null;
-            return false;
-        }
-
-        // Two callers can race to create the first instance for the same (zoneDefinitionId, ownerId)
-        // pair - e.g. two party members both zoning into a not-yet-created dungeon at once. Whichever
-        // TryAdd loses just discards its own zone (never started, so this is cheap) and hands back
-        // whichever instance actually won.
-        if (!_zones.TryAdd(key, newZone))
-        {
-            newZone.Dispose();
-            return _zones.TryGetValue(key, out zone);
-        }
-
-        newZone.OnStart();
-        zone = newZone;
-        return true;
+    private static int NextRuntimeId()
+    {
+        return Interlocked.Increment(ref _uniqueId) - 1;
     }
 
     public void RemoveZoneInstance(IZone zone)
@@ -183,9 +260,9 @@ public class ZoneManager : IZoneManager
         if (dbHouse is null)
             return false;
 
-        zone = new HousingZone(housingZoneDefinition, _serviceProvider)
+        zone = new HousingZone(housingZoneDefinition, dbHouse.Id, _serviceProvider)
         {
-            Id = _uniqueId++,
+            Id = NextRuntimeId(),
             OwnerId = ownerId
         };
 

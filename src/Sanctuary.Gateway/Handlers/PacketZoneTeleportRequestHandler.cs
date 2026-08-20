@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Game;
+using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
@@ -15,6 +16,7 @@ public static class PacketZoneTeleportRequestHandler
 {
     private static ILogger _logger = null!;
     private static IResourceManager _resourceManager = null!;
+    private static IZoneManager _zoneManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -22,6 +24,7 @@ public static class PacketZoneTeleportRequestHandler
         _logger = loggerFactory.CreateLogger(nameof(PacketZoneTeleportRequestHandler));
 
         _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
+        _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
     }
 
     public static bool HandlePacket(GatewayConnection connection, Span<byte> data)
@@ -45,6 +48,12 @@ public static class PacketZoneTeleportRequestHandler
 
         var position = pointOfInterest.SpawnPosition;
         var rotation = new Quaternion(rotationZ, 0f, rotationX, 0f);
+
+        if (connection.Player.Zone is HousingZone)
+        {
+            connection.Player.TeleportToZone(_zoneManager.StartingZone, position, rotation);
+            return true;
+        }
 
         connection.Player.UpdatePosition(position, rotation, updateZoneArea: false);
 

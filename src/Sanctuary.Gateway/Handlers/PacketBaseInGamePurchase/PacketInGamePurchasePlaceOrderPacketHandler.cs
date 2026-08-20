@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -11,6 +13,8 @@ using Sanctuary.Core.IO;
 using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game;
+using Sanctuary.Game.Resources.Definitions.Zones;
+using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -47,7 +51,7 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
 
         var orderDetail = packet.Order.Details.FirstOrDefault();
 
-        if (orderDetail is null)
+        if (orderDetail is null || orderDetail.Quantity <= 0)
         {
             packetInGamePurchasePlaceOrderResponse.Result = 2;
 
@@ -74,6 +78,28 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
             return true;
         }
 
+        var housingZoneDefinition = _resourceManager.Zones.Values
+            .OfType<HousingZoneDefinition>()
+            .FirstOrDefault(definition => definition.StoreBundleId == appStoreBundleDefinition.Id);
+        var containsHouseItem = appStoreBundleDefinition.Entries.Any(entry =>
+            _resourceManager.ClientItemDefinitions.TryGetValue(entry.MarketingItemId, out var definition) &&
+            definition.Type == 16);
+
+        if ((containsHouseItem && housingZoneDefinition is null) ||
+            (housingZoneDefinition is not null &&
+                (orderDetail.Quantity != 1 ||
+                 appStoreBundleDefinition.Entries.Count != 1 ||
+                 appStoreBundleDefinition.Entries[0].MarketingItemId != housingZoneDefinition.ItemDefinitionId ||
+                 !_resourceManager.ClientItemDefinitions.TryGetValue(housingZoneDefinition.ItemDefinitionId, out var houseItemDefinition) ||
+                 houseItemDefinition.Type != 16)))
+        {
+            packetInGamePurchasePlaceOrderResponse.Result = 2;
+
+            connection.SendTunneled(packetInGamePurchasePlaceOrderResponse);
+
+            return true;
+        }
+
         if (!int.TryParse(orderDetail.Tint, out var orderDetailTint))
         {
             packetInGamePurchasePlaceOrderResponse.Result = 2;
@@ -83,11 +109,40 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
             return true;
         }
 
+        if (housingZoneDefinition is not null)
+        {
+            var houseCost = connection.Player.MembershipStatus == 0
+                ? appStoreBundleDefinition.Price
+                : appStoreBundleDefinition.MembersOnlyPrice;
+
+            return PurchaseHouse(
+                connection,
+                packet,
+                housingZoneDefinition,
+                houseCost,
+                packetInGamePurchasePlaceOrderResponse);
+        }
+
+        var containsHousingInventory = appStoreBundleDefinition.Entries.Any(entry =>
+            _resourceManager.ClientItemDefinitions.TryGetValue(entry.MarketingItemId, out var definition) &&
+            StoreInventoryPurchasePolicy.IsHousingInventoryItem(definition));
         var cost = connection.Player.MembershipStatus == 0
             ? appStoreBundleDefinition.Price
-            : appStoreBundleDefinition.MemberDiscount;
+            : containsHousingInventory
+                ? appStoreBundleDefinition.MembersOnlyPrice
+                : appStoreBundleDefinition.MemberDiscount;
 
-        var totalCost = cost * orderDetail.Quantity;
+        var totalCostValue = (long)cost * orderDetail.Quantity;
+        if (cost < 0 || totalCostValue > int.MaxValue)
+        {
+            packetInGamePurchasePlaceOrderResponse.Result = 2;
+
+            connection.SendTunneled(packetInGamePurchasePlaceOrderResponse);
+
+            return true;
+        }
+
+        var totalCost = (int)totalCostValue;
 
         if (connection.Player.StationCash < totalCost)
         {
@@ -119,9 +174,20 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
         var lastMountId = dbCharacter.Mounts.Count > 0 ? dbCharacter.Mounts.Max(x => x.Id) : 0;
 
         var pendingUpdates = new List<Action>();
+        var purchasedHousingInventory = false;
 
         foreach (var bundleEntry in appStoreBundleDefinition.Entries)
         {
+            var totalQuantityValue = (long)orderDetail.Quantity * bundleEntry.Quantity;
+            if (bundleEntry.Quantity <= 0 || totalQuantityValue > int.MaxValue)
+            {
+                packetInGamePurchasePlaceOrderResponse.Result = 2;
+
+                connection.SendTunneled(packetInGamePurchasePlaceOrderResponse);
+
+                return true;
+            }
+
             if (!_resourceManager.ClientItemDefinitions.TryGetValue(bundleEntry.MarketingItemId, out var clientItemDefinition))
             {
                 packetInGamePurchasePlaceOrderResponse.Result = 2;
@@ -131,24 +197,46 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
                 return true;
             }
 
-            if (clientItemDefinition.Type == 1 || clientItemDefinition.Type == 12)
+            if (StoreInventoryPurchasePolicy.IsSupported(clientItemDefinition))
             {
-                var totalQuantity = orderDetail.Quantity * bundleEntry.Quantity;
+                var totalQuantity = (int)totalQuantityValue;
+                var isHousingInventory = StoreInventoryPurchasePolicy.IsHousingInventoryItem(clientItemDefinition);
+                var itemTint = isHousingInventory
+                    ? StoreInventoryPurchasePolicy.ResolveHousingTint(clientItemDefinition, orderDetailTint)
+                    : orderDetailTint;
 
                 var dbItem = dbCharacter.Items.SingleOrDefault(i =>
-                    i.Definition == clientItemDefinition.Id && i.Tint == orderDetailTint);
+                    i.Definition == clientItemDefinition.Id && i.Tint == itemTint);
 
                 if (dbItem is not null)
                 {
+                    if (dbItem.Count < 0 || dbItem.Count > int.MaxValue - totalQuantity)
+                    {
+                        packetInGamePurchasePlaceOrderResponse.Result = 2;
+
+                        connection.SendTunneled(packetInGamePurchasePlaceOrderResponse);
+
+                        return true;
+                    }
+
                     dbItem.Count += totalQuantity;
                 }
                 else
                 {
+                    if (lastItemId == int.MaxValue)
+                    {
+                        packetInGamePurchasePlaceOrderResponse.Result = 2;
+
+                        connection.SendTunneled(packetInGamePurchasePlaceOrderResponse);
+
+                        return true;
+                    }
+
                     dbItem = new DbItem
                     {
                         Id = ++lastItemId,
                         Definition = clientItemDefinition.Id,
-                        Tint = orderDetailTint,
+                        Tint = itemTint,
 
                         Count = totalQuantity
                     };
@@ -158,10 +246,12 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
 
                 var itemDefinition = clientItemDefinition;
                 var savedItem = dbItem;
+                purchasedHousingInventory |= isHousingInventory;
 
                 pendingUpdates.Add(() =>
                 {
-                    var clientItem = connection.Player.Items.SingleOrDefault(x => x.Definition == itemDefinition.Id && x.Tint == orderDetailTint);
+                    var clientItem = connection.Player.Items.SingleOrDefault(x =>
+                        x.Definition == itemDefinition.Id && x.Tint == savedItem.Tint);
 
                     var addItem = false;
 
@@ -212,6 +302,15 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
             }
             else if (clientItemDefinition.Type == 19) // Mounts
             {
+                if (lastMountId == int.MaxValue)
+                {
+                    packetInGamePurchasePlaceOrderResponse.Result = 2;
+
+                    connection.SendTunneled(packetInGamePurchasePlaceOrderResponse);
+
+                    return true;
+                }
+
                 if (!_resourceManager.Mounts.TryGetValue(clientItemDefinition.Param1, out var mountDefinition))
                 {
                     packetInGamePurchasePlaceOrderResponse.Result = 2;
@@ -281,6 +380,15 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
             }
         }
 
+        if (dbCharacter.StationCash < totalCost)
+        {
+            packetInGamePurchasePlaceOrderResponse.Result = 5;
+
+            connection.SendTunneled(packetInGamePurchasePlaceOrderResponse);
+
+            return true;
+        }
+
         dbCharacter.StationCash -= totalCost;
 
         if (dbContext.SaveChanges() <= 0)
@@ -297,6 +405,13 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
         foreach (var pendingUpdate in pendingUpdates)
             pendingUpdate();
 
+        if (purchasedHousingInventory &&
+            connection.Player.Zone is HousingZone housingZone &&
+            housingZone.OwnerId == GuidHelper.GetPlayerId(connection.Player.Guid))
+        {
+            housingZone.Runtime.RefreshFixtureItemList(connection.Player);
+        }
+
         packetInGamePurchasePlaceOrderResponse.Result = 1;
 
         packetInGamePurchasePlaceOrderResponse.OrderTrackingId = packet.Order.OrderTrackingId;
@@ -305,6 +420,117 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
         packetInGamePurchasePlaceOrderResponse.Total = totalCost;
 
         connection.SendTunneled(packetInGamePurchasePlaceOrderResponse);
+
+        return true;
+    }
+
+    private static bool PurchaseHouse(
+        GatewayConnection connection,
+        PacketInGamePurchasePlaceOrderPacket packet,
+        HousingZoneDefinition housingZoneDefinition,
+        int totalCost,
+        PacketInGamePurchasePlaceOrderResponse response)
+    {
+        if (totalCost < 0)
+        {
+            response.Result = 2;
+            connection.SendTunneled(response);
+            return true;
+        }
+
+        var characterId = GuidHelper.GetPlayerId(connection.Player.Guid);
+        var stationCash = 0;
+        var result = 2;
+
+        using var strategyContext = _dbContextFactory.CreateDbContext();
+        var strategy = strategyContext.Database.CreateExecutionStrategy();
+
+        try
+        {
+            strategy.ExecuteInTransaction(
+                () =>
+                {
+                    strategyContext.ChangeTracker.Clear();
+
+                    if (strategyContext.Houses.Any(house =>
+                            house.CharacterId == characterId &&
+                            house.ZoneDefinitionId == housingZoneDefinition.Id))
+                    {
+                        result = 2;
+                        return;
+                    }
+
+                    var updated = strategyContext.Characters
+                        .Where(character =>
+                            character.Id == characterId &&
+                            character.StationCash >= totalCost)
+                        .ExecuteUpdate(setters => setters.SetProperty(
+                            character => character.StationCash,
+                            character => character.StationCash - totalCost));
+
+                    if (updated != 1)
+                    {
+                        result = strategyContext.Characters.Any(character => character.Id == characterId) ? 5 : 2;
+                        return;
+                    }
+
+                    strategyContext.Houses.Add(new DbHouse
+                    {
+                        CharacterId = characterId,
+                        ZoneDefinitionId = housingZoneDefinition.Id
+                    });
+
+                    if (strategyContext.SaveChanges() <= 0)
+                    {
+                        result = 2;
+                        return;
+                    }
+
+                    result = 1;
+                },
+                () =>
+                {
+                    if (result != 1)
+                        return false;
+
+                    using var verificationContext = _dbContextFactory.CreateDbContext();
+                    return verificationContext.Houses.AsNoTracking().Any(house =>
+                        house.CharacterId == characterId &&
+                        house.ZoneDefinitionId == housingZoneDefinition.Id);
+                },
+                IsolationLevel.Serializable);
+
+            if (result == 1)
+            {
+                using var resultContext = _dbContextFactory.CreateDbContext();
+                stationCash = resultContext.Characters
+                    .Where(character => character.Id == characterId)
+                    .Select(character => character.StationCash)
+                    .Single();
+            }
+        }
+        catch (Exception exception) when (exception is DbUpdateException or RetryLimitExceededException)
+        {
+            _logger.LogWarning(exception, "Unable to purchase house {ZoneDefinitionId} for character {CharacterId}.", housingZoneDefinition.Id, characterId);
+            result = 2;
+        }
+
+        if (result != 1)
+        {
+            response.Result = result;
+            connection.SendTunneled(response);
+            return true;
+        }
+
+        connection.Player.StationCash = stationCash;
+
+        response.Result = 1;
+        response.OrderTrackingId = packet.Order.OrderTrackingId;
+        response.OrderId = packet.Order.OrderTrackingId.ToString();
+        response.Total = totalCost;
+
+        connection.SendTunneled(response);
+        ClientHousingPacketRequestPlayerHousesHandler.SendHouseList(connection);
 
         return true;
     }
