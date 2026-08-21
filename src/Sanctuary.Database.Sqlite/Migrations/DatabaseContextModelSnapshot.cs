@@ -89,7 +89,7 @@ namespace Sanctuary.Database.Sqlite.Migrations
 
                     b.Property<string>("FullName")
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasMaxLength(33)
+                        .HasMaxLength(32)
                         .HasColumnType("TEXT")
                         .HasComputedColumnSql("CONCAT_WS(' ', FirstName, NULLIF(LastName, ''))", true);
 
@@ -254,31 +254,6 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     b.HasIndex("GuildId");
 
                     b.ToTable("GuildMembers");
-                });
-
-            modelBuilder.Entity("Sanctuary.Database.Entities.DbHouse", b =>
-                {
-                    b.Property<ulong>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<ulong>("CharacterId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTimeOffset>("Created")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValueSql("DATE()");
-
-                    b.Property<int>("ZoneDefinitionId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CharacterId", "ZoneDefinitionId")
-                        .IsUnique();
-
-                    b.ToTable("Houses");
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbIgnore", b =>
@@ -529,17 +504,6 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     b.Navigation("Guild");
                 });
 
-            modelBuilder.Entity("Sanctuary.Database.Entities.DbHouse", b =>
-                {
-                    b.HasOne("Sanctuary.Database.Entities.DbCharacter", "Character")
-                        .WithMany("Houses")
-                        .HasForeignKey("CharacterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Character");
-                });
-
             modelBuilder.Entity("Sanctuary.Database.Entities.DbIgnore", b =>
                 {
                     b.HasOne("Sanctuary.Database.Entities.DbCharacter", "Character")
@@ -606,8 +570,6 @@ namespace Sanctuary.Database.Sqlite.Migrations
             modelBuilder.Entity("Sanctuary.Database.Entities.DbCharacter", b =>
                 {
                     b.Navigation("Friends");
-
-                    b.Navigation("Houses");
 
                     b.Navigation("Ignores");
 

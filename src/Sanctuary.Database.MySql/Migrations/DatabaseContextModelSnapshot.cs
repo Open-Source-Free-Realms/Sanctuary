@@ -265,33 +265,6 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.ToTable("GuildMembers");
                 });
 
-            modelBuilder.Entity("Sanctuary.Database.Entities.DbHouse", b =>
-                {
-                    b.Property<ulong>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint unsigned");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<ulong>("Id"));
-
-                    b.Property<ulong>("CharacterId")
-                        .HasColumnType("bigint unsigned");
-
-                    b.Property<DateTimeOffset>("Created")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime(6)")
-                        .HasDefaultValueSql("NOW()");
-
-                    b.Property<int>("ZoneDefinitionId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CharacterId", "ZoneDefinitionId")
-                        .IsUnique();
-
-                    b.ToTable("Houses");
-                });
-
             modelBuilder.Entity("Sanctuary.Database.Entities.DbIgnore", b =>
                 {
                     b.Property<ulong>("IgnoreCharacterId")
@@ -542,17 +515,6 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.Navigation("Guild");
                 });
 
-            modelBuilder.Entity("Sanctuary.Database.Entities.DbHouse", b =>
-                {
-                    b.HasOne("Sanctuary.Database.Entities.DbCharacter", "Character")
-                        .WithMany("Houses")
-                        .HasForeignKey("CharacterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Character");
-                });
-
             modelBuilder.Entity("Sanctuary.Database.Entities.DbIgnore", b =>
                 {
                     b.HasOne("Sanctuary.Database.Entities.DbCharacter", "Character")
@@ -619,8 +581,6 @@ namespace Sanctuary.Database.MySql.Migrations
             modelBuilder.Entity("Sanctuary.Database.Entities.DbCharacter", b =>
                 {
                     b.Navigation("Friends");
-
-                    b.Navigation("Houses");
 
                     b.Navigation("Ignores");
 
