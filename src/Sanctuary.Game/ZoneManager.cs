@@ -27,7 +27,8 @@ public class ZoneManager : IZoneManager
 
     private readonly ConcurrentDictionary<(int, ulong?), IZone> _zones = new();
 
-    private const int StartingZoneDefinitionId = 1;
+    public int StartingZoneDefinitionId => 1;
+
     public WorldZone StartingZone { get; private set; } = null!;
 
     public IEnumerable<IZone> Zones => _zones.Values;

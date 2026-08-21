@@ -2149,7 +2149,9 @@ public abstract class BaseZone : IZone, IDisposable
         {
             try
             {
-                if (!ReferenceEquals(this, _zoneManager.StartingZone) && TryMarkDisposedIfEmpty())
+                var isStartingZone = DefinitionId == _zoneManager.StartingZoneDefinitionId && OwnerId is null;
+
+                if (!isStartingZone && TryMarkDisposedIfEmpty())
                     continue;
 
                 foreach (var entity in _entities)

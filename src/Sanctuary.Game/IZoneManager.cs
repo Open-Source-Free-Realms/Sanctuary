@@ -8,6 +8,8 @@ namespace Sanctuary.Game;
 
 public interface IZoneManager
 {
+    int StartingZoneDefinitionId { get; }
+
     WorldZone StartingZone { get; }
 
     IEnumerable<IZone> Zones { get; }
