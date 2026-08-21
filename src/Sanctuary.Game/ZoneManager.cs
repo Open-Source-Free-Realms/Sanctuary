@@ -21,8 +21,6 @@ public class ZoneManager : IZoneManager
     private readonly ILogger _logger;
     private readonly IResourceManager _resourceManager;
     private readonly IServiceProvider _serviceProvider;
-    private readonly IDbContextFactory<DatabaseContext> _dbContextFactory;
-
     private static int _uniqueId = 1;
 
     private readonly ConcurrentDictionary<(int, ulong?), IZone> _zones = new();
@@ -36,14 +34,12 @@ public class ZoneManager : IZoneManager
     public ZoneManager(
         ILoggerFactory loggerFactory,
         IResourceManager resourceManager,
-        IServiceProvider serviceProvider,
-        IDbContextFactory<DatabaseContext> dbContextFactory)
+        IServiceProvider serviceProvider)
     {
         _logger = loggerFactory.CreateLogger<ZoneManager>();
 
         _resourceManager = resourceManager;
         _serviceProvider = serviceProvider;
-        _dbContextFactory = dbContextFactory;
     }
 
     public bool Load()
@@ -162,60 +158,28 @@ public class ZoneManager : IZoneManager
     private bool TryGetHousingZone(HousingZoneDefinition housingZoneDefinition, ulong ownerId,
         [MaybeNullWhen(false)] out HousingZone zone)
     {
-        zone = null;
+        // NOTE: As of PR-116, this MIGHT NOT be hooked up properly. It will be the responsibility
+        // of anyone working on housing to properly match conventions/make adjustments. Once that is 
+        // done, remove this note.
+        //
+        // The commented code will be left as a convenience. You will need to give database access
+        // to the class for it to work.
 
-        using var dbContext = _dbContextFactory.CreateDbContext();
+        // zone = null;
 
-        var dbHouse = dbContext.Houses.SingleOrDefault(house =>
-            house.CharacterId == ownerId && house.ZoneDefinitionId == housingZoneDefinition.Id);
+        // using var dbContext = _dbContextFactory.CreateDbContext();
 
-        if (dbHouse is null)
-            return false;
+        // var dbHouse = dbContext.Houses.SingleOrDefault(house =>
+        //     house.CharacterId == ownerId && house.ZoneDefinitionId == housingZoneDefinition.Id);
+
+        // if (dbHouse is null)
+        //     return false;
 
         zone = new HousingZone(housingZoneDefinition, _serviceProvider)
         {
             Id = _uniqueId++,
             OwnerId = ownerId
         };
-
-        return true;
-    }
-
-    public bool TryGrantHouse(int zoneDefinitionId, ulong ownerId)
-    {
-        if (!_resourceManager.Zones.TryGetValue(zoneDefinitionId, out var zoneDefinition) ||
-            zoneDefinition is not HousingZoneDefinition housingZoneDefinition)
-        {
-            return false;
-        }
-
-        using var dbContext = _dbContextFactory.CreateDbContext();
-
-        var dbHouse = dbContext.Houses.SingleOrDefault(house =>
-            house.CharacterId == ownerId && house.ZoneDefinitionId == housingZoneDefinition.Id);
-
-        if (dbHouse is not null)
-            return true;
-
-        dbHouse = new DbHouse
-        {
-            CharacterId = ownerId,
-            ZoneDefinitionId = housingZoneDefinition.Id
-        };
-
-        dbContext.Houses.Add(dbHouse);
-
-        try
-        {
-            if (dbContext.SaveChanges() <= 0)
-            {
-                _logger.LogWarning("Failed to create house for character {characterId}.", ownerId);
-                return false;
-            }
-        }
-        catch (DbUpdateException)
-        {
-        }
 
         return true;
     }

@@ -70,8 +70,6 @@ public class DbCharacter
     public ICollection<DbIgnore> Ignores { get; set; } = new HashSet<DbIgnore>();
     public ICollection<DbProfile> Profiles { get; set; } = new HashSet<DbProfile>();
 
-    public ICollection<DbHouse> Houses { get; set; } = new HashSet<DbHouse>();
-
     public ulong UserId { get; set; }
     public DbUser User { get; set; } = null!;
 }
