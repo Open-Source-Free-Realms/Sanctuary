@@ -82,6 +82,8 @@ public abstract class BaseZone : IZone, IDisposable
 
     public bool IsDisposed => _cancellationTokenSource.IsCancellationRequested;
 
+    private bool _started = false;
+
     protected BaseZone(BaseZoneDefinition zoneDefinition, IServiceProvider serviceProvider)
     {
         _zoneDefinition = zoneDefinition;
@@ -106,9 +108,6 @@ public abstract class BaseZone : IZone, IDisposable
             ArgumentNullException.ThrowIfNull(tile.Value.VisibleTiles);
         }
 
-        Task.Factory.StartNew(UpdateEveryTickAsync, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-        Task.Factory.StartNew(UpdateEverySecondAsync, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-
         // Just in case we don't actually have the `.map` file for a particular zone.
         if (_resourceManager.Maps.TryGetValue(Name, out var mapGraph))
             Pathfinder = new Pathfinder<MapNode>(mapGraph.Nodes, _logger);
@@ -116,11 +115,28 @@ public abstract class BaseZone : IZone, IDisposable
 
     #region Events
 
-    public virtual void OnStart()
+    public void Start()
     {
-        GetOrCreateScriptContext().FireEvent("start");
+        lock (_lifecycleLock)
+        {
+            if (_started)
+                return;
 
+            _started = true;
+        }
+
+        GetOrCreateScriptContext().FireEvent("start");
         ActivateCollectionNodePools();
+
+        OnStart();
+
+        Task.Factory.StartNew(UpdateEveryTickAsync, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        Task.Factory.StartNew(UpdateEverySecondAsync, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+    }
+
+    protected virtual void OnStart()
+    {
+
     }
 
     public virtual void OnClientIsReady(Player player)
@@ -2169,6 +2185,8 @@ public abstract class BaseZone : IZone, IDisposable
         // before a player makes it in.
         lock (_lifecycleLock)
         {
+            _zoneManager.RemoveZoneInstance(this);
+
             _cancellationTokenSource.Cancel();
 
             lock (_collectionNodeLock)
@@ -2181,8 +2199,6 @@ public abstract class BaseZone : IZone, IDisposable
 
             _scriptManager.DeleteContext(this);
         }
-
-        _zoneManager.RemoveZoneInstance(this);
     }
 
     public bool TryMarkDisposedIfEmpty()

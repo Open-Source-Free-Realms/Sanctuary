@@ -102,7 +102,7 @@ public class ZoneManager : IZoneManager
             Id = _uniqueId++
         };
 
-        zone.OnStart();
+        zone.Start();
 
         return _zones.TryAdd((zone.DefinitionId, null), zone);
     }
@@ -111,21 +111,29 @@ public class ZoneManager : IZoneManager
     {
         var key = (zoneDefinitionId, ownerId);
 
-        if (_zones.TryGetValue(key, out zone))
-        {
-            if (!zone.IsDisposed)
-                return true;
+        var storedZone = _zones.GetOrAdd(key, _ => CreateZoneInstance(zoneDefinitionId, ownerId)!);
 
-            ((ICollection<KeyValuePair<(int, ulong?), IZone>>)_zones).Remove(new(key, zone));
-        }
-
-        if (!_resourceManager.Zones.TryGetValue(zoneDefinitionId, out var zoneDefinition))
+        if (storedZone is null)
         {
+            _zones.TryRemove(key, out _);
             zone = null;
             return false;
         }
 
-        BaseZone? newZone = zoneDefinition switch
+        storedZone.Start();
+
+        zone = storedZone;
+        return true;
+    }
+
+    private IZone? CreateZoneInstance(int zoneDefinitionId, ulong? ownerId)
+    {
+        if (!_resourceManager.Zones.TryGetValue(zoneDefinitionId, out var zoneDefinition))
+        {
+            return null;
+        }
+
+        return zoneDefinition switch
         {
             WorldZoneDefinition worldZoneDefinition => new WorldZone(worldZoneDefinition, _serviceProvider)
             {
@@ -141,26 +149,6 @@ public class ZoneManager : IZoneManager
             },
             _ => null
         };
-
-        if (newZone is null)
-        {
-            zone = null;
-            return false;
-        }
-
-        // Two callers can race to create the first instance for the same (zoneDefinitionId, ownerId)
-        // pair - e.g. two party members both zoning into a not-yet-created dungeon at once. Whichever
-        // TryAdd loses just discards its own zone (never started, so this is cheap) and hands back
-        // whichever instance actually won.
-        if (!_zones.TryAdd(key, newZone))
-        {
-            newZone.Dispose();
-            return _zones.TryGetValue(key, out zone);
-        }
-
-        newZone.OnStart();
-        zone = newZone;
-        return true;
     }
 
     public void RemoveZoneInstance(IZone zone)
