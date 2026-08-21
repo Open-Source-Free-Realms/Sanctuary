@@ -13,9 +13,18 @@ namespace Sanctuary.Game.Zones;
 public interface IZone : IScriptableZone
 {
     int DefinitionId { get; }
+
+    ulong? OwnerId { get; }
+
+    Vector4 SpawnPosition { get; }
+    Quaternion SpawnRotation { get; }
+
+    bool IsDisposed { get; }
+    bool TryMarkDisposedIfEmpty();
+
     #region Events
 
-    void OnStart();
+    void Start();
     void OnClientIsReady(Player entity);
     void OnClientFinishedLoading(Player entity);
 
