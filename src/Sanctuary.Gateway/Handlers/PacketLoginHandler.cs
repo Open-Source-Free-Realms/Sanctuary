@@ -10,6 +10,7 @@ using Sanctuary.Core.Configuration;
 using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Game;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
@@ -155,6 +156,16 @@ public static class PacketLoginHandler
             }
         }
 
+        bool isReferee = character.User.IsMod || character.User.IsAdmin;
+        if (isReferee)
+        {
+            ProfileHelper.AddSpecialProfile(character, dbContext, _resourceManager, _logger, SpecialProfileIds.Referee);
+        }
+        else
+        {
+            // if user is no longer a mod, remove referee profile
+            ProfileHelper.RemoveSpecialProfile(character, dbContext, SpecialProfileIds.Referee);
+        }
 #if !DEBUG
         var result = dbContext.Characters
             .Where(x => x.Id == character.Id)
