@@ -1,7 +1,10 @@
+using System;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 using Lua;
+
+using Sanctuary.Core.Actions;
 
 namespace Sanctuary.Scripting;
 
@@ -51,10 +54,75 @@ internal sealed class NpcUserData(IScriptableNpc npc) : ILuaUserData
             direct = context.GetArgument<bool>(4);
         }
 
-        self._npc.MoveTo(x, y, z, direct);
+        // MoveTo just constructs the action now - pair it with SetAction here so the simple
+        // "fire and forget" Lua call still starts moving immediately, same as before.
+        self._npc.SetAction("move", self._npc.MoveTo(x, y, z, direct));
 
         return new ValueTask<int>(context.Return());
     });
+
+    // Supported step keys: "say" (InstantAction), "wait" (seconds), "moveTo" (real MoveToAction,
+    // reports done only once actually arrived), "parallel"/"sequential" (nested step lists).
+    // NOTE: no "anim"/"reward" steps yet - those C# capabilities don't exist on Npc at all yet.
+    private static readonly LuaFunction RunBehaviorFunction = new("runBehavior", static (context, cancellationToken) =>
+    {
+        var self = context.GetArgument<NpcUserData>(0);
+        var slot = context.GetArgument<string>(1);
+        var step = context.GetArgument<LuaTable>(2);
+
+        var action = ParseStep(self._npc, step);
+        self._npc.SetAction(slot, action);
+
+        return new ValueTask<int>(context.Return());
+    });
+
+    private static IAction ParseSequence(IScriptableNpc npc, LuaTable steps)
+    {
+        return new SequentialAction(ParseSteps(npc, steps));
+    }
+
+    private static IAction[] ParseSteps(IScriptableNpc npc, LuaTable steps)
+    {
+        var result = new IAction[steps.ArrayLength];
+
+        for (var i = 0; i < steps.ArrayLength; i++)
+            result[i] = ParseStep(npc, steps[(double)(i + 1)].Read<LuaTable>());
+
+        return result;
+    }
+
+    private static IAction ParseStep(IScriptableNpc npc, LuaTable step)
+    {
+        var say = step["say"];
+        if (say.Type != LuaValueType.Nil)
+            return new InstantAction(() => npc.Say(say.Read<string>()));
+
+        var wait = step["wait"];
+        if (wait.Type != LuaValueType.Nil)
+            return new WaitAction(wait.Read<double>());
+
+        var moveTo = step["moveTo"];
+        if (moveTo.Type == LuaValueType.Table)
+        {
+            var position = moveTo.Read<LuaTable>();
+            var x = position[1.0].Read<float>();
+            var y = position[2.0].Read<float>();
+            var z = position[3.0].Read<float>();
+            var direct = position.ArrayLength >= 4 && position[4.0].Read<bool>();
+
+            return npc.MoveTo(x, y, z, direct);
+        }
+
+        var parallel = step["parallel"];
+        if (parallel.Type == LuaValueType.Table)
+            return new ParallelAction(ParseSteps(npc, parallel.Read<LuaTable>()));
+
+        var sequential = step["sequential"];
+        if (sequential.Type == LuaValueType.Table)
+            return ParseSequence(npc, sequential.Read<LuaTable>());
+
+        throw new InvalidOperationException("Unrecognized behavior step");
+    }
 
     #endregion
 
@@ -85,6 +153,7 @@ internal sealed class NpcUserData(IScriptableNpc npc) : ILuaUserData
                 "say" => SayFunction,
                 "sayLocalized" => SayLocalizedFunction,
                 "moveTo" => MoveToFunction,
+                "runBehavior" => RunBehaviorFunction,
                 _ => LuaValue.Nil
             };
 

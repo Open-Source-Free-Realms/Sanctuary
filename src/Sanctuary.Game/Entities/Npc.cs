@@ -6,8 +6,9 @@ using System.Numerics;
 
 using Microsoft.Extensions.Logging;
 
+using Sanctuary.Core.Actions;
 using Sanctuary.Core.Collections;
-using Sanctuary.Game.Pathfinding;
+using Sanctuary.Game.Actions;
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -84,9 +85,7 @@ public class Npc : IScriptableNpc, IEntity
     public float WaypointTolerance { get; set; } = 0f;
     public float Speed { get; set; } = 6.25f;
 
-    private readonly PathState _path = new();
-
-    private PathBuilder? _pathBuilder;
+    private readonly ActionManager _actions = new();
 
     public Npc(IZone zone)
     {
@@ -132,13 +131,7 @@ public class Npc : IScriptableNpc, IEntity
         if (!_scripts.IsEmpty)
             GetOrCreateScriptContext().FireEvent("tick");
 
-        var currentPosition = new Vector3(Position.X, Position.Y, Position.Z);
-        var result = PathFollower.Advance(_path, currentPosition, Speed, WaypointTolerance, Zone.TickDeltaSeconds);
-
-        if (result.Moved)
-        {
-            UpdatePosition(new Vector4(result.NewPosition, 1f), result.NewRotation!.Value);
-        }
+        _actions.Tick();
     }
 
     public void UpdateEverySecond()
@@ -425,11 +418,13 @@ public class Npc : IScriptableNpc, IEntity
             visiblePlayer.Value.SendTunneled(packet);
     }
 
-    public void MoveTo(float x, float y, float z, bool direct)
+    public IAction MoveTo(float x, float y, float z, bool direct)
     {
-        MoveTo(new Vector3(x, y, z), direct);
+        return MoveTo(new Vector3(x, y, z), direct);
     }
-    
+
+    public void SetAction(string slot, IAction action) => _actions.SetAction(slot, action);
+
     #endregion
 
     public virtual void Dispose()
@@ -460,21 +455,8 @@ public class Npc : IScriptableNpc, IEntity
         Zone.TryRemoveNpc(Guid);
     }
 
-    public void MoveTo(Vector3 goalPosition, bool direct = false)
+    public IAction MoveTo(Vector3 goalPosition, bool direct = false)
     {
-        if (direct || Zone.Pathfinder is null)
-        {
-            var waypoints = new Queue<Vector3>();
-            waypoints.Enqueue(goalPosition);
-            _path.Set(waypoints);
-            return;
-        }
-
-        _pathBuilder ??= new PathBuilder(Zone.Pathfinder);
-
-        var currentPosition = new Vector3(Position.X, Position.Y, Position.Z);
-        var newWaypoints = _pathBuilder.TryRecompute(currentPosition, goalPosition);
-        if (newWaypoints is not null)
-            _path.Set(newWaypoints);
+        return new MoveToAction(this, goalPosition, direct);
     }
 }

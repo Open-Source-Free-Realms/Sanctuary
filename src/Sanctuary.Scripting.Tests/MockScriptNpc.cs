@@ -2,6 +2,8 @@ using System;
 
 using Microsoft.Extensions.Logging;
 
+using Sanctuary.Core.Actions;
+
 namespace Sanctuary.Scripting.Tests;
 
 internal class MockScriptNpc(IScriptableZone _zone) : IScriptableNpc
@@ -28,7 +30,12 @@ internal class MockScriptNpc(IScriptableZone _zone) : IScriptableNpc
         throw new NotImplementedException();
     }
 
-    public void MoveTo(float x, float y, float z, bool direct)
+    public IAction MoveTo(float x, float y, float z, bool direct)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SetAction(string slot, IAction action)
     {
         throw new NotImplementedException();
     }
