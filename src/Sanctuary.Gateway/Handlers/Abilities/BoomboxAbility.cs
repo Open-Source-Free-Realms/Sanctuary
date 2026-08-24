@@ -7,20 +7,21 @@ using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 
-using static Sanctuary.Gateway.Handlers.AbilityPacketClientRequestStartAbilityHandler;
-
 namespace Sanctuary.Gateway.Handlers.Abilities;
 
 // Split out of the old handler's big if-chain - same logic, just its own class now.
-public sealed class BoomboxAbility : IConsumableAbility
+public sealed class BoomboxAbility : ConsumableAbility
 {
     // How long a boombox stays out, which is also its use cooldown.
     private const int BoomboxDurationMs = 180_000;
 
-    public bool Matches(ClientItemDefinition itemDefinition) =>
+    // PFX_smoke_black_explosion
+    private const int PoofEffectId = 21;
+
+    public override bool IsInCollection(ClientItemDefinition itemDefinition) =>
         _resourceManager.Consumables.Boomboxes.ContainsKey(itemDefinition.Id);
 
-    public bool Handle(GatewayConnection connection, AbilityPacketClientRequestStartAbility packet, int slot, ClientItem clientItem, ClientItemDefinition itemDefinition)
+    public override bool HandleAbility(GatewayConnection connection, AbilityPacketClientRequestStartAbility packet, int slot, ClientItem clientItem, ClientItemDefinition itemDefinition)
     {
         if (IsOnCooldown(connection.Player.Guid, itemDefinition.Id))
             return SendFailure(connection);
@@ -28,35 +29,18 @@ public sealed class BoomboxAbility : IConsumableAbility
         SpawnBoomboxNpc(connection, itemDefinition);
 
         StartCooldown(connection.Player.Guid, itemDefinition.Id, BoomboxDurationMs);
-        connection.Player.StartActionBarCooldown(2, slot, itemDefinition.Icon.Id, itemDefinition.NameId, clientItem.Count, BoomboxDurationMs);
+        connection.Player.StartActionBarCooldown(ActionBarId, slot, itemDefinition.Icon.Id, itemDefinition.NameId, clientItem.Count, BoomboxDurationMs);
 
         return true;
     }
 
-    private static void SpawnBoomboxNpc(GatewayConnection connection, ClientItemDefinition itemDefinition)
+    private void SpawnBoomboxNpc(GatewayConnection connection, ClientItemDefinition itemDefinition)
     {
-        if (connection.Player.Zone is not StartingZone startingZone)
-            return;
-
-        if (!startingZone.TryCreateNpc(out var boomboxNpc))
-            return;
-
         _resourceManager.Consumables.Boomboxes.TryGetValue(itemDefinition.Id, out var boomboxDefinition);
 
         var modelId = boomboxDefinition?.ModelId ?? 1062;
         var effectId = boomboxDefinition?.EffectId ?? 0;
         var danceSequence = boomboxDefinition?.DanceSequence ?? [3501, 3502, 3503, 3504, 3505];
-
-        boomboxNpc.NameId = 0;
-        boomboxNpc.ModelId = modelId;
-        boomboxNpc.Name = "Boombox";
-        boomboxNpc.TextureAlias = itemDefinition.TextureAlias ?? "";
-        boomboxNpc.TintAlias = itemDefinition.TintAlias ?? "";
-        boomboxNpc.Scale = 1.0f;
-        boomboxNpc.Animation = 2100; // Bouncing animation
-        boomboxNpc.CompositeEffectId = effectId; // Owned by the entity, so the client stops it on RemovePlayer
-        boomboxNpc.HideNamePlate = true;
-        boomboxNpc.IsInteractable = false;
 
         var leftDirection = Vector3.Transform(new Vector3(-1, 0, 0), connection.Player.Rotation);
         var spawnPosition = new Vector4(
@@ -66,29 +50,25 @@ public sealed class BoomboxAbility : IConsumableAbility
             connection.Player.Position.W
         );
 
-        // Visible must be set before UpdatePosition so the zone tile system sends AddNpc to players in range.
-        boomboxNpc.Visible = true;
-        boomboxNpc.UpdatePosition(spawnPosition, connection.Player.Rotation);
-
-        var poofEffect = new PlayerUpdatePacketPlayCompositeEffect
+        var boomboxNpc = SpawnNpc(connection, spawnPosition, npc =>
         {
-            Guid = boomboxNpc.Guid,
-            CompositeEffectId = 21, // PFX_smoke_black_explosion
-            Position = spawnPosition,
-            Clear = false
-        };
+            npc.NameId = 0;
+            npc.ModelId = modelId;
+            npc.Name = "Boombox";
+            npc.TextureAlias = itemDefinition.TextureAlias ?? "";
+            npc.TintAlias = itemDefinition.TintAlias ?? "";
+            npc.Scale = 1.0f;
+            npc.Animation = 2100; // Bouncing animation
+            npc.CompositeEffectId = effectId; // Owned by the entity, so the client stops it on RemovePlayer
+            npc.HideNamePlate = true;
+            npc.IsInteractable = false;
+        });
 
-        var poofRecipients = boomboxNpc.VisiblePlayers.Values.ToList();
+        // SpawnNpc already checked this - re-derive the zone reference for StartDanceLoop below.
+        if (boomboxNpc is null || connection.Player.Zone is not StartingZone startingZone)
+            return;
 
-        if (!boomboxNpc.VisiblePlayers.ContainsKey(connection.Player.Guid))
-        {
-            // Spawner is outside zone tile range, send the packets manually.
-            connection.Player.SendTunneled(boomboxNpc.GetAddNpcPacket());
-            poofRecipients.Insert(0, connection.Player);
-        }
-
-        foreach (var player in poofRecipients)
-            player.SendTunneled(poofEffect);
+        var poofRecipients = BroadcastSpawn(connection, boomboxNpc, spawnPosition, PoofEffectId);
 
         // Tag-attach the song so it plays right away and we can stop it cleanly on despawn.
         var songTagId = 0;
@@ -110,6 +90,35 @@ public sealed class BoomboxAbility : IConsumableAbility
         }
 
         StartDanceLoop(startingZone, boomboxNpc, spawnPosition, danceSequence, songTagId, effectId);
+    }
+
+    // Boombox's spawn broadcast doesn't follow the default (Cake-style) strategy: instead of
+    // explicitly pushing OnAddVisibleNpcs, it trusts the zone tile system (already populated by
+    // SpawnNpc's UpdatePosition call) and only patches the spawner as an edge case if they're
+    // outside their own tile range.
+    protected override List<Player> BroadcastSpawn(GatewayConnection connection, Npc npc, Vector4 position, int poofEffectId)
+    {
+        var poofEffect = new PlayerUpdatePacketPlayCompositeEffect
+        {
+            Guid = npc.Guid,
+            CompositeEffectId = poofEffectId,
+            Position = position,
+            Clear = false
+        };
+
+        var poofRecipients = npc.VisiblePlayers.Values.ToList();
+
+        if (!npc.VisiblePlayers.ContainsKey(connection.Player.Guid))
+        {
+            // Spawner is outside zone tile range, send the packets manually.
+            connection.Player.SendTunneled(npc.GetAddNpcPacket());
+            poofRecipients.Insert(0, connection.Player);
+        }
+
+        foreach (var player in poofRecipients)
+            player.SendTunneled(poofEffect);
+
+        return poofRecipients;
     }
 
     private static void StartDanceLoop(StartingZone startingZone, Npc boomboxNpc, Vector4 spawnPosition, int[] danceSequence, int songTagId, int effectId)
@@ -145,7 +154,7 @@ public sealed class BoomboxAbility : IConsumableAbility
                         player.SendTunneled(stopSong);
                 }
 
-                DespawnNpc(boomboxNpc, 21);
+                DespawnNpc(boomboxNpc, PoofEffectId);
                 return;
             }
 
@@ -244,7 +253,7 @@ public sealed class BoomboxAbility : IConsumableAbility
         player.SendTunneledToVisible(new PlayerUpdatePacketSetAnimation
         {
             Guid = player.Guid,
-            AnimationId = BoomboxIdleAnimId,
+            AnimationId = IdleAnimationId,
             Flags = 1
         }, true);
     }

@@ -1,15 +1,13 @@
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 
-using static Sanctuary.Gateway.Handlers.AbilityPacketClientRequestStartAbilityHandler;
-
 namespace Sanctuary.Gateway.Handlers.Abilities;
 
 // Transform foods (dog/cat/bat treats, etc). Random ones (Jack-O-Lantern) roll a transform in Handle
 // rather than Matches, so it's a fresh roll every use - same as before the move.
-public sealed class TransformFoodAbility : IConsumableAbility
+public sealed class TransformFoodAbility : ConsumableAbility
 {
-    public bool Matches(ClientItemDefinition itemDefinition)
+    public override bool IsInCollection(ClientItemDefinition itemDefinition)
     {
         if (_resourceManager.Consumables.RandomTransformFoods.TryGetValue(itemDefinition.Id, out var randomFood) && randomFood.TransformAbilityIds.Length > 0)
             return true;
@@ -17,7 +15,7 @@ public sealed class TransformFoodAbility : IConsumableAbility
         return _resourceManager.Consumables.Transformations.ContainsKey(itemDefinition.ActivatableAbilityId);
     }
 
-    public bool Handle(GatewayConnection connection, AbilityPacketClientRequestStartAbility packet, int slot, ClientItem clientItem, ClientItemDefinition itemDefinition)
+    public override bool HandleAbility(GatewayConnection connection, AbilityPacketClientRequestStartAbility packet, int slot, ClientItem clientItem, ClientItemDefinition itemDefinition)
     {
         var transformAbilityId = itemDefinition.ActivatableAbilityId;
 
@@ -42,7 +40,7 @@ public sealed class TransformFoodAbility : IConsumableAbility
             ConsumeItem(connection, clientItem, itemDefinition, slot);
 
         if (count > 1)
-            connection.Player.StartActionBarCooldown(2, slot, itemDefinition.Icon.Id, itemDefinition.NameId, count - 1, transform.CooldownMs);
+            connection.Player.StartActionBarCooldown(ActionBarId, slot, itemDefinition.Icon.Id, itemDefinition.NameId, count - 1, transform.CooldownMs);
 
         return true;
     }

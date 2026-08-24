@@ -1,37 +1,45 @@
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
-
-using static Sanctuary.Gateway.Handlers.AbilityPacketClientRequestStartAbilityHandler;
+using Sanctuary.Packet.Common.Chat;
 
 namespace Sanctuary.Gateway.Handlers.Abilities;
 
-// Food with just a plain visual/chat effect, nothing fancier. TriggerAbilityEffect stays on the old
-// handler since the generic fallback below needs it too.
-public sealed class FoodEffectAbility : IConsumableAbility
+// Food with just a plain visual/chat effect, nothing fancier - owns the FoodEffects lookup itself,
+// since it's the only ability that ever matches one. (The handler's generic fallback for anything
+// unrecognized never gets a FoodEffects hit: if an item had one, IsInCollection below would already
+// have claimed it before dispatch reaches the fallback.)
+public sealed class FoodEffectAbility : ConsumableAbility
 {
     private const int FoodEffectCooldownMs = 120_000;
 
-    public bool Matches(ClientItemDefinition itemDefinition) =>
+    public override bool IsInCollection(ClientItemDefinition itemDefinition) =>
         _resourceManager.Consumables.FoodEffects.ContainsKey(itemDefinition.ActivatableAbilityId);
 
-    public bool Handle(GatewayConnection connection, AbilityPacketClientRequestStartAbility packet, int slot, ClientItem clientItem, ClientItemDefinition itemDefinition)
+    public override bool HandleAbility(GatewayConnection connection, AbilityPacketClientRequestStartAbility packet, int slot, ClientItem clientItem, ClientItemDefinition itemDefinition)
     {
         if (IsOnCooldown(connection.Player.Guid, itemDefinition.Id))
             return SendFailure(connection);
 
         StartCooldown(connection.Player.Guid, itemDefinition.Id, FoodEffectCooldownMs);
 
-        TriggerAbilityEffect(connection, itemDefinition);
+        _resourceManager.Consumables.FoodEffects.TryGetValue(itemDefinition.ActivatableAbilityId, out var foodEffect);
 
-        var count = clientItem.Count;
-        var hasItemLeft = !itemDefinition.SingleUse || count > 1;
+        if (foodEffect?.QuickChatId is int quickChatId and not 0)
+        {
+            connection.Player.SendTunneledToVisible(new QuickChatSendChatToChannelPacket
+            {
+                Id = quickChatId,
+                Guid = connection.Player.Guid,
+                Name = connection.Player.Name ?? new NameData(),
+                Channel = ChatChannel.WorldArea,
+                AreaNameId = 0,
+                GuildGuid = 0
+            }, true);
+        }
 
-        if (itemDefinition.SingleUse)
-            ConsumeItem(connection, clientItem, itemDefinition, slot);
+        PlayEffect(connection, foodEffect?.CompositeEffectId ?? itemDefinition.CompositeEffectId, foodEffect?.EffectDelayMs ?? 0);
 
-        if (hasItemLeft)
-            connection.Player.StartActionBarCooldown(2, slot, itemDefinition.Icon.Id, itemDefinition.NameId,
-                itemDefinition.SingleUse ? count - 1 : count, FoodEffectCooldownMs);
+        FinishActivation(connection, clientItem, itemDefinition, slot, FoodEffectCooldownMs);
 
         return true;
     }

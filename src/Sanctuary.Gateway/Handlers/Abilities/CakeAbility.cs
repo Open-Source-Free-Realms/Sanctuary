@@ -1,23 +1,19 @@
 using System;
 using System.Numerics;
 
-using Sanctuary.Game.Entities;
 using Sanctuary.Game.Resources.Definitions;
-using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
-
-using static Sanctuary.Gateway.Handlers.AbilityPacketClientRequestStartAbilityHandler;
 
 namespace Sanctuary.Gateway.Handlers.Abilities;
 
 // Split out of the old handler's big if-chain - same logic, just its own class now.
-public sealed class CakeAbility : IConsumableAbility
+public sealed class CakeAbility : ConsumableAbility
 {
-    public bool Matches(ClientItemDefinition itemDefinition) =>
+    public override bool IsInCollection(ClientItemDefinition itemDefinition) =>
         _resourceManager.Consumables.Cakes.ContainsKey(itemDefinition.Id);
 
-    public bool Handle(GatewayConnection connection, AbilityPacketClientRequestStartAbility packet, int slot, ClientItem clientItem, ClientItemDefinition itemDefinition)
+    public override bool HandleAbility(GatewayConnection connection, AbilityPacketClientRequestStartAbility packet, int slot, ClientItem clientItem, ClientItemDefinition itemDefinition)
     {
         _resourceManager.Consumables.Cakes.TryGetValue(itemDefinition.Id, out var cakeDefinition);
 
@@ -27,29 +23,13 @@ public sealed class CakeAbility : IConsumableAbility
         SpawnCakeNpc(connection, cakeDefinition!);
 
         StartCooldown(connection.Player.Guid, itemDefinition.Id, cakeDefinition!.CooldownMs);
-        connection.Player.StartActionBarCooldown(2, slot, itemDefinition.Icon.Id, itemDefinition.NameId, clientItem.Count, cakeDefinition.CooldownMs);
+        connection.Player.StartActionBarCooldown(ActionBarId, slot, itemDefinition.Icon.Id, itemDefinition.NameId, clientItem.Count, cakeDefinition.CooldownMs);
 
         return true;
     }
 
-    private static void SpawnCakeNpc(GatewayConnection connection, CakeItemDefinition cakeDefinition)
+    private void SpawnCakeNpc(GatewayConnection connection, CakeItemDefinition cakeDefinition)
     {
-        if (connection.Player.Zone is not StartingZone startingZone)
-            return;
-
-        if (!startingZone.TryCreateNpc(out var cakeNpc))
-            return;
-
-        cakeNpc.NameId = cakeDefinition.NameId;
-        cakeNpc.ModelId = cakeDefinition.ModelId;
-        cakeNpc.TextureAlias = "";
-        cakeNpc.TintAlias = "";
-        cakeNpc.Scale = 1.0f;
-        cakeNpc.Animation = cakeDefinition.Animation;
-        cakeNpc.HideNamePlate = false;
-        cakeNpc.IsInteractable = true;
-        cakeNpc.CursorId = (byte)cakeDefinition.CursorId;
-
         var forwardDirection = Vector3.Transform(new Vector3(0, 0, 1), connection.Player.Rotation);
         var spawnPosition = new Vector4(
             connection.Player.Position.X + forwardDirection.X * 1.5f,
@@ -58,8 +38,21 @@ public sealed class CakeAbility : IConsumableAbility
             connection.Player.Position.W
         );
 
-        cakeNpc.Visible = true;
-        cakeNpc.UpdatePosition(spawnPosition, connection.Player.Rotation);
+        var cakeNpc = SpawnNpc(connection, spawnPosition, npc =>
+        {
+            npc.NameId = cakeDefinition.NameId;
+            npc.ModelId = cakeDefinition.ModelId;
+            npc.TextureAlias = "";
+            npc.TintAlias = "";
+            npc.Scale = 1.0f;
+            npc.Animation = cakeDefinition.Animation;
+            npc.HideNamePlate = false;
+            npc.IsInteractable = true;
+            npc.CursorId = (byte)cakeDefinition.CursorId;
+        });
+
+        if (cakeNpc is null)
+            return;
 
         if (cakeDefinition.Type == CakeItemType.BossCake)
         {
@@ -108,22 +101,7 @@ public sealed class CakeAbility : IConsumableAbility
             };
         }
 
-        var poofEffect = new PlayerUpdatePacketPlayCompositeEffect
-        {
-            Guid = cakeNpc.Guid,
-            CompositeEffectId = cakeDefinition.SpawnPoofEffectId,
-            Position = spawnPosition,
-            Clear = false
-        };
-
-        connection.Player.SendTunneled(poofEffect);
-        connection.Player.OnAddVisibleNpcs([cakeNpc]);
-
-        foreach (var player in connection.Player.VisiblePlayers.Values)
-        {
-            player.SendTunneled(poofEffect);
-            player.OnAddVisibleNpcs([cakeNpc]);
-        }
+        BroadcastSpawn(connection, cakeNpc, spawnPosition, cakeDefinition.SpawnPoofEffectId);
 
         var despawnTime = DateTimeOffset.UtcNow.AddMilliseconds(cakeDefinition.LifetimeMs);
 

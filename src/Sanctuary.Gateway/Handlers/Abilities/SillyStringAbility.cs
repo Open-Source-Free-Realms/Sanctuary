@@ -8,21 +8,19 @@ using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 
-using static Sanctuary.Gateway.Handlers.AbilityPacketClientRequestStartAbilityHandler;
-
 namespace Sanctuary.Gateway.Handlers.Abilities;
 
 // Split out of the old handler's big if-chain - same logic, just its own class now.
-public sealed class SillyStringAbility : IConsumableAbility
+public sealed class SillyStringAbility : ConsumableAbility
 {
     // Who each player last sprayed, so back-to-back cans don't just soak the same nearest victim over
     // and over - spread it around when there's anyone else to spread it to.
     private static readonly ConcurrentDictionary<ulong, ulong> _lastSillyStringTarget = new();
 
-    public bool Matches(ClientItemDefinition itemDefinition) =>
+    public override bool IsInCollection(ClientItemDefinition itemDefinition) =>
         _resourceManager.Consumables.PartyFavors.ContainsKey(itemDefinition.Id);
 
-    public bool Handle(GatewayConnection connection, AbilityPacketClientRequestStartAbility packet, int slot, ClientItem clientItem, ClientItemDefinition itemDefinition)
+    public override bool HandleAbility(GatewayConnection connection, AbilityPacketClientRequestStartAbility packet, int slot, ClientItem clientItem, ClientItemDefinition itemDefinition)
     {
         _resourceManager.Consumables.PartyFavors.TryGetValue(itemDefinition.Id, out var favor);
 
@@ -73,7 +71,7 @@ public sealed class SillyStringAbility : IConsumableAbility
         player.SendTunneledToVisibleDelayed(new PlayerUpdatePacketSetAnimation
         {
             Guid = player.Guid,
-            AnimationId = BoomboxIdleAnimId,
+            AnimationId = IdleAnimationId,
             Flags = 1
         }, (int)(favor.GestureSeconds * 1000), sendToSelf: true);
 
@@ -83,15 +81,7 @@ public sealed class SillyStringAbility : IConsumableAbility
 
         StartCooldown(player.Guid, itemDefinition.Id, favor.CooldownMs);
 
-        var count = clientItem.Count;
-        var hasItemLeft = !itemDefinition.SingleUse || count > 1;
-
-        if (itemDefinition.SingleUse)
-            ConsumeItem(connection, clientItem, itemDefinition, slot);
-
-        if (hasItemLeft)
-            player.StartActionBarCooldown(2, slot, itemDefinition.Icon.Id, itemDefinition.NameId,
-                itemDefinition.SingleUse ? count - 1 : count, favor.CooldownMs, IconTintId(clientItem, itemDefinition));
+        FinishActivation(connection, clientItem, itemDefinition, slot, favor.CooldownMs, IconTintId(clientItem, itemDefinition.Icon.TintId));
 
         return true;
     }
