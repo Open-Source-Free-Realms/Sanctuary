@@ -71,6 +71,11 @@ public sealed class DbCharacterConfiguration : IEntityTypeConfiguration<DbCharac
             .HasForeignKey<DbCharacter>(c => c.GuildMemberId)
             .OnDelete(DeleteBehavior.SetNull);
 
+        builder.HasMany(c => c.Houses)
+            .WithOne(h => h.Character)
+            .HasForeignKey(h => h.CharacterId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         builder.HasMany(c => c.Items)
             .WithOne(i => i.Character)
             .HasForeignKey(i => i.CharacterId)

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 using Sanctuary.Core.Collections;
 using Sanctuary.Core.IO;
+using Sanctuary.Game;
 using Sanctuary.Game.ChatCommands;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Interactions;
@@ -25,6 +26,7 @@ public sealed class Player : ClientPcData, IEntity
 {
     private readonly UdpConnection _connection;
     private readonly IResourceManager _resourceManager;
+    private readonly IZoneManager _zoneManager;
 
     public bool Visible { get; set; }
 
@@ -67,12 +69,13 @@ public sealed class Player : ClientPcData, IEntity
     public Vector4 StartingZonePosition { get; set; }
     public Quaternion StartingZoneRotation { get; set; }
 
-    public Player(BaseZone zone, UdpConnection connection, IResourceManager resourceManager)
+    public Player(BaseZone zone, UdpConnection connection, IResourceManager resourceManager, IZoneManager zoneManager)
     {
         Zone = zone;
 
         _connection = connection;
         _resourceManager = resourceManager;
+        _zoneManager = zoneManager;
     }
 
     #region Connection
@@ -209,65 +212,165 @@ public sealed class Player : ClientPcData, IEntity
         ZoneTile = newZoneTile;
     }
 
-    public void TeleportToZone(IZone zone, Vector4 position, Quaternion rotation)
+    public bool TeleportToZone(IZone zone, Vector4 position, Quaternion rotation)
     {
         if (Zone == zone)
-            return;
+            return true;
 
-        if (Zone is StartingZone)
+        if (zone.IsDisposed)
         {
-            StartingZonePosition = Position;
-            StartingZoneRotation = Rotation;
+            if (!_zoneManager.TryGetOrCreateZoneInstance(zone.DefinitionId, zone.OwnerId, out var freshZone))
+                return false;
+
+            zone = freshZone;
         }
 
-        if (Mount is not null)
-            Mount.TeleportToZone(zone, position, rotation);
+        if (zone is not BaseZone targetZone)
+            return false;
 
-        // Alert/Remove visible entities
-        foreach (var visiblePlayer in VisiblePlayers)
-            visiblePlayer.Value.OnRemoveVisiblePlayers([this]);
-
-        OnRemoveVisibleNpcs(VisibleNpcs.Values);
-        OnRemoveVisiblePlayers(VisiblePlayers.Values);
-
-        ZoneTile.Entities.Remove(Guid, out _);
-
-        Zone.TryRemovePlayer(Guid);
-
-        // Add to new zone/zonetile
-
-        zone.TryAddPlayer(this);
-
-        // Teleport to new zone
-
-        Visible = false;
-
-        Zone = zone;
-
-        ZoneTile = ZoneTile.Empty;
-
-        UpdatePosition(position, rotation);
-
-        var packetClientBeginZoning = new PacketClientBeginZoning
+        if (!targetZone.TryReservePlayer(Guid))
         {
-            Name = Zone.Name,
-            Position = position,
-            Rotation = rotation,
-            Sky = "sky_deep_mines.xml",
-            Id = Zone.Id,
-            GeometryId = 214,
-            OverrideUpdateRadius = true
-        };
+            if (!_zoneManager.TryGetOrCreateZoneInstance(zone.DefinitionId, zone.OwnerId, out var freshZone) ||
+                freshZone is not BaseZone freshTargetZone ||
+                !freshTargetZone.TryReservePlayer(Guid))
+            {
+                return false;
+            }
 
-        SendTunneled(packetClientBeginZoning);
+            zone = freshZone;
+            targetZone = freshTargetZone;
+        }
+
+        if (Zone is not BaseZone oldZone || !oldZone.TryReservePlayer(Guid))
+        {
+            targetZone.CancelPlayerReservation(Guid);
+            return false;
+        }
+
+        var targetReservationHeld = true;
+        var oldReservationHeld = true;
+        var oldZoneTile = ZoneTile;
+        var oldStateDetached = false;
+        var removedFromOld = false;
+        var addedToTarget = false;
+        var transferCommitted = false;
+
+        try
+        {
+            if (Zone is WorldZone)
+            {
+                StartingZonePosition = Position;
+                StartingZoneRotation = Rotation;
+            }
+
+            oldStateDetached = true;
+            foreach (var visiblePlayer in VisiblePlayers)
+                visiblePlayer.Value.OnRemoveVisiblePlayers([this]);
+
+            OnRemoveVisibleNpcs(VisibleNpcs.Values);
+            OnRemoveVisiblePlayers(VisiblePlayers.Values);
+
+            ZoneTile.Entities.Remove(Guid, out _);
+
+            removedFromOld = oldZone.TryRemovePlayer(Guid);
+            if (!removedFromOld)
+            {
+                oldZone.UpdateEntityZoneTile(this, ZoneTile.Empty, oldZoneTile);
+                ZoneTile = oldZoneTile;
+                return false;
+            }
+
+            addedToTarget = zone.TryAddPlayer(this);
+            targetReservationHeld = false;
+
+            if (!addedToTarget)
+            {
+                Zone = oldZone;
+                var restoredToOldZone = oldZone.TryAddPlayer(this);
+                oldReservationHeld = false;
+
+                if (restoredToOldZone)
+                {
+                    oldZone.UpdateEntityZoneTile(this, ZoneTile.Empty, oldZoneTile);
+                    ZoneTile = oldZoneTile;
+                }
+
+                return false;
+            }
+
+            Visible = false;
+
+            Zone = zone;
+
+            ZoneTile = ZoneTile.Empty;
+            transferCommitted = true;
+
+            oldZone.CancelPlayerReservation(Guid);
+            oldReservationHeld = false;
+
+            UpdatePosition(position, rotation);
+
+            if (Mount is not null)
+                Mount.TeleportToZone(zone, position, rotation);
+
+            var packetClientBeginZoning = new PacketClientBeginZoning
+            {
+                Name = Zone.Name,
+                Position = position,
+                Rotation = rotation,
+                Sky = null,
+                Id = Zone.Id,
+                GeometryId = 214,
+                OverrideUpdateRadius = true
+            };
+
+            SendTunneled(packetClientBeginZoning);
+
+            return true;
+        }
+        catch
+        {
+            if (!transferCommitted)
+            {
+                if (addedToTarget || zone.TryGetPlayer(Guid, out _))
+                    zone.TryRemovePlayer(Guid);
+
+                if (oldStateDetached)
+                {
+                    Zone = oldZone;
+                    var restoredToOldZone = oldZone.TryGetPlayer(Guid, out _);
+                    if (!restoredToOldZone)
+                    {
+                        restoredToOldZone = oldZone.TryAddPlayer(this);
+                        oldReservationHeld = false;
+                    }
+
+                    if (restoredToOldZone)
+                    {
+                        oldZone.UpdateEntityZoneTile(this, ZoneTile.Empty, oldZoneTile);
+                        ZoneTile = oldZoneTile;
+                    }
+                }
+            }
+
+            throw;
+        }
+        finally
+        {
+            if (oldReservationHeld)
+                oldZone.CancelPlayerReservation(Guid);
+
+            if (targetReservationHeld)
+                targetZone.CancelPlayerReservation(Guid);
+        }
     }
 
     private void UpdateZoneArea()
     {
-        if (Zone is not StartingZone startingZone)
+        if (Zone is not WorldZone worldZone)
             return;
 
-        var zoneAreaId = startingZone.GetZoneAreaId(Position);
+        var zoneAreaId = worldZone.GetZoneAreaId(Position);
 
         if (ZoneAreaId == zoneAreaId)
             return;

@@ -247,6 +247,8 @@ public class ResourceManager : IResourceManager
         if (!Stores.Load(StoresFile) || !Stores.LoadBundles(StoreBundlesFile))
             return false;
 
+        HousingItemDefinitionGenerator.AddMissingDefinitions(ClientItemDefinitions, Stores);
+
         if (!StoreBundleGroups.Load(StoreBundleGroupsFile))
             return false;
 
@@ -378,6 +380,9 @@ public class ResourceManager : IResourceManager
                 loaded = RewardTables.Load(RewardTablesFile);
             else
                 _logger.LogWarning("Unknown file changed. File: {filepath}", e.FullPath);
+
+            if (loaded && (e.FullPath == ClientItemDefinitionsFile || e.FullPath == StoreBundlesFile))
+                HousingItemDefinitionGenerator.AddMissingDefinitions(ClientItemDefinitions, Stores);
 
             if (!loaded)
                 _logger.LogError("Error loading modified file. File: {filepath}", e.FullPath);

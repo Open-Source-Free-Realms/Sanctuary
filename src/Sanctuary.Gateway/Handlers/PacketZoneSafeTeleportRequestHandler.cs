@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Game;
+using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -17,6 +18,7 @@ public static class PacketZoneSafeTeleportRequestHandler
 {
     private static ILogger _logger = null!;
     private static IResourceManager _resourceManager = null!;
+    private static IZoneManager _zoneManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -24,6 +26,7 @@ public static class PacketZoneSafeTeleportRequestHandler
         _logger = loggerFactory.CreateLogger(nameof(PacketZoneSafeTeleportRequestHandler));
 
         _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
+        _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
     }
 
     public static bool HandlePacket(GatewayConnection connection, Span<byte> data)
@@ -35,6 +38,18 @@ public static class PacketZoneSafeTeleportRequestHandler
         }
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(PacketZoneSafeTeleportRequest), packet);
+
+        if (connection.Player.Zone is HousingZone)
+        {
+            var returnPosition = connection.Player.StartingZonePosition == default
+                ? _zoneManager.StartingZone.SpawnPosition
+                : connection.Player.StartingZonePosition;
+            var returnRotation = connection.Player.StartingZoneRotation == default
+                ? _zoneManager.StartingZone.SpawnRotation
+                : connection.Player.StartingZoneRotation;
+            connection.Player.TeleportToZone(_zoneManager.StartingZone, returnPosition, returnRotation);
+            return true;
+        }
 
         var pointOfInterest = FindNearestSafePointOfInterest(connection.Player.Position);
 

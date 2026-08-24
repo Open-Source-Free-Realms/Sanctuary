@@ -1,0 +1,33 @@
+{
+  "$type": "Housing",
+  "Id": 14,
+  "Name": "hsg_emptylot_seaside_cliffs_01",
+  "DisplayName": "Seaside Lot",
+  "CommandName": "seaside",
+  "NameId": 8320,
+  "IconId": 32638,
+  "StoreBundleId": 4536,
+  "ItemDefinitionId": 10384,
+  "DirectorySnapshot": "seaside_lot",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 12,
+  "EndLongitude": 12,
+  "Sky": "sky_seaside24.xml",
+  "SpawnPosition": [
+    568.8,
+    50.8,
+    517.9
+  ],
+  "SpawnRotation": [
+    -1,
+    0
+  ],
+  "BuildAreas": [
+    {
+      "Min": [446.1, 0, 455.7, 1],
+      "Max": [569.5, 120, 559, 1]
+    }
+  ]
+}

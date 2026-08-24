@@ -7,6 +7,8 @@ namespace Sanctuary.Packet.Common.GameCommerce;
 
 public class MarketingBundleDefinition : ISerializableType
 {
+    public string? Comment { get; set; }
+
     public DateTimeOffset LaunchTime { get; set; }
     public DateTimeOffset ExpireTime { get; set; }
 

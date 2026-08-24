@@ -10,6 +10,7 @@ using Sanctuary.Core.IO;
 using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game;
+using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -50,7 +51,8 @@ public static class CoinStoreSellToClientRequestPacketHandler
             }
         };
 
-        if (!_resourceManager.ClientItemDefinitions.TryGetValue(packet.ItemRecord.Definition, out var clientItemDefinition))
+        if (packet.Quantity <= 0 ||
+            !_resourceManager.ClientItemDefinitions.TryGetValue(packet.ItemRecord.Definition, out var clientItemDefinition))
         {
             _logger.LogWarning("User tried to buy unknown item definition. {guid} {definition}", connection.Player.Guid, packet.ItemRecord.Definition);
 
@@ -61,9 +63,7 @@ public static class CoinStoreSellToClientRequestPacketHandler
             return true;
         }
 
-        // TODO: Implement other item types
-        if (clientItemDefinition.Type != 1 &&
-            clientItemDefinition.Type != 12)
+        if (!StoreInventoryPurchasePolicy.IsSupported(clientItemDefinition))
         {
             coinStoreTransactionCompletePacket.Result = 8;
 
@@ -76,7 +76,26 @@ public static class CoinStoreSellToClientRequestPacketHandler
             ? clientItemDefinition.Cost
             : clientItemDefinition.GetMemberPurchasePrice();
 
-        var totalCost = cost * packet.Quantity;
+        var totalCostValue = (long)cost * packet.Quantity;
+        if (cost < 0 || totalCostValue > int.MaxValue)
+        {
+            coinStoreTransactionCompletePacket.Result = 8;
+
+            connection.SendTunneled(coinStoreTransactionCompletePacket);
+
+            return true;
+        }
+
+        if (!_resourceManager.CoinStoreItems.ContainsKey(clientItemDefinition.Id))
+        {
+            coinStoreTransactionCompletePacket.Result = 8;
+
+            connection.SendTunneled(coinStoreTransactionCompletePacket);
+
+            return true;
+        }
+
+        var totalCost = (int)totalCostValue;
 
         if (connection.Player.Coins < totalCost)
         {
@@ -87,10 +106,12 @@ public static class CoinStoreSellToClientRequestPacketHandler
             return true;
         }
 
-        var tint = packet.ItemRecord.Tint;
-
-        if (!clientItemDefinition.IsTintable)
-            tint = clientItemDefinition.Icon.TintId;
+        var isHousingInventory = StoreInventoryPurchasePolicy.IsHousingInventoryItem(clientItemDefinition);
+        var tint = isHousingInventory
+            ? StoreInventoryPurchasePolicy.ResolveHousingTint(clientItemDefinition, packet.ItemRecord.Tint)
+            : clientItemDefinition.IsTintable
+                ? packet.ItemRecord.Tint
+                : clientItemDefinition.Icon.TintId;
 
         using var dbContext = _dbContextFactory.CreateDbContext();
 
@@ -100,7 +121,7 @@ public static class CoinStoreSellToClientRequestPacketHandler
             {
                 Character = x,
                 Item = x.Items.SingleOrDefault(i => i.Definition == clientItemDefinition.Id && i.Tint == tint),
-                NextId = x.Items.Max(i => i.Id)
+                NextId = x.Items.Select(i => (int?)i.Id).Max() ?? 0
             })
             .SingleOrDefault();
 
@@ -117,11 +138,28 @@ public static class CoinStoreSellToClientRequestPacketHandler
 
         if (dbItem is not null)
         {
-            dbItem.Tint = tint;
+            if (dbItem.Count < 0 || dbItem.Count > int.MaxValue - packet.Quantity)
+            {
+                coinStoreTransactionCompletePacket.Result = 8;
+
+                connection.SendTunneled(coinStoreTransactionCompletePacket);
+
+                return true;
+            }
+
             dbItem.Count += packet.Quantity;
         }
         else
         {
+            if (dbQuery.NextId == int.MaxValue)
+            {
+                coinStoreTransactionCompletePacket.Result = 8;
+
+                connection.SendTunneled(coinStoreTransactionCompletePacket);
+
+                return true;
+            }
+
             dbItem = new DbItem
             {
                 Id = dbQuery.NextId + 1,
@@ -132,6 +170,15 @@ public static class CoinStoreSellToClientRequestPacketHandler
             };
 
             dbQuery.Character.Items.Add(dbItem);
+        }
+
+        if (dbQuery.Character.Coins < totalCost)
+        {
+            coinStoreTransactionCompletePacket.Result = 7;
+
+            connection.SendTunneled(coinStoreTransactionCompletePacket);
+
+            return true;
         }
 
         dbQuery.Character.Coins -= totalCost;
@@ -202,6 +249,13 @@ public static class CoinStoreSellToClientRequestPacketHandler
         };
 
         connection.SendTunneled(clientUpdatePacketCoinCount);
+
+        if (isHousingInventory &&
+            connection.Player.Zone is HousingZone housingZone &&
+            housingZone.OwnerId == GuidHelper.GetPlayerId(connection.Player.Guid))
+        {
+            housingZone.Runtime.RefreshFixtureItemList(connection.Player);
+        }
 
         coinStoreTransactionCompletePacket.Result = 1;
 
