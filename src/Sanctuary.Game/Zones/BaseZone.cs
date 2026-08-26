@@ -41,7 +41,8 @@ public abstract class BaseZone : IZone, IDisposable
     private const int VisibleTileRadius = 2;
     private readonly Dictionary<int, ZoneTile> _tiles;
 
-    private static ulong _nextNpcGuid = NpcBaseGuid;
+    private readonly object _npcGuidLock = new();
+    private ulong _nextNpcGuid = NpcBaseGuid;
 
     private readonly ConcurrentDictionary<ulong, Npc> _npcs = new();
     private readonly ConcurrentDictionary<ulong, Player> _players = new();
@@ -1516,7 +1517,22 @@ public abstract class BaseZone : IZone, IDisposable
             Guid = GetNpcGuid(guid)
         };
 
-        return _npcs.TryAdd(npc.Guid, npc) && _entities.TryAdd(npc.Guid, npc);
+        // NOTE: we want to ensure we don't add an NPC
+        // that can't be added to both  
+        if (!_npcs.TryAdd(npc.Guid, npc))
+        {
+            npc = null;
+            return false;
+        }
+
+        if (!_entities.TryAdd(npc.Guid, npc))
+        {
+            _npcs.TryRemove(npc.Guid, out _);
+            npc = null;
+            return false;
+        }
+
+        return true;
     }
 
     public bool TryCreateNpc(ulong? guid, NpcDefinition definition, [MaybeNullWhen(false)] out Npc npc)
@@ -1804,7 +1820,7 @@ public abstract class BaseZone : IZone, IDisposable
     {
         node = new CollectionNode(this, typeDefinition, poolDefinition, spawnDefinition)
         {
-            Guid = _nextNpcGuid++,
+            Guid = GetNpcGuid(null),
             Name = typeDefinition.Name,
             ModelId = typeDefinition.ModelId,
             Scale = typeDefinition.Scale,
@@ -1873,7 +1889,7 @@ public abstract class BaseZone : IZone, IDisposable
     {
         mount = new Mount(this, rider, definition)
         {
-            Guid = _nextNpcGuid++
+            Guid = GetNpcGuid(null)
         };
 
         return _npcs.TryAdd(mount.Guid, mount) && _entities.TryAdd(mount.Guid, mount);
@@ -2163,13 +2179,16 @@ public abstract class BaseZone : IZone, IDisposable
 
     private ulong GetNpcGuid(ulong? guid)
     {
-        if (guid.HasValue)
+        lock (_npcGuidLock)
         {
-            _nextNpcGuid = Math.Max(_nextNpcGuid, guid.Value + 1);
-            return guid.Value;
-        }
+            if (guid.HasValue)
+            {
+                _nextNpcGuid = Math.Max(_nextNpcGuid, guid.Value + 1);
+                return guid.Value;
+            }
 
-        return _nextNpcGuid++;
+            return _nextNpcGuid++;
+        }
     }
 
     public void Dispose()

@@ -136,7 +136,7 @@ public sealed class Player : ClientPcData, IEntity
         DateTimeOffset? mutedUntil = MutedUntil;
         return mutedUntil.HasValue && mutedUntil > currentTime;
     }
-    
+
     public void Disconnect()
     {
         _connection.Disconnect();
@@ -225,6 +225,12 @@ public sealed class Player : ClientPcData, IEntity
             zone = freshZone;
         }
 
+        // NOTE: There may be a tiny period of time in which
+        // the player exists in the dictionary of BOTH zones,
+        // new and old.
+        if (!zone.TryAddPlayer(this))
+            return false;
+
         if (Zone is WorldZone)
         {
             StartingZonePosition = Position;
@@ -244,16 +250,8 @@ public sealed class Player : ClientPcData, IEntity
 
         oldZone.TryRemovePlayer(Guid);
 
-        // Add to new zone/zonetile
-
-        if (!zone.TryAddPlayer(this))
-        {
-            oldZone.TryAddPlayer(this);
-            return false;
-        }
-
-        if (Mount is not null)
-            Mount.TeleportToZone(zone, position, rotation);
+        if (Mount is not null && !Mount.TeleportToZone(zone, position, rotation))
+            Dismount();
 
         // Teleport to new zone
 
