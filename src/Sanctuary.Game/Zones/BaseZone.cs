@@ -1510,6 +1510,21 @@ public abstract class BaseZone : IZone, IDisposable
         }
     }
 
+    private bool TryRegisterEntity<TEntity>(ConcurrentDictionary<ulong, TEntity> collection, TEntity entity)
+        where TEntity : IEntity
+    {
+        if (!collection.TryAdd(entity.Guid, entity))
+            return false;
+
+        if (!_entities.TryAdd(entity.Guid, entity))
+        {
+            collection.TryRemove(entity.Guid, out _);
+            return false;
+        }
+
+        return true;
+    }
+
     public bool TryCreateNpc(ulong? guid, [MaybeNullWhen(false)] out Npc npc)
     {
         npc = new Npc(this)
@@ -1517,17 +1532,8 @@ public abstract class BaseZone : IZone, IDisposable
             Guid = GetNpcGuid(guid)
         };
 
-        // NOTE: we want to ensure we don't add an NPC
-        // that can't be added to both  
-        if (!_npcs.TryAdd(npc.Guid, npc))
+        if (!TryRegisterEntity(_npcs, npc))
         {
-            npc = null;
-            return false;
-        }
-
-        if (!_entities.TryAdd(npc.Guid, npc))
-        {
-            _npcs.TryRemove(npc.Guid, out _);
             npc = null;
             return false;
         }
@@ -1553,7 +1559,7 @@ public abstract class BaseZone : IZone, IDisposable
             Visible = true
         };
 
-        if (!_npcs.TryAdd(npc.Guid, npc) || !_entities.TryAdd(npc.Guid, npc))
+        if (!TryRegisterEntity(_npcs, npc))
         {
             npc = null;
             return false;
@@ -1830,8 +1836,11 @@ public abstract class BaseZone : IZone, IDisposable
             Visible = true
         };
 
-        if (!_npcs.TryAdd(node.Guid, node) || !_entities.TryAdd(node.Guid, node))
+        if (!TryRegisterEntity(_npcs, node))
+        {
+            node = null;
             return false;
+        }
 
         node.UpdatePosition(spawnDefinition.SpawnPosition, spawnDefinition.SpawnRotation);
         return true;
@@ -1892,7 +1901,13 @@ public abstract class BaseZone : IZone, IDisposable
             Guid = GetNpcGuid(null)
         };
 
-        return _npcs.TryAdd(mount.Guid, mount) && _entities.TryAdd(mount.Guid, mount);
+        if (!TryRegisterEntity(_npcs, mount))
+        {
+            mount = null;
+            return false;
+        }
+
+        return true;
     }
 
     public bool TryCreatePlayer(ulong guid, UdpConnection connection, [MaybeNullWhen(false)] out Player player)
@@ -1902,7 +1917,13 @@ public abstract class BaseZone : IZone, IDisposable
             Guid = guid
         };
 
-        return _players.TryAdd(player.Guid, player) && _entities.TryAdd(player.Guid, player);
+        if (!TryRegisterEntity(_players, player))
+        {
+            player = null;
+            return false;
+        }
+
+        return true;
     }
 
     public bool TryRemoveNpc(ulong guid)
