@@ -115,7 +115,7 @@ public abstract class BaseZone : IZone, IDisposable
 
     #region Events
 
-    public void Start()
+    public virtual void OnStart()
     {
         lock (_lifecycleLock)
         {
@@ -128,15 +128,8 @@ public abstract class BaseZone : IZone, IDisposable
         GetOrCreateScriptContext().FireEvent("start");
         ActivateCollectionNodePools();
 
-        OnStart();
-
         Task.Factory.StartNew(UpdateEveryTickAsync, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         Task.Factory.StartNew(UpdateEverySecondAsync, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-    }
-
-    protected virtual void OnStart()
-    {
-
     }
 
     public virtual void OnClientIsReady(Player player)

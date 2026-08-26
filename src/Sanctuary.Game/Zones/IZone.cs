@@ -24,7 +24,7 @@ public interface IZone : IScriptableZone
 
     #region Events
 
-    void Start();
+    void OnStart();
     void OnClientIsReady(Player entity);
     void OnClientFinishedLoading(Player entity);
 

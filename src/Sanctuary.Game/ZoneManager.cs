@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,8 @@ public class ZoneManager : IZoneManager
     private readonly IResourceManager _resourceManager;
     private readonly IServiceProvider _serviceProvider;
     private static int _uniqueId = 1;
+
+    private int NextID() => Interlocked.Increment(ref _uniqueId) - 1;
 
     private readonly ConcurrentDictionary<(int, ulong?), IZone> _zones = new();
 
@@ -96,12 +99,15 @@ public class ZoneManager : IZoneManager
 
         zone = new WorldZone(worldZoneDefinition, _serviceProvider)
         {
-            Id = _uniqueId++
+            Id = NextID()
         };
 
-        zone.Start();
+        if (!_zones.TryAdd((zone.DefinitionId, null), zone))
+            return false;
 
-        return _zones.TryAdd((zone.DefinitionId, null), zone);
+        zone.OnStart();
+
+        return true;
     }
 
     public bool TryGetOrCreateZoneInstance(int zoneDefinitionId, ulong? ownerId, [MaybeNullWhen(false)] out IZone zone)
@@ -117,7 +123,7 @@ public class ZoneManager : IZoneManager
             return false;
         }
 
-        storedZone.Start();
+        storedZone.OnStart();
 
         zone = storedZone;
         return true;
@@ -134,14 +140,14 @@ public class ZoneManager : IZoneManager
         {
             WorldZoneDefinition worldZoneDefinition => new WorldZone(worldZoneDefinition, _serviceProvider)
             {
-                Id = _uniqueId++,
+                Id = NextID(),
                 OwnerId = ownerId
             },
             HousingZoneDefinition housingZoneDefinition when ownerId is not null =>
                 TryGetHousingZone(housingZoneDefinition, ownerId.Value, out var housingZone) ? housingZone : null,
             CombatZoneDefinition combatZoneDefinition when ownerId is not null => new CombatZone(combatZoneDefinition, _serviceProvider)
             {
-                Id = _uniqueId++,
+                Id = NextID(),
                 OwnerId = ownerId
             },
             _ => null
@@ -151,19 +157,13 @@ public class ZoneManager : IZoneManager
     public void RemoveZoneInstance(IZone zone)
     {
         var key = (zone.DefinitionId, zone.OwnerId);
-
-        ((ICollection<KeyValuePair<(int, ulong?), IZone>>)_zones).Remove(new(key, zone));
+        _zones.TryRemove(new(key, zone));
     }
 
     private bool TryGetHousingZone(HousingZoneDefinition housingZoneDefinition, ulong ownerId,
         [MaybeNullWhen(false)] out HousingZone zone)
     {
-        // NOTE: As of PR-116, this MIGHT NOT be hooked up properly. It will be the responsibility
-        // of anyone working on housing to properly match conventions/make adjustments. Once that is 
-        // done, remove this note.
-        //
-        // The commented code will be left as a convenience. You will need to give database access
-        // to the class for it to work.
+        // TODO: fetch from DB
 
         // zone = null;
 
@@ -177,7 +177,7 @@ public class ZoneManager : IZoneManager
 
         zone = new HousingZone(housingZoneDefinition, _serviceProvider)
         {
-            Id = _uniqueId++,
+            Id = NextID(),
             OwnerId = ownerId
         };
 
