@@ -163,6 +163,69 @@ public class RewardManager : IRewardManager
         return true;
     }
 
+    public bool TryGrantExperience(Player player, int profileId, int amount)
+    {
+        if (amount <= 0)
+            return false;
+
+        var characterId = GuidHelper.GetPlayerId(player.Guid);
+
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        var dbProfile = dbContext.Profiles
+            .SingleOrDefault(profile => profile.CharacterId == characterId && profile.Id == profileId);
+
+        if (dbProfile is null)
+            return false;
+
+        var maxLevel = _resourceManager.RankLevels.Keys.Max();
+        var oldLevel = dbProfile.Level;
+
+        dbProfile.LevelXP += amount;
+
+        while (dbProfile.Level < maxLevel &&
+            _resourceManager.RankLevels.TryGetValue(dbProfile.Level, out var rankLevel) &&
+            rankLevel.StarsToNextLevel > 0 &&
+            dbProfile.LevelXP >= rankLevel.StarsToNextLevel)
+        {
+            dbProfile.LevelXP -= rankLevel.StarsToNextLevel;
+            dbProfile.Level++;
+        }
+
+        if (dbContext.SaveChanges() <= 0)
+            return false;
+
+        var clientPcProfile = player.Profiles.SingleOrDefault(profile => profile.Id == profileId);
+
+        if (clientPcProfile is null)
+            return true;
+
+        var rankPercent = _resourceManager.RankLevels.GetRankPercent(dbProfile.Level, dbProfile.LevelXP);
+
+        clientPcProfile.Rank = dbProfile.Level;
+        clientPcProfile.RankPercent = rankPercent;
+
+        player.SendTunneled(new ClientUpdatePacketUpdateProfileExperience
+        {
+            ProfileId = profileId,
+            Rank = dbProfile.Level,
+            RankPercent = rankPercent,
+            StarsAvailable = 0,
+            StarsEarned = dbProfile.LevelXP,
+            Unknown6 = 0
+        });
+
+        if (dbProfile.Level > oldLevel)
+        {
+            player.SendTunneled(new ClientUpdatePacketUpdateProfileRank
+            {
+                ProfileId = profileId,
+                Rank = dbProfile.Level
+            });
+        }
+
+        return true;
+    }
+
     private static void SendRewardToast(Player player, ClientItem clientItem, ClientItemDefinition itemDefinition, int quantity, ulong sourceGuid)
     {
         // TODO: Is there a coin/station cash toast? How about for other types of rewards..?

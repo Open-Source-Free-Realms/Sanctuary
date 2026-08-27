@@ -41,5 +41,7 @@ public interface IResourceManager
 
     RewardTableDefinitionCollection RewardTables { get; }
 
+    RankLevelDefinitionCollection RankLevels { get; }
+
     bool Load();
 }
