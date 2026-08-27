@@ -177,53 +177,59 @@ public class RewardManager : IRewardManager
         if (dbProfile is null)
             return false;
 
-        var maxLevel = _resourceManager.RankLevels.Keys.Max();
         var oldLevel = dbProfile.Level;
 
-        dbProfile.LevelXP += amount;
-
-        while (dbProfile.Level < maxLevel &&
-            _resourceManager.RankLevels.TryGetValue(dbProfile.Level, out var rankLevel) &&
-            rankLevel.StarsToNextLevel > 0 &&
-            dbProfile.LevelXP >= rankLevel.StarsToNextLevel)
-        {
-            dbProfile.LevelXP -= rankLevel.StarsToNextLevel;
-            dbProfile.Level++;
-        }
+        AccrueExperience(dbProfile, amount);
 
         if (dbContext.SaveChanges() <= 0)
             return false;
 
         var clientPcProfile = player.Profiles.SingleOrDefault(profile => profile.Id == profileId);
 
+        // NOTE: This shouldn't happen, so if we don't care we can remove this.
+        // It returns 'true', i.e., claims success, because the DATABASE gets updated...
+        // The client won't...
         if (clientPcProfile is null)
+        {
+            _logger.LogWarning("Granted experience to profile {profileId} for {guid}, but no matching client profile is loaded.",
+                profileId, player.Guid);
             return true;
-
-        var rankPercent = _resourceManager.RankLevels.GetRankPercent(dbProfile.Level, dbProfile.LevelXP);
+        }
 
         clientPcProfile.Rank = dbProfile.Level;
-        clientPcProfile.RankPercent = rankPercent;
-
-        player.SendTunneled(new ClientUpdatePacketUpdateProfileExperience
-        {
-            ProfileId = profileId,
-            Rank = dbProfile.Level,
-            RankPercent = rankPercent,
-            StarsAvailable = 0,
-            StarsEarned = dbProfile.LevelXP,
-            Unknown6 = 0
-        });
+        clientPcProfile.RankPercent = _resourceManager.RankLevels.GetRankPercent(dbProfile.Level, dbProfile.LevelXP);
 
         if (dbProfile.Level > oldLevel)
         {
-            player.SendTunneled(new ClientUpdatePacketUpdateProfileRank
-            {
-                ProfileId = profileId,
-                Rank = dbProfile.Level
-            });
+            SendLevelUpNotification(player, clientPcProfile);
+            player.OnLevelUp(clientPcProfile);
         }
 
         return true;
+    }
+
+    private void AccrueExperience(DbProfile dbProfile, int amount)
+    {
+        var maxLevel = _resourceManager.RankLevels.Keys.Max(); // NOTE: May just want a hard-coded const of '20'.
+
+        dbProfile.LevelXP += amount;
+
+        // TODO: Double check that these conditions are satisfactory for rank-ups.
+        while (dbProfile.Level < maxLevel &&
+            _resourceManager.RankLevels.TryGetValue(dbProfile.Level, out var rankLevel) &&
+            dbProfile.LevelXP >= rankLevel.StarsToNextLevel)
+        {
+            dbProfile.LevelXP -= rankLevel.StarsToNextLevel;
+            dbProfile.Level++;
+        }
+    }
+
+    private static void SendLevelUpNotification(Player player, ClientPcProfile profile)
+    {
+        using var writer = new PacketWriter();
+        profile.Serialize(writer);
+
+        player.SendTunneled(new ClientUpdatePacketJobLevelUp { Payload = writer.Buffer });
     }
 
     private static void SendRewardToast(Player player, ClientItem clientItem, ClientItemDefinition itemDefinition, int quantity, ulong sourceGuid)
