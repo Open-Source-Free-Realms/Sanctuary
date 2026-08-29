@@ -612,6 +612,7 @@ public class GatewayConnection : UdpConnection
         Player.Collections = _resourceManager.Collections.CreateClientCollections(Player.Guid, ownedItemDefinitionIds);
 
         var packetSendSelfToClient = new PacketSendSelfToClient();
+        
         packetSendSelfToClient.Payload = Player.Serialize();
 
         SendTunneled(packetSendSelfToClient);
