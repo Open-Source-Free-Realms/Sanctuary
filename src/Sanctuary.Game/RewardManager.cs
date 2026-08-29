@@ -177,6 +177,9 @@ public class RewardManager : IRewardManager
         if (dbProfile is null)
             return false;
 
+        if (dbProfile.Level >= _resourceManager.RankLevels.Keys.Max())
+            return false;
+
         var oldLevel = dbProfile.Level;
 
         AccrueExperience(dbProfile, amount);
@@ -201,9 +204,11 @@ public class RewardManager : IRewardManager
 
         if (dbProfile.Level > oldLevel)
         {
-            SendLevelUpNotification(player, clientPcProfile);
+            SendRankUpNotification(player, clientPcProfile.Id, dbProfile.Level);
             player.OnLevelUp(clientPcProfile);
         }
+
+        SendExperienceUpdate(player, clientPcProfile, dbProfile.LevelXP);
 
         return true;
     }
@@ -224,12 +229,28 @@ public class RewardManager : IRewardManager
         }
     }
 
-    private static void SendLevelUpNotification(Player player, ClientPcProfile profile)
+    // Sent on every grant, level-up or not - refreshes the client's profile datasource
+    // (XP bar/percent/stars) live, with no fanfare.
+    private static void SendExperienceUpdate(Player player, ClientPcProfile profile, int levelXp)
     {
-        using var writer = new PacketWriter();
-        profile.Serialize(writer);
+        player.SendTunneled(new ClientUpdatePacketUpdateProfileExperience
+        {
+            ProfileId = profile.Id,
+            Rank = profile.Rank,
+            RankPercent = profile.RankPercent,
+            StarsAvailable = 0,
+            StarsEarned = levelXp,
+            Unknown6 = 0
+        });
+    }
 
-        player.SendTunneled(new ClientUpdatePacketJobLevelUp { Payload = writer.Buffer });
+    private static void SendRankUpNotification(Player player, int profileId, int newLevel)
+    {
+        player.SendTunneled(new ClientUpdatePacketUpdateProfileRank
+        {
+            ProfileId = profileId,
+            Rank = newLevel
+        });
     }
 
     private static void SendRewardToast(Player player, ClientItem clientItem, ClientItemDefinition itemDefinition, int quantity, ulong sourceGuid)
