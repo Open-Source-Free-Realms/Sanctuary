@@ -611,7 +611,7 @@ public class GatewayConnection : UdpConnection
         // adventure coins have a database representation.
         Player.Collections = _resourceManager.Collections.CreateClientCollections(Player.Guid, ownedItemDefinitionIds);
 
-        var packetSendSelfToClient = new PacketSendSelfToClient(); 
+        var packetSendSelfToClient = new PacketSendSelfToClient();
 
         packetSendSelfToClient.Payload = Player.Serialize();
 
