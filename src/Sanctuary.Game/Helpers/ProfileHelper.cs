@@ -103,6 +103,4 @@ public static class ProfileHelper
             character.Profiles.Remove(profileToRemove);
         }
     }
-    // void AddTitle();
-    // void RemoveTitle();
 }
