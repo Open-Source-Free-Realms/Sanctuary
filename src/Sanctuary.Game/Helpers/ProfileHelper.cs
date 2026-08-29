@@ -28,7 +28,7 @@ public static class ProfileHelper
             if (defaultClientItemDefinition.GenderUsage != 0 && defaultClientItemDefinition.GenderUsage != character.Gender)
                 continue;
 
-            var dbItem = character.Items.SingleOrDefault(x => x.Definition == defaultItemId);
+            var dbItem = character.Items.FirstOrDefault(x => x.Definition == defaultItemId);
 
             if (dbItem is null)
             {
@@ -62,7 +62,7 @@ public static class ProfileHelper
         // Check if the character already has the profile
         if (character.Profiles.Any(p => p.Id == id))
         {
-            logger.LogInformation("Character {characterId} already has profile {profileId}.", character.Id, id);
+            logger.LogDebug("Character {characterId} already has profile {profileId}.", character.Id, id);
             return;
         }
 
