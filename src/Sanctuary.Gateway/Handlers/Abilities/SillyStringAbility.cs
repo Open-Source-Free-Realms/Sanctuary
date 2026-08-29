@@ -10,14 +10,12 @@ using Sanctuary.Packet.Common;
 
 namespace Sanctuary.Gateway.Handlers.Abilities;
 
-// Split out of the old handler's big if-chain - same logic, just its own class now.
-public sealed class SillyStringAbility : ConsumableAbility
+public sealed class SillyStringAbility(AbilityServices services) : ConsumableAbility(services)
 {
-    // Who each player last sprayed, so back-to-back cans don't just soak the same nearest victim over
-    // and over - spread it around when there's anyone else to spread it to.
+    // Who each player last sprayed, so back-to-back cans don't soak the same victim every time.
     private static readonly ConcurrentDictionary<ulong, ulong> _lastSillyStringTarget = new();
 
-    public override bool IsInCollection(ClientItemDefinition itemDefinition) =>
+    public override bool Matches(ClientItemDefinition itemDefinition) =>
         _resourceManager.Consumables.PartyFavors.ContainsKey(itemDefinition.Id);
 
     public override bool HandleAbility(GatewayConnection connection, AbilityPacketClientRequestStartAbility packet, int slot, ClientItem clientItem, ClientItemDefinition itemDefinition)
@@ -30,8 +28,8 @@ public sealed class SillyStringAbility : ConsumableAbility
         if (IsOnCooldown(player.Guid, itemDefinition.Id))
             return SendFailure(connection);
 
-        // Not an aimable ability, so no selected-target honoring. Skip whoever was sprayed last time,
-        // unless they're the only one around.
+        // Not aimable, so there's no selected target to honour. Skip last time's victim unless
+        // they're the only one around.
         _lastSillyStringTarget.TryGetValue(player.Guid, out var lastTargetGuid);
 
         var target = AbilityTargeting.FindNearestPlayer(zone, player, favor!.Range, lastTargetGuid)
@@ -52,7 +50,7 @@ public sealed class SillyStringAbility : ConsumableAbility
         foreach (var recipient in recipients)
             recipient.SendTunneled(sync);
 
-        var tagId = System.Threading.Interlocked.Increment(ref _castFxTagCounter);
+        var tagId = NextEffectTagId();
 
         var beam = new PlayerUpdatePacketAddEffectTagCompositeEffect
         {
@@ -67,7 +65,7 @@ public sealed class SillyStringAbility : ConsumableAbility
 
         _logger.LogTrace("Silly String: {who} sprayed {target}.", player.Name, target.Name);
 
-        // Ticked from Player.UpdateEveryTick's delayed-packet queue - no background tasks/threads.
+        // Ticked from Player.UpdateEveryTick's delayed-packet queue, no background tasks.
         player.SendTunneledToVisibleDelayed(new PlayerUpdatePacketSetAnimation
         {
             Guid = player.Guid,

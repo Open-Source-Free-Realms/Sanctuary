@@ -4,15 +4,13 @@ using Sanctuary.Packet.Common.Chat;
 
 namespace Sanctuary.Gateway.Handlers.Abilities;
 
-// Food with just a plain visual/chat effect, nothing fancier - owns the FoodEffects lookup itself,
-// since it's the only ability that ever matches one. (The handler's generic fallback for anything
-// unrecognized never gets a FoodEffects hit: if an item had one, IsInCollection below would already
-// have claimed it before dispatch reaches the fallback.)
-public sealed class FoodEffectAbility : ConsumableAbility
+// Food with just a visual/chat effect. Only ability that touches FoodEffects, so the lookup
+// lives here rather than being repeated by the catch-all.
+public sealed class FoodEffectAbility(AbilityServices services) : ConsumableAbility(services)
 {
     private const int FoodEffectCooldownMs = 120_000;
 
-    public override bool IsInCollection(ClientItemDefinition itemDefinition) =>
+    public override bool Matches(ClientItemDefinition itemDefinition) =>
         _resourceManager.Consumables.FoodEffects.ContainsKey(itemDefinition.ActivatableAbilityId);
 
     public override bool HandleAbility(GatewayConnection connection, AbilityPacketClientRequestStartAbility packet, int slot, ClientItem clientItem, ClientItemDefinition itemDefinition)

@@ -16,34 +16,44 @@ namespace Sanctuary.Gateway.Handlers;
 [PacketHandler]
 public static class AbilityPacketClientRequestStartAbilityHandler
 {
-    // Tries each ability in order; first match handles it.
-    private static readonly ConsumableAbility[] _consumableAbilities =
-    [
-        new BoomboxAbility(),
-        new CakeAbility(),
-        new SillyStringAbility(),
-        new TransformFoodAbility(),
-        new FoodEffectAbility(),
-    ];
+    private static ILogger _logger = null!;
+    private static IResourceManager _resourceManager = null!;
+
+    // Tried in order; first match handles it. The default matches anything, so it goes last.
+    private static ConsumableAbility[] _consumableAbilities = [];
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
         var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
-        ConsumableAbility._logger = loggerFactory.CreateLogger(nameof(AbilityPacketClientRequestStartAbilityHandler));
 
-        ConsumableAbility._resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
-        ConsumableAbility._dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
+        _logger = loggerFactory.CreateLogger(nameof(AbilityPacketClientRequestStartAbilityHandler));
+        _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
+
+        var abilityServices = new AbilityServices(
+            _logger,
+            _resourceManager,
+            serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>());
+
+        _consumableAbilities =
+        [
+            new BoomboxAbility(abilityServices),
+            new CakeAbility(abilityServices),
+            new SillyStringAbility(abilityServices),
+            new TransformFoodAbility(abilityServices),
+            new FoodEffectAbility(abilityServices),
+            new DefaultConsumableAbility(abilityServices),
+        ];
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
     {
         if (!AbilityPacketClientRequestStartAbility.TryDeserialize(data, out var packet))
         {
-            ConsumableAbility._logger.LogError("Failed to deserialize {packet}.", nameof(AbilityPacketClientRequestStartAbility));
+            _logger.LogError("Failed to deserialize {packet}.", nameof(AbilityPacketClientRequestStartAbility));
             return false;
         }
 
-        if (packet.Data.Id == 2)
+        if (packet.Data.Id == ConsumableAbility.ActionBarId)
             return HandleItemAbility(connection, packet);
 
         return ConsumableAbility.SendFailure(connection);
@@ -65,22 +75,16 @@ public static class AbilityPacketClientRequestStartAbilityHandler
         if (clientItem is null)
             return ConsumableAbility.SendFailure(connection);
 
-        if (!ConsumableAbility._resourceManager.ClientItemDefinitions.TryGetValue(clientItem.Definition, out var itemDefinition) ||
+        if (!_resourceManager.ClientItemDefinitions.TryGetValue(clientItem.Definition, out var itemDefinition) ||
             itemDefinition.ActivatableAbilityId == 0)
             return ConsumableAbility.SendFailure(connection);
 
-        // Anything unrecognized falls through to the generic case below.
         foreach (var ability in _consumableAbilities)
         {
-            if (ability.IsInCollection(itemDefinition))
+            if (ability.Matches(itemDefinition))
                 return ability.HandleAbility(connection, packet, packet.Data.Slot, clientItem, itemDefinition);
         }
 
-        ConsumableAbility.PlayEffect(connection, itemDefinition.CompositeEffectId);
-
-        if (itemDefinition.SingleUse)
-            return ConsumableAbility.ConsumeItem(connection, clientItem, itemDefinition, packet.Data.Slot);
-
-        return true;
+        return ConsumableAbility.SendFailure(connection);
     }
 }

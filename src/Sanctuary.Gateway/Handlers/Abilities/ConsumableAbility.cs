@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Threading;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -17,40 +18,50 @@ using Sanctuary.Packet.Common;
 
 namespace Sanctuary.Gateway.Handlers.Abilities;
 
-public abstract class ConsumableAbility
+public sealed record AbilityServices(
+    ILogger Logger,
+    IResourceManager ResourceManager,
+    IDbContextFactory<DatabaseContext> DbContextFactory);
+
+public abstract class ConsumableAbility(AbilityServices services)
 {
-    // Set once from AbilityPacketClientRequestStartAbilityHandler.ConfigureServices.
-    internal static ILogger _logger = null!;
-    internal static IResourceManager _resourceManager = null!;
-    internal static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
-    internal static int _castFxTagCounter = 5000;
+    // Static so cooldowns and effect tag ids are shared across every ability, not per instance.
     private static readonly ConcurrentDictionary<ulong, ConcurrentDictionary<int, DateTimeOffset>> _itemCooldowns = new();
+    private static int _castFxTagCounter = 5000;
 
     internal const int ActionBarId = 2;
-    internal const int IdleAnimationId = 1;
+    protected const int IdleAnimationId = 1;
 
-    public abstract bool IsInCollection(ClientItemDefinition itemDefinition);
+    protected readonly ILogger _logger = services.Logger;
+    protected readonly IResourceManager _resourceManager = services.ResourceManager;
+
+    private readonly IDbContextFactory<DatabaseContext> _dbContextFactory = services.DbContextFactory;
+
+    public abstract bool Matches(ClientItemDefinition itemDefinition);
 
     public abstract bool HandleAbility(GatewayConnection connection, AbilityPacketClientRequestStartAbility packet, int slot, ClientItem clientItem, ClientItemDefinition itemDefinition);
 
-    internal static bool IsOnCooldown(ulong playerGuid, int itemDefinitionId)
+    protected static bool IsOnCooldown(ulong playerGuid, int itemDefinitionId)
     {
         return _itemCooldowns.TryGetValue(playerGuid, out var cooldowns) &&
                cooldowns.TryGetValue(itemDefinitionId, out var expiry) &&
                DateTimeOffset.UtcNow < expiry;
     }
 
-    internal static void StartCooldown(ulong playerGuid, int itemDefinitionId, int cooldownMs)
+    protected static void StartCooldown(ulong playerGuid, int itemDefinitionId, int cooldownMs)
     {
         var cooldowns = _itemCooldowns.GetOrAdd(playerGuid, _ => new ConcurrentDictionary<int, DateTimeOffset>());
 
         cooldowns[itemDefinitionId] = DateTimeOffset.UtcNow.AddMilliseconds(cooldownMs);
     }
 
-    internal static int IconTintId(ClientItem clientItem, int defaultTintId) =>
+    protected static int NextEffectTagId() => Interlocked.Increment(ref _castFxTagCounter);
+
+    // Color-variant items (the 5 Silly String Can colors) share one Icon.Id and differ only by TintId.
+    protected static int IconTintId(ClientItem clientItem, int defaultTintId) =>
         clientItem.Tint == 0 ? defaultTintId : clientItem.Tint;
 
-    internal static bool ConsumeItem(GatewayConnection connection, ClientItem clientItem, ClientItemDefinition clientItemDefinition, int actionBarSlot)
+    protected bool ConsumeItem(GatewayConnection connection, ClientItem clientItem, ClientItemDefinition clientItemDefinition, int actionBarSlot)
     {
         using var dbContext = _dbContextFactory.CreateDbContext();
 
@@ -75,6 +86,7 @@ public abstract class ConsumableAbility
             connection.Player.Items.Remove(clientItem);
             connection.SendTunneled(new ClientUpdatePacketItemDelete { ItemGuid = clientItem.Id });
 
+            // A pending cooldown re-enable would fire after this and un-delete the slot.
             connection.Player.CancelScheduledSlotPacket(ActionBarId, actionBarSlot);
 
             var slotPacket = new ClientUpdatePacketUpdateActionBarSlot { Data = { Id = ActionBarId, Slot = actionBarSlot } };
@@ -119,7 +131,7 @@ public abstract class ConsumableAbility
         return true;
     }
 
-    internal static void PlayEffect(GatewayConnection connection, int effectId, int delayMs = 0)
+    protected static void PlayEffect(GatewayConnection connection, int effectId, int delayMs = 0)
     {
         if (effectId == 0)
             return;
@@ -137,7 +149,7 @@ public abstract class ConsumableAbility
             connection.Player.SendTunneledToVisible(effectPacket, true);
     }
 
-    internal static void DespawnNpc(Npc npc, int effectId)
+    protected static void DespawnNpc(Npc npc, int effectId)
     {
         var removePacket = new PlayerUpdatePacketRemovePlayerGracefully
         {
@@ -155,7 +167,7 @@ public abstract class ConsumableAbility
         npc.Dispose();
     }
 
-    protected Npc? SpawnNpc(GatewayConnection connection, Vector4 position, Action<Npc> configure)
+    protected static Npc? SpawnNpc(GatewayConnection connection, Vector4 position, Action<Npc> configure)
     {
         if (connection.Player.Zone is not StartingZone startingZone)
             return null;
@@ -172,7 +184,9 @@ public abstract class ConsumableAbility
         return npc;
     }
 
-    protected virtual List<Player> BroadcastSpawn(GatewayConnection connection, Npc npc, Vector4 position, int poofEffectId)
+    // SpawnNpc already sent AddNpc to everyone in tile range, so this only plays the poof and
+    // covers the spawner if they ended up outside the NPC's tiles. Returns who got the spawn.
+    protected static List<Player> BroadcastSpawn(GatewayConnection connection, Npc npc, Vector4 position, int poofEffectId)
     {
         var poofEffect = new PlayerUpdatePacketPlayCompositeEffect
         {
@@ -182,21 +196,21 @@ public abstract class ConsumableAbility
             Clear = false
         };
 
-        connection.Player.SendTunneled(poofEffect);
-        connection.Player.OnAddVisibleNpcs([npc]);
+        var recipients = npc.VisiblePlayers.Values.ToList();
 
-        var recipients = new List<Player> { connection.Player };
-
-        foreach (var player in connection.Player.VisiblePlayers.Values)
+        if (!npc.VisiblePlayers.ContainsKey(connection.Player.Guid))
         {
-            player.SendTunneled(poofEffect);
-            player.OnAddVisibleNpcs([npc]);
-            recipients.Add(player);
+            connection.Player.SendTunneled(npc.GetAddNpcPacket());
+            recipients.Insert(0, connection.Player);
         }
+
+        foreach (var player in recipients)
+            player.SendTunneled(poofEffect);
 
         return recipients;
     }
 
+    // internal so the handler can fail its own request validation the same way.
     internal static bool SendFailure(GatewayConnection connection)
     {
         connection.SendTunneled(new AbilityPacketFailed { StringId = 3079 });
@@ -204,7 +218,7 @@ public abstract class ConsumableAbility
         return true;
     }
 
-    internal static void FinishActivation(GatewayConnection connection, ClientItem clientItem, ClientItemDefinition itemDefinition, int slot, int cooldownMs, int iconTintId = 0)
+    protected void FinishActivation(GatewayConnection connection, ClientItem clientItem, ClientItemDefinition itemDefinition, int slot, int cooldownMs, int iconTintId = 0)
     {
         var count = clientItem.Count;
         var hasItemLeft = !itemDefinition.SingleUse || count > 1;

@@ -9,8 +9,7 @@ using Sanctuary.Packet.Common;
 
 namespace Sanctuary.Gateway.Handlers.Abilities;
 
-// Split out of the old handler's big if-chain - same logic, just its own class now.
-public sealed class BoomboxAbility : ConsumableAbility
+public sealed class BoomboxAbility(AbilityServices services) : ConsumableAbility(services)
 {
     // How long a boombox stays out, which is also its use cooldown.
     private const int BoomboxDurationMs = 180_000;
@@ -18,7 +17,7 @@ public sealed class BoomboxAbility : ConsumableAbility
     // PFX_smoke_black_explosion
     private const int PoofEffectId = 21;
 
-    public override bool IsInCollection(ClientItemDefinition itemDefinition) =>
+    public override bool Matches(ClientItemDefinition itemDefinition) =>
         _resourceManager.Consumables.Boomboxes.ContainsKey(itemDefinition.Id);
 
     public override bool HandleAbility(GatewayConnection connection, AbilityPacketClientRequestStartAbility packet, int slot, ClientItem clientItem, ClientItemDefinition itemDefinition)
@@ -64,18 +63,17 @@ public sealed class BoomboxAbility : ConsumableAbility
             npc.IsInteractable = false;
         });
 
-        // SpawnNpc already checked this - re-derive the zone reference for StartDanceLoop below.
         if (boomboxNpc is null || connection.Player.Zone is not StartingZone startingZone)
             return;
 
         var poofRecipients = BroadcastSpawn(connection, boomboxNpc, spawnPosition, PoofEffectId);
 
-        // Tag-attach the song so it plays right away and we can stop it cleanly on despawn.
+        // Tag-attached so it can be stopped cleanly on despawn.
         var songTagId = 0;
 
         if (effectId != 0)
         {
-            songTagId = System.Threading.Interlocked.Increment(ref _castFxTagCounter);
+            songTagId = NextEffectTagId();
 
             var songEffect = new PlayerUpdatePacketAddEffectTagCompositeEffect
             {
@@ -90,35 +88,6 @@ public sealed class BoomboxAbility : ConsumableAbility
         }
 
         StartDanceLoop(startingZone, boomboxNpc, spawnPosition, danceSequence, songTagId, effectId);
-    }
-
-    // Boombox's spawn broadcast doesn't follow the default (Cake-style) strategy: instead of
-    // explicitly pushing OnAddVisibleNpcs, it trusts the zone tile system (already populated by
-    // SpawnNpc's UpdatePosition call) and only patches the spawner as an edge case if they're
-    // outside their own tile range.
-    protected override List<Player> BroadcastSpawn(GatewayConnection connection, Npc npc, Vector4 position, int poofEffectId)
-    {
-        var poofEffect = new PlayerUpdatePacketPlayCompositeEffect
-        {
-            Guid = npc.Guid,
-            CompositeEffectId = poofEffectId,
-            Position = position,
-            Clear = false
-        };
-
-        var poofRecipients = npc.VisiblePlayers.Values.ToList();
-
-        if (!npc.VisiblePlayers.ContainsKey(connection.Player.Guid))
-        {
-            // Spawner is outside zone tile range, send the packets manually.
-            connection.Player.SendTunneled(npc.GetAddNpcPacket());
-            poofRecipients.Insert(0, connection.Player);
-        }
-
-        foreach (var player in poofRecipients)
-            player.SendTunneled(poofEffect);
-
-        return poofRecipients;
     }
 
     private static void StartDanceLoop(StartingZone startingZone, Npc boomboxNpc, Vector4 spawnPosition, int[] danceSequence, int songTagId, int effectId)
@@ -158,8 +127,8 @@ public sealed class BoomboxAbility : ConsumableAbility
                 return;
             }
 
-            // Rotate to the next dance when due. Only flag a change when the id actually
-            // differs, so multi-dance boomboxes don't restart the crowd every rotation.
+            // Only flag a change when the id differs, so multi-dance boomboxes don't restart
+            // the crowd every rotation.
             var animChanged = false;
 
             if (sinceSwitch >= SwitchMs)
@@ -168,9 +137,8 @@ public sealed class BoomboxAbility : ConsumableAbility
                 sequenceIndex++;
                 sinceSwitch = 0;
 
-                // A single-clip sequence (Totem, Realms Roll) never "changes" id, but the client
-                // doesn't loop it forever on its own - it needs a fresh trigger every rotation or it
-                // just stops after one play-through.
+                // A single-clip sequence (Totem, Realms Roll) never changes id, and the client
+                // stops after one play-through unless it's re-triggered every rotation.
                 if (selected != previousAnim || danceSequence.Length <= 1)
                 {
                     currentAnim = selected;
@@ -191,19 +159,16 @@ public sealed class BoomboxAbility : ConsumableAbility
             var newcomers = inRange.Where(p => !dancing.Contains(p.Guid)).ToList();
             dancing = inRangeGuids;
 
-            // On a rotation, re-sync the whole crowd so it stays phase-locked. Otherwise just
-            // start late arrivals on the current dance without hitching everyone else.
+            // Re-sync everyone on a rotation to stay phase-locked, otherwise only start late
+            // arrivals so the rest don't hitch.
             if (animChanged)
                 SyncDance(inRange, currentAnim);
             else if (newcomers.Count > 0)
                 SyncDance(newcomers, currentAnim);
 
-            // Newcomers need the song re-sent too, same as the dance sync above. Unlike the dance sync
-            // (targets the PLAYER's own guid, always known client-side), this packet targets the
-            // boombox NPC's guid - if a teleported player's zone-tile visibility for that NPC hasn't
-            // caught up yet, the client silently drops it as an unknown entity and never plays the
-            // song. Guard it the same way the spawn-time send already does: make sure they actually
-            // have AddNpc for the boombox before attaching an effect to it.
+            // This targets the boombox's guid, not the player's, so a newcomer whose tile
+            // visibility hasn't caught up drops it as an unknown entity and never hears the song.
+            // Make sure they have AddNpc first.
             if (songTagId != 0 && newcomers.Count > 0)
             {
                 var songEffect = new PlayerUpdatePacketAddEffectTagCompositeEffect

@@ -7,10 +7,9 @@ using Sanctuary.Packet.Common;
 
 namespace Sanctuary.Gateway.Handlers.Abilities;
 
-// Split out of the old handler's big if-chain - same logic, just its own class now.
-public sealed class CakeAbility : ConsumableAbility
+public sealed class CakeAbility(AbilityServices services) : ConsumableAbility(services)
 {
-    public override bool IsInCollection(ClientItemDefinition itemDefinition) =>
+    public override bool Matches(ClientItemDefinition itemDefinition) =>
         _resourceManager.Consumables.Cakes.ContainsKey(itemDefinition.Id);
 
     public override bool HandleAbility(GatewayConnection connection, AbilityPacketClientRequestStartAbility packet, int slot, ClientItem clientItem, ClientItemDefinition itemDefinition)
