@@ -86,7 +86,7 @@ public static class ProfileHelper
 
         dbContext.Entry(newProfile).State = EntityState.Added;
 
-         try
+        try
         {
             if (dbContext.SaveChanges() <= 0)
             {
