@@ -249,6 +249,7 @@ public sealed class Player : ClientPcData, IEntity
         var oldZone = Zone;
 
         oldZone.TryRemovePlayer(Guid);
+        _zoneManager.EvictIfEmpty(oldZone);
 
         if (Mount is not null && !Mount.TeleportToZone(zone, position, rotation))
             Dismount();
@@ -656,5 +657,6 @@ public sealed class Player : ClientPcData, IEntity
 
         ZoneTile.Entities.Remove(Guid, out _);
         Zone.TryRemovePlayer(Guid);
+        _zoneManager.EvictIfEmpty(Zone);
     }
 }

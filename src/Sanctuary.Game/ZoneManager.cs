@@ -160,6 +160,20 @@ public class ZoneManager : IZoneManager
         _zones.TryRemove(new(key, zone));
     }
 
+    public void EvictIfEmpty(IZone zone)
+    {
+        var isStartingZone = zone.DefinitionId == StartingZoneDefinitionId && zone.OwnerId is null;
+
+        if (isStartingZone)
+            return;
+
+        // NOTE: So the zone instance itself has access to players and its lock
+        // so this will handle the empty check. 
+        // Another option is to build helpers to expose something like an 
+        // 'isEmpty' which we can call here.
+        zone.TryMarkDisposedIfEmpty();
+    }
+
     private bool TryGetHousingZone(HousingZoneDefinition housingZoneDefinition, ulong ownerId,
         [MaybeNullWhen(false)] out HousingZone zone)
     {

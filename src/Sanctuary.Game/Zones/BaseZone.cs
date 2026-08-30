@@ -2179,11 +2179,6 @@ public abstract class BaseZone : IZone, IDisposable
         {
             try
             {
-                var isStartingZone = DefinitionId == _zoneManager.StartingZoneDefinitionId && OwnerId is null;
-
-                if (!isStartingZone && TryMarkDisposedIfEmpty())
-                    continue;
-
                 foreach (var entity in _entities)
                 {
                     entity.Value.UpdateEverySecond();
