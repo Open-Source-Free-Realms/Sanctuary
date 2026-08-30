@@ -1,28 +1,24 @@
 using System;
 using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
+using System.Collections.Concurrent;
 
 using Microsoft.Extensions.Logging;
 
 using Lua;
-using Lua.Standard;
 
 namespace Sanctuary.Scripting;
 
 public class ScriptManager : IScriptManager
 {
-    private static readonly string BaseDirectory = ResolveScriptsDirectory();
-
-    internal static readonly string ZoneScriptsDirectory = Path.Combine(BaseDirectory, "Zone");
+    internal static readonly string BaseDirectory = ResolveScriptsDirectory();
 
     private readonly ILogger _logger;
-    private readonly LuaState _luaState;
+
+    private readonly ConcurrentDictionary<IScriptable, ScriptContext> _contexts = new();
 
     public ScriptManager(ILoggerFactory loggerFactory)
     {
         _logger = loggerFactory.CreateLogger<ScriptManager>();
-        _luaState = LuaState.Create();
     }
 
     private static string ResolveScriptsDirectory()
@@ -41,54 +37,48 @@ public class ScriptManager : IScriptManager
 
     public bool Load()
     {
-        _logger.LogInformation("Initializing Lua engine...");
-
-        _luaState.OpenStandardLibraries();
+        _logger.LogInformation("Lua engine initialized");
 
         return true;
     }
 
-    internal async ValueTask<LuaTable> LoadInstanceAsync(string path)
+    public void Reload()
     {
-        var env = new LuaTable
+        _logger.LogDebug("Reloading scripts...");
+
+        _contexts.Clear();
+
+        _logger.LogInformation("Scripts reloaded");
+    }
+
+    public bool DeleteContext(IScriptable scriptable)
+    {
+        return _contexts.TryRemove(scriptable, out _);
+    }
+
+    public bool GetOrCreateContext(IScriptable scriptable, out ScriptContext context)
+    {
+        if (_contexts.TryGetValue(scriptable, out var existingContext))
         {
-            Metatable = new LuaTable()
+            context = existingContext;
+            return false;
+        }
+
+        ILuaUserData userData = scriptable switch
+        {
+            IScriptableZone zone => ZoneUserData.GetOrCreate(zone),
+            IScriptableNpc npc => NpcUserData.GetOrCreate(npc),
+            _ => throw new NotSupportedException($"No script wrapper for {scriptable.GetType().Name}.")
         };
 
-        env.Metatable["__index"] = _luaState.Environment; // read access to Lua std lib
+        var newContext = new ScriptContext(scriptable.ScriptRuntime, scriptable.Logger, userData);
 
-        var closure = await _luaState.LoadFileAsync(path, "bt", env, CancellationToken.None);
-        await _luaState.ExecuteAsync(closure);
-        return env;
-    }
+        // GetOrAdd is atomic, so if another thread is creating a context for the same object
+        // at the same time, we'll get the existing one instead of overwriting it.
+        context = _contexts.GetOrAdd(scriptable, newContext);
 
-    public async ValueTask<ScriptContext?> GetContextForZoneAsync(IScriptZone zone)
-    {
-        var scriptFilePath = Path.Combine(ZoneScriptsDirectory, $"{zone.Name}.lua");
+        var fresh = context == newContext;
 
-        if (!File.Exists(scriptFilePath))
-        {
-            _logger.LogWarning("No script found for zone '{ZoneName}' (looking in '{ScriptFilePath}').", zone.Name, scriptFilePath);
-            return null;
-        }
-
-        try
-        {
-            var env = await LoadInstanceAsync(scriptFilePath);
-
-            var zoneUserData = new ScriptableZone(zone);
-
-            return new ScriptContext(zone.Logger, _luaState, env, zoneUserData);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to load script for zone '{ZoneName}'", zone.Name);
-            return null;
-        }
-    }
-
-    public ScriptContext? GetContextForZone(IScriptZone zone)
-    {
-        return GetContextForZoneAsync(zone).AsTask().GetAwaiter().GetResult();
+        return fresh;
     }
 }

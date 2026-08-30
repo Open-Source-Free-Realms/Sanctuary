@@ -50,6 +50,8 @@ public static class PacketMountSpawnHandler
         if (!_resourceManager.Mounts.TryGetValue(mountInfo.Definition, out var mountDefinition))
             return;
 
+        connection.Player.Dismount();
+
         if (!connection.Player.Zone.TryCreateMount(connection.Player, mountDefinition, out var mount))
             return;
 

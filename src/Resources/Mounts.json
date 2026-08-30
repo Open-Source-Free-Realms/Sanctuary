@@ -523,5 +523,96 @@
     "Stats": {
       "MaxMovementSpeed": 12.5
     }
+  },
+  {
+    "Comment": "Pogo Stick",
+    "Id": 13567,
+    "NameId": 14105,
+    "ImageSetId": 8121,
+    "TintAlias": "dyetint",
+    "ModelId": 1532,
+    "Stats": {
+      "MaxMovementSpeed": 12.5,
+      "JumpHeight": 4.5
+    }
+  },
+  {
+    "Comment": "Eyeball",
+    "Id": 13568,
+    "NameId": 5102489,
+    "ImageSetId": 8571,
+    "ModelId": 4568,
+    "Stats": {
+      "MaxMovementSpeed": 12.5
+    }
+  },
+  {
+    "Comment": "Polar Bear",
+    "Id": 13576,
+    "NameId": 441220,
+    "ImageSetId": 8225,
+    "ModelId": 4110,
+    "Stats": {
+      "MaxMovementSpeed": 12.5
+    }
+  },
+  {
+    "Comment": "Dwarftech Chopper",
+    "Id": 13587,
+    "NameId": 854,
+    "ImageSetId": 71,
+    "TintAlias": "dyetint",
+    "ModelId": 3988,
+    "Stats": {
+      "MaxMovementSpeed": 12.5
+    }
+  },
+  {
+    "Comment": "Surfboard",
+    "Id": 12161,
+    "NameId": 5635,
+    "ImageSetId": 6658,
+    "TintAlias": "dyetint",
+    "TextureAlias": "freerealmslogo",
+    "ModelId": 3033,
+    "Stats": {
+      "MaxMovementSpeed": 12.5
+    }
+  },
+  {
+    "Comment": "Wooden Surfboard",
+    "Id": 12168,
+    "NameId": 5636,
+    "ImageSetId": 6659,
+    "TintAlias": "dyetint",
+    "TextureAlias": "wood",
+    "ModelId": 3033,
+    "Stats": {
+      "MaxMovementSpeed": 12.5
+    }
+  },
+  {
+    "Comment": "Basalt Surfboard",
+    "Id": 12218,
+    "NameId": 7257,
+    "ImageSetId": 6791,
+    "TintAlias": "dyetint",
+    "TextureAlias": "lavadecal",
+    "ModelId": 3033,
+    "Stats": {
+      "MaxMovementSpeed": 12.5
+    }
+  },
+  {
+    "Comment": "Holiday Tree Board",
+    "Id": 13589,
+    "NameId": 7503,
+    "ImageSetId": 6996,
+    "TintAlias": "dyetint",
+    "TextureAlias": "wood",
+    "ModelId": 3392,
+    "Stats": {
+      "MaxMovementSpeed": 12.5
+    }
   }
 ]

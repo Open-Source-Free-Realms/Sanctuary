@@ -95,7 +95,11 @@ public static class PacketLoginHandler
                     .ThenInclude(x => x.Members)
                         .ThenInclude(x => x.Character)
             .AsSplitQuery()
-            .SingleOrDefault(x => x.Id == GuidHelper.GetPlayerId(packet.Guid) && x.Ticket == ticket);
+            .SingleOrDefault(x => x.Id == GuidHelper.GetPlayerId(packet.Guid)
+#if !DEBUG
+                && x.Ticket == ticket
+#endif
+            );
 
         if (character is null)
         {

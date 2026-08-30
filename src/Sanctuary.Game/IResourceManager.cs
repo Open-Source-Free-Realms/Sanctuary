@@ -40,5 +40,7 @@ public interface IResourceManager
     NameFilterCollection NameFilter { get; }
     MapGraphCollection Maps { get; }
 
+    RewardTableDefinitionCollection RewardTables { get; }
+
     bool Load();
 }

@@ -32,4 +32,6 @@ public abstract class BaseZoneDefinition
 
     [JsonConverter(typeof(QuaternionJsonConverter))]
     public Quaternion SpawnRotation { get; set; }
+
+    public string[]? Scripts { get; set; }
 }

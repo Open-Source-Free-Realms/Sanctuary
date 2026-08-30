@@ -33,7 +33,7 @@ public sealed class CollectionNodeTypeDefinitionTests
             ]
         };
 
-        Assert.AreEqual(expectedItemDefinitionId, definition.SelectDrop(roll).ItemDefinitionId);
+        Assert.AreEqual(expectedItemDefinitionId, definition.Table.Select(roll).ItemDefinitionId);
     }
 
     [TestMethod]

@@ -42,7 +42,6 @@ public class NavNpcToChatCommand : IChatCommand
         npc.Scale = 1f;
         npc.Disposition = 0;
         npc.HideNamePlate = false;
-        npc.MovementType = 2;
         npc.Speed = 6.25f;
         npc.Visible = true;
 
