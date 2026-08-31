@@ -103,17 +103,33 @@ public static class ProfileHelper
         return true;
     }
 
-    public static void RemoveSpecialProfile(DbCharacter character, DatabaseContext dbContext, SpecialProfileIds profileId)
+    public static bool RemoveSpecialProfile(DbCharacter character, DatabaseContext dbContext, ILogger logger, SpecialProfileIds profileId)
     {
         int id = (int)profileId;
 
-        dbContext.Profiles.Where(p => p.CharacterId == character.Id && p.Id == id).ExecuteDelete();
-        dbContext.SaveChanges();
+        if (!character.Profiles.Any(p => p.Id == id))
+            return true;
+
+        try
+        {
+            if (dbContext.Profiles.Where(p => p.CharacterId == character.Id && p.Id == id).ExecuteDelete() <= 0)
+            {
+                logger.LogWarning("Failed to remove profile {profileId} for character {characterId}.", id, character.Id);
+                return false;
+            }
+        }
+        catch (DbUpdateException ex)
+        {
+            logger.LogError(ex, "Failed to remove profile {profileId} for character {characterId}.", id, character.Id);
+            return false;
+        }
 
         var profileToRemove = character.Profiles.FirstOrDefault(p => p.Id == id);
         if (profileToRemove != null)
         {
             character.Profiles.Remove(profileToRemove);
         }
+
+        return true;
     }
 }
