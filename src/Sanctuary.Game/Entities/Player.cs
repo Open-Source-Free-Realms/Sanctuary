@@ -212,24 +212,18 @@ public sealed class Player : ClientPcData, IEntity
         ZoneTile = newZoneTile;
     }
 
-    public bool TeleportToZone(IZone zone, Vector4 position, Quaternion rotation)
+    public bool TeleportToZone(IZone destinationZone, Vector4 position, Quaternion rotation)
     {
-        if (Zone == zone)
+        if (Zone == destinationZone)
             return true;
 
-        if (zone.IsDisposed)
-        {
-            if (!_zoneManager.TryGetOrCreateZoneInstance(zone.DefinitionId, zone.OwnerId, out var freshZone))
-                return false;
 
-            zone = freshZone;
-        }
+        var oldZone = Zone;
 
-        // NOTE: There may be a tiny period of time in which
-        // the player exists in the dictionary of BOTH zones,
-        // new and old.
-        if (!zone.TryAddPlayer(this))
+        if (!_zoneManager.TryMovePlayerToZone(destinationZone.DefinitionId, destinationZone.OwnerId, this, out var zone))
             return false;
+        _zoneManager.EvictIfEmpty(oldZone);
+
 
         if (Zone is WorldZone)
         {
@@ -245,11 +239,6 @@ public sealed class Player : ClientPcData, IEntity
         OnRemoveVisiblePlayers(VisiblePlayers.Values);
 
         ZoneTile.Entities.Remove(Guid, out _);
-
-        var oldZone = Zone;
-
-        oldZone.TryRemovePlayer(Guid);
-        _zoneManager.EvictIfEmpty(oldZone);
 
         if (Mount is not null && !Mount.TeleportToZone(zone, position, rotation))
             Dismount();

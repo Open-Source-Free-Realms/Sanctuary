@@ -19,14 +19,12 @@ public interface IZone : IScriptableZone
     Vector4 SpawnPosition { get; }
     Quaternion SpawnRotation { get; }
 
-    bool IsDisposed { get; }
-    bool TryMarkDisposedIfEmpty();
-
     #region Events
 
     void OnStart();
     void OnClientIsReady(Player entity);
     void OnClientFinishedLoading(Player entity);
+    void Dispose();
 
     #endregion
 
@@ -35,7 +33,11 @@ public interface IZone : IScriptableZone
     IEnumerable<Npc> Npcs { get; }
     IEnumerable<Player> Players { get; }
 
+    bool IsEmpty { get; }
+
     float TickDeltaSeconds { get; }
+
+
 
     bool TryGetNpc(ulong guid, [MaybeNullWhen(false)] out Npc npc);
     bool TryGetPlayer(ulong guid, [MaybeNullWhen(false)] out Player player);

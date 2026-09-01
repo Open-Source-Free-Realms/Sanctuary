@@ -23,6 +23,8 @@ public class Mount : Npc
 
     public override bool TeleportToZone(IZone zone, Vector4 position, Quaternion rotation)
     {
+        Zone.TryRemoveNpc(Guid);
+
         if (!zone.TryAddMount(this))
             return false;
 
@@ -33,8 +35,6 @@ public class Mount : Npc
         OnRemoveVisiblePlayers(VisiblePlayers.Values);
 
         ZoneTile.Entities.Remove(Guid, out _);
-
-        Zone.TryRemoveNpc(Guid);
 
         // Teleport to new zone
 

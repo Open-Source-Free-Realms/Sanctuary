@@ -34,6 +34,8 @@ public class ZoneManager : IZoneManager
 
     public IEnumerable<IZone> Zones => _zones.Values;
 
+    private readonly object _playerTransitionLock = new();
+
     public ZoneManager(
         ILoggerFactory loggerFactory,
         IResourceManager resourceManager,
@@ -110,7 +112,28 @@ public class ZoneManager : IZoneManager
         return true;
     }
 
-    public bool TryGetOrCreateZoneInstance(int zoneDefinitionId, ulong? ownerId, [MaybeNullWhen(false)] out IZone zone)
+    public bool TryMovePlayerToZone(int zoneDefinitionId, ulong? ownerId, Player player, out IZone zone)
+    {
+        lock (_playerTransitionLock)
+        {
+            if (!TryGetOrCreateZoneInstance(zoneDefinitionId, ownerId, out var resolvedZone))
+            {
+                zone = player.Zone;
+                return false;
+            }
+
+            zone = resolvedZone;
+
+            // NOTE: this MIGHT be delecate...
+            // These SHOULD both always return 'true', but if we want to be extra safe,
+            // we can return the original zone the player was in if they fail...
+            player.Zone.TryRemovePlayer(player.Guid);
+            return resolvedZone.TryAddPlayer(player);
+        }
+    }
+
+
+    private bool TryGetOrCreateZoneInstance(int zoneDefinitionId, ulong? ownerId, [MaybeNullWhen(false)] out IZone zone)
     {
         if (!_resourceManager.Zones.TryGetValue(zoneDefinitionId, out var zoneDefinition))
         {
@@ -165,15 +188,22 @@ public class ZoneManager : IZoneManager
         if (isStartingZone)
             return;
 
-        // NOTE: So the zone instance itself has access to players and its lock
-        // so this will handle the empty check. 
-        // Another option is to build helpers to expose something like an 
-        // 'isEmpty' which we can call here.
-        zone.TryMarkDisposedIfEmpty();
+        lock (_playerTransitionLock)
+        {
+            if (zone.IsEmpty)
+                zone.Dispose();
+        }
     }
+
 
     private bool PlayerCanAccessZone(BaseZoneDefinition definition, ulong? ownerId) => definition switch
     {
+        // NOTE: One day, we may need to worry about code that tries to allow a player into a zone
+        // they're not aloud to be inside of (e.g., a private(?) house. Not sure if that existed).
+        // The assumption is that would be taken care of elsewhere (i.e., a player wouldn't even
+        // be able to see an option to get to a zone they shouldn't be able to get into).
+        //
+        // This is why we don't pass a player instance here directly.
         WorldZoneDefinition => true,
         CombatZoneDefinition => ownerId is not null,
         HousingZoneDefinition housing => ownerId is not null && PlayerOwnsHouse(ownerId.Value, housing.Id),

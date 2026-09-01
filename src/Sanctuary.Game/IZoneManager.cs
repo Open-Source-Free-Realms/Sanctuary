@@ -18,7 +18,9 @@ public interface IZoneManager
 
     bool TryGetPlayer(ulong guid, [MaybeNullWhen(false)] out Player player);
     bool TryGetPlayer(string name, [MaybeNullWhen(false)] out Player player);
-    bool TryGetOrCreateZoneInstance(int zoneDefinitionId, ulong? ownerId, [MaybeNullWhen(false)] out IZone zone);
+
+    bool TryMovePlayerToZone(int zoneDefinitionId, ulong? ownerId, Player player, out IZone zone);
+
     void RemoveZoneInstance(IZone zone);
     void EvictIfEmpty(IZone zone);
 }

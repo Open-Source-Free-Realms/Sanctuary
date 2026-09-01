@@ -36,7 +36,6 @@ public abstract class BaseZone : IZone, IDisposable
     private readonly ScriptRuntime _scriptRuntime;
     private readonly BaseZoneDefinition _zoneDefinition;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
-    private readonly object _lifecycleLock = new();
 
     private const int VisibleTileRadius = 2;
     private readonly Dictionary<int, ZoneTile> _tiles;
@@ -74,14 +73,14 @@ public abstract class BaseZone : IZone, IDisposable
     public IEnumerable<Npc> Npcs => _npcs.Values;
     public IEnumerable<Player> Players => _players.Values;
 
+    public bool IsEmpty => _players.IsEmpty;
+
     public IScriptManager ScriptManager => _scriptManager;
     public ScriptRuntime ScriptRuntime => _scriptRuntime;
 
     public Pathfinder<MapNode>? Pathfinder { get; }
 
     public ulong? OwnerId { get; init; }
-
-    public bool IsDisposed => _cancellationTokenSource.IsCancellationRequested;
 
     private bool _started = false;
 
@@ -118,13 +117,10 @@ public abstract class BaseZone : IZone, IDisposable
 
     public virtual void OnStart()
     {
-        lock (_lifecycleLock)
-        {
-            if (_started)
-                return;
+        if (_started)
+            return;
 
-            _started = true;
-        }
+        _started = true;
 
         GetOrCreateScriptContext().FireEvent("start");
         ActivateCollectionNodePools();
@@ -1490,24 +1486,12 @@ public abstract class BaseZone : IZone, IDisposable
 
     public bool TryAddMount(Mount mount)
     {
-        lock (_lifecycleLock)
-        {
-            if (IsDisposed)
-                return false;
-
-            return _npcs.TryAdd(mount.Guid, mount) && _entities.TryAdd(mount.Guid, mount);
-        }
+        return _npcs.TryAdd(mount.Guid, mount) && _entities.TryAdd(mount.Guid, mount);
     }
 
     public bool TryAddPlayer(Player player)
     {
-        lock (_lifecycleLock)
-        {
-            if (IsDisposed)
-                return false;
-
-            return _players.TryAdd(player.Guid, player) && _entities.TryAdd(player.Guid, player);
-        }
+        return _players.TryAdd(player.Guid, player) && _entities.TryAdd(player.Guid, player);
     }
 
     private bool TryRegisterEntity<TEntity>(ConcurrentDictionary<ulong, TEntity> collection, TEntity entity)
@@ -2213,33 +2197,19 @@ public abstract class BaseZone : IZone, IDisposable
         // function WILL get called if no players exist in a zone (except for FabledRealms)
         // which is the 'Starting Zone'. If things slow down, then this might get called
         // before a player makes it in.
-        lock (_lifecycleLock)
-        {
-            _zoneManager.RemoveZoneInstance(this);
+        _zoneManager.RemoveZoneInstance(this);
 
-            _cancellationTokenSource.Cancel();
+        _cancellationTokenSource.Cancel();
 
-            lock (_collectionNodeLock)
-                _collectionNodeRefills.Clear();
+        lock (_collectionNodeLock)
+            _collectionNodeRefills.Clear();
 
-            _tiles.Clear();
+        _tiles.Clear();
 
-            _npcs.Clear();
-            _players.Clear();
+        _npcs.Clear();
+        _players.Clear();
 
-            _scriptManager.DeleteContext(this);
-        }
+        _scriptManager.DeleteContext(this);
     }
 
-    public bool TryMarkDisposedIfEmpty()
-    {
-        lock (_lifecycleLock)
-        {
-            if (IsDisposed || !_players.IsEmpty)
-                return false;
-
-            Dispose();
-            return true;
-        }
-    }
 }
