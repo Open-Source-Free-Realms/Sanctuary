@@ -1,4 +1,4 @@
-﻿using Sanctuary.Game.Resources;
+using Sanctuary.Game.Resources;
 
 namespace Sanctuary.Game;
 
@@ -40,6 +40,9 @@ public interface IResourceManager
     MapGraphCollection Maps { get; }
 
     RewardTableDefinitionCollection RewardTables { get; }
+
+    AbilityDefinitionCollection CombatAbilities { get; }
+    JobKitDefinitionCollection CombatJobs { get; }
 
     bool Load();
 }
