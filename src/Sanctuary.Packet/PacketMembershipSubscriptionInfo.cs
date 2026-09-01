@@ -7,7 +7,7 @@ public class PacketMembershipSubscriptionInfo : ISerializablePacket
     public const short OpCode = 189;
 
     public bool IsMember;
-    public bool Unknown;
+    public bool IsReferee;
 
     public byte[] Serialize()
     {
@@ -16,7 +16,7 @@ public class PacketMembershipSubscriptionInfo : ISerializablePacket
         writer.Write(OpCode);
 
         writer.Write(IsMember);
-        writer.Write(Unknown);
+        writer.Write(IsReferee);
 
         return writer.Buffer;
     }

@@ -543,6 +543,7 @@ public sealed class Player : ClientPcData, IEntity
 
     public PlayerUpdatePacketAddPc GetAddPcPacket()
     {
+        bool isReferee = IsMod || IsAdmin;
         var packet = new PlayerUpdatePacketAddPc
         {
             Guid = Guid,
@@ -575,6 +576,7 @@ public sealed class Player : ClientPcData, IEntity
 
             IsUnderage = Age < 18,
             IsMember = MembershipStatus != 0,
+            IsReferee = isReferee,
 
             // playerUpdatePacketAddPc.TemporaryAppearance = 277;
 
