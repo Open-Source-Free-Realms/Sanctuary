@@ -40,6 +40,8 @@ public static class CommandPacketSetProfileHandler
         if (profile is null)
             return true;
 
+        bool isReferee = connection.Player.IsMod || connection.Player.IsAdmin;
+
         connection.Player.ActiveProfileId = packet.Id;
 
         var clientUpdatePacketActivateProfile = new ClientUpdatePacketActivateProfile();
