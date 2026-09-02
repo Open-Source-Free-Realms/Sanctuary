@@ -11,7 +11,7 @@
     },
     {
         "Id":  1010,
-        "Comment":  "archer basic - Barrage (sheet dmg \u0027279\u0027)",
+        "Comment":  "archer basic - Barrage (sheet dmg '279')",
         "EffectType":  "SweepDamage",
         "Damage":  279,
         "AnimationId":  1099,
@@ -23,7 +23,7 @@
     },
     {
         "Id":  1011,
-        "Comment":  "archer super - Volley (sheet dmg \u0027506\u0027)",
+        "Comment":  "archer super - Volley (sheet dmg '506')",
         "EffectType":  "AoeDamage",
         "Damage":  506,
         "AoeRadius":  10,
@@ -49,7 +49,7 @@
     },
     {
         "Id":  2050,
-        "Comment":  "ninja super - 1000 Storms (sheet dmg \u0027889\u0027)",
+        "Comment":  "ninja super - 1000 Storms (sheet dmg '889')",
         "EffectType":  "AoeDamage",
         "Damage":  889,
         "AoeRadius":  10,
@@ -63,7 +63,7 @@
     },
     {
         "Id":  2154,
-        "Comment":  "ninja basic - Lightning Strike (sheet dmg \u0027254\u0027)",
+        "Comment":  "ninja basic - Lightning Strike (sheet dmg '254')",
         "EffectType":  "SweepDamage",
         "Damage":  254,
         "AnimationId":  1099,
@@ -85,7 +85,7 @@
     },
     {
         "Id":  3011,
-        "Comment":  "medic basic - Incision (sheet dmg \u0027279\u0027)",
+        "Comment":  "medic basic - Incision (sheet dmg '279')",
         "EffectType":  "SweepDamage",
         "Damage":  279,
         "AnimationId":  1099,
@@ -97,7 +97,7 @@
     },
     {
         "Id":  3024,
-        "Comment":  "medic super - Triage (sheet dmg \u0027Heals: 254. Dmg: 889\u0027)",
+        "Comment":  "medic super - Triage (sheet dmg 'Heals: 254. Dmg: 889')",
         "EffectType":  "AoeDamageHeal",
         "Damage":  889,
         "AoeRadius":  10,
@@ -122,7 +122,7 @@
     },
     {
         "Id":  4011,
-        "Comment":  "wizard basic - Zap (sheet dmg \u0027279\u0027)",
+        "Comment":  "wizard basic - Zap (sheet dmg '279')",
         "EffectType":  "SweepDamage",
         "Damage":  279,
         "AnimationId":  1099,
@@ -134,7 +134,7 @@
     },
     {
         "Id":  4028,
-        "Comment":  "wizard super - Lightning Blast (sheet dmg \u00271143\u0027)",
+        "Comment":  "wizard super - Lightning Blast (sheet dmg '1143')",
         "EffectType":  "SweepDamage",
         "Damage":  1143,
         "EnergyCost":  100,
@@ -157,7 +157,7 @@
     },
     {
         "Id":  5011,
-        "Comment":  "warrior basic - Sweeping Slash (sheet dmg \u0027279\u0027)",
+        "Comment":  "warrior basic - Sweeping Slash (sheet dmg '279')",
         "EffectType":  "AoeDamage",
         "Damage":  279,
         "AoeRadius":  7,
@@ -170,7 +170,7 @@
     },
     {
         "Id":  5012,
-        "Comment":  "warrior super - Spinning Attack (sheet dmg \u0027506\u0027)",
+        "Comment":  "warrior super - Spinning Attack (sheet dmg '506')",
         "EffectType":  "AoeDamage",
         "Damage":  506,
         "AoeRadius":  10,
@@ -192,7 +192,7 @@
     },
     {
         "Id":  6011,
-        "Comment":  "brawler basic - Glancing Blow (sheet dmg \u0027254\u0027)",
+        "Comment":  "brawler basic - Glancing Blow (sheet dmg '254')",
         "EffectType":  "SweepDamage",
         "Damage":  254,
         "AnimationId":  1099,
@@ -204,7 +204,7 @@
     },
     {
         "Id":  6012,
-        "Comment":  "brawler super - Leg Sweep (sheet dmg \u0027889\u0027)",
+        "Comment":  "brawler super - Leg Sweep (sheet dmg '889)",
         "EffectType":  "AoeDamage",
         "Damage":  889,
         "AoeRadius":  10,
