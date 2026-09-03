@@ -665,7 +665,8 @@ public sealed class Player : ClientPcData, IEntity
         SendTunneled(setDefinition);
 
         MaxEnergy = kit.Energy.Max;
-        Energy = Energy;
+        // Resync energy against the new max.
+        Energy = _energy;
 
         return true;
     }
