@@ -223,7 +223,7 @@ public sealed class Player : ClientPcData, IEntity
         if (Mount is not null)
             Mount.TeleportToZone(zone, position, rotation);
 
-        RemoveFromVisibleEntities();
+        RemoveFromVisibleEntities(true);
 
         ZoneTile.Entities.Remove(Guid, out _);
 
@@ -624,7 +624,7 @@ public sealed class Player : ClientPcData, IEntity
 
     #endregion
 
-    private void RemoveFromVisibleEntities()
+    private void RemoveFromVisibleEntities(bool notifySelf)
     {
         foreach (var visibleNpc in VisibleNpcs)
             visibleNpc.Value.OnRemoveVisiblePlayers([this]);
@@ -632,13 +632,16 @@ public sealed class Player : ClientPcData, IEntity
         foreach (var visiblePlayer in VisiblePlayers)
             visiblePlayer.Value.OnRemoveVisiblePlayers([this]);
 
-        OnRemoveVisibleNpcs(VisibleNpcs.Values);
-        OnRemoveVisiblePlayers(VisiblePlayers.Values);
+        if (notifySelf)
+        {
+            OnRemoveVisibleNpcs(VisibleNpcs.Values);
+            OnRemoveVisiblePlayers(VisiblePlayers.Values);
+        }
     }
 
     public void Dispose()
     {
-        RemoveFromVisibleEntities();
+        RemoveFromVisibleEntities(false); // no need to notify self since we're DCing
 
         Mount?.Dispose();
         Mount = null;
