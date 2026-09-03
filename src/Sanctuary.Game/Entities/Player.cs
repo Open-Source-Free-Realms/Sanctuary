@@ -68,97 +68,6 @@ public sealed class Player : ClientPcData, IEntity
     public Vector4 StartingZonePosition { get; set; }
     public Quaternion StartingZoneRotation { get; set; }
 
-    #region Combat
-
-    public int GetEquippedWeaponDefinitionId()
-    {
-        const int PrimaryWeaponSlot = 7;
-
-        if (!ActiveProfile.Items.TryGetValue(PrimaryWeaponSlot, out var profileItem))
-            return 0;
-
-        var clientItem = Items.FirstOrDefault(x => x.Id == profileItem.Id);
-
-        return clientItem?.Definition ?? 0;
-    }
-
-    public bool SendToolbar()
-    {
-        if (!_resourceManager.CombatJobs.TryGetValue(ActiveProfileId, out var kit))
-        {
-            SendTunneled(new AbilityPacketSetDefinition { ProfileId = ActiveProfileId });
-            return false;
-        }
-
-        var weaponDefinitionId = GetEquippedWeaponDefinitionId();
-        var (basic, special) = ResolveWeaponAbilities(kit, weaponDefinitionId);
-
-        var weaponNameId = 0;
-        if (_resourceManager.ClientItemDefinitions.TryGetValue(weaponDefinitionId, out var weaponDefinition))
-            weaponNameId = weaponDefinition.NameId;
-
-        var setDefinition = new AbilityPacketSetDefinition { ProfileId = kit.ProfileId };
-
-        if (basic is not null)
-        {
-            setDefinition.AbilitySet.Abilities[0] = CreateToolbarSlot(kit.BasicSlotDefId, basic.IconId, weaponNameId, manaCost: 0);
-            SendAbilityDefinition(kit.BasicSlotDefId, basic);
-        }
-
-        if (special is not null)
-        {
-            setDefinition.AbilitySet.Abilities[1] = CreateToolbarSlot(kit.SpecialSlotDefId, special.IconId, weaponNameId, special.EnergyCost);
-            SendAbilityDefinition(kit.SpecialSlotDefId, special);
-        }
-
-        SendTunneled(setDefinition);
-
-        SetEnergy(Math.Min(Energy, kit.Energy.Max), kit.Energy.Max);
-
-        return true;
-    }
-
-    private void SendAbilityDefinition(int abilityDefinitionId, AbilityDefinition ability)
-    {
-        SendTunneled(new AbilityPacketAbilityDefinition
-        {
-            AbilityId = abilityDefinitionId,
-            NameId = ability.NameId,
-            DescriptionId = ability.DescriptionId,
-            IconId = ability.IconId,
-            ManaCost = ability.EnergyCost
-        });
-    }
-
-    private static Ability CreateToolbarSlot(int abilityDefinitionId, int iconId, int nameId, int manaCost) => new()
-    {
-        Type = 3,
-        Unknown2 = abilityDefinitionId,
-        ManaCost = manaCost,
-        IconId = iconId,
-        NameId = nameId,
-        Unknown7 = 4,
-        Unknown9 = 1,
-        AbilityDefinitionId = abilityDefinitionId,
-        ForceDismount = true
-    };
-
-    private (AbilityDefinition? Basic, AbilityDefinition? Special) ResolveWeaponAbilities(JobKitDefinition kit, int weaponDefinitionId)
-    {
-        var mapping = weaponDefinitionId != 0
-            ? kit.Weapons.FirstOrDefault(w => w.WeaponDefIds.Contains(weaponDefinitionId))
-            : null;
-
-        var basicId = mapping?.BasicAbilityId ?? kit.FallbackBasicAbilityId;
-        var specialId = mapping?.SpecialAbilityId ?? 0;
-
-        return (
-            _resourceManager.CombatAbilities.TryGetValue(basicId, out var basic) ? basic : null,
-            _resourceManager.CombatAbilities.TryGetValue(specialId, out var special) ? special : null);
-    }
-
-    #endregion
-
     public Player(BaseZone zone, UdpConnection connection, IResourceManager resourceManager)
     {
         Zone = zone;
@@ -271,19 +180,6 @@ public sealed class Player : ClientPcData, IEntity
 
     public void UpdateEverySecond()
     {
-    }
-
-    public int Energy { get; private set; } = 100;
-
-    public void SetEnergy(int energy, int maxEnergy)
-    {
-        Energy = energy;
-
-        SendTunneled(new ClientUpdatePacketMana
-        {
-            CurrentMana = Energy,
-            MaxMana = maxEnergy
-        });
     }
 
     public void UpdatePosition(Vector4 position, Quaternion rotation, bool updateZoneArea = true)
@@ -703,6 +599,117 @@ public sealed class Player : ClientPcData, IEntity
 
         return packet;
     }
+
+    #region Combat
+
+    private const int PrimaryWeaponSlot = 7;
+
+    private int _energy = 100;
+
+    public int Energy
+    {
+        get => _energy;
+        private set
+        {
+            _energy = Math.Min(value, MaxEnergy);
+
+            SendTunneled(new ClientUpdatePacketMana
+            {
+                CurrentMana = _energy,
+                MaxMana = MaxEnergy
+            });
+        }
+    }
+
+    private int MaxEnergy { get; set; } = 100;
+
+    public int GetEquippedWeaponDefinitionId()
+    {
+        if (!ActiveProfile.Items.TryGetValue(PrimaryWeaponSlot, out var profileItem))
+            return 0;
+
+        var clientItem = Items.FirstOrDefault(x => x.Id == profileItem.Id);
+
+        return clientItem?.Definition ?? 0;
+    }
+
+    public bool SendToolbar()
+    {
+        if (!_resourceManager.CombatJobs.TryGetValue(ActiveProfileId, out var kit))
+        {
+            SendTunneled(new AbilityPacketSetDefinition { ProfileId = ActiveProfileId });
+            return false;
+        }
+
+        var weaponDefinitionId = GetEquippedWeaponDefinitionId();
+        var (basic, special) = ResolveWeaponAbilities(kit, weaponDefinitionId);
+
+        var weaponNameId = 0;
+        if (_resourceManager.ClientItemDefinitions.TryGetValue(weaponDefinitionId, out var weaponDefinition))
+            weaponNameId = weaponDefinition.NameId;
+
+        var setDefinition = new AbilityPacketSetDefinition { ProfileId = kit.ProfileId };
+
+        if (basic is not null)
+        {
+            setDefinition.AbilitySet.Abilities[0] = CreateToolbarSlot(kit.BasicSlotDefId, basic.IconId, weaponNameId, manaCost: 0);
+            SendAbilityDefinition(kit.BasicSlotDefId, basic);
+        }
+
+        if (special is not null)
+        {
+            setDefinition.AbilitySet.Abilities[1] = CreateToolbarSlot(kit.SpecialSlotDefId, special.IconId, weaponNameId, special.EnergyCost);
+            SendAbilityDefinition(kit.SpecialSlotDefId, special);
+        }
+
+        SendTunneled(setDefinition);
+
+        MaxEnergy = kit.Energy.Max;
+        Energy = Energy;
+
+        return true;
+    }
+
+    private void SendAbilityDefinition(int abilityDefinitionId, AbilityDefinition ability)
+    {
+        SendTunneled(new AbilityPacketAbilityDefinition
+        {
+            AbilityId = abilityDefinitionId,
+            NameId = ability.NameId,
+            DescriptionId = ability.DescriptionId,
+            IconId = ability.IconId,
+            ManaCost = ability.EnergyCost
+        });
+    }
+
+    private static Ability CreateToolbarSlot(int abilityDefinitionId, int iconId, int nameId, int manaCost) => new()
+    {
+        Type = 3,
+        InstanceId = abilityDefinitionId,
+        ManaCost = manaCost,
+        IconId = iconId,
+        NameId = nameId,
+        Unknown7 = 4,
+        Unknown9 = 1,
+        AbilityDefinitionId = abilityDefinitionId,
+        ForceDismount = true
+    };
+
+    private (AbilityDefinition? Basic, AbilityDefinition? Special) ResolveWeaponAbilities(JobKitDefinition kit, int weaponDefinitionId)
+    {
+        var mapping = weaponDefinitionId != 0
+            ? kit.Weapons.FirstOrDefault(w => w.WeaponDefIds.Contains(weaponDefinitionId))
+            : null;
+
+        var basicId = mapping?.BasicAbilityId ?? kit.FallbackBasicAbilityId;
+        var specialId = mapping?.SpecialAbilityId ?? 0;
+
+        return (
+            _resourceManager.CombatAbilities.TryGetValue(basicId, out var basic) ? basic : null,
+            _resourceManager.CombatAbilities.TryGetValue(specialId, out var special) ? special : null);
+    }
+
+    #endregion
 
     #region Equatable
 

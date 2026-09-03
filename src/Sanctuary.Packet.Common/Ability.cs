@@ -10,7 +10,8 @@ public class Ability : ISerializableType
     // 3 - AbilityDefinition
     public int Type;
 
-    public int Unknown2;
+    // Same value as AbilityDefinitionId when the slot holds an ability.
+    public int InstanceId;
 
     public int ManaCost;
 
@@ -40,7 +41,7 @@ public class Ability : ISerializableType
 
         if (Type == 1 || Type == 3)
         {
-            writer.Write(Unknown2);
+            writer.Write(InstanceId);
             writer.Write(ManaCost);
         }
         else if (Type == 2)
