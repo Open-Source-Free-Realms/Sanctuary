@@ -155,6 +155,8 @@ public static class InventoryPacketEquipByGuidHandler
 
         connection.Player.SendTunneledToVisible(playerUpdatePacketEquipItemChange);
 
+        connection.Player.SendToolbar();
+
         // Update the Weapon composite effect if we have a Flair Shard equipped.
         if (packet.Slot == 13)
         {

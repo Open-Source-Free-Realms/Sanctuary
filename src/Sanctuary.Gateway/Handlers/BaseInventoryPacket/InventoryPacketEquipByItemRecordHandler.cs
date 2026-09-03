@@ -159,6 +159,8 @@ public static class InventoryPacketEquipByItemRecordHandler
 
         connection.Player.SendTunneledToVisible(playerUpdatePacketEquipItemChange);
 
+        connection.Player.SendToolbar();
+
         return true;
     }
 }
