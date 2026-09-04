@@ -124,6 +124,8 @@ public static class InventoryPacketEquippedRemoveHandler
 
         connection.Player.SendTunneledToVisible(playerUpdatePacketEquipItemChange);
 
+        connection.Player.SendToolbar();
+
         // Update the Weapon composite effect if we have a Flair Shard equipped.
         if (packet.Slot == 13)
         {

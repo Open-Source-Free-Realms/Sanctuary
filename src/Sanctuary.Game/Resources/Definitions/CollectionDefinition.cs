@@ -8,9 +8,9 @@ namespace Sanctuary.Game.Resources.Definitions;
 public sealed class CollectionDefinition
 {
     public int Id { get; set; }
+    public int NameId { get; set; }
     public int CategoryId { get; set; }
     public int DescriptionId { get; set; }
-    public int Type { get; set; }
     public int IconId { get; set; }
     public int IconTintId { get; set; }
     public int HeaderMetadata { get; set; }
@@ -26,10 +26,10 @@ public sealed class CollectionDefinition
     {
         var collection = new ClientCollection
         {
-            CategoryId = CategoryId,
             Id = Id,
+            NameId = NameId,
             DescriptionId = DescriptionId,
-            Type = Type,
+            CategoryId = CategoryId,
             IconId = IconId,
             IconTintId = IconTintId,
             HeaderMetadata = HeaderMetadata,
@@ -39,21 +39,25 @@ public sealed class CollectionDefinition
 
         for (var index = 0; index < Entries.Count; index++)
         {
-            var entry = Entries[index];
-
-            collection.Entries.Add(new ClientCollectionEntry
-            {
-                Id = entry.Id,
-                DefinitionId = entry.Id,
-                Index = index + 1,
-                CategoryId = CategoryId,
-                NameId = entry.NameId,
-                IconId = entry.IconId,
-                IconTintId = entry.IconTintId,
-                Collected = ownedItemDefinitionIds.Contains(entry.ItemDefinitionId)
-            });
+            collection.Entries.Add(CreateClientCollectionEntry(
+                Entries[index], index, ownedItemDefinitionIds.Contains(Entries[index].ItemDefinitionId)));
         }
 
         return collection;
+    }
+
+    public ClientCollectionEntry CreateClientCollectionEntry(CollectionEntryDefinition entry, int index, bool collected)
+    {
+        return new ClientCollectionEntry
+        {
+            Id = entry.Id,
+            DefinitionId = entry.Id,
+            Index = index + 1,
+            CollectionId = Id,
+            NameId = entry.NameId,
+            IconId = entry.IconId,
+            IconTintId = entry.IconTintId,
+            Collected = collected
+        };
     }
 }

@@ -7,7 +7,7 @@ public sealed class ClientCollectionEntry : ISerializableType
     public int Id;
     public int DefinitionId;
     public int Index;
-    public int CategoryId;
+    public int CollectionId;
     public int NameId;
     public int IconId;
     public int IconTintId;
@@ -19,7 +19,7 @@ public sealed class ClientCollectionEntry : ISerializableType
         writer.Write(Id);
         writer.Write(DefinitionId);
         writer.Write(Index);
-        writer.Write(CategoryId);
+        writer.Write(CollectionId);
         writer.Write(NameId);
         writer.Write(IconId);
         writer.Write(IconTintId);
