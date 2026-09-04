@@ -238,9 +238,6 @@ public static class RewardHelper
             dbProfile.Level++;
         }
     }
-
-    // Sent on every grant, level-up or not - refreshes the client's profile datasource
-    // (XP bar/percent/stars) live, with no fanfare.
     private static void SendExperienceUpdate(Player player, ClientPcProfile profile, int levelXp)
     {
         player.SendTunneled(new ClientUpdatePacketUpdateProfileExperience
