@@ -13,61 +13,48 @@ using Sanctuary.Game.Resources.Definitions.Rewards;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 
-namespace Sanctuary.Game;
+namespace Sanctuary.Game.Helpers;
 
-public class RewardManager : IRewardManager
+public static class RewardHelper
 {
-    private readonly ILogger _logger;
-    private readonly IResourceManager _resourceManager;
-    private readonly IDbContextFactory<DatabaseContext> _dbContextFactory;
-
-    public RewardManager(ILogger<RewardManager> logger, IResourceManager resourceManager,
-        IDbContextFactory<DatabaseContext> dbContextFactory)
+    public static bool TryGrantReward(IResourceManager resourceManager, DatabaseContext dbContext, ILogger logger,
+        Player player, string rewardTableKey, ulong sourceGuid = 0)
     {
-        _logger = logger;
-        _resourceManager = resourceManager;
-        _dbContextFactory = dbContextFactory;
-    }
-
-    public bool TryRollReward(string rewardTableKey, out RewardDropDefinition? drop)
-    {
-        drop = null;
-
-        if (!_resourceManager.RewardTables.TryGetValue(rewardTableKey.Trim().ToLowerInvariant(), out var table))
+        if (!resourceManager.RewardTables.TryRoll(rewardTableKey, out var drop))
         {
-            _logger.LogError("Unknown reward table {key}.", rewardTableKey);
+            logger.LogError("Unknown reward table {key}.", rewardTableKey);
             return false;
         }
 
-        drop = table.Table.SelectRandom();
-        return true;
+        return TryGrantReward(resourceManager, dbContext, logger, player, drop, sourceGuid);
     }
 
-    public bool TryGrantReward(Player player, RewardDropDefinition drop, ulong sourceGuid = 0)
+    public static bool TryGrantReward(IResourceManager resourceManager, DatabaseContext dbContext, ILogger logger,
+        Player player, RewardDropDefinition drop, ulong sourceGuid = 0)
     {
         return drop switch
         {
-            ItemRewardDropDefinition item => TryGrantItem(player, item.ItemDefinitionId,
-                item.TintTable?.SelectRandom().TintId ?? 0, item.Quantity, sourceGuid),
-            CurrencyRewardDropDefinition currency => TryGrantCurrency(player, currency.CurrencyType, currency.Amount),
+            ItemRewardDropDefinition item => TryGrantItem(resourceManager, dbContext, logger, player,
+                item.ItemDefinitionId, item.TintTable?.SelectRandom().TintId ?? 0, item.Quantity, sourceGuid),
+            CurrencyRewardDropDefinition currency => TryGrantCurrency(dbContext, logger, player, currency.CurrencyType, currency.Amount),
             _ => false
         };
     }
 
-    public bool TryGrantItem(Player player, int itemDefinitionId, int tint, int quantity, ulong sourceGuid = 0)
+    public static bool TryGrantItem(IResourceManager resourceManager, DatabaseContext dbContext, ILogger logger,
+        Player player, int itemDefinitionId, int tint, int quantity, ulong sourceGuid = 0)
     {
         // TODO: I think similar logic lives in the shop + collections stuff. We should eventually extract
-        // and generalize that to avoid repeats. 
+        // and generalize that to avoid repeats.
         // https://github.com/Open-Source-Free-Realms/Sanctuary/issues/114
-        if (!_resourceManager.ClientItemDefinitions.TryGetValue(itemDefinitionId, out var itemDefinition))
+        if (!resourceManager.ClientItemDefinitions.TryGetValue(itemDefinitionId, out var itemDefinition))
         {
-            _logger.LogError("Cannot grant unknown item definition {itemDefinitionId}.", itemDefinitionId);
+            logger.LogError("Cannot grant unknown item definition {itemDefinitionId}.", itemDefinitionId);
             return false;
         }
 
         var characterId = GuidHelper.GetPlayerId(player.Guid);
 
-        using var dbContext = _dbContextFactory.CreateDbContext();
         var dbCharacter = dbContext.Characters
             .Include(character => character.Items)
             .SingleOrDefault(character => character.Id == characterId);
@@ -94,8 +81,16 @@ public class RewardManager : IRewardManager
             dbItem.Count += quantity;
         }
 
-        if (dbContext.SaveChanges() <= 0)
+        try
+        {
+            if (dbContext.SaveChanges() <= 0)
+                return false;
+        }
+        catch (DbUpdateException ex)
+        {
+            logger.LogError(ex, "Failed to save granted item {itemDefinitionId} for character {characterId}.", itemDefinitionId, characterId);
             return false;
+        }
 
         var clientItem = player.Items.SingleOrDefault(item => item.Definition == itemDefinitionId && item.Tint == tint);
 
@@ -132,20 +127,19 @@ public class RewardManager : IRewardManager
         return true;
     }
 
-    public bool TryGrantCurrency(Player player, CurrencyType currencyType, int amount)
+    public static bool TryGrantCurrency(DatabaseContext dbContext, ILogger logger, Player player, CurrencyType currencyType, int amount)
     {
         if (amount <= 0)
             return false;
 
         if (currencyType == CurrencyType.StationCash)
         {
-            _logger.LogWarning("Station Cash grants are not yet implemented.");
+            logger.LogWarning("Station Cash grants are not yet implemented.");
             return false;
         }
 
         var characterId = GuidHelper.GetPlayerId(player.Guid);
 
-        using var dbContext = _dbContextFactory.CreateDbContext();
         var dbCharacter = dbContext.Characters.SingleOrDefault(character => character.Id == characterId);
 
         if (dbCharacter is null)
@@ -153,8 +147,16 @@ public class RewardManager : IRewardManager
 
         dbCharacter.Coins += amount;
 
-        if (dbContext.SaveChanges() <= 0)
+        try
+        {
+            if (dbContext.SaveChanges() <= 0)
+                return false;
+        }
+        catch (DbUpdateException ex)
+        {
+            logger.LogError(ex, "Failed to save granted currency for character {characterId}.", characterId);
             return false;
+        }
 
         player.Coins = dbCharacter.Coins;
 
@@ -163,29 +165,37 @@ public class RewardManager : IRewardManager
         return true;
     }
 
-    public bool TryGrantExperience(Player player, int profileId, int amount)
+    public static bool TryGrantExperience(IResourceManager resourceManager, DatabaseContext dbContext, ILogger logger,
+        Player player, int profileId, int amount)
     {
         if (amount <= 0)
             return false;
 
         var characterId = GuidHelper.GetPlayerId(player.Guid);
 
-        using var dbContext = _dbContextFactory.CreateDbContext();
         var dbProfile = dbContext.Profiles
             .SingleOrDefault(profile => profile.CharacterId == characterId && profile.Id == profileId);
 
         if (dbProfile is null)
             return false;
 
-        if (dbProfile.Level >= _resourceManager.RankLevels.Keys.Max())
+        if (dbProfile.Level >= resourceManager.RankLevels.Keys.Max())
             return false;
 
         var oldLevel = dbProfile.Level;
 
-        AccrueExperience(dbProfile, amount);
+        AccrueExperience(resourceManager, dbProfile, amount);
 
-        if (dbContext.SaveChanges() <= 0)
+        try
+        {
+            if (dbContext.SaveChanges() <= 0)
+                return false;
+        }
+        catch (DbUpdateException ex)
+        {
+            logger.LogError(ex, "Failed to save granted experience for profile {profileId}, character {characterId}.", profileId, characterId);
             return false;
+        }
 
         var clientPcProfile = player.Profiles.SingleOrDefault(profile => profile.Id == profileId);
 
@@ -194,13 +204,13 @@ public class RewardManager : IRewardManager
         // The client won't...
         if (clientPcProfile is null)
         {
-            _logger.LogWarning("Granted experience to profile {profileId} for {guid}, but no matching client profile is loaded.",
+            logger.LogWarning("Granted experience to profile {profileId} for {guid}, but no matching client profile is loaded.",
                 profileId, player.Guid);
             return true;
         }
 
         clientPcProfile.Rank = dbProfile.Level;
-        clientPcProfile.RankPercent = _resourceManager.RankLevels.GetRankPercent(dbProfile.Level, dbProfile.LevelXP);
+        clientPcProfile.RankPercent = resourceManager.RankLevels.GetRankPercent(dbProfile.Level, dbProfile.LevelXP);
 
         if (dbProfile.Level > oldLevel)
         {
@@ -213,15 +223,15 @@ public class RewardManager : IRewardManager
         return true;
     }
 
-    private void AccrueExperience(DbProfile dbProfile, int amount)
+    private static void AccrueExperience(IResourceManager resourceManager, DbProfile dbProfile, int amount)
     {
-        var maxLevel = _resourceManager.RankLevels.Keys.Max(); // NOTE: May just want a hard-coded const of '20'.
+        var maxLevel = resourceManager.RankLevels.Keys.Max(); // NOTE: May just want a hard-coded const of '20'.
 
         dbProfile.LevelXP += amount;
 
         // TODO: Double check that these conditions are satisfactory for rank-ups.
         while (dbProfile.Level < maxLevel &&
-            _resourceManager.RankLevels.TryGetValue(dbProfile.Level, out var rankLevel) &&
+            resourceManager.RankLevels.TryGetValue(dbProfile.Level, out var rankLevel) &&
             dbProfile.LevelXP >= rankLevel.StarsToNextLevel)
         {
             dbProfile.LevelXP -= rankLevel.StarsToNextLevel;

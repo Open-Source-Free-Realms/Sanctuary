@@ -1,3 +1,7 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+
+using Sanctuary.Database;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
 
@@ -6,17 +10,22 @@ namespace Sanctuary.Game.ChatCommands;
 public class ExperienceChatCommand : IChatCommand
 {
     private readonly IChatCommandManager _chatCommandManager;
-    private readonly IRewardManager _rewardManager;
+    private readonly IResourceManager _resourceManager;
+    private readonly IDbContextFactory<DatabaseContext> _dbContextFactory;
+    private readonly ILogger _logger;
 
     public string KeyWord => "exp";
     public string Usage => "<profileId> <amount>";
     public string Description => "Grants experience (stars) to the given job profile, for testing.";
-    public ChatCommandRole RequiredRole => ChatCommandRole.Admin;
+    public ChatCommandRole RequiredRole => ChatCommandRole.Player;
 
-    public ExperienceChatCommand(IChatCommandManager chatCommandManager, IRewardManager rewardManager)
+    public ExperienceChatCommand(IChatCommandManager chatCommandManager, IResourceManager resourceManager,
+        IDbContextFactory<DatabaseContext> dbContextFactory, ILogger<ExperienceChatCommand> logger)
     {
         _chatCommandManager = chatCommandManager;
-        _rewardManager = rewardManager;
+        _resourceManager = resourceManager;
+        _dbContextFactory = dbContextFactory;
+        _logger = logger;
     }
 
     public bool Handle(Player invoker, string[] args)
@@ -24,7 +33,9 @@ public class ExperienceChatCommand : IChatCommand
         if (args.Length != 2 || !int.TryParse(args[0], out var profileId) || !int.TryParse(args[1], out var amount))
             return false;
 
-        if (!_rewardManager.TryGrantExperience(invoker, profileId, amount))
+        using var dbContext = _dbContextFactory.CreateDbContext();
+
+        if (!RewardHelper.TryGrantExperience(_resourceManager, dbContext, _logger, invoker, profileId, amount))
         {
             ChatHelper.SendSystemMessage(invoker, $"Failed to grant experience for profile {profileId}.");
             return true;
