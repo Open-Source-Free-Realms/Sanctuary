@@ -15,10 +15,10 @@ public sealed class FoodEffectAbility(AbilityServices services) : ConsumableAbil
 
     public override bool HandleAbility(GatewayConnection connection, AbilityPacketClientRequestStartAbility packet, int slot, ClientItem clientItem, ClientItemDefinition itemDefinition)
     {
-        if (IsOnCooldown(connection.Player.Guid, itemDefinition.Id))
+        if (connection.Player.IsItemOnCooldown(itemDefinition.Id))
             return SendFailure(connection);
 
-        StartCooldown(connection.Player.Guid, itemDefinition.Id, FoodEffectCooldownMs);
+        connection.Player.StartItemCooldown(itemDefinition.Id, FoodEffectCooldownMs);
 
         _resourceManager.Consumables.FoodEffects.TryGetValue(itemDefinition.ActivatableAbilityId, out var foodEffect);
 

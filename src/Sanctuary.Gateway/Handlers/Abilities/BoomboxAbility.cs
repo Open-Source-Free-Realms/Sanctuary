@@ -22,12 +22,12 @@ public sealed class BoomboxAbility(AbilityServices services) : ConsumableAbility
 
     public override bool HandleAbility(GatewayConnection connection, AbilityPacketClientRequestStartAbility packet, int slot, ClientItem clientItem, ClientItemDefinition itemDefinition)
     {
-        if (IsOnCooldown(connection.Player.Guid, itemDefinition.Id))
+        if (connection.Player.IsItemOnCooldown(itemDefinition.Id))
             return SendFailure(connection);
 
         SpawnBoomboxNpc(connection, itemDefinition);
 
-        StartCooldown(connection.Player.Guid, itemDefinition.Id, BoomboxDurationMs);
+        connection.Player.StartItemCooldown(itemDefinition.Id, BoomboxDurationMs);
         connection.Player.StartActionBarCooldown(ActionBarId, slot, itemDefinition.Icon.Id, itemDefinition.NameId, clientItem.Count, BoomboxDurationMs);
 
         return true;

@@ -71,6 +71,16 @@ public sealed class Player : ClientPcData, IEntity
     public DateTimeOffset? TemporaryAppearanceExpiresAt { get; set; }
     private int _temporaryAppearanceEffectId;
 
+    public ulong LastSillyStringTarget { get; set; }
+
+    private readonly ConcurrentDictionary<int, DateTimeOffset> _itemCooldowns = new();
+
+    public bool IsItemOnCooldown(int itemDefinitionId) =>
+        _itemCooldowns.TryGetValue(itemDefinitionId, out var expiresAt) && DateTimeOffset.UtcNow < expiresAt;
+
+    public void StartItemCooldown(int itemDefinitionId, int cooldownMs) =>
+        _itemCooldowns[itemDefinitionId] = DateTimeOffset.UtcNow.AddMilliseconds(cooldownMs);
+
     private readonly ConcurrentQueue<(DateTimeOffset SendAt, ISerializablePacket Packet, bool SendToSelf)> _delayedPackets = new();
 
     // One scheduled personal-UI packet per action bar slot (the cooldown re-enable) - keyed, not queued,

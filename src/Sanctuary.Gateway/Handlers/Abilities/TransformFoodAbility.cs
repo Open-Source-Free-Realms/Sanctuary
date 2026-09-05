@@ -24,7 +24,7 @@ public sealed class TransformFoodAbility(AbilityServices services) : ConsumableA
 
         _resourceManager.Consumables.Transformations.TryGetValue(transformAbilityId, out var transform);
 
-        if (IsOnCooldown(connection.Player.Guid, itemDefinition.Id))
+        if (connection.Player.IsItemOnCooldown(itemDefinition.Id))
             return SendFailure(connection);
 
         if (connection.Player.TemporaryAppearance != 0)
@@ -32,7 +32,7 @@ public sealed class TransformFoodAbility(AbilityServices services) : ConsumableA
 
         connection.Player.ApplyTemporaryAppearance(transform!.ModelId, transform.DurationMs, transform.CompositeEffectId);
 
-        StartCooldown(connection.Player.Guid, itemDefinition.Id, transform.CooldownMs);
+        connection.Player.StartItemCooldown(itemDefinition.Id, transform.CooldownMs);
 
         FinishActivation(connection, clientItem, itemDefinition, slot, transform.CooldownMs);
 

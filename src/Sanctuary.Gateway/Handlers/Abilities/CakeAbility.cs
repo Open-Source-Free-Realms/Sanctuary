@@ -16,12 +16,12 @@ public sealed class CakeAbility(AbilityServices services) : ConsumableAbility(se
     {
         _resourceManager.Consumables.Cakes.TryGetValue(itemDefinition.Id, out var cakeDefinition);
 
-        if (IsOnCooldown(connection.Player.Guid, itemDefinition.Id))
+        if (connection.Player.IsItemOnCooldown(itemDefinition.Id))
             return SendFailure(connection);
 
         SpawnCakeNpc(connection, cakeDefinition!);
 
-        StartCooldown(connection.Player.Guid, itemDefinition.Id, cakeDefinition!.CooldownMs);
+        connection.Player.StartItemCooldown(itemDefinition.Id, cakeDefinition!.CooldownMs);
         connection.Player.StartActionBarCooldown(ActionBarId, slot, itemDefinition.Icon.Id, itemDefinition.NameId, clientItem.Count, cakeDefinition.CooldownMs);
 
         return true;

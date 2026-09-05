@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -25,8 +24,6 @@ public sealed record AbilityServices(
 
 public abstract class ConsumableAbility(AbilityServices services)
 {
-    // Static so cooldowns and effect tag ids are shared across every ability, not per instance.
-    private static readonly ConcurrentDictionary<ulong, ConcurrentDictionary<int, DateTimeOffset>> _itemCooldowns = new();
     private static int _castFxTagCounter = 5000;
 
     internal const int ActionBarId = 2;
@@ -40,20 +37,6 @@ public abstract class ConsumableAbility(AbilityServices services)
     public abstract bool Matches(ClientItemDefinition itemDefinition);
 
     public abstract bool HandleAbility(GatewayConnection connection, AbilityPacketClientRequestStartAbility packet, int slot, ClientItem clientItem, ClientItemDefinition itemDefinition);
-
-    protected static bool IsOnCooldown(ulong playerGuid, int itemDefinitionId)
-    {
-        return _itemCooldowns.TryGetValue(playerGuid, out var cooldowns) &&
-               cooldowns.TryGetValue(itemDefinitionId, out var expiry) &&
-               DateTimeOffset.UtcNow < expiry;
-    }
-
-    protected static void StartCooldown(ulong playerGuid, int itemDefinitionId, int cooldownMs)
-    {
-        var cooldowns = _itemCooldowns.GetOrAdd(playerGuid, _ => new ConcurrentDictionary<int, DateTimeOffset>());
-
-        cooldowns[itemDefinitionId] = DateTimeOffset.UtcNow.AddMilliseconds(cooldownMs);
-    }
 
     protected static int NextEffectTagId() => Interlocked.Increment(ref _castFxTagCounter);
 
