@@ -160,11 +160,13 @@ public static class PacketLoginHandler
         if (isReferee)
         {
             ProfileHelper.AddSpecialProfile(character, dbContext, _resourceManager, _logger, SpecialProfileIds.Referee);
+            ProfileHelper.AddSpecialProfile(character, dbContext, _resourceManager, _logger, SpecialProfileIds.Enforcer);
         }
         else
         {
             // if user is no longer a mod, remove referee profile
             ProfileHelper.RemoveSpecialProfile(character, dbContext, _logger, SpecialProfileIds.Referee);
+            ProfileHelper.RemoveSpecialProfile(character, dbContext, _logger, SpecialProfileIds.Enforcer);
         }
 #if !DEBUG
         var result = dbContext.Characters

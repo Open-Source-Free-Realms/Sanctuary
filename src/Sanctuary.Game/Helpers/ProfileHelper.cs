@@ -12,7 +12,7 @@ namespace Sanctuary.Game.Helpers;
 public enum SpecialProfileIds
 {
     Referee = 58,
-    // Enforcer = ??
+    Enforcer = 20
 }
 
 public static class ProfileHelper
