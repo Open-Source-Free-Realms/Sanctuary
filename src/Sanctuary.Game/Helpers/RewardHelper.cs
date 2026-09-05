@@ -36,7 +36,7 @@ public static class RewardHelper
         {
             ItemRewardDropDefinition item => TryGrantItem(resourceManager, dbContext, logger, player,
                 item.ItemDefinitionId, item.TintTable?.SelectRandom().TintId ?? 0, item.Quantity, sourceGuid),
-            CurrencyRewardDropDefinition currency => TryGrantCurrency(dbContext, logger, player, currency.CurrencyType, currency.Amount),
+            CurrencyRewardDropDefinition currency => TryGrantCurrency(dbContext, logger, player, currency.CurrencyType, currency.Amount, sourceGuid),
             _ => false
         };
     }
@@ -122,12 +122,26 @@ public static class RewardHelper
             });
         }
 
-        SendRewardToast(player, clientItem, itemDefinition, quantity, sourceGuid);
+        var packet = CreateRewardBundlePacket(player, sourceGuid, iconId: itemDefinition.Icon.Id,
+            nameId: itemDefinition.NameId, descriptionId: itemDefinition.DescriptionId);
+
+        packet.RewardBundle.Entries.Add(new RewardBundleEntryItem
+        {
+            IconId = itemDefinition.Icon.Id,
+            NameId = itemDefinition.NameId,
+            DefinitionId = clientItem.Definition,
+            Tint = clientItem.Tint,
+            Quantity = quantity,
+            ItemGuid = clientItem.Id
+        });
+
+        player.SendTunneled(packet);
 
         return true;
     }
 
-    public static bool TryGrantCurrency(DatabaseContext dbContext, ILogger logger, Player player, CurrencyType currencyType, int amount)
+    public static bool TryGrantCurrency(DatabaseContext dbContext, ILogger logger, Player player, CurrencyType currencyType,
+        int amount, ulong sourceGuid = 0)
     {
         if (amount <= 0)
             return false;
@@ -161,12 +175,13 @@ public static class RewardHelper
         player.Coins = dbCharacter.Coins;
 
         player.SendTunneled(new ClientUpdatePacketCoinCount { Coins = player.Coins });
+        player.SendTunneled(CreateRewardBundlePacket(player, sourceGuid, coins: amount));
 
         return true;
     }
 
     public static bool TryGrantExperience(IResourceManager resourceManager, DatabaseContext dbContext, ILogger logger,
-        Player player, int profileId, int amount)
+        Player player, int profileId, int amount, ulong sourceGuid = 0)
     {
         if (amount <= 0)
             return false;
@@ -220,6 +235,8 @@ public static class RewardHelper
 
         SendExperienceUpdate(player, clientPcProfile, dbProfile.LevelXP);
 
+        player.SendTunneled(CreateRewardBundlePacket(player, sourceGuid, experience: amount));
+
         return true;
     }
 
@@ -260,29 +277,22 @@ public static class RewardHelper
         });
     }
 
-    private static void SendRewardToast(Player player, ClientItem clientItem, ClientItemDefinition itemDefinition, int quantity, ulong sourceGuid)
+    private static RewardBundlePacket CreateRewardBundlePacket(Player player, ulong sourceGuid, int coins = 0,
+        int experience = 0, int iconId = 0, int nameId = 0, int descriptionId = 0)
     {
-        // TODO: Is there a coin/station cash toast? How about for other types of rewards..?
         var notificationId = Environment.TickCount & int.MaxValue;
 
         var packet = new RewardBundlePacket
         {
-            Unknown8 = itemDefinition.DescriptionId
+            Unknown8 = descriptionId
         };
         packet.RewardBundle.SourceGuid = sourceGuid ^ (uint)notificationId;
         packet.RewardBundle.PlayerGuid = player.Guid;
-        packet.RewardBundle.IconId = itemDefinition.Icon.Id;
-        packet.RewardBundle.NameId = itemDefinition.NameId;
-        packet.RewardBundle.Entries.Add(new RewardBundleEntryItem
-        {
-            IconId = itemDefinition.Icon.Id,
-            NameId = itemDefinition.NameId,
-            DefinitionId = clientItem.Definition,
-            Tint = clientItem.Tint,
-            Quantity = quantity,
-            ItemGuid = clientItem.Id
-        });
+        packet.RewardBundle.IconId = iconId;
+        packet.RewardBundle.NameId = nameId;
+        packet.RewardBundle.Coins = coins;
+        packet.RewardBundle.Experience = experience;
 
-        player.SendTunneled(packet);
+        return packet;
     }
 }
