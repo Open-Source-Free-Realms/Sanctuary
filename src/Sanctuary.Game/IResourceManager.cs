@@ -41,6 +41,7 @@ public interface IResourceManager
 
     RewardTableDefinitionCollection RewardTables { get; }
 
+    RankLevelDefinitionCollection RankLevels { get; }
     AbilityDefinitionCollection CombatAbilities { get; }
     JobKitDefinitionCollection CombatJobs { get; }
 

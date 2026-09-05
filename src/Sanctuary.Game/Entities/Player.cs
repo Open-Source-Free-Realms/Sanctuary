@@ -134,7 +134,7 @@ public sealed class Player : ClientPcData, IEntity
         DateTimeOffset? mutedUntil = MutedUntil;
         return mutedUntil.HasValue && mutedUntil > currentTime;
     }
-    
+
     public void Disconnect()
     {
         _connection.Disconnect();
@@ -456,6 +456,14 @@ public sealed class Player : ClientPcData, IEntity
             commandPacketInteractionList.List.Interactions.Add(GuildInviteInteraction.Data);
 
         player.SendTunneled(commandPacketInteractionList);
+    }
+
+    public void OnLevelUp(ClientPcProfile profile)
+    {
+        // TODO: Hook for player level-up mechanics. The reward manager will call
+        // this function whenever a level-up is detected for the given job.
+        // Use this to implement stat changes, or any other level-up specific
+        // benefits.
     }
 
     #endregion
