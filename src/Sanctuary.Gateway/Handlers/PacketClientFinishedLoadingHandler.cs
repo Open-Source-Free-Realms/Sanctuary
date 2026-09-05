@@ -38,6 +38,8 @@ public static class PacketClientFinishedLoadingHandler
 
         connection.Player.Zone.OnClientFinishedLoading(connection.Player);
 
+        connection.Player.SendToolbar();
+
         return true;
     }
 }

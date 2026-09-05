@@ -67,6 +67,8 @@ public static class CommandPacketSetProfileHandler
 
         connection.Player.SendTunneledToVisible(playerUpdatePacketEquippedItemsChange);
 
+        connection.Player.SendToolbar();
+
         var friendStatusPacket = new FriendStatusPacket
         {
             Guid = connection.Player.Guid,

@@ -1,0 +1,150 @@
+[
+    {
+        "ProfileId":  35,
+        "Comment":  "Archer. Ranged; reach 30u. Slot def ids are client-known. Creation kit = 4266.",
+        "AutoTargetReach":  30,
+        "WieldType":  11,
+        "BasicSlotDefId":  4895,
+        "SpecialSlotDefId":  4899,
+        "BasicRecastMs":  600,
+        "FallbackBasicAbilityId":  1001,
+        "Energy":  {
+                       "Max":  100,
+                       "RegenPerSecond":  4
+                   },
+        "Weapons":  [
+                        {
+                            "Comment":  "Student Archer Bow - Barrage 11 / Volley",
+                            "WeaponDefIds":  [
+                                                 4266
+                                             ],
+                            "BasicAbilityId":  1010,
+                            "SpecialAbilityId":  1011
+                        }
+                    ]
+    },
+    {
+        "ProfileId":  2,
+        "Comment":  "Ninja. Melee; basics reach 4u, specials 7u. Slot def ids are client-known. Creation kit = 75091.",
+        "AutoTargetReach":  7,
+        "BasicAutoTargetReach":  4,
+        "WieldType":  9,
+        "BasicSlotDefId":  4895,
+        "SpecialSlotDefId":  4899,
+        "BasicRecastMs":  600,
+        "FallbackBasicAbilityId":  2010,
+        "Energy":  {
+                       "Max":  100,
+                       "RegenPerSecond":  4
+                   },
+        "Weapons":  [
+                        {
+                            "Comment":  "Ninja\u0027s Training Sword of 1000 Storms - Lightning Strike 4 / 1000 Storms 2",
+                            "WeaponDefIds":  [
+                                                 75091
+                                             ],
+                            "BasicAbilityId":  2154,
+                            "SpecialAbilityId":  2050
+                        }
+                    ]
+    },
+    {
+        "ProfileId":  11,
+        "Comment":  "Medic. Melee; basics reach 4u, specials 7u. Slot def ids are client-known. Creation kit = 4622.",
+        "AutoTargetReach":  7,
+        "BasicAutoTargetReach":  4,
+        "WieldType":  14,
+        "BasicSlotDefId":  4895,
+        "SpecialSlotDefId":  4899,
+        "BasicRecastMs":  600,
+        "FallbackBasicAbilityId":  3010,
+        "Energy":  {
+                       "Max":  100,
+                       "RegenPerSecond":  4
+                   },
+        "Weapons":  [
+                        {
+                            "Comment":  "Student Medic Hammer - Incision / Triage 2",
+                            "WeaponDefIds":  [
+                                                 4622
+                                             ],
+                            "BasicAbilityId":  3011,
+                            "SpecialAbilityId":  3024
+                        }
+                    ]
+    },
+    {
+        "ProfileId":  12,
+        "Comment":  "Wizard. Ranged; reach 20u. Slot def ids are client-known. Creation kit = 4914.",
+        "AutoTargetReach":  20,
+        "WieldType":  10,
+        "BasicSlotDefId":  4895,
+        "SpecialSlotDefId":  4899,
+        "BasicRecastMs":  600,
+        "FallbackBasicAbilityId":  4010,
+        "Energy":  {
+                       "Max":  100,
+                       "RegenPerSecond":  4
+                   },
+        "Weapons":  [
+                        {
+                            "Comment":  "Student Wizard Wand - Zap 6 / Lightning Blast 4",
+                            "WeaponDefIds":  [
+                                                 4914
+                                             ],
+                            "BasicAbilityId":  4011,
+                            "SpecialAbilityId":  4028
+                        }
+                    ]
+    },
+    {
+        "ProfileId":  32,
+        "Comment":  "Warrior. Melee; basics reach 4u, specials 7u. Slot def ids are client-known. Creation kit = 29963.",
+        "AutoTargetReach":  7,
+        "BasicAutoTargetReach":  4,
+        "WieldType":  12,
+        "BasicSlotDefId":  4895,
+        "SpecialSlotDefId":  4899,
+        "BasicRecastMs":  600,
+        "FallbackBasicAbilityId":  5010,
+        "Energy":  {
+                       "Max":  100,
+                       "RegenPerSecond":  4
+                   },
+        "Weapons":  [
+                        {
+                            "Comment":  "Student Warrior Cudgel - Sweeping Slash 11 / Spinning Attack",
+                            "WeaponDefIds":  [
+                                                 29963
+                                             ],
+                            "BasicAbilityId":  5011,
+                            "SpecialAbilityId":  5012
+                        }
+                    ]
+    },
+    {
+        "ProfileId":  43,
+        "Comment":  "Brawler. Melee; basics reach 4u, specials 7u. Slot def ids are client-known. Creation kit = 75030.",
+        "AutoTargetReach":  7,
+        "BasicAutoTargetReach":  4,
+        "WieldType":  13,
+        "BasicSlotDefId":  4895,
+        "SpecialSlotDefId":  4899,
+        "BasicRecastMs":  600,
+        "FallbackBasicAbilityId":  6010,
+        "Energy":  {
+                       "Max":  100,
+                       "RegenPerSecond":  4
+                   },
+        "Weapons":  [
+                        {
+                            "Comment":  "Brawler\u0027s Mallet of Sweeps - Glancing Blow 7 / Leg Sweep 2",
+                            "WeaponDefIds":  [
+                                                 75030
+                                             ],
+                            "BasicAbilityId":  6011,
+                            "SpecialAbilityId":  6012
+                        }
+                    ]
+    }
+]

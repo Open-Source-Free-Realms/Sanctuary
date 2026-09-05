@@ -54,6 +54,8 @@ public class ResourceManager : IResourceManager
     public static readonly string MapsDirectory = Path.Combine(BaseDirectory, "Maps");
     public static readonly string RewardTablesFile = Path.Combine(BaseDirectory, "Rewards.json");
     public static readonly string RankLevelsFile = Path.Combine(BaseDirectory, "RankLevels.json");
+    public static readonly string CombatAbilitiesFile = Path.Combine(BaseDirectory, "CombatAbilities.json");
+    public static readonly string CombatJobsFile = Path.Combine(BaseDirectory, "CombatJobs.json");
 
 
     public IdToStringLookup HairMappings { get; }
@@ -95,6 +97,8 @@ public class ResourceManager : IResourceManager
     public RewardTableDefinitionCollection RewardTables { get; }
 
     public RankLevelDefinitionCollection RankLevels { get; }
+    public AbilityDefinitionCollection CombatAbilities { get; }
+    public JobKitDefinitionCollection CombatJobs { get; }
 
     public ResourceManager(ILogger<ResourceManager> logger)
     {
@@ -144,6 +148,8 @@ public class ResourceManager : IResourceManager
         Maps = new(_logger);
         RewardTables = new(_logger);
         RankLevels = new(_logger);
+        CombatAbilities = new(_logger);
+        CombatJobs = new(_logger);
     }
 
     public bool Load()
@@ -224,6 +230,23 @@ public class ResourceManager : IResourceManager
 
         if (!RewardTables.Load(RewardTablesFile))
             return false;
+
+        if (!CombatAbilities.Load(CombatAbilitiesFile))
+            return false;
+
+        if (!CombatJobs.Load(CombatJobsFile))
+            return false;
+
+        foreach (var kit in CombatJobs.Values)
+        {
+            if (kit.FallbackBasicAbilityId != 0 && !CombatAbilities.ContainsKey(kit.FallbackBasicAbilityId) ||
+                kit.Weapons.Any(w => !CombatAbilities.ContainsKey(w.BasicAbilityId) ||
+                                     w.SpecialAbilityId != 0 && !CombatAbilities.ContainsKey(w.SpecialAbilityId)))
+            {
+                _logger.LogError("Combat job kit {id} references an unknown ability definition.", kit.ProfileId);
+                return false;
+            }
+        }
 
         foreach (var table in RewardTables.Values)
         {
@@ -385,6 +408,10 @@ public class ResourceManager : IResourceManager
                 loaded = RewardTables.Load(RewardTablesFile);
             else if (e.FullPath == RankLevelsFile)
                 loaded = RankLevels.Load(RankLevelsFile);
+            else if (e.FullPath == CombatAbilitiesFile)
+                loaded = CombatAbilities.Load(CombatAbilitiesFile);
+            else if (e.FullPath == CombatJobsFile)
+                loaded = CombatJobs.Load(CombatJobsFile);
             else
                 _logger.LogWarning("Unknown file changed. File: {filepath}", e.FullPath);
 
