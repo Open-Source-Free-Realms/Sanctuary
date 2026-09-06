@@ -1,9 +1,9 @@
 [
   {
-    "Id": 17054,
-    "CategoryId": 10,
+    "Id": 10,
+    "NameId": 17054,
+    "CategoryId": 3,
     "DescriptionId": 17055,
-    "Type": 3,
     "IconId": 2124,
     "IconTintId": 92,
     "HeaderMetadata": 9,

@@ -15,6 +15,7 @@ public sealed class CollectionDefinitionTests
         var definition = new CollectionDefinition
         {
             Id = 17054,
+            NameId = 17055,
             CategoryId = 10,
             Entries =
             [
@@ -30,5 +31,34 @@ public sealed class CollectionDefinitionTests
         Assert.IsFalse(clientCollection.Entries[0].Collected);
         Assert.IsTrue(clientCollection.Entries[1].Collected);
         Assert.AreEqual(123ul, clientCollection.PlayerGuid);
+    }
+
+    [TestMethod]
+    public void CreateClientCollectionEntry_UsesCollectionMetadata()
+    {
+        var definition = new CollectionDefinition
+        {
+            Id = 17054,
+            NameId = 17055,
+            CategoryId = 10
+        };
+        var entry = new CollectionEntryDefinition
+        {
+            Id = 41,
+            NameId = 17056,
+            IconId = 2124,
+            IconTintId = 99
+        };
+
+        var clientEntry = definition.CreateClientCollectionEntry(entry, 2, true);
+
+        Assert.AreEqual(entry.Id, clientEntry.Id);
+        Assert.AreEqual(entry.Id, clientEntry.DefinitionId);
+        Assert.AreEqual(3, clientEntry.Index);
+        Assert.AreEqual(definition.Id, clientEntry.CollectionId);
+        Assert.AreEqual(entry.NameId, clientEntry.NameId);
+        Assert.AreEqual(entry.IconId, clientEntry.IconId);
+        Assert.AreEqual(entry.IconTintId, clientEntry.IconTintId);
+        Assert.IsTrue(clientEntry.Collected);
     }
 }
