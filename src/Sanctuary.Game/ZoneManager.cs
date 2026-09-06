@@ -116,19 +116,19 @@ public class ZoneManager : IZoneManager
     {
         lock (_playerTransitionLock)
         {
-            if (!TryGetOrCreateZoneInstance(zoneDefinitionId, ownerId, out var resolvedZone))
+            if (!TryGetOrCreateZoneInstance(zoneDefinitionId, ownerId, out var newZone))
             {
                 zone = player.Zone;
                 return false;
             }
 
-            zone = resolvedZone;
+            zone = newZone;
 
             // NOTE: this MIGHT be delecate...
             // These SHOULD both always return 'true', but if we want to be extra safe,
             // we can return the original zone the player was in if they fail...
             player.Zone.TryRemovePlayer(player.Guid);
-            return resolvedZone.TryAddPlayer(player);
+            return newZone.TryAddPlayer(player);
         }
     }
 
@@ -188,8 +188,12 @@ public class ZoneManager : IZoneManager
         if (isStartingZone)
             return;
 
+        // NOTE: This might be called twice from two separate threads (one after the other)
+        // This means the zone may be disposed twice. Right now, this seems to be okay, so
+        // no protection will be added within 'dispose'.
         lock (_playerTransitionLock)
         {
+
             if (zone.IsEmpty)
                 zone.Dispose();
         }

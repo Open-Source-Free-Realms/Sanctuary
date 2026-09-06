@@ -2195,12 +2195,6 @@ public abstract class BaseZone : IZone, IDisposable
 
     public void Dispose()
     {
-        // NOTE: We currently do not have a grace-period or timeout for this. This
-        // function WILL get called if no players exist in a zone (except for FabledRealms)
-        // which is the 'Starting Zone'. If things slow down, then this might get called
-        // before a player makes it in.
-        _zoneManager.RemoveZoneInstance(this);
-
         _cancellationTokenSource.Cancel();
 
         lock (_collectionNodeLock)
@@ -2212,6 +2206,8 @@ public abstract class BaseZone : IZone, IDisposable
         _players.Clear();
 
         _scriptManager.DeleteContext(this);
+
+        _zoneManager.RemoveZoneInstance(this);
     }
 
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
@@ -10,7 +11,7 @@ using Sanctuary.Game.Pathfinding;
 
 namespace Sanctuary.Game.Zones;
 
-public interface IZone : IScriptableZone
+public interface IZone : IScriptableZone, IDisposable
 {
     int DefinitionId { get; }
 
@@ -24,7 +25,6 @@ public interface IZone : IScriptableZone
     void OnStart();
     void OnClientIsReady(Player entity);
     void OnClientFinishedLoading(Player entity);
-    void Dispose();
 
     #endregion
 
