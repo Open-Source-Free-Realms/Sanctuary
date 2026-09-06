@@ -65,6 +65,36 @@ public sealed class Player : ClientPcData, IEntity
 
     public int TimezoneOffset { get; set; }
 
+    public Dictionary<int, Dictionary<int, int>> ActionBarItemGuids { get; set; } = new();
+
+    public int TemporaryAppearance { get; set; }
+    public DateTimeOffset? TemporaryAppearanceExpiresAt { get; set; }
+    private int _temporaryAppearanceEffectId;
+
+    public ulong LastSillyStringTarget { get; set; }
+
+    private readonly ConcurrentDictionary<int, DateTimeOffset> _itemCooldowns = new();
+
+    public bool IsItemOnCooldown(int itemDefinitionId) =>
+        _itemCooldowns.TryGetValue(itemDefinitionId, out var expiresAt) && DateTimeOffset.UtcNow < expiresAt;
+
+    public void StartItemCooldown(int itemDefinitionId, int cooldownMs) =>
+        _itemCooldowns[itemDefinitionId] = DateTimeOffset.UtcNow.AddMilliseconds(cooldownMs);
+
+    private readonly ConcurrentQueue<(DateTimeOffset SendAt, ISerializablePacket Packet, bool SendToSelf)> _delayedPackets = new();
+
+    // One scheduled personal-UI packet per action bar slot (the cooldown re-enable) - keyed, not queued,
+    // so a slot that gets emptied before its cooldown naturally expires (last item consumed) can cancel
+    // its own pending re-enable instead of it firing later and silently un-deleting the slot.
+    private readonly ConcurrentDictionary<(int, int), (DateTimeOffset SendAt, ISerializablePacket Packet)> _delayedSlotPackets = new();
+
+    public void ScheduleSlotPacket(int actionBarId, int slotIndex, ISerializablePacket packet, int delayMs)
+    {
+        _delayedSlotPackets[(actionBarId, slotIndex)] = (DateTimeOffset.UtcNow.AddMilliseconds(delayMs), packet);
+    }
+
+    public void CancelScheduledSlotPacket(int actionBarId, int slotIndex) => _delayedSlotPackets.TryRemove((actionBarId, slotIndex), out _);
+
     public Vector4 StartingZonePosition { get; set; }
     public Quaternion StartingZoneRotation { get; set; }
 
@@ -128,13 +158,18 @@ public sealed class Player : ClientPcData, IEntity
             SendTunneled(packet);
     }
 
+    public void SendTunneledToVisibleDelayed(ISerializablePacket packet, int delayMs, bool sendToSelf = false)
+    {
+        _delayedPackets.Enqueue((DateTimeOffset.UtcNow.AddMilliseconds(delayMs), packet, sendToSelf));
+    }
+
     public bool IsMuted()
     {
         DateTimeOffset currentTime = DateTimeOffset.UtcNow;
         DateTimeOffset? mutedUntil = MutedUntil;
         return mutedUntil.HasValue && mutedUntil > currentTime;
     }
-    
+
     public void Disconnect()
     {
         _connection.Disconnect();
@@ -176,10 +211,62 @@ public sealed class Player : ClientPcData, IEntity
 
     public void UpdateEveryTick()
     {
+        if (TemporaryAppearanceExpiresAt.HasValue &&
+            TemporaryAppearanceExpiresAt.Value <= DateTimeOffset.UtcNow)
+        {
+            RemoveTemporaryAppearance();
+        }
+
+        while (_delayedPackets.TryPeek(out var delayed) && delayed.SendAt <= DateTimeOffset.UtcNow)
+        {
+            if (_delayedPackets.TryDequeue(out delayed))
+                SendTunneledToVisible(delayed.Packet, delayed.SendToSelf);
+        }
+
+        var now = DateTimeOffset.UtcNow;
+        foreach (var (key, scheduled) in _delayedSlotPackets)
+        {
+            if (scheduled.SendAt > now)
+                continue;
+
+            if (_delayedSlotPackets.TryRemove(key, out var removed))
+                SendTunneled(removed.Packet);
+        }
     }
 
     public void UpdateEverySecond()
     {
+    }
+
+    // Live-confirmed (2026-07-31): the client animates the cooldown sweep itself from TotalRefreshTime -
+    // no per-second resend needed for that. But it does NOT re-enable the slot for input on its own once
+    // the sweep finishes ("sweep animates but after the sweep I cannot use the ability again") - that
+    // needs one explicit packet once the cooldown is actually over. So: one packet now, one packet
+    // scheduled for later - not the old repeating-every-second loop, and not silence either.
+    public void StartActionBarCooldown(int actionBarId, int slotIndex, int iconId, int nameId, int count, int cooldownMs, int iconTintId = 0)
+    {
+        SendTunneled(BuildActionBarSlotPacket(actionBarId, slotIndex, iconId, iconTintId, nameId, count, cooldownMs, enabled: false, elapsed: 0));
+        ScheduleSlotPacket(actionBarId, slotIndex, BuildActionBarSlotPacket(actionBarId, slotIndex, iconId, iconTintId, nameId, count, cooldownMs, enabled: true, elapsed: cooldownMs), cooldownMs);
+    }
+
+    private static ClientUpdatePacketUpdateActionBarSlot BuildActionBarSlotPacket(int actionBarId, int slotIndex, int iconId, int iconTintId, int nameId, int count, int cooldownMs, bool enabled, int elapsed)
+    {
+        var packet = new ClientUpdatePacketUpdateActionBarSlot { Data = { Id = actionBarId, Slot = slotIndex } };
+        packet.Slot.IsEmpty = false;
+        packet.Slot.IconId = iconId;
+        packet.Slot.IconTintId = iconTintId;
+        packet.Slot.NameId = nameId;
+        packet.Slot.Unknown5 = 1;
+        packet.Slot.Unknown6 = 4;
+        packet.Slot.Unknown7 = 15;
+        packet.Slot.Enabled = enabled;
+        packet.Slot.Unknown10 = elapsed;
+        packet.Slot.TotalRefreshTime = cooldownMs;
+        packet.Slot.Unknown12 = elapsed;
+        packet.Slot.Quantity = count;
+        packet.Slot.ForceDismount = true;
+        packet.Slot.Unknown15 = elapsed;
+        return packet;
     }
 
     public void UpdatePosition(Vector4 position, Quaternion rotation, bool updateZoneArea = true)
@@ -567,7 +654,7 @@ public sealed class Player : ClientPcData, IEntity
             IsMember = MembershipStatus != 0,
             IsReferee = isReferee,
 
-            // playerUpdatePacketAddPc.TemporaryAppearance = 277;
+            TemporaryAppearance = TemporaryAppearance,
 
             ActiveProfileId = ActiveProfileId,
 
@@ -593,6 +680,34 @@ public sealed class Player : ClientPcData, IEntity
             packet.Guilds.Add(0, GuildData.Guid);
 
         return packet;
+    }
+
+    public void ApplyTemporaryAppearance(int modelId, int durationMs, int effectId = 0)
+    {
+        TemporaryAppearance = modelId;
+        _temporaryAppearanceEffectId = effectId;
+
+        if (durationMs > 0)
+            TemporaryAppearanceExpiresAt = DateTimeOffset.UtcNow.AddMilliseconds(durationMs);
+
+        if (effectId != 0)
+            SendTunneledToVisible(new PlayerUpdatePacketPlayCompositeEffect { Guid = Guid, CompositeEffectId = effectId, Position = Position, Clear = false }, true);
+
+        SendTunneledToVisible(new PlayerUpdatePacketUpdateTemporaryAppearance { Guid = Guid, TemporaryAppearance = modelId }, true);
+    }
+
+    public void RemoveTemporaryAppearance()
+    {
+        TemporaryAppearance = 0;
+        TemporaryAppearanceExpiresAt = null;
+
+        if (_temporaryAppearanceEffectId != 0)
+        {
+            SendTunneledToVisible(new PlayerUpdatePacketPlayCompositeEffect { Guid = Guid, CompositeEffectId = _temporaryAppearanceEffectId, Position = Position, Clear = false }, true);
+            _temporaryAppearanceEffectId = 0;
+        }
+
+        SendTunneledToVisible(new PlayerUpdatePacketRemoveTemporaryAppearance { Guid = Guid }, true);
     }
 
     #region Combat
