@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
@@ -10,9 +11,15 @@ using Sanctuary.Game.Pathfinding;
 
 namespace Sanctuary.Game.Zones;
 
-public interface IZone : IScriptableZone
+public interface IZone : IScriptableZone, IDisposable
 {
     int DefinitionId { get; }
+
+    ulong? OwnerId { get; }
+
+    Vector4 SpawnPosition { get; }
+    Quaternion SpawnRotation { get; }
+
     #region Events
 
     void OnStart();
@@ -26,7 +33,11 @@ public interface IZone : IScriptableZone
     IEnumerable<Npc> Npcs { get; }
     IEnumerable<Player> Players { get; }
 
+    bool IsEmpty { get; }
+
     float TickDeltaSeconds { get; }
+
+
 
     bool TryGetNpc(ulong guid, [MaybeNullWhen(false)] out Npc npc);
     bool TryGetPlayer(ulong guid, [MaybeNullWhen(false)] out Player player);

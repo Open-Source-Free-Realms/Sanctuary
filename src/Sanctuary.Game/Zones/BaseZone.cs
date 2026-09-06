@@ -13,9 +13,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Collections;
+using Sanctuary.Core.Extensions;
+using Sanctuary.Core.IO;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Zones;
+using Sanctuary.Packet;
+using Sanctuary.Packet.Common;
 using Sanctuary.Scripting;
 using Sanctuary.UdpLibrary;
 using Sanctuary.Game.Pathfinding;
@@ -26,7 +30,8 @@ namespace Sanctuary.Game.Zones;
 public abstract class BaseZone : IZone, IDisposable
 {
     private readonly ILogger _logger;
-    private readonly IResourceManager _resourceManager;
+    protected readonly IResourceManager _resourceManager;
+    private readonly IZoneManager _zoneManager;
     private readonly IScriptManager _scriptManager;
     private readonly ScriptRuntime _scriptRuntime;
     private readonly BaseZoneDefinition _zoneDefinition;
@@ -35,7 +40,8 @@ public abstract class BaseZone : IZone, IDisposable
     private const int VisibleTileRadius = 2;
     private readonly Dictionary<int, ZoneTile> _tiles;
 
-    private static ulong _nextNpcGuid = NpcBaseGuid;
+    private readonly object _npcGuidLock = new();
+    private ulong _nextNpcGuid = NpcBaseGuid;
 
     private readonly ConcurrentDictionary<ulong, Npc> _npcs = new();
     private readonly ConcurrentDictionary<ulong, Player> _players = new();
@@ -67,15 +73,22 @@ public abstract class BaseZone : IZone, IDisposable
     public IEnumerable<Npc> Npcs => _npcs.Values;
     public IEnumerable<Player> Players => _players.Values;
 
+    public bool IsEmpty => _players.IsEmpty;
+
     public IScriptManager ScriptManager => _scriptManager;
     public ScriptRuntime ScriptRuntime => _scriptRuntime;
 
     public Pathfinder<MapNode>? Pathfinder { get; }
 
+    public ulong? OwnerId { get; init; }
+
+    private bool _started = false;
+
     protected BaseZone(BaseZoneDefinition zoneDefinition, IServiceProvider serviceProvider)
     {
         _zoneDefinition = zoneDefinition;
         _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
+        _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
 
         var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
 
@@ -95,9 +108,6 @@ public abstract class BaseZone : IZone, IDisposable
             ArgumentNullException.ThrowIfNull(tile.Value.VisibleTiles);
         }
 
-        Task.Factory.StartNew(UpdateEveryTickAsync, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-        Task.Factory.StartNew(UpdateEverySecondAsync, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-
         // Just in case we don't actually have the `.map` file for a particular zone.
         if (_resourceManager.Maps.TryGetValue(Name, out var mapGraph))
             Pathfinder = new Pathfinder<MapNode>(mapGraph.Nodes, _logger);
@@ -107,17 +117,434 @@ public abstract class BaseZone : IZone, IDisposable
 
     public virtual void OnStart()
     {
-        GetOrCreateScriptContext().FireEvent("start");
+        if (_started)
+            return;
 
+        _started = true;
+
+        GetOrCreateScriptContext().FireEvent("start");
         ActivateCollectionNodePools();
+
+        Task.Factory.StartNew(UpdateEveryTickAsync, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        Task.Factory.StartNew(UpdateEverySecondAsync, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
     }
 
     public virtual void OnClientIsReady(Player player)
     {
+        SendQuickChatData(player);
+
+        SendUpdateStat(player);
+
+        var clientUpdatePacketHitpoints = new ClientUpdatePacketHitpoints
+        {
+            CurrentHitpoints = 2500,
+            MaxHitpoints = 2500
+        };
+
+        player.SendTunneled(clientUpdatePacketHitpoints);
+
+        var clientUpdatePacketMana = new ClientUpdatePacketMana
+        {
+            CurrentMana = 100,
+            MaxMana = 100
+        };
+
+        player.SendTunneled(clientUpdatePacketMana);
+
+        SendGuildData(player);
+
+        SendReferenceData(player);
+
+        SendPlayerCustomizations(player);
+
+        SendMembershipSubscriptionInfo(player);
+
+        var packetZoneDoneSendingInitialData = new PacketZoneDoneSendingInitialData();
+
+        player.SendTunneled(packetZoneDoneSendingInitialData);
+
+        var clientUpdatePacketDoneSendingPreloadCharacters = new ClientUpdatePacketDoneSendingPreloadCharacters();
+
+        player.SendTunneled(clientUpdatePacketDoneSendingPreloadCharacters);
+
+        SendFriendList(player);
+        SendIgnoreList(player);
+
+        UpdateFriendStatus(player);
     }
 
     public virtual void OnClientFinishedLoading(Player player)
     {
+    }
+
+    private void SendQuickChatData(Player player)
+    {
+        var quickChatSendDataPacket = new QuickChatSendDataPacket();
+
+        quickChatSendDataPacket.QuickChats = _resourceManager.QuickChats.ToDictionary();
+
+        player.SendTunneled(quickChatSendDataPacket);
+    }
+
+    private void SendUpdateStat(Player player)
+    {
+        var clientUpdatePacketUpdateStat = new ClientUpdatePacketUpdateStat();
+
+        clientUpdatePacketUpdateStat.Guid = player.Guid;
+
+        // TODO
+        clientUpdatePacketUpdateStat.Stats.AddRange(
+        [
+            new CharacterStat(CharacterStatId.MaxHealth, 2500),
+            new CharacterStat(CharacterStatId.MaxMovementSpeed, 8f),
+            new CharacterStat(CharacterStatId.WeaponRange, 5f),
+            new CharacterStat(CharacterStatId.HitPointRegen, 25),
+            new CharacterStat(CharacterStatId.MaxMana, 100),
+            new CharacterStat(CharacterStatId.ManaRegen, 4),
+            new CharacterStat(CharacterStatId.MeleeChanceToHit, 100),
+            new CharacterStat(CharacterStatId.MeleeWeaponDamageMultiplier, 1f),
+            new CharacterStat(CharacterStatId.MeleeHandToHandDamage, 1),
+            new CharacterStat(CharacterStatId.EquippedMeleeWeaponDamage, 1),
+            new CharacterStat(CharacterStatId.MeleeAttackIntervalMs, 2000),
+            new CharacterStat(CharacterStatId.DamageMultiplier, 1f),
+            new CharacterStat(CharacterStatId.HealingMultiplier, 1f),
+            new CharacterStat(CharacterStatId.AbilityCriticalHitMultiplier, 1f),
+            new CharacterStat(CharacterStatId.HeadInflationPercent, 100),
+            new CharacterStat(CharacterStatId.RangeMultiplier, 1f),
+            new CharacterStat(CharacterStatId.FactoryProductionModifier, 1f),
+            new CharacterStat(CharacterStatId.FactoryYieldModifier, 1f),
+            new CharacterStat(CharacterStatId.InCombatHitPointRegen, 6),
+            new CharacterStat(CharacterStatId.InCombatManaRegen, 4)
+        ]);
+
+        player.SendTunneled(clientUpdatePacketUpdateStat);
+    }
+
+    private void SendGuildData(Player player)
+    {
+        var guildCanCreateGuildPacket = new GuildCanCreateGuildPacket
+        {
+            CanCreateGuild = player.Profiles.Any(x => x.Rank >= 15) && player.GuildData is null
+        };
+
+        player.SendTunneled(guildCanCreateGuildPacket);
+
+        if (player.GuildData is null)
+            return;
+
+        var guildDataFullPacket = new GuildDataFullPacket
+        {
+            Data = player.GuildData,
+            Guid = player.GuildData.Guid
+        };
+
+        player.SendTunneled(guildDataFullPacket);
+
+        var guildPlayerStatusUpdatePacket = new GuildPlayerStatusUpdatePacket
+        {
+            PlayerGuid = player.Guid,
+            GuildGuid = player.GuildData.Guid,
+            IsInGuild = true
+        };
+
+        player.SendTunneled(guildPlayerStatusUpdatePacket);
+
+        if (!player.GuildData.Members.TryGetValue(player.Guid, out var playerGuildMember))
+            return;
+
+        var guildMemberStatusUpdatePacket = new GuildMemberStatusUpdatePacket
+        {
+            GuildGuid = player.GuildData.Guid,
+            MemberGuid = player.Guid,
+
+            Name = player.Name,
+            Role = playerGuildMember.Role,
+            Online = true,
+
+            Type = 6,
+
+            WorldId = player.Zone.Id,
+
+            ProfileId = player.ActiveProfileId,
+            ProfileRank = player.ActiveProfile.Rank
+        };
+
+        foreach (var guildMember in player.GuildData.Members)
+        {
+            if (guildMember.Key == player.Guid)
+                continue;
+
+            if (!_zoneManager.TryGetPlayer(guildMember.Key, out var guildPlayer))
+                continue;
+
+            if (guildPlayer.GuildData is null)
+                continue;
+
+            if (guildPlayer.GuildData.Members.TryGetValue(player.Guid, out var onlineMember))
+            {
+                onlineMember.Online = true;
+                onlineMember.WorldId = player.Zone.Id;
+                onlineMember.ProfileId = player.ActiveProfileId;
+                onlineMember.ProfileRank = player.ActiveProfile.Rank;
+            }
+            else
+            {
+                guildPlayer.GuildData.Members[player.Guid] = new GuildMember
+                {
+                    Guid = player.Guid,
+                    Name = player.Name,
+                    Role = playerGuildMember.Role,
+                    Online = true,
+                    WorldId = player.Zone.Id,
+                    ProfileId = player.ActiveProfileId,
+                    ProfileRank = player.ActiveProfile.Rank
+                };
+            }
+
+            guildPlayer.SendTunneled(guildMemberStatusUpdatePacket);
+        }
+    }
+
+    private void SendReferenceData(Player player)
+    {
+        var referenceDataPacketItemClassDefinitions = new ReferenceDataPacketItemClassDefinitions();
+
+        referenceDataPacketItemClassDefinitions.ItemClasses = _resourceManager.ItemClasses.ToDictionary();
+
+        player.SendTunneled(referenceDataPacketItemClassDefinitions);
+
+        var referenceDataPacketItemCategoryDefinitions = new ReferenceDataPacketItemCategoryDefinitions();
+
+        referenceDataPacketItemCategoryDefinitions.ItemCategories = _resourceManager.ItemCategories.ToDictionary();
+        referenceDataPacketItemCategoryDefinitions.ItemCategoryGroups = _resourceManager.ItemCategoryGroups.ToDictionary();
+
+        player.SendTunneled(referenceDataPacketItemCategoryDefinitions);
+
+        var referenceDataPacketClientProfileData = new ReferenceDataPacketClientProfileData();
+
+        referenceDataPacketClientProfileData.Profiles = _resourceManager.Profiles.ToDictionary();
+
+        player.SendTunneled(referenceDataPacketClientProfileData);
+    }
+
+    protected void SendShopData(Player player)
+    {
+        SendCoinStoreItemList(player);
+        SendInGamePurchase(player);
+    }
+
+    private void SendCoinStoreItemList(Player player)
+    {
+        var coinStoreItemListPacket = new CoinStoreItemListPacket();
+
+        coinStoreItemListPacket.StaticItems = _resourceManager.CoinStoreItems.ToDictionary();
+
+        player.SendTunneled(coinStoreItemListPacket);
+
+        var clientItemDefinitions = new List<ClientItemDefinition>();
+
+        foreach (var coinStoreItem in _resourceManager.CoinStoreItems)
+        {
+            if (!_resourceManager.ClientItemDefinitions.TryGetValue(coinStoreItem.Key, out var clientItemDefinition))
+                continue;
+
+            clientItemDefinitions.Add(clientItemDefinition);
+        }
+
+        using var writer = new PacketWriter();
+
+        writer.Write(clientItemDefinitions);
+
+        var playerUpdatePacketItemDefinitions = new PlayerUpdatePacketItemDefinitions();
+
+        playerUpdatePacketItemDefinitions.Payload = writer.Buffer;
+
+        player.SendTunneled(playerUpdatePacketItemDefinitions);
+    }
+
+
+    private void SendPlayerCustomizations(Player player)
+    {
+        var playerUpdatePacketCustomizationData = new PlayerUpdatePacketCustomizationData();
+
+        var customizations = new[]
+        {
+            new PlayerCustomizationData
+            {
+                Id = 0, // Head
+                Param = player.HeadId,
+                StringParam = player.Head
+            },
+            new PlayerCustomizationData
+            {
+                Id = 1, // Skin Tone
+                Param = player.SkinToneId,
+                StringParam = player.SkinTone
+            },
+            new PlayerCustomizationData
+            {
+                Id = 2, // Hair
+                Param = player.HairId,
+                StringParam = player.Hair
+            },
+            new PlayerCustomizationData
+            {
+                Id = 3, // Hair Color
+                Param = player.HairColor
+            },
+            new PlayerCustomizationData
+            {
+                Id = 4, // Eye Color
+                Param = player.EyeColor
+            },
+            new PlayerCustomizationData
+            {
+                Id = 5, // Model Customization
+                Param = player.ModelCustomizationId,
+                StringParam = player.ModelCustomization
+            },
+            new PlayerCustomizationData
+            {
+                Id = 6, // Face Paint
+                Param = player.FacePaintId,
+                StringParam = player.FacePaint
+            },
+            new PlayerCustomizationData
+            {
+                Id = 8, // Model
+                Param = player.Model
+            }
+        };
+
+        playerUpdatePacketCustomizationData.Customizations.AddRange(customizations);
+
+        player.SendTunneled(playerUpdatePacketCustomizationData);
+    }
+
+    private void SendMembershipSubscriptionInfo(Player player)
+    {
+        bool isReferee = player.IsAdmin || player.IsMod;
+        var packetMembershipSubscriptionInfo = new PacketMembershipSubscriptionInfo
+        {
+            IsMember = player.MembershipStatus != 0,
+            IsReferee = isReferee
+        };
+
+        player.SendTunneled(packetMembershipSubscriptionInfo);
+    }
+
+    private void SendInGamePurchase(Player player)
+    {
+        var packetInGamePurchaseEnableMarketplace = new PacketInGamePurchaseEnableMarketplace
+        {
+            Enabled = true
+        };
+
+        player.SendTunneled(packetInGamePurchaseEnableMarketplace);
+
+        var packetInGamePurchaseStoreEnablePaymentSources = new PacketInGamePurchaseStoreEnablePaymentSources
+        {
+            Sms = true,
+            Paypal = true
+        };
+
+        player.SendTunneled(packetInGamePurchaseStoreEnablePaymentSources);
+
+        var packetInGamePurchaseStoreBundleCategoryGroups = new PacketInGamePurchaseStoreBundleCategoryGroups();
+
+        packetInGamePurchaseStoreBundleCategoryGroups.CategoryGroups = _resourceManager.StoreBundleCategoryGroups.ToDictionary();
+
+        player.SendTunneled(packetInGamePurchaseStoreBundleCategoryGroups);
+
+        var packetInGamePurchaseStoreBundleCategories = new PacketInGamePurchaseStoreBundleCategories();
+
+        packetInGamePurchaseStoreBundleCategories.CategoryTree.Categories = _resourceManager.StoreBundleCategories.ToDictionary();
+
+        player.SendTunneled(packetInGamePurchaseStoreBundleCategories);
+
+        if (_resourceManager.Stores.TryGetValue(1, out var mainStore))
+        {
+            var packetInGamePurchaseStoreBundles = new PacketInGamePurchaseStoreBundles();
+
+            packetInGamePurchaseStoreBundles.StoreId = mainStore.Id;
+
+            packetInGamePurchaseStoreBundles.Store.Id = mainStore.Id;
+            packetInGamePurchaseStoreBundles.Store.NameId = mainStore.NameId;
+            packetInGamePurchaseStoreBundles.Store.DescriptionId = mainStore.DescriptionId;
+            packetInGamePurchaseStoreBundles.Store.Image = mainStore.Image;
+
+            foreach (var storeBundle in mainStore.Bundles.Values)
+            {
+                var valid = storeBundle.Entries.All(x => _resourceManager.ClientItemDefinitions.ContainsKey(x.MarketingItemId));
+
+                if (valid)
+                    packetInGamePurchaseStoreBundles.Store.Bundles.Add(storeBundle.Id, storeBundle);
+            }
+
+            player.SendTunneled(packetInGamePurchaseStoreBundles);
+        }
+
+        var packetInGamePurchaseStoreBundleGroups = new PacketInGamePurchaseStoreBundleGroups();
+
+        packetInGamePurchaseStoreBundleGroups.BundleGroups = _resourceManager.StoreBundleGroups.ToDictionary();
+
+        player.SendTunneled(packetInGamePurchaseStoreBundleGroups);
+    }
+
+    private void SendFriendList(Player player)
+    {
+        var friendListPacket = new FriendListPacket();
+
+        friendListPacket.Friends = player.Friends;
+
+        player.SendTunneled(friendListPacket);
+    }
+
+    private void SendIgnoreList(Player player)
+    {
+        var ignoreListPacket = new IgnoreListPacket();
+
+        ignoreListPacket.Ignores = player.Ignores;
+
+        player.SendTunneled(ignoreListPacket);
+    }
+
+    private void UpdateFriendStatus(Player player)
+    {
+        var friendOnlinePacket = new FriendOnlinePacket();
+
+        friendOnlinePacket.Guid = player.Guid;
+
+        friendOnlinePacket.IsLocal = true;
+
+        var friendStatusPacket = new FriendStatusPacket
+        {
+            Guid = player.Guid,
+            Status =
+            {
+                ProfileId = player.ActiveProfile.Id,
+                ProfileRank = player.ActiveProfile.Rank,
+                ProfileIconId = player.ActiveProfile.Icon,
+                ProfileNameId = player.ActiveProfile.NameId,
+                ProfileBackgroundImageId = player.ActiveProfile.BadgeImageSet
+            }
+        };
+
+        foreach (var friend in player.Friends)
+        {
+            if (!_zoneManager.TryGetPlayer(friend.Guid, out var friendPlayer))
+                continue;
+
+            var otherFriendPlayer = friendPlayer.Friends.FirstOrDefault(x => x.Guid == player.Guid);
+
+            if (otherFriendPlayer is null || otherFriendPlayer.Online)
+                continue;
+
+            otherFriendPlayer.Online = true;
+
+            friendPlayer.SendTunneled(friendOnlinePacket);
+            friendPlayer.SendTunneled(friendStatusPacket);
+        }
     }
 
     #endregion
@@ -231,6 +658,21 @@ public abstract class BaseZone : IZone, IDisposable
         return _players.TryAdd(player.Guid, player) && _entities.TryAdd(player.Guid, player);
     }
 
+    private bool TryRegisterEntity<TEntity>(ConcurrentDictionary<ulong, TEntity> collection, TEntity entity)
+        where TEntity : IEntity
+    {
+        if (!collection.TryAdd(entity.Guid, entity))
+            return false;
+
+        if (!_entities.TryAdd(entity.Guid, entity))
+        {
+            collection.TryRemove(entity.Guid, out _);
+            return false;
+        }
+
+        return true;
+    }
+
     public bool TryCreateNpc(ulong? guid, [MaybeNullWhen(false)] out Npc npc)
     {
         npc = new Npc(this)
@@ -238,7 +680,13 @@ public abstract class BaseZone : IZone, IDisposable
             Guid = GetNpcGuid(guid)
         };
 
-        return _npcs.TryAdd(npc.Guid, npc) && _entities.TryAdd(npc.Guid, npc);
+        if (!TryRegisterEntity(_npcs, npc))
+        {
+            npc = null;
+            return false;
+        }
+
+        return true;
     }
 
     public bool TryCreateNpc(ulong? guid, NpcDefinition definition, [MaybeNullWhen(false)] out Npc npc)
@@ -259,7 +707,7 @@ public abstract class BaseZone : IZone, IDisposable
             Visible = true
         };
 
-        if (!_npcs.TryAdd(npc.Guid, npc) || !_entities.TryAdd(npc.Guid, npc))
+        if (!TryRegisterEntity(_npcs, npc))
         {
             npc = null;
             return false;
@@ -526,7 +974,7 @@ public abstract class BaseZone : IZone, IDisposable
     {
         node = new CollectionNode(this, typeDefinition, poolDefinition, spawnDefinition)
         {
-            Guid = _nextNpcGuid++,
+            Guid = GetNpcGuid(null),
             Name = typeDefinition.Name,
             ModelId = typeDefinition.ModelId,
             Scale = typeDefinition.Scale,
@@ -536,8 +984,11 @@ public abstract class BaseZone : IZone, IDisposable
             Visible = true
         };
 
-        if (!_npcs.TryAdd(node.Guid, node) || !_entities.TryAdd(node.Guid, node))
+        if (!TryRegisterEntity(_npcs, node))
+        {
+            node = null;
             return false;
+        }
 
         node.UpdatePosition(spawnDefinition.SpawnPosition, spawnDefinition.SpawnRotation);
         return true;
@@ -595,20 +1046,32 @@ public abstract class BaseZone : IZone, IDisposable
     {
         mount = new Mount(this, rider, definition)
         {
-            Guid = _nextNpcGuid++
+            Guid = GetNpcGuid(null)
         };
 
-        return _npcs.TryAdd(mount.Guid, mount) && _entities.TryAdd(mount.Guid, mount);
+        if (!TryRegisterEntity(_npcs, mount))
+        {
+            mount = null;
+            return false;
+        }
+
+        return true;
     }
 
     public bool TryCreatePlayer(ulong guid, UdpConnection connection, [MaybeNullWhen(false)] out Player player)
     {
-        player = new Player(this, connection, _resourceManager)
+        player = new Player(this, connection, _resourceManager, _zoneManager)
         {
             Guid = guid
         };
 
-        return _players.TryAdd(player.Guid, player) && _entities.TryAdd(player.Guid, player);
+        if (!TryRegisterEntity(_players, player))
+        {
+            player = null;
+            return false;
+        }
+
+        return true;
     }
 
     public bool TryRemoveNpc(ulong guid)
@@ -880,13 +1343,16 @@ public abstract class BaseZone : IZone, IDisposable
 
     private ulong GetNpcGuid(ulong? guid)
     {
-        if (guid.HasValue)
+        lock (_npcGuidLock)
         {
-            _nextNpcGuid = Math.Max(_nextNpcGuid, guid.Value + 1);
-            return guid.Value;
-        }
+            if (guid.HasValue)
+            {
+                _nextNpcGuid = Math.Max(_nextNpcGuid, guid.Value + 1);
+                return guid.Value;
+            }
 
-        return _nextNpcGuid++;
+            return _nextNpcGuid++;
+        }
     }
 
     public void Dispose()
@@ -902,5 +1368,8 @@ public abstract class BaseZone : IZone, IDisposable
         _players.Clear();
 
         _scriptManager.DeleteContext(this);
+
+        _zoneManager.RemoveZoneInstance(this);
     }
+
 }
