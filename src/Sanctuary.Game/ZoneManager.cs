@@ -230,6 +230,6 @@ public class ZoneManager : IZoneManager
         // if (dbHouse is null)
         //     return false;
 
-        return true;
+        throw new NotImplementedException();
     }
 }
