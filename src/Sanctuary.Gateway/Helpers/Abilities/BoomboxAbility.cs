@@ -38,8 +38,11 @@ public sealed class BoomboxAbility(AbilityServices services) : ConsumableAbility
         _resourceManager.Consumables.Boomboxes.TryGetValue(itemDefinition.Id, out var boomboxDefinition);
 
         var modelId = boomboxDefinition?.ModelId ?? 1062;
-        var effectId = boomboxDefinition?.EffectId ?? 0;
+        var effectIds = boomboxDefinition?.EffectIds ?? [];
+        var effectId = effectIds.Length > 0 ? effectIds[System.Random.Shared.Next(effectIds.Length)] : 0;
+
         var danceSequence = boomboxDefinition?.DanceSequence ?? [3501, 3502, 3503, 3504, 3505];
+        var transformModelId = boomboxDefinition?.TransformModelId ?? 0;
 
         var leftDirection = Vector3.Transform(new Vector3(-1, 0, 0), player.Rotation);
         var spawnPosition = new Vector4(
@@ -87,10 +90,10 @@ public sealed class BoomboxAbility(AbilityServices services) : ConsumableAbility
                 recipient.SendTunneled(songEffect);
         }
 
-        StartDanceLoop(startingZone, boomboxNpc, spawnPosition, danceSequence, songTagId, effectId);
+        StartDanceLoop(startingZone, boomboxNpc, spawnPosition, danceSequence, songTagId, effectId, transformModelId);
     }
 
-    private static void StartDanceLoop(StartingZone startingZone, Npc boomboxNpc, Vector4 spawnPosition, int[] danceSequence, int songTagId, int effectId)
+    private static void StartDanceLoop(StartingZone startingZone, Npc boomboxNpc, Vector4 spawnPosition, int[] danceSequence, int songTagId, int effectId, int transformModelId)
     {
         const float BoomboxRangeInMeters = 15.0f;
         const int SwitchMs = 4000;
@@ -109,7 +112,7 @@ public sealed class BoomboxAbility(AbilityServices services) : ConsumableAbility
             if (elapsedMs >= BoomboxDurationMs)
             {
                 foreach (var player in startingZone.Players.Where(p => dancing.Contains(p.Guid)))
-                    StopDancing(player);
+                    StopDancing(player, transformModelId);
 
                 if (songTagId != 0)
                 {
@@ -154,10 +157,16 @@ public sealed class BoomboxAbility(AbilityServices services) : ConsumableAbility
             var inRangeGuids = inRange.Select(p => p.Guid).ToHashSet();
 
             foreach (var player in players.Where(p => dancing.Contains(p.Guid) && !inRangeGuids.Contains(p.Guid)))
-                StopDancing(player);
+                StopDancing(player, transformModelId);
 
             var newcomers = inRange.Where(p => !dancing.Contains(p.Guid)).ToList();
             dancing = inRangeGuids;
+
+            if (transformModelId != 0)
+            {
+                foreach (var player in newcomers.Where(p => p.TemporaryAppearance == 0))
+                    player.ApplyTemporaryAppearance(transformModelId, 0);
+            }
 
             // Re-sync everyone on a rotation to stay phase-locked, otherwise only start late
             // arrivals so the rest don't hitch.
@@ -213,8 +222,11 @@ public sealed class BoomboxAbility(AbilityServices services) : ConsumableAbility
             recipient.SendTunneled(sync);
     }
 
-    private static void StopDancing(Player player)
+    private static void StopDancing(Player player, int transformModelId)
     {
+        if (transformModelId != 0 && player.TemporaryAppearance == transformModelId)
+            player.RemoveTemporaryAppearance();
+
         player.SendTunneledToVisible(new PlayerUpdatePacketSetAnimation
         {
             Guid = player.Guid,

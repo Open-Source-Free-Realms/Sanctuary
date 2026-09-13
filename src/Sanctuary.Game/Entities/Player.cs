@@ -73,6 +73,8 @@ public sealed class Player : ClientPcData, IEntity
 
     public ulong LastSillyStringTarget { get; set; }
 
+    public int ActiveFoodEffectTagId { get; set; }
+
     private readonly ConcurrentDictionary<int, DateTimeOffset> _itemCooldowns = new();
 
     public bool IsItemOnCooldown(int itemDefinitionId) =>
