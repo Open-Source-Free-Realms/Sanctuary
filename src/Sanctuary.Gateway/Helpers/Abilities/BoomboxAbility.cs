@@ -39,6 +39,10 @@ public sealed class BoomboxAbility(AbilityServices services) : ConsumableAbility
 
         var modelId = boomboxDefinition?.ModelId ?? 1062;
         var effectId = boomboxDefinition?.EffectId ?? 0;
+
+        if (boomboxDefinition?.RandomEffectIds is { Length: > 0 } randomEffectIds)
+            effectId = randomEffectIds[System.Random.Shared.Next(randomEffectIds.Length)];
+
         var danceSequence = boomboxDefinition?.DanceSequence ?? [3501, 3502, 3503, 3504, 3505];
         var transformModelId = boomboxDefinition?.TransformModelId ?? 0;
 
