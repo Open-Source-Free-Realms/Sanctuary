@@ -31,7 +31,7 @@ public sealed class TransformFoodAbility(AbilityServices services) : ConsumableA
         if (player.TemporaryAppearance != 0)
             return SendFailure(player);
 
-        player.ApplyTemporaryAppearance(transform!.ModelId, transform.DurationMs, transform.CompositeEffectId);
+        player.ApplyTemporaryAppearance(transform!.ModelId, transform.DurationMs, transform.CompositeEffectId, itemDefinition.NameId);
 
         player.StartItemCooldown(itemDefinition.Id, transform.CooldownMs);
 

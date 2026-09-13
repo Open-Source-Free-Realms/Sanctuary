@@ -70,10 +70,12 @@ public sealed class Player : ClientPcData, IEntity
     public int TemporaryAppearance { get; set; }
     public DateTimeOffset? TemporaryAppearanceExpiresAt { get; set; }
     private int _temporaryAppearanceEffectId;
+    private int _temporaryAppearanceBuffTagId;
 
     public ulong LastSillyStringTarget { get; set; }
 
     public int ActiveFoodEffectTagId { get; set; }
+    public int ActiveFoodBuffTagId { get; set; }
 
     private readonly ConcurrentDictionary<int, DateTimeOffset> _itemCooldowns = new();
 
@@ -224,6 +226,8 @@ public sealed class Player : ClientPcData, IEntity
         {
             RemoveTemporaryAppearance();
         }
+
+        EndExpiredBuffs(now);
 
         while (true)
         {
@@ -723,13 +727,24 @@ public sealed class Player : ClientPcData, IEntity
         return packet;
     }
 
-    public void ApplyTemporaryAppearance(int modelId, int durationMs, int effectId = 0)
+    public const int ChangeFormBuffIconId = 3843;
+
+    public void ApplyTemporaryAppearance(int modelId, int durationMs, int effectId = 0, int buffNameId = 0)
     {
         TemporaryAppearance = modelId;
         _temporaryAppearanceEffectId = effectId;
 
         if (durationMs > 0)
             TemporaryAppearanceExpiresAt = DateTimeOffset.UtcNow.AddMilliseconds(durationMs);
+
+        if (_temporaryAppearanceBuffTagId != 0)
+        {
+            RemoveBuff(_temporaryAppearanceBuffTagId);
+            _temporaryAppearanceBuffTagId = 0;
+        }
+
+        if (buffNameId != 0 && durationMs > 0)
+            _temporaryAppearanceBuffTagId = AddBuff(ChangeFormBuffIconId, buffNameId, durationMs, RemoveTemporaryAppearance);
 
         if (effectId != 0)
             SendTunneledToVisible(new PlayerUpdatePacketPlayCompositeEffect { Guid = Guid, CompositeEffectId = effectId, Position = Position, Clear = false }, true);
@@ -742,6 +757,12 @@ public sealed class Player : ClientPcData, IEntity
         TemporaryAppearance = 0;
         TemporaryAppearanceExpiresAt = null;
 
+        if (_temporaryAppearanceBuffTagId != 0)
+        {
+            RemoveBuff(_temporaryAppearanceBuffTagId);
+            _temporaryAppearanceBuffTagId = 0;
+        }
+
         if (_temporaryAppearanceEffectId != 0)
         {
             SendTunneledToVisible(new PlayerUpdatePacketPlayCompositeEffect { Guid = Guid, CompositeEffectId = _temporaryAppearanceEffectId, Position = Position, Clear = false }, true);
@@ -750,6 +771,101 @@ public sealed class Player : ClientPcData, IEntity
 
         SendTunneledToVisible(new PlayerUpdatePacketRemoveTemporaryAppearance { Guid = Guid }, true);
     }
+
+    #region Buffs
+
+    private sealed class Buff
+    {
+        public DateTimeOffset? ExpiresAt;
+        public Action? OnEnded;
+    }
+
+    private readonly Dictionary<int, Buff> _buffs = new();
+    private int _buffTagCounter;
+
+    public int AddBuff(int iconId, int nameId, int durationMs, Action? onEnded = null)
+    {
+        int tagId;
+
+        lock (_buffs)
+        {
+            tagId = ++_buffTagCounter;
+
+            _buffs[tagId] = new Buff
+            {
+                ExpiresAt = durationMs > 0 ? DateTimeOffset.UtcNow.AddMilliseconds(durationMs) : null,
+                OnEnded = onEnded
+            };
+        }
+
+        var durationSeconds = (durationMs + 999) / 1000;
+
+        SendTunneled(new ClientUpdatePacketAddEffectTag
+        {
+            TagId = tagId,
+            EffectTag = new EffectTag
+            {
+                InstanceId = tagId,
+                Duration = durationSeconds,
+                StartTime = 0,
+                StopTime = unchecked((uint)-durationSeconds)
+            },
+            IconId = iconId,
+            NameId = nameId
+        });
+
+        return tagId;
+    }
+
+    public void RemoveBuff(int tagId)
+    {
+        lock (_buffs)
+        {
+            if (!_buffs.Remove(tagId))
+                return;
+        }
+
+        SendTunneled(new ClientUpdatePacketRemoveEffectTag { TagId = tagId });
+    }
+
+    public void CancelBuff(int tagId) => EndBuff(tagId);
+
+    private void EndBuff(int tagId)
+    {
+        Buff? buff;
+
+        lock (_buffs)
+        {
+            if (!_buffs.Remove(tagId, out buff))
+                return;
+        }
+
+        SendTunneled(new ClientUpdatePacketRemoveEffectTag { TagId = tagId });
+
+        buff.OnEnded?.Invoke();
+    }
+
+    private void EndExpiredBuffs(DateTimeOffset now)
+    {
+        List<int>? expired = null;
+
+        lock (_buffs)
+        {
+            foreach (var (tagId, buff) in _buffs)
+            {
+                if (buff.ExpiresAt <= now)
+                    (expired ??= []).Add(tagId);
+            }
+        }
+
+        if (expired is null)
+            return;
+
+        foreach (var tagId in expired)
+            EndBuff(tagId);
+    }
+
+    #endregion
 
     #region Combat
 

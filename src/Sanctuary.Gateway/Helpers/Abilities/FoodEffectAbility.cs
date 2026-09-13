@@ -37,26 +37,25 @@ public sealed class FoodEffectAbility(AbilityServices services) : ConsumableAbil
             }, true);
         }
 
-        ApplyFoodAura(player, foodEffect?.CompositeEffectId ?? itemDefinition.CompositeEffectId, foodEffect?.EffectDelayMs ?? 0);
+        ApplyFoodAura(player, itemDefinition.NameId, foodEffect?.CompositeEffectId ?? itemDefinition.CompositeEffectId, foodEffect?.EffectDelayMs ?? 0);
 
         FinishActivation(player, clientItem, itemDefinition, slot, FoodEffectCooldownMs);
 
         return true;
     }
 
-    private static void ApplyFoodAura(Player player, int effectId, int delayMs)
+    private static void ApplyFoodAura(Player player, int nameId, int effectId, int delayMs)
     {
         if (effectId == 0)
             return;
 
-        if (player.ActiveFoodEffectTagId != 0)
+        if (player.ActiveFoodBuffTagId != 0)
         {
-            player.SendTunneledToVisible(new PlayerUpdatePacketRemoveEffectTagCompositeEffect
-            {
-                Guid = player.Guid,
-                TagId = player.ActiveFoodEffectTagId
-            }, true);
+            player.RemoveBuff(player.ActiveFoodBuffTagId);
+            player.ActiveFoodBuffTagId = 0;
         }
+
+        RemoveFoodAura(player);
 
         var tagId = NextEffectTagId();
         player.ActiveFoodEffectTagId = tagId;
@@ -74,10 +73,27 @@ public sealed class FoodEffectAbility(AbilityServices services) : ConsumableAbil
         else
             player.SendTunneledToVisible(addAura, true);
 
-        player.SendTunneledToVisibleDelayed(new PlayerUpdatePacketRemoveEffectTagCompositeEffect
+        player.ActiveFoodBuffTagId = player.AddBuff(Player.ChangeFormBuffIconId, nameId, delayMs + FoodEffectDurationMs, () =>
+        {
+            if (player.ActiveFoodEffectTagId != tagId)
+                return;
+
+            player.ActiveFoodBuffTagId = 0;
+            RemoveFoodAura(player);
+        });
+    }
+
+    private static void RemoveFoodAura(Player player)
+    {
+        if (player.ActiveFoodEffectTagId == 0)
+            return;
+
+        player.SendTunneledToVisible(new PlayerUpdatePacketRemoveEffectTagCompositeEffect
         {
             Guid = player.Guid,
-            TagId = tagId
-        }, delayMs + FoodEffectDurationMs, true);
+            TagId = player.ActiveFoodEffectTagId
+        }, true);
+
+        player.ActiveFoodEffectTagId = 0;
     }
 }
