@@ -10,6 +10,8 @@ namespace Sanctuary.Gateway.Helpers.Abilities;
 
 public sealed class CakeAbility(AbilityServices services) : ConsumableAbility(services)
 {
+    private const int DefaultSpawnEffectId = 21;
+
     public override bool Matches(ClientItemDefinition itemDefinition) =>
         _resourceManager.Consumables.Cakes.ContainsKey(itemDefinition.Id);
 
@@ -114,7 +116,7 @@ public sealed class CakeAbility(AbilityServices services) : ConsumableAbility(se
             };
         }
 
-        var spawnRecipients = BroadcastSpawn(player, cakeNpc, spawnPosition, cakeDefinition.SpawnEffectIds[0]);
+        var spawnRecipients = BroadcastSpawn(player, cakeNpc, spawnPosition, cakeDefinition.SpawnEffectIds.Length > 0 ? cakeDefinition.SpawnEffectIds[0] : DefaultSpawnEffectId);
 
         for (var i = 1; i < cakeDefinition.SpawnEffectIds.Length; i++)
         {
