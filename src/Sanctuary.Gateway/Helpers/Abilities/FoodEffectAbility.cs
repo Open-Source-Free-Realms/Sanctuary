@@ -1,3 +1,5 @@
+using System;
+
 using Sanctuary.Game.Entities;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -59,7 +61,7 @@ public sealed class FoodEffectAbility(AbilityServices services) : ConsumableAbil
         }
 
         var tagId = NextEffectTagId();
-        player.ActiveFoodEffectTagId = tagId;
+        player.SetActiveFoodEffect(tagId, effectId, DateTimeOffset.UtcNow.AddMilliseconds(delayMs + FoodEffectDurationMs));
 
         var addAura = new PlayerUpdatePacketAddEffectTagCompositeEffect
         {

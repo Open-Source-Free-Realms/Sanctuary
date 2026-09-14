@@ -74,6 +74,9 @@ public sealed class Player : ClientPcData, IEntity
     public ulong LastSillyStringTarget { get; set; }
 
     public int ActiveFoodEffectTagId { get; set; }
+    private int _activeFoodEffectCompositeEffectId;
+    private DateTimeOffset? _activeFoodEffectExpiresAt;
+    private const int ReapplyFoodEffectAfterAppearanceRevertDelayMs = 750;
 
     private readonly ConcurrentDictionary<int, DateTimeOffset> _itemCooldowns = new();
 
@@ -749,6 +752,28 @@ public sealed class Player : ClientPcData, IEntity
         }
 
         SendTunneledToVisible(new PlayerUpdatePacketRemoveTemporaryAppearance { Guid = Guid }, true);
+
+        if (ActiveFoodEffectTagId != 0 &&
+            _activeFoodEffectExpiresAt is DateTimeOffset expiresAt &&
+            DateTimeOffset.UtcNow < expiresAt)
+        {
+            ActiveFoodEffectTagId = EffectTagIdGenerator.Next();
+
+            SendTunneledToVisibleDelayed(new PlayerUpdatePacketAddEffectTagCompositeEffect
+            {
+                Guid = Guid,
+                TagId = ActiveFoodEffectTagId,
+                CompositeEffectId = _activeFoodEffectCompositeEffectId,
+                SourceGuid = Guid
+            }, ReapplyFoodEffectAfterAppearanceRevertDelayMs, true);
+        }
+    }
+
+    public void SetActiveFoodEffect(int tagId, int compositeEffectId, DateTimeOffset expiresAt)
+    {
+        ActiveFoodEffectTagId = tagId;
+        _activeFoodEffectCompositeEffectId = compositeEffectId;
+        _activeFoodEffectExpiresAt = expiresAt;
     }
 
     #region Combat
