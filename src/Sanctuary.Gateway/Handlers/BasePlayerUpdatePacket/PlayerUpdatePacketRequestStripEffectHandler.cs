@@ -29,7 +29,7 @@ public static class PlayerUpdatePacketRequestStripEffectHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(PlayerUpdatePacketRequestStripEffect), packet);
 
-        connection.Player.CancelBuff(packet.TagId);
+        connection.Player.RemoveEffect(packet.TagId);
 
         return true;
     }

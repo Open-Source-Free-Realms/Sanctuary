@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Threading;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -11,6 +10,7 @@ using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Game;
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -24,8 +24,6 @@ public sealed record AbilityServices(
 
 public abstract class ConsumableAbility(AbilityServices services)
 {
-    private static int _castFxTagCounter = 5000;
-
     internal const int ActionBarId = 2;
     protected const int IdleAnimationId = 1;
 
@@ -38,7 +36,7 @@ public abstract class ConsumableAbility(AbilityServices services)
 
     public abstract bool HandleAbility(Player player, AbilityPacketClientRequestStartAbility packet, int slot, ClientItem clientItem, ClientItemDefinition itemDefinition);
 
-    protected static int NextEffectTagId() => Interlocked.Increment(ref _castFxTagCounter);
+    protected static int NextEffectTagId() => EffectTagIdGenerator.Next();
 
     // Color-variant items (the 5 Silly String Can colors) share one Icon.Id and differ only by TintId.
     protected static int IconTintId(ClientItem clientItem, int defaultTintId) =>

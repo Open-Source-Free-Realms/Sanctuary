@@ -1,3 +1,5 @@
+using System;
+
 using Sanctuary.Game.Entities;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -49,51 +51,17 @@ public sealed class FoodEffectAbility(AbilityServices services) : ConsumableAbil
         if (effectId == 0)
             return;
 
-        if (player.ActiveFoodBuffTagId != 0)
+        if (player.ActiveFoodEffectId != 0)
+            player.RemoveEffect(player.ActiveFoodEffectId);
+
+        player.ActiveFoodEffectId = player.AddEffect(new PlayerEffect
         {
-            player.RemoveBuff(player.ActiveFoodBuffTagId);
-            player.ActiveFoodBuffTagId = 0;
-        }
-
-        RemoveFoodAura(player);
-
-        var tagId = NextEffectTagId();
-        player.ActiveFoodEffectTagId = tagId;
-
-        var addAura = new PlayerUpdatePacketAddEffectTagCompositeEffect
-        {
-            Guid = player.Guid,
-            TagId = tagId,
-            CompositeEffectId = effectId,
-            SourceGuid = player.Guid
-        };
-
-        if (delayMs > 0)
-            player.SendTunneledToVisibleDelayed(addAura, delayMs, true);
-        else
-            player.SendTunneledToVisible(addAura, true);
-
-        player.ActiveFoodBuffTagId = player.AddBuff(Player.ChangeFormBuffIconId, nameId, delayMs + FoodEffectDurationMs, () =>
-        {
-            if (player.ActiveFoodEffectTagId != tagId)
-                return;
-
-            player.ActiveFoodBuffTagId = 0;
-            RemoveFoodAura(player);
+            ExpiresAt = DateTimeOffset.UtcNow.AddMilliseconds(delayMs + FoodEffectDurationMs),
+            WorldEffectId = effectId,
+            WorldEffectStartsAt = delayMs > 0 ? DateTimeOffset.UtcNow.AddMilliseconds(delayMs) : null,
+            BuffIconId = Player.ChangeFormBuffIconId,
+            BuffNameId = nameId,
+            OnRemoved = () => player.ActiveFoodEffectId = 0
         });
-    }
-
-    private static void RemoveFoodAura(Player player)
-    {
-        if (player.ActiveFoodEffectTagId == 0)
-            return;
-
-        player.SendTunneledToVisible(new PlayerUpdatePacketRemoveEffectTagCompositeEffect
-        {
-            Guid = player.Guid,
-            TagId = player.ActiveFoodEffectTagId
-        }, true);
-
-        player.ActiveFoodEffectTagId = 0;
     }
 }

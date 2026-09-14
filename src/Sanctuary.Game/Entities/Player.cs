@@ -67,15 +67,11 @@ public sealed class Player : ClientPcData, IEntity
 
     public Dictionary<int, Dictionary<int, int>> ActionBarItemGuids { get; set; } = new();
 
-    public int TemporaryAppearance { get; set; }
-    public DateTimeOffset? TemporaryAppearanceExpiresAt { get; set; }
-    private int _temporaryAppearanceEffectId;
-    private int _temporaryAppearanceBuffTagId;
+    public int TemporaryAppearance { get; private set; }
 
     public ulong LastSillyStringTarget { get; set; }
 
-    public int ActiveFoodEffectTagId { get; set; }
-    public int ActiveFoodBuffTagId { get; set; }
+    public int ActiveFoodEffectId { get; set; }
 
     private readonly ConcurrentDictionary<int, DateTimeOffset> _itemCooldowns = new();
 
@@ -221,13 +217,7 @@ public sealed class Player : ClientPcData, IEntity
     {
         var now = DateTimeOffset.UtcNow;
 
-        if (TemporaryAppearanceExpiresAt.HasValue &&
-            TemporaryAppearanceExpiresAt.Value <= now)
-        {
-            RemoveTemporaryAppearance();
-        }
-
-        EndExpiredBuffs(now);
+        TickEffects(now);
 
         while (true)
         {
@@ -731,138 +721,178 @@ public sealed class Player : ClientPcData, IEntity
 
     public void ApplyTemporaryAppearance(int modelId, int durationMs, int effectId = 0, int buffNameId = 0)
     {
-        TemporaryAppearance = modelId;
-        _temporaryAppearanceEffectId = effectId;
+        if (_appearanceEffectId != 0)
+            RemoveEffect(_appearanceEffectId);
 
-        if (durationMs > 0)
-            TemporaryAppearanceExpiresAt = DateTimeOffset.UtcNow.AddMilliseconds(durationMs);
-
-        if (_temporaryAppearanceBuffTagId != 0)
+        _appearanceEffectId = AddEffect(new PlayerEffect
         {
-            RemoveBuff(_temporaryAppearanceBuffTagId);
-            _temporaryAppearanceBuffTagId = 0;
-        }
-
-        if (buffNameId != 0 && durationMs > 0)
-            _temporaryAppearanceBuffTagId = AddBuff(ChangeFormBuffIconId, buffNameId, durationMs, RemoveTemporaryAppearance);
-
-        if (effectId != 0)
-            SendTunneledToVisible(new PlayerUpdatePacketPlayCompositeEffect { Guid = Guid, CompositeEffectId = effectId, Position = Position, Clear = false }, true);
-
-        SendTunneledToVisible(new PlayerUpdatePacketUpdateTemporaryAppearance { Guid = Guid, TemporaryAppearance = modelId }, true);
+            ExpiresAt = durationMs > 0 ? DateTimeOffset.UtcNow.AddMilliseconds(durationMs) : null,
+            AppearanceModelId = modelId,
+            AppearancePoofEffectId = effectId,
+            BuffIconId = buffNameId != 0 ? ChangeFormBuffIconId : 0,
+            BuffNameId = buffNameId,
+            OnRemoved = () => _appearanceEffectId = 0
+        });
     }
 
     public void RemoveTemporaryAppearance()
     {
-        TemporaryAppearance = 0;
-        TemporaryAppearanceExpiresAt = null;
-
-        if (_temporaryAppearanceBuffTagId != 0)
-        {
-            RemoveBuff(_temporaryAppearanceBuffTagId);
-            _temporaryAppearanceBuffTagId = 0;
-        }
-
-        if (_temporaryAppearanceEffectId != 0)
-        {
-            SendTunneledToVisible(new PlayerUpdatePacketPlayCompositeEffect { Guid = Guid, CompositeEffectId = _temporaryAppearanceEffectId, Position = Position, Clear = false }, true);
-            _temporaryAppearanceEffectId = 0;
-        }
-
-        SendTunneledToVisible(new PlayerUpdatePacketRemoveTemporaryAppearance { Guid = Guid }, true);
+        if (_appearanceEffectId != 0)
+            RemoveEffect(_appearanceEffectId);
     }
 
-    #region Buffs
+    #region Effects
 
-    private sealed class Buff
+    // A tracked, timed effect on the player - a transformation, a food effect aura, or both a
+    // world-visible composite effect and a buff bar icon at once. One tick loop expires them,
+    // one pair of methods applies/unapplies whatever packets each of those parts needs, so adding
+    // a new kind of effect doesn't mean adding another set of ad hoc fields and conditions.
+    private readonly Dictionary<int, PlayerEffect> _effects = new();
+    private int _appearanceEffectId;
+
+    public int AddEffect(PlayerEffect effect)
     {
-        public DateTimeOffset? ExpiresAt;
-        public Action? OnEnded;
-    }
-
-    private readonly Dictionary<int, Buff> _buffs = new();
-    private int _buffTagCounter;
-
-    public int AddBuff(int iconId, int nameId, int durationMs, Action? onEnded = null)
-    {
-        int tagId;
-
-        lock (_buffs)
+        lock (_effects)
         {
-            tagId = ++_buffTagCounter;
-
-            _buffs[tagId] = new Buff
-            {
-                ExpiresAt = durationMs > 0 ? DateTimeOffset.UtcNow.AddMilliseconds(durationMs) : null,
-                OnEnded = onEnded
-            };
+            effect.Id = EffectTagIdGenerator.Next();
+            _effects[effect.Id] = effect;
         }
 
-        var durationSeconds = (durationMs + 999) / 1000;
+        ApplyEffect(effect);
 
-        SendTunneled(new ClientUpdatePacketAddEffectTag
-        {
-            TagId = tagId,
-            EffectTag = new EffectTag
-            {
-                InstanceId = tagId,
-                Duration = durationSeconds,
-                StartTime = 0,
-                StopTime = unchecked((uint)-durationSeconds)
-            },
-            IconId = iconId,
-            NameId = nameId
-        });
-
-        return tagId;
+        return effect.Id;
     }
 
-    public void RemoveBuff(int tagId)
+    public void RemoveEffect(int id)
     {
-        lock (_buffs)
+        PlayerEffect? effect;
+
+        lock (_effects)
         {
-            if (!_buffs.Remove(tagId))
+            if (!_effects.Remove(id, out effect))
                 return;
         }
 
-        SendTunneled(new ClientUpdatePacketRemoveEffectTag { TagId = tagId });
+        UnapplyEffect(effect);
+        effect.OnRemoved?.Invoke();
     }
 
-    public void CancelBuff(int tagId) => EndBuff(tagId);
-
-    private void EndBuff(int tagId)
+    private void TickEffects(DateTimeOffset now)
     {
-        Buff? buff;
-
-        lock (_buffs)
-        {
-            if (!_buffs.Remove(tagId, out buff))
-                return;
-        }
-
-        SendTunneled(new ClientUpdatePacketRemoveEffectTag { TagId = tagId });
-
-        buff.OnEnded?.Invoke();
-    }
-
-    private void EndExpiredBuffs(DateTimeOffset now)
-    {
+        List<PlayerEffect>? starting = null;
         List<int>? expired = null;
 
-        lock (_buffs)
+        lock (_effects)
         {
-            foreach (var (tagId, buff) in _buffs)
+            foreach (var effect in _effects.Values)
             {
-                if (buff.ExpiresAt <= now)
-                    (expired ??= []).Add(tagId);
+                if (!effect.WorldEffectStarted && effect.WorldEffectId != 0 &&
+                    (effect.WorldEffectStartsAt is null || effect.WorldEffectStartsAt <= now))
+                    (starting ??= []).Add(effect);
+
+                if (effect.ExpiresAt is { } expiresAt && expiresAt <= now)
+                    (expired ??= []).Add(effect.Id);
             }
         }
 
-        if (expired is null)
-            return;
+        if (starting is not null)
+            foreach (var effect in starting)
+                StartWorldEffect(effect);
 
-        foreach (var tagId in expired)
-            EndBuff(tagId);
+        if (expired is not null)
+            foreach (var id in expired)
+                RemoveEffect(id);
+    }
+
+    private void ApplyEffect(PlayerEffect effect)
+    {
+        if (effect.AppearanceModelId != 0)
+        {
+            TemporaryAppearance = effect.AppearanceModelId;
+
+            if (effect.AppearancePoofEffectId != 0)
+                SendTunneledToVisible(new PlayerUpdatePacketPlayCompositeEffect { Guid = Guid, CompositeEffectId = effect.AppearancePoofEffectId, Position = Position, Clear = false }, true);
+
+            SendTunneledToVisible(new PlayerUpdatePacketUpdateTemporaryAppearance { Guid = Guid, TemporaryAppearance = effect.AppearanceModelId }, true);
+
+            // Unlike reverting to the full player model (see UnapplyEffect below), swapping into
+            // a transform model doesn't drop a world-visible effect tag that's already attached
+            // to the actor - it just keeps playing. Resyncing here anyway used to leave a second,
+            // orphaned copy of the tag behind once the original was cancelled, which is what kept
+            // the aura visible no matter what got removed.
+        }
+
+        if (effect.WorldEffectId != 0 && (effect.WorldEffectStartsAt is null || effect.WorldEffectStartsAt <= DateTimeOffset.UtcNow))
+            StartWorldEffect(effect);
+
+        if (effect.BuffIconId != 0)
+        {
+            var durationSeconds = effect.ExpiresAt is { } expiresAt
+                ? Math.Max(1, (int)(expiresAt - DateTimeOffset.UtcNow).TotalSeconds)
+                : 0;
+
+            SendTunneled(new ClientUpdatePacketAddEffectTag
+            {
+                TagId = effect.Id,
+                EffectTag = new EffectTag
+                {
+                    InstanceId = effect.Id,
+                    Duration = durationSeconds,
+                    StartTime = 0,
+                    StopTime = unchecked((uint)-durationSeconds)
+                },
+                IconId = effect.BuffIconId,
+                NameId = effect.BuffNameId
+            });
+        }
+    }
+
+    private void UnapplyEffect(PlayerEffect effect)
+    {
+        if (effect.AppearanceModelId != 0)
+        {
+            TemporaryAppearance = 0;
+            SendTunneledToVisible(new PlayerUpdatePacketRemoveTemporaryAppearance { Guid = Guid }, true);
+            ResyncWorldEffects();
+        }
+
+        if (effect.WorldEffectStarted)
+        {
+            SendTunneledToVisible(new PlayerUpdatePacketRemoveEffectTagCompositeEffect { Guid = Guid, TagId = effect.WorldTagId }, true);
+            effect.WorldEffectStarted = false;
+        }
+
+        if (effect.BuffIconId != 0)
+            SendTunneled(new ClientUpdatePacketRemoveEffectTag { TagId = effect.Id });
+    }
+
+    private void StartWorldEffect(PlayerEffect effect)
+    {
+        effect.WorldEffectStarted = true;
+        effect.WorldTagId = EffectTagIdGenerator.Next();
+
+        SendTunneledToVisible(new PlayerUpdatePacketAddEffectTagCompositeEffect
+        {
+            Guid = Guid,
+            TagId = effect.WorldTagId,
+            CompositeEffectId = effect.WorldEffectId,
+            SourceGuid = Guid
+        }, true);
+    }
+
+    // Reverting to the full player model rebuilds the actor client-side, which drops any
+    // world-visible effect tag that was attached to it. Resend every effect that's still supposed
+    // to be showing one, with a fresh tag id - the client ignores a repeat of an id it has already
+    // seen for this actor.
+    private void ResyncWorldEffects()
+    {
+        List<PlayerEffect> active;
+
+        lock (_effects)
+            active = _effects.Values.Where(e => e.WorldEffectStarted).ToList();
+
+        foreach (var effect in active)
+            StartWorldEffect(effect);
     }
 
     #endregion
