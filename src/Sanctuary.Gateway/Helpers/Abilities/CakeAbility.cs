@@ -73,7 +73,7 @@ public sealed class CakeAbility(AbilityServices services) : ConsumableAbility(se
                 var abilityId = cakeDefinition.TransformAbilityIds[lastTransform];
 
                 if (_resourceManager.Consumables.Transformations.TryGetValue(abilityId, out var transform))
-                    player.ApplyTemporaryAppearance(transform.ModelId, transform.DurationMs, transform.CompositeEffectId);
+                    player.ApplyTemporaryAppearance(transform.ModelId, transform.DurationMs, transform.CompositeEffectId, cakeDefinition.NameId);
             };
         }
         else
@@ -111,7 +111,7 @@ public sealed class CakeAbility(AbilityServices services) : ConsumableAbility(se
                     var abilityId = cakeDefinition.TransformAbilityIds[roll - cakeDefinition.ScareGroups.Length];
 
                     if (_resourceManager.Consumables.Transformations.TryGetValue(abilityId, out var transform))
-                        player.ApplyTemporaryAppearance(transform.ModelId, transform.DurationMs, transform.CompositeEffectId);
+                        player.ApplyTemporaryAppearance(transform.ModelId, transform.DurationMs, transform.CompositeEffectId, cakeDefinition.NameId);
                 }
             };
         }
