@@ -36,6 +36,8 @@ public abstract class ConsumableAbility(AbilityServices services)
 
     public abstract bool HandleAbility(Player player, AbilityPacketClientRequestStartAbility packet, int slot, ClientItem clientItem, ClientItemDefinition itemDefinition);
 
+    // Global, not scoped to the player - shared with Player's own effect tags (see PlayerEffect)
+    // so two unrelated tags never collide on the same actor.
     protected static int NextEffectTagId() => EffectTagIdGenerator.Next();
 
     // Color-variant items (the 5 Silly String Can colors) share one Icon.Id and differ only by TintId.
