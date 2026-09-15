@@ -21169,7 +21169,7 @@
         "MembersOnlyPrice":  1
     },
     {
-        "Comment":  "Chicken Boombox - price restored from Free Realms Wiki (was 299 SC / 269 SC member; previously listed here as a stale Price:1 placeholder)",
+        "Comment":  "Chicken Boombox",
         "LaunchTime":  "2011-01-10T08:00:00+00:00",
         "ExpireTime":  "2090-01-01T08:00:00+00:00",
         "Image":  {
@@ -21187,15 +21187,15 @@
         "DescriptionId":  29793,
         "Status":  1,
         "CurrencyType":  1,
-        "Price":  299,
-        "AltCurrencyPrice":  299,
+        "Price":  1,
+        "AltCurrencyPrice":  1,
         "StoreId":  1,
         "CategoryGroupId":  89,
         "CategoryDisplayOrder":  1315000,
         "DiscountType":  114,
         "SkuId":  1,
         "MemberDiscount":  10,
-        "MembersOnlyPrice":  269
+        "MembersOnlyPrice":  1
     },
     {
         "Comment":  "Phoenix",
@@ -22239,7 +22239,7 @@
         "MembersOnlyPrice":  1
     },
     {
-        "Comment":  "Plants Dance Boombox - price restored from Free Realms Wiki (was 350 SC; previously listed here as a stale Price:1 placeholder; member price not documented by the wiki, so left at the standard 10% discount)",
+        "Comment":  "Plants Dance Boombox",
         "LaunchTime":  "2011-06-30T07:00:00+00:00",
         "ExpireTime":  "2090-01-01T08:00:00+00:00",
         "Image":  {
@@ -22257,15 +22257,15 @@
         "DescriptionId":  435707,
         "Status":  1,
         "CurrencyType":  1,
-        "Price":  350,
-        "AltCurrencyPrice":  350,
+        "Price":  1,
+        "AltCurrencyPrice":  1,
         "StoreId":  1,
         "CategoryGroupId":  89,
         "CategoryDisplayOrder":  1300,
         "DiscountType":  115,
         "SkuId":  1,
         "MemberDiscount":  10,
-        "MembersOnlyPrice":  315
+        "MembersOnlyPrice":  1
     },
     {
         "Comment":  "Briarwood Farm",
@@ -29972,7 +29972,7 @@
         "MembersOnlyPrice":  1
     },
     {
-        "Comment":  "Robot Boombox - CANNOT FIND THE CORRECT STORE ENTRY FOR THIS ITEM. Was never sold in the marketplace (per Free Realms Wiki it only dropped from Sci-Fi Mystery Chests, and this codebase has no chest/loot system), so no real Price/NameId/DescriptionId/Image ever existed - all values below are placeholders for functional testing only.",
+        "Comment":  "Robot Boombox - cannot find the correct store entry (never sold, only from Sci-Fi Mystery Chests)",
         "LaunchTime":  "2026-09-15T00:00:00+00:00",
         "ExpireTime":  "2040-08-15T07:00:00+00:00",
         "Image":  {
@@ -30002,7 +30002,7 @@
         "MembersOnlyPrice":  1
     },
     {
-        "Comment":  "Ballet Boombox - CANNOT FIND THE CORRECT STORE ENTRY FOR THIS ITEM. Was never sold (unreleased/staff-only per Free Realms Wiki), so no real Price/NameId/DescriptionId/Image ever existed - all values below are placeholders for functional testing only.",
+        "Comment":  "Ballet Boombox - cannot find the correct store entry (never released, staff events only)",
         "LaunchTime":  "2026-09-15T00:00:00+00:00",
         "ExpireTime":  "2040-08-15T07:00:00+00:00",
         "Image":  {
@@ -30032,7 +30032,7 @@
         "MembersOnlyPrice":  1
     },
     {
-        "Comment":  "Chiptune Boombox - CANNOT FIND THE CORRECT NameId/DescriptionId/Image FOR THIS ITEM (checked this file for an orphaned listing like Chicken/Plants Dance had, and public sources - neither has it, likely because it only sold for ~5 weeks during 8-Bit Month, Sep-Oct 2013). Price IS correct: 499 SC / 449 SC member per Free Realms Wiki.",
+        "Comment":  "Chiptune Boombox - cannot find the correct name/description/icon",
         "LaunchTime":  "2026-09-15T00:00:00+00:00",
         "ExpireTime":  "2040-08-15T07:00:00+00:00",
         "Image":  {
@@ -30050,8 +30050,8 @@
         "DescriptionId":  999903,
         "Status":  1,
         "CurrencyType":  1,
-        "Price":  499,
-        "AltCurrencyPrice":  499,
+        "Price":  1,
+        "AltCurrencyPrice":  1,
         "StoreId":  1,
         "CategoryGroupId":  89,
         "DisplayOrder":  1,
@@ -30059,7 +30059,7 @@
         "DiscountType":  104,
         "SkuId":  1,
         "MemberDiscount":  10,
-        "MembersOnlyPrice":  449
+        "MembersOnlyPrice":  1
     },
     {
         "Comment":  "Lucky Clover T-Shirt",
