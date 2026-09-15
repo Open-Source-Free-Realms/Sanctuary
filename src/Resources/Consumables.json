@@ -15,11 +15,12 @@
     { "ItemId": 76935,  "ModelId": 4428, "DanceSequence": [3570], "Comment": "Realmshake Boombox" },
     { "ItemId": 77329,  "ModelId": 2059, "DanceSequence": [3521, 3522, 3523, 3524, 3525], "Comment": "Lovelectric Boombox" },
     { "ItemId": 76934,  "ModelId": 4100, "DanceSequence": [3568009, 3569009, 3570009, 3571009], "Comment": "Xylophone" },
-    { "ItemId": 900059, "ModelId": 3893, "DanceSequence": [3568005, 3569005, 3570005, 3571005], "Comment": "Sci-Fi Boombox" },
-    { "ItemId": 900060, "ModelId": 4095, "DanceSequence": [3568000, 3569000, 3570000, 3571000], "Comment": "Piano Boombox (Unreleased)" },
-    { "ItemId": 900061, "ModelId": 4539, "DanceSequence": [3500011], "Comment": "8-Bit Boombox" },
-    { "ItemId": 900062, "ModelId": 3408, "DanceSequence": [35010, 35020, 35030, 35040, 35050], "Comment": "Chicken Boombox" },
-    { "ItemId": 900063, "ModelId": 3794, "DanceSequence": [3564, 3565, 3566, 3567], "Comment": "Rainbow Leaf Boombox" }
+    { "ItemId": 900059, "ModelId": 3893, "DanceSequence": [3568005, 3569005, 3570005, 3571005], "Comment": "Robot Boombox" },
+    { "ItemId": 900060, "ModelId": 4095, "DanceSequence": [3568000, 3569000, 3570000, 3571000], "Comment": "Ballet Boombox" },
+    { "ItemId": 900061, "ModelId": 4539, "DanceSequence": [3568011, 3569011, 3570011, 3571011], "Comment": "Chiptune Boombox" },
+    { "ItemId": 76877,  "ModelId": 3408, "DanceSequence": [35010, 35020, 35030, 35040, 35050], "Comment": "Chicken Boombox" },
+    { "ItemId": 900063, "ModelId": 3794, "DanceSequence": [3564, 3565, 3566, 3567], "Comment": "Rainbow Leaf Boombox" },
+    { "ItemId": 78075,  "ModelId": 3794, "DanceSequence": [3564, 3565, 3566, 3567], "Comment": "Plants Dance Boombox" }
   ],
 
   "Cakes": [

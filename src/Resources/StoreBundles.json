@@ -14204,64 +14204,6 @@
         "MembersOnlyPrice":  1
     },
     {
-        "Comment":  "Realms Roll Boombox",
-        "LaunchTime":  "2009-12-12T02:05:59+00:00",
-        "ExpireTime":  "2040-08-15T07:00:00+00:00",
-        "Image":  {
-                      "Image":  "5897"
-                  },
-        "Entries":  [
-                        {
-                            "Quantity":  1,
-                            "GameItemId":  3481,
-                            "MarketingItemId":  1180
-                        }
-                    ],
-        "Id":  3761,
-        "NameId":  4298,
-        "DescriptionId":  4299,
-        "Status":  1,
-        "CurrencyType":  1,
-        "Price":  1,
-        "AltCurrencyPrice":  1,
-        "StoreId":  1,
-        "CategoryGroupId":  89,
-        "CategoryDisplayOrder":  2000,
-        "DiscountType":  109,
-        "SkuId":  1,
-        "MemberDiscount":  10,
-        "MembersOnlyPrice":  1
-    },
-    {
-        "Comment":  "Rainbow Randomizer Boombox",
-        "LaunchTime":  "2009-12-16T20:04:06+00:00",
-        "ExpireTime":  "2040-08-15T07:00:00+00:00",
-        "Image":  {
-                      "Image":  "5922"
-                  },
-        "Entries":  [
-                        {
-                            "Quantity":  1,
-                            "GameItemId":  3504,
-                            "MarketingItemId":  1913
-                        }
-                    ],
-        "Id":  3765,
-        "NameId":  4449,
-        "DescriptionId":  4450,
-        "Status":  1,
-        "CurrencyType":  1,
-        "Price":  1,
-        "AltCurrencyPrice":  1,
-        "StoreId":  1,
-        "CategoryGroupId":  89,
-        "CategoryDisplayOrder":  1900,
-        "DiscountType":  112,
-        "SkuId":  1,
-        "MemberDiscount":  10,
-        "MembersOnlyPrice":  1
-    },
-    {
         "Comment":  "Standard Candy Cart",
         "LaunchTime":  "2009-12-19T01:15:38+00:00",
         "ExpireTime":  "2040-08-15T07:00:00+00:00",
@@ -21227,7 +21169,7 @@
         "MembersOnlyPrice":  1
     },
     {
-        "Comment":  "Chicken Boombox",
+        "Comment":  "Chicken Boombox - price restored from Free Realms Wiki (was 299 SC / 269 SC member; previously listed here as a stale Price:1 placeholder)",
         "LaunchTime":  "2011-01-10T08:00:00+00:00",
         "ExpireTime":  "2090-01-01T08:00:00+00:00",
         "Image":  {
@@ -21245,15 +21187,15 @@
         "DescriptionId":  29793,
         "Status":  1,
         "CurrencyType":  1,
-        "Price":  1,
-        "AltCurrencyPrice":  1,
+        "Price":  299,
+        "AltCurrencyPrice":  299,
         "StoreId":  1,
         "CategoryGroupId":  89,
         "CategoryDisplayOrder":  1315000,
         "DiscountType":  114,
         "SkuId":  1,
         "MemberDiscount":  10,
-        "MembersOnlyPrice":  1
+        "MembersOnlyPrice":  269
     },
     {
         "Comment":  "Phoenix",
@@ -22297,7 +22239,7 @@
         "MembersOnlyPrice":  1
     },
     {
-        "Comment":  "Plants Dance Boombox",
+        "Comment":  "Plants Dance Boombox - price restored from Free Realms Wiki (was 350 SC; previously listed here as a stale Price:1 placeholder; member price not documented by the wiki, so left at the standard 10% discount)",
         "LaunchTime":  "2011-06-30T07:00:00+00:00",
         "ExpireTime":  "2090-01-01T08:00:00+00:00",
         "Image":  {
@@ -22315,15 +22257,15 @@
         "DescriptionId":  435707,
         "Status":  1,
         "CurrencyType":  1,
-        "Price":  1,
-        "AltCurrencyPrice":  1,
+        "Price":  350,
+        "AltCurrencyPrice":  350,
         "StoreId":  1,
         "CategoryGroupId":  89,
         "CategoryDisplayOrder":  1300,
         "DiscountType":  115,
         "SkuId":  1,
         "MemberDiscount":  10,
-        "MembersOnlyPrice":  1
+        "MembersOnlyPrice":  315
     },
     {
         "Comment":  "Briarwood Farm",
@@ -30028,6 +29970,96 @@
         "SkuId":  1,
         "MemberDiscount":  10,
         "MembersOnlyPrice":  1
+    },
+    {
+        "Comment":  "Robot Boombox - CANNOT FIND THE CORRECT STORE ENTRY FOR THIS ITEM. Was never sold in the marketplace (per Free Realms Wiki it only dropped from Sci-Fi Mystery Chests, and this codebase has no chest/loot system), so no real Price/NameId/DescriptionId/Image ever existed - all values below are placeholders for functional testing only.",
+        "LaunchTime":  "2026-09-15T00:00:00+00:00",
+        "ExpireTime":  "2040-08-15T07:00:00+00:00",
+        "Image":  {
+                      "Image":  "8123"
+                  },
+        "Entries":  [
+                        {
+                            "Quantity":  1,
+                            "GameItemId":  900059,
+                            "MarketingItemId":  900059
+                        }
+                    ],
+        "Id":  900072,
+        "NameId":  999906,
+        "DescriptionId":  999907,
+        "Status":  1,
+        "CurrencyType":  1,
+        "Price":  1,
+        "AltCurrencyPrice":  1,
+        "StoreId":  1,
+        "CategoryGroupId":  89,
+        "DisplayOrder":  1,
+        "CategoryDisplayOrder":  1,
+        "DiscountType":  104,
+        "SkuId":  1,
+        "MemberDiscount":  10,
+        "MembersOnlyPrice":  1
+    },
+    {
+        "Comment":  "Ballet Boombox - CANNOT FIND THE CORRECT STORE ENTRY FOR THIS ITEM. Was never sold (unreleased/staff-only per Free Realms Wiki), so no real Price/NameId/DescriptionId/Image ever existed - all values below are placeholders for functional testing only.",
+        "LaunchTime":  "2026-09-15T00:00:00+00:00",
+        "ExpireTime":  "2040-08-15T07:00:00+00:00",
+        "Image":  {
+                      "Image":  "8123"
+                  },
+        "Entries":  [
+                        {
+                            "Quantity":  1,
+                            "GameItemId":  900060,
+                            "MarketingItemId":  900060
+                        }
+                    ],
+        "Id":  900070,
+        "NameId":  999900,
+        "DescriptionId":  999901,
+        "Status":  1,
+        "CurrencyType":  1,
+        "Price":  1,
+        "AltCurrencyPrice":  1,
+        "StoreId":  1,
+        "CategoryGroupId":  89,
+        "DisplayOrder":  1,
+        "CategoryDisplayOrder":  1,
+        "DiscountType":  104,
+        "SkuId":  1,
+        "MemberDiscount":  10,
+        "MembersOnlyPrice":  1
+    },
+    {
+        "Comment":  "Chiptune Boombox - CANNOT FIND THE CORRECT NameId/DescriptionId/Image FOR THIS ITEM (checked this file for an orphaned listing like Chicken/Plants Dance had, and public sources - neither has it, likely because it only sold for ~5 weeks during 8-Bit Month, Sep-Oct 2013). Price IS correct: 499 SC / 449 SC member per Free Realms Wiki.",
+        "LaunchTime":  "2026-09-15T00:00:00+00:00",
+        "ExpireTime":  "2040-08-15T07:00:00+00:00",
+        "Image":  {
+                      "Image":  "8123"
+                  },
+        "Entries":  [
+                        {
+                            "Quantity":  1,
+                            "GameItemId":  900061,
+                            "MarketingItemId":  900061
+                        }
+                    ],
+        "Id":  900071,
+        "NameId":  999902,
+        "DescriptionId":  999903,
+        "Status":  1,
+        "CurrencyType":  1,
+        "Price":  499,
+        "AltCurrencyPrice":  499,
+        "StoreId":  1,
+        "CategoryGroupId":  89,
+        "DisplayOrder":  1,
+        "CategoryDisplayOrder":  1,
+        "DiscountType":  104,
+        "SkuId":  1,
+        "MemberDiscount":  10,
+        "MembersOnlyPrice":  449
     },
     {
         "Comment":  "Lucky Clover T-Shirt",
