@@ -30002,6 +30002,246 @@
         "MembersOnlyPrice":  1
     },
     {
+        "Comment":  "Shrouded Glade Birthday Cake",
+        "LaunchTime":  "2026-09-15T00:00:00+00:00",
+        "ExpireTime":  "2040-08-15T07:00:00+00:00",
+        "Image":  {
+                      "Image":  "6378"
+                  },
+        "Entries":  [
+                        {
+                            "Quantity":  1,
+                            "GameItemId":  7966,
+                            "MarketingItemId":  7966
+                        }
+                    ],
+        "Id":  900110,
+        "NameId":  9392,
+        "DescriptionId":  30110,
+        "Status":  1,
+        "CurrencyType":  1,
+        "Price":  1,
+        "AltCurrencyPrice":  1,
+        "StoreId":  1,
+        "CategoryGroupId":  42,
+        "DisplayOrder":  1,
+        "CategoryDisplayOrder":  1,
+        "DiscountType":  104,
+        "SkuId":  1,
+        "MemberDiscount":  10,
+        "MembersOnlyPrice":  1
+    },
+    {
+        "Comment":  "Seaside Birthday Cake",
+        "LaunchTime":  "2026-09-15T00:00:00+00:00",
+        "ExpireTime":  "2040-08-15T07:00:00+00:00",
+        "Image":  {
+                      "Image":  "6396"
+                  },
+        "Entries":  [
+                        {
+                            "Quantity":  1,
+                            "GameItemId":  7967,
+                            "MarketingItemId":  7967
+                        }
+                    ],
+        "Id":  900111,
+        "NameId":  9393,
+        "DescriptionId":  30111,
+        "Status":  1,
+        "CurrencyType":  1,
+        "Price":  1,
+        "AltCurrencyPrice":  1,
+        "StoreId":  1,
+        "CategoryGroupId":  42,
+        "DisplayOrder":  1,
+        "CategoryDisplayOrder":  1,
+        "DiscountType":  104,
+        "SkuId":  1,
+        "MemberDiscount":  10,
+        "MembersOnlyPrice":  1
+    },
+    {
+        "Comment":  "Snowhill Birthday Cake",
+        "LaunchTime":  "2026-09-15T00:00:00+00:00",
+        "ExpireTime":  "2040-08-15T07:00:00+00:00",
+        "Image":  {
+                      "Image":  "6383"
+                  },
+        "Entries":  [
+                        {
+                            "Quantity":  1,
+                            "GameItemId":  7968,
+                            "MarketingItemId":  7968
+                        }
+                    ],
+        "Id":  900112,
+        "NameId":  9394,
+        "DescriptionId":  30112,
+        "Status":  1,
+        "CurrencyType":  1,
+        "Price":  1,
+        "AltCurrencyPrice":  1,
+        "StoreId":  1,
+        "CategoryGroupId":  42,
+        "DisplayOrder":  1,
+        "CategoryDisplayOrder":  1,
+        "DiscountType":  104,
+        "SkuId":  1,
+        "MemberDiscount":  10,
+        "MembersOnlyPrice":  1
+    },
+    {
+        "Comment":  "Merry Vale Birthday Cake",
+        "LaunchTime":  "2026-09-15T00:00:00+00:00",
+        "ExpireTime":  "2040-08-15T07:00:00+00:00",
+        "Image":  {
+                      "Image":  "6377"
+                  },
+        "Entries":  [
+                        {
+                            "Quantity":  1,
+                            "GameItemId":  7969,
+                            "MarketingItemId":  7969
+                        }
+                    ],
+        "Id":  900113,
+        "NameId":  9395,
+        "DescriptionId":  30113,
+        "Status":  1,
+        "CurrencyType":  1,
+        "Price":  1,
+        "AltCurrencyPrice":  1,
+        "StoreId":  1,
+        "CategoryGroupId":  42,
+        "DisplayOrder":  1,
+        "CategoryDisplayOrder":  1,
+        "DiscountType":  104,
+        "SkuId":  1,
+        "MemberDiscount":  10,
+        "MembersOnlyPrice":  1
+    },
+    {
+        "Comment":  "Sanctuary Birthday Cake",
+        "LaunchTime":  "2026-09-15T00:00:00+00:00",
+        "ExpireTime":  "2040-08-15T07:00:00+00:00",
+        "Image":  {
+                      "Image":  "6382"
+                  },
+        "Entries":  [
+                        {
+                            "Quantity":  1,
+                            "GameItemId":  7970,
+                            "MarketingItemId":  7970
+                        }
+                    ],
+        "Id":  900114,
+        "NameId":  9396,
+        "DescriptionId":  30114,
+        "Status":  1,
+        "CurrencyType":  1,
+        "Price":  1,
+        "AltCurrencyPrice":  1,
+        "StoreId":  1,
+        "CategoryGroupId":  42,
+        "DisplayOrder":  1,
+        "CategoryDisplayOrder":  1,
+        "DiscountType":  104,
+        "SkuId":  1,
+        "MemberDiscount":  10,
+        "MembersOnlyPrice":  1
+    },
+    {
+        "Comment":  "Wugachug Birthday Cake",
+        "LaunchTime":  "2026-09-15T00:00:00+00:00",
+        "ExpireTime":  "2040-08-15T07:00:00+00:00",
+        "Image":  {
+                      "Image":  "6384"
+                  },
+        "Entries":  [
+                        {
+                            "Quantity":  1,
+                            "GameItemId":  7971,
+                            "MarketingItemId":  7971
+                        }
+                    ],
+        "Id":  900115,
+        "NameId":  9397,
+        "DescriptionId":  30115,
+        "Status":  1,
+        "CurrencyType":  1,
+        "Price":  1,
+        "AltCurrencyPrice":  1,
+        "StoreId":  1,
+        "CategoryGroupId":  42,
+        "DisplayOrder":  1,
+        "CategoryDisplayOrder":  1,
+        "DiscountType":  104,
+        "SkuId":  1,
+        "MemberDiscount":  10,
+        "MembersOnlyPrice":  1
+    },
+    {
+        "Comment":  "Blackspore Swamp Birthday Cake",
+        "LaunchTime":  "2026-09-15T00:00:00+00:00",
+        "ExpireTime":  "2040-08-15T07:00:00+00:00",
+        "Image":  {
+                      "Image":  "6379"
+                  },
+        "Entries":  [
+                        {
+                            "Quantity":  1,
+                            "GameItemId":  7972,
+                            "MarketingItemId":  7972
+                        }
+                    ],
+        "Id":  900116,
+        "NameId":  9398,
+        "DescriptionId":  30116,
+        "Status":  1,
+        "CurrencyType":  1,
+        "Price":  1,
+        "AltCurrencyPrice":  1,
+        "StoreId":  1,
+        "CategoryGroupId":  42,
+        "DisplayOrder":  1,
+        "CategoryDisplayOrder":  1,
+        "DiscountType":  104,
+        "SkuId":  1,
+        "MemberDiscount":  10,
+        "MembersOnlyPrice":  1
+    },
+    {
+        "Comment":  "Briarwood Birthday Cake",
+        "LaunchTime":  "2026-09-15T00:00:00+00:00",
+        "ExpireTime":  "2040-08-15T07:00:00+00:00",
+        "Image":  {
+                      "Image":  "6381"
+                  },
+        "Entries":  [
+                        {
+                            "Quantity":  1,
+                            "GameItemId":  7973,
+                            "MarketingItemId":  7973
+                        }
+                    ],
+        "Id":  900117,
+        "NameId":  9399,
+        "DescriptionId":  30117,
+        "Status":  1,
+        "CurrencyType":  1,
+        "Price":  1,
+        "AltCurrencyPrice":  1,
+        "StoreId":  1,
+        "CategoryGroupId":  42,
+        "DisplayOrder":  1,
+        "CategoryDisplayOrder":  1,
+        "DiscountType":  104,
+        "SkuId":  1,
+        "MemberDiscount":  10,
+        "MembersOnlyPrice":  1
+    },
+    {
         "Comment":  "Ballet Boombox - cannot find the correct store entry (never released, staff events only)",
         "LaunchTime":  "2026-09-15T00:00:00+00:00",
         "ExpireTime":  "2040-08-15T07:00:00+00:00",

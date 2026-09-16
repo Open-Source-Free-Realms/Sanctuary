@@ -48,6 +48,46 @@
       "ItemId": 7974, "Type": "BossCake", "CooldownMs": 60000, "InteractCooldownMs": 5000, "ModelId": 2090, "NameId": 30109,
       "OneShotAnimation": 2001, "SpawnEffectIds": [16372, 16441], "LifetimeMs": 60000, "TransformAbilityIds": [4370, 4371, 4372],
       "Comment": "Boss Birthday Cake"
+    },
+    {
+      "ItemId": 7966, "Type": "BossCake", "CooldownMs": 60000, "InteractCooldownMs": 5000, "ModelId": 2082, "NameId": 9392,
+      "SpawnEffectIds": [21], "LifetimeMs": 60000, "TransformAbilityIds": [278],
+      "Comment": "Shrouded Glade Birthday Cake"
+    },
+    {
+      "ItemId": 7967, "Type": "BossCake", "CooldownMs": 60000, "InteractCooldownMs": 5000, "ModelId": 2083, "NameId": 9393,
+      "SpawnEffectIds": [21], "LifetimeMs": 60000, "TransformAbilityIds": [900100, 900101],
+      "Comment": "Seaside Birthday Cake"
+    },
+    {
+      "ItemId": 7968, "Type": "BossCake", "CooldownMs": 60000, "InteractCooldownMs": 5000, "ModelId": 2084, "NameId": 9394,
+      "SpawnEffectIds": [21], "LifetimeMs": 60000, "TransformAbilityIds": [280],
+      "Comment": "Snowhill Birthday Cake"
+    },
+    {
+      "ItemId": 7969, "Type": "BossCake", "CooldownMs": 60000, "InteractCooldownMs": 5000, "ModelId": 2085, "NameId": 9395,
+      "SpawnEffectIds": [21], "LifetimeMs": 60000, "TransformAbilityIds": [281],
+      "Comment": "Merry Vale Birthday Cake"
+    },
+    {
+      "ItemId": 7970, "Type": "BossCake", "CooldownMs": 60000, "InteractCooldownMs": 5000, "ModelId": 2086, "NameId": 9396,
+      "SpawnEffectIds": [21], "LifetimeMs": 60000, "TransformAbilityIds": [282],
+      "Comment": "Sanctuary Birthday Cake"
+    },
+    {
+      "ItemId": 7971, "Type": "BossCake", "CooldownMs": 60000, "InteractCooldownMs": 5000, "ModelId": 2087, "NameId": 9397,
+      "SpawnEffectIds": [21], "LifetimeMs": 60000, "TransformAbilityIds": [283],
+      "Comment": "Wugachug Birthday Cake"
+    },
+    {
+      "ItemId": 7972, "Type": "BossCake", "CooldownMs": 60000, "InteractCooldownMs": 5000, "ModelId": 2088, "NameId": 9398,
+      "SpawnEffectIds": [21], "LifetimeMs": 60000, "TransformAbilityIds": [284],
+      "Comment": "Blackspore Swamp Birthday Cake"
+    },
+    {
+      "ItemId": 7973, "Type": "BossCake", "CooldownMs": 60000, "InteractCooldownMs": 5000, "ModelId": 2089, "NameId": 9399,
+      "SpawnEffectIds": [21], "LifetimeMs": 60000, "TransformAbilityIds": [285],
+      "Comment": "Briarwood Birthday Cake"
     }
   ],
 
@@ -72,7 +112,9 @@
     { "AbilityId": 1973, "CompositeEffectId": 16471, "Comment": "Scrumptious Soup" },
     { "AbilityId": 2004, "CompositeEffectId": 5698,  "Comment": "Steaming Pretzels" },
     { "AbilityId": 1964, "CompositeEffectId": 5232,  "Comment": "Graveyard Flambe (shadow flames)" },
-    { "AbilityId": 660,  "CompositeEffectId": 5343, "QuickChatId": 3340, "EffectDelayMs": 300, "Comment": "Can of Beans" }
+    { "AbilityId": 660,  "CompositeEffectId": 5343, "QuickChatId": 3340, "EffectDelayMs": 300, "Comment": "Can of Beans" },
+    { "AbilityId": 278, "CompositeEffectId": 15009, "Comment": "Shrouded Glade Birthday Cake - magic-glow_red_skel_loop_rare" },
+    { "AbilityId": 281, "CompositeEffectId": 15110, "Comment": "Merry Vale Birthday Cake - star-ring_rainbow_skel_loop" }
   ],
 
   "Transformations": [
@@ -145,7 +187,14 @@
     { "AbilityId": 4370, "ModelId": 2055, "DurationMs": 30000, "CooldownMs": 1800000, "CompositeEffectId": 21, "Comment": "Boss Cake - Stone Heart" },
     { "AbilityId": 4371, "ModelId": 1944, "DurationMs": 30000, "CooldownMs": 1800000, "CompositeEffectId": 21, "Comment": "Boss Cake - Abominable Snowman" },
     { "AbilityId": 4372, "ModelId": 1702, "DurationMs": 30000, "CooldownMs": 1800000, "CompositeEffectId": 21, "Comment": "Boss Cake - Pumpkin Prince" },
-    { "AbilityId": 4373, "ModelId": 22,   "DurationMs": 30000, "CooldownMs": 1800000, "CompositeEffectId": 21, "Comment": "Boss Cake - Cakenstein" }
+    { "AbilityId": 4373, "ModelId": 22,   "DurationMs": 30000, "CooldownMs": 1800000, "CompositeEffectId": 21, "Comment": "Boss Cake - Cakenstein" },
+    { "AbilityId": 280,    "ModelId": 16,  "DurationMs": 1800000, "CooldownMs": 0, "CompositeEffectId": 21, "Comment": "Snowhill Birthday Cake - Penguin" },
+    { "AbilityId": 282,    "ModelId": 210, "DurationMs": 1800000, "CooldownMs": 0, "CompositeEffectId": 21, "Comment": "Sanctuary Birthday Cake - Bixie" },
+    { "AbilityId": 283,    "ModelId": 221, "DurationMs": 1800000, "CooldownMs": 0, "CompositeEffectId": 21, "Comment": "Wugachug Birthday Cake - Chugawug" },
+    { "AbilityId": 284,    "ModelId": 767, "DurationMs": 1800000, "CooldownMs": 0, "CompositeEffectId": 21, "Comment": "Blackspore Swamp Birthday Cake - Grave Elemental" },
+    { "AbilityId": 285,    "ModelId": 121, "DurationMs": 1800000, "CooldownMs": 0, "CompositeEffectId": 21, "Comment": "Briarwood Birthday Cake - The Mushroom Gigas" },
+    { "AbilityId": 900100, "ModelId": 750, "DurationMs": 1800000, "CooldownMs": 0, "CompositeEffectId": 21, "Comment": "Seaside Birthday Cake - Seagull" },
+    { "AbilityId": 900101, "ModelId": 749, "DurationMs": 1800000, "CooldownMs": 0, "CompositeEffectId": 21, "Comment": "Seaside Birthday Cake - Parrot" }
   ],
 
   "PartyFavors": [
