@@ -1,3 +1,5 @@
+using System;
+
 using Sanctuary.Game.Entities;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -37,47 +39,29 @@ public sealed class FoodEffectAbility(AbilityServices services) : ConsumableAbil
             }, true);
         }
 
-        ApplyFoodAura(player, foodEffect?.CompositeEffectId ?? itemDefinition.CompositeEffectId, foodEffect?.EffectDelayMs ?? 0);
+        ApplyFoodAura(player, itemDefinition.NameId, foodEffect?.CompositeEffectId ?? itemDefinition.CompositeEffectId, foodEffect?.EffectDelayMs ?? 0);
 
         FinishActivation(player, clientItem, itemDefinition, slot, FoodEffectCooldownMs);
 
         return true;
     }
 
-    private static void ApplyFoodAura(Player player, int effectId, int delayMs)
+    private static void ApplyFoodAura(Player player, int nameId, int effectId, int delayMs)
     {
         if (effectId == 0)
             return;
 
-        if (player.ActiveFoodEffectTagId != 0)
+        if (player.ActiveFoodEffectId != 0)
+            player.RemoveEffect(player.ActiveFoodEffectId);
+
+        player.ActiveFoodEffectId = player.AddEffect(new PlayerEffect
         {
-            player.SendTunneledToVisible(new PlayerUpdatePacketRemoveEffectTagCompositeEffect
-            {
-                Guid = player.Guid,
-                TagId = player.ActiveFoodEffectTagId
-            }, true);
-        }
-
-        var tagId = NextEffectTagId();
-        player.ActiveFoodEffectTagId = tagId;
-
-        var addAura = new PlayerUpdatePacketAddEffectTagCompositeEffect
-        {
-            Guid = player.Guid,
-            TagId = tagId,
-            CompositeEffectId = effectId,
-            SourceGuid = player.Guid
-        };
-
-        if (delayMs > 0)
-            player.SendTunneledToVisibleDelayed(addAura, delayMs, true);
-        else
-            player.SendTunneledToVisible(addAura, true);
-
-        player.SendTunneledToVisibleDelayed(new PlayerUpdatePacketRemoveEffectTagCompositeEffect
-        {
-            Guid = player.Guid,
-            TagId = tagId
-        }, delayMs + FoodEffectDurationMs, true);
+            ExpiresAt = DateTimeOffset.UtcNow.AddMilliseconds(delayMs + FoodEffectDurationMs),
+            WorldEffectId = effectId,
+            WorldEffectStartsAt = delayMs > 0 ? DateTimeOffset.UtcNow.AddMilliseconds(delayMs) : null,
+            BuffIconId = Player.ChangeFormBuffIconId,
+            BuffNameId = nameId,
+            OnRemoved = () => player.ActiveFoodEffectId = 0
+        });
     }
 }
