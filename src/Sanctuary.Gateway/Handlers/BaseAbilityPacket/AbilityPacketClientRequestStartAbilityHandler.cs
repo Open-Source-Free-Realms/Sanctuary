@@ -33,7 +33,8 @@ public static class AbilityPacketClientRequestStartAbilityHandler
         var abilityServices = new AbilityServices(
             _logger,
             _resourceManager,
-            serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>());
+            serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>(),
+            serviceProvider.GetRequiredService<IRewardManager>());
 
         _consumableAbilities =
         [

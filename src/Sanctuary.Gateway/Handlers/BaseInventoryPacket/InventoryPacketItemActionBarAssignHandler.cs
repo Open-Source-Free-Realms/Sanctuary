@@ -85,6 +85,35 @@ public static class InventoryPacketItemActionBarAssignHandler
         // Color-variant items share one Icon.Id and differ only by TintId.
         var iconTintId = clientItem.Tint == 0 ? clientItemDefinition.Icon.TintId : clientItem.Tint;
 
+        if (!connection.Player.ActionBarItemGuids.ContainsKey(2))
+        {
+            connection.Player.ActionBarItemGuids[2] = new Dictionary<int, int>();
+        }
+        connection.Player.ActionBarItemGuids[2][packet.Slot] = packet.Guid;
+
+        if (connection.Player.TryGetItemCooldown(clientItemDefinition.Id, out var totalCooldownMs, out var elapsedCooldownMs))
+        {
+            connection.Player.ActionBars[2].Slots[packet.Slot] = new Packet.Common.ActionBarSlot
+            {
+                IsEmpty = false,
+                IconId = clientItemDefinition.Icon.Id,
+                IconTintId = iconTintId,
+                NameId = clientItemDefinition.NameId,
+                Unknown5 = 1,
+                Unknown6 = 4,
+                Unknown7 = 15,
+                Enabled = false,
+                TotalRefreshTime = totalCooldownMs,
+                Quantity = clientItem.Count,
+                ForceDismount = true
+            };
+
+            connection.Player.StartActionBarCooldown(2, packet.Slot, clientItemDefinition.Icon.Id,
+                clientItemDefinition.NameId, clientItem.Count, totalCooldownMs, iconTintId, elapsedCooldownMs);
+
+            return true;
+        }
+
         clientUpdatePacketUpdateActionBarSlot.Slot.IsEmpty = false;
 
         clientUpdatePacketUpdateActionBarSlot.Slot.IconId = clientItemDefinition.Icon.Id;
@@ -103,7 +132,7 @@ public static class InventoryPacketItemActionBarAssignHandler
         clientUpdatePacketUpdateActionBarSlot.Slot.ForceDismount = true;
         clientUpdatePacketUpdateActionBarSlot.Slot.Unknown15 = 1000;
 
-        var slotData = new Packet.Common.ActionBarSlot
+        connection.Player.ActionBars[2].Slots[packet.Slot] = new Packet.Common.ActionBarSlot
         {
             IsEmpty = false,
             IconId = clientItemDefinition.Icon.Id,
@@ -119,14 +148,6 @@ public static class InventoryPacketItemActionBarAssignHandler
             ForceDismount = true,
             Unknown15 = 1000
         };
-
-        connection.Player.ActionBars[2].Slots[packet.Slot] = slotData;
-
-        if (!connection.Player.ActionBarItemGuids.ContainsKey(2))
-        {
-            connection.Player.ActionBarItemGuids[2] = new Dictionary<int, int>();
-        }
-        connection.Player.ActionBarItemGuids[2][packet.Slot] = packet.Guid;
 
         connection.SendTunneled(clientUpdatePacketUpdateActionBarSlot);
 

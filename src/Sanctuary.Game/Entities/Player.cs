@@ -73,13 +73,35 @@ public sealed class Player : ClientPcData, IEntity
 
     public int ActiveFoodEffectId { get; set; }
 
-    private readonly ConcurrentDictionary<int, DateTimeOffset> _itemCooldowns = new();
+    private readonly ConcurrentDictionary<int, (DateTimeOffset ExpiresAt, int TotalMs)> _itemCooldowns = new();
 
     public bool IsItemOnCooldown(int itemDefinitionId) =>
-        _itemCooldowns.TryGetValue(itemDefinitionId, out var expiresAt) && DateTimeOffset.UtcNow < expiresAt;
+        _itemCooldowns.TryGetValue(itemDefinitionId, out var cooldown) && DateTimeOffset.UtcNow < cooldown.ExpiresAt;
 
     public void StartItemCooldown(int itemDefinitionId, int cooldownMs) =>
-        _itemCooldowns[itemDefinitionId] = DateTimeOffset.UtcNow.AddMilliseconds(cooldownMs);
+        _itemCooldowns[itemDefinitionId] = (DateTimeOffset.UtcNow.AddMilliseconds(cooldownMs), cooldownMs);
+
+    public bool TryGetItemCooldown(int itemDefinitionId, out int totalMs, out int elapsedMs)
+    {
+        if (_itemCooldowns.TryGetValue(itemDefinitionId, out var cooldown) && DateTimeOffset.UtcNow < cooldown.ExpiresAt)
+        {
+            totalMs = cooldown.TotalMs;
+            elapsedMs = totalMs - (int)(cooldown.ExpiresAt - DateTimeOffset.UtcNow).TotalMilliseconds;
+            return true;
+        }
+
+        totalMs = 0;
+        elapsedMs = 0;
+        return false;
+    }
+
+    private readonly ConcurrentDictionary<int, int> _lastRandomTransformIndex = new();
+
+    public int LastRandomTransformIndex(int itemDefinitionId) =>
+        _lastRandomTransformIndex.TryGetValue(itemDefinitionId, out var index) ? index : -1;
+
+    public void SetLastRandomTransformIndex(int itemDefinitionId, int index) =>
+        _lastRandomTransformIndex[itemDefinitionId] = index;
 
     // For one-off delayed packets unrelated to tracked effects (e.g. a silly string reset
     // animation, a boombox poof) - see PlayerEffect/AddEffect for anything with its own state.
@@ -255,10 +277,12 @@ public sealed class Player : ClientPcData, IEntity
     // the sweep finishes ("sweep animates but after the sweep I cannot use the ability again") - that
     // needs one explicit packet once the cooldown is actually over. So: one packet now, one packet
     // scheduled for later - not the old repeating-every-second loop, and not silence either.
-    public void StartActionBarCooldown(int actionBarId, int slotIndex, int iconId, int nameId, int count, int cooldownMs, int iconTintId = 0)
+    public void StartActionBarCooldown(int actionBarId, int slotIndex, int iconId, int nameId, int count, int cooldownMs, int iconTintId = 0, int elapsedMs = 0)
     {
-        SendTunneled(BuildActionBarSlotPacket(actionBarId, slotIndex, iconId, iconTintId, nameId, count, cooldownMs, enabled: false, elapsed: 0));
-        ScheduleSlotPacket(actionBarId, slotIndex, BuildActionBarSlotPacket(actionBarId, slotIndex, iconId, iconTintId, nameId, count, cooldownMs, enabled: true, elapsed: cooldownMs), cooldownMs);
+        var remainingMs = Math.Max(0, cooldownMs - elapsedMs);
+
+        SendTunneled(BuildActionBarSlotPacket(actionBarId, slotIndex, iconId, iconTintId, nameId, count, cooldownMs, enabled: false, elapsed: elapsedMs));
+        ScheduleSlotPacket(actionBarId, slotIndex, BuildActionBarSlotPacket(actionBarId, slotIndex, iconId, iconTintId, nameId, count, cooldownMs, enabled: true, elapsed: cooldownMs), remainingMs);
     }
 
     private static ClientUpdatePacketUpdateActionBarSlot BuildActionBarSlotPacket(int actionBarId, int slotIndex, int iconId, int iconTintId, int nameId, int count, int cooldownMs, bool enabled, int elapsed)

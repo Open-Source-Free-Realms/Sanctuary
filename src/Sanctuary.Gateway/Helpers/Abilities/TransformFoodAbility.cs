@@ -21,21 +21,29 @@ public sealed class TransformFoodAbility(AbilityServices services) : ConsumableA
         var transformAbilityId = itemDefinition.ActivatableAbilityId;
 
         if (_resourceManager.Consumables.RandomTransformFoods.TryGetValue(itemDefinition.Id, out var randomFood) && randomFood.TransformAbilityIds.Length > 0)
-            transformAbilityId = randomFood.TransformAbilityIds[System.Random.Shared.Next(randomFood.TransformAbilityIds.Length)];
+        {
+            var previousIndex = player.LastRandomTransformIndex(itemDefinition.Id);
+            var index = RollExcluding(randomFood.TransformAbilityIds.Length, previousIndex);
 
-        _resourceManager.Consumables.Transformations.TryGetValue(transformAbilityId, out var transform);
+            player.SetLastRandomTransformIndex(itemDefinition.Id, index);
+            transformAbilityId = randomFood.TransformAbilityIds[index];
+        }
+
+        var hasTransform = _resourceManager.Consumables.Transformations.TryGetValue(transformAbilityId, out var transform);
+        var cooldownMs = hasTransform ? transform!.CooldownMs
+            : _resourceManager.Consumables.FoodEffects.TryGetValue(transformAbilityId, out var foodEffect) ? foodEffect.CooldownMs : 0;
 
         if (player.IsItemOnCooldown(itemDefinition.Id))
             return SendFailure(player);
 
-        if (player.TemporaryAppearance != 0)
+        if (hasTransform && player.TemporaryAppearance != 0)
             return SendFailure(player);
 
-        player.ApplyTemporaryAppearance(transform!.ModelId, transform.DurationMs, transform.CompositeEffectId, itemDefinition.NameId);
+        ApplyTransformOrFoodEffect(player, transformAbilityId, itemDefinition.NameId);
 
-        player.StartItemCooldown(itemDefinition.Id, transform.CooldownMs);
+        player.StartItemCooldown(itemDefinition.Id, cooldownMs);
 
-        FinishActivation(player, clientItem, itemDefinition, slot, transform.CooldownMs);
+        FinishActivation(player, clientItem, itemDefinition, slot, cooldownMs);
 
         return true;
     }

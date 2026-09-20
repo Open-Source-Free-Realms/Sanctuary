@@ -30242,6 +30242,36 @@
         "MembersOnlyPrice":  1
     },
     {
+        "Comment":  "Mystery Cake (normally a Chef collection reward, no collections system yet)",
+        "LaunchTime":  "2026-09-15T00:00:00+00:00",
+        "ExpireTime":  "2040-08-15T07:00:00+00:00",
+        "Image":  {
+                      "Image":  "932"
+                  },
+        "Entries":  [
+                        {
+                            "Quantity":  1,
+                            "GameItemId":  48100,
+                            "MarketingItemId":  48100
+                        }
+                    ],
+        "Id":  900118,
+        "NameId":  139461,
+        "DescriptionId":  139462,
+        "Status":  1,
+        "CurrencyType":  1,
+        "Price":  1,
+        "AltCurrencyPrice":  1,
+        "StoreId":  1,
+        "CategoryGroupId":  42,
+        "DisplayOrder":  1,
+        "CategoryDisplayOrder":  1,
+        "DiscountType":  104,
+        "SkuId":  1,
+        "MemberDiscount":  10,
+        "MembersOnlyPrice":  1
+    },
+    {
         "Comment":  "Ballet Boombox - cannot find the correct store entry (never released, staff events only)",
         "LaunchTime":  "2026-09-15T00:00:00+00:00",
         "ExpireTime":  "2040-08-15T07:00:00+00:00",
