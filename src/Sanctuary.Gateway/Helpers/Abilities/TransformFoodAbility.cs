@@ -41,9 +41,9 @@ public sealed class TransformFoodAbility(AbilityServices services) : ConsumableA
 
         ApplyTransformOrFoodEffect(player, transformAbilityId, itemDefinition.NameId);
 
-        player.StartItemCooldown(itemDefinition.Id, cooldownMs);
+        player.StartItemCooldown(itemDefinition.Id, ClampCooldown(cooldownMs));
 
-        FinishActivation(player, clientItem, itemDefinition, slot, cooldownMs);
+        FinishActivation(player, clientItem, itemDefinition, slot, ClampCooldown(cooldownMs));
 
         return true;
     }
