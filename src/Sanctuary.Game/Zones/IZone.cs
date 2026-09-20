@@ -46,6 +46,7 @@ public interface IZone : IScriptableZone, IDisposable
     bool TryAddMount(Mount mount);
     bool TryAddPlayer(Player player);
 
+    bool TryCreateNpc([MaybeNullWhen(false)] out Npc npc);
     bool TryCreateNpc(ulong? guid, [MaybeNullWhen(false)] out Npc npc);
     bool TryCreateNpc(ulong? guid, NpcDefinition definition, [MaybeNullWhen(false)] out Npc npc);
     IReadOnlyList<CollectionNodePoolStatus> GetCollectionNodePoolStatuses();

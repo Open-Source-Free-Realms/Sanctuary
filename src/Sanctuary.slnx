@@ -19,6 +19,7 @@
     <File Path="Resources/CollectionNodePools.json" />
     <File Path="Resources/CollectionNodeTypes.json" />
     <File Path="Resources/Collections.json" />
+    <File Path="Resources/Consumables.json" />
     <File Path="Resources/ItemCategories.txt" />
     <File Path="Resources/ItemCategoryGroups.txt" />
     <File Path="Resources/ItemClasses.txt" />

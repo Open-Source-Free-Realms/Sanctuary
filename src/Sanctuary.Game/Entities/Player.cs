@@ -67,6 +67,39 @@ public sealed class Player : ClientPcData, IEntity
 
     public int TimezoneOffset { get; set; }
 
+    public Dictionary<int, Dictionary<int, int>> ActionBarItemGuids { get; set; } = new();
+
+    public int TemporaryAppearance { get; private set; }
+
+    public ulong LastSillyStringTarget { get; set; }
+
+    public int ActiveFoodEffectId { get; set; }
+
+    private readonly ConcurrentDictionary<int, DateTimeOffset> _itemCooldowns = new();
+
+    public bool IsItemOnCooldown(int itemDefinitionId) =>
+        _itemCooldowns.TryGetValue(itemDefinitionId, out var expiresAt) && DateTimeOffset.UtcNow < expiresAt;
+
+    public void StartItemCooldown(int itemDefinitionId, int cooldownMs) =>
+        _itemCooldowns[itemDefinitionId] = DateTimeOffset.UtcNow.AddMilliseconds(cooldownMs);
+
+    // For one-off delayed packets unrelated to tracked effects (e.g. a silly string reset
+    // animation, a boombox poof) - see PlayerEffect/AddEffect for anything with its own state.
+    // Min-heap ordered by send time.
+    private readonly PriorityQueue<(ISerializablePacket Packet, bool SendToSelf), DateTimeOffset> _delayedPackets = new();
+
+    // One scheduled personal-UI packet per action bar slot (the cooldown re-enable) - keyed, not queued,
+    // so a slot that gets emptied before its cooldown naturally expires (last item consumed) can cancel
+    // its own pending re-enable instead of it firing later and silently un-deleting the slot.
+    private readonly ConcurrentDictionary<(int, int), (DateTimeOffset SendAt, ISerializablePacket Packet)> _delayedSlotPackets = new();
+
+    public void ScheduleSlotPacket(int actionBarId, int slotIndex, ISerializablePacket packet, int delayMs)
+    {
+        _delayedSlotPackets[(actionBarId, slotIndex)] = (DateTimeOffset.UtcNow.AddMilliseconds(delayMs), packet);
+    }
+
+    public void CancelScheduledSlotPacket(int actionBarId, int slotIndex) => _delayedSlotPackets.TryRemove((actionBarId, slotIndex), out _);
+
     public Vector4 StartingZonePosition { get; set; }
     public Quaternion StartingZoneRotation { get; set; }
 
@@ -131,6 +164,14 @@ public sealed class Player : ClientPcData, IEntity
             SendTunneled(packet);
     }
 
+    public void SendTunneledToVisibleDelayed(ISerializablePacket packet, int delayMs, bool sendToSelf = false)
+    {
+        lock (_delayedPackets)
+        {
+            _delayedPackets.Enqueue((packet, sendToSelf), DateTimeOffset.UtcNow.AddMilliseconds(delayMs));
+        }
+    }
+
     public bool IsMuted()
     {
         DateTimeOffset currentTime = DateTimeOffset.UtcNow;
@@ -179,10 +220,68 @@ public sealed class Player : ClientPcData, IEntity
 
     public void UpdateEveryTick()
     {
+        var now = DateTimeOffset.UtcNow;
+
+        TickEffects(now);
+
+        while (true)
+        {
+            (ISerializablePacket Packet, bool SendToSelf) due;
+
+            lock (_delayedPackets)
+            {
+                if (!_delayedPackets.TryPeek(out _, out var sendAt) || sendAt > now)
+                    break; // none or none ready
+
+                due = _delayedPackets.Dequeue();
+            }
+
+            SendTunneledToVisible(due.Packet, due.SendToSelf);
+        }
+
+        foreach (var (key, scheduled) in _delayedSlotPackets)
+        {
+            if (scheduled.SendAt > now)
+                continue;
+
+            if (_delayedSlotPackets.TryRemove(key, out var removed))
+                SendTunneled(removed.Packet);
+        }
     }
 
     public void UpdateEverySecond()
     {
+    }
+
+    // The client animates the cooldown sweep itself from TotalRefreshTime -
+    // no per-second resend needed for that. But it does NOT re-enable the slot for input on its own once
+    // the sweep finishes ("sweep animates but after the sweep I cannot use the ability again") - that
+    // needs one explicit packet once the cooldown is actually over. So: one packet now, one packet
+    // scheduled for later - not the old repeating-every-second loop, and not silence either.
+    public void StartActionBarCooldown(int actionBarId, int slotIndex, int iconId, int nameId, int count, int cooldownMs, int iconTintId = 0)
+    {
+        SendTunneled(BuildActionBarSlotPacket(actionBarId, slotIndex, iconId, iconTintId, nameId, count, cooldownMs, enabled: false, elapsed: 0));
+        ScheduleSlotPacket(actionBarId, slotIndex, BuildActionBarSlotPacket(actionBarId, slotIndex, iconId, iconTintId, nameId, count, cooldownMs, enabled: true, elapsed: cooldownMs), cooldownMs);
+    }
+
+    private static ClientUpdatePacketUpdateActionBarSlot BuildActionBarSlotPacket(int actionBarId, int slotIndex, int iconId, int iconTintId, int nameId, int count, int cooldownMs, bool enabled, int elapsed)
+    {
+        var packet = new ClientUpdatePacketUpdateActionBarSlot { Data = { Id = actionBarId, Slot = slotIndex } };
+        packet.Slot.IsEmpty = false;
+        packet.Slot.IconId = iconId;
+        packet.Slot.IconTintId = iconTintId;
+        packet.Slot.NameId = nameId;
+        packet.Slot.Unknown5 = 1;
+        packet.Slot.Unknown6 = 4;
+        packet.Slot.Unknown7 = 15;
+        packet.Slot.Enabled = enabled;
+        packet.Slot.Unknown10 = elapsed;
+        packet.Slot.TotalRefreshTime = cooldownMs;
+        packet.Slot.Unknown12 = elapsed;
+        packet.Slot.Quantity = count;
+        packet.Slot.ForceDismount = true;
+        packet.Slot.Unknown15 = elapsed;
+        return packet;
     }
 
     public void UpdatePosition(Vector4 position, Quaternion rotation, bool updateZoneArea = true)
@@ -199,6 +298,31 @@ public sealed class Player : ClientPcData, IEntity
             if (updateZoneArea)
                 UpdateZoneArea();
         }
+    }
+
+    // Nearest other player in the zone within range, excluding excludeGuid if given.
+    public Player? FindNearestPlayer(float range, ulong excludeGuid = 0)
+    {
+        Player? nearest = null;
+        var nearestDistance = range * range;
+
+        foreach (var candidate in Zone.Players)
+        {
+            if (candidate.Guid == Guid || candidate.Guid == excludeGuid)
+                continue;
+
+            var deltaX = candidate.Position.X - Position.X;
+            var deltaZ = candidate.Position.Z - Position.Z;
+            var distance = deltaX * deltaX + deltaZ * deltaZ;
+
+            if (distance >= nearestDistance)
+                continue;
+
+            nearestDistance = distance;
+            nearest = candidate;
+        }
+
+        return nearest;
     }
 
     private void UpdateZoneTile()
@@ -454,7 +578,7 @@ public sealed class Player : ClientPcData, IEntity
         {
             commandPacketInteractionList.List.Interactions.Add(StopIgnoringInteraction.Data);
         }
-        else
+        else if (!Friends.Any(x => x.Guid == player.Guid))
         {
             commandPacketInteractionList.List.Interactions.Add(IgnoreInteraction.Data);
         }
@@ -574,7 +698,7 @@ public sealed class Player : ClientPcData, IEntity
             IsMember = MembershipStatus != 0,
             IsReferee = isReferee,
 
-            // playerUpdatePacketAddPc.TemporaryAppearance = 277;
+            TemporaryAppearance = TemporaryAppearance,
 
             ActiveProfileId = ActiveProfileId,
 
@@ -601,6 +725,170 @@ public sealed class Player : ClientPcData, IEntity
 
         return packet;
     }
+
+    public const int ChangeFormBuffIconId = 3843;
+
+    public void ApplyTemporaryAppearance(int modelId, int durationMs, int effectId = 0, int buffNameId = 0)
+    {
+        if (_appearanceEffectId != 0)
+            RemoveEffect(_appearanceEffectId);
+
+        _appearanceEffectId = AddEffect(new PlayerEffect
+        {
+            ExpiresAt = durationMs > 0 ? DateTimeOffset.UtcNow.AddMilliseconds(durationMs) : null,
+            AppearanceModelId = modelId,
+            AppearancePoofEffectId = effectId,
+            BuffIconId = buffNameId != 0 ? ChangeFormBuffIconId : 0,
+            BuffNameId = buffNameId,
+            OnRemoved = () => _appearanceEffectId = 0
+        });
+    }
+
+    public void RemoveTemporaryAppearance()
+    {
+        if (_appearanceEffectId != 0)
+            RemoveEffect(_appearanceEffectId);
+    }
+
+    #region Effects
+
+    // A tracked, timed effect on the player - a transformation, a food effect aura, or both a
+    // world-visible composite effect and a buff bar icon at once. One tick loop expires them,
+    // one pair of methods applies/unapplies whatever packets each of those parts needs, so adding
+    // a new kind of effect doesn't mean adding another set of ad hoc fields and conditions.
+    private readonly ConcurrentDictionary<int, PlayerEffect> _effects = new();
+    private int _appearanceEffectId;
+
+    public int AddEffect(PlayerEffect effect)
+    {
+        effect.Id = EffectTagIdGenerator.Next();
+        _effects[effect.Id] = effect;
+
+        ApplyEffect(effect);
+
+        return effect.Id;
+    }
+
+    public void RemoveEffect(int id)
+    {
+        if (!_effects.TryRemove(id, out var effect))
+            return;
+
+        UnapplyEffect(effect);
+        effect.OnRemoved?.Invoke();
+    }
+
+    private void TickEffects(DateTimeOffset now)
+    {
+        List<PlayerEffect> starting = [];
+        List<int> expired = [];
+
+        foreach (var effect in _effects.Values)
+        {
+            if (!effect.WorldEffectStarted && effect.WorldEffectId != 0 &&
+                (effect.WorldEffectStartsAt is null || effect.WorldEffectStartsAt <= now))
+                starting.Add(effect);
+
+            if (effect.ExpiresAt is { } expiresAt && expiresAt <= now)
+                expired.Add(effect.Id);
+        }
+
+        foreach (var effect in starting)
+            StartWorldEffect(effect);
+
+        foreach (var id in expired)
+            RemoveEffect(id);
+    }
+
+    private void ApplyEffect(PlayerEffect effect)
+    {
+        if (effect.AppearanceModelId != 0)
+        {
+            TemporaryAppearance = effect.AppearanceModelId;
+
+            if (effect.AppearancePoofEffectId != 0)
+                SendTunneledToVisible(new PlayerUpdatePacketPlayCompositeEffect { Guid = Guid, CompositeEffectId = effect.AppearancePoofEffectId, Position = Position, Clear = false }, true);
+
+            SendTunneledToVisible(new PlayerUpdatePacketUpdateTemporaryAppearance { Guid = Guid, TemporaryAppearance = effect.AppearanceModelId }, true);
+
+            ResyncWorldEffects();
+        }
+
+        if (effect.WorldEffectId != 0 && (effect.WorldEffectStartsAt is null || effect.WorldEffectStartsAt <= DateTimeOffset.UtcNow))
+            StartWorldEffect(effect);
+
+        if (effect.BuffIconId != 0)
+        {
+            var durationSeconds = effect.ExpiresAt is { } expiresAt
+                ? Math.Max(1, (int)(expiresAt - DateTimeOffset.UtcNow).TotalSeconds)
+                : 0;
+
+            SendTunneled(new ClientUpdatePacketAddEffectTag
+            {
+                TagId = effect.Id,
+                EffectTag = new EffectTag
+                {
+                    InstanceId = effect.Id,
+                    Duration = durationSeconds,
+                    StartTime = 0,
+                    StopTime = (uint)-durationSeconds
+                },
+                IconId = effect.BuffIconId,
+                NameId = effect.BuffNameId
+            });
+        }
+    }
+
+    private void UnapplyEffect(PlayerEffect effect)
+    {
+        if (effect.AppearanceModelId != 0)
+        {
+            TemporaryAppearance = 0;
+            SendTunneledToVisible(new PlayerUpdatePacketRemoveTemporaryAppearance { Guid = Guid }, true);
+            ResyncWorldEffects();
+        }
+
+        if (effect.WorldEffectStarted)
+        {
+            SendTunneledToVisible(new PlayerUpdatePacketRemoveEffectTagCompositeEffect { Guid = Guid, TagId = effect.WorldTagId }, true);
+            effect.WorldEffectStarted = false;
+        }
+
+        if (effect.BuffIconId != 0)
+            SendTunneled(new ClientUpdatePacketRemoveEffectTag { TagId = effect.Id });
+    }
+
+    private void StartWorldEffect(PlayerEffect effect)
+    {
+        effect.WorldEffectStarted = true;
+        effect.WorldTagId = EffectTagIdGenerator.Next();
+
+        SendTunneledToVisible(new PlayerUpdatePacketAddEffectTagCompositeEffect
+        {
+            Guid = Guid,
+            TagId = effect.WorldTagId,
+            CompositeEffectId = effect.WorldEffectId,
+            SourceGuid = Guid
+        }, true);
+    }
+
+    // A temporary appearance change is unreliable about which world-visible effect tags survive
+    // it - sometimes a tag keeps playing across it, sometimes it doesn't, and the client also
+    // ignores a repeat of a tag id it's already seen for this actor. Rather than guess which case
+    // this is, explicitly drop and re-add every effect that's supposed to be showing one, with a
+    // fresh id, on every appearance change in either direction.
+    private void ResyncWorldEffects()
+    {
+        var active = _effects.Values.Where(e => e.WorldEffectStarted).ToList();
+
+        foreach (var effect in active)
+        {
+            SendTunneledToVisible(new PlayerUpdatePacketRemoveEffectTagCompositeEffect { Guid = Guid, TagId = effect.WorldTagId }, true);
+            StartWorldEffect(effect);
+        }
+    }
+
+    #endregion
 
     #region Combat
 
@@ -643,25 +931,25 @@ public sealed class Player : ClientPcData, IEntity
             return false;
         }
 
-        var weaponDefinitionId = GetEquippedWeaponDefinitionId();
-        var (basic, special) = ResolveWeaponAbilities(kit, weaponDefinitionId);
-
-        var weaponNameId = 0;
-        if (_resourceManager.ClientItemDefinitions.TryGetValue(weaponDefinitionId, out var weaponDefinition))
-            weaponNameId = weaponDefinition.NameId;
-
         var setDefinition = new AbilityPacketSetDefinition { ProfileId = kit.ProfileId };
 
-        if (basic is not null)
-        {
-            setDefinition.AbilitySet.Abilities[0] = CreateToolbarSlot(kit.BasicSlotDefId, basic.IconId, weaponNameId, manaCost: 0);
-            SendAbilityDefinition(kit.BasicSlotDefId, basic);
-        }
+        var weaponDefinitionId = GetEquippedWeaponDefinitionId();
 
-        if (special is not null)
+        if (_resourceManager.ClientItemDefinitions.TryGetValue(weaponDefinitionId, out var weaponDefinition))
         {
-            setDefinition.AbilitySet.Abilities[1] = CreateToolbarSlot(kit.SpecialSlotDefId, special.IconId, weaponNameId, special.EnergyCost);
-            SendAbilityDefinition(kit.SpecialSlotDefId, special);
+            var (basic, special) = ResolveWeaponAbilities(kit, weaponDefinitionId);
+
+            if (basic is not null)
+            {
+                setDefinition.AbilitySet.Abilities[0] = CreateToolbarSlot(kit.BasicSlotDefId, basic.IconId, weaponDefinition.NameId, manaCost: 0);
+                SendAbilityDefinition(kit.BasicSlotDefId, basic);
+            }
+
+            if (special is not null)
+            {
+                setDefinition.AbilitySet.Abilities[1] = CreateToolbarSlot(kit.SpecialSlotDefId, special.IconId, weaponDefinition.NameId, special.EnergyCost);
+                SendAbilityDefinition(kit.SpecialSlotDefId, special);
+            }
         }
 
         SendTunneled(setDefinition);
@@ -700,9 +988,7 @@ public sealed class Player : ClientPcData, IEntity
 
     private (AbilityDefinition? Basic, AbilityDefinition? Special) ResolveWeaponAbilities(JobKitDefinition kit, int weaponDefinitionId)
     {
-        var mapping = weaponDefinitionId != 0
-            ? kit.Weapons.FirstOrDefault(w => w.WeaponDefIds.Contains(weaponDefinitionId))
-            : null;
+        var mapping = kit.Weapons.FirstOrDefault(w => w.WeaponDefIds.Contains(weaponDefinitionId));
 
         var basicId = mapping?.BasicAbilityId ?? kit.FallbackBasicAbilityId;
         var specialId = mapping?.SpecialAbilityId ?? 0;

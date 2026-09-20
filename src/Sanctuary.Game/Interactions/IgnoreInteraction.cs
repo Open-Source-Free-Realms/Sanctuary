@@ -37,6 +37,9 @@ public class IgnoreInteraction : IInteraction
         if (player.Ignores.Any(x => x.Guid == otherPlayer.Guid))
             return;
 
+        if (player.Friends.Any(x => x.Guid == otherPlayer.Guid))
+            return;
+
         using var dbContext = _dbContextFactory.CreateDbContext();
 
         var dbCharacter = dbContext.Characters.FirstOrDefault(x => x.Id == GuidHelper.GetPlayerId(player.Guid));

@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -59,6 +60,9 @@ public class Npc : IScriptableNpc, IEntity
     /// </summary>
     public int Disposition { get; set; } = 1;
 
+    public Action<Player>? InteractAction { get; set; }
+    public Action? UpdateEverySecondAction { get; set; }
+
     public int Animation { get; set; } = 1;
 
     public int CompositeEffectId { get; set; }
@@ -97,6 +101,7 @@ public class Npc : IScriptableNpc, IEntity
 
     public void OnInteract(Player player)
     {
+        InteractAction?.Invoke(player);
     }
 
     public virtual void OnAddVisibleNpcs(params IEnumerable<Npc> npcs)
@@ -143,6 +148,8 @@ public class Npc : IScriptableNpc, IEntity
 
     public void UpdateEverySecond()
     {
+        UpdateEverySecondAction?.Invoke();
+
         if (!_scripts.IsEmpty)
             GetOrCreateScriptContext().FireEvent("second");
     }

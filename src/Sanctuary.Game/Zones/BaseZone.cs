@@ -658,6 +658,11 @@ public abstract class BaseZone : IZone, IDisposable
         return _players.TryAdd(player.Guid, player) && _entities.TryAdd(player.Guid, player);
     }
 
+    public bool TryCreateNpc([MaybeNullWhen(false)] out Npc npc)
+    {
+        return TryCreateNpc(null, out npc);
+    }
+
     private bool TryRegisterEntity<TEntity>(ConcurrentDictionary<ulong, TEntity> collection, TEntity entity)
         where TEntity : IEntity
     {

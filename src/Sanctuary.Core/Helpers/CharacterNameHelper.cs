@@ -6,8 +6,12 @@ public static class CharacterNameHelper
     {
         foreach (var character in name)
         {
-            if (character is >= 'A' and <= 'Z' or >= 'a' and <= 'z' or '\'' or ' ')
+
+            if (character is '\'' or ' ' || (character >= '\u0041' && character <= '\u024F'))
                 continue;
+
+            // if (character is >= 'A' and <= 'Z' or >= 'a' and <= 'z' or '\'' or ' ')
+            //     continue;
 
             return true;
         }
