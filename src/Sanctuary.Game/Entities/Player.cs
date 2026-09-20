@@ -349,16 +349,11 @@ public sealed class Player : ClientPcData, IEntity
             return false;
         _zoneManager.EvictIfEmpty(oldZone);
 
-
         if (Zone is WorldZone)
         {
             StartingZonePosition = Position;
             StartingZoneRotation = Rotation;
         }
-
-        RemoveFromVisibleEntities(true);
-
-        ZoneTile.Entities.Remove(Guid, out _);
 
         if (Mount is not null && !Mount.TeleportToZone(zone, position, rotation))
             Dismount();
@@ -378,7 +373,7 @@ public sealed class Player : ClientPcData, IEntity
             Name = Zone.Name,
             Position = position,
             Rotation = rotation,
-            Sky = null,
+            Sky = Zone.Sky,
             Id = Zone.Id,
             GeometryId = 214,
             OverrideUpdateRadius = true
@@ -1045,6 +1040,13 @@ public sealed class Player : ClientPcData, IEntity
             OnRemoveVisibleNpcs(VisibleNpcs.Values);
             OnRemoveVisiblePlayers(VisiblePlayers.Values);
         }
+    }
+
+    public void OnBeforeZoneChange()
+    {
+        RemoveFromVisibleEntities(true);
+
+        ZoneTile.Entities.Remove(Guid, out _);
     }
 
     public void Dispose()

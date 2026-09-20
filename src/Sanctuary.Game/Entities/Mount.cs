@@ -25,9 +25,6 @@ public class Mount : Npc
     {
         Zone.TryRemoveNpc(Guid);
 
-        if (!zone.TryAddMount(this))
-            return false;
-
         // Alert/Remove visible entities
         foreach (var visiblePlayer in VisiblePlayers)
             visiblePlayer.Value.OnRemoveVisibleNpcs([this]);
@@ -35,6 +32,9 @@ public class Mount : Npc
         OnRemoveVisiblePlayers(VisiblePlayers.Values);
 
         ZoneTile.Entities.Remove(Guid, out _);
+
+        if (!zone.TryAddMount(this))
+            return false;
 
         // Teleport to new zone
 

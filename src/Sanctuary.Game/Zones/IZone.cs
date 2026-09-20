@@ -20,6 +20,8 @@ public interface IZone : IScriptableZone, IDisposable
     Vector4 SpawnPosition { get; }
     Quaternion SpawnRotation { get; }
 
+    string? Sky { get; }
+
     #region Events
 
     void OnStart();
@@ -36,8 +38,6 @@ public interface IZone : IScriptableZone, IDisposable
     bool IsEmpty { get; }
 
     float TickDeltaSeconds { get; }
-
-
 
     bool TryGetNpc(ulong guid, [MaybeNullWhen(false)] out Npc npc);
     bool TryGetPlayer(ulong guid, [MaybeNullWhen(false)] out Player player);

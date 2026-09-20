@@ -124,6 +124,8 @@ public class ZoneManager : IZoneManager
 
             zone = newZone;
 
+            player.OnBeforeZoneChange();
+
             // NOTE: this MIGHT be delecate...
             // These SHOULD both always return 'true', but if we want to be extra safe,
             // we can return the original zone the player was in if they fail...
@@ -202,7 +204,7 @@ public class ZoneManager : IZoneManager
     }
 
 
-    private bool PlayerCanAccessZone(BaseZoneDefinition definition, ulong? ownerId) => definition switch
+    private static bool PlayerCanAccessZone(BaseZoneDefinition definition, ulong? ownerId) => definition switch
     {
         // NOTE: One day, we may need to worry about code that tries to allow a player into a zone
         // they're not aloud to be inside of (e.g., a private(?) house. Not sure if that existed).
@@ -216,7 +218,7 @@ public class ZoneManager : IZoneManager
         _ => false
     };
 
-    private bool PlayerOwnsHouse(ulong ownerId, int zoneDefinitionId)
+    private static bool PlayerOwnsHouse(ulong ownerId, int zoneDefinitionId)
     {
         // NOTE: I'm not sure I like this function living here...
         // maybe just throw this DB logic into the 'PlayerCanAccessZone' funciton in
