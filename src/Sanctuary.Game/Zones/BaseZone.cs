@@ -1374,6 +1374,9 @@ public abstract class BaseZone : IZone, IDisposable
 
         _tiles.Clear();
 
+        foreach (var npc in _npcs.Values)
+            _scriptManager.DeleteContext(npc);
+
         _npcs.Clear();
         _players.Clear();
 
