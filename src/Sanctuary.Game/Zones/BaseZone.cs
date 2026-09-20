@@ -62,6 +62,9 @@ public abstract class BaseZone : IZone, IDisposable
     private readonly PeriodicTimer _updateEveryTickTimer = new(TimeSpan.FromMilliseconds(TickRate));
     private readonly PeriodicTimer _updateEverySecondTimer = new(TimeSpan.FromSeconds(1));
 
+    private Task _updateEveryTickTask = Task.CompletedTask;
+    private Task _updateEverySecondTask = Task.CompletedTask;
+
     public int Id { get; init; }
     public int DefinitionId => _zoneDefinition.Id;
     public string Name => _zoneDefinition.Name;
@@ -125,8 +128,8 @@ public abstract class BaseZone : IZone, IDisposable
         GetOrCreateScriptContext().FireEvent("start");
         ActivateCollectionNodePools();
 
-        Task.Factory.StartNew(UpdateEveryTickAsync, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-        Task.Factory.StartNew(UpdateEverySecondAsync, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        _updateEveryTickTask = Task.Factory.StartNew(UpdateEveryTickAsync, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
+        _updateEverySecondTask = Task.Factory.StartNew(UpdateEverySecondAsync, _cancellationTokenSource.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).Unwrap();
     }
 
     public virtual void OnClientIsReady(Player player)
@@ -1364,6 +1367,8 @@ public abstract class BaseZone : IZone, IDisposable
     {
         _cancellationTokenSource.Cancel();
 
+        Task.WaitAll(_updateEveryTickTask, _updateEverySecondTask);
+
         lock (_collectionNodeLock)
             _collectionNodeRefills.Clear();
 
@@ -1373,8 +1378,6 @@ public abstract class BaseZone : IZone, IDisposable
         _players.Clear();
 
         _scriptManager.DeleteContext(this);
-
-        _zoneManager.RemoveZoneInstance(this);
     }
 
 }

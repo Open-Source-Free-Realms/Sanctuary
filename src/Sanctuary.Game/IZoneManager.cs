@@ -21,6 +21,6 @@ public interface IZoneManager
 
     bool TryMovePlayerToZone(int zoneDefinitionId, ulong? ownerId, Player player, out IZone zone);
 
-    void RemoveZoneInstance(IZone zone);
+    bool TryRemoveZoneInstance(IZone zone);
     void EvictIfEmpty(IZone zone);
 }

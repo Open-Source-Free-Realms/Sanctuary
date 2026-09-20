@@ -175,10 +175,10 @@ public class ZoneManager : IZoneManager
         _ => throw new InvalidOperationException($"Unhandled zone definition type: {zoneDefinition.GetType()}")
     };
 
-    public void RemoveZoneInstance(IZone zone)
+    public bool TryRemoveZoneInstance(IZone zone)
     {
         var key = (zone.DefinitionId, zone.OwnerId);
-        _zones.TryRemove(new(key, zone));
+        return _zones.TryRemove(new(key, zone));
     }
 
     public void EvictIfEmpty(IZone zone)
@@ -188,15 +188,17 @@ public class ZoneManager : IZoneManager
         if (isStartingZone)
             return;
 
-        // NOTE: This might be called twice from two separate threads (one after the other)
-        // This means the zone may be disposed twice. Right now, this seems to be okay, so
-        // no protection will be added within 'dispose'.
+        bool removed;
+
         lock (_playerTransitionLock)
         {
-
-            if (zone.IsEmpty)
-                zone.Dispose();
+            // NOTE: This may look a bit awkward, but recall that the first statement
+            // will prevent the second statement from being run if it is 'false'!
+            removed = zone.IsEmpty && TryRemoveZoneInstance(zone);
         }
+
+        if (removed)
+            zone.Dispose();
     }
 
 
