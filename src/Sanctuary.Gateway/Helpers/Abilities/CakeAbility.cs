@@ -72,8 +72,7 @@ public sealed class CakeAbility(AbilityServices services) : ConsumableAbility(se
                 lastTransform = RollExcluding(cakeDefinition.TransformAbilityIds.Length, lastTransform);
                 var abilityId = cakeDefinition.TransformAbilityIds[lastTransform];
 
-                if (_resourceManager.Consumables.Transformations.TryGetValue(abilityId, out var transform))
-                    player.ApplyTemporaryAppearance(transform.ModelId, transform.DurationMs, transform.CompositeEffectId, cakeDefinition.NameId);
+                ApplyTransformOrFoodEffect(player, abilityId, cakeDefinition.NameId);
             };
         }
         else
@@ -110,8 +109,7 @@ public sealed class CakeAbility(AbilityServices services) : ConsumableAbility(se
                 {
                     var abilityId = cakeDefinition.TransformAbilityIds[roll - cakeDefinition.ScareGroups.Length];
 
-                    if (_resourceManager.Consumables.Transformations.TryGetValue(abilityId, out var transform))
-                        player.ApplyTemporaryAppearance(transform.ModelId, transform.DurationMs, transform.CompositeEffectId, cakeDefinition.NameId);
+                    ApplyTransformOrFoodEffect(player, abilityId, cakeDefinition.NameId);
                 }
             };
         }
@@ -164,6 +162,16 @@ public sealed class CakeAbility(AbilityServices services) : ConsumableAbility(se
                 oneShotEndTime = now.AddMilliseconds(cakeDefinition.OneShotAnimationMs);
             }
         };
+    }
+
+    // Most TransformAbilityIds resolve to a creature transform; a couple of birthday cakes (Shrouded
+    // Glade, Merry Vale) instead grant a plain visual aura, so fall back to FoodEffects for those.
+    private void ApplyTransformOrFoodEffect(Player player, int abilityId, int nameId)
+    {
+        if (_resourceManager.Consumables.Transformations.TryGetValue(abilityId, out var transform))
+            player.ApplyTemporaryAppearance(transform.ModelId, transform.DurationMs, transform.CompositeEffectId, nameId);
+        else if (_resourceManager.Consumables.FoodEffects.TryGetValue(abilityId, out var foodEffect))
+            ApplyFoodEffect(player, nameId, foodEffect.CompositeEffectId, foodEffect.EffectDelayMs);
     }
 
     private static DateTimeOffset NextOneShotTime(CakeItemDefinition cakeDefinition) =>

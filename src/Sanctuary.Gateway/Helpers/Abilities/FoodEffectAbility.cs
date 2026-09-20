@@ -1,5 +1,3 @@
-using System;
-
 using Sanctuary.Game.Entities;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -11,8 +9,7 @@ namespace Sanctuary.Gateway.Helpers.Abilities;
 // lives here rather than being repeated by the catch-all.
 public sealed class FoodEffectAbility(AbilityServices services) : ConsumableAbility(services)
 {
-    private const int FoodEffectDurationMs = 30 * 60 * 1000;
-    private const int FoodEffectCooldownMs = 30 * 60 * 1000;
+    private const int FoodEffectCooldownMs = 1_800_000;
 
     public override bool Matches(ClientItemDefinition itemDefinition) =>
         _resourceManager.Consumables.FoodEffects.ContainsKey(itemDefinition.ActivatableAbilityId);
@@ -22,7 +19,7 @@ public sealed class FoodEffectAbility(AbilityServices services) : ConsumableAbil
         if (player.IsItemOnCooldown(itemDefinition.Id))
             return SendFailure(player);
 
-        player.StartItemCooldown(itemDefinition.Id, FoodEffectCooldownMs);
+        player.StartItemCooldown(itemDefinition.Id, ClampCooldown(FoodEffectCooldownMs));
 
         _resourceManager.Consumables.FoodEffects.TryGetValue(itemDefinition.ActivatableAbilityId, out var foodEffect);
 
@@ -39,29 +36,10 @@ public sealed class FoodEffectAbility(AbilityServices services) : ConsumableAbil
             }, true);
         }
 
-        ApplyFoodAura(player, itemDefinition.NameId, foodEffect?.CompositeEffectId ?? itemDefinition.CompositeEffectId, foodEffect?.EffectDelayMs ?? 0);
+        ApplyFoodEffect(player, itemDefinition.NameId, foodEffect?.CompositeEffectId ?? itemDefinition.CompositeEffectId, foodEffect?.EffectDelayMs ?? 0);
 
-        FinishActivation(player, clientItem, itemDefinition, slot, FoodEffectCooldownMs);
+        FinishActivation(player, clientItem, itemDefinition, slot, ClampCooldown(FoodEffectCooldownMs));
 
         return true;
-    }
-
-    private static void ApplyFoodAura(Player player, int nameId, int effectId, int delayMs)
-    {
-        if (effectId == 0)
-            return;
-
-        if (player.ActiveFoodEffectId != 0)
-            player.RemoveEffect(player.ActiveFoodEffectId);
-
-        player.ActiveFoodEffectId = player.AddEffect(new PlayerEffect
-        {
-            ExpiresAt = DateTimeOffset.UtcNow.AddMilliseconds(delayMs + FoodEffectDurationMs),
-            WorldEffectId = effectId,
-            WorldEffectStartsAt = delayMs > 0 ? DateTimeOffset.UtcNow.AddMilliseconds(delayMs) : null,
-            BuffIconId = Player.ChangeFormBuffIconId,
-            BuffNameId = nameId,
-            OnRemoved = () => player.ActiveFoodEffectId = 0
-        });
     }
 }

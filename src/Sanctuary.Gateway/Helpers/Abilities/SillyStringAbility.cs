@@ -68,9 +68,9 @@ public sealed class SillyStringAbility(AbilityServices services) : ConsumableAbi
             new PlayerUpdatePacketRemoveEffectTagCompositeEffect { Guid = target.Guid, TagId = tagId },
             (int)(favor.EffectSeconds * 1000), sendToSelf: true);
 
-        player.StartItemCooldown(itemDefinition.Id, favor.CooldownMs);
+        player.StartItemCooldown(itemDefinition.Id, ClampCooldown(favor.CooldownMs));
 
-        FinishActivation(player, clientItem, itemDefinition, slot, favor.CooldownMs, IconTintId(clientItem, itemDefinition.Icon.TintId));
+        FinishActivation(player, clientItem, itemDefinition, slot, ClampCooldown(favor.CooldownMs), IconTintId(clientItem, itemDefinition.Icon.TintId));
 
         return true;
     }
