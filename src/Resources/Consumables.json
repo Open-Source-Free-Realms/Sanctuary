@@ -98,7 +98,7 @@
 
   "RandomTransformFoods": [
     { "ItemId": 69828, "TransformAbilityIds": [4370, 4371, 4372, 4373], "Comment": "Jack-O-Lantern" },
-    { "ItemId": 48104, "TransformAbilityIds": [900120, 900121, 900122, 900123], "Comment": "Slice of Mystery Cake" }
+    { "ItemId": 48104, "TransformAbilityIds": [900120, 900121, 900122, 900123, 900124], "Comment": "Slice of Mystery Cake" }
   ],
 
   "FoodEffects": [
@@ -122,7 +122,8 @@
     { "AbilityId": 278, "CompositeEffectId": 15009, "DurationMs": 1800000, "Comment": "Shrouded Glade Birthday Cake - magic-glow_red_skel_loop_rare" },
     { "AbilityId": 281, "CompositeEffectId": 15110, "DurationMs": 1800000, "Comment": "Merry Vale Birthday Cake - star-ring_rainbow_skel_loop" },
     { "AbilityId": 900122, "CompositeEffectId": 5028,  "DurationMs": 60000, "CooldownMs": 60000, "Comment": "Slice of Mystery Cake - magic-steam_orange_skel_aura_loop" },
-    { "AbilityId": 900123, "CompositeEffectId": 15128, "DurationMs": 60000, "CooldownMs": 60000, "Comment": "Slice of Mystery Cake - shadow_sprite_skel_loop" }
+    { "AbilityId": 900123, "CompositeEffectId": 15128, "DurationMs": 60000, "CooldownMs": 60000, "Comment": "Slice of Mystery Cake - shadow_sprite_skel_loop" },
+    { "AbilityId": 900124, "CompositeEffectId": 0, "Scale": 2.0, "DurationMs": 60000, "CooldownMs": 60000, "Comment": "Slice of Mystery Cake - grow to twice normal size" }
   ],
 
   "Transformations": [

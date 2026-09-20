@@ -120,9 +120,9 @@ public abstract class ConsumableAbility(AbilityServices services)
         return true;
     }
 
-    protected static void ApplyFoodEffect(Player player, int nameId, int effectId, int durationMs, int delayMs = 0)
+    protected static void ApplyFoodEffect(Player player, int nameId, int effectId, int durationMs, int delayMs = 0, float scale = 0)
     {
-        if (effectId == 0)
+        if (effectId == 0 && scale == 0)
             return;
 
         if (player.ActiveFoodEffectId != 0)
@@ -133,6 +133,7 @@ public abstract class ConsumableAbility(AbilityServices services)
             ExpiresAt = DateTimeOffset.UtcNow.AddMilliseconds(delayMs + durationMs),
             WorldEffectId = effectId,
             WorldEffectStartsAt = delayMs > 0 ? DateTimeOffset.UtcNow.AddMilliseconds(delayMs) : null,
+            Scale = scale,
             BuffIconId = Player.ChangeFormBuffIconId,
             BuffNameId = nameId,
             OnRemoved = () => player.ActiveFoodEffectId = 0
@@ -146,7 +147,7 @@ public abstract class ConsumableAbility(AbilityServices services)
         if (_resourceManager.Consumables.Transformations.TryGetValue(abilityId, out var transform))
             player.ApplyTemporaryAppearance(transform.ModelId, transform.DurationMs, transform.CompositeEffectId, nameId);
         else if (_resourceManager.Consumables.FoodEffects.TryGetValue(abilityId, out var foodEffect))
-            ApplyFoodEffect(player, nameId, foodEffect.CompositeEffectId, foodEffect.DurationMs, foodEffect.EffectDelayMs);
+            ApplyFoodEffect(player, nameId, foodEffect.CompositeEffectId, foodEffect.DurationMs, foodEffect.EffectDelayMs, foodEffect.Scale);
     }
 
     protected static void PlayEffect(Player player, int effectId, int delayMs = 0)

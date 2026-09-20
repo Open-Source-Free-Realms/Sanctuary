@@ -9,4 +9,6 @@ public class FoodEffectDefinition
 
     public int DurationMs { get; set; }
     public int CooldownMs { get; set; }
+
+    public float Scale { get; set; }
 }

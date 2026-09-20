@@ -69,6 +69,10 @@ public sealed class Player : ClientPcData, IEntity
 
     public int TemporaryAppearance { get; private set; }
 
+    public const float DefaultScale = 1f;
+
+    public float Scale { get; private set; } = DefaultScale;
+
     public ulong LastSillyStringTarget { get; set; }
 
     public int ActiveFoodEffectId { get; set; }
@@ -521,6 +525,9 @@ public sealed class Player : ClientPcData, IEntity
             }
             else
                 SendTunneled(player.GetAddPcPacket());
+
+            if (player.Scale != DefaultScale)
+                SendTunneled(new PlayerUpdatePacketUpdateScale { Guid = player.Guid, Scale = player.Scale });
         }
 
         foreach (var player in players)
@@ -767,6 +774,38 @@ public sealed class Player : ClientPcData, IEntity
             RemoveEffect(_appearanceEffectId);
     }
 
+    // AddPc has no scale field, so late joiners have to be told separately (see OnAddVisiblePlayers).
+    public void SetScale(float scale)
+    {
+        if (!float.IsFinite(scale) || scale <= 0)
+            return;
+
+        Scale = scale;
+
+        SendTunneledToVisible(new PlayerUpdatePacketUpdateScale { Guid = Guid, Scale = scale }, true);
+    }
+
+    public void ApplyTemporaryScale(float scale, int durationMs, int buffNameId = 0)
+    {
+        if (_scaleEffectId != 0)
+            RemoveEffect(_scaleEffectId);
+
+        _scaleEffectId = AddEffect(new PlayerEffect
+        {
+            ExpiresAt = durationMs > 0 ? DateTimeOffset.UtcNow.AddMilliseconds(durationMs) : null,
+            Scale = scale,
+            BuffIconId = buffNameId != 0 ? ChangeFormBuffIconId : 0,
+            BuffNameId = buffNameId,
+            OnRemoved = () => _scaleEffectId = 0
+        });
+    }
+
+    public void RemoveTemporaryScale()
+    {
+        if (_scaleEffectId != 0)
+            RemoveEffect(_scaleEffectId);
+    }
+
     #region Effects
 
     // A tracked, timed effect on the player - a transformation, a food effect aura, or both a
@@ -775,6 +814,7 @@ public sealed class Player : ClientPcData, IEntity
     // a new kind of effect doesn't mean adding another set of ad hoc fields and conditions.
     private readonly ConcurrentDictionary<int, PlayerEffect> _effects = new();
     private int _appearanceEffectId;
+    private int _scaleEffectId;
 
     public int AddEffect(PlayerEffect effect)
     {
@@ -831,6 +871,9 @@ public sealed class Player : ClientPcData, IEntity
             ResyncWorldEffects();
         }
 
+        if (effect.Scale != 0)
+            SetScale(effect.Scale);
+
         if (effect.WorldEffectId != 0 && (effect.WorldEffectStartsAt is null || effect.WorldEffectStartsAt <= DateTimeOffset.UtcNow))
             StartWorldEffect(effect);
 
@@ -864,6 +907,10 @@ public sealed class Player : ClientPcData, IEntity
             SendTunneledToVisible(new PlayerUpdatePacketRemoveTemporaryAppearance { Guid = Guid }, true);
             ResyncWorldEffects();
         }
+
+        // Fall back to any other scale effect that's still running.
+        if (effect.Scale != 0)
+            SetScale(_effects.Values.FirstOrDefault(e => e.Id != effect.Id && e.Scale != 0)?.Scale ?? DefaultScale);
 
         if (effect.WorldEffectStarted)
         {

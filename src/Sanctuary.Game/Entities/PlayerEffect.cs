@@ -18,5 +18,7 @@ public sealed class PlayerEffect
     public int AppearanceModelId { get; init; }
     public int AppearancePoofEffectId { get; init; }
 
+    public float Scale { get; init; }
+
     public Action? OnRemoved { get; init; }
 }
