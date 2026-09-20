@@ -27,8 +27,8 @@ public sealed class BoomboxAbility(AbilityServices services) : ConsumableAbility
 
         SpawnBoomboxNpc(player, itemDefinition);
 
-        player.StartItemCooldown(itemDefinition.Id, BoomboxDurationMs);
-        player.StartActionBarCooldown(ActionBarId, slot, itemDefinition.Icon.Id, itemDefinition.NameId, clientItem.Count, BoomboxDurationMs);
+        player.StartItemCooldown(itemDefinition.Id, ClampCooldown(BoomboxDurationMs));
+        player.StartActionBarCooldown(ActionBarId, slot, itemDefinition.Icon.Id, itemDefinition.NameId, clientItem.Count, ClampCooldown(BoomboxDurationMs));
 
         return true;
     }

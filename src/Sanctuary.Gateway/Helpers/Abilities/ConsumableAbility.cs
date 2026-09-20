@@ -27,6 +27,10 @@ public abstract class ConsumableAbility(AbilityServices services)
     internal const int ActionBarId = 2;
     protected const int IdleAnimationId = 1;
 
+    protected const int MinCooldownMs = 3000;
+
+    protected static int ClampCooldown(int cooldownMs) => Math.Max(cooldownMs, MinCooldownMs);
+
     protected readonly ILogger _logger = services.Logger;
     protected readonly IResourceManager _resourceManager = services.ResourceManager;
 
@@ -134,7 +138,7 @@ public abstract class ConsumableAbility(AbilityServices services)
         });
     }
 
-    private const int FoodEffectDurationMs = 30 * 60 * 1000;
+    private const int FoodEffectDurationMs = 1_800_000;
 
     protected static void PlayEffect(Player player, int effectId, int delayMs = 0)
     {

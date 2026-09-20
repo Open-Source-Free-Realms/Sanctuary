@@ -9,7 +9,7 @@ namespace Sanctuary.Gateway.Helpers.Abilities;
 // lives here rather than being repeated by the catch-all.
 public sealed class FoodEffectAbility(AbilityServices services) : ConsumableAbility(services)
 {
-    private const int FoodEffectCooldownMs = 30 * 60 * 1000;
+    private const int FoodEffectCooldownMs = 1_800_000;
 
     public override bool Matches(ClientItemDefinition itemDefinition) =>
         _resourceManager.Consumables.FoodEffects.ContainsKey(itemDefinition.ActivatableAbilityId);
@@ -19,7 +19,7 @@ public sealed class FoodEffectAbility(AbilityServices services) : ConsumableAbil
         if (player.IsItemOnCooldown(itemDefinition.Id))
             return SendFailure(player);
 
-        player.StartItemCooldown(itemDefinition.Id, FoodEffectCooldownMs);
+        player.StartItemCooldown(itemDefinition.Id, ClampCooldown(FoodEffectCooldownMs));
 
         _resourceManager.Consumables.FoodEffects.TryGetValue(itemDefinition.ActivatableAbilityId, out var foodEffect);
 
@@ -38,7 +38,7 @@ public sealed class FoodEffectAbility(AbilityServices services) : ConsumableAbil
 
         ApplyFoodEffect(player, itemDefinition.NameId, foodEffect?.CompositeEffectId ?? itemDefinition.CompositeEffectId, foodEffect?.EffectDelayMs ?? 0);
 
-        FinishActivation(player, clientItem, itemDefinition, slot, FoodEffectCooldownMs);
+        FinishActivation(player, clientItem, itemDefinition, slot, ClampCooldown(FoodEffectCooldownMs));
 
         return true;
     }
