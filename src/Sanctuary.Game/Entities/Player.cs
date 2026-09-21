@@ -103,6 +103,8 @@ public sealed class Player : ClientPcData, IEntity
     public Vector4 StartingZonePosition { get; set; }
     public Quaternion StartingZoneRotation { get; set; }
 
+    public ConcurrentSet<OneTimeNotification> SeenOneTimeNotifications { get; } = [];
+
     public Player(BaseZone zone, UdpConnection connection, IResourceManager resourceManager, IZoneManager zoneManager)
     {
         Zone = zone;

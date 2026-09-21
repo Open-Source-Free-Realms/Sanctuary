@@ -212,7 +212,6 @@ public static class PacketLoginHandler
         // AchievementObjectiveActivatedPacket - Part 2?
 
         connection.SendSelfToClient();
-        connection.SendWelcomeInfo();
 
         _logger.LogInformation("{address} successfully logged in with character {name} ({id}).", connection.EndPoint.Address, character.FullName, character.Id);
 
