@@ -347,6 +347,9 @@ public sealed class Player : ClientPcData, IEntity
         if (!_zoneManager.TryMovePlayerToZone(destinationZone.DefinitionId, destinationZone.OwnerId, this, out var zone))
             return false;
 
+        if (_appearanceEffectId != 0 && _effects.TryGetValue(_appearanceEffectId, out var appearanceEffect) && appearanceEffect.ExpiresAt is null)
+            RemoveTemporaryAppearance();
+
         if (Zone is WorldZone)
         {
             StartingZonePosition = Position;
