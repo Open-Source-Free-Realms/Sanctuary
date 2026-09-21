@@ -129,11 +129,14 @@ public class ZoneManager : IZoneManager
 
             player.OnBeforeZoneChange();
 
-            // NOTE: this MIGHT be delecate...
-            // These SHOULD both always return 'true', but if we want to be extra safe,
-            // we can return the original zone the player was in if they fail...
             oldZone.TryRemovePlayer(player.Guid);
             moved = newZone.TryAddPlayer(player);
+
+            if (!moved)
+            {
+                oldZone.TryAddPlayer(player);
+                oldZone.UpdateEntityZoneTile(player, ZoneTile.Empty, player.ZoneTile);
+            }
         }
 
         EvictIfEmpty(oldZone);
