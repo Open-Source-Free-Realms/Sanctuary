@@ -342,12 +342,8 @@ public sealed class Player : ClientPcData, IEntity
         if (Zone == destinationZone)
             return true;
 
-
-        var oldZone = Zone;
-
         if (!_zoneManager.TryMovePlayerToZone(destinationZone.DefinitionId, destinationZone.OwnerId, this, out var zone))
             return false;
-        _zoneManager.EvictIfEmpty(oldZone);
 
         if (Zone is WorldZone)
         {

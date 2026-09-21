@@ -114,6 +114,9 @@ public class ZoneManager : IZoneManager
 
     public bool TryMovePlayerToZone(int zoneDefinitionId, ulong? ownerId, Player player, out IZone zone)
     {
+        var oldZone = player.Zone;
+        bool moved;
+
         lock (_playerTransitionLock)
         {
             if (!TryGetOrCreateZoneInstance(zoneDefinitionId, ownerId, out var newZone))
@@ -129,9 +132,13 @@ public class ZoneManager : IZoneManager
             // NOTE: this MIGHT be delecate...
             // These SHOULD both always return 'true', but if we want to be extra safe,
             // we can return the original zone the player was in if they fail...
-            player.Zone.TryRemovePlayer(player.Guid);
-            return newZone.TryAddPlayer(player);
+            oldZone.TryRemovePlayer(player.Guid);
+            moved = newZone.TryAddPlayer(player);
         }
+
+        EvictIfEmpty(oldZone);
+
+        return moved;
     }
 
 
