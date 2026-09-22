@@ -344,30 +344,20 @@ public sealed class Player : ClientPcData, IEntity
         if (Zone == destinationZone)
             return true;
 
-        if (!_zoneManager.TryMovePlayerToZone(destinationZone.DefinitionId, destinationZone.OwnerId, this, out var zone))
-            return false;
-
-        if (_appearanceEffectId != 0 && _effects.TryGetValue(_appearanceEffectId, out var appearanceEffect) && appearanceEffect.ExpiresAt is null)
-            RemoveTemporaryAppearance();
-
         if (Zone is WorldZone)
         {
             StartingZonePosition = Position;
             StartingZoneRotation = Rotation;
         }
 
+        if (!_zoneManager.TryMovePlayerToZone(destinationZone.DefinitionId, destinationZone.OwnerId, this, position, rotation, out var zone))
+            return false;
+
+        if (_appearanceEffectId != 0 && _effects.TryGetValue(_appearanceEffectId, out var appearanceEffect) && appearanceEffect.ExpiresAt is null)
+            RemoveTemporaryAppearance();
+
         if (Mount is not null && !Mount.TeleportToZone(zone, position, rotation))
             Dismount();
-
-        // Teleport to new zone
-
-        Visible = false;
-
-        Zone = zone;
-
-        ZoneTile = ZoneTile.Empty;
-
-        UpdatePosition(position, rotation);
 
         var packetClientBeginZoning = new PacketClientBeginZoning
         {
@@ -1043,11 +1033,19 @@ public sealed class Player : ClientPcData, IEntity
         }
     }
 
-    public void OnBeforeZoneChange()
+    public void OnZoneChanged(IZone zone, Vector4 position, Quaternion rotation)
     {
         RemoveFromVisibleEntities(true);
 
         ZoneTile.Entities.Remove(Guid, out _);
+
+        Zone = zone;
+
+        ZoneTile = ZoneTile.Empty;
+
+        Visible = false;
+
+        UpdatePosition(position, rotation);
     }
 
     public void Dispose()

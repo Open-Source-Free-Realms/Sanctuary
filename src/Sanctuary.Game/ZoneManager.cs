@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -112,7 +113,7 @@ public class ZoneManager : IZoneManager
         return true;
     }
 
-    public bool TryMovePlayerToZone(int zoneDefinitionId, ulong? ownerId, Player player, out IZone zone)
+    public bool TryMovePlayerToZone(int zoneDefinitionId, ulong? ownerId, Player player, Vector4 position, Quaternion rotation, out IZone zone)
     {
         var oldZone = player.Zone;
         bool moved;
@@ -127,16 +128,13 @@ public class ZoneManager : IZoneManager
 
             zone = newZone;
 
-            player.OnBeforeZoneChange();
-
             oldZone.TryRemovePlayer(player.Guid);
             moved = newZone.TryAddPlayer(player);
 
-            if (!moved)
-            {
+            if (moved)
+                player.OnZoneChanged(newZone, position, rotation);
+            else
                 oldZone.TryAddPlayer(player);
-                oldZone.UpdateEntityZoneTile(player, ZoneTile.Empty, player.ZoneTile);
-            }
         }
 
         EvictIfEmpty(oldZone);
