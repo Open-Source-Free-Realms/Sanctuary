@@ -1369,6 +1369,9 @@ public abstract class BaseZone : IZone, IDisposable
     {
         _cancellationTokenSource.Cancel();
 
+        _updateEveryTickTimer.Dispose();
+        _updateEverySecondTimer.Dispose();
+
         Task.WaitAll(_updateEveryTickTask, _updateEverySecondTask);
 
         lock (_collectionNodeLock)
