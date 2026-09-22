@@ -582,6 +582,14 @@ public sealed class Player : ClientPcData, IEntity
         player.SendTunneled(commandPacketInteractionList);
     }
 
+    public void OnLevelUp(ClientPcProfile profile)
+    {
+        // TODO: Hook for player level-up mechanics. The reward manager will call
+        // this function whenever a level-up is detected for the given job.
+        // Use this to implement stat changes, or any other level-up specific
+        // benefits.
+    }
+
     #endregion
 
     public int GetFlairShardCompositeEffect()
