@@ -653,15 +653,9 @@ public abstract class BaseZone : IZone, IDisposable
         return _entities.TryGetValue(guid, out entity);
     }
 
-    public bool TryAddMount(Mount mount)
-    {
-        return _npcs.TryAdd(mount.Guid, mount) && _entities.TryAdd(mount.Guid, mount);
-    }
+    public bool TryAddMount(Mount mount) => TryRegisterEntity(_npcs, mount);
 
-    public bool TryAddPlayer(Player player)
-    {
-        return _players.TryAdd(player.Guid, player) && _entities.TryAdd(player.Guid, player);
-    }
+    public bool TryAddPlayer(Player player) => TryRegisterEntity(_players, player);
 
     public bool TryCreateNpc([MaybeNullWhen(false)] out Npc npc)
     {
