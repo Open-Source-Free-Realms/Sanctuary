@@ -162,7 +162,21 @@ public class ZoneManager : IZoneManager
         var key = (zoneDefinitionId, ownerId);
 
         zone = _zones.GetOrAdd(key, _ => CreateZoneInstance(zoneDefinition, ownerId));
-        zone.OnStart();
+
+        try
+        {
+            zone.OnStart();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to start zone '{name}' ({id})", zone.Name, zone.Id);
+
+            _zones.TryRemove(new(key, zone));
+            zone.Dispose();
+
+            zone = null;
+            return false;
+        }
 
         return true;
     }
