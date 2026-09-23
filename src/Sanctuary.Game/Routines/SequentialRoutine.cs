@@ -18,8 +18,18 @@ public sealed class SequentialRoutine : IRoutine
         return Advance();
     }
 
+    public void OnEnd()
+    {
+        _current?.OnEnd();
+
+        while (_routines.TryDequeue(out var routine))
+            routine.OnEnd();
+    }
+
     private bool Advance()
     {
+        _current?.OnEnd();
+
         if (!_routines.TryDequeue(out _current)) return true;
         _current.OnStart();
         return false;

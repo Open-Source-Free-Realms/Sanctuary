@@ -24,4 +24,6 @@ public sealed class TimeoutRoutine : IRoutine
     {
         return _stopwatch.Elapsed.TotalSeconds >= _timeoutSeconds || _routine.OnStep();
     }
+
+    public void OnEnd() => _routine.OnEnd();
 }

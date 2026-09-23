@@ -21,7 +21,21 @@ public sealed class ParallelRoutine : IRoutine
 
     public bool OnStep()
     {
-        _routines.RemoveAll(routine => routine.OnStep());
+        for (int i = _routines.Count - 1; i >= 0; i--)
+        {
+            if (!_routines[i].OnStep())
+                continue;
+
+            _routines[i].OnEnd();
+            _routines.RemoveAt(i);
+        }
+
         return _routines.Count == 0;
+    }
+
+    public void OnEnd()
+    {
+        foreach (var routine in _routines)
+            routine.OnEnd();
     }
 }

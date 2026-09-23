@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 
 using Microsoft.Extensions.Logging;
 
@@ -8,8 +7,20 @@ namespace Sanctuary.Game.Routines;
 
 public sealed class RoutineManager
 {
+    private sealed class RoutineEntry
+    {
+        public readonly IRoutine Routine;
+        public readonly Cadence Cadence;
+
+        public RoutineEntry(IRoutine routine, Cadence cadence)
+        {
+            Routine = routine;
+            Cadence = cadence;
+        }
+    }
+
     private readonly ILogger _logger;
-    private readonly ConcurrentDictionary<string, (IRoutine Routine, Cadence Cadence)> _routines = new();
+    private readonly ConcurrentDictionary<string, RoutineEntry> _routines = new();
 
     public RoutineManager(ILogger logger)
     {
@@ -25,49 +36,81 @@ public sealed class RoutineManager
         catch (Exception ex)
         {
             _logger.LogError(ex, "Routine '{name}' threw during OnStart and will not be scheduled.", name);
+            End(name, routine);
             return;
         }
 
-        _routines[name] = (routine, cadence);
+        var entry = new RoutineEntry(routine, cadence);
+
+        while (true)
+        {
+            if (_routines.TryGetValue(name, out var previous))
+            {
+                if (!_routines.TryUpdate(name, entry, previous))
+                    continue;
+
+                lock (previous)
+                    End(name, previous.Routine);
+
+                return;
+            }
+
+            if (_routines.TryAdd(name, entry))
+                return;
+        }
     }
 
-    public void SetRoutine(string name, Func<bool> onStep, Cadence cadence, Action? onStart = null)
+    public void SetRoutine(string name, Func<bool> onStep, Cadence cadence, Action? onStart = null, Action? onEnd = null)
     {
-        SetRoutine(name, new DelegateRoutine(onStart, onStep), cadence);
+        SetRoutine(name, new DelegateRoutine(onStart, onStep, onEnd), cadence);
     }
 
-    public void Cancel(string name) => _routines.TryRemove(name, out _);
+    public void Cancel(string name)
+    {
+        if (_routines.TryRemove(name, out var entry))
+            lock (entry)
+                End(name, entry.Routine);
+    }
 
     public void OnTick() => Step(Cadence.Tick);
     public void OnSecond() => Step(Cadence.Second);
 
     private void Step(Cadence cadence)
     {
-        List<KeyValuePair<string, (IRoutine Routine, Cadence Cadence)>>? finished = null;
-
-        foreach (var entry in _routines)
+        foreach (var (name, entry) in _routines)
         {
-            if (entry.Value.Cadence != cadence)
+            if (entry.Cadence != cadence)
                 continue;
 
-            bool done;
-
-            try
+            lock (entry)
             {
-                done = entry.Value.Routine.OnStep();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Routine '{name}' threw and will be removed.", entry.Key);
-                done = true;
-            }
+                bool done;
 
-            if (done)
-                (finished ??= new()).Add(entry);
+                try
+                {
+                    done = entry.Routine.OnStep();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Routine '{name}' threw and will be removed.", name);
+                    done = true;
+                }
+
+                if (done && _routines.TryRemove(new(name, entry)))
+                    End(name, entry.Routine);
+            }
         }
+    }
 
-        if (finished is not null)
-            foreach (var entry in finished)
-                _routines.TryRemove(entry);
+    private void End(string name, IRoutine routine)
+    {
+        try
+        {
+            routine.OnEnd();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Routine '{name}' threw during OnEnd.", name);
+        }
     }
 }

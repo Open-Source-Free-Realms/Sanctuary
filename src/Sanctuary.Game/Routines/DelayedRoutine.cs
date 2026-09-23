@@ -11,4 +11,5 @@ public sealed class DelayedRoutine : IRoutine
 
     public void OnStart() => _sequence.OnStart();
     public bool OnStep() => _sequence.OnStep();
+    public void OnEnd() => _sequence.OnEnd();
 }
