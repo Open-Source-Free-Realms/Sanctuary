@@ -3,6 +3,7 @@ using System.Linq;
 using System.Numerics;
 
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Routines;
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -101,35 +102,13 @@ public sealed class BoomboxAbility(AbilityServices services) : ConsumableAbility
         var danceCenter = new Vector3(spawnPosition.X, spawnPosition.Y, spawnPosition.Z);
 
         var dancing = new HashSet<ulong>();
-        var elapsedMs = 0;
         var sinceSwitch = SwitchMs; // so a dance starts on the first tick
         var sequenceIndex = 0;
         var previousAnim = -1;
         var currentAnim = 0;
 
-        boomboxNpc.UpdateEverySecondAction = () =>
+        var danceRoutine = new DelegateRoutine(onStep: () =>
         {
-            if (elapsedMs >= BoomboxDurationMs)
-            {
-                foreach (var player in startingZone.Players.Where(p => dancing.Contains(p.Guid)))
-                    StopDancing(player, transformModelId);
-
-                if (songTagId != 0)
-                {
-                    var stopSong = new PlayerUpdatePacketRemoveEffectTagCompositeEffect
-                    {
-                        Guid = boomboxNpc.Guid,
-                        TagId = songTagId,
-                    };
-
-                    foreach (var player in startingZone.Players)
-                        player.SendTunneled(stopSong);
-                }
-
-                DespawnNpc(boomboxNpc, PoofEffectId);
-                return;
-            }
-
             // Only flag a change when the id differs, so multi-dance boomboxes don't restart
             // the crowd every rotation.
             var animChanged = false;
@@ -197,9 +176,30 @@ public sealed class BoomboxAbility(AbilityServices services) : ConsumableAbility
                 }
             }
 
-            elapsedMs += 1000;
             sinceSwitch += 1000;
-        };
+            return false;
+        },
+        onEnd: () =>
+        {
+            foreach (var player in startingZone.Players.Where(p => dancing.Contains(p.Guid)))
+                StopDancing(player, transformModelId);
+
+            if (songTagId != 0)
+            {
+                var stopSong = new PlayerUpdatePacketRemoveEffectTagCompositeEffect
+                {
+                    Guid = boomboxNpc.Guid,
+                    TagId = songTagId,
+                };
+
+                foreach (var player in startingZone.Players)
+                    player.SendTunneled(stopSong);
+            }
+
+            DespawnNpc(boomboxNpc, PoofEffectId);
+        });
+
+        boomboxNpc.Routines.SetRoutine("dance", new TimeoutRoutine(danceRoutine, BoomboxDurationMs / 1000.0), Cadence.Second);
     }
 
     private static void SyncDance(List<Player> targets, int animationId)

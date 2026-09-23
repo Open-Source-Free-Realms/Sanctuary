@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Collections;
 using Sanctuary.Game.Pathfinding;
+using Sanctuary.Game.Routines;
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -61,7 +62,7 @@ public class Npc : IScriptableNpc, IEntity
     public int Disposition { get; set; } = 1;
 
     public Action<Player>? InteractAction { get; set; }
-    public Action? UpdateEverySecondAction { get; set; }
+    public RoutineManager Routines { get; }
 
     public int Animation { get; set; } = 1;
 
@@ -95,6 +96,7 @@ public class Npc : IScriptableNpc, IEntity
     public Npc(IZone zone)
     {
         Zone = zone;
+        Routines = new RoutineManager(Logger);
     }
 
     #region Events
@@ -134,6 +136,8 @@ public class Npc : IScriptableNpc, IEntity
 
     public void UpdateEveryTick()
     {
+        Routines.OnTick();
+
         if (!_scripts.IsEmpty)
             GetOrCreateScriptContext().FireEvent("tick");
 
@@ -148,7 +152,7 @@ public class Npc : IScriptableNpc, IEntity
 
     public void UpdateEverySecond()
     {
-        UpdateEverySecondAction?.Invoke();
+        Routines.OnSecond();
 
         if (!_scripts.IsEmpty)
             GetOrCreateScriptContext().FireEvent("second");
