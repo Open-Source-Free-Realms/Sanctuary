@@ -66,7 +66,7 @@ public sealed class BoomboxAbility(AbilityServices services) : ConsumableAbility
             npc.IsInteractable = false;
         });
 
-        if (boomboxNpc is null)
+        if (boomboxNpc is null || player.Zone is not StartingZone startingZone)
             return;
 
         var poofRecipients = BroadcastSpawn(player, boomboxNpc, spawnPosition, PoofEffectId);
@@ -90,10 +90,10 @@ public sealed class BoomboxAbility(AbilityServices services) : ConsumableAbility
                 recipient.SendTunneled(songEffect);
         }
 
-        StartDanceLoop(player.Zone, boomboxNpc, spawnPosition, danceSequence, songTagId, effectId, transformModelId);
+        StartDanceLoop(startingZone, boomboxNpc, spawnPosition, danceSequence, songTagId, effectId, transformModelId);
     }
 
-    private static void StartDanceLoop(IZone zone, Npc boomboxNpc, Vector4 spawnPosition, int[] danceSequence, int songTagId, int effectId, int transformModelId)
+    private static void StartDanceLoop(StartingZone startingZone, Npc boomboxNpc, Vector4 spawnPosition, int[] danceSequence, int songTagId, int effectId, int transformModelId)
     {
         const float BoomboxRangeInMeters = 15.0f;
         const int SwitchMs = 4000;
@@ -111,7 +111,7 @@ public sealed class BoomboxAbility(AbilityServices services) : ConsumableAbility
         {
             if (elapsedMs >= BoomboxDurationMs)
             {
-                foreach (var player in zone.Players.Where(p => dancing.Contains(p.Guid)))
+                foreach (var player in startingZone.Players.Where(p => dancing.Contains(p.Guid)))
                     StopDancing(player, transformModelId);
 
                 if (songTagId != 0)
@@ -122,7 +122,7 @@ public sealed class BoomboxAbility(AbilityServices services) : ConsumableAbility
                         TagId = songTagId,
                     };
 
-                    foreach (var player in zone.Players)
+                    foreach (var player in startingZone.Players)
                         player.SendTunneled(stopSong);
                 }
 
@@ -150,7 +150,7 @@ public sealed class BoomboxAbility(AbilityServices services) : ConsumableAbility
                 }
             }
 
-            var players = zone.Players.ToList();
+            var players = startingZone.Players.ToList();
             var inRange = players.Where(p =>
                 Vector3.Distance(new Vector3(p.Position.X, p.Position.Y, p.Position.Z), danceCenter) <= BoomboxRangeInMeters)
                 .ToList();

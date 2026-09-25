@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 
 using Sanctuary.Core.Collections;
 using Sanctuary.Core.IO;
-using Sanctuary.Game;
 using Sanctuary.Game.ChatCommands;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Interactions;
@@ -27,7 +26,6 @@ public sealed class Player : ClientPcData, IEntity
 {
     private readonly UdpConnection _connection;
     private readonly IResourceManager _resourceManager;
-    private readonly IZoneManager _zoneManager;
 
     public bool Visible { get; set; }
 
@@ -103,15 +101,12 @@ public sealed class Player : ClientPcData, IEntity
     public Vector4 StartingZonePosition { get; set; }
     public Quaternion StartingZoneRotation { get; set; }
 
-    public ConcurrentSet<OneTimeNotification> SeenOneTimeNotifications { get; } = [];
-
-    public Player(BaseZone zone, UdpConnection connection, IResourceManager resourceManager, IZoneManager zoneManager)
+    public Player(BaseZone zone, UdpConnection connection, IResourceManager resourceManager)
     {
         Zone = zone;
 
         _connection = connection;
         _resourceManager = resourceManager;
-        _zoneManager = zoneManager;
     }
 
     #region Connection
@@ -339,48 +334,60 @@ public sealed class Player : ClientPcData, IEntity
         ZoneTile = newZoneTile;
     }
 
-    public bool TeleportToZone(IZone destinationZone, Vector4 position, Quaternion rotation)
+    public void TeleportToZone(IZone zone, Vector4 position, Quaternion rotation)
     {
-        if (Zone == destinationZone)
-            return true;
+        if (Zone == zone)
+            return;
 
-        if (Zone is WorldZone)
+        if (Zone is StartingZone)
         {
             StartingZonePosition = Position;
             StartingZoneRotation = Rotation;
         }
 
-        if (!_zoneManager.TryMovePlayerToZone(destinationZone.DefinitionId, destinationZone.OwnerId, this, position, rotation, out var zone))
-            return false;
+        if (Mount is not null)
+            Mount.TeleportToZone(zone, position, rotation);
 
-        if (_appearanceEffectId != 0 && _effects.TryGetValue(_appearanceEffectId, out var appearanceEffect) && appearanceEffect.ExpiresAt is null)
-            RemoveTemporaryAppearance();
+        RemoveFromVisibleEntities(true);
 
-        if (Mount is not null && !Mount.TeleportToZone(zone, position, rotation))
-            Dismount();
+        ZoneTile.Entities.Remove(Guid, out _);
+
+        Zone.TryRemovePlayer(Guid);
+
+        // Add to new zone/zonetile
+
+        zone.TryAddPlayer(this);
+
+        // Teleport to new zone
+
+        Visible = false;
+
+        Zone = zone;
+
+        ZoneTile = ZoneTile.Empty;
+
+        UpdatePosition(position, rotation);
 
         var packetClientBeginZoning = new PacketClientBeginZoning
         {
             Name = Zone.Name,
             Position = position,
             Rotation = rotation,
-            Sky = Zone.Sky,
+            Sky = "sky_deep_mines.xml",
             Id = Zone.Id,
             GeometryId = 214,
             OverrideUpdateRadius = true
         };
 
         SendTunneled(packetClientBeginZoning);
-
-        return true;
     }
 
     private void UpdateZoneArea()
     {
-        if (Zone is not WorldZone worldZone)
+        if (Zone is not StartingZone startingZone)
             return;
 
-        var zoneAreaId = worldZone.GetZoneAreaId(Position);
+        var zoneAreaId = startingZone.GetZoneAreaId(Position);
 
         if (ZoneAreaId == zoneAreaId)
             return;
@@ -1033,21 +1040,6 @@ public sealed class Player : ClientPcData, IEntity
         }
     }
 
-    public void OnZoneChanged(IZone zone, Vector4 position, Quaternion rotation)
-    {
-        RemoveFromVisibleEntities(true);
-
-        ZoneTile.Entities.Remove(Guid, out _);
-
-        Zone = zone;
-
-        ZoneTile = ZoneTile.Empty;
-
-        Visible = false;
-
-        UpdatePosition(position, rotation);
-    }
-
     public void Dispose()
     {
         RemoveFromVisibleEntities(false); // no need to notify self since we're DCing
@@ -1057,6 +1049,5 @@ public sealed class Player : ClientPcData, IEntity
 
         ZoneTile.Entities.Remove(Guid, out _);
         Zone.TryRemovePlayer(Guid);
-        _zoneManager.EvictIfEmpty(Zone);
     }
 }
