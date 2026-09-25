@@ -1,8 +1,8 @@
 {
-  "$type": "Starting",
+  "$type": "World",
   "Id": 1,
   "Name": "FabledRealms",
-  "Type": "Starting",
+  "Type": "World",
   "TileSize": 64,
   "StartLatitude": -48,
   "StartLongitude": -32,

@@ -21,8 +21,10 @@ public class Mount : Npc
         Definition = definition;
     }
 
-    public override void TeleportToZone(IZone zone, Vector4 position, Quaternion rotation)
+    public override bool TeleportToZone(IZone zone, Vector4 position, Quaternion rotation)
     {
+        Zone.TryRemoveNpc(Guid);
+
         // Alert/Remove visible entities
         foreach (var visiblePlayer in VisiblePlayers)
             visiblePlayer.Value.OnRemoveVisibleNpcs([this]);
@@ -31,11 +33,8 @@ public class Mount : Npc
 
         ZoneTile.Entities.Remove(Guid, out _);
 
-        Zone.TryRemoveNpc(Guid);
-
-        // Add to new zone/zonetile
-
-        zone.TryAddMount(this);
+        if (!zone.TryAddMount(this))
+            return false;
 
         // Teleport to new zone
 
@@ -46,6 +45,8 @@ public class Mount : Npc
         ZoneTile = ZoneTile.Empty;
 
         UpdatePosition(position, rotation);
+
+        return true;
     }
 
     public override PlayerUpdatePacketAddNpc GetAddNpcPacket()
