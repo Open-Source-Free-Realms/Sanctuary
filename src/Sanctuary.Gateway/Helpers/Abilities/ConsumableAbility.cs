@@ -19,7 +19,8 @@ namespace Sanctuary.Gateway.Helpers.Abilities;
 public sealed record AbilityServices(
     ILogger Logger,
     IResourceManager ResourceManager,
-    IDbContextFactory<DatabaseContext> DbContextFactory);
+    IDbContextFactory<DatabaseContext> DbContextFactory,
+    IRewardManager RewardManager);
 
 public abstract class ConsumableAbility(AbilityServices services)
 {
@@ -32,6 +33,7 @@ public abstract class ConsumableAbility(AbilityServices services)
 
     protected readonly ILogger _logger = services.Logger;
     protected readonly IResourceManager _resourceManager = services.ResourceManager;
+    protected readonly IRewardManager _rewardManager = services.RewardManager;
 
     private readonly IDbContextFactory<DatabaseContext> _dbContextFactory = services.DbContextFactory;
 
@@ -117,10 +119,9 @@ public abstract class ConsumableAbility(AbilityServices services)
         return true;
     }
 
-    // Shared by FoodEffectAbility and CakeAbility (some cake interactions grant an aura rather than a transform).
-    protected static void ApplyFoodEffect(Player player, int nameId, int effectId, int delayMs = 0)
+    protected static void ApplyFoodEffect(Player player, int nameId, int effectId, int durationMs, int delayMs = 0, float scale = 0)
     {
-        if (effectId == 0)
+        if (effectId == 0 && scale == 0)
             return;
 
         if (player.ActiveFoodEffectId != 0)
@@ -128,16 +129,25 @@ public abstract class ConsumableAbility(AbilityServices services)
 
         player.ActiveFoodEffectId = player.AddEffect(new PlayerEffect
         {
-            ExpiresAt = DateTimeOffset.UtcNow.AddMilliseconds(delayMs + FoodEffectDurationMs),
+            ExpiresAt = DateTimeOffset.UtcNow.AddMilliseconds(delayMs + durationMs),
             WorldEffectId = effectId,
             WorldEffectStartsAt = delayMs > 0 ? DateTimeOffset.UtcNow.AddMilliseconds(delayMs) : null,
+            Scale = scale,
             BuffIconId = Player.ChangeFormBuffIconId,
             BuffNameId = nameId,
             OnRemoved = () => player.ActiveFoodEffectId = 0
         });
     }
 
-    private const int FoodEffectDurationMs = 1_800_000;
+    protected const int FoodEffectDurationMs = 1_800_000;
+
+    protected void ApplyTransformOrFoodEffect(Player player, int abilityId, int nameId)
+    {
+        if (_resourceManager.Consumables.Transformations.TryGetValue(abilityId, out var transform))
+            player.ApplyTemporaryAppearance(transform.ModelId, transform.DurationMs, transform.CompositeEffectId, nameId);
+        else if (_resourceManager.Consumables.FoodEffects.TryGetValue(abilityId, out var foodEffect))
+            ApplyFoodEffect(player, nameId, foodEffect.CompositeEffectId, foodEffect.DurationMs, foodEffect.EffectDelayMs, foodEffect.Scale);
+    }
 
     protected static void PlayEffect(Player player, int effectId, int delayMs = 0)
     {
@@ -221,6 +231,16 @@ public abstract class ConsumableAbility(AbilityServices services)
         player.SendTunneled(new AbilityPacketFailed { StringId = 3079 });
 
         return true;
+    }
+
+    protected static int RollExcluding(int count, int previous)
+    {
+        if (count <= 1 || previous < 0)
+            return Random.Shared.Next(count);
+
+        var roll = Random.Shared.Next(count - 1);
+
+        return roll >= previous ? roll + 1 : roll;
     }
 
     protected void FinishActivation(Player player, ClientItem clientItem, ClientItemDefinition itemDefinition, int slot, int cooldownMs, int iconTintId = 0)

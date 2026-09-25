@@ -36,7 +36,9 @@ public sealed class FoodEffectAbility(AbilityServices services) : ConsumableAbil
             }, true);
         }
 
-        ApplyFoodEffect(player, itemDefinition.NameId, foodEffect?.CompositeEffectId ?? itemDefinition.CompositeEffectId, foodEffect?.EffectDelayMs ?? 0);
+        var durationMs = foodEffect?.DurationMs > 0 ? foodEffect.DurationMs : FoodEffectDurationMs;
+
+        ApplyFoodEffect(player, itemDefinition.NameId, foodEffect?.CompositeEffectId ?? itemDefinition.CompositeEffectId, durationMs, foodEffect?.EffectDelayMs ?? 0, foodEffect?.Scale ?? 0);
 
         FinishActivation(player, clientItem, itemDefinition, slot, ClampCooldown(FoodEffectCooldownMs));
 

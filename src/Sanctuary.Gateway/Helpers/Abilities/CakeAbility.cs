@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Numerics;
 
 using Sanctuary.Game.Entities;
@@ -58,7 +59,29 @@ public sealed class CakeAbility(AbilityServices services) : ConsumableAbility(se
 
         var interactReadyTime = DateTimeOffset.MinValue;
 
-        if (cakeDefinition.Type == CakeItemType.BossCake)
+        if (cakeDefinition.Type == CakeItemType.GiftCake)
+        {
+            cakeNpc.InteractAction = player =>
+            {
+                if (DateTimeOffset.UtcNow < interactReadyTime)
+                    return;
+
+                if (player.Items.Any(item => item.Definition == cakeDefinition.GrantItemId))
+                {
+                    player.SendTunneled(new ChatPacketDebugChat
+                    {
+                        Message = "<font color=\"#FFFF00\">You already have a slice - eat it before taking another.</font>",
+                        PrintToChat = true
+                    });
+                    return;
+                }
+
+                interactReadyTime = DateTimeOffset.UtcNow.AddMilliseconds(cakeDefinition.InteractCooldownMs);
+
+                _rewardManager.TryGrantItem(player, cakeDefinition.GrantItemId, 0, cakeDefinition.GrantItemQuantity, cakeNpc.Guid);
+            };
+        }
+        else if (cakeDefinition.Type == CakeItemType.BossCake)
         {
             var lastTransform = -1;
 
@@ -164,16 +187,6 @@ public sealed class CakeAbility(AbilityServices services) : ConsumableAbility(se
         };
     }
 
-    // Most TransformAbilityIds resolve to a creature transform; a couple of birthday cakes (Shrouded
-    // Glade, Merry Vale) instead grant a plain visual aura, so fall back to FoodEffects for those.
-    private void ApplyTransformOrFoodEffect(Player player, int abilityId, int nameId)
-    {
-        if (_resourceManager.Consumables.Transformations.TryGetValue(abilityId, out var transform))
-            player.ApplyTemporaryAppearance(transform.ModelId, transform.DurationMs, transform.CompositeEffectId, nameId);
-        else if (_resourceManager.Consumables.FoodEffects.TryGetValue(abilityId, out var foodEffect))
-            ApplyFoodEffect(player, nameId, foodEffect.CompositeEffectId, foodEffect.EffectDelayMs);
-    }
-
     private static DateTimeOffset NextOneShotTime(CakeItemDefinition cakeDefinition) =>
         DateTimeOffset.UtcNow.AddMilliseconds(cakeDefinition.OneShotIntervalMs + Random.Shared.Next(cakeDefinition.OneShotIntervalMs + 1));
 
@@ -188,15 +201,5 @@ public sealed class CakeAbility(AbilityServices services) : ConsumableAbility(se
 
         foreach (var viewer in cakeNpc.VisiblePlayers.Values)
             viewer.SendTunneled(packet);
-    }
-
-    private static int RollExcluding(int count, int previous)
-    {
-        if (count <= 1 || previous < 0)
-            return Random.Shared.Next(count);
-
-        var roll = Random.Shared.Next(count - 1);
-
-        return roll >= previous ? roll + 1 : roll;
     }
 }

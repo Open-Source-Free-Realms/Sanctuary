@@ -88,11 +88,17 @@
       "ItemId": 7973, "Type": "BossCake", "CooldownMs": 60000, "InteractCooldownMs": 5000, "ModelId": 2089, "NameId": 9399,
       "SpawnEffectIds": [21], "LifetimeMs": 60000, "TransformAbilityIds": [285],
       "Comment": "Briarwood Birthday Cake"
+    },
+    {
+      "ItemId": 48100, "Type": "GiftCake", "CooldownMs": 3600000, "InteractCooldownMs": 5000, "ModelId": 897, "NameId": 139461,
+      "SpawnEffectIds": [21], "LifetimeMs": 60000, "GrantItemId": 48104, "GrantItemQuantity": 1,
+      "Comment": "Mystery Cake (sg_pretty_cake)"
     }
   ],
 
   "RandomTransformFoods": [
-    { "ItemId": 69828, "TransformAbilityIds": [4370, 4371, 4372, 4373], "Comment": "Jack-O-Lantern" }
+    { "ItemId": 69828, "TransformAbilityIds": [4370, 4371, 4372, 4373], "Comment": "Jack-O-Lantern" },
+    { "ItemId": 48104, "TransformAbilityIds": [900120, 900121, 900122, 900123, 900124], "Comment": "Slice of Mystery Cake" }
   ],
 
   "FoodEffects": [
@@ -113,8 +119,11 @@
     { "AbilityId": 2004, "CompositeEffectId": 5698,  "Comment": "Steaming Pretzels" },
     { "AbilityId": 1964, "CompositeEffectId": 5232,  "Comment": "Graveyard Flambe (shadow flames)" },
     { "AbilityId": 660,  "CompositeEffectId": 5343, "QuickChatId": 3340, "EffectDelayMs": 300, "Comment": "Can of Beans" },
-    { "AbilityId": 278, "CompositeEffectId": 15009, "Comment": "Shrouded Glade Birthday Cake - magic-glow_red_skel_loop_rare" },
-    { "AbilityId": 281, "CompositeEffectId": 15110, "Comment": "Merry Vale Birthday Cake - star-ring_rainbow_skel_loop" }
+    { "AbilityId": 278, "CompositeEffectId": 15009, "DurationMs": 1800000, "Comment": "Shrouded Glade Birthday Cake - magic-glow_red_skel_loop_rare" },
+    { "AbilityId": 281, "CompositeEffectId": 15110, "DurationMs": 1800000, "Comment": "Merry Vale Birthday Cake - star-ring_rainbow_skel_loop" },
+    { "AbilityId": 900122, "CompositeEffectId": 5028,  "DurationMs": 60000, "CooldownMs": 60000, "Comment": "Slice of Mystery Cake - magic-steam_orange_skel_aura_loop" },
+    { "AbilityId": 900123, "CompositeEffectId": 15128, "DurationMs": 60000, "CooldownMs": 60000, "Comment": "Slice of Mystery Cake - shadow_sprite_skel_loop" },
+    { "AbilityId": 900124, "CompositeEffectId": 0, "Scale": 2.0, "DurationMs": 60000, "CooldownMs": 60000, "Comment": "Slice of Mystery Cake - grow to twice normal size" }
   ],
 
   "Transformations": [
@@ -194,7 +203,9 @@
     { "AbilityId": 284,    "ModelId": 767, "DurationMs": 1800000, "CooldownMs": 0, "CompositeEffectId": 21, "Comment": "Blackspore Swamp Birthday Cake - Grave Elemental" },
     { "AbilityId": 285,    "ModelId": 121, "DurationMs": 1800000, "CooldownMs": 0, "CompositeEffectId": 21, "Comment": "Briarwood Birthday Cake - The Mushroom Gigas" },
     { "AbilityId": 900100, "ModelId": 750, "DurationMs": 1800000, "CooldownMs": 0, "CompositeEffectId": 21, "Comment": "Seaside Birthday Cake - Seagull" },
-    { "AbilityId": 900101, "ModelId": 749, "DurationMs": 1800000, "CooldownMs": 0, "CompositeEffectId": 21, "Comment": "Seaside Birthday Cake - Parrot" }
+    { "AbilityId": 900101, "ModelId": 749, "DurationMs": 1800000, "CooldownMs": 0, "CompositeEffectId": 21, "Comment": "Seaside Birthday Cake - Parrot" },
+    { "AbilityId": 900120, "ModelId": 208, "DurationMs": 60000, "CooldownMs": 60000, "CompositeEffectId": 21, "Comment": "Slice of Mystery Cake - female changeling (cook, with frying pan)" },
+    { "AbilityId": 900121, "ModelId": 145, "DurationMs": 60000, "CooldownMs": 60000, "CompositeEffectId": 21, "Comment": "Slice of Mystery Cake - cow" }
   ],
 
   "PartyFavors": [
