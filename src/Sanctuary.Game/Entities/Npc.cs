@@ -179,8 +179,9 @@ public class Npc : IScriptableNpc, IEntity
         }
     }
 
-    public virtual void TeleportToZone(IZone zone, Vector4 position, Quaternion rotation)
+    public virtual bool TeleportToZone(IZone zone, Vector4 position, Quaternion rotation)
     {
+        return true;
     }
 
     protected void UpdateZoneTile()
