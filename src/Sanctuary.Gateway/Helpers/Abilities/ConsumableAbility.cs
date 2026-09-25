@@ -11,6 +11,7 @@ using Sanctuary.Database;
 using Sanctuary.Game;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
+using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 
@@ -177,7 +178,10 @@ public abstract class ConsumableAbility(AbilityServices services)
 
     protected static Npc? SpawnNpc(Player player, Vector4 position, Action<Npc> configure)
     {
-        if (!player.Zone.TryCreateNpc(out var npc))
+        if (player.Zone is not StartingZone startingZone)
+            return null;
+
+        if (!startingZone.TryCreateNpc(out var npc))
             return null;
 
         configure(npc);
