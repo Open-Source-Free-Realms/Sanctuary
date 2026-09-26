@@ -17,6 +17,18 @@ public sealed class QuestDialogueLine
     public int ResponseTextId { get; set; }
 }
 
+// One NPC that credits a talk goal, and the line it says.
+public sealed class TalkTarget
+{
+    public ulong Guid { get; set; }
+
+    // 0 = the goal's DialogueId.
+    public int DialogueId { get; set; }
+
+    // 0 = the generic caption.
+    public int ResponseId { get; set; }
+}
+
 // One checklist row within a quest. Goals complete in order.
 public sealed class QuestGoal
 {
@@ -31,16 +43,11 @@ public sealed class QuestGoal
 
     public QuestGoalType Type { get; set; } = QuestGoalType.TalkToNpc;
 
-    // 0 = the quest's TargetGuid.
+    // 0 = the quest's TargetGuid, applied by the caller.
     public ulong TargetGuid { get; set; }
 
-    // Extra NPCs that also credit this goal, for a counted talk step where several interchangeable
-    // NPCs share one tracker row. RequiredCount sets how many are needed.
-    public List<ulong> TargetGuids { get; set; } = [];
-
-    // Per-NPC lines, aligned with AllTalkTargetGuids().
-    public List<int> TargetDialogueIds { get; set; } = [];
-    public List<int> TargetResponseIds { get; set; } = [];
+    // Every NPC that credits this goal, each with its own line. RequiredCount sets how many are needed.
+    public List<TalkTarget> Targets { get; set; } = [];
 
     public int RequiredCount { get; set; }
 
@@ -51,8 +58,7 @@ public sealed class QuestGoal
     // [x, y, z]. The proximity check is 2D, so the Y only feeds the map pin.
     public float[] ReachPosition { get; set; } = [];
 
-    // 0 = 12.
-    public float ReachRadius { get; set; }
+    public float ReachRadius { get; set; } = 12f;
 
     // Hover cursor and click distance for whatever this goal makes clickable: its NPCs, or its
     // collect pickups. Per-goal, since a quest can mix a distant landmark with a close-up pickup.
@@ -66,9 +72,9 @@ public sealed class QuestGoal
         if (TargetGuid != 0)
             yield return TargetGuid;
 
-        foreach (var guid in TargetGuids)
-            if (guid != 0 && guid != TargetGuid)
-                yield return guid;
+        foreach (var target in Targets)
+            if (target.Guid != 0 && target.Guid != TargetGuid)
+                yield return target.Guid;
     }
 
     // The authored Dialogue, else this NPC's own line, else DialogueId. Empty = say nothing.
@@ -77,20 +83,10 @@ public sealed class QuestGoal
         if (Dialogue.Count > 0)
             return Dialogue;
 
-        var index = 0;
-
-        foreach (var guid in AllTalkTargetGuids())
+        foreach (var target in Targets)
         {
-            if (guid == npcGuid && index < TargetDialogueIds.Count && TargetDialogueIds[index] != 0)
-            {
-                return [new QuestDialogueLine
-                {
-                    TextId = TargetDialogueIds[index],
-                    ResponseTextId = index < TargetResponseIds.Count ? TargetResponseIds[index] : 0
-                }];
-            }
-
-            index++;
+            if (target.Guid == npcGuid && target.DialogueId != 0)
+                return [new QuestDialogueLine { TextId = target.DialogueId, ResponseTextId = target.ResponseId }];
         }
 
         return DialogueId != 0 ? [new QuestDialogueLine { TextId = DialogueId }] : [];

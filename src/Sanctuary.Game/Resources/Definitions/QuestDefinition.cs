@@ -52,12 +52,13 @@ public sealed class QuestDefinition
         if (playerQuests.ContainsKey(QuestId))
             return false;
 
-        if (PrerequisiteQuestId != 0)
-            return playerQuests.TryGetValue(PrerequisiteQuestId, out var prerequisiteDone) && prerequisiteDone;
-
+        // Before the prerequisite, so exclusive branches that share one still lock each other out.
         foreach (var excludedId in ExcludesQuestIds)
             if (playerQuests.ContainsKey(excludedId))
                 return false;
+
+        if (PrerequisiteQuestId != 0)
+            return playerQuests.TryGetValue(PrerequisiteQuestId, out var prerequisiteDone) && prerequisiteDone;
 
         return true;
     }

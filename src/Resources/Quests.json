@@ -794,9 +794,11 @@
         "NameId": 438985,
         "RequiredCount": 3,
         "TargetGuid": 100000040032,
-        "TargetGuids": [100000040033, 100000040034],
-        "TargetDialogueIds": [438971, 438973, 438975],
-        "TargetResponseIds": [438972, 438974, 8136]
+        "Targets": [
+          { "Guid": 100000040032, "DialogueId": 438971, "ResponseId": 438972 },
+          { "Guid": 100000040033, "DialogueId": 438973, "ResponseId": 438974 },
+          { "Guid": 100000040034, "DialogueId": 438975, "ResponseId": 8136 }
+        ]
       },
       {
         "NameId": 437816,
