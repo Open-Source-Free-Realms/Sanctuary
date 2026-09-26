@@ -38,6 +38,7 @@ public interface IResourceManager
     ConsumableCollection Consumables { get; }
     NpcDefinitionCollection Npcs { get; }
     NameFilterCollection NameFilter { get; }
+    QuestDefinitionCollection Quests { get; }
     MapGraphCollection Maps { get; }
 
     RewardTableDefinitionCollection RewardTables { get; }
