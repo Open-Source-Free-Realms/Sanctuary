@@ -1,15 +1,28 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sanctuary.Game.Routines;
 
 public sealed class SequentialRoutine : IRoutine
 {
-    private readonly Queue<IRoutine> _routines;
+    private readonly IRoutine[] _routines;
+    private readonly Queue<IRoutine> _pending = new();
+
     private IRoutine? _current;
 
-    public SequentialRoutine(IEnumerable<IRoutine> routines) => _routines = new Queue<IRoutine>(routines);
+    public SequentialRoutine(IEnumerable<IRoutine> routines) => _routines = routines.ToArray();
 
-    public void OnStart() => Advance();
+    public void OnStart()
+    {
+        _pending.Clear();
+
+        foreach (var routine in _routines)
+            _pending.Enqueue(routine);
+
+        _current = null;
+
+        Advance();
+    }
 
     public bool OnStep()
     {
@@ -21,16 +34,17 @@ public sealed class SequentialRoutine : IRoutine
     public void OnEnd()
     {
         _current?.OnEnd();
+        _current = null;
 
-        while (_routines.TryDequeue(out var routine))
-            routine.OnEnd();
+        _pending.Clear();
     }
 
     private bool Advance()
     {
         _current?.OnEnd();
 
-        if (!_routines.TryDequeue(out _current)) return true;
+        if (!_pending.TryDequeue(out _current)) return true;
+
         _current.OnStart();
         return false;
     }

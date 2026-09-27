@@ -1,19 +1,24 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Sanctuary.Game.Routines;
 
 public sealed class ParallelRoutine : IRoutine
 {
-    private readonly List<IRoutine> _routines;
+    private readonly IRoutine[] _routines;
+    private readonly List<IRoutine> _active = new();
 
     public ParallelRoutine(params IRoutine[] routines)
     {
-        _routines = new List<IRoutine>(routines);
+        _routines = routines.ToArray();
     }
 
     public void OnStart()
     {
-        foreach (var routine in _routines)
+        _active.Clear();
+        _active.AddRange(_routines);
+
+        foreach (var routine in _active)
         {
             routine.OnStart();
         }
@@ -21,21 +26,23 @@ public sealed class ParallelRoutine : IRoutine
 
     public bool OnStep()
     {
-        for (int i = _routines.Count - 1; i >= 0; i--)
+        for (int i = _active.Count - 1; i >= 0; i--)
         {
-            if (!_routines[i].OnStep())
+            if (!_active[i].OnStep())
                 continue;
 
-            _routines[i].OnEnd();
-            _routines.RemoveAt(i);
+            _active[i].OnEnd();
+            _active.RemoveAt(i);
         }
 
-        return _routines.Count == 0;
+        return _active.Count == 0;
     }
 
     public void OnEnd()
     {
-        foreach (var routine in _routines)
+        foreach (var routine in _active)
             routine.OnEnd();
+
+        _active.Clear();
     }
 }
