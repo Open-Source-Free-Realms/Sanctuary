@@ -29,6 +29,8 @@ public sealed class RoutineManager
 
     public void SetRoutine(string name, IRoutine routine, Cadence cadence)
     {
+        Cancel(name);
+
         try
         {
             routine.OnStart();
