@@ -91,13 +91,6 @@
 
 This repository only contains the **server emulator** for Free Realms. To play the game, you must also have a **Free Realms client**. You can download the client using the **OSFR Launcher** available here: [OSFR Launcher](https://github.com/Open-Source-Free-Realms/Launcher).
 
-### Prerequisites
-
-Before you can use this software, ensure you have the following installed:
-
-- **Visual Studio 2022**  
-  Make sure to include the **.NET Framework development workload** during installation.
-
 ### Release
 
 1. Clone the repo in VSCode.
@@ -108,7 +101,7 @@ Before you can use this software, ensure you have the following installed:
 6. Run Servers + WebAPI (or switch it to Servers + WebAPI and hit F5).
 7. Configure Terminal Settings (plus sign with a down arrow on the terminal bar, 'Launch Settings') and set it to External. 
 8. Open a new Terminal and run python run_client.py -a 127.0.0.1
-9. Profit.git add README.md
+9. Profit.
 
 **_NOTE:_** The following user should already exist, but if not then implement one with the following credentials:
 
