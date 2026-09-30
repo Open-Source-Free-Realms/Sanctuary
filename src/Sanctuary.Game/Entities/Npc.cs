@@ -51,7 +51,7 @@ public class Npc : IScriptableNpc, IEntity
     public string? TintAlias { get; set; }
     public int TintId { get; set; }
 
-    public float Scale { get; set; }
+    public float Scale { get; set; } = 1f;
 
     /// <summary>
     /// 0 - Hostile

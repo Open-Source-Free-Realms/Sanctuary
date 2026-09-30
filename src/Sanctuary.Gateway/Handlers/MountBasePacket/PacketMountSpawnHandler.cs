@@ -56,21 +56,13 @@ public static class PacketMountSpawnHandler
             return;
 
         mount.Visible = true;
-
         mount.NameId = mountDefinition.NameId;
         mount.ModelId = mountDefinition.ModelId;
-
         mount.TextureAlias = mountDefinition.TextureAlias;
         mount.TintAlias = mountDefinition.TintAlias;
         mount.TintId = mountInfo.TintId;
-
-        mount.Scale = 1f;
-        mount.Disposition = 1;
-
         mount.HideNamePlate = true;
-
         mount.ImageSetId = mountDefinition.ImageSetId;
-
         mount.Seat = 0;
         mount.QueuePosition = 1;
 
@@ -84,7 +76,7 @@ public static class PacketMountSpawnHandler
         connection.Player.SendTunneled(mount.GetAddNpcPacket());
 
         var mountResponse = mount.GetMountResponsePacket();
-        mountResponse.CompositeEffectId = 46; // PFX_Teleport_Flash
+        mountResponse.CompositeEffectId = 46;
 
         connection.Player.SendTunneledToVisible(mountResponse, sendToSelf: true);
 

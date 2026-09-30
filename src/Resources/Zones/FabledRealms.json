@@ -22,6 +22,7 @@
   ],
   "AreaDefinitions": [
     {
+      "Comment": "Blackspore",
       "Id": 2,
       "Shape": "Rectangle",
       "X1": -1680,
@@ -30,6 +31,7 @@
       "Z2": 820
     },
     {
+      "Comment": "Briarwood",
       "Id": 3,
       "Shape": "Circle",
       "X1": -540,
@@ -37,13 +39,15 @@
       "Radius": 700
     },
     {
+      "Comment": "Merryvale",
       "Id": 4,
       "Shape": "Circle",
-      "X1": -1030,
-      "Z1": -410,
-      "Radius": 270
+      "X1": -1040,
+      "Z1": -404,
+      "Radius": 275
     },
     {
+      "Comment": "Sanctuary",
       "Id": 5,
       "Shape": "Rectangle",
       "X1": -860,
@@ -52,21 +56,24 @@
       "Z2": 130
     },
     {
+      "Comment": "Seaside",
       "Id": 6,
       "Shape": "Rectangle",
-      "X1": 520,
-      "Z1": -1000,
-      "X2": -1300,
-      "Z2": -2050
+      "X1": -1162,
+      "Z1": -1343,
+      "X2": 37,
+      "Z2": -993
     },
     {
+      "Comment": "Shrouded Glades",
       "Id": 7,
       "Shape": "Circle",
-      "X1": 90,
-      "Z1": 1200,
-      "Radius": 260
+      "X1": 96,
+      "Z1": 1190,
+      "Radius": 250
     },
     {
+      "Comment": "Snowhill",
       "Id": 8,
       "Shape": "Circle",
       "X1": 380,
@@ -74,18 +81,20 @@
       "Radius": 350
     },
     {
+      "Comment": "Wugachug",
       "Id": 9,
       "Shape": "Circle",
-      "X1": 50,
-      "Z1": -430,
-      "Radius": 120
+      "X1": 66,
+      "Z1": -396,
+      "Radius": 165
     },
     {
+      "Comment": "Sunstone Valley",
       "Id": 10,
       "Shape": "Circle",
-      "X1": 970,
-      "Z1": 2140,
-      "Radius": 900
+      "X1": 711,
+      "Z1": 2143,
+      "Radius": 765
     }
   ]
 }

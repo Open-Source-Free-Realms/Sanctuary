@@ -1,9 +1,8 @@
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
-
-using Sanctuary.Game;
 using Sanctuary.Packet;
-using Sanctuary.Packet.Common.Attributes;
+
+using System.Numerics;
 
 namespace Sanctuary.Game.ChatCommands;
 
@@ -28,17 +27,19 @@ public class TeleportCommand : IChatCommand
             return false;
         }
 
-        var position = invoker.Position;
+        var newPosition = new Vector4(x, y, z, invoker.Position.W);
 
-        invoker.UpdatePosition(position, System.Numerics.Quaternion.Identity, false);
+        var currentRotation = invoker.Rotation;
 
-        var clientUpdatePacketUpdateLocation = new ClientUpdatePacketUpdateLocation
+        invoker.UpdatePosition(newPosition, currentRotation, false);
+
+        var teleportPacket = new ClientUpdatePacketUpdateLocation
         {
-            Position = new System.Numerics.Vector4(x, y, z, position.W),
-            Rotation = System.Numerics.Quaternion.Identity,
+            Position = newPosition,
+            Rotation = currentRotation,
             Teleport = true
         };
-        invoker.SendTunneled(clientUpdatePacketUpdateLocation);
+        invoker.SendTunneled(teleportPacket);
         ChatHelper.SendSystemMessage(invoker, $"Teleported to ({x:F2}, {y:F2}, {z:F2})");
         return true;
     }
