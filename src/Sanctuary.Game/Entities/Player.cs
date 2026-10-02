@@ -25,6 +25,9 @@ namespace Sanctuary.Game.Entities;
 
 public sealed class Player : ClientPcData, IEntity
 {
+    private const int WeaponSlot = 7;
+    private const int FlairShardSlot = 13;
+
     private readonly UdpConnection _connection;
     private readonly IResourceManager _resourceManager;
     private readonly IZoneManager _zoneManager;
@@ -577,6 +580,53 @@ public sealed class Player : ClientPcData, IEntity
 
     #endregion
 
+    public ClientItem? GetEquippedItem(int slot) =>
+        ActiveProfile.Items.TryGetValue(slot, out var profileItem)
+            ? Items.FirstOrDefault(item => item.Id == profileItem.Id)
+            : null;
+
+    public int GetEquippedCompositeEffectId(int slot)
+    {
+        var item = GetEquippedItem(slot);
+        return item is not null && _resourceManager.ClientItemDefinitions.TryGetValue(item.Definition, out var definition)
+            ? Math.Max(0, definition.CompositeEffectId)
+            : 0;
+    }
+
+    public PlayerUpdatePacketSlotCompositeEffectOverride GetSlotCompositeEffectOverridePacket(int slot, int compositeEffect) => new()
+    {
+        Guid = Guid,
+        Slot = slot,
+        CompositeEffect = Math.Max(0, compositeEffect)
+    };
+
+    public PlayerUpdatePacketSlotCompositeEffectOverride GetWeaponFlairOverridePacket() =>
+        GetSlotCompositeEffectOverridePacket(WeaponSlot, GetEquippedCompositeEffectId(FlairShardSlot));
+
+    public void RefreshWeaponFlair(int profileId, int changedSlot)
+    {
+        if (profileId != ActiveProfileId || (changedSlot != WeaponSlot && changedSlot != FlairShardSlot))
+            return;
+
+        // Job switches reuse the cached attachment effect until the new weapon appears.
+        if (GetEquippedItem(WeaponSlot) is { } item
+            && _resourceManager.ClientItemDefinitions.TryGetValue(item.Definition, out var definition)
+            && _resourceManager.ItemClasses.TryGetValue(definition.Class, out var itemClass)
+            && GetAttachment(WeaponSlot) is { } attachment)
+        {
+            SendTunneledToVisible(new PlayerUpdatePacketEquipItemChange
+            {
+                Guid = Guid,
+                Id = item.Id,
+                Attachment = attachment,
+                ProfileId = ActiveProfileId,
+                WieldType = itemClass.WieldType
+            }, true);
+        }
+
+        SendTunneledToVisible(GetWeaponFlairOverridePacket(), true);
+    }
+
     public int GetFlairShardCompositeEffect()
     {
         const int FlairShardSlot = 13;
@@ -641,7 +691,7 @@ public sealed class Player : ClientPcData, IEntity
             ModelName = clientItemDefinition.ModelName,
             TextureAlias = clientItemDefinition.TextureAlias,
             TintAlias = clientItemDefinition.TintAlias,
-            TintId = clientItem.Tint,
+            TintId = clientItem.Tint == 0 ? clientItemDefinition.Icon.TintId : clientItem.Tint,
             CompositeEffectId = compositeEffectId,
             Slot = clientItemDefinition.Slot
         };
