@@ -4,14 +4,14 @@ namespace Sanctuary.Packet.Common;
 
 public class ClaimCodeInfo : ISerializableType
 {
-    public string Code = null!;
+    public string Code = string.Empty;
 
     public int NameId;
     public int DescriptionId;
 
     public int IconId;
 
-    public string TintAlias = null!;
+    public string TintAlias = string.Empty;
 
     public void Serialize(PacketWriter writer)
     {

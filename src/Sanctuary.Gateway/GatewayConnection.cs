@@ -17,6 +17,7 @@ using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game;
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Gateway.Handlers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -214,6 +215,9 @@ public class GatewayConnection : UdpConnection
         }
 
         Player = player;
+
+        player.LoginStartedAt = DateTimeOffset.UtcNow;
+        player.SecondsSinceLastLogin = WelcomeScreenHelper.SecondsSinceLastLogin(dbCharacter.LastLogin, player.LoginStartedAt);
 
         // Start - ClientPcData
 
