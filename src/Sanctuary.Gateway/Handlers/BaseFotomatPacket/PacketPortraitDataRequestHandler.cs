@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Helpers;
+using Sanctuary.Game;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
@@ -14,11 +15,13 @@ namespace Sanctuary.Gateway.Handlers;
 public static class PacketPortraitDataRequestHandler
 {
     private static ILogger _logger = null!;
+    private static IZoneManager _zoneManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
         var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
         _logger = loggerFactory.CreateLogger(nameof(PacketPortraitDataRequestHandler));
+        _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -36,6 +39,9 @@ public static class PacketPortraitDataRequestHandler
         if (!File.Exists(path))
             return true;
 
+        if (!_zoneManager.TryGetPlayer(packetPortraitDataRequest.Guid, out var portraitPlayer))
+            return true;
+
         var packetPlayerImageData = new PacketPlayerImageData
         {
             Guid = packetPortraitDataRequest.Guid,
@@ -46,22 +52,22 @@ public static class PacketPortraitDataRequestHandler
 
                 Guid = packetPortraitDataRequest.Guid,
 
-                ModelId = connection.Player.Model,
+                ModelId = portraitPlayer.Model,
 
-                Attachments = connection.Player.GetAttachments(),
+                Attachments = portraitPlayer.GetAttachments(),
 
-                Head = connection.Player.Head,
-                Hair = connection.Player.Hair,
-                SkinTone = connection.Player.SkinTone,
-                FacePaint = connection.Player.FacePaint,
-                ModelCustomization = connection.Player.ModelCustomization,
+                Head = portraitPlayer.Head,
+                Hair = portraitPlayer.Hair,
+                SkinTone = portraitPlayer.SkinTone,
+                FacePaint = portraitPlayer.FacePaint,
+                ModelCustomization = portraitPlayer.ModelCustomization,
 
-                HairColor = connection.Player.HairColor,
-                EyeColor = connection.Player.EyeColor,
-                HeadId = connection.Player.HeadId,
-                HairId = connection.Player.HairId,
-                SkinToneId = connection.Player.SkinToneId,
-                FacePaintId = connection.Player.FacePaintId,
+                HairColor = portraitPlayer.HairColor,
+                EyeColor = portraitPlayer.EyeColor,
+                HeadId = portraitPlayer.HeadId,
+                HairId = portraitPlayer.HairId,
+                SkinToneId = portraitPlayer.SkinToneId,
+                FacePaintId = portraitPlayer.FacePaintId,
 
                 Provider = packetPortraitDataRequest.Provider
             },
