@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -470,10 +470,9 @@ public sealed class Player : ClientPcData, IEntity
 
         foreach (var npc in npcs)
         {
-            if (npc.Notification is null)
-                continue;
-
-            playerUpdatePacketAddNotifications.Notifications.Add(npc.Notification);
+            playerUpdatePacketAddNotifications.Notifications.AddRange(npc.Notifications);
+            if (npc.Notification is not null)
+                playerUpdatePacketAddNotifications.Notifications.Add(npc.Notification);
         }
 
         if (playerUpdatePacketAddNotifications.Notifications.Count > 0)
