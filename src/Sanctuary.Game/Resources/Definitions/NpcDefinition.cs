@@ -16,10 +16,6 @@ public class NpcDefinition
     public string ModelFileName { get; set; } = null!;
 
     public string? TextureAlias { get; set; }
-    public string? TintAlias { get; set; }
-    public int TintId { get; set; }
-    public int Disposition { get; set; } = 1;
-    public float VerticalOffset { get; set; }
     public int TerrainObjectId { get; set; }
     public bool ReplaceTerrainObject { get; set; }
     public float? Scale { get; set; }
@@ -34,5 +30,8 @@ public class NpcDefinition
     public bool InteractionUnknown { get; set; }
     public NotificationInfo? Notification { get; set; }
     public List<NotificationInfo> Notifications { get; set; } = [];
+    public string? TintAlias { get; set; }
+    public int TintId { get; set; }
+    public int Disposition { get; set; } = 1;
     public string[]? Scripts { get; set; }
 }

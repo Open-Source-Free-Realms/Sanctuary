@@ -720,7 +720,6 @@ public abstract class BaseZone : IZone, IDisposable
             TintAlias = definition.TintAlias,
             TintId = definition.TintId,
             Disposition = definition.Disposition,
-            VerticalOffset = definition.VerticalOffset,
             InteractionList = definition.InteractionList,
             InteractionUnknown = definition.InteractionUnknown,
             Scale = definition.Scale ?? scale,
