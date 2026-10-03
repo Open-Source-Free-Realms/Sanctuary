@@ -4,6 +4,7 @@ using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using Sanctuary.Core.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
@@ -22,28 +23,28 @@ public static class PacketPortraitDataRequestHandler
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
     {
-        if (!PacketPortraitDataRequest.TryDeserialize(data, out var packet))
+        if (!PacketPortraitDataRequest.TryDeserialize(data, out var packetPortraitDataRequest))
         {
             _logger.LogError("Failed to deserialize {packet}.", nameof(PacketPortraitDataRequest));
             return false;
         }
 
-        _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(PacketPortraitDataRequest), packet);
+        _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(PacketPortraitDataRequest), packetPortraitDataRequest);
 
-        var path = Path.Combine("Images", packet.Guid.ToString(), "headshot.png");
+        var path = Path.Combine(PortraitStorage.GetCharacterDirectory(packetPortraitDataRequest.Guid), "headshot.png");
 
         if (!File.Exists(path))
             return true;
 
         var packetPlayerImageData = new PacketPlayerImageData
         {
-            Guid = packet.Guid,
-            Provider = packet.Provider,
+            Guid = packetPortraitDataRequest.Guid,
+            Provider = packetPortraitDataRequest.Provider,
             Portrait =
             {
                 Unknown2 = 1,
 
-                Guid = packet.Guid,
+                Guid = packetPortraitDataRequest.Guid,
 
                 ModelId = connection.Player.Model,
 
@@ -62,7 +63,7 @@ public static class PacketPortraitDataRequestHandler
                 SkinToneId = connection.Player.SkinToneId,
                 FacePaintId = connection.Player.FacePaintId,
 
-                Provider = packet.Provider
+                Provider = packetPortraitDataRequest.Provider
             },
             PngPayload = File.ReadAllBytes(path)
         };

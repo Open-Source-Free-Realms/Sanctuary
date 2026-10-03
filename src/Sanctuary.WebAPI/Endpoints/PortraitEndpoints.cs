@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
@@ -13,6 +13,8 @@ using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
+
+using Sanctuary.Core.Helpers;
 
 namespace Sanctuary.WebAPI.Endpoints;
 
@@ -60,7 +62,7 @@ public static class PortraitEndpoints
             return Results.BadRequest("Invalid characterId.");
         }
 
-        var saveDirectory = Path.Combine("Images", characterId.ToString());
+        var saveDirectory = PortraitStorage.GetCharacterDirectory(characterId);
 
         if (!Directory.Exists(saveDirectory))
             Directory.CreateDirectory(saveDirectory);
