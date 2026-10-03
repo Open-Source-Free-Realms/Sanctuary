@@ -70,6 +70,12 @@ public sealed class Player : ClientPcData, IEntity
 
     public int TemporaryAppearance { get; private set; }
 
+    public int BoomboxDancePriority { get; set; }
+    public ulong BoomboxDanceOwner { get; set; }
+    public int BoomboxDanceAnimation { get; set; }
+    public bool BoomboxDanceIsStanding { get; set; }
+    public int BoomboxDanceTransform { get; set; }
+
     public ulong LastSillyStringTarget { get; set; }
 
     public int ActiveFoodEffectId { get; set; }
@@ -234,6 +240,12 @@ public sealed class Player : ClientPcData, IEntity
 
         Mount.Dispose();
         Mount = null;
+        if (BoomboxDanceTransform != 0 && TemporaryAppearance == BoomboxDanceTransform)
+            SendTunneledToVisible(new PlayerUpdatePacketUpdateTemporaryAppearance
+            {
+                Guid = Guid,
+                TemporaryAppearance = TemporaryAppearance
+            }, true);
     }
 
     #endregion
@@ -510,6 +522,16 @@ public sealed class Player : ClientPcData, IEntity
             }
             else
                 SendTunneled(player.GetAddPcPacket());
+
+            // Native standing groups can resume independently. Timed routines must wait
+            // for their next shared packet: SetAnimation cannot seek into a current clip.
+            if (player.Mount is null && player.BoomboxDanceIsStanding && player.BoomboxDanceAnimation != 0)
+                SendTunneled(new PlayerUpdatePacketSetAnimation
+                {
+                    Guid = player.Guid,
+                    AnimationId = player.BoomboxDanceAnimation,
+                    Flags = 1
+                });
         }
 
         foreach (var player in players)

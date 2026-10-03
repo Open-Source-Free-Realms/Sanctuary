@@ -15,5 +15,10 @@ public class NpcDefinition
     public string ModelFileName { get; set; } = null!;
 
     public string? TextureAlias { get; set; }
+    public bool HideNamePlate { get; set; }
+    public int Animation { get; set; } = 1;
+    public float VerticalOffset { get; set; }
+    public float? Scale { get; set; }
+    public int BoomboxItemId { get; set; }
     public string[]? Scripts { get; set; }
 }

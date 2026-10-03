@@ -62,6 +62,7 @@ public class Npc : IScriptableNpc, IEntity
 
     public Action<Player>? InteractAction { get; set; }
     public Action? UpdateEverySecondAction { get; set; }
+    public Action? UpdateEveryTickAction { get; set; }
 
     public int Animation { get; set; } = 1;
 
@@ -134,6 +135,7 @@ public class Npc : IScriptableNpc, IEntity
 
     public void UpdateEveryTick()
     {
+        UpdateEveryTickAction?.Invoke();
         if (!_scripts.IsEmpty)
             GetOrCreateScriptContext().FireEvent("tick");
 

@@ -20787,5 +20787,30 @@
     "Name": "Snowhill Warpstone",
     "ModelId": 280,
     "ModelFileName": "sg_warpstone_01.adr"
+  },
+  {
+    "Id": 33617,
+    "CaptureGuid": "28449863368738",
+    "NameId": 18044,
+    "ModelId": 185,
+    "ModelFileName": "sh_primitive_radio_01.adr",
+    "Scale": 1,
+    "Name": "Boom Box",
+    "HideNamePlate": true,
+    "VerticalOffset": -0.1,
+    "Animation": 2100,
+    "BoomboxItemId": 48244
+  },
+  {
+    "Id": 33838,
+    "CaptureGuid": "28518582845474",
+    "NameId": 18044,
+    "ModelId": 185,
+    "ModelFileName": "sh_primitive_radio_01.adr",
+    "Scale": 1,
+    "Name": "Boom Box",
+    "HideNamePlate": true,
+    "Animation": 2100,
+    "BoomboxItemId": 48244
   }
 ]

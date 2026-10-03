@@ -16,6 +16,7 @@ using Sanctuary.Core.Collections;
 using Sanctuary.Core.Extensions;
 using Sanctuary.Core.IO;
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Zones;
 using Sanctuary.Packet;
@@ -630,6 +631,10 @@ public abstract class BaseZone : IZone, IDisposable
 
         spawnedNpc.UpdatePosition(position, rotation);
 
+        if (definition.BoomboxItemId != 0 && _resourceManager.Consumables.Boomboxes.TryGetValue(definition.BoomboxItemId, out var boomboxDefinition))
+            Sanctuary.Game.Helpers.BoomboxHelper.StartDanceLoop(this, spawnedNpc, position, boomboxDefinition,
+                0, 0, 0, 0, permanent: true);
+
         npc = spawnedNpc;
         return true;
     }
@@ -707,7 +712,10 @@ public abstract class BaseZone : IZone, IDisposable
             Name = definition.Name,
             ModelId = definition.ModelId,
             TextureAlias = definition.TextureAlias,
-            Scale = scale,
+            Scale = definition.Scale ?? scale,
+            HideNamePlate = definition.HideNamePlate,
+            Animation = definition.Animation,
+            VerticalOffset = definition.VerticalOffset,
             Visible = true
         };
 
@@ -1085,7 +1093,12 @@ public abstract class BaseZone : IZone, IDisposable
 
     public bool TryRemovePlayer(ulong guid)
     {
-        return _players.TryRemove(guid, out _) && _entities.TryRemove(guid, out _);
+        if (!_players.TryRemove(guid, out _))
+            return false;
+
+        BoomboxHelper.RemovePlayer(this, guid);
+
+        return _entities.TryRemove(guid, out _);
     }
 
     #endregion
