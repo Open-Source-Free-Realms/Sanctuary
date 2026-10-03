@@ -161,6 +161,7 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
 
                 pendingUpdates.Add(() =>
                 {
+
                     var clientItem = connection.Player.Items.SingleOrDefault(x => x.Definition == itemDefinition.Id && x.Tint == orderDetailTint);
 
                     var addItem = false;
@@ -243,9 +244,26 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
 
                 var mountDef = mountDefinition;
                 var savedMount = dbMount;
+                var mountItemDefinition = clientItemDefinition;
 
                 pendingUpdates.Add(() =>
                 {
+                      var mountItem = new ClientItem
+                    {
+                        Id = 1_000_000 + savedMount.Id, // I added this as an ID test but it mysteriously works completely
+                        Definition = mountItemDefinition.Id,
+                        Tint = orderDetailTint,
+                        Count = 1
+                    };
+
+                    using (var writer = new PacketWriter())
+                    {
+                        mountItem.Serialize(writer);
+                        mountItemDefinition.Serialize(writer);
+
+                     connection.SendTunneled(new ClientUpdatePacketItemAdd { Payload = writer.Buffer });
+                    }
+
                     if (!connection.Player.Mounts.Any(x => x.Definition == mountDef.Id && x.TintId == orderDetailTint))
                     {
                         connection.Player.Mounts.Add(new PacketMountInfo
