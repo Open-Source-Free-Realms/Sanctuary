@@ -80,7 +80,6 @@ public static class CharacterLoginRequestHandler
         var ticket = Guid.NewGuid();
 
         character.Ticket = ticket;
-        character.LastLogin = DateTimeOffset.UtcNow;
 
         if (dbContext.SaveChanges() <= 0)
         {

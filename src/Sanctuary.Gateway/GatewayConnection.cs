@@ -535,8 +535,7 @@ public class GatewayConnection : UdpConnection
 
         dbCharacter.ActiveTitleId = Player.ActiveTitle;
 
-        if (dbCharacter.LastLogin.HasValue)
-            dbCharacter.PlayTime += (int)(DateTimeOffset.UtcNow - dbCharacter.LastLogin.Value).TotalMinutes;
+        dbCharacter.PlayTime += (int)Math.Max(0, (DateTimeOffset.UtcNow - Player.LoginStartedAt).TotalMinutes);
 
         // End ClientPcData
 
