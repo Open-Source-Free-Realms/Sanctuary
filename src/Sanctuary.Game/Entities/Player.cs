@@ -228,17 +228,7 @@ public sealed class Player : ClientPcData, IEntity
             CharacterStats.GlideEnabled.Set(0),
             CharacterStats.JumpHeight.Set(0f));
 
-        SendTunneledToVisible(new PlayerUpdatePacketRemovePlayerGracefully
-        {
-            Guid = Mount.Guid,
-            Animate = false,
-            Delay = 0,
-            EffectDelay = 0,
-            CompositeEffectId = 0,
-            Duration = 1000
-        }, sendToSelf: true);
-
-        Mount.Dispose();
+        EntityHelper.RemovePlayerGracefully(Mount, recipients: VisiblePlayers.Values.Append(this));
         Mount = null;
         if (BoomboxDanceTransform != 0 && TemporaryAppearance == BoomboxDanceTransform)
             SendTunneledToVisible(new PlayerUpdatePacketUpdateTemporaryAppearance
@@ -550,25 +540,6 @@ public sealed class Player : ClientPcData, IEntity
 
         foreach (var npc in npcs)
             VisibleNpcs.TryRemove(npc.Guid, out _);
-    }
-
-    public void OnRemoveVisibleNpcGracefully(Npc npc, bool animate, int delay, int effectDelay,
-        int compositeEffectId, int duration)
-    {
-        if (npc is Mount)
-            return;
-
-        SendTunneled(new PlayerUpdatePacketRemovePlayerGracefully
-        {
-            Guid = npc.Guid,
-            Animate = animate,
-            Delay = delay,
-            EffectDelay = effectDelay,
-            CompositeEffectId = compositeEffectId,
-            Duration = duration
-        });
-
-        VisibleNpcs.TryRemove(npc.Guid, out _);
     }
 
     public void OnRemoveVisiblePlayers(params IEnumerable<Player> players)

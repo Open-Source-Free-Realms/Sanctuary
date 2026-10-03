@@ -457,17 +457,6 @@ public class Npc : IScriptableNpc, IEntity
         Zone.ScriptManager.DeleteContext(this);
     }
 
-    protected void DisposeGracefully(bool animate, int delay, int effectDelay, int compositeEffectId, int duration)
-    {
-        foreach (var visiblePlayer in VisiblePlayers)
-        {
-            visiblePlayer.Value.OnRemoveVisibleNpcGracefully(
-                this, animate, delay, effectDelay, compositeEffectId, duration);
-        }
-
-        RemoveFromZone();
-    }
-
     private void RemoveFromZone()
     {
         ZoneTile.Entities.Remove(Guid, out _);

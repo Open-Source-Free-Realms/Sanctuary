@@ -37,13 +37,4 @@ public sealed class CollectionNode : Npc
         Zone.CompleteCollectionNode(this);
     }
 
-    internal void DisposeAfterCollection()
-    {
-        DisposeGracefully(
-            animate: true,
-            delay: 0,
-            effectDelay: 0,
-            compositeEffectId: 0,
-            duration: 1000);
-    }
 }
