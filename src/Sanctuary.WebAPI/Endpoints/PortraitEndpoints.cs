@@ -67,6 +67,8 @@ public static class PortraitEndpoints
         if (!Directory.Exists(saveDirectory))
             Directory.CreateDirectory(saveDirectory);
 
+        uint? portraitCrc = null;
+
         foreach (var file in files)
         {
             if (file.Length == 0)
@@ -111,7 +113,11 @@ public static class PortraitEndpoints
             {
                 using var stream = file.OpenReadStream();
 
-                using var image = await Image.LoadAsync<Rgba32>(stream, cancellationToken);
+                using var imageBuffer = new MemoryStream();
+                await stream.CopyToAsync(imageBuffer, cancellationToken);
+                imageBuffer.Position = 0;
+
+                using var image = await Image.LoadAsync<Rgba32>(imageBuffer, cancellationToken);
 
                 if (image.Metadata.DecodedImageFormat is not PngFormat)
                 {
@@ -136,6 +142,9 @@ public static class PortraitEndpoints
 
                 await image.SaveAsPngAsync(savePath, cancellationToken);
 
+                if (file.Name == "imageFile")
+                    portraitCrc = PortraitStorage.GetPortraitCrc(imageBuffer.GetBuffer().AsSpan(0, (int)imageBuffer.Length));
+
                 _logger.LogDebug("Successfully uploaded {Name} for character {Character}.", file.Name, characterId);
             }
             catch (Exception ex)
@@ -149,6 +158,9 @@ public static class PortraitEndpoints
                 fileLock.Release();
             }
         }
+
+        if (portraitCrc is not null)
+            await File.WriteAllBytesAsync(Path.Combine(saveDirectory, "portrait.crc"), BitConverter.GetBytes(portraitCrc.Value), cancellationToken);
 
         return Results.Ok();
     }
