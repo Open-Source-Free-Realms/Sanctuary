@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -85,10 +85,7 @@ public class Npc : IScriptableNpc, IEntity
     public bool? HasCursor { get; set; }
     public bool RelevanceUnknown2 { get; set; }
 
-    public InteractionList? InteractionList { get; set; }
-    public bool InteractionUnknown { get; set; }
     public NotificationInfo? Notification { get; set; }
-    public List<NotificationInfo> Notifications { get; set; } = [];
 
     public List<CharacterAttachmentData> Attachments { get; set; } = [];
 
@@ -111,13 +108,6 @@ public class Npc : IScriptableNpc, IEntity
 
     public void OnInteract(Player player)
     {
-        if (InteractionList is not null)
-        {
-            if (InteractionMenuHelper.CanInteract(this, player))
-                player.SendTunneled(InteractionMenuHelper.GetInteractionListPacket(Guid, InteractionList, InteractionUnknown));
-            return;
-        }
-
         if (Interactions.Count > 0)
         {
             if (InteractionMenuHelper.CanInteract(this, player))

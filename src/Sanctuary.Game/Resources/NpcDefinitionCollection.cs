@@ -33,8 +33,7 @@ public class NpcDefinitionCollection : ObservableConcurrentDictionary<int, NpcDe
 
             var jsonSerializerOptions = new JsonSerializerOptions
             {
-                PropertyNameCaseInsensitive = true,
-                IncludeFields = true
+                PropertyNameCaseInsensitive = true
             };
 
             var entries = JsonSerializer.Deserialize<List<NpcDefinition>>(fileStream, jsonSerializerOptions);
