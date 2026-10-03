@@ -20856,27 +20856,6 @@
     "ModelFileName": "hsg_painting_tcg_chaos_creepylaughter_01.adr"
   },
   {
-    "Id": 33082,
-    "NameId": 20831,
-    "Name": "Sanctuary Warpstone",
-    "ModelId": 280,
-    "ModelFileName": "sg_warpstone_01.adr"
-  },
-  {
-    "Id": 33083,
-    "NameId": 41298,
-    "Name": "Lakeshore Warpstone",
-    "ModelId": 280,
-    "ModelFileName": "sg_warpstone_01.adr"
-  },
-  {
-    "Id": 33084,
-    "NameId": 20830,
-    "Name": "Snowhill Warpstone",
-    "ModelId": 280,
-    "ModelFileName": "sg_warpstone_01.adr"
-  },
-  {
     "Id": 33617,
     "CaptureGuid": "28449863368738",
     "NameId": 18044,
