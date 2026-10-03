@@ -5,6 +5,7 @@ using System.Numerics;
 using Sanctuary.Core.Extensions;
 using Sanctuary.Core.IO;
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -36,6 +37,9 @@ public sealed class WorldZone : BaseZone
 
     public int GetZoneAreaId(Vector4 position)
     {
+        if (_zoneDefinition.Name != "FabledRealms")
+            return 0;
+
         foreach (var areaDefinition in _zoneDefinition.AreaDefinitions)
         {
             if (areaDefinition.Shape == "Circle")
@@ -53,6 +57,11 @@ public sealed class WorldZone : BaseZone
                 if (position.IsInRectangle(p1, p2))
                     return areaDefinition.Id;
             }
+            else if (areaDefinition.Shape == "Polygon")
+            {
+                if (IsInArea(position, areaDefinition))
+                    return areaDefinition.Id;
+            }
             else
             {
                 throw new NotImplementedException(nameof(areaDefinition.Shape));
@@ -60,6 +69,24 @@ public sealed class WorldZone : BaseZone
         }
 
         return 0;
+    }
+
+    private static bool IsInArea(Vector4 position, ZoneAreaDefinition areaDefinition)
+    {
+        var inside = false;
+
+        for (var index = 0; index < areaDefinition.Points.Count; index++)
+        {
+            var point = areaDefinition.Points[index];
+            var previousPoint = areaDefinition.Points[(index + areaDefinition.Points.Count - 1) % areaDefinition.Points.Count];
+
+            if ((point[1] > position.Z) != (previousPoint[1] > position.Z) &&
+                position.X < ((double)previousPoint[0] - point[0]) * ((double)position.Z - point[1]) /
+                ((double)previousPoint[1] - point[1]) + point[0])
+                inside = !inside;
+        }
+
+        return inside;
     }
 
     private void SendPointOfInterests(Player player)
