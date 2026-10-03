@@ -34,6 +34,29 @@ public class Vector4JsonConverter : JsonConverter<Vector4>
     }
 }
 
+public class Vector2JsonConverter : JsonConverter<Vector2>
+{
+    public override Vector2 Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        var list = JsonSerializer.Deserialize<float[]>(ref reader, options);
+
+        if (list?.Length == 2)
+            return new Vector2(list[0], list[1]);
+
+        return Vector2.Zero;
+    }
+
+    public override void Write(Utf8JsonWriter writer, Vector2 value, JsonSerializerOptions options)
+    {
+        writer.WriteStartArray();
+
+        writer.WriteNumberValue(value.X);
+        writer.WriteNumberValue(value.Y);
+
+        writer.WriteEndArray();
+    }
+}
+
 public class QuaternionJsonConverter : JsonConverter<Quaternion>
 {
     public override Quaternion Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)

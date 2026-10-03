@@ -28,7 +28,7 @@ public static class Vector4Extensions
         return value.X > minX && value.X < maxX && value.Z > minZ && value.Z < maxZ;
     }
 
-    public static bool IsInArea(this Vector4 value, IReadOnlyList<float[]> points)
+    public static bool IsInPolygon(this Vector4 value, IReadOnlyList<Vector2> points)
     {
         var inside = false;
 
@@ -37,9 +37,9 @@ public static class Vector4Extensions
             var point = points[index];
             var previousPoint = points[(index + points.Count - 1) % points.Count];
 
-            if ((point[1] > value.Z) != (previousPoint[1] > value.Z) &&
-                value.X < ((double)previousPoint[0] - point[0]) * ((double)value.Z - point[1]) /
-                ((double)previousPoint[1] - point[1]) + point[0])
+            if ((point.Y > value.Z) != (previousPoint.Y > value.Z) &&
+                value.X < ((double)previousPoint.X - point.X) * ((double)value.Z - point.Y) /
+                ((double)previousPoint.Y - point.Y) + point.X)
                 inside = !inside;
         }
 

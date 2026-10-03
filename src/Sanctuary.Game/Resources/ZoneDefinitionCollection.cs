@@ -5,6 +5,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Collections;
+using Sanctuary.Core.IO;
 using Sanctuary.Game.Resources.Definitions.Zones;
 
 namespace Sanctuary.Game.Resources;
@@ -34,7 +35,8 @@ public class ZoneDefinitionCollection : ObservableConcurrentDictionary<int, Base
 
                 var jsonSerializerOptions = new JsonSerializerOptions
                 {
-                    PropertyNameCaseInsensitive = true
+                    PropertyNameCaseInsensitive = true,
+                    Converters = { new Vector2JsonConverter() }
                 };
 
                 var entry = JsonSerializer.Deserialize<BaseZoneDefinition>(fileStream, jsonSerializerOptions);

@@ -5,6 +5,7 @@ using System.Numerics;
 using Sanctuary.Core.Extensions;
 using Sanctuary.Core.IO;
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -41,14 +42,14 @@ public sealed class WorldZone : BaseZone
 
         foreach (var areaDefinition in _zoneDefinition.AreaDefinitions)
         {
-            if (areaDefinition.Shape == "Circle")
+            if (areaDefinition.Shape == ZoneAreaShape.Circle)
             {
                 var circle = new Vector3(areaDefinition.X1, 0, areaDefinition.Z1);
 
                 if (position.IsInCircle(circle, areaDefinition.Radius))
                     return areaDefinition.Id;
             }
-            else if (areaDefinition.Shape == "Rectangle")
+            else if (areaDefinition.Shape == ZoneAreaShape.Rectangle)
             {
                 var p1 = new Vector3(areaDefinition.X1, 0, areaDefinition.Z1);
                 var p2 = new Vector3(areaDefinition.X2, 0, areaDefinition.Z2);
@@ -56,9 +57,9 @@ public sealed class WorldZone : BaseZone
                 if (position.IsInRectangle(p1, p2))
                     return areaDefinition.Id;
             }
-            else if (areaDefinition.Shape == "Polygon")
+            else if (areaDefinition.Shape == ZoneAreaShape.Polygon)
             {
-                if (position.IsInArea(areaDefinition.Points))
+                if (position.IsInPolygon(areaDefinition.Points))
                     return areaDefinition.Id;
             }
             else
