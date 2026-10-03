@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using System.Numerics;
 using System.Text.Json.Serialization;
+using System.Collections.Generic;
 
 using Sanctuary.Packet.Common;
 
