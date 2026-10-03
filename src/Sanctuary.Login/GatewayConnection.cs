@@ -21,6 +21,7 @@ public class GatewayConnection : UdpConnection
     private readonly GatewayServer _gatewayServer;
 
     private LoginServerOptions _options;
+    private readonly IDisposable? _optionsSubscription;
 
     public string ServerAddress { get; set; } = null!;
     public GameServerData ServerData { get; set; } = null!;
@@ -33,11 +34,13 @@ public class GatewayConnection : UdpConnection
         _gatewayServer = gatewayServer;
 
         _options = options.CurrentValue;
-        options.OnChange(o => _options = o);
+        _optionsSubscription = options.OnChange(o => _options = o);
     }
 
     public override void OnTerminated()
     {
+        _optionsSubscription?.Dispose();
+
         var reason = DisconnectReason == DisconnectReason.OtherSideTerminated
             ? OtherSideDisconnectReason
             : DisconnectReason;

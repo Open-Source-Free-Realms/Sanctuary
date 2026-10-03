@@ -23,6 +23,7 @@ public class LoginConnection : UdpConnection
     private bool _useEncryption = true; // Hardcoded in the client.
 
     private LoginServerOptions _options;
+    private readonly IDisposable? _optionsSubscription;
 
     public ulong UserId { get; set; }
 
@@ -31,7 +32,7 @@ public class LoginConnection : UdpConnection
         _logger = logger;
 
         _options = options.CurrentValue;
-        options.OnChange(o => _options = o);
+        _optionsSubscription = options.OnChange(o => _options = o);
 
         _cipher = new CipherRC4();
 
@@ -42,6 +43,8 @@ public class LoginConnection : UdpConnection
 
     public override void OnTerminated()
     {
+        _optionsSubscription?.Dispose();
+
         var reason = DisconnectReason == DisconnectReason.OtherSideTerminated
             ? OtherSideDisconnectReason
             : DisconnectReason;
