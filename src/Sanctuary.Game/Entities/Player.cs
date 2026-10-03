@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -116,54 +115,75 @@ public sealed class Player : ClientPcData, IEntity
 
     #region Connection
 
-    public void Send(ISerializablePacket packet)
+    public void Send(ISerializablePacket serializablePacket)
     {
-        var data = packet.Serialize();
+        var data = serializablePacket.Serialize();
 
         _connection.Send(UdpChannel.Reliable1, data);
     }
 
-    public void SendToVisible(ISerializablePacket packet, bool sendToSelf = false)
+    internal void SendSerialized(byte[] data)
     {
-        var visiblePlayers = VisiblePlayers.ToFrozenDictionary();
-
-        foreach (var visiblePlayer in visiblePlayers)
-            visiblePlayer.Value.Send(packet);
-
-        if (sendToSelf)
-            Send(packet);
+        _connection.Send(UdpChannel.Reliable1, data);
     }
 
-    public void SendTunneled(ISerializablePacket packet)
+    internal static byte[] SerializeTunneled(ISerializablePacket serializablePacket)
     {
-        var packetTunneled = new PacketTunneledClientPacket
+        var packetTunneledClientPacket = new PacketTunneledClientPacket
         {
-            Payload = packet.Serialize()
+            Payload = serializablePacket.Serialize()
         };
 
-        Send(packetTunneled);
+        return packetTunneledClientPacket.Serialize();
+    }
+
+    public void SendToVisible(ISerializablePacket serializablePacket, bool sendToSelf = false)
+    {
+        if (VisiblePlayers.IsEmpty && !sendToSelf)
+            return;
+
+        var data = serializablePacket.Serialize();
+
+        foreach (var visiblePlayer in VisiblePlayers)
+            visiblePlayer.Value.SendSerialized(data);
+
+        if (sendToSelf)
+            SendSerialized(data);
+    }
+
+    public void SendTunneled(ISerializablePacket serializablePacket)
+    {
+        var packetTunneledClientPacket = new PacketTunneledClientPacket
+        {
+            Payload = serializablePacket.Serialize()
+        };
+
+        Send(packetTunneledClientPacket);
     }
 
     [Obsolete]
     public void SendTunneled(byte[] buffer)
     {
-        var packetTunneled = new PacketTunneledClientPacket
+        var packetTunneledClientPacket = new PacketTunneledClientPacket
         {
             Payload = buffer
         };
 
-        Send(packetTunneled);
+        Send(packetTunneledClientPacket);
     }
 
-    public void SendTunneledToVisible(ISerializablePacket packet, bool sendToSelf = false)
+    public void SendTunneledToVisible(ISerializablePacket serializablePacket, bool sendToSelf = false)
     {
-        var visiblePlayers = VisiblePlayers.ToFrozenDictionary();
+        if (VisiblePlayers.IsEmpty && !sendToSelf)
+            return;
 
-        foreach (var visiblePlayer in visiblePlayers)
-            visiblePlayer.Value.SendTunneled(packet);
+        var data = SerializeTunneled(serializablePacket);
+
+        foreach (var visiblePlayer in VisiblePlayers)
+            visiblePlayer.Value.SendSerialized(data);
 
         if (sendToSelf)
-            SendTunneled(packet);
+            SendSerialized(data);
     }
 
     public void SendTunneledToVisibleDelayed(ISerializablePacket packet, int delayMs, bool sendToSelf = false)

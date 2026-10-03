@@ -164,7 +164,7 @@ public class Npc : IScriptableNpc, IEntity
             UpdateZoneTile();
         }
 
-        var packet = new PlayerUpdatePacketUpdatePosition
+        var playerUpdatePacketUpdatePosition = new PlayerUpdatePacketUpdatePosition
         {
             Guid = Guid,
             Position = position,
@@ -173,9 +173,14 @@ public class Npc : IScriptableNpc, IEntity
             Unknown = 0
         };
 
+        if (VisiblePlayers.IsEmpty)
+            return;
+
+        var data = Player.SerializeTunneled(playerUpdatePacketUpdatePosition);
+
         foreach (var visiblePlayer in VisiblePlayers)
         {
-            visiblePlayer.Value.SendTunneled(packet);
+            visiblePlayer.Value.SendSerialized(data);
         }
     }
 
