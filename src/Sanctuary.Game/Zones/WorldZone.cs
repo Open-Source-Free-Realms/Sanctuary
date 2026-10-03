@@ -6,7 +6,6 @@ using Sanctuary.Core.Extensions;
 using Sanctuary.Core.IO;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Resources.Definitions.Zones;
-using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 
@@ -59,7 +58,7 @@ public sealed class WorldZone : BaseZone
             }
             else if (areaDefinition.Shape == "Polygon")
             {
-                if (IsInArea(position, areaDefinition))
+                if (position.IsInArea(areaDefinition.Points))
                     return areaDefinition.Id;
             }
             else
@@ -69,24 +68,6 @@ public sealed class WorldZone : BaseZone
         }
 
         return 0;
-    }
-
-    private static bool IsInArea(Vector4 position, ZoneAreaDefinition areaDefinition)
-    {
-        var inside = false;
-
-        for (var index = 0; index < areaDefinition.Points.Count; index++)
-        {
-            var point = areaDefinition.Points[index];
-            var previousPoint = areaDefinition.Points[(index + areaDefinition.Points.Count - 1) % areaDefinition.Points.Count];
-
-            if ((point[1] > position.Z) != (previousPoint[1] > position.Z) &&
-                position.X < ((double)previousPoint[0] - point[0]) * ((double)position.Z - point[1]) /
-                ((double)previousPoint[1] - point[1]) + point[0])
-                inside = !inside;
-        }
-
-        return inside;
     }
 
     private void SendPointOfInterests(Player player)
