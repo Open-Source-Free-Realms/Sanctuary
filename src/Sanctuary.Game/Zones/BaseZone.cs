@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -704,6 +704,7 @@ public abstract class BaseZone : IZone, IDisposable
         {
             Guid = GetNpcGuid(guid),
             NameId = definition.NameId,
+            SubTextNameId = definition.SubTextNameId,
             Name = definition.Name,
             ModelId = definition.ModelId,
             TerrainObjectId = definition.TerrainObjectId,
@@ -716,6 +717,12 @@ public abstract class BaseZone : IZone, IDisposable
             HasCursor = definition.HasCursor,
             RelevanceUnknown2 = definition.RelevanceUnknown2,
             TextureAlias = definition.TextureAlias,
+            TintAlias = definition.TintAlias,
+            TintId = definition.TintId,
+            Disposition = definition.Disposition,
+            VerticalOffset = definition.VerticalOffset,
+            InteractionList = definition.InteractionList,
+            InteractionUnknown = definition.InteractionUnknown,
             Scale = definition.Scale ?? scale,
             Visible = true
         };
@@ -728,6 +735,9 @@ public abstract class BaseZone : IZone, IDisposable
 
         if (definition.Notification is not null)
             npc.Notification = Sanctuary.Game.Helpers.InteractionMenuHelper.GetNotification(npc.Guid, definition.Notification);
+
+        foreach (var notification in definition.Notifications)
+            npc.Notifications.Add(Sanctuary.Game.Helpers.InteractionMenuHelper.GetNotification(npc.Guid, notification));
 
         if (definition.OpensAtlas)
             npc.Interactions.Add(Sanctuary.Game.Interactions.OpenAtlasInteraction.Data);

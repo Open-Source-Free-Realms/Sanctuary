@@ -1,6 +1,4 @@
-using System;
-using System.Numerics;
-using System.Text.Json.Serialization;
+using System.Collections.Generic;
 
 using Sanctuary.Packet.Common;
 
@@ -11,12 +9,17 @@ public class NpcDefinition
     public int Id { get; set; }
 
     public int NameId { get; set; }
+    public int SubTextNameId { get; set; }
     public string? Name { get; set; }
 
     public int ModelId { get; set; }
     public string ModelFileName { get; set; } = null!;
 
     public string? TextureAlias { get; set; }
+    public string? TintAlias { get; set; }
+    public int TintId { get; set; }
+    public int Disposition { get; set; } = 1;
+    public float VerticalOffset { get; set; }
     public int TerrainObjectId { get; set; }
     public bool ReplaceTerrainObject { get; set; }
     public float? Scale { get; set; }
@@ -27,6 +30,9 @@ public class NpcDefinition
     public byte CursorId { get; set; }
     public bool? HasCursor { get; set; }
     public bool RelevanceUnknown2 { get; set; }
+    public InteractionList? InteractionList { get; set; }
+    public bool InteractionUnknown { get; set; }
     public NotificationInfo? Notification { get; set; }
+    public List<NotificationInfo> Notifications { get; set; } = [];
     public string[]? Scripts { get; set; }
 }
