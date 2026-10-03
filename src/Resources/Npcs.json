@@ -5220,28 +5220,60 @@
     "NameId": 437140,
     "Name": "Shrouded Glade Warpstone",
     "ModelId": 280,
-    "ModelFileName": "sg_warpstone_01.adr"
+    "ModelFileName": "sg_warpstone_01.adr",
+    "OpensAtlas": true,
+    "AutoSelectSingleInteraction": true,
+    "CursorId": 17,
+    "Notification": {
+      "NotificationType": 6,
+      "IconId": 3,
+      "NameId": 437140
+    }
   },
   {
     "Id": 2164,
     "NameId": 41302,
     "Name": "Seaside Warpstone",
     "ModelId": 280,
-    "ModelFileName": "sg_warpstone_01.adr"
+    "ModelFileName": "sg_warpstone_01.adr",
+    "OpensAtlas": true,
+    "AutoSelectSingleInteraction": true,
+    "CursorId": 17,
+    "Notification": {
+      "NotificationType": 6,
+      "IconId": 3,
+      "NameId": 41302
+    }
   },
   {
     "Id": 2165,
     "NameId": 41301,
     "Name": "Wugachug Warpstone",
     "ModelId": 280,
-    "ModelFileName": "sg_warpstone_01.adr"
+    "ModelFileName": "sg_warpstone_01.adr",
+    "OpensAtlas": true,
+    "AutoSelectSingleInteraction": true,
+    "CursorId": 17,
+    "Notification": {
+      "NotificationType": 6,
+      "IconId": 3,
+      "NameId": 41301
+    }
   },
   {
     "Id": 2166,
     "NameId": 41303,
     "Name": "Merry Vale Warpstone",
     "ModelId": 280,
-    "ModelFileName": "sg_warpstone_01.adr"
+    "ModelFileName": "sg_warpstone_01.adr",
+    "OpensAtlas": true,
+    "AutoSelectSingleInteraction": true,
+    "CursorId": 17,
+    "Notification": {
+      "NotificationType": 6,
+      "IconId": 3,
+      "NameId": 41303
+    }
   },
   {
     "Id": 2167,
@@ -5672,7 +5704,15 @@
     "NameId": 20247,
     "Name": "Cobblestone Village Warpstone",
     "ModelId": 280,
-    "ModelFileName": "sg_warpstone_01.adr"
+    "ModelFileName": "sg_warpstone_01.adr",
+    "OpensAtlas": true,
+    "AutoSelectSingleInteraction": true,
+    "CursorId": 17,
+    "Notification": {
+      "NotificationType": 6,
+      "IconId": 3,
+      "NameId": 20247
+    }
   },
   {
     "Id": 2262,
@@ -7299,7 +7339,15 @@
     "NameId": 20832,
     "Name": "Briarwood Warpstone",
     "ModelId": 280,
-    "ModelFileName": "sg_warpstone_01.adr"
+    "ModelFileName": "sg_warpstone_01.adr",
+    "OpensAtlas": true,
+    "AutoSelectSingleInteraction": true,
+    "CursorId": 17,
+    "Notification": {
+      "NotificationType": 6,
+      "IconId": 3,
+      "NameId": 20832
+    }
   },
   {
     "Id": 2553,
@@ -7858,7 +7906,15 @@
     "NameId": 390361,
     "Name": "Bristlewood Warpstone",
     "ModelId": 280,
-    "ModelFileName": "sg_warpstone_01.adr"
+    "ModelFileName": "sg_warpstone_01.adr",
+    "OpensAtlas": true,
+    "AutoSelectSingleInteraction": true,
+    "CursorId": 17,
+    "Notification": {
+      "NotificationType": 6,
+      "IconId": 3,
+      "NameId": 390361
+    }
   },
   {
     "Id": 2650,
@@ -9117,7 +9173,15 @@
     "NameId": 24730,
     "Name": "Briarheart Warpstone",
     "ModelId": 280,
-    "ModelFileName": "sg_warpstone_01.adr"
+    "ModelFileName": "sg_warpstone_01.adr",
+    "OpensAtlas": true,
+    "AutoSelectSingleInteraction": true,
+    "CursorId": 17,
+    "Notification": {
+      "NotificationType": 6,
+      "IconId": 3,
+      "NameId": 24730
+    }
   },
   {
     "Id": 2854,
@@ -9311,7 +9375,15 @@
     "NameId": 104037,
     "Name": "Highroad Junction Warpstone",
     "ModelId": 280,
-    "ModelFileName": "sg_warpstone_01.adr"
+    "ModelFileName": "sg_warpstone_01.adr",
+    "OpensAtlas": true,
+    "AutoSelectSingleInteraction": true,
+    "CursorId": 17,
+    "Notification": {
+      "NotificationType": 6,
+      "IconId": 3,
+      "NameId": 104037
+    }
   },
   {
     "Id": 2887,
@@ -12543,7 +12615,15 @@
     "NameId": 41304,
     "Name": "Lavender Coast Warpstone",
     "ModelId": 280,
-    "ModelFileName": "sg_warpstone_01.adr"
+    "ModelFileName": "sg_warpstone_01.adr",
+    "OpensAtlas": true,
+    "AutoSelectSingleInteraction": true,
+    "CursorId": 17,
+    "Notification": {
+      "NotificationType": 6,
+      "IconId": 3,
+      "NameId": 41304
+    }
   },
   {
     "Id": 3423,
@@ -18662,7 +18742,15 @@
     "NameId": 429122,
     "Name": "Greenwood Warpstone",
     "ModelId": 280,
-    "ModelFileName": "sg_warpstone_01.adr"
+    "ModelFileName": "sg_warpstone_01.adr",
+    "OpensAtlas": true,
+    "AutoSelectSingleInteraction": true,
+    "CursorId": 17,
+    "Notification": {
+      "NotificationType": 6,
+      "IconId": 3,
+      "NameId": 429122
+    }
   },
   {
     "Id": 4612,
@@ -20812,5 +20900,122 @@
     "HideNamePlate": true,
     "Animation": 2100,
     "BoomboxItemId": 48244
+  },
+  {
+    "Id": 33167,
+    "CaptureGuid": "14293651161170",
+    "NameId": 20831,
+    "ModelId": 280,
+    "ModelFileName": "sg_warpstone_01.adr",
+    "Scale": 1,
+    "Name": "Sanctuary Warpstone",
+    "OpensAtlas": true,
+    "AutoSelectSingleInteraction": true,
+    "CursorId": 17,
+    "Notification": {
+      "NotificationType": 6,
+      "IconId": 3,
+      "NameId": 20831
+    }
+  },
+  {
+    "Id": 33558,
+    "CaptureGuid": "23983097380882",
+    "NameId": 41298,
+    "ModelId": 280,
+    "ModelFileName": "sg_warpstone_01.adr",
+    "Scale": 1,
+    "Name": "Lakeshore Warpstone",
+    "OpensAtlas": true,
+    "AutoSelectSingleInteraction": true,
+    "CursorId": 17,
+    "Notification": {
+      "NotificationType": 6,
+      "IconId": 3,
+      "NameId": 41298
+    }
+  },
+  {
+    "Id": 33602,
+    "CaptureGuid": "7215545057314",
+    "NameId": 20830,
+    "ModelId": 280,
+    "ModelFileName": "sg_warpstone_01.adr",
+    "Scale": 1,
+    "Name": "Snowhill Warpstone",
+    "OpensAtlas": true,
+    "AutoSelectSingleInteraction": true,
+    "CursorId": 17,
+    "Notification": {
+      "NotificationType": 6,
+      "IconId": 3,
+      "NameId": 20830
+    }
+  },
+  {
+    "Id": 36143,
+    "CaptureGuid": "13125420056642",
+    "NameId": 440370,
+    "ModelId": 0,
+    "Scale": 1,
+    "Name": "Sunstone Valley Warpstone",
+    "OpensAtlas": true,
+    "AutoSelectSingleInteraction": true,
+    "CursorId": 17,
+    "Notification": {
+      "NotificationType": 6,
+      "IconId": 3,
+      "NameId": 440370
+    },
+    "TerrainObjectId": 1346725607,
+    "ReplaceTerrainObject": false
+  },
+  {
+    "Id": 36307,
+    "NameId": 116623,
+    "Name": "Stillwater Crossing Warpstone",
+    "ModelId": 0,
+    "TerrainObjectId": 1254775835,
+    "OpensAtlas": true,
+    "AutoSelectSingleInteraction": true,
+    "CursorId": 17,
+    "Notification": {
+      "NotificationType": 6,
+      "IconId": 3,
+      "NameId": 116623
+    },
+    "Comment": "Interaction NPC bound to the existing FabledRealms terrain Warpstone"
+  },
+  {
+    "Id": 36308,
+    "NameId": 93509,
+    "Name": "Blackspore Warpstone",
+    "ModelId": 0,
+    "TerrainObjectId": 1254779212,
+    "OpensAtlas": true,
+    "AutoSelectSingleInteraction": true,
+    "CursorId": 17,
+    "Notification": {
+      "NotificationType": 6,
+      "IconId": 3,
+      "NameId": 93509
+    },
+    "Comment": "Interaction NPC bound to the existing FabledRealms terrain Warpstone"
+  },
+  {
+    "Id": 36309,
+    "NameId": 440369,
+    "Name": "Rumble Ridge Warpstone",
+    "ModelId": 0,
+    "TerrainObjectId": 1345844843,
+    "OpensAtlas": true,
+    "AutoSelectSingleInteraction": true,
+    "CursorId": 17,
+    "Notification": {
+      "NotificationType": 6,
+      "IconId": 3,
+      "NameId": 440369
+    },
+    "Comment": "Interaction NPC bound to the existing FabledRealms terrain Warpstone"
   }
 ]
