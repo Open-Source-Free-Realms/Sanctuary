@@ -28,7 +28,7 @@ public static class Vector4Extensions
         return value.X > minX && value.X < maxX && value.Z > minZ && value.Z < maxZ;
     }
 
-    public static bool IsInArea(this Vector4 value, IReadOnlyList<float[]> points)
+    public static bool IsInPolygon(this Vector4 value, IReadOnlyList<float[]> points)
     {
         var inside = false;
 

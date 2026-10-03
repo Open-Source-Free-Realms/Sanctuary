@@ -58,7 +58,7 @@ public sealed class WorldZone : BaseZone
             }
             else if (areaDefinition.Shape == "Polygon")
             {
-                if (position.IsInArea(areaDefinition.Points))
+                if (position.IsInPolygon(areaDefinition.Points))
                     return areaDefinition.Id;
             }
             else
