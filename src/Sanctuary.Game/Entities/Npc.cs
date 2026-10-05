@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Collections;
 using Sanctuary.Game.Pathfinding;
+using Sanctuary.Game.Routines;
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -61,7 +62,7 @@ public class Npc : IScriptableNpc, IEntity
     public int Disposition { get; set; } = 1;
 
     public Action<Player>? InteractAction { get; set; }
-    public Action? UpdateEverySecondAction { get; set; }
+    public RoutineManager Routines { get; }
 
     public int Animation { get; set; } = 1;
 
@@ -88,13 +89,12 @@ public class Npc : IScriptableNpc, IEntity
     public float WaypointTolerance { get; set; } = 0f;
     public float Speed { get; set; } = 6.25f;
 
-    private readonly PathState _path = new();
-
     private PathBuilder? _pathBuilder;
 
     public Npc(IZone zone)
     {
         Zone = zone;
+        Routines = new RoutineManager(Logger);
     }
 
     #region Events
@@ -134,21 +134,15 @@ public class Npc : IScriptableNpc, IEntity
 
     public void UpdateEveryTick()
     {
+        Routines.OnTick();
+
         if (!_scripts.IsEmpty)
             GetOrCreateScriptContext().FireEvent("tick");
-
-        var currentPosition = new Vector3(Position.X, Position.Y, Position.Z);
-        var result = PathFollower.Advance(_path, currentPosition, Speed, WaypointTolerance, Zone.TickDeltaSeconds);
-
-        if (result.Moved)
-        {
-            UpdatePosition(new Vector4(result.NewPosition, 1f), result.NewRotation!.Value);
-        }
     }
 
     public void UpdateEverySecond()
     {
-        UpdateEverySecondAction?.Invoke();
+        Routines.OnSecond();
 
         if (!_scripts.IsEmpty)
             GetOrCreateScriptContext().FireEvent("second");
@@ -470,19 +464,42 @@ public class Npc : IScriptableNpc, IEntity
 
     public void MoveTo(Vector3 goalPosition, bool direct = false)
     {
+        Queue<Vector3> waypoints;
+
         if (direct || Zone.Pathfinder is null)
         {
-            var waypoints = new Queue<Vector3>();
+            waypoints = new Queue<Vector3>();
             waypoints.Enqueue(goalPosition);
-            _path.Set(waypoints);
-            return;
+        }
+        else
+        {
+            _pathBuilder ??= new PathBuilder(Zone.Pathfinder);
+
+            var currentPosition = new Vector3(Position.X, Position.Y, Position.Z);
+            var newWaypoints = _pathBuilder.TryRecompute(currentPosition, goalPosition);
+
+            // Close enough to what's already running - leave the in-flight routine (and its
+            // own path) alone rather than replacing it with a fresh, empty one.
+            if (newWaypoints is null)
+                return;
+
+            waypoints = newWaypoints;
         }
 
-        _pathBuilder ??= new PathBuilder(Zone.Pathfinder);
+        var path = new PathState();
 
-        var currentPosition = new Vector3(Position.X, Position.Y, Position.Z);
-        var newWaypoints = _pathBuilder.TryRecompute(currentPosition, goalPosition);
-        if (newWaypoints is not null)
-            _path.Set(newWaypoints);
+        Routines.SetRoutine("move", new DelegateRoutine(
+            onStart: () => path.Set(waypoints),
+            onStep: () =>
+            {
+                var currentPosition = new Vector3(Position.X, Position.Y, Position.Z);
+                var result = PathFollower.Advance(path, currentPosition, Speed, WaypointTolerance, Zone.TickDeltaSeconds);
+
+                if (result.Moved)
+                    UpdatePosition(new Vector4(result.NewPosition, 1f), result.NewRotation!.Value);
+
+                return result.Arrived;
+            }),
+            Cadence.Tick);
     }
 }

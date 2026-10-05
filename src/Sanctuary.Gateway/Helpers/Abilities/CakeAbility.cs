@@ -3,6 +3,7 @@ using System.Numerics;
 
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Resources.Definitions;
+using Sanctuary.Game.Routines;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 
@@ -130,27 +131,20 @@ public sealed class CakeAbility(AbilityServices services) : ConsumableAbility(se
                 recipient.SendTunneled(spawnEffect);
         }
 
-        var despawnTime = DateTimeOffset.UtcNow.AddMilliseconds(cakeDefinition.LifetimeMs);
         var nextOneShotTime = NextOneShotTime(cakeDefinition);
         DateTimeOffset? oneShotEndTime = null;
 
-        cakeNpc.UpdateEverySecondAction = () =>
+        var cakeRoutine = new DelegateRoutine(onStep: () =>
         {
-            var now = DateTimeOffset.UtcNow;
-
-            if (now >= despawnTime)
-            {
-                DespawnNpc(cakeNpc, 0);
-                return;
-            }
-
             if (cakeDefinition.OneShotAnimation == 0)
-                return;
+                return false;
+
+            var now = DateTimeOffset.UtcNow;
 
             if (oneShotEndTime is not null)
             {
                 if (now < oneShotEndTime)
-                    return;
+                    return false;
 
                 SetCakeAnimation(cakeNpc, cakeDefinition.Animation);
                 oneShotEndTime = null;
@@ -161,7 +155,12 @@ public sealed class CakeAbility(AbilityServices services) : ConsumableAbility(se
                 SetCakeAnimation(cakeNpc, cakeDefinition.OneShotAnimation);
                 oneShotEndTime = now.AddMilliseconds(cakeDefinition.OneShotAnimationMs);
             }
-        };
+
+            return false;
+        },
+        onEnd: () => DespawnNpc(cakeNpc, 0));
+
+        cakeNpc.Routines.SetRoutine("lifetime", new TimeoutRoutine(cakeRoutine, cakeDefinition.LifetimeMs / 1000.0), Cadence.Second);
     }
 
     // Most TransformAbilityIds resolve to a creature transform; a couple of birthday cakes (Shrouded
