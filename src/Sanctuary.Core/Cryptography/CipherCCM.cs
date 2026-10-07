@@ -98,16 +98,18 @@ public sealed class CipherCCM : ICipher
 
         try
         {
-            _aesCcm.Encrypt(nonce, sourceData, encryptedData, tag);
+            _aesCcm.Encrypt(nonce, sourceData, encryptedData.AsSpan(0, sourceData.Length), tag);
+            writer.Write(encryptedData.AsSpan(0, sourceData.Length));
         }
         catch
         {
             return false;
         }
 
-        writer.Write(encryptedData);
-
-        ArrayPool<byte>.Shared.Return(encryptedData);
+        finally
+        {
+            ArrayPool<byte>.Shared.Return(encryptedData);
+        }
 
         writer.Write(tag);
         writer.Write(nonce);
