@@ -3,11 +3,13 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.IO;
 using System.Numerics;
 using System.Threading.Tasks;
 
 using Sanctuary.Core.Collections;
 using Sanctuary.Core.IO;
+using Sanctuary.Core.Helpers;
 using Sanctuary.Game;
 using Sanctuary.Game.ChatCommands;
 using Sanctuary.Game.Helpers;
@@ -37,6 +39,10 @@ public sealed class Player : ClientPcData, IEntity
     public ZoneTile ZoneTile { get; private set; } = ZoneTile.Empty;
     public ConcurrentDictionary<ulong, Npc> VisibleNpcs { get; } = [];
     public ConcurrentDictionary<ulong, Player> VisiblePlayers { get; } = [];
+
+    private uint? _portraitCrc;
+    private uint? _pendingPortraitCrc;
+    private DateTimeOffset _portraitUpdateExpiresAt;
 
     private int ZoneAreaId { get; set; }
 
@@ -276,6 +282,100 @@ public sealed class Player : ClientPcData, IEntity
 
     public void UpdateEverySecond()
     {
+        UpdatePortrait();
+    }
+
+    private void UpdatePortrait()
+    {
+        if (_pendingPortraitCrc is null)
+            return;
+
+        if (DateTimeOffset.UtcNow >= _portraitUpdateExpiresAt)
+        {
+            _pendingPortraitCrc = null;
+            return;
+        }
+
+        try
+        {
+            var path = Path.Combine(PortraitStorage.GetCharacterDirectory(Guid), "portrait.crc");
+
+            if (!File.Exists(path))
+                return;
+
+            var data = File.ReadAllBytes(path);
+
+            if (data.Length != sizeof(uint) || BitConverter.ToUInt32(data) != _pendingPortraitCrc)
+                return;
+
+            var packetPlayerImageDataHeadshot = GetPortraitPacket("Headshot");
+            var packetPlayerImageDataPortrait = GetPortraitPacket("Portrait");
+
+            if (packetPlayerImageDataHeadshot is null || packetPlayerImageDataPortrait is null)
+                return;
+
+            SendTunneledToVisible(packetPlayerImageDataHeadshot, true);
+            SendTunneledToVisible(packetPlayerImageDataPortrait, true);
+            _portraitCrc = _pendingPortraitCrc;
+            _pendingPortraitCrc = null;
+        }
+        catch (IOException)
+        {
+            // Retry while the upload is being written.
+        }
+    }
+
+    public void UpdatePortrait(uint portraitCrc)
+    {
+        if (_portraitCrc == portraitCrc)
+            return;
+
+        _pendingPortraitCrc = portraitCrc;
+        _portraitUpdateExpiresAt = DateTimeOffset.UtcNow.AddSeconds(30);
+    }
+
+    public PacketPlayerImageData? GetPortraitPacket(string? provider)
+    {
+        var fileName = provider switch
+        {
+            "Headshot" => "headshot.png",
+            "Portrait" => "portrait.png",
+            _ => null
+        };
+
+        if (fileName is null)
+            return null;
+
+        var path = Path.Combine(PortraitStorage.GetCharacterDirectory(Guid), fileName);
+
+        if (!File.Exists(path))
+            return null;
+
+        return new PacketPlayerImageData
+        {
+            Guid = Guid,
+            Provider = provider,
+            Portrait =
+            {
+                Unknown2 = 1,
+                Guid = Guid,
+                ModelId = Model,
+                Attachments = GetAttachments(),
+                Head = Head,
+                Hair = Hair,
+                SkinTone = SkinTone,
+                FacePaint = FacePaint,
+                ModelCustomization = ModelCustomization,
+                HairColor = HairColor,
+                EyeColor = EyeColor,
+                HeadId = HeadId,
+                HairId = HairId,
+                SkinToneId = SkinToneId,
+                FacePaintId = FacePaintId,
+                Provider = provider
+            },
+            PngPayload = File.ReadAllBytes(path)
+        };
     }
 
     // The client animates the cooldown sweep itself from TotalRefreshTime -
