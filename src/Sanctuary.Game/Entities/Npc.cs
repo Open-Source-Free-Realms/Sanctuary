@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Collections;
 using Sanctuary.Game.Pathfinding;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -46,6 +47,7 @@ public class Npc : IScriptableNpc, IEntity
 
     public int ModelId { get; set; }
     public int TerrainObjectId { get; set; }
+    public bool ReplaceTerrainObject { get; set; }
 
     public string? TextureAlias { get; set; }
     public string? TintAlias { get; set; }
@@ -69,6 +71,9 @@ public class Npc : IScriptableNpc, IEntity
 
     public int InteractRange { get; set; } = 100;
     public bool IsInteractable { get; set; } = true;
+    public bool OpensAtlas { get; set; }
+    public bool AutoSelectSingleInteraction { get; set; }
+    public List<InteractionData> Interactions { get; } = [];
 
     public int MovementType => 2;
 
@@ -77,6 +82,8 @@ public class Npc : IScriptableNpc, IEntity
     public int ImageSetId { get; set; }
 
     public byte CursorId { get; set; }
+    public bool? HasCursor { get; set; }
+    public bool RelevanceUnknown2 { get; set; }
 
     public NotificationInfo? Notification { get; set; }
 
@@ -101,6 +108,13 @@ public class Npc : IScriptableNpc, IEntity
 
     public void OnInteract(Player player)
     {
+        if (Interactions.Count > 0)
+        {
+            if (InteractionMenuHelper.CanInteract(this, player))
+                player.SendTunneled(InteractionMenuHelper.GetInteractionListPacket(Guid, Name, Interactions, autoSelectSingle: AutoSelectSingleInteraction));
+            return;
+        }
+
         InteractAction?.Invoke(player);
     }
 
@@ -164,7 +178,7 @@ public class Npc : IScriptableNpc, IEntity
             UpdateZoneTile();
         }
 
-        var packet = new PlayerUpdatePacketUpdatePosition
+        var playerUpdatePacketUpdatePosition = new PlayerUpdatePacketUpdatePosition
         {
             Guid = Guid,
             Position = position,
@@ -173,9 +187,14 @@ public class Npc : IScriptableNpc, IEntity
             Unknown = 0
         };
 
+        if (VisiblePlayers.IsEmpty)
+            return;
+
+        var data = Player.SerializeTunneled(playerUpdatePacketUpdatePosition);
+
         foreach (var visiblePlayer in VisiblePlayers)
         {
-            visiblePlayer.Value.SendTunneled(packet);
+            visiblePlayer.Value.SendSerialized(data);
         }
     }
 
@@ -306,7 +325,7 @@ public class Npc : IScriptableNpc, IEntity
             // playerUpdatePacketAddNpc.Hair = TODO
             // playerUpdatePacketAddNpc.ModelCustomization = TODO
 
-            ReplaceTerrainObject = default,
+            ReplaceTerrainObject = ReplaceTerrainObject,
 
             Unknown63 = default,
             Unknown64 = 3050,

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 
 using Microsoft.EntityFrameworkCore;
@@ -32,19 +32,19 @@ public static class InventoryPacketEquipByItemRecordHandler
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
     {
-        if (!InventoryPacketEquipByItemRecord.TryDeserialize(data, out var packet))
+        if (!InventoryPacketEquipByItemRecord.TryDeserialize(data, out var inventoryPacketEquipByItemRecord))
         {
             _logger.LogError("Failed to deserialize {packet}.", nameof(InventoryPacketEquipByItemRecord));
             return false;
         }
 
-        _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(InventoryPacketEquipByItemRecord), packet);
+        _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(InventoryPacketEquipByItemRecord), inventoryPacketEquipByItemRecord);
 
-        var clientItem = connection.Player.Items.SingleOrDefault(x => x.Definition == packet.ItemRecord.Definition && x.Tint == packet.ItemRecord.Tint);
+        var clientItem = connection.Player.Items.SingleOrDefault(x => x.Definition == inventoryPacketEquipByItemRecord.ItemRecord.Definition && x.Tint == inventoryPacketEquipByItemRecord.ItemRecord.Tint);
 
         if (clientItem is null)
         {
-            _logger.LogWarning("User tried to equip unknown item. {definition} {tint}", packet.ItemRecord.Definition, packet.ItemRecord.Tint);
+            _logger.LogWarning("User tried to equip unknown item. {definition} {tint}", inventoryPacketEquipByItemRecord.ItemRecord.Definition, inventoryPacketEquipByItemRecord.ItemRecord.Tint);
             return true;
         }
 
@@ -58,11 +58,11 @@ public static class InventoryPacketEquipByItemRecordHandler
         if (clientItemDefinition.Type != 1)
             return true;
 
-        var profile = connection.Player.Profiles.SingleOrDefault(x => x.Id == packet.ProfileId);
+        var profile = connection.Player.Profiles.SingleOrDefault(x => x.Id == inventoryPacketEquipByItemRecord.ProfileId);
 
         if (profile is null)
         {
-            _logger.LogWarning("Invalid player profile. {id} {profile}", clientItem.Id, packet.ProfileId);
+            _logger.LogWarning("Invalid player profile. {id} {profile}", clientItem.Id, inventoryPacketEquipByItemRecord.ProfileId);
             return true;
         }
 
@@ -70,7 +70,7 @@ public static class InventoryPacketEquipByItemRecordHandler
 
         var dbProfile = dbContext.Profiles
             .Include(x => x.Items)
-            .SingleOrDefault(x => x.CharacterId == GuidHelper.GetPlayerId(connection.Player.Guid) && x.Id == packet.ProfileId);
+            .SingleOrDefault(x => x.CharacterId == GuidHelper.GetPlayerId(connection.Player.Guid) && x.Id == inventoryPacketEquipByItemRecord.ProfileId);
 
         if (dbProfile is null)
         {
@@ -131,9 +131,9 @@ public static class InventoryPacketEquipByItemRecordHandler
         clientUpdatePacketEquipItem.Attachment.TintAlias = clientItemDefinition.TintAlias;
         clientUpdatePacketEquipItem.Attachment.TintId = clientItem.Tint == 0 ? clientItemDefinition.Icon.TintId : clientItem.Tint;
         clientUpdatePacketEquipItem.Attachment.CompositeEffectId = clientItemDefinition.CompositeEffectId;
-        clientUpdatePacketEquipItem.Attachment.Slot = packet.Slot;
+        clientUpdatePacketEquipItem.Attachment.Slot = inventoryPacketEquipByItemRecord.Slot;
 
-        clientUpdatePacketEquipItem.ProfileId = packet.ProfileId;
+        clientUpdatePacketEquipItem.ProfileId = inventoryPacketEquipByItemRecord.ProfileId;
 
         clientUpdatePacketEquipItem.Equip = true;
 
@@ -157,9 +157,12 @@ public static class InventoryPacketEquipByItemRecordHandler
 
         playerUpdatePacketEquipItemChange.WieldType = itemClass.WieldType;
 
-        connection.Player.SendTunneledToVisible(playerUpdatePacketEquipItemChange);
+        if (inventoryPacketEquipByItemRecord.ProfileId == connection.Player.ActiveProfileId)
+            connection.Player.SendTunneledToVisible(playerUpdatePacketEquipItemChange);
 
         connection.Player.SendToolbar();
+
+        connection.Player.RefreshWeaponFlair(inventoryPacketEquipByItemRecord.ProfileId, inventoryPacketEquipByItemRecord.Slot);
 
         return true;
     }
