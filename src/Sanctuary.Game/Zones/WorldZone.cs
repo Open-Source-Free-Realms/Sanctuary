@@ -36,6 +36,9 @@ public sealed class WorldZone : BaseZone
 
     public int GetZoneAreaId(Vector4 position)
     {
+        if (_zoneDefinition.Name != "FabledRealms")
+            return 0;
+
         foreach (var areaDefinition in _zoneDefinition.AreaDefinitions)
         {
             if (areaDefinition.Shape == "Circle")
@@ -51,6 +54,11 @@ public sealed class WorldZone : BaseZone
                 var p2 = new Vector3(areaDefinition.X2, 0, areaDefinition.Z2);
 
                 if (position.IsInRectangle(p1, p2))
+                    return areaDefinition.Id;
+            }
+            else if (areaDefinition.Shape == "Polygon")
+            {
+                if (position.IsInPolygon(areaDefinition.Points))
                     return areaDefinition.Id;
             }
             else

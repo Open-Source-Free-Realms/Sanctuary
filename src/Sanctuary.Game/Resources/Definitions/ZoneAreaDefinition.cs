@@ -1,12 +1,15 @@
-﻿namespace Sanctuary.Game.Resources.Definitions;
+﻿using System.Collections.Generic;
+
+namespace Sanctuary.Game.Resources.Definitions;
 
 public class ZoneAreaDefinition
 {
     public int Id { get; set; }
 
     /// <summary>
-    /// Sphere - XZ 1 and Radius
+    /// Circle - XZ 1 and Radius
     /// Rectangle - XZ 1 and 2
+    /// Polygon - Points containing XZ pairs
     /// </summary>
     public string Shape { get; set; } = null!;
 
@@ -17,4 +20,6 @@ public class ZoneAreaDefinition
     public float Z2 { get; set; }
 
     public float Radius { get; set; }
+
+    public List<float[]> Points { get; set; } = [];
 }
