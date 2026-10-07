@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -64,6 +64,7 @@ public class Npc : IScriptableNpc, IEntity
 
     public Action<Player>? InteractAction { get; set; }
     public Action? UpdateEverySecondAction { get; set; }
+    public Action? UpdateEveryTickAction { get; set; }
 
     public int Animation { get; set; } = 1;
 
@@ -85,7 +86,10 @@ public class Npc : IScriptableNpc, IEntity
     public bool? HasCursor { get; set; }
     public bool RelevanceUnknown2 { get; set; }
 
+    public InteractionList? InteractionList { get; set; }
+    public bool InteractionUnknown { get; set; }
     public NotificationInfo? Notification { get; set; }
+    public List<NotificationInfo> Notifications { get; set; } = [];
 
     public List<CharacterAttachmentData> Attachments { get; set; } = [];
 
@@ -108,6 +112,13 @@ public class Npc : IScriptableNpc, IEntity
 
     public void OnInteract(Player player)
     {
+        if (InteractionList is not null)
+        {
+            if (InteractionMenuHelper.CanInteract(this, player))
+                player.SendTunneled(InteractionMenuHelper.GetInteractionListPacket(Guid, InteractionList, InteractionUnknown));
+            return;
+        }
+
         if (Interactions.Count > 0)
         {
             if (InteractionMenuHelper.CanInteract(this, player))
@@ -148,6 +159,7 @@ public class Npc : IScriptableNpc, IEntity
 
     public void UpdateEveryTick()
     {
+        UpdateEveryTickAction?.Invoke();
         if (!_scripts.IsEmpty)
             GetOrCreateScriptContext().FireEvent("tick");
 
@@ -467,17 +479,6 @@ public class Npc : IScriptableNpc, IEntity
         RemoveFromZone();
 
         Zone.ScriptManager.DeleteContext(this);
-    }
-
-    protected void DisposeGracefully(bool animate, int delay, int effectDelay, int compositeEffectId, int duration)
-    {
-        foreach (var visiblePlayer in VisiblePlayers)
-        {
-            visiblePlayer.Value.OnRemoveVisibleNpcGracefully(
-                this, animate, delay, effectDelay, compositeEffectId, duration);
-        }
-
-        RemoveFromZone();
     }
 
     private void RemoveFromZone()

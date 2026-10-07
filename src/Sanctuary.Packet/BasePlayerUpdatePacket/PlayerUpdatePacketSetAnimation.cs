@@ -8,6 +8,7 @@ public class PlayerUpdatePacketSetAnimation : BasePlayerUpdatePacket, ISerializa
 
     public ulong Guid;
     public int AnimationId;
+    // Loop count on the play-now path. A positive count also bypasses transition-rule overrides.
     public int Unknown;
 
     // Bit 0 set = set the entity's base/idle animation, otherwise play it now.

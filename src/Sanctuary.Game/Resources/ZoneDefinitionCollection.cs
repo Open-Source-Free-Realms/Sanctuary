@@ -30,7 +30,7 @@ public class ZoneDefinitionCollection : ObservableConcurrentDictionary<int, Base
         {
             try
             {
-                var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
 
                 var jsonSerializerOptions = new JsonSerializerOptions
                 {

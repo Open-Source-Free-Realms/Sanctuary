@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Linq;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Game;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -27,15 +28,15 @@ public static class PacketMountSpawnHandler
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
     {
-        if (!PacketMountSpawn.TryDeserialize(data, out var packet))
+        if (!PacketMountSpawn.TryDeserialize(data, out var packetMountSpawn))
         {
             _logger.LogError("Failed to deserialize {packet}.", nameof(PacketMountSpawn));
             return false;
         }
 
-        _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(PacketMountSpawn), packet);
+        _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(PacketMountSpawn), packetMountSpawn);
 
-        var mountInfo = connection.Player.Mounts.SingleOrDefault(x => x.Id == packet.Id);
+        var mountInfo = connection.Player.Mounts.SingleOrDefault(x => x.Id == packetMountSpawn.Id);
 
         if (mountInfo is null)
             return true;
@@ -66,6 +67,7 @@ public static class PacketMountSpawnHandler
         mount.Seat = 0;
         mount.QueuePosition = 1;
 
+        BoomboxHelper.PauseDance(connection.Player);
         connection.Player.Mount = mount;
 
         connection.Player.UpdatePosition(connection.Player.Position, connection.Player.Rotation);
@@ -75,10 +77,10 @@ public static class PacketMountSpawnHandler
 
         connection.Player.SendTunneled(mount.GetAddNpcPacket());
 
-        var mountResponse = mount.GetMountResponsePacket();
-        mountResponse.CompositeEffectId = 46;
+        var packetMountResponse = mount.GetMountResponsePacket();
+        packetMountResponse.CompositeEffectId = 46;
 
-        connection.Player.SendTunneledToVisible(mountResponse, sendToSelf: true);
+        connection.Player.SendTunneledToVisible(packetMountResponse, sendToSelf: true);
 
         var mountStats = mountDefinition.Stats;
 

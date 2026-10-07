@@ -16,6 +16,7 @@ using Sanctuary.Core.Collections;
 using Sanctuary.Core.Extensions;
 using Sanctuary.Core.IO;
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Zones;
 using Sanctuary.Packet;
@@ -630,6 +631,10 @@ public abstract class BaseZone : IZone, IDisposable
 
         spawnedNpc.UpdatePosition(position, rotation);
 
+        if (definition.BoomboxItemId != 0 && _resourceManager.Consumables.Boomboxes.TryGetValue(definition.BoomboxItemId, out var boomboxDefinition))
+            Sanctuary.Game.Helpers.BoomboxHelper.StartDanceLoop(this, spawnedNpc, position, boomboxDefinition,
+                0, 0, 0, 0, permanent: true);
+
         npc = spawnedNpc;
         return true;
     }
@@ -704,6 +709,7 @@ public abstract class BaseZone : IZone, IDisposable
         {
             Guid = GetNpcGuid(guid),
             NameId = definition.NameId,
+            SubTextNameId = definition.SubTextNameId,
             Name = definition.Name,
             ModelId = definition.ModelId,
             TerrainObjectId = definition.TerrainObjectId,
@@ -715,8 +721,13 @@ public abstract class BaseZone : IZone, IDisposable
             CursorId = definition.CursorId,
             HasCursor = definition.HasCursor,
             RelevanceUnknown2 = definition.RelevanceUnknown2,
+            InteractionList = definition.InteractionList,
+            InteractionUnknown = definition.InteractionUnknown,
             TextureAlias = definition.TextureAlias,
             Scale = definition.Scale ?? scale,
+            HideNamePlate = definition.HideNamePlate,
+            Animation = definition.Animation,
+            VerticalOffset = definition.VerticalOffset,
             Visible = true
         };
 
@@ -728,6 +739,9 @@ public abstract class BaseZone : IZone, IDisposable
 
         if (definition.Notification is not null)
             npc.Notification = Sanctuary.Game.Helpers.InteractionMenuHelper.GetNotification(npc.Guid, definition.Notification);
+
+        foreach (var notification in definition.Notifications)
+            npc.Notifications.Add(Sanctuary.Game.Helpers.InteractionMenuHelper.GetNotification(npc.Guid, notification));
 
         if (definition.OpensAtlas)
             npc.Interactions.Add(Sanctuary.Game.Interactions.OpenAtlasInteraction.Data);
@@ -972,7 +986,7 @@ public abstract class BaseZone : IZone, IDisposable
             if (!_npcs.ContainsKey(node.Guid))
                 return;
 
-            node.DisposeAfterCollection();
+            EntityHelper.RemovePlayerGracefully(node, animate: true);
 
             if (!_resourceManager.CollectionNodePools.TryGetValue(node.PoolDefinition.Key, out var poolDefinition) ||
                 poolDefinition.ZoneDefinitionId != DefinitionId)
@@ -1100,7 +1114,12 @@ public abstract class BaseZone : IZone, IDisposable
 
     public bool TryRemovePlayer(ulong guid)
     {
-        return _players.TryRemove(guid, out _) && _entities.TryRemove(guid, out _);
+        if (!_players.TryRemove(guid, out _))
+            return false;
+
+        BoomboxHelper.RemovePlayer(this, guid);
+
+        return _entities.TryRemove(guid, out _);
     }
 
     #endregion

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -72,6 +72,12 @@ public sealed class Player : ClientPcData, IEntity
     public Dictionary<int, Dictionary<int, int>> ActionBarItemGuids { get; set; } = new();
 
     public int TemporaryAppearance { get; private set; }
+
+    public int BoomboxDancePriority { get; set; }
+    public ulong BoomboxDanceOwner { get; set; }
+    public int BoomboxDanceAnimation { get; set; }
+    public bool BoomboxDanceIsStanding { get; set; }
+    public int BoomboxDanceTransform { get; set; }
 
     public ulong LastSillyStringTarget { get; set; }
 
@@ -225,18 +231,14 @@ public sealed class Player : ClientPcData, IEntity
             CharacterStats.GlideEnabled.Set(0),
             CharacterStats.JumpHeight.Set(0f));
 
-        SendTunneledToVisible(new PlayerUpdatePacketRemovePlayerGracefully
-        {
-            Guid = Mount.Guid,
-            Animate = false,
-            Delay = 0,
-            EffectDelay = 0,
-            CompositeEffectId = 0,
-            Duration = 1000
-        }, sendToSelf: true);
-
-        Mount.Dispose();
+        EntityHelper.RemovePlayerGracefully(Mount, recipients: VisiblePlayers.Values.Append(this));
         Mount = null;
+        if (BoomboxDanceTransform != 0 && TemporaryAppearance == BoomboxDanceTransform)
+            SendTunneledToVisible(new PlayerUpdatePacketUpdateTemporaryAppearance
+            {
+                Guid = Guid,
+                TemporaryAppearance = TemporaryAppearance
+            }, true);
     }
 
     #endregion
@@ -468,10 +470,9 @@ public sealed class Player : ClientPcData, IEntity
 
         foreach (var npc in npcs)
         {
-            if (npc.Notification is null)
-                continue;
-
-            playerUpdatePacketAddNotifications.Notifications.Add(npc.Notification);
+            playerUpdatePacketAddNotifications.Notifications.AddRange(npc.Notifications);
+            if (npc.Notification is not null)
+                playerUpdatePacketAddNotifications.Notifications.Add(npc.Notification);
         }
 
         if (playerUpdatePacketAddNotifications.Notifications.Count > 0)
@@ -500,6 +501,16 @@ public sealed class Player : ClientPcData, IEntity
             else
                 SendTunneled(player.GetAddPcPacket());
 
+            // Native standing groups can resume independently. Timed routines must wait
+            // for their next shared packet: SetAnimation cannot seek into a current clip.
+            if (player.Mount is null && player.BoomboxDanceIsStanding && player.BoomboxDanceAnimation != 0)
+                SendTunneled(new PlayerUpdatePacketSetAnimation
+                {
+                    Guid = player.Guid,
+                    AnimationId = player.BoomboxDanceAnimation,
+                    Flags = 1
+                });
+
             SendTunneled(player.GetWeaponFlairOverridePacket());
         }
 
@@ -519,25 +530,6 @@ public sealed class Player : ClientPcData, IEntity
 
         foreach (var npc in npcs)
             VisibleNpcs.TryRemove(npc.Guid, out _);
-    }
-
-    public void OnRemoveVisibleNpcGracefully(Npc npc, bool animate, int delay, int effectDelay,
-        int compositeEffectId, int duration)
-    {
-        if (npc is Mount)
-            return;
-
-        SendTunneled(new PlayerUpdatePacketRemovePlayerGracefully
-        {
-            Guid = npc.Guid,
-            Animate = animate,
-            Delay = delay,
-            EffectDelay = effectDelay,
-            CompositeEffectId = compositeEffectId,
-            Duration = duration
-        });
-
-        VisibleNpcs.TryRemove(npc.Guid, out _);
     }
 
     public void OnRemoveVisiblePlayers(params IEnumerable<Player> players)

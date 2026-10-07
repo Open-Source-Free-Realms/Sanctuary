@@ -3427,6 +3427,9 @@ local function spawnStaticNpcs(zone)
     zone:spawnNpcWithGuid(36307, 100000036307, -1270.01453, -49.5988922, 785.111572, -0.383972555)
     zone:spawnNpcWithGuid(36308, 100000036308, -2128.67554, -32.8866158, 1044.89343, -1.83259571)
     zone:spawnNpcWithGuid(36309, 100000036309, 501.101013, 69.9525299, 1779.1543, -0.820305467)
+    -- Permanent Snowhill boomboxes.
+    zone:spawnNpcWithGuid(33617, 28449863368738, 88.90495, 23.542553, 410.57498, 2.34577802)
+    zone:spawnNpcWithGuid(33838, 28518582845474, -63.054962, 5.882222, 327.70673, -2.98661589)
 end
 
 registerCallback("start", function(zone)

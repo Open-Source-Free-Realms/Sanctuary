@@ -36,6 +36,8 @@ public class ItemCategoryGroupDefinitionCollection : ObservableConcurrentDiction
                 .Reader()
                 .From(fileStream);
 
+            Clear();
+
             foreach (var row in reader)
             {
                 if (row.ColCount < 2)

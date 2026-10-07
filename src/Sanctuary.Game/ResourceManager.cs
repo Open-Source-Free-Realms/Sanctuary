@@ -9,7 +9,7 @@ using Sanctuary.Game.Resources.Definitions.Rewards;
 
 namespace Sanctuary.Game;
 
-public class ResourceManager : IResourceManager
+public class ResourceManager : IResourceManager, IDisposable
 {
     private ILogger _logger;
     private FileSystemWatcher _fileSystemWatcher;
@@ -425,4 +425,11 @@ public class ResourceManager : IResourceManager
             _fileSystemWatcher.EnableRaisingEvents = true;
         }
     }
+
+    public void Dispose()
+    {
+        _fileSystemWatcher.Changed -= _fileSystemWatcher_Changed;
+        _fileSystemWatcher.Dispose();
+    }
+
 }
