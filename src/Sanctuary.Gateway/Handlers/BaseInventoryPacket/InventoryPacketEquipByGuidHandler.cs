@@ -32,33 +32,33 @@ public static class InventoryPacketEquipByGuidHandler
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
     {
-        if (!InventoryPacketEquipByGuid.TryDeserialize(data, out var packet))
+        if (!InventoryPacketEquipByGuid.TryDeserialize(data, out var inventoryPacketEquipByGuid))
         {
             _logger.LogError("Failed to deserialize {packet}.", nameof(InventoryPacketEquipByGuid));
             return false;
         }
 
-        _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(InventoryPacketEquipByGuid), packet);
+        _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(InventoryPacketEquipByGuid), inventoryPacketEquipByGuid);
 
-        var clientItem = connection.Player.Items.SingleOrDefault(x => x.Id == packet.Guid);
+        var clientItem = connection.Player.Items.SingleOrDefault(x => x.Id == inventoryPacketEquipByGuid.Guid);
 
         if (clientItem is null)
         {
-            _logger.LogWarning("User tried to equip unknown item. {guid}", packet.Guid);
+            _logger.LogWarning("User tried to equip unknown item. {guid}", inventoryPacketEquipByGuid.Guid);
             return true;
         }
 
         if (!_resourceManager.ClientItemDefinitions.TryGetValue(clientItem.Definition, out var clientItemDefinition))
         {
-            _logger.LogWarning("User tried to equip unknown item definition. {guid} {definition}", packet.Guid, clientItem.Definition);
+            _logger.LogWarning("User tried to equip unknown item definition. {guid} {definition}", inventoryPacketEquipByGuid.Guid, clientItem.Definition);
             return true;
         }
 
-        var profile = connection.Player.Profiles.SingleOrDefault(x => x.Id == packet.ProfileId);
+        var profile = connection.Player.Profiles.SingleOrDefault(x => x.Id == inventoryPacketEquipByGuid.ProfileId);
 
         if (profile is null)
         {
-            _logger.LogWarning("Invalid player profile. {guid} {profile}", packet.Guid, packet.ProfileId);
+            _logger.LogWarning("Invalid player profile. {guid} {profile}", inventoryPacketEquipByGuid.Guid, inventoryPacketEquipByGuid.ProfileId);
             return true;
         }
 
@@ -66,7 +66,7 @@ public static class InventoryPacketEquipByGuidHandler
 
         var dbProfile = dbContext.Profiles
             .Include(x => x.Items)
-            .SingleOrDefault(x => x.CharacterId == GuidHelper.GetPlayerId(connection.Player.Guid) && x.Id == packet.ProfileId);
+            .SingleOrDefault(x => x.CharacterId == GuidHelper.GetPlayerId(connection.Player.Guid) && x.Id == inventoryPacketEquipByGuid.ProfileId);
 
         if (dbProfile is null)
         {
@@ -75,7 +75,7 @@ public static class InventoryPacketEquipByGuidHandler
         }
 
         var dbItem = dbContext.Items
-            .SingleOrDefault(x => x.CharacterId == GuidHelper.GetPlayerId(connection.Player.Guid) && x.Id == packet.Guid);
+            .SingleOrDefault(x => x.CharacterId == GuidHelper.GetPlayerId(connection.Player.Guid) && x.Id == inventoryPacketEquipByGuid.Guid);
 
         if (dbItem is null)
         {
@@ -120,16 +120,16 @@ public static class InventoryPacketEquipByGuidHandler
 
         var clientUpdatePacketEquipItem = new ClientUpdatePacketEquipItem();
 
-        clientUpdatePacketEquipItem.Guid = packet.Guid;
+        clientUpdatePacketEquipItem.Guid = inventoryPacketEquipByGuid.Guid;
 
         clientUpdatePacketEquipItem.Attachment.ModelName = clientItemDefinition.ModelName;
         clientUpdatePacketEquipItem.Attachment.TextureAlias = clientItemDefinition.TextureAlias;
         clientUpdatePacketEquipItem.Attachment.TintAlias = clientItemDefinition.TintAlias;
         clientUpdatePacketEquipItem.Attachment.TintId = clientItem.Tint == 0 ? clientItemDefinition.Icon.TintId : clientItem.Tint;
         clientUpdatePacketEquipItem.Attachment.CompositeEffectId = clientItemDefinition.CompositeEffectId;
-        clientUpdatePacketEquipItem.Attachment.Slot = packet.Slot;
+        clientUpdatePacketEquipItem.Attachment.Slot = inventoryPacketEquipByGuid.Slot;
 
-        clientUpdatePacketEquipItem.ProfileId = packet.ProfileId;
+        clientUpdatePacketEquipItem.ProfileId = inventoryPacketEquipByGuid.ProfileId;
 
         clientUpdatePacketEquipItem.Equip = true;
 
@@ -147,87 +147,18 @@ public static class InventoryPacketEquipByGuidHandler
 
         if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out var itemClass))
         {
-            _logger.LogWarning("User tried to equip unknown item class. {guid} {definition}", packet.Guid, clientItemDefinition.Class);
+            _logger.LogWarning("User tried to equip unknown item class. {guid} {definition}", inventoryPacketEquipByGuid.Guid, clientItemDefinition.Class);
             return true;
         }
 
         playerUpdatePacketEquipItemChange.WieldType = itemClass.WieldType;
 
-        connection.Player.SendTunneledToVisible(playerUpdatePacketEquipItemChange);
+        if (inventoryPacketEquipByGuid.ProfileId == connection.Player.ActiveProfileId)
+            connection.Player.SendTunneledToVisible(playerUpdatePacketEquipItemChange);
 
         connection.Player.SendToolbar();
 
-        // Update the Weapon composite effect if we have a Flair Shard equipped.
-        if (packet.Slot == 13)
-        {
-            if (profile.Items.TryGetValue(7, out var weaponProfileItem))
-            {
-                var weaponClientItem = connection.Player.Items.SingleOrDefault(x => x.Id == weaponProfileItem.Id);
-
-                if (weaponClientItem is not null)
-                {
-                    playerUpdatePacketEquipItemChange.Id = weaponClientItem.Id;
-
-                    if (!_resourceManager.ClientItemDefinitions.TryGetValue(weaponClientItem.Definition, out var weaponClientItemDefinition))
-                        return true;
-
-                    playerUpdatePacketEquipItemChange.Attachment.ModelName = weaponClientItemDefinition.ModelName;
-                    playerUpdatePacketEquipItemChange.Attachment.TextureAlias = weaponClientItemDefinition.TextureAlias;
-                    playerUpdatePacketEquipItemChange.Attachment.TintAlias = weaponClientItemDefinition.TintAlias;
-                    playerUpdatePacketEquipItemChange.Attachment.TintId = weaponClientItem.Tint;
-
-                    playerUpdatePacketEquipItemChange.Attachment.CompositeEffectId = clientItemDefinition.CompositeEffectId > 0
-                        ? clientItemDefinition.CompositeEffectId
-                        : weaponClientItemDefinition.CompositeEffectId;
-
-                    playerUpdatePacketEquipItemChange.Attachment.Slot = weaponClientItemDefinition.Slot;
-
-                    playerUpdatePacketEquipItemChange.ProfileId = connection.Player.ActiveProfileId;
-
-                    if (!_resourceManager.ItemClasses.TryGetValue(weaponClientItemDefinition.Class, out itemClass))
-                        return true;
-
-                    playerUpdatePacketEquipItemChange.WieldType = itemClass.WieldType;
-
-                    connection.Player.SendTunneledToVisible(playerUpdatePacketEquipItemChange, true);
-                }
-            }
-        }
-        else if (packet.Slot == 7)
-        {
-            if (profile.Items.TryGetValue(13, out var flairShardProfileItem))
-            {
-                var flairShardClientItem = connection.Player.Items.SingleOrDefault(x => x.Id == flairShardProfileItem.Id);
-
-                if (flairShardClientItem is not null)
-                {
-                    playerUpdatePacketEquipItemChange.Id = clientItem.Id;
-
-                    if (!_resourceManager.ClientItemDefinitions.TryGetValue(flairShardClientItem.Definition, out var flairShardClientItemDefinition))
-                        return true;
-
-                    playerUpdatePacketEquipItemChange.Attachment.ModelName = clientItemDefinition.ModelName;
-                    playerUpdatePacketEquipItemChange.Attachment.TextureAlias = clientItemDefinition.TextureAlias;
-                    playerUpdatePacketEquipItemChange.Attachment.TintAlias = clientItemDefinition.TintAlias;
-                    playerUpdatePacketEquipItemChange.Attachment.TintId = clientItem.Tint;
-
-                    playerUpdatePacketEquipItemChange.Attachment.CompositeEffectId = flairShardClientItemDefinition.CompositeEffectId > 0
-                        ? flairShardClientItemDefinition.CompositeEffectId
-                        : clientItemDefinition.CompositeEffectId;
-
-                    playerUpdatePacketEquipItemChange.Attachment.Slot = clientItemDefinition.Slot;
-
-                    playerUpdatePacketEquipItemChange.ProfileId = connection.Player.ActiveProfileId;
-
-                    if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out itemClass))
-                        return true;
-
-                    playerUpdatePacketEquipItemChange.WieldType = itemClass.WieldType;
-
-                    connection.Player.SendTunneledToVisible(playerUpdatePacketEquipItemChange, true);
-                }
-            }
-        }
+        connection.Player.RefreshWeaponFlair(inventoryPacketEquipByGuid.ProfileId, inventoryPacketEquipByGuid.Slot);
 
         return true;
     }

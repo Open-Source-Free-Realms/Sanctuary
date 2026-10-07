@@ -41,8 +41,8 @@ public class NotificationInfo : ISerializableType
         writer.Write(Unknown);
         writer.Write(NameId);
         writer.Write(ReferenceId);
-        writer.Write(Unknown2);
         writer.Write(Unknown3);
+        writer.Write(Unknown2);
         writer.Write(Enabled);
     }
 }
