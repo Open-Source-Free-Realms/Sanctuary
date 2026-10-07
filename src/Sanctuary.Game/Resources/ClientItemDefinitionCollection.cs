@@ -33,7 +33,8 @@ public class ClientItemDefinitionCollection : ObservableConcurrentDictionary<int
 
             var jsonSerializerOptions = new JsonSerializerOptions
             {
-                PropertyNameCaseInsensitive = true
+                PropertyNameCaseInsensitive = true,
+                ReadCommentHandling = JsonCommentHandling.Skip
             };
 
             var entries = JsonSerializer.Deserialize<List<ClientItemDefinition>>(fileStream, jsonSerializerOptions);
