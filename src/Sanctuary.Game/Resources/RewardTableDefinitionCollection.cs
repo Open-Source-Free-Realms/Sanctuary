@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -19,6 +20,18 @@ public sealed class RewardTableDefinitionCollection : ObservableConcurrentDictio
     public RewardTableDefinitionCollection(ILogger logger)
     {
         _logger = logger;
+    }
+
+    public bool TryRoll(string key, [MaybeNullWhen(false)] out RewardDropDefinition drop)
+    {
+        if (!TryGetValue(key.Trim().ToLowerInvariant(), out var table))
+        {
+            drop = null;
+            return false;
+        }
+
+        drop = table.Table.SelectRandom();
+        return true;
     }
 
     public bool Load(string filePath)

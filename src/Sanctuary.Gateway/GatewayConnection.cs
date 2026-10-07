@@ -282,7 +282,7 @@ public class GatewayConnection : UdpConnection
             clientPcProfile.ItemClasses = profileData.ItemClasses;
 
             clientPcProfile.Rank = dbProfile.Level;
-            clientPcProfile.RankPercent = dbProfile.LevelXP;
+            clientPcProfile.RankPercent = _resourceManager.RankLevels.GetRankPercent(dbProfile.Level, dbProfile.LevelXP);
 
             foreach (var dbItem in dbProfile.Items)
             {
