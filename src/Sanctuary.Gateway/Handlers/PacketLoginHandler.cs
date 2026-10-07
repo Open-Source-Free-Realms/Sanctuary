@@ -192,6 +192,10 @@ public static class PacketLoginHandler
             return true;
         }
 
+        dbContext.Characters
+            .Where(x => x.Id == character.Id)
+            .ExecuteUpdate(x => x.SetProperty(x => x.LastLogin, connection.Player.LoginStartedAt));
+
         _loginClient.SendCharacterLogin(character.Id);
 
         packetLoginReply.Success = true;

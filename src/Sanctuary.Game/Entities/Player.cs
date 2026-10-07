@@ -62,6 +62,9 @@ public sealed class Player : ClientPcData, IEntity
 
     public ConcurrentDictionary<ChatChannel, bool> ChatChannelStatus { get; set; } = [];
 
+    public DateTimeOffset LoginStartedAt { get; set; }
+    public int SecondsSinceLastLogin { get; set; } = -1;
+
     public int StationCash { get; set; }
     public List<CoinStoreTransactionRecord> CoinStoreTransactions { get; set; } = [];
 

@@ -16,6 +16,7 @@ using Sanctuary.Core.Collections;
 using Sanctuary.Core.Extensions;
 using Sanctuary.Core.IO;
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Zones;
 using Sanctuary.Packet;
@@ -440,6 +441,11 @@ public abstract class BaseZone : IZone, IDisposable
 
     private void SendInGamePurchase(Player player)
     {
+        var packetInGamePurchaseStoreBundleGroups = new PacketInGamePurchaseStoreBundleGroups
+        {
+            BundleGroups = _resourceManager.StoreBundleGroups.ToDictionary()
+        };
+
         var packetInGamePurchaseEnableMarketplace = new PacketInGamePurchaseEnableMarketplace
         {
             Enabled = true
@@ -487,11 +493,11 @@ public abstract class BaseZone : IZone, IDisposable
             }
 
             player.SendTunneled(packetInGamePurchaseStoreBundles);
+
+            if (packetInGamePurchaseStoreBundleGroups.BundleGroups.TryGetValue(WelcomeScreenHelper.PopularItemsGroupId, out var popularItems))
+                packetInGamePurchaseStoreBundleGroups.BundleGroups[WelcomeScreenHelper.PopularItemsGroupId] = WelcomeScreenHelper.GetPopularItems(
+                    popularItems, packetInGamePurchaseStoreBundles.Store.Bundles.Values);
         }
-
-        var packetInGamePurchaseStoreBundleGroups = new PacketInGamePurchaseStoreBundleGroups();
-
-        packetInGamePurchaseStoreBundleGroups.BundleGroups = _resourceManager.StoreBundleGroups.ToDictionary();
 
         player.SendTunneled(packetInGamePurchaseStoreBundleGroups);
     }
