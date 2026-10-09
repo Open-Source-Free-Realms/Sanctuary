@@ -25,6 +25,13 @@ namespace Sanctuary.Game.Entities;
 
 public sealed class Player : ClientPcData, IEntity
 {
+    private enum PacketSendType
+    {
+        All,
+        AllAndSelf,
+        SelfOnly
+    }
+
     private readonly UdpConnection _connection;
     private readonly IResourceManager _resourceManager;
     private readonly IZoneManager _zoneManager;
@@ -88,9 +95,7 @@ public sealed class Player : ClientPcData, IEntity
     // For one-off delayed packets unrelated to tracked effects (e.g. a silly string reset
     // animation, a boombox poof) - see PlayerEffect/AddEffect for anything with its own state.
     // Min-heap ordered by send time.
-    private readonly PriorityQueue<(ISerializablePacket Packet, bool SendToSelf), DateTimeOffset> _delayedPackets = new();
-    // Collection UI transitions are private to this player and must not reach visible neighbors.
-    private readonly PriorityQueue<ISerializablePacket, DateTimeOffset> _delayedPersonalPackets = new();
+    private readonly PriorityQueue<(ISerializablePacket Packet, PacketSendType SendType), DateTimeOffset> _delayedPackets = new();
 
     // One scheduled personal-UI packet per action bar slot (the cooldown re-enable) - keyed, not queued,
     // so a slot that gets emptied before its cooldown naturally expires (last item consumed) can cancel
@@ -174,15 +179,16 @@ public sealed class Player : ClientPcData, IEntity
     {
         lock (_delayedPackets)
         {
-            _delayedPackets.Enqueue((packet, sendToSelf), DateTimeOffset.UtcNow.AddMilliseconds(delayMs));
+            var sendType = sendToSelf ? PacketSendType.AllAndSelf : PacketSendType.All;
+            _delayedPackets.Enqueue((packet, sendType), DateTimeOffset.UtcNow.AddMilliseconds(delayMs));
         }
     }
 
     public void SendTunneledDelayed(ISerializablePacket packet, int delayMs)
     {
-        lock (_delayedPersonalPackets)
+        lock (_delayedPackets)
         {
-            _delayedPersonalPackets.Enqueue(packet, DateTimeOffset.UtcNow.AddMilliseconds(delayMs));
+            _delayedPackets.Enqueue((packet, PacketSendType.SelfOnly), DateTimeOffset.UtcNow.AddMilliseconds(delayMs));
         }
     }
 
@@ -240,7 +246,7 @@ public sealed class Player : ClientPcData, IEntity
 
         while (true)
         {
-            (ISerializablePacket Packet, bool SendToSelf) due;
+            (ISerializablePacket Packet, PacketSendType SendType) due;
 
             lock (_delayedPackets)
             {
@@ -250,22 +256,18 @@ public sealed class Player : ClientPcData, IEntity
                 due = _delayedPackets.Dequeue();
             }
 
-            SendTunneledToVisible(due.Packet, due.SendToSelf);
-        }
-
-        while (true)
-        {
-            ISerializablePacket packet;
-
-            lock (_delayedPersonalPackets)
+            switch (due.SendType)
             {
-                if (!_delayedPersonalPackets.TryPeek(out _, out var sendAt) || sendAt > now)
+                case PacketSendType.All:
+                    SendTunneledToVisible(due.Packet);
                     break;
-
-                packet = _delayedPersonalPackets.Dequeue();
+                case PacketSendType.AllAndSelf:
+                    SendTunneledToVisible(due.Packet, sendToSelf: true);
+                    break;
+                case PacketSendType.SelfOnly:
+                    SendTunneled(due.Packet);
+                    break;
             }
-
-            SendTunneled(packet);
         }
 
         foreach (var (key, scheduled) in _delayedSlotPackets)
