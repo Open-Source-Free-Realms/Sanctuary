@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.IO;
 using System.Numerics;
 using System.Threading.Tasks;
 
 using Sanctuary.Core.Collections;
 using Sanctuary.Core.IO;
+using Sanctuary.Core.Helpers;
 using Sanctuary.Game;
 using Sanctuary.Game.ChatCommands;
 using Sanctuary.Game.Helpers;
@@ -32,6 +33,9 @@ public sealed class Player : ClientPcData, IEntity
         SelfOnly
     }
 
+    private const int WeaponSlot = 7;
+    private const int FlairShardSlot = 13;
+
     private readonly UdpConnection _connection;
     private readonly IResourceManager _resourceManager;
     private readonly IZoneManager _zoneManager;
@@ -42,6 +46,10 @@ public sealed class Player : ClientPcData, IEntity
     public ZoneTile ZoneTile { get; private set; } = ZoneTile.Empty;
     public ConcurrentDictionary<ulong, Npc> VisibleNpcs { get; } = [];
     public ConcurrentDictionary<ulong, Player> VisiblePlayers { get; } = [];
+
+    private uint? _portraitCrc;
+    private uint? _pendingPortraitCrc;
+    private DateTimeOffset _portraitUpdateExpiresAt;
 
     private int ZoneAreaId { get; set; }
 
@@ -125,54 +133,75 @@ public sealed class Player : ClientPcData, IEntity
 
     #region Connection
 
-    public void Send(ISerializablePacket packet)
+    public void Send(ISerializablePacket serializablePacket)
     {
-        var data = packet.Serialize();
+        var data = serializablePacket.Serialize();
 
         _connection.Send(UdpChannel.Reliable1, data);
     }
 
-    public void SendToVisible(ISerializablePacket packet, bool sendToSelf = false)
+    internal void SendSerialized(byte[] data)
     {
-        var visiblePlayers = VisiblePlayers.ToFrozenDictionary();
-
-        foreach (var visiblePlayer in visiblePlayers)
-            visiblePlayer.Value.Send(packet);
-
-        if (sendToSelf)
-            Send(packet);
+        _connection.Send(UdpChannel.Reliable1, data);
     }
 
-    public void SendTunneled(ISerializablePacket packet)
+    internal static byte[] SerializeTunneled(ISerializablePacket serializablePacket)
     {
-        var packetTunneled = new PacketTunneledClientPacket
+        var packetTunneledClientPacket = new PacketTunneledClientPacket
         {
-            Payload = packet.Serialize()
+            Payload = serializablePacket.Serialize()
         };
 
-        Send(packetTunneled);
+        return packetTunneledClientPacket.Serialize();
+    }
+
+    public void SendToVisible(ISerializablePacket serializablePacket, bool sendToSelf = false)
+    {
+        if (VisiblePlayers.IsEmpty && !sendToSelf)
+            return;
+
+        var data = serializablePacket.Serialize();
+
+        foreach (var visiblePlayer in VisiblePlayers)
+            visiblePlayer.Value.SendSerialized(data);
+
+        if (sendToSelf)
+            SendSerialized(data);
+    }
+
+    public void SendTunneled(ISerializablePacket serializablePacket)
+    {
+        var packetTunneledClientPacket = new PacketTunneledClientPacket
+        {
+            Payload = serializablePacket.Serialize()
+        };
+
+        Send(packetTunneledClientPacket);
     }
 
     [Obsolete]
     public void SendTunneled(byte[] buffer)
     {
-        var packetTunneled = new PacketTunneledClientPacket
+        var packetTunneledClientPacket = new PacketTunneledClientPacket
         {
             Payload = buffer
         };
 
-        Send(packetTunneled);
+        Send(packetTunneledClientPacket);
     }
 
-    public void SendTunneledToVisible(ISerializablePacket packet, bool sendToSelf = false)
+    public void SendTunneledToVisible(ISerializablePacket serializablePacket, bool sendToSelf = false)
     {
-        var visiblePlayers = VisiblePlayers.ToFrozenDictionary();
+        if (VisiblePlayers.IsEmpty && !sendToSelf)
+            return;
 
-        foreach (var visiblePlayer in visiblePlayers)
-            visiblePlayer.Value.SendTunneled(packet);
+        var data = SerializeTunneled(serializablePacket);
+
+        foreach (var visiblePlayer in VisiblePlayers)
+            visiblePlayer.Value.SendSerialized(data);
 
         if (sendToSelf)
-            SendTunneled(packet);
+            SendSerialized(data);
     }
 
     public void SendTunneledToVisibleDelayed(ISerializablePacket packet, int delayMs, bool sendToSelf = false)
@@ -282,6 +311,97 @@ public sealed class Player : ClientPcData, IEntity
 
     public void UpdateEverySecond()
     {
+        UpdatePortrait();
+    }
+
+    private void UpdatePortrait()
+    {
+        if (_pendingPortraitCrc is null)
+            return;
+
+        if (DateTimeOffset.UtcNow >= _portraitUpdateExpiresAt)
+        {
+            _pendingPortraitCrc = null;
+            return;
+        }
+
+        try
+        {
+            var path = Path.Combine(PortraitStorage.GetCharacterDirectory(Guid), "portrait.crc");
+
+            if (!File.Exists(path))
+                return;
+
+            var data = File.ReadAllBytes(path);
+
+            if (data.Length != sizeof(uint) || BitConverter.ToUInt32(data) != _pendingPortraitCrc)
+                return;
+
+            var packetPlayerImageDataHeadshot = GetPortraitPacket(PortraitProvider.Headshot);
+            var packetPlayerImageDataPortrait = GetPortraitPacket(PortraitProvider.Portrait);
+
+            if (packetPlayerImageDataHeadshot is null || packetPlayerImageDataPortrait is null)
+                return;
+
+            SendTunneledToVisible(packetPlayerImageDataHeadshot, true);
+            SendTunneledToVisible(packetPlayerImageDataPortrait, true);
+            _portraitCrc = _pendingPortraitCrc;
+            _pendingPortraitCrc = null;
+        }
+        catch (IOException)
+        {
+            // Retry while the upload is being written.
+        }
+    }
+
+    public void UpdatePortrait(uint portraitCrc)
+    {
+        if (_portraitCrc == portraitCrc)
+            return;
+
+        _pendingPortraitCrc = portraitCrc;
+        _portraitUpdateExpiresAt = DateTimeOffset.UtcNow.AddSeconds(30);
+    }
+
+    public PacketPlayerImageData? GetPortraitPacket(PortraitProvider provider)
+    {
+        var fileName = provider switch
+        {
+            PortraitProvider.Headshot => "headshot.png",
+            PortraitProvider.Portrait => "portrait.png",
+            _ => throw new ArgumentOutOfRangeException(nameof(provider))
+        };
+
+        var path = Path.Combine(PortraitStorage.GetCharacterDirectory(Guid), fileName);
+
+        if (!File.Exists(path))
+            return null;
+
+        return new PacketPlayerImageData
+        {
+            Guid = Guid,
+            Provider = provider.ToString(),
+            Portrait =
+            {
+                Unknown2 = 1,
+                Guid = Guid,
+                ModelId = Model,
+                Attachments = GetAttachments(),
+                Head = Head,
+                Hair = Hair,
+                SkinTone = SkinTone,
+                FacePaint = FacePaint,
+                ModelCustomization = ModelCustomization,
+                HairColor = HairColor,
+                EyeColor = EyeColor,
+                HeadId = HeadId,
+                HairId = HairId,
+                SkinToneId = SkinToneId,
+                FacePaintId = FacePaintId,
+                Provider = provider.ToString()
+            },
+            PngPayload = File.ReadAllBytes(path)
+        };
     }
 
     // The client animates the cooldown sweep itself from TotalRefreshTime -
@@ -406,7 +526,7 @@ public sealed class Player : ClientPcData, IEntity
 
     private void UpdateZoneArea()
     {
-        if (Zone is not WorldZone worldZone)
+        if (Zone is not WorldZone worldZone || worldZone.Name != "FabledRealms")
             return;
 
         var zoneAreaId = worldZone.GetZoneAreaId(Position);
@@ -468,21 +588,7 @@ public sealed class Player : ClientPcData, IEntity
             SendTunneled(npc.GetAddNpcPacket());
         }
 
-        var playerUpdatePacketNpcRelevance = new PlayerUpdatePacketNpcRelevance();
-
-        foreach (var npc in visibleNpcs)
-        {
-            if (npc.CursorId == 0)
-                continue;
-
-            playerUpdatePacketNpcRelevance.Entries.Add(new PlayerUpdatePacketNpcRelevance.Entry
-            {
-                Guid = npc.Guid,
-                HasCursor = true,
-                CursorId = npc.CursorId
-            });
-        }
-
+        var playerUpdatePacketNpcRelevance = InteractionMenuHelper.GetNpcRelevancePacket(visibleNpcs);
         if (playerUpdatePacketNpcRelevance.Entries.Count > 0)
             SendTunneled(playerUpdatePacketNpcRelevance);
 
@@ -521,6 +627,8 @@ public sealed class Player : ClientPcData, IEntity
             }
             else
                 SendTunneled(player.GetAddPcPacket());
+
+            SendTunneled(player.GetWeaponFlairOverridePacket());
         }
 
         foreach (var player in players)
@@ -608,22 +716,54 @@ public sealed class Player : ClientPcData, IEntity
 
     #endregion
 
-    public int GetFlairShardCompositeEffect()
+    public ClientItem? GetEquippedItem(int slot) =>
+        ActiveProfile.Items.TryGetValue(slot, out var profileItem)
+            ? Items.FirstOrDefault(item => item.Id == profileItem.Id)
+            : null;
+
+    public int GetEquippedCompositeEffectId(int slot)
     {
-        const int FlairShardSlot = 13;
+        var item = GetEquippedItem(slot);
+        return item is not null && _resourceManager.ClientItemDefinitions.TryGetValue(item.Definition, out var definition)
+            ? Math.Max(0, definition.CompositeEffectId)
+            : 0;
+    }
 
-        if (ActiveProfile.Items.TryGetValue(FlairShardSlot, out var profileItem))
+    public PlayerUpdatePacketSlotCompositeEffectOverride GetSlotCompositeEffectOverridePacket(int slot, int compositeEffect) => new()
+    {
+        Guid = Guid,
+        Slot = slot,
+        CompositeEffect = Math.Max(0, compositeEffect)
+    };
+
+    public PlayerUpdatePacketSlotCompositeEffectOverride GetWeaponFlairOverridePacket() =>
+        GetSlotCompositeEffectOverridePacket(WeaponSlot, GetEquippedCompositeEffectId(FlairShardSlot));
+
+    public void ClearWeaponFlairOverride() =>
+        SendTunneledToVisible(GetSlotCompositeEffectOverridePacket(WeaponSlot, 0), true);
+
+    public void RefreshWeaponFlair(int profileId, int changedSlot)
+    {
+        if (profileId != ActiveProfileId || (changedSlot != WeaponSlot && changedSlot != FlairShardSlot))
+            return;
+
+        // Job switches reuse the cached attachment effect until the new weapon appears.
+        if (GetEquippedItem(WeaponSlot) is { } item
+            && _resourceManager.ClientItemDefinitions.TryGetValue(item.Definition, out var definition)
+            && _resourceManager.ItemClasses.TryGetValue(definition.Class, out var itemClass)
+            && GetAttachment(WeaponSlot) is { } attachment)
         {
-            var clientItem = Items.FirstOrDefault(x => x.Id == profileItem.Id);
-
-            if (clientItem is not null)
+            SendTunneledToVisible(new PlayerUpdatePacketEquipItemChange
             {
-                if (_resourceManager.ClientItemDefinitions.TryGetValue(clientItem.Definition, out var clientItemDefinition))
-                    return clientItemDefinition.CompositeEffectId;
-            }
+                Guid = Guid,
+                Id = item.Id,
+                Attachment = attachment,
+                ProfileId = ActiveProfileId,
+                WieldType = itemClass.WieldType
+            }, true);
         }
 
-        return 0;
+        SendTunneledToVisible(GetWeaponFlairOverridePacket(), true);
     }
 
     public List<CharacterAttachmentData> GetAttachments()
@@ -645,10 +785,7 @@ public sealed class Player : ClientPcData, IEntity
 
     public CharacterAttachmentData? GetAttachment(int slot)
     {
-        if (!ActiveProfile.Items.TryGetValue(slot, out var profileItem))
-            return null;
-
-        var clientItem = Items.FirstOrDefault(x => x.Id == profileItem.Id);
+        var clientItem = GetEquippedItem(slot);
 
         if (clientItem is null)
             return null;
@@ -658,13 +795,12 @@ public sealed class Player : ClientPcData, IEntity
 
         var compositeEffectId = clientItemDefinition.CompositeEffectId;
 
-        // Update the Weapon composite effect if we have a Flair Shard equipped.
-        if (slot == 7)
+        if (slot == WeaponSlot)
         {
-            var flairShardcompositeEffectId = GetFlairShardCompositeEffect();
+            var flairEffectId = GetEquippedCompositeEffectId(FlairShardSlot);
 
-            if (flairShardcompositeEffectId > 0)
-                compositeEffectId = flairShardcompositeEffectId;
+            if (flairEffectId > 0)
+                compositeEffectId = flairEffectId;
         }
 
         return new CharacterAttachmentData
@@ -672,7 +808,7 @@ public sealed class Player : ClientPcData, IEntity
             ModelName = clientItemDefinition.ModelName,
             TextureAlias = clientItemDefinition.TextureAlias,
             TintAlias = clientItemDefinition.TintAlias,
-            TintId = clientItem.Tint,
+            TintId = clientItem.Tint == 0 ? clientItemDefinition.Icon.TintId : clientItem.Tint,
             CompositeEffectId = compositeEffectId,
             Slot = clientItemDefinition.Slot
         };

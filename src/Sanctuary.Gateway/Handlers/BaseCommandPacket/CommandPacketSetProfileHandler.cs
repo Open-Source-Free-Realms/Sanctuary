@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -27,22 +27,22 @@ public static class CommandPacketSetProfileHandler
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
     {
-        if (!CommandPacketSetProfile.TryDeserialize(data, out var packet))
+        if (!CommandPacketSetProfile.TryDeserialize(data, out var commandPacketSetProfile))
         {
             _logger.LogError("Failed to deserialize {packet}.", nameof(CommandPacketSetProfile));
             return false;
         }
 
-        _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(CommandPacketSetProfile), packet);
+        _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(CommandPacketSetProfile), commandPacketSetProfile);
 
-        var profile = connection.Player.Profiles.FirstOrDefault(x => x.Id == packet.Id);
+        var profile = connection.Player.Profiles.FirstOrDefault(x => x.Id == commandPacketSetProfile.Id);
 
         if (profile is null)
             return true;
 
-        bool isReferee = connection.Player.IsMod || connection.Player.IsAdmin;
-
-        connection.Player.ActiveProfileId = packet.Id;
+        // Let each weapon use its own attachment effect during the job transition.
+        connection.Player.ClearWeaponFlairOverride();
+        connection.Player.ActiveProfileId = commandPacketSetProfile.Id;
 
         var clientUpdatePacketActivateProfile = new ClientUpdatePacketActivateProfile();
 

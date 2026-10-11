@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
@@ -13,6 +13,8 @@ using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
+
+using Sanctuary.Core.Helpers;
 
 namespace Sanctuary.WebAPI.Endpoints;
 
@@ -60,10 +62,12 @@ public static class PortraitEndpoints
             return Results.BadRequest("Invalid characterId.");
         }
 
-        var saveDirectory = Path.Combine("Images", characterId.ToString());
+        var saveDirectory = PortraitStorage.GetCharacterDirectory(characterId);
 
         if (!Directory.Exists(saveDirectory))
             Directory.CreateDirectory(saveDirectory);
+
+        uint? portraitCrc = null;
 
         foreach (var file in files)
         {
@@ -109,7 +113,11 @@ public static class PortraitEndpoints
             {
                 using var stream = file.OpenReadStream();
 
-                using var image = await Image.LoadAsync<Rgba32>(stream, cancellationToken);
+                using var imageBuffer = new MemoryStream();
+                await stream.CopyToAsync(imageBuffer, cancellationToken);
+                imageBuffer.Position = 0;
+
+                using var image = await Image.LoadAsync<Rgba32>(imageBuffer, cancellationToken);
 
                 if (image.Metadata.DecodedImageFormat is not PngFormat)
                 {
@@ -134,6 +142,9 @@ public static class PortraitEndpoints
 
                 await image.SaveAsPngAsync(savePath, cancellationToken);
 
+                if (file.Name == "imageFile")
+                    portraitCrc = PortraitStorage.GetPortraitCrc(imageBuffer.GetBuffer().AsSpan(0, (int)imageBuffer.Length));
+
                 _logger.LogDebug("Successfully uploaded {Name} for character {Character}.", file.Name, characterId);
             }
             catch (Exception ex)
@@ -147,6 +158,9 @@ public static class PortraitEndpoints
                 fileLock.Release();
             }
         }
+
+        if (portraitCrc is not null)
+            await File.WriteAllBytesAsync(Path.Combine(saveDirectory, "portrait.crc"), BitConverter.GetBytes(portraitCrc.Value), cancellationToken);
 
         return Results.Ok();
     }

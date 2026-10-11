@@ -708,13 +708,23 @@ public abstract class BaseZone : IZone, IDisposable
         npc.NameId = definition.NameId;
         npc.Name = definition.Name;
         npc.ModelId = definition.ModelId;
+        npc.TerrainObjectId = definition.TerrainObjectId;
+        npc.ReplaceTerrainObject = definition.ReplaceTerrainObject;
+        npc.OpensAtlas = definition.OpensAtlas;
+        npc.AutoSelectSingleInteraction = definition.AutoSelectSingleInteraction;
+        npc.InteractRange = definition.InteractRange;
+        npc.IsInteractable = definition.IsInteractable;
+        npc.CursorId = definition.CursorId;
+        npc.HasCursor = definition.HasCursor;
+        npc.RelevanceUnknown2 = definition.RelevanceUnknown2;
         npc.TextureAlias = definition.TextureAlias;
-        npc.Scale = scale;
+        npc.Scale = definition.Scale ?? scale;
         npc.Visible = true;
 
         if (npc is CollectionCoin)
         {
             npc.CursorId = 18;
+            npc.HasCursor = true;
             npc.InteractRange = 12;
         }
 
@@ -723,6 +733,12 @@ public abstract class BaseZone : IZone, IDisposable
             npc = null;
             return false;
         }
+
+        if (definition.Notification is not null)
+            npc.Notification = Sanctuary.Game.Helpers.InteractionMenuHelper.GetNotification(npc.Guid, definition.Notification);
+
+        if (definition.OpensAtlas)
+            npc.Interactions.Add(Sanctuary.Game.Interactions.OpenAtlasInteraction.Data);
 
         foreach (var script in definition.Scripts ?? [])
         {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 
 using Microsoft.EntityFrameworkCore;
@@ -31,25 +31,25 @@ public static class InventoryPacketEquippedRemoveHandler
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
     {
-        if (!InventoryPacketEquippedRemove.TryDeserialize(data, out var packet))
+        if (!InventoryPacketEquippedRemove.TryDeserialize(data, out var inventoryPacketEquippedRemove))
         {
             _logger.LogError("Failed to deserialize {packet}.", nameof(InventoryPacketEquippedRemove));
             return false;
         }
 
-        _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(InventoryPacketEquippedRemove), packet);
+        _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(InventoryPacketEquippedRemove), inventoryPacketEquippedRemove);
 
-        var profile = connection.Player.Profiles.SingleOrDefault(x => x.Id == packet.ProfileId);
+        var profile = connection.Player.Profiles.SingleOrDefault(x => x.Id == inventoryPacketEquippedRemove.ProfileId);
 
         if (profile is null)
         {
-            _logger.LogWarning("Invalid player profile id. {id}", packet.ProfileId);
+            _logger.LogWarning("Invalid player profile id. {id}", inventoryPacketEquippedRemove.ProfileId);
             return true;
         }
 
-        if (!profile.Items.TryGetValue(packet.Slot, out var profileItem))
+        if (!profile.Items.TryGetValue(inventoryPacketEquippedRemove.Slot, out var profileItem))
         {
-            _logger.LogWarning("User tried to unequip empty slot. {slot}", packet.Slot);
+            _logger.LogWarning("User tried to unequip empty slot. {slot}", inventoryPacketEquippedRemove.Slot);
             return true;
         }
 
@@ -77,7 +77,7 @@ public static class InventoryPacketEquippedRemoveHandler
 
         var dbProfile = dbContext.Profiles
             .Include(x => x.Items)
-            .SingleOrDefault(x => x.CharacterId == GuidHelper.GetPlayerId(connection.Player.Guid) && x.Id == packet.ProfileId);
+            .SingleOrDefault(x => x.CharacterId == GuidHelper.GetPlayerId(connection.Player.Guid) && x.Id == inventoryPacketEquippedRemove.ProfileId);
 
         if (dbProfile is null)
         {
@@ -101,12 +101,12 @@ public static class InventoryPacketEquippedRemoveHandler
             return true;
         }
 
-        profile.Items.Remove(packet.Slot);
+        profile.Items.Remove(inventoryPacketEquippedRemove.Slot);
 
         var clientUpdatePacketUnequipSlot = new ClientUpdatePacketUnequipSlot();
 
-        clientUpdatePacketUnequipSlot.Slot = packet.Slot;
-        clientUpdatePacketUnequipSlot.ProfileId = packet.ProfileId;
+        clientUpdatePacketUnequipSlot.Slot = inventoryPacketEquippedRemove.Slot;
+        clientUpdatePacketUnequipSlot.ProfileId = inventoryPacketEquippedRemove.ProfileId;
 
         connection.SendTunneled(clientUpdatePacketUnequipSlot);
 
@@ -116,48 +116,18 @@ public static class InventoryPacketEquippedRemoveHandler
 
         playerUpdatePacketEquipItemChange.Id = clientItem.Id;
 
-        playerUpdatePacketEquipItemChange.Attachment.Slot = packet.Slot;
+        playerUpdatePacketEquipItemChange.Attachment.Slot = inventoryPacketEquippedRemove.Slot;
 
-        playerUpdatePacketEquipItemChange.ProfileId = packet.ProfileId;
+        playerUpdatePacketEquipItemChange.ProfileId = inventoryPacketEquippedRemove.ProfileId;
 
         playerUpdatePacketEquipItemChange.WieldType = itemClass.WieldType;
 
-        connection.Player.SendTunneledToVisible(playerUpdatePacketEquipItemChange);
+        if (inventoryPacketEquippedRemove.ProfileId == connection.Player.ActiveProfileId)
+            connection.Player.SendTunneledToVisible(playerUpdatePacketEquipItemChange);
 
         connection.Player.SendToolbar();
 
-        // Update the Weapon composite effect if we have a Flair Shard equipped.
-        if (packet.Slot == 13)
-        {
-            if (profile.Items.TryGetValue(7, out var weaponProfileItem))
-            {
-                var weaponClientItem = connection.Player.Items.SingleOrDefault(x => x.Id == weaponProfileItem.Id);
-
-                if (weaponClientItem is not null)
-                {
-                    playerUpdatePacketEquipItemChange.Id = weaponClientItem.Id;
-
-                    if (!_resourceManager.ClientItemDefinitions.TryGetValue(weaponClientItem.Definition, out var weaponClientItemDefinition))
-                        return true;
-
-                    playerUpdatePacketEquipItemChange.Attachment.ModelName = weaponClientItemDefinition.ModelName;
-                    playerUpdatePacketEquipItemChange.Attachment.TextureAlias = weaponClientItemDefinition.TextureAlias;
-                    playerUpdatePacketEquipItemChange.Attachment.TintAlias = weaponClientItemDefinition.TintAlias;
-                    playerUpdatePacketEquipItemChange.Attachment.TintId = weaponClientItem.Tint;
-                    playerUpdatePacketEquipItemChange.Attachment.CompositeEffectId = weaponClientItemDefinition.CompositeEffectId;
-                    playerUpdatePacketEquipItemChange.Attachment.Slot = weaponClientItemDefinition.Slot;
-
-                    playerUpdatePacketEquipItemChange.ProfileId = packet.ProfileId;
-
-                    if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out itemClass))
-                        return true;
-
-                    playerUpdatePacketEquipItemChange.WieldType = itemClass.WieldType;
-
-                    connection.Player.SendTunneledToVisible(playerUpdatePacketEquipItemChange, true);
-                }
-            }
-        }
+        connection.Player.RefreshWeaponFlair(inventoryPacketEquippedRemove.ProfileId, inventoryPacketEquippedRemove.Slot);
 
         return true;
     }

@@ -46,6 +46,7 @@ public static class PacketTunneledClientWorldPacketHandler
             BaseLobbyGameDefinitionPacket.OpCode => BaseLobbyGameDefinitionPacketHandler.HandlePacket(connection, reader),
             BaseHousingPacket.OpCode => BaseHousingPacketHandler.HandlePacket(connection, reader),
             BaseGuildPacket.OpCode => BaseGuildPacketHandler.HandlePacket(connection, reader),
+            PacketAddClientPortraitCrc.OpCode => PacketAddClientPortraitCrcHandler.HandlePacket(connection, packet.Payload),
             BaseFotomatPacket.OpCode => BaseFotomatPacketHandler.HandlePacket(connection, reader),
             WallOfDataBasePacket.OpCode => WallOfDataBasePacketHandler.HandlePacket(connection, reader),
             _ => false
