@@ -1,0 +1,22 @@
+[
+  { "Level": 1, "StarsToNextLevel": 100 },
+  { "Level": 2, "StarsToNextLevel": 150 },
+  { "Level": 3, "StarsToNextLevel": 200 },
+  { "Level": 4, "StarsToNextLevel": 250 },
+  { "Level": 5, "StarsToNextLevel": 300 },
+  { "Level": 6, "StarsToNextLevel": 350 },
+  { "Level": 7, "StarsToNextLevel": 400 },
+  { "Level": 8, "StarsToNextLevel": 450 },
+  { "Level": 9, "StarsToNextLevel": 500 },
+  { "Level": 10, "StarsToNextLevel": 550 },
+  { "Level": 11, "StarsToNextLevel": 600 },
+  { "Level": 12, "StarsToNextLevel": 650 },
+  { "Level": 13, "StarsToNextLevel": 700 },
+  { "Level": 14, "StarsToNextLevel": 750 },
+  { "Level": 15, "StarsToNextLevel": 800 },
+  { "Level": 16, "StarsToNextLevel": 850 },
+  { "Level": 17, "StarsToNextLevel": 900 },
+  { "Level": 18, "StarsToNextLevel": 950 },
+  { "Level": 19, "StarsToNextLevel": 1000 },
+  { "Level": 20, "StarsToNextLevel": 0 }
+]
