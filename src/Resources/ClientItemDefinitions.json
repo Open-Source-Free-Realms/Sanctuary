@@ -216239,7 +216239,7 @@
       "TintId": 553
     },
     "Class": 9,
-    "MaxStackSize": -1,
+    "MaxStackSize": 1,
     "NoTrade": true,
     "TintAlias": "kangaroo-red",
     "MemberDiscount": 10,
@@ -262422,7 +262422,7 @@
       "TintId": 121
     },
     "Class": 172,
-    "MaxStackSize": -1,
+    "MaxStackSize": 1,
     "NoTrade": true,
     "TintAlias": "dyetint",
     "MemberDiscount": 10,
@@ -262431,8 +262431,7 @@
     "CategoryId": 3,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3,
-    "IsTintable": true
+    "Rarity": 3
   },
   {
     "Comment": "High Speed Gloves",
@@ -1256491,8 +1256490,7 @@
     "CategoryId": 3,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3,
-    "IsTintable": true
+    "Rarity": 3
   },
   {
     "Comment": "Fire Pegasus",
@@ -1257048,8 +1257046,7 @@
     "CategoryId": 3,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3,
-    "IsTintable": true
+    "Rarity": 3
   },
   {
     "Comment": "Pockets Dress",
@@ -1257547,8 +1257544,7 @@
     "CategoryId": 3,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3,
-    "IsTintable": true
+    "Rarity": 3
   },
   {
     "Comment": "The Cyber Cycle",
@@ -1257570,8 +1257566,7 @@
     "CategoryId": 3,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3,
-    "IsTintable": true
+    "Rarity": 3
   },
   {
     "Comment": "The Blast Rover",
@@ -1257593,8 +1257588,7 @@
     "CategoryId": 3,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3,
-    "IsTintable": true
+    "Rarity": 3
   },
   {
     "Comment": "The Fire Hawk",
@@ -1257617,7 +1257611,6 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true,
     "Stats.59.Id": 59,
     "Stats.59.Value": 1094713344,
     "Stats.60.Id": 60,
@@ -1265970,7 +1265963,7 @@
       "TintId": 100
     },
     "Class": 172,
-    "MaxStackSize": -1,
+    "MaxStackSize": 1,
     "NoTrade": true,
     "TintAlias": "dyetint",
     "TextureAlias": "lawnchair-summerpass",
@@ -1266064,7 +1266057,7 @@
       "Id": 7297
     },
     "Class": 172,
-    "MaxStackSize": -1,
+    "MaxStackSize": 1,
     "TextureAlias": "solidcolor",
     "Param1": 13464,
     "ModelName": "bike_m_futuristic.adr",
@@ -1266480,7 +1266473,7 @@
       "Id": 8598
     },
     "Class": 9,
-    "MaxStackSize": -1,
+    "MaxStackSize": 1,
     "NoTrade": true,
     "MinProfileRank": 1,
     "Param1": 13563,
@@ -1266501,7 +1266494,7 @@
       "Id": 7911
     },
     "Class": 9,
-    "MaxStackSize": -1,
+    "MaxStackSize": 1,
     "NoTrade": true,
     "MinProfileRank": 1,
     "Param1": 13564,
@@ -1266658,7 +1266651,7 @@
       "Id": 7674
     },
     "Class": 9,
-    "MaxStackSize": -1,
+    "MaxStackSize": 1,
     "NoTrade": true,
     "MinProfileRank": 1,
     "Param1": 13571,
@@ -1266762,8 +1266755,7 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "ResellValue": 50,
-    "IsTintable": true
+    "ResellValue": 50
   },
   {
     "Comment": "Polar Bear",
@@ -1266882,8 +1266874,7 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "ResellValue": 50,
-    "IsTintable": true
+    "ResellValue": 50
   },
   {
     "Comment": "Santa's Sleigh-mobile",
@@ -1269821,5 +1269812,130 @@
     "NoSale": true,
     "Rarity": 3,
     "IsTintable": true
+  },
+  {
+    "Comment": "S.M.A.C.M.",
+    "Id": 950101,
+    "Type": 19,
+    "NameId": 442675,
+    "DescriptionId": 442680,
+    "Icon": {
+      "Id": 8574
+    },
+    "Class": 172,
+    "MaxStackSize": 1,
+    "NoTrade": true,
+    "TextureAlias": "mech-basic-P",
+    "MemberDiscount": 10,
+    "Param1": 14004,
+    "ModelName": "mech_m_combiner.adr",
+    "CategoryId": 3,
+    "NoSale": true,
+    "NonMiniGame": true,
+    "Rarity": 3
+  },
+  {
+    "Comment": "Chicken",
+    "Id": 950102,
+    "Type": 19,
+    "NameId": 19016,
+    "DescriptionId": 19017,
+    "Icon": {
+      "Id": 7810
+    },
+    "Class": 9,
+    "MaxStackSize": 1,
+    "NoTrade": true,
+    "TextureAlias": "white-tips",
+    "MemberDiscount": 10,
+    "Param1": 14000,
+    "ModelName": "chicken_m_default.adr",
+    "CategoryId": 3,
+    "NoSale": true,
+    "NonMiniGame": true,
+    "Rarity": 3
+  },
+  {
+    "Comment": "Wilds Tractor",
+    "Id": 950103,
+    "Type": 19,
+    "NameId": 436274,
+    "Icon": {
+      "Id": 7605
+    },
+    "Class": 9,
+    "MaxStackSize": 1,
+    "NoTrade": true,
+    "TextureAlias": "tractor-farmreward",
+    "MemberDiscount": 10,
+    "Param1": 14001,
+    "ModelName": "tractor_m_farmreward.adr",
+    "CategoryId": 3,
+    "NoSale": true,
+    "NonMiniGame": true,
+    "Rarity": 3
+  },
+  {
+    "Comment": "Drake",
+    "Id": 950104,
+    "Type": 19,
+    "NameId": 17428,
+    "DescriptionId": 17429,
+    "Icon": {
+      "Id": 7151
+    },
+    "Class": 9,
+    "MaxStackSize": 1,
+    "NoTrade": true,
+    "TextureAlias": "air",
+    "MemberDiscount": 10,
+    "Param1": 14002,
+    "ModelName": "wyvern_m_air.adr",
+    "CategoryId": 3,
+    "NoSale": true,
+    "NonMiniGame": true,
+    "Rarity": 3
+  },
+  {
+    "Comment": "Undead Nightmare",
+    "Id": 950105,
+    "Type": 19,
+    "NameId": 5102548,
+    "DescriptionId": 5102549,
+    "Icon": {
+      "Id": 8575
+    },
+    "Class": 9,
+    "MaxStackSize": 1,
+    "NoTrade": true,
+    "TextureAlias": "undead-nightmare",
+    "MemberDiscount": 10,
+    "Param1": 14003,
+    "ModelName": "horse_m_skeletal.adr",
+    "CategoryId": 3,
+    "NoSale": true,
+    "NonMiniGame": true,
+    "Rarity": 3
+  },
+  {
+    "Comment": "Arctic Cat",
+    "Id": 950106,
+    "Type": 19,
+    "NameId": 5102967,
+    "DescriptionId": 5102968,
+    "Icon": {
+      "Id": 8740
+    },
+    "Class": 9,
+    "MaxStackSize": 1,
+    "NoTrade": true,
+    "TextureAlias": "snowcat",
+    "MemberDiscount": 10,
+    "Param1": 14005,
+    "ModelName": "tiger_m_snowcat.adr",
+    "CategoryId": 3,
+    "NoSale": true,
+    "NonMiniGame": true,
+    "Rarity": 3
   }
 ]

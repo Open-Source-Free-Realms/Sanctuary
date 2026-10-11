@@ -13816,10 +13816,6 @@
     "TintGroupId": 3
   },
   {
-    "Id": 10530,
-    "TintGroupId": 3
-  },
-  {
     "Id": 10584,
     "CategoryId": 106,
     "TintGroupId": 1
@@ -14697,9 +14693,6 @@
     "Id": 11316,
     "CategoryId": 105,
     "TintGroupId": 1
-  },
-  {
-    "Id": 11317
   },
   {
     "Id": 11318,
@@ -77672,13 +77665,6 @@
   {
     "Id": 79480,
     "CategoryId": 142
-  },
-  {
-    "Id": 79410,
-    "TintGroupId": 2
-  },
-  {
-    "Id": 79454
   },
   {
     "Id": 68909,

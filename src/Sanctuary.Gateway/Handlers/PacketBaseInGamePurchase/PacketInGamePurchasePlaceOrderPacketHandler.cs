@@ -221,7 +221,9 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
                     return true;
                 }
 
-                if (dbCharacter.Mounts.Any(x => x.Definition == mountDefinition.Id && x.Tint == orderDetailTint))
+                var mountTint = appStoreBundleDefinition.IsTintable ? orderDetailTint : mountDefinition.TintId;
+
+                if (dbCharacter.Mounts.Any(x => x.Definition == mountDefinition.Id && x.Tint == mountTint))
                 {
                     packetInGamePurchasePlaceOrderResponse.Result = 2;
 
@@ -234,7 +236,7 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
                 {
                     Id = ++lastMountId,
 
-                    Tint = orderDetailTint,
+                    Tint = mountTint,
                     Definition = mountDefinition.Id,
                     IsUpgraded = mountDefinition.IsUpgradable // TODO: Implement training
                 };
@@ -246,7 +248,7 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
 
                 pendingUpdates.Add(() =>
                 {
-                    if (!connection.Player.Mounts.Any(x => x.Definition == mountDef.Id && x.TintId == orderDetailTint))
+                    if (!connection.Player.Mounts.Any(x => x.Definition == mountDef.Id && x.TintId == mountTint))
                     {
                         connection.Player.Mounts.Add(new PacketMountInfo
                         {
@@ -254,7 +256,7 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
                             Definition = mountDef.Id,
                             NameId = mountDef.NameId,
                             ImageSetId = mountDef.ImageSetId,
-                            TintId = orderDetailTint,
+                            TintId = mountTint,
                             MembersOnly = mountDef.MembersOnly,
                             IsUpgradable = mountDef.IsUpgradable,
                             IsUpgraded = savedMount.IsUpgraded
