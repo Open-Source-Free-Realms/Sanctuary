@@ -42,30 +42,17 @@ public sealed class WorldZone : BaseZone
 
         foreach (var areaDefinition in _zoneDefinition.AreaDefinitions)
         {
-            if (areaDefinition.Shape == ZoneAreaShape.Circle)
+            var isInArea = areaDefinition.Shape switch
             {
-                var circle = new Vector3(areaDefinition.X1, 0, areaDefinition.Z1);
+                ZoneAreaShape.Circle => position.IsInCircle(new Vector3(areaDefinition.X1, 0, areaDefinition.Z1), areaDefinition.Radius),
+                ZoneAreaShape.Rectangle => position.IsInRectangle(new Vector3(areaDefinition.X1, 0, areaDefinition.Z1),
+                    new Vector3(areaDefinition.X2, 0, areaDefinition.Z2)),
+                ZoneAreaShape.Polygon => position.IsInPolygon(areaDefinition.Points),
+                _ => throw new NotImplementedException(nameof(areaDefinition.Shape))
+            };
 
-                if (position.IsInCircle(circle, areaDefinition.Radius))
-                    return areaDefinition.Id;
-            }
-            else if (areaDefinition.Shape == ZoneAreaShape.Rectangle)
-            {
-                var p1 = new Vector3(areaDefinition.X1, 0, areaDefinition.Z1);
-                var p2 = new Vector3(areaDefinition.X2, 0, areaDefinition.Z2);
-
-                if (position.IsInRectangle(p1, p2))
-                    return areaDefinition.Id;
-            }
-            else if (areaDefinition.Shape == ZoneAreaShape.Polygon)
-            {
-                if (position.IsInPolygon(areaDefinition.Points))
-                    return areaDefinition.Id;
-            }
-            else
-            {
-                throw new NotImplementedException(nameof(areaDefinition.Shape));
-            }
+            if (isInArea)
+                return areaDefinition.Id;
         }
 
         return 0;

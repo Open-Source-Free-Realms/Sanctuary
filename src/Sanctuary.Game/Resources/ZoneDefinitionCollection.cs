@@ -36,7 +36,7 @@ public class ZoneDefinitionCollection : ObservableConcurrentDictionary<int, Base
                 var jsonSerializerOptions = new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true,
-                    Converters = { new Vector2JsonConverter() }
+                    Converters = { new Vector3XzJsonConverter() }
                 };
 
                 var entry = JsonSerializer.Deserialize<BaseZoneDefinition>(fileStream, jsonSerializerOptions);

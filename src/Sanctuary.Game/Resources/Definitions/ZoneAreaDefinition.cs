@@ -22,5 +22,5 @@ public class ZoneAreaDefinition
 
     public float Radius { get; set; }
 
-    public List<Vector2> Points { get; set; } = [];
+    public List<Vector3> Points { get; set; } = [];
 }
