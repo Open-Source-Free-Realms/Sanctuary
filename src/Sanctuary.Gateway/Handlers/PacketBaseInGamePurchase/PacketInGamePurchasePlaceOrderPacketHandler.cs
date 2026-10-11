@@ -11,6 +11,7 @@ using Sanctuary.Core.IO;
 using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -35,17 +36,21 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
     {
-        if (!PacketInGamePurchasePlaceOrderPacket.TryDeserialize(data, out var packet))
+        if (!PacketInGamePurchasePlaceOrderPacket.TryDeserialize(data, out var packetInGamePurchasePlaceOrderPacket))
         {
             _logger.LogError("Failed to deserialize {packet}.", nameof(PacketInGamePurchasePlaceOrderPacket));
             return false;
         }
 
-        _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(PacketInGamePurchasePlaceOrderPacket), packet);
+        _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(PacketInGamePurchasePlaceOrderPacket), packetInGamePurchasePlaceOrderPacket);
 
-        var packetInGamePurchasePlaceOrderResponse = new PacketInGamePurchasePlaceOrderResponse();
+        var packetInGamePurchasePlaceOrderResponse = new PacketInGamePurchasePlaceOrderResponse
+        {
+            OrderTrackingId = packetInGamePurchasePlaceOrderPacket.Order.OrderTrackingId,
+            OrderId = packetInGamePurchasePlaceOrderPacket.Order.OrderTrackingId.ToString()
+        };
 
-        var orderDetail = packet.Order.Details.FirstOrDefault();
+        var orderDetail = packetInGamePurchasePlaceOrderPacket.Order.Details.FirstOrDefault();
 
         if (orderDetail is null)
         {
@@ -269,6 +274,8 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
                     };
 
                     connection.Player.SendTunneled(packetMountList);
+
+                    ItemDefinitionHelper.SendItemDefinition(connection.Player, _resourceManager, clientItemDefinition);
                 });
             }
             else
@@ -300,9 +307,6 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
             pendingUpdate();
 
         packetInGamePurchasePlaceOrderResponse.Result = 1;
-
-        packetInGamePurchasePlaceOrderResponse.OrderTrackingId = packet.Order.OrderTrackingId;
-        packetInGamePurchasePlaceOrderResponse.OrderId = packet.Order.OrderTrackingId.ToString();
 
         packetInGamePurchasePlaceOrderResponse.Total = totalCost;
 

@@ -42,6 +42,8 @@ public class ClientItemDefinition : BaseItemDefinition
         writer.Write(Abilities);
     }
 
+    public ClientItemDefinition Clone() => (ClientItemDefinition)MemberwiseClone();
+
     public int GetMemberPurchasePrice()
     {
         if (Cost > 0 && (MemberDiscount - 1) <= 99)

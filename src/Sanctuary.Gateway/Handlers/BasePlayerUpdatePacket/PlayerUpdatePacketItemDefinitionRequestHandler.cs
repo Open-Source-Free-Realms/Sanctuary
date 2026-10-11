@@ -3,8 +3,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using Sanctuary.Core.IO;
 using Sanctuary.Game;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
@@ -40,13 +40,7 @@ public static class PlayerUpdatePacketItemDefinitionRequestHandler
             return true;
         }
 
-        using var writer = new PacketWriter();
-
-        clientItemDefinition.Serialize(writer);
-
-        packet.Payload = writer.Buffer;
-
-        connection.SendTunneled(packet);
+        ItemDefinitionHelper.SendItemDefinition(connection.Player, _resourceManager, clientItemDefinition);
 
         return true;
     }
