@@ -400,7 +400,7 @@ public sealed class Player : ClientPcData, IEntity
 
     private void UpdateZoneArea()
     {
-        if (Zone is not WorldZone worldZone)
+        if (Zone is not WorldZone worldZone || worldZone.Name != "FabledRealms")
             return;
 
         var zoneAreaId = worldZone.GetZoneAreaId(Position);

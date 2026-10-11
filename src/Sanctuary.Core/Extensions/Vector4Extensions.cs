@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Numerics;
 
 namespace Sanctuary.Core.Extensions;
@@ -25,5 +26,23 @@ public static class Vector4Extensions
         var maxZ = Math.Max(p1.Z, p2.Z);
 
         return value.X > minX && value.X < maxX && value.Z > minZ && value.Z < maxZ;
+    }
+
+    public static bool IsInPolygon(this Vector4 value, IReadOnlyList<Vector3> points)
+    {
+        var inside = false;
+
+        for (var index = 0; index < points.Count; index++)
+        {
+            var point = points[index];
+            var previousPoint = points[(index + points.Count - 1) % points.Count];
+
+            if ((point.Z > value.Z) != (previousPoint.Z > value.Z) &&
+                value.X < ((double)previousPoint.X - point.X) * ((double)value.Z - point.Z) /
+                ((double)previousPoint.Z - point.Z) + point.X)
+                inside = !inside;
+        }
+
+        return inside;
     }
 }

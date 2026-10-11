@@ -5,6 +5,7 @@ using System.Numerics;
 using Sanctuary.Core.Extensions;
 using Sanctuary.Core.IO;
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -36,27 +37,22 @@ public sealed class WorldZone : BaseZone
 
     public int GetZoneAreaId(Vector4 position)
     {
+        if (_zoneDefinition.Name != "FabledRealms")
+            return 0;
+
         foreach (var areaDefinition in _zoneDefinition.AreaDefinitions)
         {
-            if (areaDefinition.Shape == "Circle")
+            var isInArea = areaDefinition.Shape switch
             {
-                var circle = new Vector3(areaDefinition.X1, 0, areaDefinition.Z1);
+                ZoneAreaShape.Circle => position.IsInCircle(new Vector3(areaDefinition.X1, 0, areaDefinition.Z1), areaDefinition.Radius),
+                ZoneAreaShape.Rectangle => position.IsInRectangle(new Vector3(areaDefinition.X1, 0, areaDefinition.Z1),
+                    new Vector3(areaDefinition.X2, 0, areaDefinition.Z2)),
+                ZoneAreaShape.Polygon => position.IsInPolygon(areaDefinition.Points),
+                _ => throw new NotImplementedException(nameof(areaDefinition.Shape))
+            };
 
-                if (position.IsInCircle(circle, areaDefinition.Radius))
-                    return areaDefinition.Id;
-            }
-            else if (areaDefinition.Shape == "Rectangle")
-            {
-                var p1 = new Vector3(areaDefinition.X1, 0, areaDefinition.Z1);
-                var p2 = new Vector3(areaDefinition.X2, 0, areaDefinition.Z2);
-
-                if (position.IsInRectangle(p1, p2))
-                    return areaDefinition.Id;
-            }
-            else
-            {
-                throw new NotImplementedException(nameof(areaDefinition.Shape));
-            }
+            if (isInArea)
+                return areaDefinition.Id;
         }
 
         return 0;
