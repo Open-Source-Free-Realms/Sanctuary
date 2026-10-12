@@ -67,7 +67,7 @@ public static class InventoryPacketEquippedRemoveHandler
             return true;
         }
 
-        if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out var itemClass))
+        if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out _))
         {
             _logger.LogWarning("User tried to equip unknown item class. {id} {definition}", profileItem.Id, clientItemDefinition.Class);
             return true;
@@ -120,7 +120,7 @@ public static class InventoryPacketEquippedRemoveHandler
 
         playerUpdatePacketEquipItemChange.ProfileId = inventoryPacketEquippedRemove.ProfileId;
 
-        playerUpdatePacketEquipItemChange.WieldType = itemClass.WieldType;
+        playerUpdatePacketEquipItemChange.WieldType = connection.Player.GetWieldType();
 
         if (inventoryPacketEquippedRemove.ProfileId == connection.Player.ActiveProfileId)
             connection.Player.SendTunneledToVisible(playerUpdatePacketEquipItemChange);

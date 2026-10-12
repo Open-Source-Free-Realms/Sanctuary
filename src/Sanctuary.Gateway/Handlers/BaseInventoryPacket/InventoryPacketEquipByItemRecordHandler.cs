@@ -149,13 +149,13 @@ public static class InventoryPacketEquipByItemRecordHandler
 
         playerUpdatePacketEquipItemChange.ProfileId = connection.Player.ActiveProfileId;
 
-        if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out var itemClass))
+        if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out _))
         {
             _logger.LogWarning("User tried to equip unknown item class. {id} {definition}", clientItem.Id, clientItemDefinition.Class);
             return true;
         }
 
-        playerUpdatePacketEquipItemChange.WieldType = itemClass.WieldType;
+        playerUpdatePacketEquipItemChange.WieldType = connection.Player.GetWieldType();
 
         if (inventoryPacketEquipByItemRecord.ProfileId == connection.Player.ActiveProfileId)
             connection.Player.SendTunneledToVisible(playerUpdatePacketEquipItemChange);

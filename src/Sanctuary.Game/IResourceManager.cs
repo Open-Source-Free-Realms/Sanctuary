@@ -21,6 +21,7 @@ public interface IResourceManager
     CoinStoreItemCollection CoinStoreItems { get; }
 
     ItemClassDefinitionCollection ItemClasses { get; }
+    EquipmentSlotDefinitionCollection EquipmentSlots { get; }
     ItemCategoryDefinitionCollection ItemCategories { get; }
     ItemCategoryGroupDefinitionCollection ItemCategoryGroups { get; }
 

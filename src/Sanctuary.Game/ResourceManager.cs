@@ -33,6 +33,7 @@ public class ResourceManager : IResourceManager
     public static readonly string CoinStoreItemsFile = Path.Combine(BaseDirectory, "CoinStoreItems.json");
 
     public static readonly string ItemClassesFile = Path.Combine(BaseDirectory, "ItemClasses.txt");
+    public static readonly string EquipmentSlotDefinitionsFile = Path.Combine(BaseDirectory, "EquipmentSlotDefinitions.txt");
     public static readonly string ItemCategoriesFile = Path.Combine(BaseDirectory, "ItemCategories.txt");
     public static readonly string ItemCategoryGroupsFile = Path.Combine(BaseDirectory, "ItemCategoryGroups.txt");
 
@@ -75,6 +76,7 @@ public class ResourceManager : IResourceManager
     public CoinStoreItemCollection CoinStoreItems { get; }
 
     public ItemClassDefinitionCollection ItemClasses { get; }
+    public EquipmentSlotDefinitionCollection EquipmentSlots { get; }
     public ItemCategoryDefinitionCollection ItemCategories { get; }
     public ItemCategoryGroupDefinitionCollection ItemCategoryGroups { get; }
 
@@ -128,6 +130,7 @@ public class ResourceManager : IResourceManager
         CoinStoreItems = new(_logger);
 
         ItemClasses = new(_logger);
+        EquipmentSlots = new(_logger);
         ItemCategories = new(_logger);
         ItemCategoryGroups = new(_logger);
 
@@ -265,6 +268,9 @@ public class ResourceManager : IResourceManager
         if (!ItemClasses.Load(ItemClassesFile))
             return false;
 
+        if (!EquipmentSlots.Load(EquipmentSlotDefinitionsFile))
+            return false;
+
         if (!ItemCategories.Load(ItemCategoriesFile))
             return false;
 
@@ -374,6 +380,8 @@ public class ResourceManager : IResourceManager
                 loaded = CollectionNodeSpawns.Load(CollectionNodeSpawnsDirectory);
             else if (e.FullPath == ItemClassesFile)
                 loaded = ItemClasses.Load(ItemClassesFile);
+            else if (e.FullPath == EquipmentSlotDefinitionsFile)
+                loaded = EquipmentSlots.Load(EquipmentSlotDefinitionsFile);
             else if (e.FullPath == ItemCategoriesFile)
                 loaded = ItemCategories.Load(ItemCategoriesFile);
             else if (e.FullPath == ItemCategoryGroupsFile)

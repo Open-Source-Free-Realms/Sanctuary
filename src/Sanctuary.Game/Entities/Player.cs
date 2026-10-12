@@ -690,6 +690,25 @@ public sealed class Player : ClientPcData, IEntity
             ? Items.FirstOrDefault(item => item.Id == profileItem.Id)
             : null;
 
+    public int GetWieldType()
+    {
+        foreach (var equipmentSlot in _resourceManager.EquipmentSlots.Values.OrderBy(x => x.AnimationPriority))
+        {
+            if (GetEquippedItem(equipmentSlot.Id) is not { } item
+                || !_resourceManager.ClientItemDefinitions.TryGetValue(item.Definition, out var definition)
+                || definition.Class == 0)
+                continue;
+
+            if (!_resourceManager.ItemClasses.TryGetValue(definition.Class, out var itemClass))
+                return 0;
+
+            if (itemClass.WieldType != 0)
+                return itemClass.WieldType;
+        }
+
+        return 0;
+    }
+
     public int GetEquippedCompositeEffectId(int slot)
     {
         var item = GetEquippedItem(slot);
@@ -719,7 +738,6 @@ public sealed class Player : ClientPcData, IEntity
         // Job switches reuse the cached attachment effect until the new weapon appears.
         if (GetEquippedItem(WeaponSlot) is { } item
             && _resourceManager.ClientItemDefinitions.TryGetValue(item.Definition, out var definition)
-            && _resourceManager.ItemClasses.TryGetValue(definition.Class, out var itemClass)
             && GetAttachment(WeaponSlot) is { } attachment)
         {
             SendTunneledToVisible(new PlayerUpdatePacketEquipItemChange
@@ -728,7 +746,7 @@ public sealed class Player : ClientPcData, IEntity
                 Id = item.Id,
                 Attachment = attachment,
                 ProfileId = ActiveProfileId,
-                WieldType = itemClass.WieldType
+                WieldType = GetWieldType()
             }, true);
         }
 
@@ -823,6 +841,8 @@ public sealed class Player : ClientPcData, IEntity
             TemporaryAppearance = TemporaryAppearance,
 
             ActiveProfileId = ActiveProfileId,
+
+            WieldType = GetWieldType(),
 
             MountQueuePosition = -1,
             MountSeat = -1,
