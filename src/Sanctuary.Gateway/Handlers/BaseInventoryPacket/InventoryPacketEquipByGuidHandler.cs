@@ -151,6 +151,8 @@ public static class InventoryPacketEquipByGuidHandler
             return true;
         }
 
+        playerUpdatePacketEquipItemChange.ItemClassId = clientItemDefinition.Class;
+
         playerUpdatePacketEquipItemChange.WieldType = itemClass.WieldType;
 
         if (inventoryPacketEquipByGuid.ProfileId == connection.Player.ActiveProfileId)

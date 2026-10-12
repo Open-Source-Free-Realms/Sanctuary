@@ -728,6 +728,7 @@ public sealed class Player : ClientPcData, IEntity
                 Id = item.Id,
                 Attachment = attachment,
                 ProfileId = ActiveProfileId,
+                ItemClassId = definition.Class,
                 WieldType = itemClass.WieldType
             }, true);
         }

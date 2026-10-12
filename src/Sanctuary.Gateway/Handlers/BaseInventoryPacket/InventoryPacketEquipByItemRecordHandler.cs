@@ -155,6 +155,8 @@ public static class InventoryPacketEquipByItemRecordHandler
             return true;
         }
 
+        playerUpdatePacketEquipItemChange.ItemClassId = clientItemDefinition.Class;
+
         playerUpdatePacketEquipItemChange.WieldType = itemClass.WieldType;
 
         if (inventoryPacketEquipByItemRecord.ProfileId == connection.Player.ActiveProfileId)
