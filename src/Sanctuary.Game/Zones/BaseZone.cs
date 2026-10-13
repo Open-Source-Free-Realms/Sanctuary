@@ -723,6 +723,8 @@ public abstract class BaseZone : IZone, IDisposable
 
         if (npc is CollectionCoin)
         {
+            npc.NameId = 0;
+            npc.Name = $"{definition.Name} #{definition.Id}";
             npc.CursorId = 18;
             npc.HasCursor = true;
             npc.InteractRange = 12;
