@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading;
 
 using Sanctuary.Game.Resources.Definitions;
@@ -8,6 +9,7 @@ namespace Sanctuary.Game.Entities;
 public sealed class CollectionNode : Npc
 {
     private int _reserved;
+    private readonly List<Npc> _effectAnchors = [];
 
     public CollectionNodeTypeDefinition TypeDefinition { get; }
     public CollectionNodePoolDefinition PoolDefinition { get; }
@@ -37,13 +39,33 @@ public sealed class CollectionNode : Npc
         Zone.CompleteCollectionNode(this);
     }
 
+    internal void AddEffectAnchor(Npc anchor)
+    {
+        _effectAnchors.Add(anchor);
+    }
+
     internal void DisposeAfterCollection()
     {
+        DisposeEffectAnchors();
         DisposeGracefully(
             animate: true,
             delay: 0,
             effectDelay: 0,
             compositeEffectId: 0,
             duration: 1000);
+    }
+
+    public override void Dispose()
+    {
+        DisposeEffectAnchors();
+        base.Dispose();
+    }
+
+    private void DisposeEffectAnchors()
+    {
+        foreach (var anchor in _effectAnchors)
+            anchor.Dispose();
+
+        _effectAnchors.Clear();
     }
 }

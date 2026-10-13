@@ -58,6 +58,13 @@ public static class InventoryPacketEquipByItemRecordHandler
         if (clientItemDefinition.Type != 1)
             return true;
 
+        if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out var itemClass))
+        {
+            _logger.LogWarning("User tried to equip item with unknown class. {id} {definition} {class}",
+                clientItem.Id, clientItem.Definition, clientItemDefinition.Class);
+            return true;
+        }
+
         var profile = connection.Player.Profiles.SingleOrDefault(x => x.Id == inventoryPacketEquipByItemRecord.ProfileId);
 
         if (profile is null)
@@ -149,14 +156,7 @@ public static class InventoryPacketEquipByItemRecordHandler
 
         playerUpdatePacketEquipItemChange.ProfileId = connection.Player.ActiveProfileId;
 
-        if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out var itemClass))
-        {
-            _logger.LogWarning("User tried to equip unknown item class. {id} {definition}", clientItem.Id, clientItemDefinition.Class);
-            return true;
-        }
-
         playerUpdatePacketEquipItemChange.ItemClassId = clientItemDefinition.Class;
-
         playerUpdatePacketEquipItemChange.WieldType = itemClass.WieldType;
 
         if (inventoryPacketEquipByItemRecord.ProfileId == connection.Player.ActiveProfileId)

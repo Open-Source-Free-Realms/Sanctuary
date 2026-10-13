@@ -17,7 +17,7 @@ namespace Sanctuary.Database.MySql.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.9")
+                .HasAnnotation("ProductVersion", "9.0.17")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
@@ -189,6 +189,27 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Characters");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbCollectionEntry", b =>
+                {
+                    b.Property<ulong>("CharacterId")
+                        .HasColumnType("bigint unsigned");
+
+                    b.Property<int>("CollectionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EntryId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("Collected")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.HasKey("CharacterId", "CollectionId", "EntryId");
+
+                    b.ToTable("CollectionEntries");
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbFriend", b =>
@@ -485,6 +506,17 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbCollectionEntry", b =>
+                {
+                    b.HasOne("Sanctuary.Database.Entities.DbCharacter", "Character")
+                        .WithMany("CollectionEntries")
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Character");
+                });
+
             modelBuilder.Entity("Sanctuary.Database.Entities.DbFriend", b =>
                 {
                     b.HasOne("Sanctuary.Database.Entities.DbCharacter", "Character")
@@ -580,6 +612,8 @@ namespace Sanctuary.Database.MySql.Migrations
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbCharacter", b =>
                 {
+                    b.Navigation("CollectionEntries");
+
                     b.Navigation("Friends");
 
                     b.Navigation("Ignores");

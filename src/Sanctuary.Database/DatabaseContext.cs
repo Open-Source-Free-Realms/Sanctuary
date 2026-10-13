@@ -8,6 +8,7 @@ public abstract class DatabaseContext : DbContext
 {
     public DbSet<DbUser> Users => Set<DbUser>();
     public DbSet<DbItem> Items => Set<DbItem>();
+    public DbSet<DbCollectionEntry> CollectionEntries => Set<DbCollectionEntry>();
     public DbSet<DbTitle> Titles => Set<DbTitle>();
     public DbSet<DbMount> Mounts => Set<DbMount>();
     public DbSet<DbGuild> Guilds => Set<DbGuild>();

@@ -118,6 +118,8 @@ public class Npc : IScriptableNpc, IEntity
         InteractAction?.Invoke(player);
     }
 
+    public virtual bool IsVisibleTo(Player player) => true;
+
     public virtual void OnAddVisibleNpcs(params IEnumerable<Npc> npcs)
     {
         foreach (var npc in npcs)
@@ -127,7 +129,10 @@ public class Npc : IScriptableNpc, IEntity
     public virtual void OnAddVisiblePlayers(params IEnumerable<Player> players)
     {
         foreach (var player in players)
-            VisiblePlayers.TryAdd(player.Guid, player);
+        {
+            if (IsVisibleTo(player))
+                VisiblePlayers.TryAdd(player.Guid, player);
+        }
     }
 
     public virtual void OnRemoveVisibleNpcs(params IEnumerable<Npc> npcs)

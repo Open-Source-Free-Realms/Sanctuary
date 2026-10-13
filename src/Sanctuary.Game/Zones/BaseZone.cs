@@ -700,25 +700,35 @@ public abstract class BaseZone : IZone, IDisposable
         if (_resourceManager.Models.TryGetValue(definition.ModelId, out var model) && model.Scale != 0f)
             scale = model.Scale;
 
-        npc = new Npc(this)
+        var npcGuid = GetNpcGuid(guid);
+        npc = _resourceManager.CollectionCoins.TryGetValue(definition.Id, out var coinDefinition)
+            ? new CollectionCoin(this, coinDefinition) { Guid = npcGuid }
+            : new Npc(this) { Guid = npcGuid };
+
+        npc.NameId = definition.NameId;
+        npc.Name = definition.Name;
+        npc.ModelId = definition.ModelId;
+        npc.TerrainObjectId = definition.TerrainObjectId;
+        npc.ReplaceTerrainObject = definition.ReplaceTerrainObject;
+        npc.OpensAtlas = definition.OpensAtlas;
+        npc.AutoSelectSingleInteraction = definition.AutoSelectSingleInteraction;
+        npc.InteractRange = definition.InteractRange;
+        npc.IsInteractable = definition.IsInteractable;
+        npc.CursorId = definition.CursorId;
+        npc.HasCursor = definition.HasCursor;
+        npc.RelevanceUnknown2 = definition.RelevanceUnknown2;
+        npc.TextureAlias = definition.TextureAlias;
+        npc.Scale = definition.Scale ?? scale;
+        npc.Visible = true;
+
+        if (npc is CollectionCoin)
         {
-            Guid = GetNpcGuid(guid),
-            NameId = definition.NameId,
-            Name = definition.Name,
-            ModelId = definition.ModelId,
-            TerrainObjectId = definition.TerrainObjectId,
-            ReplaceTerrainObject = definition.ReplaceTerrainObject,
-            OpensAtlas = definition.OpensAtlas,
-            AutoSelectSingleInteraction = definition.AutoSelectSingleInteraction,
-            InteractRange = definition.InteractRange,
-            IsInteractable = definition.IsInteractable,
-            CursorId = definition.CursorId,
-            HasCursor = definition.HasCursor,
-            RelevanceUnknown2 = definition.RelevanceUnknown2,
-            TextureAlias = definition.TextureAlias,
-            Scale = definition.Scale ?? scale,
-            Visible = true
-        };
+            npc.NameId = 0;
+            npc.Name = $"{definition.Name} #{definition.Id}";
+            npc.CursorId = 18;
+            npc.HasCursor = true;
+            npc.InteractRange = 12;
+        }
 
         if (!TryRegisterEntity(_npcs, npc))
         {
@@ -802,7 +812,8 @@ public abstract class BaseZone : IZone, IDisposable
             if (string.IsNullOrWhiteSpace(poolKey) ||
                 !_resourceManager.CollectionNodePools.TryGetValue(poolKey.Trim().ToLowerInvariant(), out var poolDefinition) ||
                 poolDefinition.ZoneDefinitionId != DefinitionId ||
-                !_resourceManager.CollectionNodeTypes.TryGetValue(poolDefinition.NodeType, out var typeDefinition))
+                !_resourceManager.CollectionNodeTypes.TryGetValue(poolDefinition.NodeType, out var typeDefinition) ||
+                GetTileFromPosition(position) == ZoneTile.Empty)
             {
                 return false;
             }
@@ -998,6 +1009,7 @@ public abstract class BaseZone : IZone, IDisposable
             ModelId = typeDefinition.ModelId,
             Scale = typeDefinition.Scale,
             CompositeEffectId = typeDefinition.CompositeEffectId,
+            SubTextNameId = typeDefinition.SubTextNameId,
             InteractRange = typeDefinition.InteractRange,
             CursorId = typeDefinition.CursorId,
             Visible = true
@@ -1010,6 +1022,25 @@ public abstract class BaseZone : IZone, IDisposable
         }
 
         node.UpdatePosition(spawnDefinition.SpawnPosition, spawnDefinition.SpawnRotation);
+
+        foreach (var effectId in typeDefinition.ExtraCompositeEffectIds)
+        {
+            if (!TryCreateNpc(null, out var anchor))
+                continue;
+
+            anchor.Name = typeDefinition.Name;
+            anchor.ModelId = typeDefinition.ModelId;
+            anchor.Scale = typeDefinition.Scale;
+            anchor.CompositeEffectId = effectId;
+            anchor.HideNamePlate = true;
+            anchor.IsInteractable = false;
+            anchor.InteractRange = 0;
+            anchor.CursorId = 0;
+            anchor.Visible = true;
+            anchor.UpdatePosition(spawnDefinition.SpawnPosition, spawnDefinition.SpawnRotation);
+            node.AddEffectAnchor(anchor);
+        }
+
         return true;
     }
 

@@ -14,6 +14,7 @@ public interface IResourceManager
 
     ClientItemDefinitionCollection ClientItemDefinitions { get; }
     CollectionDefinitionCollection Collections { get; }
+    CollectionCoinDefinitionCollection CollectionCoins { get; }
     CollectionNodePoolDefinitionCollection CollectionNodePools { get; }
     CollectionNodeTypeDefinitionCollection CollectionNodeTypes { get; }
     CollectionNodeSpawnDefinitionCollection CollectionNodeSpawns { get; }

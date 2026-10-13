@@ -83,6 +83,7 @@ public static class PacketLoginHandler
             .AsNoTrackingWithIdentityResolution()
             .Include(x => x.User)
             .Include(x => x.Items)
+            .Include(x => x.CollectionEntries)
             .Include(x => x.Titles)
             .Include(x => x.Mounts)
             .Include(x => x.Friends)

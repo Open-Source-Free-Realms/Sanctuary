@@ -54,6 +54,20 @@ public static class InventoryPacketEquipByGuidHandler
             return true;
         }
 
+        if (clientItemDefinition.Type != 1)
+        {
+            _logger.LogWarning("User tried to equip non-equipment item. {guid} {definition} {type}",
+                inventoryPacketEquipByGuid.Guid, clientItem.Definition, clientItemDefinition.Type);
+            return true;
+        }
+
+        if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out var itemClass))
+        {
+            _logger.LogWarning("User tried to equip item with unknown class. {guid} {definition} {class}",
+                inventoryPacketEquipByGuid.Guid, clientItem.Definition, clientItemDefinition.Class);
+            return true;
+        }
+
         var profile = connection.Player.Profiles.SingleOrDefault(x => x.Id == inventoryPacketEquipByGuid.ProfileId);
 
         if (profile is null)
@@ -145,14 +159,7 @@ public static class InventoryPacketEquipByGuidHandler
 
         playerUpdatePacketEquipItemChange.ProfileId = connection.Player.ActiveProfileId;
 
-        if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out var itemClass))
-        {
-            _logger.LogWarning("User tried to equip unknown item class. {guid} {definition}", inventoryPacketEquipByGuid.Guid, clientItemDefinition.Class);
-            return true;
-        }
-
         playerUpdatePacketEquipItemChange.ItemClassId = clientItemDefinition.Class;
-
         playerUpdatePacketEquipItemChange.WieldType = itemClass.WieldType;
 
         if (inventoryPacketEquipByGuid.ProfileId == connection.Player.ActiveProfileId)

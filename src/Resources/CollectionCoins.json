@@ -1,0 +1,592 @@
+[
+  {
+    "NpcDefinitionId": 1946,
+    "CollectionId": 267,
+    "EntryId": 1937
+  },
+  {
+    "NpcDefinitionId": 2090,
+    "CollectionId": 289,
+    "EntryId": 2046
+  },
+  {
+    "NpcDefinitionId": 2091,
+    "CollectionId": 289,
+    "EntryId": 2047
+  },
+  {
+    "NpcDefinitionId": 2092,
+    "CollectionId": 289,
+    "EntryId": 2048
+  },
+  {
+    "NpcDefinitionId": 2093,
+    "CollectionId": 289,
+    "EntryId": 2049
+  },
+  {
+    "NpcDefinitionId": 2094,
+    "CollectionId": 289,
+    "EntryId": 2050
+  },
+  {
+    "NpcDefinitionId": 2095,
+    "CollectionId": 289,
+    "EntryId": 2051
+  },
+  {
+    "NpcDefinitionId": 2096,
+    "CollectionId": 289,
+    "EntryId": 2052
+  },
+  {
+    "NpcDefinitionId": 2097,
+    "CollectionId": 267,
+    "EntryId": 1956
+  },
+  {
+    "NpcDefinitionId": 2098,
+    "CollectionId": 267,
+    "EntryId": 1957
+  },
+  {
+    "NpcDefinitionId": 2099,
+    "CollectionId": 267,
+    "EntryId": 1958
+  },
+  {
+    "NpcDefinitionId": 2101,
+    "CollectionId": 289,
+    "EntryId": 2053
+  },
+  {
+    "NpcDefinitionId": 2102,
+    "CollectionId": 267,
+    "EntryId": 1959
+  },
+  {
+    "NpcDefinitionId": 2103,
+    "CollectionId": 270,
+    "EntryId": 1940
+  },
+  {
+    "NpcDefinitionId": 2104,
+    "CollectionId": 270,
+    "EntryId": 1968
+  },
+  {
+    "NpcDefinitionId": 2105,
+    "CollectionId": 285,
+    "EntryId": 2020
+  },
+  {
+    "NpcDefinitionId": 2106,
+    "CollectionId": 270,
+    "EntryId": 1969
+  },
+  {
+    "NpcDefinitionId": 2107,
+    "CollectionId": 285,
+    "EntryId": 2021
+  },
+  {
+    "NpcDefinitionId": 2108,
+    "CollectionId": 285,
+    "EntryId": 2022
+  },
+  {
+    "NpcDefinitionId": 2109,
+    "CollectionId": 285,
+    "EntryId": 2023
+  },
+  {
+    "NpcDefinitionId": 2110,
+    "CollectionId": 285,
+    "EntryId": 2024
+  },
+  {
+    "NpcDefinitionId": 2111,
+    "CollectionId": 268,
+    "EntryId": 1938
+  },
+  {
+    "NpcDefinitionId": 2112,
+    "CollectionId": 288,
+    "EntryId": 2038
+  },
+  {
+    "NpcDefinitionId": 2113,
+    "CollectionId": 268,
+    "EntryId": 1960
+  },
+  {
+    "NpcDefinitionId": 2114,
+    "CollectionId": 268,
+    "EntryId": 1961
+  },
+  {
+    "NpcDefinitionId": 2115,
+    "CollectionId": 288,
+    "EntryId": 2039
+  },
+  {
+    "NpcDefinitionId": 2116,
+    "CollectionId": 288,
+    "EntryId": 2040
+  },
+  {
+    "NpcDefinitionId": 2117,
+    "CollectionId": 268,
+    "EntryId": 1962
+  },
+  {
+    "NpcDefinitionId": 2118,
+    "CollectionId": 288,
+    "EntryId": 2041
+  },
+  {
+    "NpcDefinitionId": 2119,
+    "CollectionId": 288,
+    "EntryId": 2042
+  },
+  {
+    "NpcDefinitionId": 2120,
+    "CollectionId": 288,
+    "EntryId": 2043
+  },
+  {
+    "NpcDefinitionId": 2121,
+    "CollectionId": 288,
+    "EntryId": 2044
+  },
+  {
+    "NpcDefinitionId": 2122,
+    "CollectionId": 268,
+    "EntryId": 1963
+  },
+  {
+    "NpcDefinitionId": 2123,
+    "CollectionId": 272,
+    "EntryId": 1942
+  },
+  {
+    "NpcDefinitionId": 2125,
+    "CollectionId": 286,
+    "EntryId": 2025
+  },
+  {
+    "NpcDefinitionId": 2126,
+    "CollectionId": 286,
+    "EntryId": 2026
+  },
+  {
+    "NpcDefinitionId": 2127,
+    "CollectionId": 286,
+    "EntryId": 2027
+  },
+  {
+    "NpcDefinitionId": 2128,
+    "CollectionId": 286,
+    "EntryId": 2028
+  },
+  {
+    "NpcDefinitionId": 2129,
+    "CollectionId": 286,
+    "EntryId": 2029
+  },
+  {
+    "NpcDefinitionId": 2130,
+    "CollectionId": 272,
+    "EntryId": 1972
+  },
+  {
+    "NpcDefinitionId": 2131,
+    "CollectionId": 272,
+    "EntryId": 1973
+  },
+  {
+    "NpcDefinitionId": 2302,
+    "CollectionId": 290,
+    "EntryId": 2054
+  },
+  {
+    "NpcDefinitionId": 2303,
+    "CollectionId": 271,
+    "EntryId": 1941
+  },
+  {
+    "NpcDefinitionId": 2304,
+    "CollectionId": 271,
+    "EntryId": 1970
+  },
+  {
+    "NpcDefinitionId": 2305,
+    "CollectionId": 290,
+    "EntryId": 2055
+  },
+  {
+    "NpcDefinitionId": 2306,
+    "CollectionId": 271,
+    "EntryId": 1971
+  },
+  {
+    "NpcDefinitionId": 2307,
+    "CollectionId": 290,
+    "EntryId": 2056
+  },
+  {
+    "NpcDefinitionId": 2308,
+    "CollectionId": 290,
+    "EntryId": 2057
+  },
+  {
+    "NpcDefinitionId": 2309,
+    "CollectionId": 290,
+    "EntryId": 2058
+  },
+  {
+    "NpcDefinitionId": 2473,
+    "CollectionId": 266,
+    "EntryId": 1936
+  },
+  {
+    "NpcDefinitionId": 2474,
+    "CollectionId": 291,
+    "EntryId": 2059
+  },
+  {
+    "NpcDefinitionId": 2475,
+    "CollectionId": 291,
+    "EntryId": 2060
+  },
+  {
+    "NpcDefinitionId": 2476,
+    "CollectionId": 291,
+    "EntryId": 2061
+  },
+  {
+    "NpcDefinitionId": 2477,
+    "CollectionId": 291,
+    "EntryId": 2062
+  },
+  {
+    "NpcDefinitionId": 2478,
+    "CollectionId": 291,
+    "EntryId": 2063
+  },
+  {
+    "NpcDefinitionId": 2479,
+    "CollectionId": 291,
+    "EntryId": 2064
+  },
+  {
+    "NpcDefinitionId": 2480,
+    "CollectionId": 291,
+    "EntryId": 2065
+  },
+  {
+    "NpcDefinitionId": 2481,
+    "CollectionId": 266,
+    "EntryId": 1951
+  },
+  {
+    "NpcDefinitionId": 2482,
+    "CollectionId": 266,
+    "EntryId": 1952
+  },
+  {
+    "NpcDefinitionId": 2483,
+    "CollectionId": 266,
+    "EntryId": 1953
+  },
+  {
+    "NpcDefinitionId": 2484,
+    "CollectionId": 291,
+    "EntryId": 2066
+  },
+  {
+    "NpcDefinitionId": 4421,
+    "CollectionId": 269,
+    "EntryId": 1939
+  },
+  {
+    "NpcDefinitionId": 4422,
+    "CollectionId": 269,
+    "EntryId": 1964
+  },
+  {
+    "NpcDefinitionId": 4423,
+    "CollectionId": 269,
+    "EntryId": 1965
+  },
+  {
+    "NpcDefinitionId": 4424,
+    "CollectionId": 269,
+    "EntryId": 1966
+  },
+  {
+    "NpcDefinitionId": 4425,
+    "CollectionId": 269,
+    "EntryId": 1967
+  },
+  {
+    "NpcDefinitionId": 4426,
+    "CollectionId": 287,
+    "EntryId": 2030
+  },
+  {
+    "NpcDefinitionId": 4427,
+    "CollectionId": 287,
+    "EntryId": 2031
+  },
+  {
+    "NpcDefinitionId": 4428,
+    "CollectionId": 287,
+    "EntryId": 2032
+  },
+  {
+    "NpcDefinitionId": 4429,
+    "CollectionId": 287,
+    "EntryId": 2033
+  },
+  {
+    "NpcDefinitionId": 4430,
+    "CollectionId": 287,
+    "EntryId": 2034
+  },
+  {
+    "NpcDefinitionId": 4431,
+    "CollectionId": 287,
+    "EntryId": 2035
+  },
+  {
+    "NpcDefinitionId": 4432,
+    "CollectionId": 287,
+    "EntryId": 2036
+  },
+  {
+    "NpcDefinitionId": 4433,
+    "CollectionId": 287,
+    "EntryId": 2037
+  },
+  {
+    "NpcDefinitionId": 4434,
+    "CollectionId": 284,
+    "EntryId": 2012
+  },
+  {
+    "NpcDefinitionId": 4435,
+    "CollectionId": 284,
+    "EntryId": 2013
+  },
+  {
+    "NpcDefinitionId": 4436,
+    "CollectionId": 265,
+    "EntryId": 1935
+  },
+  {
+    "NpcDefinitionId": 4437,
+    "CollectionId": 284,
+    "EntryId": 2014
+  },
+  {
+    "NpcDefinitionId": 4438,
+    "CollectionId": 284,
+    "EntryId": 2015
+  },
+  {
+    "NpcDefinitionId": 4439,
+    "CollectionId": 265,
+    "EntryId": 1947
+  },
+  {
+    "NpcDefinitionId": 4440,
+    "CollectionId": 284,
+    "EntryId": 2016
+  },
+  {
+    "NpcDefinitionId": 4441,
+    "CollectionId": 284,
+    "EntryId": 2017
+  },
+  {
+    "NpcDefinitionId": 4442,
+    "CollectionId": 284,
+    "EntryId": 2018
+  },
+  {
+    "NpcDefinitionId": 4443,
+    "CollectionId": 265,
+    "EntryId": 1948
+  },
+  {
+    "NpcDefinitionId": 4444,
+    "CollectionId": 284,
+    "EntryId": 2019
+  },
+  {
+    "NpcDefinitionId": 4445,
+    "CollectionId": 312,
+    "EntryId": 2196
+  },
+  {
+    "NpcDefinitionId": 4446,
+    "CollectionId": 312,
+    "EntryId": 2197
+  },
+  {
+    "NpcDefinitionId": 4447,
+    "CollectionId": 311,
+    "EntryId": 2188
+  },
+  {
+    "NpcDefinitionId": 4448,
+    "CollectionId": 312,
+    "EntryId": 2198
+  },
+  {
+    "NpcDefinitionId": 4449,
+    "CollectionId": 311,
+    "EntryId": 2189
+  },
+  {
+    "NpcDefinitionId": 4450,
+    "CollectionId": 311,
+    "EntryId": 2190
+  },
+  {
+    "NpcDefinitionId": 4451,
+    "CollectionId": 312,
+    "EntryId": 2199
+  },
+  {
+    "NpcDefinitionId": 4452,
+    "CollectionId": 311,
+    "EntryId": 2191
+  },
+  {
+    "NpcDefinitionId": 4453,
+    "CollectionId": 312,
+    "EntryId": 2200
+  },
+  {
+    "NpcDefinitionId": 4454,
+    "CollectionId": 311,
+    "EntryId": 2192
+  },
+  {
+    "NpcDefinitionId": 4455,
+    "CollectionId": 311,
+    "EntryId": 2193
+  },
+  {
+    "NpcDefinitionId": 4461,
+    "CollectionId": 312,
+    "EntryId": 2201
+  },
+  {
+    "NpcDefinitionId": 4462,
+    "CollectionId": 311,
+    "EntryId": 2194
+  },
+  {
+    "NpcDefinitionId": 4463,
+    "CollectionId": 312,
+    "EntryId": 2202
+  },
+  {
+    "NpcDefinitionId": 4465,
+    "CollectionId": 276,
+    "EntryId": 1946
+  },
+  {
+    "NpcDefinitionId": 4467,
+    "CollectionId": 276,
+    "EntryId": 1986
+  },
+  {
+    "NpcDefinitionId": 4470,
+    "CollectionId": 276,
+    "EntryId": 1987
+  },
+  {
+    "NpcDefinitionId": 4471,
+    "CollectionId": 276,
+    "EntryId": 1988
+  },
+  {
+    "NpcDefinitionId": 4473,
+    "CollectionId": 276,
+    "EntryId": 1989
+  },
+  {
+    "NpcDefinitionId": 4474,
+    "CollectionId": 274,
+    "EntryId": 1944
+  },
+  {
+    "NpcDefinitionId": 4477,
+    "CollectionId": 274,
+    "EntryId": 1978
+  },
+  {
+    "NpcDefinitionId": 4478,
+    "CollectionId": 274,
+    "EntryId": 1979
+  },
+  {
+    "NpcDefinitionId": 4479,
+    "CollectionId": 274,
+    "EntryId": 1980
+  },
+  {
+    "NpcDefinitionId": 4480,
+    "CollectionId": 274,
+    "EntryId": 1981
+  },
+  {
+    "NpcDefinitionId": 4481,
+    "CollectionId": 275,
+    "EntryId": 1945
+  },
+  {
+    "NpcDefinitionId": 4482,
+    "CollectionId": 275,
+    "EntryId": 1982
+  },
+  {
+    "NpcDefinitionId": 4484,
+    "CollectionId": 275,
+    "EntryId": 1983
+  },
+  {
+    "NpcDefinitionId": 4485,
+    "CollectionId": 275,
+    "EntryId": 1984
+  },
+  {
+    "NpcDefinitionId": 4488,
+    "CollectionId": 273,
+    "EntryId": 1943
+  },
+  {
+    "NpcDefinitionId": 4489,
+    "CollectionId": 273,
+    "EntryId": 1974
+  },
+  {
+    "NpcDefinitionId": 4490,
+    "CollectionId": 273,
+    "EntryId": 1975
+  },
+  {
+    "NpcDefinitionId": 4491,
+    "CollectionId": 273,
+    "EntryId": 1976
+  },
+  {
+    "NpcDefinitionId": 4492,
+    "CollectionId": 273,
+    "EntryId": 1977
+  }
+]

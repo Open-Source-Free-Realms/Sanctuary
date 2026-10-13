@@ -19,6 +19,10 @@ public class GatewayServer : UdpManager<GatewayConnection>
     {
         _logger = logger;
         _resourceManager = resourceManager;
+
+        // Run game callbacks after releasing the UDP connection lock. Zone ticks send
+        // packets while holding zone locks, so inline callbacks can invert that order.
+        EventQueuing = true;
     }
 
     public override bool OnConnectRequest(UdpConnection udpConnection)

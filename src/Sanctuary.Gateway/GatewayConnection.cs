@@ -344,6 +344,9 @@ public class GatewayConnection : UdpConnection
             });
         }
 
+        foreach (var collectionEntry in dbCharacter.CollectionEntries)
+            Player.CollectedCollectionEntryIds.TryAdd(collectionEntry.EntryId);
+
         Player.Gender = dbCharacter.Gender;
 
         foreach (var dbMount in dbCharacter.Mounts)
@@ -607,9 +610,10 @@ public class GatewayConnection : UdpConnection
             .Select(item => item.Definition)
             .ToHashSet();
 
-        // TODO: Include persisted non-inventory progress here when direct collections such as
-        // adventure coins have a database representation.
-        Player.Collections = _resourceManager.Collections.CreateClientCollections(Player.Guid, ownedItemDefinitionIds);
+        var collectedEntryIds = Player.CollectedCollectionEntryIds.ToHashSet();
+
+        Player.Collections = _resourceManager.Collections.CreateClientCollections(
+            Player.Guid, ownedItemDefinitionIds, collectedEntryIds);
 
         var packetSendSelfToClient = new PacketSendSelfToClient();
 
