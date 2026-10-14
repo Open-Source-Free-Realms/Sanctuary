@@ -16,7 +16,7 @@ public class PacketZoneSafeTeleportRequest : IDeserializable<PacketZoneSafeTelep
 
         var reader = new PacketReader(data);
 
-        if (!reader.TryRead(out short opCode) && opCode != OpCode)
+        if (!reader.TryRead(out short opCode) || opCode != OpCode)
             return false;
 
         return reader.RemainingLength == 0;

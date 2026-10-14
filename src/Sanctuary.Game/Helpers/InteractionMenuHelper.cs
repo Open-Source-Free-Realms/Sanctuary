@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.Numerics;
 
+using Sanctuary.Core.Extensions;
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Interactions;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 
@@ -20,9 +22,15 @@ public static class InteractionMenuHelper
         commandPacketInteractionList.List.Unknown2 = true;
         foreach (var interaction in interactions)
         {
+            var id = interaction.Type switch
+            {
+                MerchantInteraction.Type => MerchantInteraction.Data.Id,
+                SnowballInteraction.Type => SnowballInteraction.Data.Id,
+                _ => interaction.Id
+            };
             commandPacketInteractionList.List.Interactions.Add(new InteractionData
             {
-                Id = interaction.Id,
+                Id = id,
                 IconId = interaction.IconId,
                 ButtonText = interaction.ButtonText,
                 Type = interaction.Type,
@@ -83,8 +91,8 @@ public static class InteractionMenuHelper
             return false;
 
         var distanceSquared = Vector3.DistanceSquared(
-            new Vector3(npc.Position.X, npc.Position.Y, npc.Position.Z),
-            new Vector3(player.Position.X, player.Position.Y, player.Position.Z));
+            npc.Position.ToVector3(),
+            player.Position.ToVector3());
         return float.IsFinite(distanceSquared) && npc.InteractRange >= 0 &&
             distanceSquared <= (float)npc.InteractRange * npc.InteractRange;
     }

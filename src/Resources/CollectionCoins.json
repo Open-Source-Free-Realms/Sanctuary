@@ -391,8 +391,8 @@
   },
   {
     "NpcDefinitionId": 4438,
-    "CollectionId": 284,
-    "EntryId": 2015
+    "CollectionId": 265,
+    "EntryId": 1949
   },
   {
     "NpcDefinitionId": 4439,
@@ -588,5 +588,20 @@
     "NpcDefinitionId": 4492,
     "CollectionId": 273,
     "EntryId": 1977
+  },
+  {
+    "NpcDefinitionId": 34011,
+    "CollectionId": 284,
+    "EntryId": 2015
+  },
+  {
+    "NpcDefinitionId": 36196,
+    "CollectionId": 312,
+    "EntryId": 2203
+  },
+  {
+    "NpcDefinitionId": 36199,
+    "CollectionId": 311,
+    "EntryId": 2195
   }
 ]

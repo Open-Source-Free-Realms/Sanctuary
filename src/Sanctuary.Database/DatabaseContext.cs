@@ -11,6 +11,7 @@ public abstract class DatabaseContext : DbContext
     public DbSet<DbCollectionEntry> CollectionEntries => Set<DbCollectionEntry>();
     public DbSet<DbTitle> Titles => Set<DbTitle>();
     public DbSet<DbMount> Mounts => Set<DbMount>();
+    public DbSet<DbPet> Pets => Set<DbPet>();
     public DbSet<DbGuild> Guilds => Set<DbGuild>();
     public DbSet<DbFriend> Friends => Set<DbFriend>();
     public DbSet<DbIgnore> Ignores => Set<DbIgnore>();

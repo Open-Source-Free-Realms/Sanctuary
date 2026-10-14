@@ -15,29 +15,26 @@ using Sanctuary.UdpLibrary.Enumerations;
 
 namespace Sanctuary.Login;
 
-public class GatewayConnection : UdpConnection
+public class GatewayConnection : LoginServerConnection
 {
     private readonly ILogger _logger;
     private readonly GatewayServer _gatewayServer;
-
-    private LoginServerOptions _options;
 
     public string ServerAddress { get; set; } = null!;
     public GameServerData ServerData { get; set; } = null!;
 
     public HashSet<ulong> OnlineCharacters { get; set; } = new();
 
-    public GatewayConnection(ILogger<GatewayConnection> logger, IOptionsMonitor<LoginServerOptions> options, GatewayServer gatewayServer, SocketAddress socketAddress, int connectCode) : base(gatewayServer, socketAddress, connectCode)
+    public GatewayConnection(ILogger<GatewayConnection> logger, IOptionsMonitor<LoginServerOptions> options, GatewayServer gatewayServer, SocketAddress socketAddress, int connectCode) : base(options, gatewayServer, socketAddress, connectCode)
     {
         _logger = logger;
         _gatewayServer = gatewayServer;
-
-        _options = options.CurrentValue;
-        options.OnChange(o => _options = o);
     }
 
     public override void OnTerminated()
     {
+        base.OnTerminated();
+
         var reason = DisconnectReason == DisconnectReason.OtherSideTerminated
             ? OtherSideDisconnectReason
             : DisconnectReason;

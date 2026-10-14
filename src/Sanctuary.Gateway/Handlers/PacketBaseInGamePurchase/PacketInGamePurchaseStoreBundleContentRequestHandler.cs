@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.IO;
 using Sanctuary.Game;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -61,7 +62,7 @@ public static class PacketInGamePurchaseStoreBundleContentRequestHandler
                     continue;
                 }
 
-                clientItemDefinitions.Add(clientItemDefinition);
+                clientItemDefinitions.Add(ItemDefinitionHelper.GetPlayerItemDefinition(connection.Player, _resourceManager, clientItemDefinition));
             }
         }
 

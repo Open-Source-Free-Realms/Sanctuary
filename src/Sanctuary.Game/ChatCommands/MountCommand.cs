@@ -75,7 +75,7 @@ public class MountCommand : IChatCommand
         invoker.Mount = mount;
         invoker.UpdatePosition(invoker.Position, invoker.Rotation);
 
-        foreach (var visiblePlayer in invoker.VisiblePlayers.Values)
+        foreach (var (_, visiblePlayer) in invoker.VisiblePlayers)
         {
             visiblePlayer.OnAddVisiblePlayers([invoker]);
         }

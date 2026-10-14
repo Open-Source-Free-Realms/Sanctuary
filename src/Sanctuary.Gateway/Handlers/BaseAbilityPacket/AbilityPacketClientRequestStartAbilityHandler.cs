@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Sanctuary.Database;
 using Sanctuary.Game;
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Interactions;
 using Sanctuary.Gateway.Helpers.Abilities;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
@@ -48,27 +49,33 @@ public static class AbilityPacketClientRequestStartAbilityHandler
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
     {
-        if (!AbilityPacketClientRequestStartAbility.TryDeserialize(data, out var packet))
+        if (!AbilityPacketClientRequestStartAbility.TryDeserialize(data, out var abilityPacketClientRequestStartAbility))
         {
             _logger.LogError("Failed to deserialize {packet}.", nameof(AbilityPacketClientRequestStartAbility));
             return false;
         }
 
-        if (packet.Data.Id == ConsumableAbility.ActionBarId)
-            return HandleItemAbility(connection.Player, packet);
+        _logger.LogTrace("Received ability request. Player: {guid}, action bar: {id}, slot: {slot}, target: {target}.",
+            connection.Player.Guid, abilityPacketClientRequestStartAbility.Data.Id, abilityPacketClientRequestStartAbility.Data.Slot, abilityPacketClientRequestStartAbility.Guid);
+
+        if (SnowballInteraction.HandleAbility(connection.Player, abilityPacketClientRequestStartAbility))
+            return true;
+
+        if (abilityPacketClientRequestStartAbility.Data.Id == ConsumableAbility.ActionBarId)
+            return HandleItemAbility(connection.Player, abilityPacketClientRequestStartAbility);
 
         return ConsumableAbility.SendFailure(connection.Player);
     }
 
-    private static bool HandleItemAbility(Player player, AbilityPacketClientRequestStartAbility packet)
+    private static bool HandleItemAbility(Player player, AbilityPacketClientRequestStartAbility abilityPacketClientRequestStartAbility)
     {
         player.ActionBars.TryGetValue(ConsumableAbility.ActionBarId, out var actionBar);
 
-        if (actionBar is null || !actionBar.Slots.TryGetValue(packet.Data.Slot, out var slot) || slot.IsEmpty)
+        if (actionBar is null || !actionBar.Slots.TryGetValue(abilityPacketClientRequestStartAbility.Data.Slot, out var slot) || slot.IsEmpty)
             return ConsumableAbility.SendFailure(player);
 
         if (!player.ActionBarItemGuids.TryGetValue(ConsumableAbility.ActionBarId, out var slotItemGuids) ||
-            !slotItemGuids.TryGetValue(packet.Data.Slot, out var itemGuid))
+            !slotItemGuids.TryGetValue(abilityPacketClientRequestStartAbility.Data.Slot, out var itemGuid))
             return ConsumableAbility.SendFailure(player);
 
         var clientItem = player.Items.FirstOrDefault(x => x.Id == itemGuid);
@@ -83,7 +90,7 @@ public static class AbilityPacketClientRequestStartAbilityHandler
         foreach (var ability in _consumableAbilities)
         {
             if (ability.Matches(itemDefinition))
-                return ability.HandleAbility(player, packet, packet.Data.Slot, clientItem, itemDefinition);
+                return ability.HandleAbility(player, abilityPacketClientRequestStartAbility, abilityPacketClientRequestStartAbility.Data.Slot, clientItem, itemDefinition);
         }
 
         return ConsumableAbility.SendFailure(player);

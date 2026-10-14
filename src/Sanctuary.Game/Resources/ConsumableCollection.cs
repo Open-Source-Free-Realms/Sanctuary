@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -7,6 +8,7 @@ using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Collections;
 using Sanctuary.Game.Resources.Definitions;
+using Sanctuary.Game.Helpers;
 
 namespace Sanctuary.Game.Resources;
 
@@ -45,72 +47,76 @@ public class ConsumableCollection
                 Converters = { new JsonStringEnumConverter() } // parse CakeItemType from strings ("BossCake"/"ScaredyCake")
             };
 
-            var consumables = JsonSerializer.Deserialize<ConsumableDefinitions>(fileStream, jsonSerializerOptions);
-
-            if (consumables is null)
+            using var jsonDocument = JsonDocument.Parse(fileStream, new JsonDocumentOptions
             {
-                _logger.LogError("No entries found in file \"{file}\".", filePath);
-                return false;
-            }
+                CommentHandling = JsonCommentHandling.Skip
+            });
 
-            foreach (var entry in consumables.Boomboxes)
+            foreach (var property in jsonDocument.RootElement.EnumerateObject())
             {
-                if (!Boomboxes.TryAdd(entry.ItemId, entry))
+                switch (property.Name.ToLowerInvariant())
                 {
-                    _logger.LogWarning("Failed to add Boombox entry. ItemId={id} \"{file}\"", entry.ItemId, filePath);
-                    return false;
+                    case "boomboxes":
+                        ResourceHelper.LoadDefinitions<BoomboxDefinition>(property.Value, jsonSerializerOptions, _logger, filePath,
+                            entry => entry.ItemId,
+                            entry => entry.ItemId > 0 && entry.EffectIds is not null && entry.DanceSequence is not null
+                                && entry.DanceDurationsMs is not null && entry.IndependentDanceDurationsMs is not null
+                                && float.IsFinite(entry.Range) && entry.Range > 0 && entry.DurationMs > 0
+                                && float.IsFinite(entry.SpawnOffset) && entry.ModelId > 0
+                                && entry.DanceBlendMs >= 0 && entry.TransformReapplyDelayMs >= 0
+                                && (!(entry.SynchronizedDances || entry.StandingDanceAnimationId == 0) || entry.DanceDurationsMs.Count > 0)
+                                && (entry.DanceDurationsMs.Count == 0 || entry.DanceSequence.Length > 0)
+                                && entry.DanceDurationsMs.Values.All(durations => durations is not null
+                                && durations.Length == entry.DanceSequence.Length && durations.All(duration => duration > 0))
+                                && entry.IndependentDanceDurationsMs.Values.All(durations => durations is not null
+                                && durations.Count > 0 && durations.All(clip => clip.Key > 0 && clip.Value > 0)),
+                            Boomboxes.TryAdd);
+                        break;
+                    case "cakes":
+                        ResourceHelper.LoadDefinitions<CakeItemDefinition>(property.Value, jsonSerializerOptions, _logger, filePath,
+                            entry => entry.ItemId,
+                            entry => entry.ItemId > 0 && Enum.IsDefined(entry.Type) && entry.ModelId > 0
+                                && entry.CooldownMs >= 0 && entry.LifetimeMs > 0 && entry.InteractCooldownMs >= 0
+                                && entry.SpawnEffectIds is not null && entry.TransformAbilityIds is not null
+                                && entry.ScareGroups is not null && entry.ScareGroups.All(group => group is not null)
+                                && entry.OneShotAnimationMs > 0 && entry.OneShotIntervalMs > 0,
+                            Cakes.TryAdd);
+                        break;
+                    case "foodeffects":
+                        ResourceHelper.LoadDefinitions<FoodEffectDefinition>(property.Value, jsonSerializerOptions, _logger, filePath,
+                            entry => entry.AbilityId, entry => entry.AbilityId > 0 && entry.EffectDelayMs >= 0,
+                            FoodEffects.TryAdd);
+                        break;
+                    case "transformations":
+                        ResourceHelper.LoadDefinitions<TransformAbilityDefinition>(property.Value, jsonSerializerOptions, _logger, filePath,
+                            entry => entry.AbilityId,
+                            entry => entry.AbilityId > 0 && entry.ModelId > 0 && entry.DurationMs > 0 && entry.CooldownMs >= 0,
+                            Transformations.TryAdd);
+                        break;
+                    case "randomtransformfoods":
+                        ResourceHelper.LoadDefinitions<RandomTransformFoodDefinition>(property.Value, jsonSerializerOptions, _logger, filePath,
+                            entry => entry.ItemId,
+                            entry => entry.ItemId > 0 && entry.TransformAbilityIds is not null
+                                && entry.TransformAbilityIds.Length > 0 && entry.TransformAbilityIds.All(id => id > 0),
+                            RandomTransformFoods.TryAdd);
+                        break;
+                    case "partyfavors":
+                        ResourceHelper.LoadDefinitions<PartyFavorDefinition>(property.Value, jsonSerializerOptions, _logger, filePath,
+                            entry => entry.ItemId,
+                            entry => entry.ItemId > 0 && entry.CooldownMs >= 0
+                                && float.IsFinite(entry.GestureSeconds) && entry.GestureSeconds > 0
+                                && float.IsFinite(entry.EffectSeconds) && entry.EffectSeconds > 0
+                                && float.IsFinite(entry.Range) && entry.Range > 0,
+                            PartyFavors.TryAdd);
+                        break;
                 }
             }
+
             _logger.LogInformation("Loaded {count} Boombox definitions.", Boomboxes.Count);
-
-            foreach (var entry in consumables.FoodEffects)
-            {
-                if (!FoodEffects.TryAdd(entry.AbilityId, entry))
-                {
-                    _logger.LogWarning("Failed to add FoodEffect entry. AbilityId={id} \"{file}\"", entry.AbilityId, filePath);
-                    return false;
-                }
-            }
-            _logger.LogInformation("Loaded {count} FoodEffect definitions.", FoodEffects.Count);
-
-            foreach (var entry in consumables.Cakes)
-            {
-                if (!Cakes.TryAdd(entry.ItemId, entry))
-                {
-                    _logger.LogWarning("Failed to add Cake entry. ItemId={id} \"{file}\"", entry.ItemId, filePath);
-                    return false;
-                }
-            }
             _logger.LogInformation("Loaded {count} Cake definitions.", Cakes.Count);
-
-            foreach (var entry in consumables.Transformations)
-            {
-                if (!Transformations.TryAdd(entry.AbilityId, entry))
-                {
-                    _logger.LogWarning("Failed to add Transformation entry. AbilityId={id} \"{file}\"", entry.AbilityId, filePath);
-                    return false;
-                }
-            }
+            _logger.LogInformation("Loaded {count} FoodEffect definitions.", FoodEffects.Count);
             _logger.LogInformation("Loaded {count} Transformation definitions.", Transformations.Count);
-
-            foreach (var entry in consumables.RandomTransformFoods)
-            {
-                if (!RandomTransformFoods.TryAdd(entry.ItemId, entry))
-                {
-                    _logger.LogWarning("Failed to add RandomTransformFood entry. ItemId={id} \"{file}\"", entry.ItemId, filePath);
-                    return false;
-                }
-            }
             _logger.LogInformation("Loaded {count} RandomTransformFood definitions.", RandomTransformFoods.Count);
-
-            foreach (var entry in consumables.PartyFavors)
-            {
-                if (!PartyFavors.TryAdd(entry.ItemId, entry))
-                {
-                    _logger.LogWarning("Failed to add PartyFavor entry. ItemId={id} \"{file}\"", entry.ItemId, filePath);
-                    return false;
-                }
-            }
             _logger.LogInformation("Loaded {count} PartyFavor definitions.", PartyFavors.Count);
         }
         catch (Exception ex)
@@ -119,7 +125,8 @@ public class ConsumableCollection
             return false;
         }
 
-        if (Boomboxes.Count == 0 && FoodEffects.Count == 0 && Transformations.Count == 0 && Cakes.Count == 0)
+        if (Boomboxes.Count == 0 && FoodEffects.Count == 0 && Transformations.Count == 0 && Cakes.Count == 0
+            && RandomTransformFoods.Count == 0 && PartyFavors.Count == 0)
         {
             _logger.LogError("No data was loaded from \"{file}\"", filePath);
             return false;

@@ -340,7 +340,7 @@ public class ClientPcData
     // public List<Acquaintance> Acquaintances = new();
     // public List<RecipeData> Recipes = new();
 
-    // public List<UnknownPetStruct> Pets = new();
+    public List<PetClientInfo> Pets = new();
 
     public int ActivePetId;
     public ulong ActivePetGuid;
@@ -526,7 +526,10 @@ public class ClientPcData
 
         writer.Write(0); // TODO Recipes
 
-        writer.Write(0); // TODO Pets
+        writer.Write(Pets.Count);
+
+        foreach (var petClientInfo in Pets)
+            petClientInfo.Serialize(writer);
 
         writer.Write(ActivePetId);
         writer.Write(ActivePetGuid);

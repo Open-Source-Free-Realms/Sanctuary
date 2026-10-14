@@ -1,0 +1,612 @@
+[
+  {
+    "ModelFileName": "chugawug_f_01.adr",
+    "AnimationIds": [
+      3302,
+      3306
+    ],
+    "MinIntervalMs": 3796,
+    "MaxIntervalMs": 5563,
+    "ConversationAnimationIds": [
+      3302,
+      3306
+    ],
+    "ConversationMinGapMs": 495,
+    "ConversationMaxGapMs": 3702
+  },
+  {
+    "ModelFileName": "chugawug_f_02.adr",
+    "AnimationIds": [
+      3316
+    ],
+    "MinIntervalMs": 9936,
+    "MaxIntervalMs": 10434
+  },
+  {
+    "ModelFileName": "chugawug_m_01_blue_drinking.agr",
+    "AnimationIds": [
+      3302,
+      3306
+    ],
+    "MinIntervalMs": 3807,
+    "MaxIntervalMs": 5604,
+    "ConversationAnimationIds": [
+      3302,
+      3306
+    ],
+    "ConversationMinGapMs": 129,
+    "ConversationMaxGapMs": 3610
+  },
+  {
+    "ModelFileName": "chugawug_m_02.adr",
+    "AnimationIds": [
+      3306,
+      3302
+    ],
+    "MinIntervalMs": 3809,
+    "MaxIntervalMs": 5712,
+    "ConversationAnimationIds": [
+      3306,
+      3302
+    ],
+    "ConversationMinGapMs": 411,
+    "ConversationMaxGapMs": 3282
+  },
+  {
+    "ModelFileName": "chugawug_m_miner_01.adr",
+    "AnimationIds": [
+      3106
+    ],
+    "MinIntervalMs": 17392,
+    "MaxIntervalMs": 87297
+  },
+  {
+    "ModelFileName": "dog_large_dalmation.adr",
+    "AnimationIds": [
+      5213,
+      5210,
+      5214,
+      5209,
+      5212
+    ],
+    "MinIntervalMs": 2063,
+    "MaxIntervalMs": 4705,
+    "LookAtRadius": 20,
+    "LookAtIntervalMs": 1250
+  },
+  {
+    "ModelFileName": "dog_large_pointy.adr",
+    "AnimationIds": [
+      5524,
+      5522
+    ],
+    "MinIntervalMs": 3029,
+    "MaxIntervalMs": 4180
+  },
+  {
+    "ModelFileName": "dog_small_floppy.adr",
+    "AnimationIds": [
+      5514
+    ],
+    "MinIntervalMs": 102571,
+    "MaxIntervalMs": 102571
+  },
+  {
+    "ModelFileName": "dog_small_fluffy.adr",
+    "AnimationIds": [
+      5213,
+      5210,
+      5214
+    ],
+    "MinIntervalMs": 1696,
+    "MaxIntervalMs": 3460,
+    "LookAtRadius": 20,
+    "LookAtIntervalMs": 1250
+  },
+  {
+    "ModelFileName": "fairy_f_01.adr",
+    "AnimationIds": [
+      3307,
+      3319,
+      3317
+    ],
+    "MinIntervalMs": 8439,
+    "MaxIntervalMs": 9968
+  },
+  {
+    "ModelFileName": "fairy_f_02.adr",
+    "AnimationIds": [
+      3103,
+      3307,
+      3301
+    ],
+    "MinIntervalMs": 10069,
+    "MaxIntervalMs": 10106
+  },
+  {
+    "ModelFileName": "fairy_f_03.adr",
+    "AnimationIds": [
+      3103,
+      3102
+    ],
+    "MinIntervalMs": 10087,
+    "MaxIntervalMs": 10087
+  },
+  {
+    "ModelFileName": "fairy_f_freestyle_06.agr",
+    "AnimationIds": [
+      3302,
+      3306
+    ],
+    "MinIntervalMs": 3859,
+    "MaxIntervalMs": 5453,
+    "ConversationAnimationIds": [
+      3302,
+      3306
+    ],
+    "ConversationMinGapMs": 265,
+    "ConversationMaxGapMs": 2900
+  },
+  {
+    "ModelFileName": "fairy_f_freestyle_09.agr",
+    "AnimationIds": [
+      3101
+    ],
+    "MinIntervalMs": 787,
+    "MaxIntervalMs": 912
+  },
+  {
+    "ModelFileName": "fairy_f_freestyle_10.agr",
+    "AnimationIds": [
+      3306,
+      3302
+    ],
+    "MinIntervalMs": 3868,
+    "MaxIntervalMs": 5549,
+    "ConversationAnimationIds": [
+      3306,
+      3302
+    ],
+    "ConversationMinGapMs": 128,
+    "ConversationMaxGapMs": 2045
+  },
+  {
+    "ModelFileName": "fairy_m_02.adr",
+    "AnimationIds": [
+      3101,
+      3102
+    ],
+    "MinIntervalMs": 9968,
+    "MaxIntervalMs": 45334
+  },
+  {
+    "ModelFileName": "fairy_m_blacksmith_01.agr",
+    "AnimationIds": [
+      3101
+    ],
+    "MinIntervalMs": 45289,
+    "MaxIntervalMs": 45324
+  },
+  {
+    "ModelFileName": "fairy_m_freestyle_04.agr",
+    "AnimationIds": [
+      3302,
+      3306
+    ],
+    "MinIntervalMs": 3885,
+    "MaxIntervalMs": 5678,
+    "ConversationAnimationIds": [
+      3302,
+      3306
+    ],
+    "ConversationMinGapMs": 292,
+    "ConversationMaxGapMs": 3510
+  },
+  {
+    "ModelFileName": "fairy_m_freestyle_05.agr",
+    "AnimationIds": [
+      3101
+    ],
+    "MinIntervalMs": 4565,
+    "MaxIntervalMs": 4815
+  },
+  {
+    "ModelFileName": "fairy_m_freestyle_08.agr",
+    "AnimationIds": [
+      3306,
+      3302
+    ],
+    "MinIntervalMs": 3822,
+    "MaxIntervalMs": 5654,
+    "ConversationAnimationIds": [
+      3306,
+      3302
+    ],
+    "ConversationMinGapMs": 191,
+    "ConversationMaxGapMs": 3163
+  },
+  {
+    "ModelFileName": "fairy_m_old_01.adr",
+    "AnimationIds": [
+      3101
+    ],
+    "MinIntervalMs": 4575,
+    "MaxIntervalMs": 4809
+  },
+  {
+    "ModelFileName": "fairy_sanctuary_f.adr",
+    "AnimationIds": [
+      3103,
+      3101,
+      3316
+    ],
+    "MinIntervalMs": 4587,
+    "MaxIntervalMs": 10170
+  },
+  {
+    "ModelFileName": "fairy_sanctuary_m_01.adr",
+    "AnimationIds": [
+      3103
+    ],
+    "MinIntervalMs": 4566,
+    "MaxIntervalMs": 4783
+  },
+  {
+    "ModelFileName": "fairy_seaside_m_01_lod0.adr",
+    "AnimationIds": [
+      3101,
+      3316
+    ],
+    "MinIntervalMs": 6068,
+    "MaxIntervalMs": 7294
+  },
+  {
+    "ModelFileName": "fairychild_f_pigtailsdress.adr",
+    "AnimationIds": [
+      3101
+    ],
+    "MinIntervalMs": 49968,
+    "MaxIntervalMs": 125929
+  },
+  {
+    "ModelFileName": "fairychild_m_mohawkshorts.adr",
+    "AnimationIds": [
+      3306,
+      3302
+    ],
+    "MinIntervalMs": 3874,
+    "MaxIntervalMs": 8954,
+    "ConversationAnimationIds": [
+      3306,
+      3302
+    ],
+    "ConversationMinGapMs": 317,
+    "ConversationMaxGapMs": 3183
+  },
+  {
+    "ModelFileName": "fish.adr",
+    "AnimationIds": [
+      2002,
+      2001
+    ],
+    "MinIntervalMs": 31214,
+    "MaxIntervalMs": 93164,
+    "IdleAnimationIds": [
+      10,
+      2140
+    ],
+    "IdleIntervalMs": 9123
+  },
+  {
+    "ModelFileName": "human_f_freestyle_01.agr",
+    "AnimationIds": [
+      5001,
+      3308,
+      3306,
+      3317,
+      3307
+    ],
+    "MinIntervalMs": 6024,
+    "MaxIntervalMs": 11827
+  },
+  {
+    "ModelFileName": "human_f_freestyle_02.agr",
+    "AnimationIds": [
+      3306,
+      3302
+    ],
+    "MinIntervalMs": 3828,
+    "MaxIntervalMs": 5555,
+    "ConversationAnimationIds": [
+      3306,
+      3302
+    ],
+    "ConversationMinGapMs": 167,
+    "ConversationMaxGapMs": 2321
+  },
+  {
+    "ModelFileName": "human_f_freestyle_06.agr",
+    "AnimationIds": [
+      3306,
+      3302,
+      5001,
+      3317,
+      3308,
+      3307
+    ],
+    "MinIntervalMs": 3944,
+    "MaxIntervalMs": 12666,
+    "ConversationAnimationIds": [
+      3306,
+      3302
+    ],
+    "ConversationMinGapMs": 140,
+    "ConversationMaxGapMs": 3476
+  },
+  {
+    "ModelFileName": "human_f_freestyle_07.agr",
+    "AnimationIds": [
+      3302,
+      3306
+    ],
+    "MinIntervalMs": 3809,
+    "MaxIntervalMs": 5490,
+    "ConversationAnimationIds": [
+      3302,
+      3306
+    ],
+    "ConversationMinGapMs": 246,
+    "ConversationMaxGapMs": 3456
+  },
+  {
+    "ModelFileName": "human_f_freestyle_10.agr",
+    "AnimationIds": [
+      3302,
+      3306
+    ],
+    "MinIntervalMs": 3894,
+    "MaxIntervalMs": 5438
+  },
+  {
+    "ModelFileName": "human_m_farmer_henry.agr",
+    "AnimationIds": [
+      1112,
+      3320,
+      3101,
+      3334,
+      3307
+    ],
+    "MinIntervalMs": 4552,
+    "MaxIntervalMs": 8854
+  },
+  {
+    "ModelFileName": "human_m_freestyle_02.agr",
+    "AnimationIds": [
+      3306,
+      3302
+    ],
+    "MinIntervalMs": 3822,
+    "MaxIntervalMs": 5441,
+    "ConversationAnimationIds": [
+      3306,
+      3302
+    ],
+    "ConversationMinGapMs": 377,
+    "ConversationMaxGapMs": 2990
+  },
+  {
+    "ModelFileName": "human_m_freestyle_05.agr",
+    "AnimationIds": [
+      3306,
+      3302,
+      3333
+    ],
+    "MinIntervalMs": 3872,
+    "MaxIntervalMs": 30231,
+    "ConversationAnimationIds": [
+      3306,
+      3302
+    ],
+    "ConversationMinGapMs": 80,
+    "ConversationMaxGapMs": 2761
+  },
+  {
+    "ModelFileName": "human_m_freestyle_06.agr",
+    "AnimationIds": [
+      3306,
+      3302
+    ],
+    "MinIntervalMs": 3783,
+    "MaxIntervalMs": 5452,
+    "ConversationAnimationIds": [
+      3306,
+      3302
+    ],
+    "ConversationMinGapMs": 331,
+    "ConversationMaxGapMs": 3813
+  },
+  {
+    "ModelFileName": "human_m_freestyle_09.agr",
+    "AnimationIds": [
+      3101,
+      3306,
+      3302,
+      3316
+    ],
+    "MinIntervalMs": 4185,
+    "MaxIntervalMs": 7281,
+    "ConversationAnimationIds": [
+      3306,
+      3302
+    ],
+    "ConversationMinGapMs": 95,
+    "ConversationMaxGapMs": 3063
+  },
+  {
+    "ModelFileName": "human_m_freestyle_11.agr",
+    "AnimationIds": [
+      3302,
+      3306
+    ],
+    "MinIntervalMs": 3879,
+    "MaxIntervalMs": 5490,
+    "ConversationAnimationIds": [
+      3302,
+      3306
+    ],
+    "ConversationMinGapMs": 277,
+    "ConversationMaxGapMs": 2080
+  },
+  {
+    "ModelFileName": "human_m_hooligan_brawler_01.agr",
+    "AnimationIds": [
+      3306,
+      3334
+    ],
+    "MinIntervalMs": 30088,
+    "MaxIntervalMs": 108698
+  },
+  {
+    "ModelFileName": "human_m_miner_01.adr",
+    "AnimationIds": [
+      3335,
+      3317,
+      3102,
+      3112,
+      3101
+    ],
+    "MinIntervalMs": 5180,
+    "MaxIntervalMs": 84411
+  },
+  {
+    "ModelFileName": "humanchild_f_skirtandtunic.adr",
+    "AnimationIds": [
+      3302,
+      3306,
+      3101,
+      2101,
+      2103,
+      2102
+    ],
+    "MinIntervalMs": 3910,
+    "MaxIntervalMs": 19289,
+    "ConversationAnimationIds": [
+      3302,
+      3306
+    ],
+    "ConversationMinGapMs": 170,
+    "ConversationMaxGapMs": 3118,
+    "IdleAnimationIds": [
+      2100
+    ],
+    "IdleIntervalMs": 3621
+  },
+  {
+    "ModelFileName": "humanchild_m_afro.adr",
+    "AnimationIds": [
+      2103,
+      2102,
+      2101
+    ],
+    "MinIntervalMs": 11762,
+    "MaxIntervalMs": 19406,
+    "IdleAnimationIds": [
+      2100
+    ],
+    "IdleIntervalMs": 3820
+  },
+  {
+    "ModelFileName": "humanchild_m_tshirtwithbaggypants.adr",
+    "AnimationIds": [
+      3101
+    ],
+    "MinIntervalMs": 10067,
+    "MaxIntervalMs": 13543
+  },
+  {
+    "ModelFileName": "humanchild_m_tshirtwithbeltbig.adr",
+    "AnimationIds": [
+      3306,
+      3302,
+      2103,
+      2101,
+      2102
+    ],
+    "MinIntervalMs": 3865,
+    "MaxIntervalMs": 17034,
+    "ConversationAnimationIds": [
+      3306,
+      3302
+    ],
+    "ConversationMinGapMs": 95,
+    "ConversationMaxGapMs": 2688,
+    "IdleAnimationIds": [
+      2100
+    ],
+    "IdleIntervalMs": 3802
+  },
+  {
+    "ModelFileName": "penguin_baby_01.adr",
+    "AnimationIds": [
+      206,
+      202,
+      203,
+      205,
+      204
+    ],
+    "MinIntervalMs": 3548,
+    "MaxIntervalMs": 4976
+  },
+  {
+    "ModelFileName": "robgoblin_m_banker.adr",
+    "AnimationIds": [
+      3101
+    ],
+    "MinIntervalMs": 30285,
+    "MaxIntervalMs": 38396
+  },
+  {
+    "ModelFileName": "robgoblin_m_basic.adr",
+    "AnimationIds": [
+      3201
+    ],
+    "MinIntervalMs": 8873,
+    "MaxIntervalMs": 9257
+  },
+  {
+    "ModelFileName": "sg_treasure_chest_01.adr",
+    "AnimationIds": [
+      1111,
+      1112
+    ],
+    "MinIntervalMs": 2148,
+    "MaxIntervalMs": 2159
+  },
+  {
+    "ModelFileName": "triceratops_m_basic.adr",
+    "AnimationIds": [
+      5022,
+      5012,
+      5021,
+      5002,
+      5001
+    ],
+    "MinIntervalMs": 15953,
+    "MaxIntervalMs": 17986
+  },
+  {
+    "ModelFileName": "troll_peasant_02.adr",
+    "AnimationIds": [
+      3112
+    ],
+    "MinIntervalMs": 91078,
+    "MaxIntervalMs": 91078
+  },
+  {
+    "ModelFileName": "dog_small_pointy.adr",
+    "IdleAnimationIds": [
+      5403
+    ],
+    "IdleIntervalMs": 3400
+  }
+]

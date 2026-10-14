@@ -67,41 +67,48 @@ public static class InventoryPacketEquippedRemoveHandler
             return true;
         }
 
-        if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out var itemClass))
+        if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out _))
         {
             _logger.LogWarning("User tried to equip unknown item class. {id} {definition}", profileItem.Id, clientItemDefinition.Class);
             return true;
         }
 
-        using var dbContext = _dbContextFactory.CreateDbContext();
-
-        var dbProfile = dbContext.Profiles
-            .Include(x => x.Items)
-            .SingleOrDefault(x => x.CharacterId == GuidHelper.GetPlayerId(connection.Player.Guid) && x.Id == inventoryPacketEquippedRemove.ProfileId);
-
-        if (dbProfile is null)
-        {
-            _logger.LogWarning("Invalid database profile.");
-            return true;
-        }
-
-        var dbItem = dbProfile.Items.SingleOrDefault(x => x.CharacterId == GuidHelper.GetPlayerId(connection.Player.Guid) && x.Id == profileItem.Id);
-
-        if (dbItem is null)
-        {
-            _logger.LogWarning("Invalid database item.");
-            return true;
-        }
-
-        dbProfile.Items.Remove(dbItem);
-
-        if (dbContext.SaveChanges() <= 0)
-        {
-            _logger.LogWarning("Failed to save to database.");
-            return true;
-        }
-
         profile.Items.Remove(inventoryPacketEquippedRemove.Slot);
+
+        var characterId = GuidHelper.GetPlayerId(connection.Player.Guid);
+        var profileId = inventoryPacketEquippedRemove.ProfileId;
+        var itemId = profileItem.Id;
+
+        connection.QueueWork(() =>
+        {
+            using var dbContext = _dbContextFactory.CreateDbContext();
+
+            var dbProfile = dbContext.Profiles
+                .Include(x => x.Items)
+                .SingleOrDefault(x => x.CharacterId == characterId && x.Id == profileId);
+
+            if (dbProfile is null)
+            {
+                _logger.LogWarning("Invalid database profile.");
+                return;
+            }
+
+            var dbItem = dbProfile.Items.SingleOrDefault(x => x.Id == itemId);
+
+            if (dbItem is null)
+            {
+                _logger.LogWarning("Invalid database item.");
+                return;
+            }
+
+            dbProfile.Items.Remove(dbItem);
+
+            if (dbContext.SaveChanges() <= 0)
+            {
+                _logger.LogWarning("Failed to save to database.");
+                return;
+            }
+        });
 
         var clientUpdatePacketUnequipSlot = new ClientUpdatePacketUnequipSlot();
 
@@ -120,7 +127,7 @@ public static class InventoryPacketEquippedRemoveHandler
 
         playerUpdatePacketEquipItemChange.ProfileId = inventoryPacketEquippedRemove.ProfileId;
 
-        playerUpdatePacketEquipItemChange.WieldType = itemClass.WieldType;
+        playerUpdatePacketEquipItemChange.WieldType = connection.Player.GetWieldType();
 
         if (inventoryPacketEquippedRemove.ProfileId == connection.Player.ActiveProfileId)
             connection.Player.SendTunneledToVisible(playerUpdatePacketEquipItemChange);

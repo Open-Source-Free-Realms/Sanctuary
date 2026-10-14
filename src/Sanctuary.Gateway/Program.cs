@@ -20,6 +20,8 @@ using Sanctuary.UdpLibrary.Enumerations;
 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
 
+const int GatewaySendThreadCount = 4;
+
 var builder = new HostBuilder();
 
 builder.ConfigureHostConfiguration((configurationBuilder) =>
@@ -80,7 +82,9 @@ builder.ConfigureServices((hostBuilderContext, serviceCollection) =>
             MaxConnections = 2000,
             KeepAliveDelay = 29000,
             Port = serverOptions.Port,
-            ProtocolName = "CGAPI_527"
+            ProtocolName = "CGAPI_527",
+            SendThreadCount = GatewaySendThreadCount,
+            ParallelConnectionGiveTime = true
         };
 
         if (serverOptions.UseCompression)
