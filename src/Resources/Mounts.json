@@ -32,7 +32,7 @@
     "IsUpgradable": true,
     "ModelId": 3480,
     "Stats": {
-      "MaxMovementSpeed": 12.5
+      "MaxMovementSpeed": 0
     }
   },
   {
@@ -1041,6 +1041,7 @@
     "NameId": 17428,
     "ImageSetId": 7151,
     "TextureAlias": "air",
+    "IsUpgradable": true,
     "ModelId": 1513,
     "Stats": {
       "MaxMovementSpeed": 12.5
@@ -1052,6 +1053,7 @@
     "NameId": 5102548,
     "ImageSetId": 8575,
     "TextureAlias": "undead-nightmare",
+    "IsUpgradable": true,
     "ModelId": 4593,
     "Stats": {
       "MaxMovementSpeed": 12.5
