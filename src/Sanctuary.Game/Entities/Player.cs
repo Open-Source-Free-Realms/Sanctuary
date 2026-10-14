@@ -121,17 +121,43 @@ public sealed class Player : ClientPcData, IEntity
     public bool BoomboxDanceIsStanding { get; set; }
     public int BoomboxDanceTransform { get; set; }
 
+    public const float DefaultScale = 1f;
+
+    public float Scale { get; private set; } = DefaultScale;
+
     public ulong LastSillyStringTarget { get; set; }
 
     public int ActiveFoodEffectId { get; set; }
 
-    private readonly ConcurrentDictionary<int, DateTimeOffset> _itemCooldowns = new();
+    private readonly ConcurrentDictionary<int, (DateTimeOffset ExpiresAt, int TotalMs)> _itemCooldowns = new();
 
     public bool IsItemOnCooldown(int itemDefinitionId) =>
-        _itemCooldowns.TryGetValue(itemDefinitionId, out var expiresAt) && DateTimeOffset.UtcNow < expiresAt;
+        _itemCooldowns.TryGetValue(itemDefinitionId, out var cooldown) && DateTimeOffset.UtcNow < cooldown.ExpiresAt;
 
     public void StartItemCooldown(int itemDefinitionId, int cooldownMs) =>
-        _itemCooldowns[itemDefinitionId] = DateTimeOffset.UtcNow.AddMilliseconds(cooldownMs);
+        _itemCooldowns[itemDefinitionId] = (DateTimeOffset.UtcNow.AddMilliseconds(cooldownMs), cooldownMs);
+
+    public bool TryGetItemCooldown(int itemDefinitionId, out int totalMs, out int elapsedMs)
+    {
+        if (_itemCooldowns.TryGetValue(itemDefinitionId, out var cooldown) && DateTimeOffset.UtcNow < cooldown.ExpiresAt)
+        {
+            totalMs = cooldown.TotalMs;
+            elapsedMs = totalMs - (int)(cooldown.ExpiresAt - DateTimeOffset.UtcNow).TotalMilliseconds;
+            return true;
+        }
+
+        totalMs = 0;
+        elapsedMs = 0;
+        return false;
+    }
+
+    private readonly ConcurrentDictionary<int, int> _lastRandomTransformIndex = new();
+
+    public int LastRandomTransformIndex(int itemDefinitionId) =>
+        _lastRandomTransformIndex.TryGetValue(itemDefinitionId, out var index) ? index : -1;
+
+    public void SetLastRandomTransformIndex(int itemDefinitionId, int index) =>
+        _lastRandomTransformIndex[itemDefinitionId] = index;
 
     // For one-off delayed packets unrelated to tracked effects (e.g. a silly string reset
     // animation, a boombox poof) - see PlayerEffect/AddEffect for anything with its own state.
@@ -514,10 +540,12 @@ public sealed class Player : ClientPcData, IEntity
     // the sweep finishes ("sweep animates but after the sweep I cannot use the ability again") - that
     // needs one explicit packet once the cooldown is actually over. So: one packet now, one packet
     // scheduled for later - not the old repeating-every-second loop, and not silence either.
-    public void StartActionBarCooldown(int actionBarId, int slotIndex, int iconId, int nameId, int count, int cooldownMs, int iconTintId = 0)
+    public void StartActionBarCooldown(int actionBarId, int slotIndex, int iconId, int nameId, int count, int cooldownMs, int iconTintId = 0, int elapsedMs = 0)
     {
-        SendTunneled(BuildActionBarSlotPacket(actionBarId, slotIndex, iconId, iconTintId, nameId, count, cooldownMs, enabled: false, elapsed: 0));
-        ScheduleSlotPacket(actionBarId, slotIndex, BuildActionBarSlotPacket(actionBarId, slotIndex, iconId, iconTintId, nameId, count, cooldownMs, enabled: true, elapsed: cooldownMs), cooldownMs);
+        var remainingMs = Math.Max(0, cooldownMs - elapsedMs);
+
+        SendTunneled(BuildActionBarSlotPacket(actionBarId, slotIndex, iconId, iconTintId, nameId, count, cooldownMs, enabled: false, elapsed: elapsedMs));
+        ScheduleSlotPacket(actionBarId, slotIndex, BuildActionBarSlotPacket(actionBarId, slotIndex, iconId, iconTintId, nameId, count, cooldownMs, enabled: true, elapsed: cooldownMs), remainingMs);
     }
 
     private static ClientUpdatePacketUpdateActionBarSlot BuildActionBarSlotPacket(int actionBarId, int slotIndex, int iconId, int iconTintId, int nameId, int count, int cooldownMs, bool enabled, int elapsed)
@@ -785,6 +813,9 @@ public sealed class Player : ClientPcData, IEntity
         }
         else
             serializedAddPackets.Add(SerializeTunneled(GetAddPcPacket()));
+
+        if (Scale != DefaultScale)
+            serializedAddPackets.Add(SerializeTunneled(new PlayerUpdatePacketUpdateScale { Guid = Guid, Scale = Scale }));
 
         serializedAddPackets.Add(SerializeTunneled(new PlayerUpdatePacketUpdateCharacterState { Guid = Guid, State = IdleCharacterState }));
 
@@ -1105,6 +1136,37 @@ public sealed class Player : ClientPcData, IEntity
             RemoveEffect(_appearanceEffectId);
     }
 
+    public void SetScale(float scale)
+    {
+        if (!float.IsFinite(scale) || scale <= 0)
+            return;
+
+        Scale = scale;
+
+        SendTunneledToVisible(new PlayerUpdatePacketUpdateScale { Guid = Guid, Scale = scale }, true);
+    }
+
+    public void ApplyTemporaryScale(float scale, int durationMs, int buffNameId = 0)
+    {
+        if (_scaleEffectId != 0)
+            RemoveEffect(_scaleEffectId);
+
+        _scaleEffectId = AddEffect(new PlayerEffect
+        {
+            ExpiresAt = durationMs > 0 ? DateTimeOffset.UtcNow.AddMilliseconds(durationMs) : null,
+            Scale = scale,
+            BuffIconId = buffNameId != 0 ? ChangeFormBuffIconId : 0,
+            BuffNameId = buffNameId,
+            OnRemoved = () => _scaleEffectId = 0
+        });
+    }
+
+    public void RemoveTemporaryScale()
+    {
+        if (_scaleEffectId != 0)
+            RemoveEffect(_scaleEffectId);
+    }
+
     #region Effects
 
     // A tracked, timed effect on the player - a transformation, a food effect aura, or both a
@@ -1113,6 +1175,7 @@ public sealed class Player : ClientPcData, IEntity
     // a new kind of effect doesn't mean adding another set of ad hoc fields and conditions.
     private readonly ConcurrentDictionary<int, PlayerEffect> _effects = new();
     private int _appearanceEffectId;
+    private int _scaleEffectId;
 
     public int AddEffect(PlayerEffect effect)
     {
@@ -1169,6 +1232,9 @@ public sealed class Player : ClientPcData, IEntity
             ResyncWorldEffects();
         }
 
+        if (effect.Scale != 0)
+            SetScale(effect.Scale);
+
         if (effect.WorldEffectId != 0 && (effect.WorldEffectStartsAt is null || effect.WorldEffectStartsAt <= DateTimeOffset.UtcNow))
             StartWorldEffect(effect);
 
@@ -1206,6 +1272,9 @@ public sealed class Player : ClientPcData, IEntity
             SendTunneledToVisible(new PlayerUpdatePacketRemoveTemporaryAppearance { Guid = Guid }, true);
             ResyncWorldEffects();
         }
+
+        if (effect.Scale != 0)
+            SetScale(_effects.Values.FirstOrDefault(e => e.Id != effect.Id && e.Scale != 0)?.Scale ?? DefaultScale);
 
         if (effect.WorldEffectStarted)
         {
