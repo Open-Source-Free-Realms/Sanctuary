@@ -58,16 +58,7 @@ public class UdpManager<TConnection> : IUdpManager, IDisposable where TConnectio
 
     private readonly IUdpDriver _driver;
 
-    private const int SendThreadWakeTimeoutMs = 5;
-    private const int MaxFreeSendBuffers = 1024;
-
-    private readonly ConcurrentQueue<PendingSend>[] _sendQueues = [];
-    private readonly AutoResetEvent[] _sendSignals = [];
-    private readonly Thread[] _sendThreads = [];
-    private volatile bool _sendThreadsStopping;
-
     private readonly List<UdpConnection> _dueConnections = [];
-    private readonly ConcurrentQueue<byte[]> _freeSendBuffers = new();
 
     protected UdpClockStamp LastEmptySocketBufferStamp;
 
@@ -199,24 +190,6 @@ public class UdpManager<TConnection> : IUdpManager, IDisposable where TConnectio
 
         ArgumentNullException.ThrowIfNull(_driver);
 
-        if (Params.SendThreadCount > 0)
-        {
-            _sendQueues = new ConcurrentQueue<PendingSend>[Params.SendThreadCount];
-            _sendSignals = new AutoResetEvent[Params.SendThreadCount];
-            _sendThreads = new Thread[Params.SendThreadCount];
-
-            for (var i = 0; i < Params.SendThreadCount; i++)
-            {
-                var sendQueue = new ConcurrentQueue<PendingSend>();
-                var sendSignal = new AutoResetEvent(false);
-
-                _sendQueues[i] = sendQueue;
-                _sendSignals[i] = sendSignal;
-                _sendThreads[i] = new Thread(() => SendThreadLoop(sendQueue, sendSignal)) { IsBackground = true, Name = $"UdpSend{i}" };
-                _sendThreads[i].Start();
-            }
-        }
-
         Clock();
 
         RandomSeed = (int)CachedClock;
@@ -308,8 +281,6 @@ public class UdpManager<TConnection> : IUdpManager, IDisposable where TConnectio
         lock (_giveTimeGuard)
         {
             Clock();
-
-            WakeSendThreads();
 
             if (Params.EventQueuing && EventList.Count > 0)
             {
@@ -659,8 +630,7 @@ public class UdpManager<TConnection> : IUdpManager, IDisposable where TConnectio
                         // in this regard.  As such, the UnreachableConnection packet (like the connect and confirm packets) is one
                         // of those internal packet types that is designated as not being encrypted or CRC'ed.
                         Span<byte> buf = [0, (byte)UdpPacketType.UnreachableConnection];
-
-                        SocketSendCounted(buf, socketAddress);
+                        ActualSend(buf, buf.Length, socketAddress);
                     }
                 }
             }
@@ -740,65 +710,11 @@ public class UdpManager<TConnection> : IUdpManager, IDisposable where TConnectio
         ActualSendHelper(data, dataLen, socketAddress);
     }
 
-    private readonly record struct PendingSend(byte[] Buffer, int Length, SocketAddress SocketAddress);
-
     private void ActualSendHelper(ReadOnlySpan<byte> data, int dataLen, SocketAddress socketAddress)
     {
         // TODO: Simulation
 
-        if (_sendQueues.Length > 0)
-        {
-            if (dataLen > Params.MaxRawPacketSize || !_freeSendBuffers.TryDequeue(out var buffer))
-                buffer = new byte[dataLen > Params.MaxRawPacketSize ? Constants.HardMaxRawPacketSize : Params.MaxRawPacketSize];
-
-            data.Slice(0, dataLen).CopyTo(buffer);
-
-            var sendQueueIndex = (socketAddress.GetHashCode() & int.MaxValue) % _sendQueues.Length;
-            var sendQueue = _sendQueues[sendQueueIndex];
-            var wasEmpty = sendQueue.IsEmpty;
-
-            sendQueue.Enqueue(new PendingSend(buffer, dataLen, socketAddress));
-
-            if (wasEmpty)
-                _sendSignals[sendQueueIndex].Set();
-
-            return;
-        }
-
-        SocketSendCounted(data.Slice(0, dataLen), socketAddress);
-    }
-
-    private void WakeSendThreads()
-    {
-        for (var i = 0; i < _sendQueues.Length; i++)
-        {
-            if (!_sendQueues[i].IsEmpty)
-                _sendSignals[i].Set();
-        }
-    }
-
-    private void SendThreadLoop(ConcurrentQueue<PendingSend> sendQueue, AutoResetEvent sendSignal)
-    {
-        while (true)
-        {
-            while (sendQueue.TryDequeue(out var pendingSend))
-            {
-                SocketSendCounted(pendingSend.Buffer.AsSpan(0, pendingSend.Length), pendingSend.SocketAddress);
-
-                if (pendingSend.Buffer.Length == Params.MaxRawPacketSize && _freeSendBuffers.Count < MaxFreeSendBuffers)
-                    _freeSendBuffers.Enqueue(pendingSend.Buffer);
-            }
-
-            if (_sendThreadsStopping)
-                return;
-
-            sendSignal.WaitOne(SendThreadWakeTimeoutMs);
-        }
-    }
-
-    private void SocketSendCounted(ReadOnlySpan<byte> data, SocketAddress socketAddress)
-    {
-        if (!_driver.SocketSend(data, socketAddress))
+        if (!_driver.SocketSend(data.Slice(0, dataLen), socketAddress))
         {
             // assume a send error is a socket overflow, which we track only for statistical purposes
             lock (_statsGuard)
@@ -1180,17 +1096,6 @@ public class UdpManager<TConnection> : IUdpManager, IDisposable where TConnectio
             // sleep momentarily before closing socket to give it a chance to empty the socket buffer if there is something in it
             _driver.Sleep(Params.LingerDelay);
         }
-
-        _sendThreadsStopping = true;
-
-        foreach (var sendSignal in _sendSignals)
-            sendSignal.Set();
-
-        foreach (var sendThread in _sendThreads)
-            sendThread.Join();
-
-        foreach (var sendSignal in _sendSignals)
-            sendSignal.Dispose();
 
         CloseSocket();
     }

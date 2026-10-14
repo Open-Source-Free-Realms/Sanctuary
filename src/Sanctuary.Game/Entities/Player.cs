@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.IO;
 using System.Numerics;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Sanctuary.Core.Collections;
@@ -111,12 +112,12 @@ public sealed class Player : ClientPcData, IEntity
     public ulong BoomboxDanceOwner { get; set; }
     public byte PositionState { get; set; }
 
-    private const int PositionRelayIntervalMs = 500;
+    private const int CrowdedVisiblePlayerCount = 50;
+    private const int CrowdedRelayIntervalMs = 500;
 
-    private readonly object _positionRelayLock = new();
-    private PlayerUpdatePacketUpdatePosition? _pendingRelayPosition;
-    private long _nextPositionRelayAt;
-    private byte _lastRelayedPositionState;
+    public RelayedPosition? LatestPosition { get; private set; }
+    private long _positionVersion;
+    private readonly ConcurrentDictionary<ulong, (long Version, byte State, long NextDueAt)> _sentPositions = new();
     public int BoomboxDanceAnimation { get; set; }
     public bool BoomboxDanceIsStanding { get; set; }
     public int BoomboxDanceTransform { get; set; }
@@ -184,11 +185,6 @@ public sealed class Player : ClientPcData, IEntity
     public bool ShopDataSent { get; set; }
     public ConcurrentSet<int> SentCoinStoreItemDefinitionIds { get; } = [];
 
-    public bool VisiblePlayersCapped { get; set; }
-
-    private const int VisiblePlayersRefreshSeconds = 3;
-    private int _secondsSinceVisiblePlayersRefresh;
-
     public Player(BaseZone zone, UdpConnection connection, IResourceManager resourceManager, IZoneManager zoneManager)
     {
         Zone = zone;
@@ -245,17 +241,6 @@ public sealed class Player : ClientPcData, IEntity
         };
 
         Send(packetTunneledClientPacket);
-    }
-
-    public void SendTunneledUnreliable(ISerializablePacket serializablePacket)
-    {
-        var packetTunneledClientPacket = new PacketTunneledClientPacket
-        {
-            Reliable = false,
-            Payload = serializablePacket.Serialize()
-        };
-
-        _connection.Send(UdpChannel.Unreliable, packetTunneledClientPacket.Serialize());
     }
 
     [Obsolete]
@@ -355,6 +340,7 @@ public sealed class Player : ClientPcData, IEntity
 
         TickEffects(now);
         PlayerPet.UpdateEveryTick();
+        SendVisiblePositions();
 
         while (true)
         {
@@ -404,45 +390,47 @@ public sealed class Player : ClientPcData, IEntity
     {
         SnowballInteraction.Update(this);
         UpdatePortrait();
-        FlushPendingPosition();
-
-        if (VisiblePlayersCapped && ++_secondsSinceVisiblePlayersRefresh >= VisiblePlayersRefreshSeconds)
-        {
-            _secondsSinceVisiblePlayersRefresh = 0;
-            Zone.RefreshVisiblePlayers(this);
-        }
     }
 
     public void RelayPosition(PlayerUpdatePacketUpdatePosition playerUpdatePacketUpdatePosition)
     {
-        lock (_positionRelayLock)
-        {
-            if (playerUpdatePacketUpdatePosition.State == _lastRelayedPositionState && Environment.TickCount64 < _nextPositionRelayAt)
-            {
-                _pendingRelayPosition = playerUpdatePacketUpdatePosition;
-                return;
-            }
+        var data = SerializeTunneled(playerUpdatePacketUpdatePosition);
 
-            SendRelayPosition(playerUpdatePacketUpdatePosition);
-        }
+        LatestPosition = new RelayedPosition(data, playerUpdatePacketUpdatePosition.State, Interlocked.Increment(ref _positionVersion));
     }
 
-    private void FlushPendingPosition()
+    private void SendVisiblePositions()
     {
-        lock (_positionRelayLock)
-        {
-            if (_pendingRelayPosition is { } pendingRelayPosition && Environment.TickCount64 >= _nextPositionRelayAt)
-                SendRelayPosition(pendingRelayPosition);
-        }
+        if (VisiblePlayers.IsEmpty)
+            return;
+
+        var now = Environment.TickCount64;
+        var crowded = VisiblePlayers.Count >= CrowdedVisiblePlayerCount;
+        List<byte[]>? positionData = null;
+
+        foreach (var (guid, visiblePlayer) in VisiblePlayers)
+            QueuePosition(guid, visiblePlayer.LatestPosition, now, crowded, ref positionData);
+
+        if (positionData is not null)
+            _connection.Send(UdpChannel.Reliable1, positionData);
     }
 
-    private void SendRelayPosition(PlayerUpdatePacketUpdatePosition playerUpdatePacketUpdatePosition)
+    private void QueuePosition(ulong guid, RelayedPosition? latestPosition, long now, bool crowded, ref List<byte[]>? positionData)
     {
-        _pendingRelayPosition = null;
-        _lastRelayedPositionState = playerUpdatePacketUpdatePosition.State;
-        _nextPositionRelayAt = Environment.TickCount64 + PositionRelayIntervalMs;
+        if (latestPosition is null)
+            return;
 
-        SendTunneledToVisible(playerUpdatePacketUpdatePosition);
+        _sentPositions.TryGetValue(guid, out var sentPosition);
+
+        if (latestPosition.Version == sentPosition.Version)
+            return;
+
+        if (latestPosition.State == sentPosition.State && now < sentPosition.NextDueAt)
+            return;
+
+        _sentPositions[guid] = (latestPosition.Version, latestPosition.State, crowded ? now + CrowdedRelayIntervalMs : now);
+
+        (positionData ??= []).Add(latestPosition.Data);
     }
 
     private void UpdatePortrait()
@@ -784,55 +772,43 @@ public sealed class Player : ClientPcData, IEntity
     public void OnAddVisiblePlayers(params IEnumerable<Player> players)
     {
         foreach (var player in players)
-            OnAddVisiblePlayer(player, player.GetSerializedAddPackets());
-    }
-
-    public void OnAddVisiblePlayer(Player player, List<byte[]> serializedAddPackets)
-    {
-        foreach (var data in serializedAddPackets)
-            SendSerialized(data);
-
-        VisiblePlayers.TryAdd(player.Guid, player);
-    }
-
-    public List<byte[]> GetSerializedAddPackets()
-    {
-        var serializedAddPackets = new List<byte[]>();
-
-        if (Mount is not null)
         {
-            var addPc = GetAddPcPacket();
-            addPc.MountGuid = 0;
-            addPc.MountSeat = -1;
-            addPc.MountQueuePosition = -1;
-            addPc.NameVerticalOffset = 0;
-
-            serializedAddPackets.Add(SerializeTunneled(addPc));
-            serializedAddPackets.Add(SerializeTunneled(Mount.GetAddNpcPacket()));
-            serializedAddPackets.Add(SerializeTunneled(Mount.GetMountResponsePacket()));
-        }
-        else
-            serializedAddPackets.Add(SerializeTunneled(GetAddPcPacket()));
-
-        if (Scale != DefaultScale)
-            serializedAddPackets.Add(SerializeTunneled(new PlayerUpdatePacketUpdateScale { Guid = Guid, Scale = Scale }));
-
-        serializedAddPackets.Add(SerializeTunneled(new PlayerUpdatePacketUpdateCharacterState { Guid = Guid, State = IdleCharacterState }));
-
-        serializedAddPackets.Add(SerializeTunneled(GetWeaponFlairOverridePacket()));
-
-        foreach (var effect in _effects.Values.Where(effect => effect.WorldEffectStarted))
-            serializedAddPackets.Add(SerializeTunneled(GetAddEffectTagCompositeEffectPacket(effect)));
-
-        if (Mount is null && BoomboxDanceIsStanding && BoomboxDanceAnimation != 0)
-            serializedAddPackets.Add(SerializeTunneled(new PlayerUpdatePacketSetAnimation
+            if (player.Mount is not null)
             {
-                Guid = Guid,
-                AnimationId = BoomboxDanceAnimation,
-                Flags = 1
-            }));
+                var addPc = player.GetAddPcPacket();
+                addPc.MountGuid = 0;
+                addPc.MountSeat = -1;
+                addPc.MountQueuePosition = -1;
+                addPc.NameVerticalOffset = 0;
 
-        return serializedAddPackets;
+                SendTunneled(addPc);
+                SendTunneled(player.Mount.GetAddNpcPacket());
+                SendTunneled(player.Mount.GetMountResponsePacket());
+            }
+            else
+                SendTunneled(player.GetAddPcPacket());
+
+            if (player.Scale != DefaultScale)
+                SendTunneled(new PlayerUpdatePacketUpdateScale { Guid = player.Guid, Scale = player.Scale });
+
+            SendTunneled(new PlayerUpdatePacketUpdateCharacterState { Guid = player.Guid, State = IdleCharacterState });
+
+            SendTunneled(player.GetWeaponFlairOverridePacket());
+
+            foreach (var effect in player._effects.Values.Where(effect => effect.WorldEffectStarted))
+                SendTunneled(player.GetAddEffectTagCompositeEffectPacket(effect));
+
+            if (player.Mount is null && player.BoomboxDanceIsStanding && player.BoomboxDanceAnimation != 0)
+                SendTunneled(new PlayerUpdatePacketSetAnimation
+                {
+                    Guid = player.Guid,
+                    AnimationId = player.BoomboxDanceAnimation,
+                    Flags = 1
+                });
+        }
+
+        foreach (var player in players)
+            VisiblePlayers.TryAdd(player.Guid, player);
     }
 
     public void OnRemoveVisibleNpcs(params IEnumerable<Npc> npcs)
@@ -891,7 +867,10 @@ public sealed class Player : ClientPcData, IEntity
         }
 
         foreach (var player in players)
+        {
             VisiblePlayers.TryRemove(player.Guid, out _);
+            _sentPositions.TryRemove(player.Guid, out _);
+        }
     }
 
     public void OnInteract(Player player)

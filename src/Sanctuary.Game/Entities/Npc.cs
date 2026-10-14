@@ -247,6 +247,12 @@ public class Npc : IScriptableNpc, IEntity
 
     protected virtual bool SendsPositionTo(Player player) => true;
 
+    public const int FollowerPositionIntervalMs = 500;
+
+    public int PositionSendIntervalMs { get; set; }
+    private long _nextPositionSendAllowedAt;
+    private byte _lastSentPositionState;
+
     private void SendExpectedSpeed()
     {
         if (VisiblePlayers.IsEmpty)
@@ -286,6 +292,17 @@ public class Npc : IScriptableNpc, IEntity
             State = state,
             Unknown = 0
         };
+
+        if (PositionSendIntervalMs > 0)
+        {
+            var now = Environment.TickCount64;
+
+            if (state == _lastSentPositionState && now < _nextPositionSendAllowedAt)
+                return;
+
+            _lastSentPositionState = state;
+            _nextPositionSendAllowedAt = now + PositionSendIntervalMs;
+        }
 
         if (VisiblePlayers.IsEmpty)
             return;
