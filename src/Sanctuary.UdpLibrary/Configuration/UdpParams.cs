@@ -334,11 +334,11 @@ public class UdpParams
     /// <remarks>default = 20</remarks>
     public int ThreadSleepTime;
 
-    /// <summary>
     public int SendThreadCount;
 
     public bool ParallelConnectionGiveTime;
 
+    /// <summary>
     /// This settings allows you to bind the socket used by the library to a specific IP address on the machine.
     /// Normally, and by default, the library will bind the socket to any address in the machine.  This setting should
     /// not be messed with unless you really know what you are doing.  In multi-homed machines it is generally NOT
