@@ -60,9 +60,9 @@ public class Npc : IScriptableNpc, IEntity
 
     public float Scale { get; set; } = 1f;
 
-    /// <summary>
     public Vector4? Tilt { get; set; }
 
+    /// <summary>
     /// 0 - Hostile
     /// 1 - Neutral
     /// 2 - Ally
