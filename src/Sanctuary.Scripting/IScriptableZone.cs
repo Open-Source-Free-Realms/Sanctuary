@@ -9,5 +9,13 @@ public interface IScriptableZone : IScriptable
     int Id { get; }
     string Name { get; }
 
-    bool TrySpawnNpc(int npcId, ulong? npcGuid, float x, float y, float z, float heading, [MaybeNullWhen(false)] out IScriptableNpc npc);
+    void SetClientAreaEnabled(int areaId, bool enabled);
+
+    void Broadcast(string message);
+
+    void BroadcastNear(string message, float x, float z, float radius);
+
+    bool IsSeasonActive(string seasonName);
+
+    bool TrySpawnNpc(int npcId, ulong? npcGuid, float x, float y, float z, float heading, float pitch, float roll, [MaybeNullWhen(false)] out IScriptableNpc npc);
 }

@@ -44,17 +44,6 @@ public sealed class CollectionNode : Npc
         _effectAnchors.Add(anchor);
     }
 
-    internal void DisposeAfterCollection()
-    {
-        DisposeEffectAnchors();
-        DisposeGracefully(
-            animate: true,
-            delay: 0,
-            effectDelay: 0,
-            compositeEffectId: 0,
-            duration: 1000);
-    }
-
     public override void Dispose()
     {
         DisposeEffectAnchors();

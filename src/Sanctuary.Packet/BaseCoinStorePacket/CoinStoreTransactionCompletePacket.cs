@@ -17,7 +17,7 @@ public class CoinStoreTransactionCompletePacket : BaseCoinStorePacket, ISerializ
     // 9 - RecipientNotFound
     // 10 - NotAMember
     // 11 - RecipientCanNotAcceptItem
-    public int Result;
+    public CoinStoreTransactionResult Result;
 
     public int ItemGuid;
 
@@ -33,7 +33,7 @@ public class CoinStoreTransactionCompletePacket : BaseCoinStorePacket, ISerializ
 
         Write(writer);
 
-        writer.Write(Result);
+        writer.Write((int)Result);
 
         writer.Write(ItemGuid);
 

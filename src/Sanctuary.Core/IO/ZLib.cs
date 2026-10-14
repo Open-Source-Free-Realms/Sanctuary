@@ -7,7 +7,8 @@ namespace Sanctuary.Core.IO;
 
 public static class ZLib
 {
-    private static readonly ZLibDotNet.ZLib _zlib = new();
+    [ThreadStatic]
+    private static ZLibDotNet.ZLib? _zlib;
 
     public static int Compress(Span<byte> input, Span<byte> output, bool prefixLength = false)
     {
@@ -31,7 +32,7 @@ public static class ZLib
             NextOut = prefixLength ? 8 : 0
         };
 
-        if (_zlib.DeflateInit(ref zStream, 6) != ZLibDotNet.ZLib.Z_OK)
+        if ((_zlib ??= new()).DeflateInit(ref zStream, 6) != ZLibDotNet.ZLib.Z_OK)
             return -1;
 
         if (_zlib.Deflate(ref zStream, ZLibDotNet.ZLib.Z_FINISH) != ZLibDotNet.ZLib.Z_STREAM_END)
@@ -64,7 +65,7 @@ public static class ZLib
             Output = output
         };
 
-        if (_zlib.InflateInit(ref zStream) != ZLibDotNet.ZLib.Z_OK)
+        if ((_zlib ??= new()).InflateInit(ref zStream) != ZLibDotNet.ZLib.Z_OK)
             return -1;
 
         if (_zlib.Inflate(ref zStream, ZLibDotNet.ZLib.Z_FINISH) != ZLibDotNet.ZLib.Z_STREAM_END)

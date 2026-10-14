@@ -14,9 +14,16 @@ public sealed class PlayerEffect
 
     public int BuffIconId { get; init; }
     public int BuffNameId { get; init; }
+    public int BuffDefinitionId { get; init; }
+
+    public ulong SourceGuid { get; init; }
+
+    public float MovementSpeedBonus { get; init; }
 
     public int AppearanceModelId { get; init; }
     public int AppearancePoofEffectId { get; init; }
+
+    public float Scale { get; init; }
 
     public Action? OnRemoved { get; init; }
 }

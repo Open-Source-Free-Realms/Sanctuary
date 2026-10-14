@@ -15,10 +15,10 @@ public class BaseInventoryPacket
 
     public bool TryRead(ref PacketReader reader)
     {
-        if (!reader.TryRead(out short opCode) && opCode != OpCode)
+        if (!reader.TryRead(out short opCode) || opCode != OpCode)
             return false;
 
-        if (!reader.TryRead(out short subOpCode) && subOpCode != SubOpCode)
+        if (!reader.TryRead(out short subOpCode) || subOpCode != SubOpCode)
             return false;
 
         return true;

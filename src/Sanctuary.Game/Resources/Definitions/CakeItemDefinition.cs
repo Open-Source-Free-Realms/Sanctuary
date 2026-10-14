@@ -22,10 +22,14 @@ public class CakeItemDefinition
 
     // BossCake
     public int[] TransformAbilityIds { get; set; } = [];
+
+    public int GrantItemId { get; set; }
+    public int GrantItemQuantity { get; set; } = 1;
 }
 
 public enum CakeItemType
 {
     ScaredyCake,
-    BossCake
+    BossCake,
+    GiftCake
 }
