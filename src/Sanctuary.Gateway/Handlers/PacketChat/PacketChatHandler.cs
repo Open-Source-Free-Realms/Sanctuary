@@ -47,7 +47,7 @@ public static class PacketChatHandler
             Message = $"You are muted until {mutedUntil:u} and cannot send chat messages."
         };
 
-        connection.Player.SendTunneledUnreliable(packet);
+        connection.Player.SendTunneled(packet);
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -103,7 +103,7 @@ public static class PacketChatHandler
                         if (toPlayer.Ignores.Any(x => x.Guid == connection.Player.Guid))
                             break;
 
-                        toPlayer.SendTunneledUnreliable(packet);
+                        toPlayer.SendTunneled(packet);
 
                         var tellEchoPacket = new TellEchoPacket();
 
@@ -128,7 +128,7 @@ public static class PacketChatHandler
                         if (zonePlayer.Ignores.Any(x => x.Guid == connection.Player.Guid))
                             continue;
 
-                        zonePlayer.SendTunneledUnreliable(packet);
+                        zonePlayer.SendTunneled(packet);
                     }
                 }
                 break;
@@ -146,7 +146,7 @@ public static class PacketChatHandler
                         packet.Message
                     );
 
-                    connection.Player.SendTunneledUnreliable(packet);
+                    connection.Player.SendTunneled(packet);
 
                     foreach (var visiblePlayer in connection.Player.VisiblePlayers)
                     {
@@ -156,7 +156,7 @@ public static class PacketChatHandler
                         if (visiblePlayer.Value.Ignores.Any(x => x.Guid == connection.Player.Guid))
                             continue;
 
-                        visiblePlayer.Value.SendTunneledUnreliable(packet);
+                        visiblePlayer.Value.SendTunneled(packet);
                     }
                 }
                 break;
@@ -183,7 +183,7 @@ public static class PacketChatHandler
                         if (guildPlayer.Guid != connection.Player.Guid && guildPlayer.Ignores.Any(x => x.Guid == connection.Player.Guid))
                             continue;
 
-                        guildPlayer.SendTunneledUnreliable(packet);
+                        guildPlayer.SendTunneled(packet);
                     }
                 }
                 break;
@@ -197,14 +197,14 @@ public static class PacketChatHandler
                         packet.Message
                     );
 
-                    connection.Player.SendTunneledUnreliable(packet);
+                    connection.Player.SendTunneled(packet);
 
                     foreach (var visiblePlayer in connection.Player.VisiblePlayers)
                     {
                         if (visiblePlayer.Value.Ignores.Any(x => x.Guid == connection.Player.Guid))
                             continue;
 
-                        visiblePlayer.Value.SendTunneledUnreliable(packet);
+                        visiblePlayer.Value.SendTunneled(packet);
                     }
                 }
                 break;

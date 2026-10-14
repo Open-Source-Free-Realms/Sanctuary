@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Buffers.Binary;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Runtime.InteropServices;
@@ -298,25 +299,42 @@ public class UdpConnection : PriorityQueueMember
     {
         lock (_guard)
         {
-            Debug.Assert(data.Length >= 0);
-
-            // if we are no longer connected (not allowed to send more when we are pending disconnect either)
-            if (Status != Status.Connected)
-                return false;
-
-            // zero length packets are ignored
-            if (data.IsEmpty)
-                return false;
-
-            // zero-escape application packets that start with 0
-            if (data[0] == 0)
-            {
-                Span<byte> hold = [0];
-                return InternalSend(channel, hold, hold.Length, data, data.Length);
-            }
-
-            return InternalSend(channel, data, data.Length);
+            return SendLocked(channel, data);
         }
+    }
+
+    public void Send(UdpChannel channel, IReadOnlyList<byte[]> dataList)
+    {
+        lock (_guard)
+        {
+            foreach (var data in dataList)
+            {
+                if (!SendLocked(channel, data))
+                    return;
+            }
+        }
+    }
+
+    private bool SendLocked(UdpChannel channel, Span<byte> data)
+    {
+        Debug.Assert(data.Length >= 0);
+
+        // if we are no longer connected (not allowed to send more when we are pending disconnect either)
+        if (Status != Status.Connected)
+            return false;
+
+        // zero length packets are ignored
+        if (data.IsEmpty)
+            return false;
+
+        // zero-escape application packets that start with 0
+        if (data[0] == 0)
+        {
+            Span<byte> hold = [0];
+            return InternalSend(channel, hold, hold.Length, data, data.Length);
+        }
+
+        return InternalSend(channel, data, data.Length);
     }
 
     public bool Send(UdpChannel channel, LogicalPacket packet)

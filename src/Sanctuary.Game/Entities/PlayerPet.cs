@@ -330,6 +330,7 @@ public sealed class PlayerPet
         if (!_player.Zone.TryCreateNpc(out var npc))
             return;
 
+        npc.PositionSendIntervalMs = Npc.FollowerPositionIntervalMs;
         npc.Name = petClientInfo.Name;
         npc.NameId = petClientInfo.NameId;
         npc.ModelId = modelDefinition.Id;

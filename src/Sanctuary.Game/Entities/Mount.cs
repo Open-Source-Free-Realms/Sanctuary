@@ -19,6 +19,7 @@ public class Mount : Npc
     public Mount(IZone zone, Player rider, MountDefinition definition) : base(zone)
     {
         Rider = rider;
+        PositionSendIntervalMs = FollowerPositionIntervalMs;
         Definition = definition;
     }
 

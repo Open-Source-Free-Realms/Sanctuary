@@ -75,7 +75,6 @@ public interface IZone : IScriptableZone, IDisposable
 
     ZoneTile GetTileFromPosition(Vector4 position);
     void UpdateEntityZoneTile(IEntity entity, ZoneTile from, ZoneTile to);
-    void RefreshVisiblePlayers(Player player);
 
     #endregion
 

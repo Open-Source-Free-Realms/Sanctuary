@@ -40,10 +40,6 @@ public abstract class BaseZone : IZone, IDisposable
     private readonly CancellationTokenSource _cancellationTokenSource = new();
 
     private const int VisibleTileRadius = 2;
-
-    private const int MaxVisiblePlayers = 300;
-
-    private const float VisiblePlayerSwapDistanceRatio = 0.75f;
     private readonly Dictionary<int, ZoneTile> _tiles;
 
     private readonly object _npcGuidLock = new();
@@ -1418,8 +1414,6 @@ public abstract class BaseZone : IZone, IDisposable
     {
         var npcsToAdd = new List<Npc>();
         var playersToAdd = new List<Player>();
-        List<byte[]>? serializedAddPackets = null;
-
         foreach (var zoneTile in zoneTiles)
         {
             foreach (var zoneTileEntity in zoneTile.Entities)
@@ -1450,9 +1444,6 @@ public abstract class BaseZone : IZone, IDisposable
 
                     case Player zoneTilePlayer:
                         {
-                            if (entity is Player entityPlayer && !HasRoomToSee(entityPlayer, zoneTilePlayer, playersToAdd.Count))
-                                continue;
-
                             playersToAdd.Add(zoneTilePlayer);
 
                             if (entity.Visible)
@@ -1466,8 +1457,7 @@ public abstract class BaseZone : IZone, IDisposable
                                         break;
 
                                     case Player player:
-                                        serializedAddPackets ??= player.GetSerializedAddPackets();
-                                        zoneTilePlayer.OnAddVisiblePlayer(player, serializedAddPackets);
+                                        zoneTilePlayer.OnAddVisiblePlayers(player);
                                         break;
                                 }
                             }
@@ -1479,93 +1469,6 @@ public abstract class BaseZone : IZone, IDisposable
 
         entity.OnAddVisibleNpcs(npcsToAdd);
         entity.OnAddVisiblePlayers(playersToAdd);
-    }
-
-    private static bool HasRoomToSee(Player player, Player otherPlayer, int pendingCount)
-    {
-        if (player.VisiblePlayers.Count + pendingCount < MaxVisiblePlayers && otherPlayer.VisiblePlayers.Count < MaxVisiblePlayers)
-            return true;
-
-        player.VisiblePlayersCapped = true;
-        otherPlayer.VisiblePlayersCapped = true;
-        return false;
-    }
-
-    private const float SwapDistanceSquaredRatio = VisiblePlayerSwapDistanceRatio * VisiblePlayerSwapDistanceRatio;
-
-    private static bool IsAmongNearest(Player player, Player otherPlayer)
-    {
-        if (!player.VisiblePlayersCapped || player.VisiblePlayers.Count < MaxVisiblePlayers)
-            return true;
-
-        var position = player.Position.ToVector3();
-        var distanceSquared = Vector3.DistanceSquared(position, otherPlayer.Position.ToVector3());
-
-        foreach (var (_, visiblePlayer) in player.VisiblePlayers)
-        {
-            if (Vector3.DistanceSquared(position, visiblePlayer.Position.ToVector3()) * SwapDistanceSquaredRatio > distanceSquared)
-                return true;
-        }
-
-        return false;
-    }
-
-    public void RefreshVisiblePlayers(Player player)
-    {
-        var position = player.Position.ToVector3();
-        var playersInRange = new List<Player>();
-
-        foreach (var zoneTile in player.ZoneTile.VisibleTiles)
-        {
-            foreach (var zoneTileEntity in zoneTile.Entities)
-            {
-                if (zoneTileEntity.Value is Player { Visible: true } zoneTilePlayer && zoneTilePlayer != player)
-                    playersInRange.Add(zoneTilePlayer);
-            }
-        }
-
-        var nearestPlayers = playersInRange
-            .OrderBy(playerInRange => Vector3.DistanceSquared(position, playerInRange.Position.ToVector3()))
-            .Take(MaxVisiblePlayers)
-            .ToHashSet();
-
-        var nearestMissingDistanceSquared = nearestPlayers
-            .Where(nearestPlayer => !player.VisiblePlayers.ContainsKey(nearestPlayer.Guid))
-            .Select(nearestPlayer => Vector3.DistanceSquared(position, nearestPlayer.Position.ToVector3()))
-            .DefaultIfEmpty(float.MaxValue)
-            .Min();
-
-        foreach (var (_, visiblePlayer) in player.VisiblePlayers)
-        {
-            if (nearestPlayers.Contains(visiblePlayer)
-                || Vector3.DistanceSquared(position, visiblePlayer.Position.ToVector3()) * SwapDistanceSquaredRatio <= nearestMissingDistanceSquared)
-                continue;
-
-            player.OnRemoveVisiblePlayers(visiblePlayer);
-            visiblePlayer.OnRemoveVisiblePlayers(player);
-        }
-
-        var playersToAdd = new List<Player>();
-        List<byte[]>? serializedAddPackets = null;
-
-        foreach (var nearestPlayer in nearestPlayers)
-        {
-            if (player.VisiblePlayers.ContainsKey(nearestPlayer.Guid) || !IsAmongNearest(nearestPlayer, player)
-                || !HasRoomToSee(player, nearestPlayer, playersToAdd.Count))
-                continue;
-
-            playersToAdd.Add(nearestPlayer);
-
-            if (player.Visible)
-            {
-                serializedAddPackets ??= player.GetSerializedAddPackets();
-                nearestPlayer.OnAddVisiblePlayer(player, serializedAddPackets);
-            }
-        }
-
-        player.OnAddVisiblePlayers(playersToAdd);
-
-        player.VisiblePlayersCapped = playersInRange.Count > player.VisiblePlayers.Count;
     }
 
     private void RemoveEntityFromZoneTiles(IEntity entity, IEnumerable<ZoneTile> zoneTiles)
@@ -1603,9 +1506,6 @@ public abstract class BaseZone : IZone, IDisposable
 
                     case Player zoneTilePlayer:
                         {
-                            if (entity is Player && !zoneTilePlayer.VisiblePlayers.ContainsKey(entity.Guid))
-                                continue;
-
                             playersToRemove.Add(zoneTilePlayer);
 
                             if (entity.Visible)

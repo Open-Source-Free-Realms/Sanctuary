@@ -334,8 +334,6 @@ public class UdpParams
     /// <remarks>default = 20</remarks>
     public int ThreadSleepTime;
 
-    public int SendThreadCount;
-
     public bool ParallelConnectionGiveTime;
 
     /// <summary>
@@ -475,7 +473,6 @@ public class UdpParams
         CallbackEventPoolMax = 5000;
         EventQueuing = false;
         ThreadSleepTime = 20;
-        SendThreadCount = 0;
         ParallelConnectionGiveTime = false;
         IncomingLogicalPacketMax = 20 * 1024 * 1024;
         ProtocolName = string.Empty;
