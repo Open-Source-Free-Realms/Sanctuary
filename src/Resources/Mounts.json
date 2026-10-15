@@ -1008,6 +1008,7 @@
     "NameId": 5232,
     "ImageSetId": 6425,
     "TextureAlias": "ign-chrome",
+    "IsUpgradable": true,
     "ModelId": 2064,
     "Stats": {
       "MaxMovementSpeed": 12.5
