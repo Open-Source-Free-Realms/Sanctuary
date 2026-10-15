@@ -111,9 +111,9 @@ public static class PacketMountSpawnHandler
             mountStats.GlideAccel = 4f;
         }
 
-        connection.Player.UpdateCharacterStats(
-            CharacterStats.MaxMovementSpeed.Set(mountStats.MaxMovementSpeed),
+        connection.Player.SetMountMovementSpeed(mountStats.MaxMovementSpeed);
 
+        connection.Player.UpdateCharacterStats(
             CharacterStats.GlideDefaultForwardSpeed.Set(mountStats.GlideDefaultForwardSpeed),
             CharacterStats.GlideMinForwardSpeed.Set(mountStats.GlideMinForwardSpeed),
             CharacterStats.GlideMaxForwardSpeed.Set(mountStats.GlideMaxForwardSpeed),
