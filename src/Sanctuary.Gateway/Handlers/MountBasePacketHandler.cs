@@ -30,6 +30,7 @@ public static class MountBasePacketHandler
 
         return opCode switch
         {
+            PacketMountRequest.OpCode => PacketMountRequestHandler.HandlePacket(connection, reader.Span),
             PacketDismountRequest.OpCode => PacketDismountRequestHandler.HandlePacket(connection),
             PacketMountSpawn.OpCode => PacketMountSpawnHandler.HandlePacket(connection, reader.Span),
             PacketMountSpawnByItemDefinitionId.OpCode => PacketMountSpawnByItemDefinitionIdHandler.HandlePacket(connection, reader.Span),

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
@@ -11,13 +11,23 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
+
+using Sanctuary.Core.Helpers;
 
 namespace Sanctuary.WebAPI.Endpoints;
 
 public static class PortraitEndpoints
 {
+    private const int ThumbnailWidth = 70;
+    private const int ThumbnailHeight = 70;
+    private const int PortraitWidth = 180;
+    private const int PortraitHeight = 330;
+
+    private static readonly DecoderOptions UploadDecoderOptions = new() { SkipMetadata = true };
+
     private static ILogger _logger = null!;
     private readonly static ConcurrentDictionary<string, SemaphoreSlim> _fileLocks = [];
 
@@ -25,7 +35,7 @@ public static class PortraitEndpoints
     {
         var loggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
 
-        _logger = loggerFactory.CreateLogger(nameof(AuthEndpoints));
+        _logger = loggerFactory.CreateLogger(nameof(PortraitEndpoints));
 
         app.MapPost("/image", ImageHandlerAsync).DisableAntiforgery();
     }
@@ -60,10 +70,12 @@ public static class PortraitEndpoints
             return Results.BadRequest("Invalid characterId.");
         }
 
-        var saveDirectory = Path.Combine("Images", characterId.ToString());
+        var saveDirectory = PortraitStorage.GetCharacterDirectory(characterId);
 
         if (!Directory.Exists(saveDirectory))
             Directory.CreateDirectory(saveDirectory);
+
+        uint? portraitCrc = null;
 
         foreach (var file in files)
         {
@@ -109,23 +121,23 @@ public static class PortraitEndpoints
             {
                 using var stream = file.OpenReadStream();
 
-                using var image = await Image.LoadAsync<Rgba32>(stream, cancellationToken);
+                using var imageBuffer = new MemoryStream();
+                await stream.CopyToAsync(imageBuffer, cancellationToken);
+                imageBuffer.Position = 0;
 
-                if (image.Metadata.DecodedImageFormat is not PngFormat)
-                {
-                    _logger.LogWarning("Invalid image format: {Format}", image.Metadata.DecodedImageFormat?.Name);
+                using var image = await TryDecodePngAsync(imageBuffer, cancellationToken);
 
+                if (image is null)
                     return Results.BadRequest("Invalid image format.");
-                }
 
-                if (file.Name == "thumbnailFile" && image.Width != 70 && image.Height != 70)
+                if (file.Name == "thumbnailFile" && (image.Width != ThumbnailWidth || image.Height != ThumbnailHeight))
                 {
                     _logger.LogWarning("Invalid thumbnailFile size: {Width}x{Height}", image.Width, image.Height);
 
                     return Results.BadRequest("Invalid thumbnailFile size.");
                 }
 
-                if (file.Name == "imageFile" && image.Width != 180 && image.Height != 330)
+                if (file.Name == "imageFile" && (image.Width != PortraitWidth || image.Height != PortraitHeight))
                 {
                     _logger.LogWarning("Invalid imageFile size: {Width}x{Height}", image.Width, image.Height);
 
@@ -133,6 +145,9 @@ public static class PortraitEndpoints
                 }
 
                 await image.SaveAsPngAsync(savePath, cancellationToken);
+
+                if (file.Name == "imageFile")
+                    portraitCrc = PortraitStorage.GetPortraitCrc(imageBuffer.GetBuffer().AsSpan(0, (int)imageBuffer.Length));
 
                 _logger.LogDebug("Successfully uploaded {Name} for character {Character}.", file.Name, characterId);
             }
@@ -148,6 +163,22 @@ public static class PortraitEndpoints
             }
         }
 
+        if (portraitCrc is not null)
+            await File.WriteAllBytesAsync(Path.Combine(saveDirectory, "portrait.crc"), BitConverter.GetBytes(portraitCrc.Value), cancellationToken);
+
         return Results.Ok();
+    }
+
+    private static async Task<Image<Rgba32>?> TryDecodePngAsync(Stream stream, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await PngDecoder.Instance.DecodeAsync<Rgba32>(UploadDecoderOptions, stream, cancellationToken);
+        }
+        catch (ImageFormatException ex)
+        {
+            _logger.LogWarning("Invalid image format: {Message}", ex.Message);
+            return null;
+        }
     }
 }

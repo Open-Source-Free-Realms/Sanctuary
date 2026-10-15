@@ -15,23 +15,18 @@ using Sanctuary.UdpLibrary.Enumerations;
 
 namespace Sanctuary.Login;
 
-public class LoginConnection : UdpConnection
+public class LoginConnection : LoginServerConnection
 {
     private readonly ILogger _logger;
 
     private ICipher _cipher;
     private bool _useEncryption = true; // Hardcoded in the client.
 
-    private LoginServerOptions _options;
-
     public ulong UserId { get; set; }
 
-    public LoginConnection(ILogger<LoginConnection> logger, IOptionsMonitor<LoginServerOptions> options, LoginServer loginServer, SocketAddress socketAddress, int connectCode) : base(loginServer, socketAddress, connectCode)
+    public LoginConnection(ILogger<LoginConnection> logger, IOptionsMonitor<LoginServerOptions> options, LoginServer loginServer, SocketAddress socketAddress, int connectCode) : base(options, loginServer, socketAddress, connectCode)
     {
         _logger = logger;
-
-        _options = options.CurrentValue;
-        options.OnChange(o => _options = o);
 
         _cipher = new CipherRC4();
 
@@ -42,6 +37,8 @@ public class LoginConnection : UdpConnection
 
     public override void OnTerminated()
     {
+        base.OnTerminated();
+
         var reason = DisconnectReason == DisconnectReason.OtherSideTerminated
             ? OtherSideDisconnectReason
             : DisconnectReason;
@@ -190,7 +187,7 @@ public class LoginConnection : UdpConnection
 
     protected override int DecryptUserSupplied(Span<byte> destData, Span<byte> sourceData)
     {
-        if (!_options.UseCompression)
+        if (!Options.UseCompression)
             return base.DecryptUserSupplied(destData, sourceData);
 
         if (sourceData[0] == 1)
@@ -207,7 +204,7 @@ public class LoginConnection : UdpConnection
 
     protected override int EncryptUserSupplied(Span<byte> destData, Span<byte> sourceData)
     {
-        if (!_options.UseCompression)
+        if (!Options.UseCompression)
             return base.EncryptUserSupplied(destData, sourceData);
 
         if (sourceData.Length >= 24)

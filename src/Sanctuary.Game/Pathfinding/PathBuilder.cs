@@ -15,20 +15,34 @@ public class PathBuilder
         _pathfinder = pathfinder;
     }
 
-    public Queue<Vector3>? TryRecompute(Vector3 searchStart, Vector3 goalPosition)
-    {
-        var path = _pathfinder.FindPath(searchStart, goalPosition);
+    public Queue<Vector3>? TryRecompute(Vector3 searchStart, Vector3 goalPosition) =>
+        TryRecompute(searchStart, goalPosition, _pathfinder.FindPath(searchStart, goalPosition));
 
+    public Queue<Vector3>? TryRecompute(Vector3 searchStart, Vector3 goalPosition, List<MapNode> path)
+    {
         if (IsSimilarPath(_lastComputedPath, path))
             return null;
 
         _lastComputedPath = path;
 
-        var waypoints = new Queue<Vector3>();
-        foreach (var node in path)
-            waypoints.Enqueue(node.Position);
+        var positions = new List<Vector3>(path.Count + 1);
 
-        waypoints.Enqueue(goalPosition);
+        foreach (var node in path)
+            positions.Add(node.Position);
+
+        positions.Add(goalPosition);
+
+        var start = 0;
+        while (start < positions.Count - 1
+            && Vector3.DistanceSquared(searchStart, positions[start + 1]) <= Vector3.DistanceSquared(positions[start], positions[start + 1]))
+        {
+            start++;
+        }
+
+        var waypoints = new Queue<Vector3>(positions.Count - start);
+
+        for (var index = start; index < positions.Count; index++)
+            waypoints.Enqueue(positions[index]);
 
         return waypoints;
     }

@@ -31,76 +31,77 @@ public sealed class CollectionNodeSpawnDefinitionCollection : ObservableConcurre
             return false;
         }
 
-        try
+        // Keep reloads from applying a stale snapshot over an admin placement that just reached disk.
+        lock (_writeLock)
         {
-            var zoneDirectories = Directory.GetDirectories(directoryPath, "*", SearchOption.TopDirectoryOnly);
-
-            if (zoneDirectories.Length == 0)
+            try
             {
-                _logger.LogError("No collection node spawn zone directories found in \"{directory}\".", directoryPath);
-                return false;
-            }
+                var zoneDirectories = Directory.GetDirectories(directoryPath, "*", SearchOption.TopDirectoryOnly);
 
-            var loaded = new Dictionary<int, CollectionNodeSpawnDefinition>();
-            var loadedPools = new HashSet<(int ZoneDefinitionId, string Pool)>();
-
-            foreach (var zoneDirectory in zoneDirectories.Order())
-            {
-                var zoneDirectoryName = Path.GetFileName(zoneDirectory);
-
-                if (!int.TryParse(zoneDirectoryName, out var zoneDefinitionId) ||
-                    zoneDefinitionId <= 0 || zoneDirectoryName != zoneDefinitionId.ToString())
+                if (zoneDirectories.Length == 0)
                 {
-                    _logger.LogError("Collection node spawn directory \"{directory}\" is not named for a valid zone id.",
-                        zoneDirectory);
+                    _logger.LogError("No collection node spawn zone directories found in \"{directory}\".", directoryPath);
                     return false;
                 }
 
-                foreach (var filePath in Directory.GetFiles(zoneDirectory, "*.json", SearchOption.TopDirectoryOnly).Order())
+                var loaded = new Dictionary<int, CollectionNodeSpawnDefinition>();
+                var loadedPools = new HashSet<(int ZoneDefinitionId, string Pool)>();
+
+                foreach (var zoneDirectory in zoneDirectories.Order())
                 {
-                    var poolFileName = Path.GetFileNameWithoutExtension(filePath);
-                    var pool = poolFileName.Trim().ToLowerInvariant();
+                    var zoneDirectoryName = Path.GetFileName(zoneDirectory);
 
-                    if (poolFileName != pool || !IsValidPoolKey(pool) || !loadedPools.Add((zoneDefinitionId, pool)))
+                    if (!int.TryParse(zoneDirectoryName, out var zoneDefinitionId) ||
+                        zoneDefinitionId <= 0 || zoneDirectoryName != zoneDefinitionId.ToString())
                     {
-                        _logger.LogError("Collection node spawn file \"{file}\" is not named for a valid unique pool.",
-                            filePath);
+                        _logger.LogError("Collection node spawn directory \"{directory}\" is not named for a valid zone id.",
+                            zoneDirectory);
                         return false;
                     }
 
-                    using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                    var entries = JsonSerializer.Deserialize<List<CollectionNodeSpawnDefinition>>(stream,
-                        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                    if (entries is null || entries.Any(entry => entry.Id <= 0 || entry.Position.Length != 3 ||
-                        entry.Position.Any(value => !float.IsFinite(value)) || !float.IsFinite(entry.Heading)))
+                    foreach (var filePath in Directory.GetFiles(zoneDirectory, "*.json", SearchOption.TopDirectoryOnly).Order())
                     {
-                        _logger.LogError("Invalid collection node spawns in \"{file}\".", filePath);
-                        return false;
-                    }
+                        var poolFileName = Path.GetFileNameWithoutExtension(filePath);
+                        var pool = poolFileName.Trim().ToLowerInvariant();
 
-                    foreach (var entry in entries)
-                    {
-                        entry.Pool = pool;
-                        entry.ZoneDefinitionId = zoneDefinitionId;
-
-                        if (!loaded.TryAdd(entry.Id, entry))
+                        if (poolFileName != pool || !IsValidPoolKey(pool) || !loadedPools.Add((zoneDefinitionId, pool)))
                         {
-                            _logger.LogError("Duplicate collection node spawn id {id} in \"{file}\".", entry.Id, filePath);
+                            _logger.LogError("Collection node spawn file \"{file}\" is not named for a valid unique pool.",
+                                filePath);
                             return false;
+                        }
+
+                        using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                        var entries = JsonSerializer.Deserialize<List<CollectionNodeSpawnDefinition>>(stream,
+                            new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                        if (entries is null || entries.Any(entry => entry.Id <= 0 || entry.Position.Length != 3 ||
+                            entry.Position.Any(value => !float.IsFinite(value)) || !float.IsFinite(entry.Heading)))
+                        {
+                            _logger.LogError("Invalid collection node spawns in \"{file}\".", filePath);
+                            return false;
+                        }
+
+                        foreach (var entry in entries)
+                        {
+                            entry.Pool = pool;
+                            entry.ZoneDefinitionId = zoneDefinitionId;
+
+                            if (!loaded.TryAdd(entry.Id, entry))
+                            {
+                                _logger.LogError("Duplicate collection node spawn id {id} in \"{file}\".", entry.Id, filePath);
+                                return false;
+                            }
                         }
                     }
                 }
-            }
 
-            if (loadedPools.Count == 0)
-            {
-                _logger.LogError("No collection node spawn files found in \"{directory}\".", directoryPath);
-                return false;
-            }
+                if (loadedPools.Count == 0)
+                {
+                    _logger.LogError("No collection node spawn files found in \"{directory}\".", directoryPath);
+                    return false;
+                }
 
-            lock (_writeLock)
-            {
                 foreach (var entry in loaded)
                     this[entry.Key] = entry.Value;
 
@@ -108,14 +109,13 @@ public sealed class CollectionNodeSpawnDefinitionCollection : ObservableConcurre
                     Remove(id);
 
                 _directoryPath = directoryPath;
+                return true;
             }
-
-            return true;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to load collection node spawns from \"{directory}\".", directoryPath);
-            return false;
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to load collection node spawns from \"{directory}\".", directoryPath);
+                return false;
+            }
         }
     }
 
@@ -134,7 +134,9 @@ public sealed class CollectionNodeSpawnDefinitionCollection : ObservableConcurre
                 ZoneDefinitionId = zoneDefinitionId
             };
 
-            if (zoneDefinitionId <= 0 || !IsValidPoolKey(pool) || !TryAdd(definition.Id, definition))
+            if (zoneDefinitionId <= 0 || !IsValidPoolKey(pool) ||
+                !float.IsFinite(position.X) || !float.IsFinite(position.Y) || !float.IsFinite(position.Z) ||
+                !float.IsFinite(heading) || !TryAdd(definition.Id, definition))
                 return false;
 
             if (Save(zoneDefinitionId, pool))

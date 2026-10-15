@@ -23,8 +23,7 @@ public sealed class SillyStringAbility(AbilityServices services) : ConsumableAbi
 
         // Not aimable, so there's no selected target to honour. Skip last time's victim unless
         // they're the only one around.
-        var target = player.FindNearestPlayer(favor!.Range, player.LastSillyStringTarget)
-            ?? player.FindNearestPlayer(favor.Range);
+        var target = player.FindTarget(0, favor!.Range, player.LastSillyStringTarget) as Player;
 
         if (target is null)
             return SendFailure(player); // nobody nearby to spray - can isn't used
@@ -35,15 +34,15 @@ public sealed class SillyStringAbility(AbilityServices services) : ConsumableAbi
         foreach (var visiblePlayer in player.VisiblePlayers.Values)
             recipients.Add(visiblePlayer);
 
-        var sync = new PlayerUpdatePacketSetSynchronizedAnimations();
-        sync.Animations.Add(new PlayerUpdatePacketSetSynchronizedAnimations.Animation { Guid = player.Guid, AnimationId = favor.AnimationId });
+        var playerUpdatePacketSetSynchronizedAnimations = new PlayerUpdatePacketSetSynchronizedAnimations();
+        playerUpdatePacketSetSynchronizedAnimations.Animations.Add(new PlayerUpdatePacketSetSynchronizedAnimations.Animation { Guid = player.Guid, AnimationId = favor.AnimationId });
 
         foreach (var recipient in recipients)
-            recipient.SendTunneled(sync);
+            recipient.SendTunneled(playerUpdatePacketSetSynchronizedAnimations);
 
         var tagId = NextEffectTagId();
 
-        var beam = new PlayerUpdatePacketAddEffectTagCompositeEffect
+        var playerUpdatePacketAddEffectTagCompositeEffect = new PlayerUpdatePacketAddEffectTagCompositeEffect
         {
             Guid = target.Guid,
             TagId = tagId,
@@ -52,7 +51,7 @@ public sealed class SillyStringAbility(AbilityServices services) : ConsumableAbi
         };
 
         foreach (var recipient in recipients)
-            recipient.SendTunneled(beam);
+            recipient.SendTunneled(playerUpdatePacketAddEffectTagCompositeEffect);
 
         _logger.LogTrace("Silly String: {who} sprayed {target}.", player.Name, target.Name);
 
@@ -68,9 +67,9 @@ public sealed class SillyStringAbility(AbilityServices services) : ConsumableAbi
             new PlayerUpdatePacketRemoveEffectTagCompositeEffect { Guid = target.Guid, TagId = tagId },
             (int)(favor.EffectSeconds * 1000), sendToSelf: true);
 
-        player.StartItemCooldown(itemDefinition.Id, favor.CooldownMs);
+        player.StartItemCooldown(itemDefinition.Id, ClampCooldown(favor.CooldownMs));
 
-        FinishActivation(player, clientItem, itemDefinition, slot, favor.CooldownMs, IconTintId(clientItem, itemDefinition.Icon.TintId));
+        FinishActivation(player, clientItem, itemDefinition, slot, ClampCooldown(favor.CooldownMs), IconTintId(clientItem, itemDefinition.Icon.TintId));
 
         return true;
     }

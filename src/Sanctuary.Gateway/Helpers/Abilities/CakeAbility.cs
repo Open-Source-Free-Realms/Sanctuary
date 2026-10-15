@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Numerics;
 
 using Sanctuary.Game.Entities;
@@ -10,6 +11,8 @@ namespace Sanctuary.Gateway.Helpers.Abilities;
 
 public sealed class CakeAbility(AbilityServices services) : ConsumableAbility(services)
 {
+    private const int DefaultSpawnEffectId = 21;
+
     public override bool Matches(ClientItemDefinition itemDefinition) =>
         _resourceManager.Consumables.Cakes.ContainsKey(itemDefinition.Id);
 
@@ -54,40 +57,74 @@ public sealed class CakeAbility(AbilityServices services) : ConsumableAbility(se
         if (cakeNpc is null)
             return;
 
-        if (cakeDefinition.Type == CakeItemType.BossCake)
+        var interactReadyTime = DateTimeOffset.MinValue;
+
+        if (cakeDefinition.Type == CakeItemType.GiftCake)
         {
             cakeNpc.InteractAction = player =>
             {
-                var abilityId = cakeDefinition.TransformAbilityIds[Random.Shared.Next(cakeDefinition.TransformAbilityIds.Length)];
+                if (DateTimeOffset.UtcNow < interactReadyTime)
+                    return;
 
-                if (_resourceManager.Consumables.Transformations.TryGetValue(abilityId, out var transform))
-                    player.ApplyTemporaryAppearance(transform.ModelId, transform.DurationMs, transform.CompositeEffectId);
+                if (player.Items.Any(item => item.Definition == cakeDefinition.GrantItemId))
+                {
+                    player.SendTunneled(new ChatPacketDebugChat
+                    {
+                        Message = "<font color=\"#FFFF00\">You already have a slice - eat it before taking another.</font>",
+                        PrintToChat = true
+                    });
+                    return;
+                }
+
+                interactReadyTime = DateTimeOffset.UtcNow.AddMilliseconds(cakeDefinition.InteractCooldownMs);
+
+                _rewardManager.TryGrantItem(player, cakeDefinition.GrantItemId, 0, cakeDefinition.GrantItemQuantity, cakeNpc.Guid);
+            };
+        }
+        else if (cakeDefinition.Type == CakeItemType.BossCake)
+        {
+            var lastTransform = -1;
+
+            cakeNpc.InteractAction = player =>
+            {
+                if (DateTimeOffset.UtcNow < interactReadyTime)
+                    return;
+
+                interactReadyTime = DateTimeOffset.UtcNow.AddMilliseconds(cakeDefinition.InteractCooldownMs);
+
+                lastTransform = RollExcluding(cakeDefinition.TransformAbilityIds.Length, lastTransform);
+                var abilityId = cakeDefinition.TransformAbilityIds[lastTransform];
+
+                ApplyTransformOrFoodEffect(player, abilityId, cakeDefinition.NameId);
             };
         }
         else
         {
-            var scareReadyTime = DateTimeOffset.MinValue;
+            var lastRoll = -1;
 
             cakeNpc.InteractAction = player =>
             {
-                if (DateTimeOffset.UtcNow < scareReadyTime)
+                if (DateTimeOffset.UtcNow < interactReadyTime)
                     return;
 
-                scareReadyTime = DateTimeOffset.UtcNow.AddMilliseconds(cakeDefinition.ScareCooldownMs);
+                interactReadyTime = DateTimeOffset.UtcNow.AddMilliseconds(cakeDefinition.InteractCooldownMs);
 
-                // Every scare group and transform is equally likely.
-                var roll = Random.Shared.Next(cakeDefinition.ScareGroups.Length + cakeDefinition.TransformAbilityIds.Length);
+                // Every scare group and transform is equally likely, except the one that played last.
+                var roll = RollExcluding(cakeDefinition.ScareGroups.Length + cakeDefinition.TransformAbilityIds.Length, lastRoll);
+                lastRoll = roll;
 
                 if (roll < cakeDefinition.ScareGroups.Length)
                 {
-                    foreach (var effectId in cakeDefinition.ScareGroups[roll])
+                    var scareEffects = cakeDefinition.ScareGroups[roll];
+
+                    for (var i = 0; i < scareEffects.Length; i++)
                     {
                         player.SendTunneledToVisible(new PlayerUpdatePacketPlayCompositeEffect
                         {
                             Guid = cakeNpc.Guid,
-                            CompositeEffectId = effectId,
+                            CompositeEffectId = scareEffects[i],
                             Position = cakeNpc.Position,
-                            Clear = true
+                            Clear = i == 0
                         }, true);
                     }
                 }
@@ -95,20 +132,74 @@ public sealed class CakeAbility(AbilityServices services) : ConsumableAbility(se
                 {
                     var abilityId = cakeDefinition.TransformAbilityIds[roll - cakeDefinition.ScareGroups.Length];
 
-                    if (_resourceManager.Consumables.Transformations.TryGetValue(abilityId, out var transform))
-                        player.ApplyTemporaryAppearance(transform.ModelId, transform.DurationMs, transform.CompositeEffectId);
+                    ApplyTransformOrFoodEffect(player, abilityId, cakeDefinition.NameId);
                 }
             };
         }
 
-        BroadcastSpawn(player, cakeNpc, spawnPosition, cakeDefinition.SpawnPoofEffectId);
+        var spawnRecipients = BroadcastSpawn(player, cakeNpc, spawnPosition, cakeDefinition.SpawnEffectIds.Length > 0 ? cakeDefinition.SpawnEffectIds[0] : DefaultSpawnEffectId);
+
+        for (var i = 1; i < cakeDefinition.SpawnEffectIds.Length; i++)
+        {
+            var spawnEffect = new PlayerUpdatePacketPlayCompositeEffect
+            {
+                Guid = cakeNpc.Guid,
+                CompositeEffectId = cakeDefinition.SpawnEffectIds[i],
+                Position = spawnPosition,
+                Clear = false
+            };
+
+            foreach (var recipient in spawnRecipients)
+                recipient.SendTunneled(spawnEffect);
+        }
 
         var despawnTime = DateTimeOffset.UtcNow.AddMilliseconds(cakeDefinition.LifetimeMs);
+        var nextOneShotTime = NextOneShotTime(cakeDefinition);
+        DateTimeOffset? oneShotEndTime = null;
 
         cakeNpc.UpdateEverySecondAction = () =>
         {
-            if (DateTimeOffset.UtcNow >= despawnTime)
-                DespawnNpc(cakeNpc, cakeDefinition.SpawnPoofEffectId);
+            var now = DateTimeOffset.UtcNow;
+
+            if (now >= despawnTime)
+            {
+                DespawnNpc(cakeNpc, 0);
+                return;
+            }
+
+            if (cakeDefinition.OneShotAnimation == 0)
+                return;
+
+            if (oneShotEndTime is not null)
+            {
+                if (now < oneShotEndTime)
+                    return;
+
+                SetCakeAnimation(cakeNpc, cakeDefinition.Animation);
+                oneShotEndTime = null;
+                nextOneShotTime = NextOneShotTime(cakeDefinition);
+            }
+            else if (now >= nextOneShotTime)
+            {
+                SetCakeAnimation(cakeNpc, cakeDefinition.OneShotAnimation);
+                oneShotEndTime = now.AddMilliseconds(cakeDefinition.OneShotAnimationMs);
+            }
         };
+    }
+
+    private static DateTimeOffset NextOneShotTime(CakeItemDefinition cakeDefinition) =>
+        DateTimeOffset.UtcNow.AddMilliseconds(cakeDefinition.OneShotIntervalMs + Random.Shared.Next(cakeDefinition.OneShotIntervalMs + 1));
+
+    private static void SetCakeAnimation(Npc cakeNpc, int animationId)
+    {
+        var packet = new PlayerUpdatePacketSetAnimation
+        {
+            Guid = cakeNpc.Guid,
+            AnimationId = animationId,
+            Flags = 1
+        };
+
+        foreach (var viewer in cakeNpc.VisiblePlayers.Values)
+            viewer.SendTunneled(packet);
     }
 }

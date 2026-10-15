@@ -33,7 +33,8 @@ public static class PacketClientMetricsHandler
         {
             _logger.LogInformation("{connection} disconnected for inactivity. ( Guid: {guid}, IdleTime: {idleTime} )", connection, connection.Player?.Guid, packet.Metrics.IdleTimeout);
 
-            connection.Disconnect();
+            // Disabled for now as community wants to AFK without being disconnected. This will be re-enabled in the future.
+            // connection.Disconnect();
         }
 
         return true;

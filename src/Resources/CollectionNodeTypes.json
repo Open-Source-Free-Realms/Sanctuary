@@ -3,32 +3,153 @@
     "Key": "mushrooms",
     "Name": "Mushrooms",
     "ModelId": 249,
-    "Scale": 1.0,
+    "Scale": 1,
     "CompositeEffectId": 5742,
     "InteractRange": 12,
     "CursorId": 18,
-    "PlacementYOffset": -0.05,
-    "DropTable": [
-      { "ItemDefinitionId": 11082, "Weight": 100 },
-      { "ItemDefinitionId": 11083, "Weight": 100 },
-      { "ItemDefinitionId": 11084, "Weight": 100 },
-      { "ItemDefinitionId": 11086, "Weight": 100 },
-      { "ItemDefinitionId": 11087, "Weight": 100 },
-      { "ItemDefinitionId": 11088, "Weight": 100 }
-    ]
+    "PlacementYOffset": -0.05
   },
   {
     "Key": "rare-mushrooms",
     "Name": "Rare Mushrooms",
     "ModelId": 674,
-    "Scale": 1.0,
+    "Scale": 1,
     "CompositeEffectId": 5740,
     "InteractRange": 12,
     "CursorId": 18,
     "PlacementYOffset": -0.05,
-    "DropTable": [
-      { "ItemDefinitionId": 11081, "Weight": 100 },
-      { "ItemDefinitionId": 11085, "Weight": 100 }
-    ]
+    "SubTextNameId": -2118222202
+  },
+  {
+    "Key": "fossils",
+    "Name": "Pile of Fossils",
+    "ModelId": 724,
+    "Scale": 1,
+    "CompositeEffectId": 5742,
+    "InteractRange": 12,
+    "CursorId": 18,
+    "PlacementYOffset": -0.05
+  },
+  {
+    "Key": "rare-fossils",
+    "Name": "Rare Pile of Fossils",
+    "ModelId": 845,
+    "Scale": 1,
+    "CompositeEffectId": 5740,
+    "InteractRange": 12,
+    "CursorId": 18,
+    "PlacementYOffset": -0.05,
+    "SubTextNameId": -2118222202
+  },
+  {
+    "Key": "sparkling-water",
+    "Name": "Sparkling Water",
+    "ModelId": 271,
+    "Scale": 1,
+    "CompositeEffectId": 15381,
+    "ExtraCompositeEffectIds": [
+      5742
+    ],
+    "InteractRange": 12,
+    "CursorId": 18,
+    "PlacementYOffset": 0
+  },
+  {
+    "Key": "rare-sparkling-water",
+    "Name": "Rare Sparkling Water",
+    "ModelId": 271,
+    "Scale": 1,
+    "CompositeEffectId": 15382,
+    "ExtraCompositeEffectIds": [
+      5740
+    ],
+    "InteractRange": 12,
+    "CursorId": 18,
+    "PlacementYOffset": 0,
+    "SubTextNameId": -2118222202
+  },
+  {
+    "Key": "flowers",
+    "Name": "Pile of Flowers",
+    "ModelId": 248,
+    "Scale": 1,
+    "CompositeEffectId": 5742,
+    "InteractRange": 12,
+    "CursorId": 18,
+    "PlacementYOffset": -0.05
+  },
+  {
+    "Key": "rare-flowers",
+    "Name": "Rare Pile of Flowers",
+    "ModelId": 670,
+    "Scale": 1,
+    "CompositeEffectId": 5740,
+    "InteractRange": 12,
+    "CursorId": 18,
+    "PlacementYOffset": -0.05,
+    "SubTextNameId": -2118222202
+  },
+  {
+    "Key": "robgoblin-junk",
+    "Name": "Robgoblin Junkpile",
+    "ModelId": 333,
+    "Scale": 1,
+    "CompositeEffectId": 5742,
+    "InteractRange": 12,
+    "CursorId": 18,
+    "PlacementYOffset": -0.05
+  },
+  {
+    "Key": "rare-robgoblin-junk",
+    "Name": "Rare Robgoblin Junkpile",
+    "ModelId": 671,
+    "Scale": 1,
+    "CompositeEffectId": 5740,
+    "InteractRange": 12,
+    "CursorId": 18,
+    "PlacementYOffset": -0.05,
+    "SubTextNameId": -2118222202
+  },
+  {
+    "Key": "shells",
+    "Name": "Pile of Shells",
+    "ModelId": 317,
+    "Scale": 1,
+    "CompositeEffectId": 5742,
+    "InteractRange": 12,
+    "CursorId": 18,
+    "PlacementYOffset": -0.05
+  },
+  {
+    "Key": "rare-shells",
+    "Name": "Rare Pile of Shells",
+    "ModelId": 672,
+    "Scale": 1,
+    "CompositeEffectId": 5740,
+    "InteractRange": 12,
+    "CursorId": 18,
+    "PlacementYOffset": -0.05,
+    "SubTextNameId": -2118222202
+  },
+  {
+    "Key": "leaves",
+    "Name": "Pile of Leaves",
+    "ModelId": 326,
+    "Scale": 1,
+    "CompositeEffectId": 5742,
+    "InteractRange": 12,
+    "CursorId": 18,
+    "PlacementYOffset": -0.05
+  },
+  {
+    "Key": "rare-leaves",
+    "Name": "Rare Pile of Leaves",
+    "ModelId": 650,
+    "Scale": 1,
+    "CompositeEffectId": 5740,
+    "InteractRange": 12,
+    "CursorId": 18,
+    "PlacementYOffset": -0.05,
+    "SubTextNameId": -2118222202
   }
 ]

@@ -44,6 +44,7 @@ public sealed class ClientCollection : ISerializableType
     public int Unknown17;
     public int Unknown18;
     public bool Unknown19;
+    public int RewardEntryItemGuid;
     public int Unknown20 = 5604;
 
     public List<ClientCollectionEntry> Entries = [];
@@ -87,6 +88,12 @@ public sealed class ClientCollection : ISerializableType
         writer.Write(Unknown17);
         writer.Write(Unknown18);
         writer.Write(Unknown19);
+
+        // Item reward entries embedded in collection data carry their item GUID
+        // before the reward bundle's trailing value.
+        if ((RewardBundleEntryType)Unknown13 == RewardBundleEntryType.Item)
+            writer.Write(RewardEntryItemGuid);
+
         writer.Write(Unknown20);
 
         writer.Write(Entries);

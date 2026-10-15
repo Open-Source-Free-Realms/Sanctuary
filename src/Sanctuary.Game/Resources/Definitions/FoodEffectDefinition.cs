@@ -6,4 +6,9 @@ public class FoodEffectDefinition
     public int CompositeEffectId { get; set; }
     public int QuickChatId { get; set; }
     public int EffectDelayMs { get; set; }
+
+    public int DurationMs { get; set; }
+    public int CooldownMs { get; set; }
+
+    public float Scale { get; set; }
 }

@@ -19,7 +19,7 @@ public class PacketLogin : IDeserializable<PacketLogin>
 
         var reader = new PacketReader(data);
 
-        if (!reader.TryRead(out short opCode) && opCode != OpCode)
+        if (!reader.TryRead(out short opCode) || opCode != OpCode)
             return false;
 
         if (!reader.TryRead(out value.Ticket))

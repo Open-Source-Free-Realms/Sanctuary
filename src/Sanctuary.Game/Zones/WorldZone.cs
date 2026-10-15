@@ -3,95 +3,163 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Extensions;
 using Sanctuary.Core.IO;
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Helpers;
+using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 
 namespace Sanctuary.Game.Zones;
 
-public sealed class StartingZone : BaseZone
+public sealed class WorldZone : BaseZone
 {
-    private readonly IZoneManager _zoneManager;
-    private readonly IResourceManager _resourceManager;
-    private readonly StartingZoneDefinition _zoneDefinition;
+    private readonly WorldZoneDefinition _zoneDefinition;
 
-    public StartingZone(StartingZoneDefinition zoneDefinition, IServiceProvider serviceProvider)
+    private readonly object _clientAreasLock = new();
+    private readonly HashSet<SeasonalClientAreaDefinition> _activeSeasonalClientAreas = [];
+    private readonly HashSet<int> _scriptEnabledClientAreaIds = [];
+
+    private const int ClientAreaRefreshSeconds = 3;
+    private int _secondsSinceClientAreaRefresh;
+
+    public WorldZone(WorldZoneDefinition zoneDefinition, IServiceProvider serviceProvider)
         : base(zoneDefinition, serviceProvider)
     {
         _zoneDefinition = zoneDefinition;
 
-        _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
-        _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
+        foreach (var seasonalClientArea in _zoneDefinition.SeasonalClientAreas)
+        {
+            if (seasonalClientArea.IsActive(DateTime.Now))
+                _activeSeasonalClientAreas.Add(seasonalClientArea);
+        }
     }
-
-    #region Client Is Ready
 
     public override void OnClientIsReady(Player player)
     {
-        SendQuickChatData(player);
+        base.OnClientIsReady(player);
 
         SendPointOfInterests(player);
-
-        SendUpdateStat(player);
-
-        var clientUpdatePacketHitpoints = new ClientUpdatePacketHitpoints
-        {
-            CurrentHitpoints = 2500,
-            MaxHitpoints = 2500
-        };
-
-        player.SendTunneled(clientUpdatePacketHitpoints);
-
-        var clientUpdatePacketMana = new ClientUpdatePacketMana
-        {
-            CurrentMana = 100,
-            MaxMana = 100
-        };
-
-        player.SendTunneled(clientUpdatePacketMana);
-
-        SendGuildData(player);
-
-        SendReferenceData(player);
-
-        SendCoinStoreItemList(player);
-
         SendAdventurersJournalInfo(player);
 
-        SendWelcomeInfo(player);
+        SendShopData(player);
+        player.SendTunneled(WelcomeScreenHelper.GetAnnouncementsPacket());
 
-        SendPlayerCustomizations(player);
-
-        SendMembershipSubscriptionInfo(player);
-
-        SendInGamePurchase(player);
-
-        var packetZoneDoneSendingInitialData = new PacketZoneDoneSendingInitialData();
-
-        player.SendTunneled(packetZoneDoneSendingInitialData);
-
-        var clientUpdatePacketDoneSendingPreloadCharacters = new ClientUpdatePacketDoneSendingPreloadCharacters();
-
-        player.SendTunneled(clientUpdatePacketDoneSendingPreloadCharacters);
-
-        SendFriendList(player);
-        SendIgnoreList(player);
-
-        UpdateFriendStatus(player);
+        if (player.SeenOneTimeNotifications.TryAdd(OneTimeNotification.WelcomeInfo))
+            SendWelcomeInfo(player);
     }
 
-    private void SendQuickChatData(Player player)
+    public override void OnClientFinishedLoading(Player player)
     {
-        var quickChatSendDataPacket = new QuickChatSendDataPacket();
+        base.OnClientFinishedLoading(player);
 
-        quickChatSendDataPacket.QuickChats = _resourceManager.QuickChats.ToDictionary();
+        SendEnabledClientAreas(player);
+    }
 
-        player.SendTunneled(quickChatSendDataPacket);
+    protected override void UpdateEverySecond()
+    {
+        base.UpdateEverySecond();
+
+        var now = DateTime.Now;
+
+        lock (_clientAreasLock)
+        {
+            foreach (var seasonalClientArea in _zoneDefinition.SeasonalClientAreas)
+            {
+                var isActive = seasonalClientArea.IsActive(now);
+
+                if (isActive == _activeSeasonalClientAreas.Contains(seasonalClientArea))
+                    continue;
+
+                if (isActive)
+                    _activeSeasonalClientAreas.Add(seasonalClientArea);
+                else
+                    _activeSeasonalClientAreas.Remove(seasonalClientArea);
+
+                Logger.LogInformation("Seasonal client areas {name} {state}", seasonalClientArea.Name, isActive ? "enabled" : "disabled");
+
+                if (!isActive)
+                {
+                    foreach (var player in Players)
+                        SendClientAreas(player, seasonalClientArea.AreaIds, false);
+                }
+            }
+        }
+
+        if (++_secondsSinceClientAreaRefresh < ClientAreaRefreshSeconds)
+            return;
+
+        _secondsSinceClientAreaRefresh = 0;
+
+        foreach (var player in Players)
+            SendEnabledClientAreas(player);
+    }
+
+    public override bool IsSeasonActive(string seasonName)
+    {
+        var now = DateTime.Now;
+
+        return _zoneDefinition.SeasonalClientAreas.Any(x => x.Name == seasonName && x.IsActive(now));
+    }
+
+    public override void SetClientAreaEnabled(int areaId, bool enabled)
+    {
+        lock (_clientAreasLock)
+        {
+            var changed = enabled ? _scriptEnabledClientAreaIds.Add(areaId) : _scriptEnabledClientAreaIds.Remove(areaId);
+
+            if (!changed)
+                return;
+        }
+
+        foreach (var player in Players)
+            SendClientAreas(player, [areaId], enabled);
+    }
+
+    private void SendEnabledClientAreas(Player player)
+    {
+        SendClientAreas(player, _zoneDefinition.EnabledClientAreaIds, true);
+
+        lock (_clientAreasLock)
+        {
+            foreach (var seasonalClientArea in _activeSeasonalClientAreas)
+                SendClientAreas(player, seasonalClientArea.AreaIds, true);
+
+            SendClientAreas(player, [.. _scriptEnabledClientAreaIds], true);
+        }
+    }
+
+    private static void SendClientAreas(Player player, List<int> areaIds, bool enabled)
+    {
+        foreach (var areaId in areaIds)
+            player.SendTunneled(new PacketSetClientArea { AreaId = areaId, Enabled = enabled });
+    }
+
+    public int GetZoneAreaId(Vector4 position)
+    {
+        if (_zoneDefinition.Name != "FabledRealms")
+            return 0;
+
+        foreach (var areaDefinition in _zoneDefinition.AreaDefinitions)
+        {
+            var isInArea = areaDefinition.Shape switch
+            {
+                ZoneAreaShape.Circle => position.IsInCircle(new Vector3(areaDefinition.X1, 0, areaDefinition.Z1), areaDefinition.Radius),
+                ZoneAreaShape.Rectangle => position.IsInRectangle(new Vector3(areaDefinition.X1, 0, areaDefinition.Z1),
+                    new Vector3(areaDefinition.X2, 0, areaDefinition.Z2)),
+                ZoneAreaShape.Polygon => position.IsInPolygon(areaDefinition.Points),
+                _ => throw new NotImplementedException(nameof(areaDefinition.Shape))
+            };
+
+            if (isInArea)
+                return areaDefinition.Id;
+        }
+
+        return 0;
     }
 
     private void SendPointOfInterests(Player player)
@@ -113,182 +181,12 @@ public sealed class StartingZone : BaseZone
         player.SendTunneled(packetPointOfInterestDefinitionReply);
     }
 
-    private void SendUpdateStat(Player player)
-    {
-        var clientUpdatePacketUpdateStat = new ClientUpdatePacketUpdateStat();
-
-        clientUpdatePacketUpdateStat.Guid = player.Guid;
-
-        // TODO
-        clientUpdatePacketUpdateStat.Stats.AddRange(
-        [
-            new CharacterStat(CharacterStatId.MaxHealth, 2500),
-            new CharacterStat(CharacterStatId.MaxMovementSpeed, 8f),
-            new CharacterStat(CharacterStatId.WeaponRange, 5f),
-            new CharacterStat(CharacterStatId.HitPointRegen, 25),
-            new CharacterStat(CharacterStatId.MaxMana, 100),
-            new CharacterStat(CharacterStatId.ManaRegen, 4),
-            new CharacterStat(CharacterStatId.MeleeChanceToHit, 100),
-            new CharacterStat(CharacterStatId.MeleeWeaponDamageMultiplier, 1f),
-            new CharacterStat(CharacterStatId.MeleeHandToHandDamage, 1),
-            new CharacterStat(CharacterStatId.EquippedMeleeWeaponDamage, 1),
-            new CharacterStat(CharacterStatId.MeleeAttackIntervalMs, 2000),
-            new CharacterStat(CharacterStatId.DamageMultiplier, 1f),
-            new CharacterStat(CharacterStatId.HealingMultiplier, 1f),
-            new CharacterStat(CharacterStatId.AbilityCriticalHitMultiplier, 1f),
-            new CharacterStat(CharacterStatId.HeadInflationPercent, 100),
-            new CharacterStat(CharacterStatId.RangeMultiplier, 1f),
-            new CharacterStat(CharacterStatId.FactoryProductionModifier, 1f),
-            new CharacterStat(CharacterStatId.FactoryYieldModifier, 1f),
-            new CharacterStat(CharacterStatId.InCombatHitPointRegen, 6),
-            new CharacterStat(CharacterStatId.InCombatManaRegen, 4)
-        ]);
-
-        player.SendTunneled(clientUpdatePacketUpdateStat);
-    }
-
-    private void SendGuildData(Player player)
-    {
-        var guildCanCreateGuildPacket = new GuildCanCreateGuildPacket
-        {
-            CanCreateGuild = player.Profiles.Any(x => x.Rank >= 15) && player.GuildData is null
-        };
-
-        player.SendTunneled(guildCanCreateGuildPacket);
-
-        if (player.GuildData is null)
-            return;
-
-        var guildDataFullPacket = new GuildDataFullPacket
-        {
-            Data = player.GuildData,
-            Guid = player.GuildData.Guid
-        };
-
-        player.SendTunneled(guildDataFullPacket);
-
-        var guildPlayerStatusUpdatePacket = new GuildPlayerStatusUpdatePacket
-        {
-            PlayerGuid = player.Guid,
-            GuildGuid = player.GuildData.Guid,
-            IsInGuild = true
-        };
-
-        player.SendTunneled(guildPlayerStatusUpdatePacket);
-
-        if (!player.GuildData.Members.TryGetValue(player.Guid, out var playerGuildMember))
-            return;
-
-        var guildMemberStatusUpdatePacket = new GuildMemberStatusUpdatePacket
-        {
-            GuildGuid = player.GuildData.Guid,
-            MemberGuid = player.Guid,
-
-            Name = player.Name,
-            Role = playerGuildMember.Role,
-            Online = true,
-
-            Type = 6,
-
-            WorldId = player.Zone.Id,
-
-            ProfileId = player.ActiveProfileId,
-            ProfileRank = player.ActiveProfile.Rank
-        };
-
-        foreach (var guildMember in player.GuildData.Members)
-        {
-            if (guildMember.Key == player.Guid)
-                continue;
-
-            if (!_zoneManager.TryGetPlayer(guildMember.Key, out var guildPlayer))
-                continue;
-
-            if (guildPlayer.GuildData is null)
-                continue;
-
-            if (guildPlayer.GuildData.Members.TryGetValue(player.Guid, out var onlineMember))
-            {
-                onlineMember.Online = true;
-                onlineMember.WorldId = player.Zone.Id;
-                onlineMember.ProfileId = player.ActiveProfileId;
-                onlineMember.ProfileRank = player.ActiveProfile.Rank;
-            }
-            else
-            {
-                guildPlayer.GuildData.Members[player.Guid] = new GuildMember
-                {
-                    Guid = player.Guid,
-                    Name = player.Name,
-                    Role = playerGuildMember.Role,
-                    Online = true,
-                    WorldId = player.Zone.Id,
-                    ProfileId = player.ActiveProfileId,
-                    ProfileRank = player.ActiveProfile.Rank
-                };
-            }
-
-            guildPlayer.SendTunneled(guildMemberStatusUpdatePacket);
-        }
-    }
-
-    private void SendReferenceData(Player player)
-    {
-        var referenceDataPacketItemClassDefinitions = new ReferenceDataPacketItemClassDefinitions();
-
-        referenceDataPacketItemClassDefinitions.ItemClasses = _resourceManager.ItemClasses.ToDictionary();
-
-        player.SendTunneled(referenceDataPacketItemClassDefinitions);
-
-        var referenceDataPacketItemCategoryDefinitions = new ReferenceDataPacketItemCategoryDefinitions();
-
-        referenceDataPacketItemCategoryDefinitions.ItemCategories = _resourceManager.ItemCategories.ToDictionary();
-        referenceDataPacketItemCategoryDefinitions.ItemCategoryGroups = _resourceManager.ItemCategoryGroups.ToDictionary();
-
-        player.SendTunneled(referenceDataPacketItemCategoryDefinitions);
-
-        var referenceDataPacketClientProfileData = new ReferenceDataPacketClientProfileData();
-
-        referenceDataPacketClientProfileData.Profiles = _resourceManager.Profiles.ToDictionary();
-
-        player.SendTunneled(referenceDataPacketClientProfileData);
-    }
-
-    private void SendCoinStoreItemList(Player player)
-    {
-        var coinStoreItemListPacket = new CoinStoreItemListPacket();
-
-        coinStoreItemListPacket.StaticItems = _resourceManager.CoinStoreItems.ToDictionary();
-
-        player.SendTunneled(coinStoreItemListPacket);
-
-        var clientItemDefinitions = new List<ClientItemDefinition>();
-
-        foreach (var coinStoreItem in _resourceManager.CoinStoreItems)
-        {
-            if (!_resourceManager.ClientItemDefinitions.TryGetValue(coinStoreItem.Key, out var clientItemDefinition))
-                continue;
-
-            clientItemDefinitions.Add(clientItemDefinition);
-        }
-
-        using var writer = new PacketWriter();
-
-        writer.Write(clientItemDefinitions);
-
-        var playerUpdatePacketItemDefinitions = new PlayerUpdatePacketItemDefinitions();
-
-        playerUpdatePacketItemDefinitions.Payload = writer.Buffer;
-
-        player.SendTunneled(playerUpdatePacketItemDefinitions);
-    }
-
     private void SendAdventurersJournalInfo(Player player)
     {
         // DO NOT REMOVE even if it's not fully implemented. This packet is needed
         // due to an Area Definition called "Newbiezone" in FabledRealmsAreas.xml.
 
-        var adventurersJournal = new AdventurersJournalInfoPacket();
+        var adventurersJournalInfoPacket = new AdventurersJournalInfoPacket();
 
         AdventurersJournalRegionDefinition[] regions =
         [
@@ -334,7 +232,7 @@ public sealed class StartingZone : BaseZone
             }
         ];
 
-        adventurersJournal.Regions = regions.ToDictionary(x => x.Id);
+        adventurersJournalInfoPacket.Regions = regions.ToDictionary(x => x.Id);
 
         AdventurersJournalHubDefinition[] hubs =
         [
@@ -470,7 +368,7 @@ public sealed class StartingZone : BaseZone
             }
         ];
 
-        adventurersJournal.Hubs = hubs.ToDictionary(x => x.Id);
+        adventurersJournalInfoPacket.Hubs = hubs.ToDictionary(x => x.Id);
 
         AdventurersJournalHubQuestDefinition[] hubQuests =
         [
@@ -824,7 +722,7 @@ public sealed class StartingZone : BaseZone
             }
         ];
 
-        adventurersJournal.HubQuests = hubQuests.ToDictionary(x => x.Id);
+        adventurersJournalInfoPacket.HubQuests = hubQuests.ToDictionary(x => x.Id);
 
         AdventurersJournalStickerDefinition[] stickers =
         [
@@ -1022,310 +920,11 @@ public sealed class StartingZone : BaseZone
             }
         ];
 
-        adventurersJournal.Stickers = stickers.ToDictionary(x => x.Id);
+        adventurersJournalInfoPacket.Stickers = stickers.ToDictionary(x => x.Id);
 
-        player.SendTunneled(adventurersJournal);
+        player.SendTunneled(adventurersJournalInfoPacket);
     }
 
-    private void SendWelcomeInfo(Player player)
-    {
-        var packetLoadWelcomeScreen = new PacketLoadWelcomeScreen();
-
-        packetLoadWelcomeScreen.Contents.AddRange(
-        [
-            new ContentInfo
-            {
-                NameId = 6185,
-                DescriptionId = 6186,
-            },
-            new ContentInfo
-            {
-                NameId = 6187,
-                DescriptionId = 6188,
-            },
-            new ContentInfo
-            {
-                NameId = 6189,
-                DescriptionId = 6190,
-            }
-        ]);
-
-        packetLoadWelcomeScreen.ClaimCodes.AddRange(
-        [
-            new ClaimCodeInfo
-            {
-                Code = "MMMDONUT",
-                NameId = 401519,
-                DescriptionId = 401534,
-                IconId = 929
-            },
-            new ClaimCodeInfo
-            {
-                Code = "BERRYCUPCAKE",
-                NameId = 401517,
-                DescriptionId = 401532,
-                IconId = 939
-            },
-            new ClaimCodeInfo
-            {
-                Code = "SKELETAL",
-                NameId = 409157,
-                DescriptionId = 109132,
-                IconId = 3459
-            },
-            new ClaimCodeInfo
-            {
-                Code = "STRAWBERRIES",
-                NameId = 409158,
-                DescriptionId = 108948,
-                IconId = 3441
-            },
-            new ClaimCodeInfo
-            {
-                Code = "FROGGY",
-                NameId = 409159,
-                DescriptionId = 3141,
-                IconId = 1258
-            },
-            new ClaimCodeInfo
-            {
-                Code = "SANDWICH",
-                NameId = 409160,
-                DescriptionId = 2430,
-                IconId = 949
-            }
-        ]);
-
-        player.SendTunneled(packetLoadWelcomeScreen);
-    }
-
-    private void SendPlayerCustomizations(Player player)
-    {
-        var playerUpdatePacketCustomizationData = new PlayerUpdatePacketCustomizationData();
-
-        var customizations = new[]
-        {
-            new PlayerCustomizationData
-            {
-                Id = 0, // Head
-                Param = player.HeadId,
-                StringParam = player.Head
-            },
-            new PlayerCustomizationData
-            {
-                Id = 1, // Skin Tone
-                Param = player.SkinToneId,
-                StringParam = player.SkinTone
-            },
-            new PlayerCustomizationData
-            {
-                Id = 2, // Hair
-                Param = player.HairId,
-                StringParam = player.Hair
-            },
-            new PlayerCustomizationData
-            {
-                Id = 3, // Hair Color
-                Param = player.HairColor
-            },
-            new PlayerCustomizationData
-            {
-                Id = 4, // Eye Color
-                Param = player.EyeColor
-            },
-            new PlayerCustomizationData
-            {
-                Id = 5, // Model Customization
-                Param = player.ModelCustomizationId,
-                StringParam = player.ModelCustomization
-            },
-            new PlayerCustomizationData
-            {
-                Id = 6, // Face Paint
-                Param = player.FacePaintId,
-                StringParam = player.FacePaint
-            },
-            new PlayerCustomizationData
-            {
-                Id = 8, // Model
-                Param = player.Model
-            }
-        };
-
-        playerUpdatePacketCustomizationData.Customizations.AddRange(customizations);
-
-        player.SendTunneled(playerUpdatePacketCustomizationData);
-    }
-
-    private void SendMembershipSubscriptionInfo(Player player)
-    {
-        bool isReferee = player.IsAdmin || player.IsMod;
-        var packetMembershipSubscriptionInfo = new PacketMembershipSubscriptionInfo
-        {
-            IsMember = player.MembershipStatus != 0,
-            IsReferee = isReferee
-        };
-
-        player.SendTunneled(packetMembershipSubscriptionInfo);
-    }
-
-    private void SendInGamePurchase(Player player)
-    {
-        var packetInGamePurchaseEnableMarketplace = new PacketInGamePurchaseEnableMarketplace
-        {
-            Enabled = true
-        };
-
-        player.SendTunneled(packetInGamePurchaseEnableMarketplace);
-
-        var packetInGamePurchaseStoreEnablePaymentSources = new PacketInGamePurchaseStoreEnablePaymentSources
-        {
-            Sms = true,
-            Paypal = true
-        };
-
-        player.SendTunneled(packetInGamePurchaseStoreEnablePaymentSources);
-
-        var packetInGamePurchaseStoreBundleCategoryGroups = new PacketInGamePurchaseStoreBundleCategoryGroups();
-
-        packetInGamePurchaseStoreBundleCategoryGroups.CategoryGroups = _resourceManager.StoreBundleCategoryGroups.ToDictionary();
-
-        player.SendTunneled(packetInGamePurchaseStoreBundleCategoryGroups);
-
-        var packetInGamePurchaseStoreBundleCategories = new PacketInGamePurchaseStoreBundleCategories();
-
-        packetInGamePurchaseStoreBundleCategories.CategoryTree.Categories = _resourceManager.StoreBundleCategories.ToDictionary();
-
-        player.SendTunneled(packetInGamePurchaseStoreBundleCategories);
-
-        if (_resourceManager.Stores.TryGetValue(1, out var mainStore))
-        {
-            var packetInGamePurchaseStoreBundles = new PacketInGamePurchaseStoreBundles();
-
-            packetInGamePurchaseStoreBundles.StoreId = mainStore.Id;
-
-            packetInGamePurchaseStoreBundles.Store.Id = mainStore.Id;
-            packetInGamePurchaseStoreBundles.Store.NameId = mainStore.NameId;
-            packetInGamePurchaseStoreBundles.Store.DescriptionId = mainStore.DescriptionId;
-            packetInGamePurchaseStoreBundles.Store.Image = mainStore.Image;
-
-            foreach (var storeBundle in mainStore.Bundles.Values)
-            {
-                var valid = storeBundle.Entries.All(x => _resourceManager.ClientItemDefinitions.ContainsKey(x.MarketingItemId));
-
-                if (valid)
-                    packetInGamePurchaseStoreBundles.Store.Bundles.Add(storeBundle.Id, storeBundle);
-            }
-
-            player.SendTunneled(packetInGamePurchaseStoreBundles);
-        }
-
-        var packetInGamePurchaseStoreBundleGroups = new PacketInGamePurchaseStoreBundleGroups();
-
-        packetInGamePurchaseStoreBundleGroups.BundleGroups = _resourceManager.StoreBundleGroups.ToDictionary();
-
-        player.SendTunneled(packetInGamePurchaseStoreBundleGroups);
-
-        /* var inGamePurchaseUpdateSaleDisplay = new InGamePurchaseUpdateSaleDisplay();
-
-        inGamePurchaseUpdateSaleDisplay.Sales.Add(new SaleDisplayInfo
-        {
-            Id = 12951,
-            IconId = 7866,
-            TintId = 0,
-            TitleId = 824,
-            BodyId = 825,
-            SecondsLeft = 1000,
-            Unknown = 0,
-            IsMembership = false
-        });
-
-        player.SendTunneled(inGamePurchaseUpdateSaleDisplay); */
-    }
-
-    private void SendFriendList(Player player)
-    {
-        var friendListPacket = new FriendListPacket();
-
-        friendListPacket.Friends = player.Friends;
-
-        player.SendTunneled(friendListPacket);
-    }
-
-    private void SendIgnoreList(Player player)
-    {
-        var ignoreListPacket = new IgnoreListPacket();
-
-        ignoreListPacket.Ignores = player.Ignores;
-
-        player.SendTunneled(ignoreListPacket);
-    }
-
-    private void UpdateFriendStatus(Player player)
-    {
-        var friendOnlinePacket = new FriendOnlinePacket();
-
-        friendOnlinePacket.Guid = player.Guid;
-
-        friendOnlinePacket.IsLocal = true;
-
-        var friendStatusPacket = new FriendStatusPacket
-        {
-            Guid = player.Guid,
-            Status =
-            {
-                ProfileId = player.ActiveProfile.Id,
-                ProfileRank = player.ActiveProfile.Rank,
-                ProfileIconId = player.ActiveProfile.Icon,
-                ProfileNameId = player.ActiveProfile.NameId,
-                ProfileBackgroundImageId = player.ActiveProfile.BadgeImageSet
-            }
-        };
-
-        foreach (var friend in player.Friends)
-        {
-            if (!_zoneManager.TryGetPlayer(friend.Guid, out var friendPlayer))
-                continue;
-
-            var otherFriendPlayer = friendPlayer.Friends.FirstOrDefault(x => x.Guid == player.Guid);
-
-            if (otherFriendPlayer is null || otherFriendPlayer.Online)
-                continue;
-
-            otherFriendPlayer.Online = true;
-
-            friendPlayer.SendTunneled(friendOnlinePacket);
-            friendPlayer.SendTunneled(friendStatusPacket);
-        }
-    }
-
-    #endregion
-
-    public int GetZoneAreaId(Vector4 position)
-    {
-        foreach (var areaDefinition in _zoneDefinition.AreaDefinitions)
-        {
-            if (areaDefinition.Shape == "Circle")
-            {
-                var circle = new Vector3(areaDefinition.X1, 0, areaDefinition.Z1);
-
-                if (position.IsInCircle(circle, areaDefinition.Radius))
-                    return areaDefinition.Id;
-            }
-            else if (areaDefinition.Shape == "Rectangle")
-            {
-                var p1 = new Vector3(areaDefinition.X1, 0, areaDefinition.Z1);
-                var p2 = new Vector3(areaDefinition.X2, 0, areaDefinition.Z2);
-
-                if (position.IsInRectangle(p1, p2))
-                    return areaDefinition.Id;
-            }
-            else
-            {
-                throw new NotImplementedException(nameof(areaDefinition.Shape));
-            }
-        }
-
-        return 0;
-    }
+    private void SendWelcomeInfo(Player player) =>
+        player.SendTunneled(WelcomeScreenHelper.GetWelcomeScreenPacket(player.SecondsSinceLastLogin, player.StationCash));
 }

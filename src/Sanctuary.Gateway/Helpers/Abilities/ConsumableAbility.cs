@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Threading;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -11,7 +10,7 @@ using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Game;
 using Sanctuary.Game.Entities;
-using Sanctuary.Game.Zones;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 
@@ -20,17 +19,21 @@ namespace Sanctuary.Gateway.Helpers.Abilities;
 public sealed record AbilityServices(
     ILogger Logger,
     IResourceManager ResourceManager,
-    IDbContextFactory<DatabaseContext> DbContextFactory);
+    IDbContextFactory<DatabaseContext> DbContextFactory,
+    IRewardManager RewardManager);
 
 public abstract class ConsumableAbility(AbilityServices services)
 {
-    private static int _castFxTagCounter = 5000;
-
     internal const int ActionBarId = 2;
     protected const int IdleAnimationId = 1;
 
+    protected const int MinCooldownMs = 3000;
+
+    protected static int ClampCooldown(int cooldownMs) => Math.Max(cooldownMs, MinCooldownMs);
+
     protected readonly ILogger _logger = services.Logger;
     protected readonly IResourceManager _resourceManager = services.ResourceManager;
+    protected readonly IRewardManager _rewardManager = services.RewardManager;
 
     private readonly IDbContextFactory<DatabaseContext> _dbContextFactory = services.DbContextFactory;
 
@@ -38,7 +41,9 @@ public abstract class ConsumableAbility(AbilityServices services)
 
     public abstract bool HandleAbility(Player player, AbilityPacketClientRequestStartAbility packet, int slot, ClientItem clientItem, ClientItemDefinition itemDefinition);
 
-    protected static int NextEffectTagId() => Interlocked.Increment(ref _castFxTagCounter);
+    // Global, not scoped to the player - shared with Player's own effect tags (see PlayerEffect)
+    // so two unrelated tags never collide on the same actor.
+    protected static int NextEffectTagId() => EffectTagIdGenerator.Next();
 
     // Color-variant items (the 5 Silly String Can colors) share one Icon.Id and differ only by TintId.
     protected static int IconTintId(ClientItem clientItem, int defaultTintId) =>
@@ -114,6 +119,36 @@ public abstract class ConsumableAbility(AbilityServices services)
         return true;
     }
 
+    protected static void ApplyFoodEffect(Player player, int nameId, int effectId, int durationMs, int delayMs = 0, float scale = 0)
+    {
+        if (effectId == 0 && scale == 0)
+            return;
+
+        if (player.ActiveFoodEffectId != 0)
+            player.RemoveEffect(player.ActiveFoodEffectId);
+
+        player.ActiveFoodEffectId = player.AddEffect(new PlayerEffect
+        {
+            ExpiresAt = DateTimeOffset.UtcNow.AddMilliseconds(delayMs + durationMs),
+            WorldEffectId = effectId,
+            WorldEffectStartsAt = delayMs > 0 ? DateTimeOffset.UtcNow.AddMilliseconds(delayMs) : null,
+            Scale = scale,
+            BuffIconId = Player.ChangeFormBuffIconId,
+            BuffNameId = nameId,
+            OnRemoved = () => player.ActiveFoodEffectId = 0
+        });
+    }
+
+    protected const int FoodEffectDurationMs = 1_800_000;
+
+    protected void ApplyTransformOrFoodEffect(Player player, int abilityId, int nameId)
+    {
+        if (_resourceManager.Consumables.Transformations.TryGetValue(abilityId, out var transform))
+            player.ApplyTemporaryAppearance(transform.ModelId, transform.DurationMs, transform.CompositeEffectId, nameId);
+        else if (_resourceManager.Consumables.FoodEffects.TryGetValue(abilityId, out var foodEffect))
+            ApplyFoodEffect(player, nameId, foodEffect.CompositeEffectId, foodEffect.DurationMs, foodEffect.EffectDelayMs, foodEffect.Scale);
+    }
+
     protected static void PlayEffect(Player player, int effectId, int delayMs = 0)
     {
         if (effectId == 0)
@@ -152,10 +187,7 @@ public abstract class ConsumableAbility(AbilityServices services)
 
     protected static Npc? SpawnNpc(Player player, Vector4 position, Action<Npc> configure)
     {
-        if (player.Zone is not StartingZone startingZone)
-            return null;
-
-        if (!startingZone.TryCreateNpc(out var npc))
+        if (!player.Zone.TryCreateNpc(out var npc))
             return null;
 
         configure(npc);
@@ -199,6 +231,16 @@ public abstract class ConsumableAbility(AbilityServices services)
         player.SendTunneled(new AbilityPacketFailed { StringId = 3079 });
 
         return true;
+    }
+
+    protected static int RollExcluding(int count, int previous)
+    {
+        if (count <= 1 || previous < 0)
+            return Random.Shared.Next(count);
+
+        var roll = Random.Shared.Next(count - 1);
+
+        return roll >= previous ? roll + 1 : roll;
     }
 
     protected void FinishActivation(Player player, ClientItem clientItem, ClientItemDefinition itemDefinition, int slot, int cooldownMs, int iconTintId = 0)

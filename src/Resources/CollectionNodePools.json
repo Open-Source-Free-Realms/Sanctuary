@@ -4,13 +4,8099 @@
     "ZoneDefinitionId": 1,
     "NodeType": "mushrooms",
     "MaxActiveNodes": 12,
-    "RespawnSeconds": 60
+    "RespawnSeconds": 60,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 11082,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 11083,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 11084,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 11086,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 11087,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 11088,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3274,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3275,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3276,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3277,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3278,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3279,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3282,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3283,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3284,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3285,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3286,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3287,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23507,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23508,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23509,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23510,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23511,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23512,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23515,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23516,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23517,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23518,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23519,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23520,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23523,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23524,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23525,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23526,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23527,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23528,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23531,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23532,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23533,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23534,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23535,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23536,
+        "Weight": 100
+      }
+    ]
   },
   {
     "Key": "briarwood-mushrooms-rare",
     "ZoneDefinitionId": 1,
     "NodeType": "rare-mushrooms",
     "MaxActiveNodes": 2,
-    "RespawnSeconds": 300
+    "RespawnSeconds": 300,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 11081,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 11085,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3280,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3281,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3288,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3289,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23513,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23514,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23521,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23522,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23529,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23530,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23537,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23538,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "blackspore-fossils",
+    "ZoneDefinitionId": 1,
+    "NodeType": "fossils",
+    "MaxActiveNodes": 5,
+    "RespawnSeconds": 60,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3799,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3800,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3801,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3802,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3803,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3804,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3805,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3806,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3807,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3808,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3809,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3810,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3811,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3812,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3813,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3814,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3823,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3824,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3825,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3826,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3827,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3828,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3829,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3830,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3831,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3832,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3833,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3834,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3835,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3836,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3837,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3838,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23363,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23364,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23365,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23366,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23367,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23368,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23371,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23372,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23373,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23374,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23375,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23376,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23379,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23380,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23381,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23382,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23383,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23384,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23387,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23388,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23389,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23390,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23391,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23392,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23395,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23396,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23397,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23398,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23399,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23400,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23403,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23404,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23405,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23406,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23407,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23408,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23411,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23412,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23413,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23414,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23415,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23416,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23419,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23420,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23421,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23422,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23423,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23424,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "blackspore-fossils-rare",
+    "ZoneDefinitionId": 1,
+    "NodeType": "rare-fossils",
+    "MaxActiveNodes": 2,
+    "RespawnSeconds": 300,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3815,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3816,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3817,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3818,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3819,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3820,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3821,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3822,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3839,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3840,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3841,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3842,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3843,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3844,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3845,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3846,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23369,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23370,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23377,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23378,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23385,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23386,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23393,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23394,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23401,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23402,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23409,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23410,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23417,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23418,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23425,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23426,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "stillwater-sparkling-water",
+    "ZoneDefinitionId": 1,
+    "NodeType": "sparkling-water",
+    "MaxActiveNodes": 6,
+    "RespawnSeconds": 60,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3943,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3944,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3945,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3946,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3947,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3948,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23179,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23180,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23181,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23182,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23183,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23184,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23227,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23228,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23229,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23230,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23231,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23232,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "stillwater-sparkling-water-rare",
+    "ZoneDefinitionId": 1,
+    "NodeType": "rare-sparkling-water",
+    "MaxActiveNodes": 1,
+    "RespawnSeconds": 300,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3949,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3950,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23185,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23186,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23233,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23234,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "stillwater-flowers",
+    "ZoneDefinitionId": 1,
+    "NodeType": "flowers",
+    "MaxActiveNodes": 4,
+    "RespawnSeconds": 60,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3106,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3107,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3108,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3109,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3110,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3111,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "stillwater-flowers-rare",
+    "ZoneDefinitionId": 1,
+    "NodeType": "rare-flowers",
+    "MaxActiveNodes": 1,
+    "RespawnSeconds": 300,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3112,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3113,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "stillwater-robgoblin-junk",
+    "ZoneDefinitionId": 1,
+    "NodeType": "robgoblin-junk",
+    "MaxActiveNodes": 3,
+    "RespawnSeconds": 60,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3122,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3123,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3124,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3125,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3126,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3127,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 11065,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 11066,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 11067,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 11068,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 11069,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 11070,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3146,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3147,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3148,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3149,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3150,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3151,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3210,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3211,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3212,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3213,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3214,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3215,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3706,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3707,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3708,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3709,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3710,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3711,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3714,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3715,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3716,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3717,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3718,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3719,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3722,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3723,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3724,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3725,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3726,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3727,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3783,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3784,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3785,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3786,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3787,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3788,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3791,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3792,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3793,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3794,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3795,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3796,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3847,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3848,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3849,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3850,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3851,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3852,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3855,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3856,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3857,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3858,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3859,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3860,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3863,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3864,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3865,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3866,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3867,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3868,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3871,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3872,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3873,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3874,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3875,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3876,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3879,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3880,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3881,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3882,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3883,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3884,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3887,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3888,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3889,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3890,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3891,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3892,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23235,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23236,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23237,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23238,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23239,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23240,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23243,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23244,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23245,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23246,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23247,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23248,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23251,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23252,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23253,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23254,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23255,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23256,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23259,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23260,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23261,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23262,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23263,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23264,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23267,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23268,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23269,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23270,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23271,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23272,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23275,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23276,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23277,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23278,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23279,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23280,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23283,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23284,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23285,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23286,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23287,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23288,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23299,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23300,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23301,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23302,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23303,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23304,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23307,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23308,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23309,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23310,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23311,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23312,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23315,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23316,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23317,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23318,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23319,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23320,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23323,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23324,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23325,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23326,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23327,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23328,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23331,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23332,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23333,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23334,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23335,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23336,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23339,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23340,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23341,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23342,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23343,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23344,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23347,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23348,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23349,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23350,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23351,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23352,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23355,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23356,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23357,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23358,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23359,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23360,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23427,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23428,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23429,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23430,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23431,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23432,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23435,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23436,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23437,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23438,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23439,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23440,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23443,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23444,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23445,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23446,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23447,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23448,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23451,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23452,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23453,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23454,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23455,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23456,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23459,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23460,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23461,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23462,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23463,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23464,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23467,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23468,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23469,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23470,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23471,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23472,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23539,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23540,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23541,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23542,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23543,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23544,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23547,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23548,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23549,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23550,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23551,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23552,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23555,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23556,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23557,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23558,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23559,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23560,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23563,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23564,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23565,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23566,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23567,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23568,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23291,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23292,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23293,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23294,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23295,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23296,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "stillwater-robgoblin-junk-rare",
+    "ZoneDefinitionId": 1,
+    "NodeType": "rare-robgoblin-junk",
+    "MaxActiveNodes": 1,
+    "RespawnSeconds": 300,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3128,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3129,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 11071,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 11072,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3152,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3153,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3216,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3217,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3712,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3713,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3720,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3721,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3728,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3729,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3789,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3790,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3797,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3798,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3853,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3854,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3861,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3862,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3869,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3870,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3877,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3878,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3885,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3886,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3893,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3894,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23241,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23242,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23249,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23250,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23257,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23258,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23265,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23266,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23273,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23274,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23281,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23282,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23289,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23290,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23305,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23306,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23313,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23314,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23321,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23322,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23329,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23330,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23337,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23338,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23345,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23346,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23353,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23354,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23361,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23362,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23433,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23434,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23441,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23442,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23449,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23450,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23457,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23458,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23465,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23466,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23473,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23474,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23545,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23546,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23553,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23554,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23561,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23562,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23569,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23570,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23297,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23298,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "lakeshore-sparkling-water",
+    "ZoneDefinitionId": 1,
+    "NodeType": "sparkling-water",
+    "MaxActiveNodes": 5,
+    "RespawnSeconds": 60,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3935,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3936,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3937,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3938,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3939,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3940,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23171,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23172,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23173,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23174,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23175,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23176,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23219,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23220,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23221,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23222,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23223,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23224,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "lakeshore-sparkling-water-rare",
+    "ZoneDefinitionId": 1,
+    "NodeType": "rare-sparkling-water",
+    "MaxActiveNodes": 1,
+    "RespawnSeconds": 300,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3941,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3942,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23177,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23178,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23225,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23226,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "seaside-shells",
+    "ZoneDefinitionId": 1,
+    "NodeType": "shells",
+    "MaxActiveNodes": 4,
+    "RespawnSeconds": 60,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3895,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3896,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3897,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3898,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3899,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3900,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3250,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3251,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3252,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3253,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3254,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3255,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3258,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3259,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3260,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3261,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3262,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3263,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3903,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3904,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3905,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3906,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3907,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3908,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "seaside-shells-rare",
+    "ZoneDefinitionId": 1,
+    "NodeType": "rare-shells",
+    "MaxActiveNodes": 2,
+    "RespawnSeconds": 300,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3901,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3902,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3256,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3257,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3264,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3265,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3909,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3910,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "seaside-sparkling-water",
+    "ZoneDefinitionId": 1,
+    "NodeType": "sparkling-water",
+    "MaxActiveNodes": 4,
+    "RespawnSeconds": 60,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3919,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3920,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3921,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3922,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3923,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3924,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23163,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23164,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23165,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23166,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23167,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23168,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23211,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23212,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23213,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23214,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23215,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23216,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "seaside-sparkling-water-rare",
+    "ZoneDefinitionId": 1,
+    "NodeType": "rare-sparkling-water",
+    "MaxActiveNodes": 2,
+    "RespawnSeconds": 300,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3925,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3926,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23169,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23170,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23217,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23218,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "snowhill-flowers",
+    "ZoneDefinitionId": 1,
+    "NodeType": "flowers",
+    "MaxActiveNodes": 3,
+    "RespawnSeconds": 60,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 9124,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9125,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9126,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9127,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9128,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9129,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9130,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9131,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9132,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9133,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9134,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9135,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9136,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9137,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9138,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9139,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9140,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9141,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9142,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9143,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9144,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9145,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9146,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9147,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9148,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9149,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9150,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9151,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9152,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9153,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9154,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9155,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9156,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9157,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9158,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9159,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9160,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9161,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9162,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9163,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9164,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9165,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9166,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9167,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9168,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9169,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9170,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9171,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9172,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9173,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9174,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9175,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9176,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9177,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9178,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9179,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9180,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9181,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9182,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9183,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9184,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9185,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9186,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9187,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "snowhill-flowers-rare",
+    "ZoneDefinitionId": 1,
+    "NodeType": "rare-flowers",
+    "MaxActiveNodes": 1,
+    "RespawnSeconds": 300,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 9196,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9197,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9198,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9199,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9200,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9201,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9202,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 9203,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "snowhill-leaves",
+    "ZoneDefinitionId": 1,
+    "NodeType": "leaves",
+    "MaxActiveNodes": 4,
+    "RespawnSeconds": 60,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3234,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3235,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3236,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3237,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3238,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3239,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3218,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3219,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3220,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3221,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3222,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3223,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3538,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3539,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3540,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3541,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3542,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3543,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3546,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3547,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3548,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3549,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3550,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3551,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3554,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3555,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3556,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3557,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3558,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3559,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3562,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3563,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3564,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3565,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3566,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3567,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3570,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3571,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3572,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3573,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3574,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3575,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3578,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3579,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3580,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3581,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3582,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3583,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3586,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3587,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3588,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3589,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3590,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3591,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3594,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3595,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3596,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3597,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3598,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3599,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3602,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3603,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3604,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3605,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3606,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3607,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3610,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3611,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3612,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3613,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3614,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3615,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3618,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3619,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3620,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3621,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3622,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3623,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3626,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3627,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3628,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3629,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3630,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3631,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3634,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3635,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3636,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3637,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3638,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3639,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3642,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3643,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3644,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3645,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3646,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3647,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3650,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3651,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3652,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3653,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3654,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3655,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3658,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3659,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3660,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3661,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3662,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3663,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3666,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3667,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3668,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3669,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3670,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3671,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3674,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3675,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3676,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3677,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3678,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3679,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3682,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3683,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3684,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3685,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3686,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3687,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3690,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3691,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3692,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3693,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3694,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3695,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3698,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3699,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3700,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3701,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3702,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3703,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23086,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23087,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23088,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23089,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23090,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23091,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23094,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23095,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23096,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23097,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23098,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23099,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23102,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23103,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23104,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23105,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23106,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23107,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23119,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23120,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23121,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23122,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23123,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23124,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23131,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23132,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23133,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23134,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23135,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23136,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "snowhill-leaves-rare",
+    "ZoneDefinitionId": 1,
+    "NodeType": "rare-leaves",
+    "MaxActiveNodes": 2,
+    "RespawnSeconds": 300,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3240,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3241,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3224,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3225,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3544,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3545,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3552,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3553,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3560,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3561,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3568,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3569,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3576,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3577,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3584,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3585,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3592,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3593,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3600,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3601,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3608,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3609,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3616,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3617,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3624,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3625,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3632,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3633,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3640,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3641,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3648,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3649,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3656,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3657,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3664,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3665,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3672,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3673,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3680,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3681,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3688,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3689,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3696,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3697,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3704,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3705,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23092,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23093,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23100,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23101,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23108,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23109,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23125,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23126,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23137,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23138,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "sanctuary-central-sparkling-water",
+    "ZoneDefinitionId": 1,
+    "NodeType": "sparkling-water",
+    "MaxActiveNodes": 4,
+    "RespawnSeconds": 60,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3943,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3944,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3945,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3946,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3947,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3948,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23179,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23180,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23181,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23182,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23183,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23184,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23227,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23228,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23229,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23230,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23231,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23232,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "sanctuary-central-sparkling-water-rare",
+    "ZoneDefinitionId": 1,
+    "NodeType": "rare-sparkling-water",
+    "MaxActiveNodes": 1,
+    "RespawnSeconds": 300,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3949,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3950,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23185,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23186,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23233,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23234,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "sanctuary-central-flowers",
+    "ZoneDefinitionId": 1,
+    "NodeType": "flowers",
+    "MaxActiveNodes": 22,
+    "RespawnSeconds": 60,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3090,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3091,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3092,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3093,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3094,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3095,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3098,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3099,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3100,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3101,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3102,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3103,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3114,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3115,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3116,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3117,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3118,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3119,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23032,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23033,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23034,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23035,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23036,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23037,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "sanctuary-central-flowers-rare",
+    "ZoneDefinitionId": 1,
+    "NodeType": "rare-flowers",
+    "MaxActiveNodes": 4,
+    "RespawnSeconds": 300,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3096,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3097,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3104,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3105,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3120,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3121,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23038,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23039,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "sanctuary-central-robgoblin-junk",
+    "ZoneDefinitionId": 1,
+    "NodeType": "robgoblin-junk",
+    "MaxActiveNodes": 18,
+    "RespawnSeconds": 60,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3122,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3123,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3124,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3125,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3126,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3127,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3138,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3139,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3140,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3141,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3142,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3143,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3146,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3147,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3148,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3149,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3150,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3151,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3162,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3163,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3164,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3165,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3166,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3167,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3170,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3171,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3172,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3173,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3174,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3175,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3210,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3211,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3212,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3213,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3214,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3215,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3706,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3707,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3708,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3709,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3710,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3711,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3714,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3715,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3716,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3717,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3718,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3719,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3722,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3723,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3724,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3725,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3726,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3727,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3783,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3784,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3785,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3786,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3787,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3788,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3791,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3792,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3793,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3794,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3795,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3796,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3847,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3848,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3849,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3850,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3851,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3852,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3855,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3856,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3857,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3858,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3859,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3860,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3863,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3864,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3865,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3866,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3867,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3868,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3871,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3872,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3873,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3874,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3875,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3876,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3879,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3880,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3881,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3882,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3883,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3884,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3887,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3888,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3889,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3890,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3891,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3892,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23235,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23236,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23237,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23238,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23239,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23240,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23243,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23244,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23245,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23246,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23247,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23248,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23251,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23252,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23253,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23254,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23255,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23256,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23259,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23260,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23261,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23262,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23263,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23264,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23267,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23268,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23269,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23270,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23271,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23272,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23275,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23276,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23277,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23278,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23279,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23280,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23283,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23284,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23285,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23286,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23287,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23288,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23299,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23300,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23301,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23302,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23303,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23304,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23307,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23308,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23309,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23310,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23311,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23312,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23315,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23316,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23317,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23318,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23319,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23320,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23323,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23324,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23325,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23326,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23327,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23328,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23331,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23332,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23333,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23334,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23335,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23336,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23339,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23340,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23341,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23342,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23343,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23344,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23347,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23348,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23349,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23350,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23351,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23352,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23355,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23356,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23357,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23358,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23359,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23360,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23427,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23428,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23429,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23430,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23431,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23432,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23435,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23436,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23437,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23438,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23439,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23440,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23443,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23444,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23445,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23446,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23447,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23448,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23451,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23452,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23453,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23454,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23455,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23456,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23459,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23460,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23461,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23462,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23463,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23464,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23467,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23468,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23469,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23470,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23471,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23472,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23539,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23540,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23541,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23542,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23543,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23544,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23547,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23548,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23549,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23550,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23551,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23552,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23555,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23556,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23557,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23558,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23559,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23560,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23563,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23564,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23565,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23566,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23567,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23568,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23291,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23292,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23293,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23294,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23295,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23296,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "sanctuary-central-robgoblin-junk-rare",
+    "ZoneDefinitionId": 1,
+    "NodeType": "rare-robgoblin-junk",
+    "MaxActiveNodes": 4,
+    "RespawnSeconds": 300,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3128,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3129,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3144,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3145,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3152,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3153,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3168,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3169,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3176,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3177,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3216,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3217,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3712,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3713,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3720,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3721,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3728,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3729,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3789,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3790,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3797,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3798,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3853,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3854,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3861,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3862,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3869,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3870,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3877,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3878,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3885,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3886,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3893,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3894,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23241,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23242,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23249,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23250,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23257,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23258,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23265,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23266,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23273,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23274,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23281,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23282,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23289,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23290,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23305,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23306,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23313,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23314,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23321,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23322,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23329,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23330,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23337,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23338,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23345,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23346,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23353,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23354,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23361,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23362,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23433,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23434,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23441,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23442,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23449,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23450,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23457,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23458,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23465,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23466,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23473,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23474,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23545,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23546,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23553,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23554,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23561,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23562,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23569,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23570,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23297,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23298,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "southern-wilds-leaves",
+    "ZoneDefinitionId": 1,
+    "NodeType": "leaves",
+    "MaxActiveNodes": 6,
+    "RespawnSeconds": 60,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3242,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3243,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3244,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3245,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3246,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3247,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3218,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3219,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3220,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3221,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3222,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3223,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3538,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3539,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3540,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3541,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3542,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3543,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3546,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3547,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3548,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3549,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3550,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3551,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3554,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3555,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3556,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3557,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3558,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3559,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3562,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3563,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3564,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3565,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3566,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3567,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3570,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3571,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3572,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3573,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3574,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3575,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3578,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3579,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3580,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3581,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3582,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3583,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3586,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3587,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3588,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3589,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3590,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3591,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3594,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3595,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3596,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3597,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3598,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3599,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3602,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3603,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3604,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3605,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3606,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3607,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3610,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3611,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3612,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3613,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3614,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3615,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3618,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3619,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3620,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3621,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3622,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3623,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3626,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3627,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3628,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3629,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3630,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3631,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3634,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3635,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3636,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3637,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3638,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3639,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3642,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3643,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3644,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3645,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3646,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3647,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3650,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3651,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3652,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3653,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3654,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3655,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3658,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3659,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3660,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3661,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3662,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3663,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3666,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3667,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3668,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3669,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3670,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3671,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3674,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3675,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3676,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3677,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3678,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3679,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3682,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3683,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3684,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3685,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3686,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3687,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3690,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3691,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3692,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3693,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3694,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3695,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3698,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3699,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3700,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3701,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3702,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3703,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23086,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23087,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23088,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23089,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23090,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23091,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23094,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23095,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23096,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23097,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23098,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23099,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23102,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23103,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23104,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23105,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23106,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23107,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23119,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23120,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23121,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23122,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23123,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23124,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23131,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23132,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23133,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23134,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23135,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23136,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "southern-wilds-leaves-rare",
+    "ZoneDefinitionId": 1,
+    "NodeType": "rare-leaves",
+    "MaxActiveNodes": 1,
+    "RespawnSeconds": 300,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3248,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3249,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3224,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3225,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3544,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3545,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3552,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3553,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3560,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3561,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3568,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3569,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3576,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3577,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3584,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3585,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3592,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3593,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3600,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3601,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3608,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3609,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3616,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3617,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3624,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3625,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3632,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3633,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3640,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3641,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3648,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3649,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3656,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3657,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3664,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3665,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3672,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3673,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3680,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3681,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3688,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3689,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3696,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3697,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3704,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3705,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23092,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23093,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23100,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23101,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23108,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23109,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23125,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23126,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23137,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23138,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "southern-wilds-flowers",
+    "ZoneDefinitionId": 1,
+    "NodeType": "flowers",
+    "MaxActiveNodes": 24,
+    "RespawnSeconds": 60,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 23475,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23476,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23477,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23478,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23479,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23480,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23483,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23484,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23485,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23486,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23487,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23488,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23491,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23492,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23493,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23494,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23495,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23496,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23499,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23500,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23501,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23502,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23503,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23504,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "southern-wilds-flowers-rare",
+    "ZoneDefinitionId": 1,
+    "NodeType": "rare-flowers",
+    "MaxActiveNodes": 5,
+    "RespawnSeconds": 300,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 23481,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23482,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23489,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23490,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23497,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23498,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23505,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23506,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "southern-wilds-robgoblin-junk",
+    "ZoneDefinitionId": 1,
+    "NodeType": "robgoblin-junk",
+    "MaxActiveNodes": 11,
+    "RespawnSeconds": 60,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3730,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3731,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3732,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3733,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3734,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3735,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3738,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3739,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3740,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3741,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3742,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3743,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3767,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3768,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3769,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3770,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3771,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3772,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3775,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3776,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3777,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3778,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3779,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3780,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3210,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3211,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3212,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3213,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3214,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3215,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3706,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3707,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3708,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3709,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3710,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3711,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3714,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3715,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3716,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3717,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3718,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3719,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3722,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3723,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3724,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3725,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3726,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3727,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3783,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3784,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3785,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3786,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3787,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3788,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3791,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3792,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3793,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3794,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3795,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3796,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3847,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3848,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3849,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3850,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3851,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3852,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3855,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3856,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3857,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3858,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3859,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3860,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3863,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3864,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3865,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3866,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3867,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3868,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3871,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3872,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3873,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3874,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3875,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3876,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3879,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3880,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3881,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3882,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3883,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3884,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3887,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3888,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3889,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3890,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3891,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3892,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23235,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23236,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23237,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23238,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23239,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23240,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23243,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23244,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23245,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23246,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23247,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23248,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23251,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23252,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23253,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23254,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23255,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23256,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23259,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23260,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23261,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23262,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23263,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23264,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23267,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23268,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23269,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23270,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23271,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23272,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23275,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23276,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23277,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23278,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23279,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23280,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23283,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23284,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23285,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23286,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23287,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23288,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23299,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23300,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23301,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23302,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23303,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23304,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23307,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23308,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23309,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23310,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23311,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23312,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23315,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23316,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23317,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23318,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23319,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23320,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23323,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23324,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23325,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23326,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23327,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23328,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23331,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23332,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23333,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23334,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23335,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23336,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23339,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23340,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23341,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23342,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23343,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23344,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23347,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23348,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23349,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23350,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23351,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23352,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23355,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23356,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23357,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23358,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23359,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23360,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23427,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23428,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23429,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23430,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23431,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23432,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23435,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23436,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23437,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23438,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23439,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23440,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23443,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23444,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23445,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23446,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23447,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23448,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23451,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23452,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23453,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23454,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23455,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23456,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23459,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23460,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23461,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23462,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23463,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23464,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23467,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23468,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23469,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23470,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23471,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23472,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23539,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23540,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23541,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23542,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23543,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23544,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23547,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23548,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23549,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23550,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23551,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23552,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23555,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23556,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23557,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23558,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23559,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23560,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23563,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23564,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23565,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23566,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23567,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23568,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23291,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23292,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23293,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23294,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23295,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23296,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "southern-wilds-robgoblin-junk-rare",
+    "ZoneDefinitionId": 1,
+    "NodeType": "rare-robgoblin-junk",
+    "MaxActiveNodes": 3,
+    "RespawnSeconds": 300,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3736,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3737,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3744,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3745,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3773,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3774,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3781,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3782,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3216,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3217,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3712,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3713,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3720,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3721,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3728,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3729,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3789,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3790,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3797,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3798,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3853,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3854,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3861,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3862,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3869,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3870,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3877,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3878,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3885,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3886,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3893,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3894,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23241,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23242,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23249,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23250,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23257,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23258,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23265,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23266,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23273,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23274,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23281,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23282,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23289,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23290,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23305,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23306,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23313,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23314,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23321,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23322,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23329,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23330,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23337,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23338,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23345,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23346,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23353,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23354,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23361,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23362,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23433,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23434,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23441,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23442,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23449,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23450,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23457,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23458,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23465,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23466,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23473,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23474,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23545,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23546,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23553,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23554,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23561,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23562,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23569,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23570,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23297,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23298,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "nettleseed-sparkling-water",
+    "ZoneDefinitionId": 1,
+    "NodeType": "sparkling-water",
+    "MaxActiveNodes": 3,
+    "RespawnSeconds": 60,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3911,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3912,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3913,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3914,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3915,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3916,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23147,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23148,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23149,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23150,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23151,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23152,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23195,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23196,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23197,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23198,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23199,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23200,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "nettleseed-sparkling-water-rare",
+    "ZoneDefinitionId": 1,
+    "NodeType": "rare-sparkling-water",
+    "MaxActiveNodes": 1,
+    "RespawnSeconds": 300,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3917,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3918,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23153,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23154,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23201,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23202,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "merryvale-sparkling-water",
+    "ZoneDefinitionId": 1,
+    "NodeType": "sparkling-water",
+    "MaxActiveNodes": 6,
+    "RespawnSeconds": 60,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3951,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3952,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3953,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3954,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3955,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3956,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23155,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23156,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23157,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23158,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23159,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23160,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23203,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23204,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23205,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23206,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23207,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23208,
+        "Weight": 100
+      }
+    ]
+  },
+  {
+    "Key": "merryvale-sparkling-water-rare",
+    "ZoneDefinitionId": 1,
+    "NodeType": "rare-sparkling-water",
+    "MaxActiveNodes": 2,
+    "RespawnSeconds": 300,
+    "DropTable": [
+      {
+        "ItemDefinitionId": 3957,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 3958,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23161,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23162,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23209,
+        "Weight": 100
+      },
+      {
+        "ItemDefinitionId": 23210,
+        "Weight": 100
+      }
+    ]
   }
 ]

@@ -11,11 +11,11 @@ public class PlayerUpdatePacketEquipItemChange : BasePlayerUpdatePacket, ISerial
 
     public int Id;
 
-    private int Unused = default;
-
     public CharacterAttachmentData Attachment = new();
 
     public int ProfileId;
+
+    public int ItemClassId;
 
     public int WieldType;
 
@@ -37,7 +37,7 @@ public class PlayerUpdatePacketEquipItemChange : BasePlayerUpdatePacket, ISerial
 
         writer.Write(ProfileId);
 
-        writer.Write(Unused);
+        writer.Write(ItemClassId);
 
         writer.Write(WieldType);
 

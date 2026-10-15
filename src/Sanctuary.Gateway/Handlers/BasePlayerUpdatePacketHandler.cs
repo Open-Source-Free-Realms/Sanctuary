@@ -31,6 +31,7 @@ public static class BasePlayerUpdatePacketHandler
         return opCode switch
         {
             PlayerUpdatePacketItemDefinitionRequest.OpCode => PlayerUpdatePacketItemDefinitionRequestHandler.HandlePacket(connection, reader.Span),
+            PlayerUpdatePacketRequestStripEffect.OpCode => PlayerUpdatePacketRequestStripEffectHandler.HandlePacket(connection, reader.Span),
             _ => false
         };
     }

@@ -30,43 +30,50 @@ public sealed class CollectionNodePoolDefinitionCollection : ObservableConcurren
             return false;
         }
 
-        try
+        // Keep reloads from applying a stale snapshot over an admin update that just reached disk.
+        lock (_writeLock)
         {
-            using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            var entries = JsonSerializer.Deserialize<List<CollectionNodePoolDefinition>>(stream, new JsonSerializerOptions
+            try
             {
-                PropertyNameCaseInsensitive = true
-            });
-
-            if (entries is null || entries.Count == 0)
-            {
-                _logger.LogError("No collection node pools found in \"{file}\".", filePath);
-                return false;
-            }
-
-            var loaded = new Dictionary<string, CollectionNodePoolDefinition>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (var entry in entries)
-            {
-                if (string.IsNullOrWhiteSpace(entry.Key) || string.IsNullOrWhiteSpace(entry.NodeType) ||
-                    entry.ZoneDefinitionId <= 0 || entry.MaxActiveNodes < 0 || entry.RespawnSeconds is < 1 or > 86400)
+                using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                var entries = JsonSerializer.Deserialize<List<CollectionNodePoolDefinition>>(stream, new JsonSerializerOptions
                 {
-                    _logger.LogError("Invalid collection node pool in \"{file}\".", filePath);
+                    PropertyNameCaseInsensitive = true
+                });
+
+                if (entries is null || entries.Count == 0)
+                {
+                    _logger.LogError("No collection node pools found in \"{file}\".", filePath);
                     return false;
                 }
 
-                entry.Key = entry.Key.Trim().ToLowerInvariant();
-                entry.NodeType = entry.NodeType.Trim().ToLowerInvariant();
+                var loaded = new Dictionary<string, CollectionNodePoolDefinition>(StringComparer.OrdinalIgnoreCase);
 
-                if (!loaded.TryAdd(entry.Key, entry))
+                foreach (var entry in entries)
                 {
-                    _logger.LogError("Duplicate collection node pool {pool} in \"{file}\".", entry.Key, filePath);
-                    return false;
-                }
-            }
+                    var totalDropWeight = entry.DropTable.Sum(drop => (long)drop.Weight);
 
-            lock (_writeLock)
-            {
+                    if (string.IsNullOrWhiteSpace(entry.Key) || string.IsNullOrWhiteSpace(entry.NodeType) ||
+                        entry.ZoneDefinitionId <= 0 || entry.MaxActiveNodes < 0 || entry.RespawnSeconds is < 1 or > 86400 ||
+                        entry.DropTable.Count == 0 ||
+                        entry.DropTable.Any(drop => drop.ItemDefinitionId <= 0 || drop.Weight <= 0) ||
+                        totalDropWeight > int.MaxValue ||
+                        entry.DropTable.Select(drop => drop.ItemDefinitionId).Distinct().Count() != entry.DropTable.Count)
+                    {
+                        _logger.LogError("Invalid collection node pool in \"{file}\".", filePath);
+                        return false;
+                    }
+
+                    entry.Key = entry.Key.Trim().ToLowerInvariant();
+                    entry.NodeType = entry.NodeType.Trim().ToLowerInvariant();
+
+                    if (!loaded.TryAdd(entry.Key, entry))
+                    {
+                        _logger.LogError("Duplicate collection node pool {pool} in \"{file}\".", entry.Key, filePath);
+                        return false;
+                    }
+                }
+
                 foreach (var entry in loaded)
                     this[entry.Key] = entry.Value;
 
@@ -74,14 +81,13 @@ public sealed class CollectionNodePoolDefinitionCollection : ObservableConcurren
                     Remove(key);
 
                 _filePath = filePath;
+                return true;
             }
-
-            return true;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to parse file \"{file}\".", filePath);
-            return false;
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to parse file \"{file}\".", filePath);
+                return false;
+            }
         }
     }
 
