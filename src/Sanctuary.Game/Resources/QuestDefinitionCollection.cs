@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 
 using Microsoft.Extensions.Logging;
@@ -68,7 +69,8 @@ public class QuestDefinitionCollection
             {
                 PropertyNameCaseInsensitive = true,
                 ReadCommentHandling = JsonCommentHandling.Skip,
-                AllowTrailingCommas = true
+                AllowTrailingCommas = true,
+                Converters = { new QuestGoalJsonConverter() }
             };
 
             var entries = JsonSerializer.Deserialize<List<QuestDefinition>>(fileStream, jsonSerializerOptions);
@@ -119,27 +121,42 @@ public class QuestDefinitionCollection
 
         foreach (var goal in quest.Goals)
         {
-            // Intermediate goals can point at NPCs that are neither the giver nor the turn-in target, and
-            // every NPC of a counted talk goal has to be clickable, so index them all.
-            foreach (var targetGuid in goal.AllTalkTargetGuids())
-            {
-                var questIds = ByTarget.GetOrAdd(targetGuid, _ => []);
-
-                if (!questIds.Contains(quest.QuestId))
-                    questIds.Add(quest.QuestId);
-            }
-
             // NameId doubles as the client's objective row key, so duplicates make goals indistinguishable.
             if (!goalNameIds.Add(goal.NameId))
                 _logger.LogWarning("Duplicate goal NameId {nameId} on quest {id} in \"{file}\".", goal.NameId, quest.QuestId, filePath);
 
-            if (goal.Type == QuestGoalType.Collect)
+            switch (goal)
             {
-                if (string.IsNullOrEmpty(goal.CollectNodeType))
-                    _logger.LogWarning("Collect goal on quest {id} has no CollectNodeType in \"{file}\"; it can never be credited.", quest.QuestId, filePath);
+                case TalkToNpcGoal talkGoal:
+                    if (talkGoal.TargetGuid == 0 && talkGoal.Targets.Count == 0)
+                        talkGoal.TargetGuid = quest.TargetGuid;
 
-                if (goal.RequiredCount <= 0)
-                    _logger.LogWarning("Collect goal on quest {id} has no RequiredCount in \"{file}\"; it can never be completed.", quest.QuestId, filePath);
+                    // Intermediate goals can point at NPCs that are neither the giver nor the turn-in target, and
+                    // every NPC of a counted talk goal has to be clickable, so index them all.
+                    foreach (var targetGuid in talkGoal.AllTalkTargetGuids())
+                    {
+                        var questIds = ByTarget.GetOrAdd(targetGuid, _ => []);
+
+                        if (!questIds.Contains(quest.QuestId))
+                            questIds.Add(quest.QuestId);
+                    }
+
+                    if (!talkGoal.AllTalkTargetGuids().Any())
+                        _logger.LogWarning("Talk goal on quest {id} has no NPC to talk to in \"{file}\"; it can never be credited.", quest.QuestId, filePath);
+                    break;
+
+                case ReachLocationGoal reachGoal:
+                    if (reachGoal.ReachPosition.Length != 3)
+                        _logger.LogWarning("Reach goal on quest {id} has no [x, y, z] ReachPosition in \"{file}\"; it can never be credited.", quest.QuestId, filePath);
+                    break;
+
+                case CollectGoal collectGoal:
+                    if (string.IsNullOrEmpty(collectGoal.CollectNodeType))
+                        _logger.LogWarning("Collect goal on quest {id} has no CollectNodeType in \"{file}\"; it can never be credited.", quest.QuestId, filePath);
+
+                    if (collectGoal.RequiredCount <= 0)
+                        _logger.LogWarning("Collect goal on quest {id} has no RequiredCount in \"{file}\"; it can never be completed.", quest.QuestId, filePath);
+                    break;
             }
         }
     }
