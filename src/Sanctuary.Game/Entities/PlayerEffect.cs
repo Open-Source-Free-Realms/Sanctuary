@@ -5,7 +5,7 @@ namespace Sanctuary.Game.Entities;
 public sealed class PlayerEffect
 {
     public int Id { get; internal set; }
-    public DateTimeOffset? ExpiresAt { get; init; }
+    public DateTimeOffset? ExpiresAt { get; set; }
 
     public int WorldEffectId { get; init; }
     public DateTimeOffset? WorldEffectStartsAt { get; init; }

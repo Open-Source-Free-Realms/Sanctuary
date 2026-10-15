@@ -42,6 +42,7 @@ public sealed class Player : ClientPcData, IEntity
     private const int ActionBarSlotUnknown5 = 1;
     private const int ActionBarSlotUnknown6 = 4;
     private const int ActionBarSlotUnknown7 = 15;
+    private const float OnFootMovementSpeed = 8f;
 
     private readonly UdpConnection _connection;
     private readonly IResourceManager _resourceManager;
@@ -308,10 +309,11 @@ public sealed class Player : ClientPcData, IEntity
             CompositeEffectId = 46
         }, sendToSelf: true);
 
-        UpdateMovementStats(
-            CharacterStats.MaxMovementSpeed.Set(8f),
+        UpdateCharacterStats(
             CharacterStats.GlideEnabled.Set(0),
             CharacterStats.JumpHeight.Set(0f));
+
+        SetMountMovementSpeed(null);
 
         EntityHelper.RemovePlayerGracefully(Mount, recipients: VisiblePlayers.Values.Append(this));
 
@@ -691,11 +693,18 @@ public sealed class Player : ClientPcData, IEntity
         SendTunneled(packetPOIChangeMessage);
     }
 
-    public void UpdateMovementStats(params CharacterStat[] characterStats)
+    public void SetMountMovementSpeed(float? mountMovementSpeed)
     {
-        PlayerPet.RemovePetSpeedBuff();
-        UpdateCharacterStats(characterStats);
-        PlayerPet.UpdatePetSpeedBuff();
+        _mountMovementSpeed = mountMovementSpeed;
+
+        RefreshMovementSpeed();
+    }
+
+    private void RefreshMovementSpeed()
+    {
+        var maxMovementSpeed = _mountMovementSpeed ?? OnFootMovementSpeed + _effects.Values.Sum(effect => effect.MovementSpeedBonus);
+
+        UpdateCharacterStats(CharacterStats.MaxMovementSpeed.Set(maxMovementSpeed));
     }
 
     public void UpdateCharacterStats(params CharacterStat[] characterStats)
@@ -1155,6 +1164,7 @@ public sealed class Player : ClientPcData, IEntity
     private readonly ConcurrentDictionary<int, PlayerEffect> _effects = new();
     private int _appearanceEffectId;
     private int _scaleEffectId;
+    private float? _mountMovementSpeed;
 
     public int AddEffect(PlayerEffect effect)
     {
@@ -1218,29 +1228,45 @@ public sealed class Player : ClientPcData, IEntity
             StartWorldEffect(effect);
 
         if (effect.BuffIconId != 0)
-        {
-            var durationSeconds = effect.ExpiresAt is { } expiresAt
-                ? Math.Max(1, (int)(expiresAt - DateTimeOffset.UtcNow).TotalSeconds)
-                : 0;
-
-            SendTunneled(new ClientUpdatePacketAddEffectTag
-            {
-                TagId = effect.Id,
-                EffectTag = new EffectTag
-                {
-                    InstanceId = effect.Id,
-                    DefinitionId = effect.BuffDefinitionId,
-                    Duration = durationSeconds,
-                    StartTime = 0,
-                    StopTime = (uint)-durationSeconds
-                },
-                IconId = effect.BuffIconId,
-                NameId = effect.BuffNameId
-            });
-        }
+            SendEffectTag(effect);
 
         if (effect.MovementSpeedBonus != 0)
-            UpdateCharacterStats(CharacterStats.MaxMovementSpeed.Set(Stats[CharacterStatId.MaxMovementSpeed].Float + effect.MovementSpeedBonus));
+            RefreshMovementSpeed();
+    }
+
+    public bool RefreshEffect(int id, DateTimeOffset expiresAt)
+    {
+        if (!_effects.TryGetValue(id, out var effect))
+            return false;
+
+        effect.ExpiresAt = expiresAt;
+
+        if (effect.BuffIconId != 0)
+            SendEffectTag(effect);
+
+        return true;
+    }
+
+    private void SendEffectTag(PlayerEffect effect)
+    {
+        var durationSeconds = effect.ExpiresAt is { } expiresAt
+            ? Math.Max(1, (int)(expiresAt - DateTimeOffset.UtcNow).TotalSeconds)
+            : 0;
+
+        SendTunneled(new ClientUpdatePacketAddEffectTag
+        {
+            TagId = effect.Id,
+            EffectTag = new EffectTag
+            {
+                InstanceId = effect.Id,
+                DefinitionId = effect.BuffDefinitionId,
+                Duration = durationSeconds,
+                StartTime = 0,
+                StopTime = (uint)-durationSeconds
+            },
+            IconId = effect.BuffIconId,
+            NameId = effect.BuffNameId
+        });
     }
 
     private void UnapplyEffect(PlayerEffect effect)
@@ -1265,7 +1291,7 @@ public sealed class Player : ClientPcData, IEntity
             SendTunneled(new ClientUpdatePacketRemoveEffectTag { TagId = effect.Id });
 
         if (effect.MovementSpeedBonus != 0)
-            UpdateCharacterStats(CharacterStats.MaxMovementSpeed.Set(Stats[CharacterStatId.MaxMovementSpeed].Float - effect.MovementSpeedBonus));
+            RefreshMovementSpeed();
     }
 
     private void StartWorldEffect(PlayerEffect effect)

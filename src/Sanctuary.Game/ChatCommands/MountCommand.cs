@@ -117,8 +117,9 @@ public class MountCommand : IChatCommand
             mountStats.GlideAccel = 4f;
         }
 
+        invoker.SetMountMovementSpeed(mountStats.MaxMovementSpeed);
+
         invoker.UpdateCharacterStats(
-            CharacterStats.MaxMovementSpeed.Set(mountStats.MaxMovementSpeed),
             CharacterStats.GlideDefaultForwardSpeed.Set(mountStats.GlideDefaultForwardSpeed),
             CharacterStats.GlideMinForwardSpeed.Set(mountStats.GlideMinForwardSpeed),
             CharacterStats.GlideMaxForwardSpeed.Set(mountStats.GlideMaxForwardSpeed),

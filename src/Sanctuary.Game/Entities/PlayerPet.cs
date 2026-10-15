@@ -26,6 +26,7 @@ public sealed class PlayerPet
     private bool _petActionActive;
     private bool _petGroomingActive;
     private int _petSpeedBuffEffectId;
+    private long _petSpeedBuffRefreshAt;
     private readonly Queue<Vector3> _petNavMeshWaypoints = new();
     private PetState _petState = new();
     private readonly ConcurrentQueue<Action> _queuedActions = new();
@@ -48,6 +49,7 @@ public sealed class PlayerPet
         public long RoamAt;
         public bool RoamFirstHold;
         public long IdleAnimationEndAt;
+        public long StandAt;
         public int LastIdleAnimationId;
         public long StayUntil;
         public PetRestPostureDefinition? RestPosture;
@@ -175,6 +177,8 @@ public sealed class PlayerPet
     private const int PetStopSettleMs = 500;
     private const int PetDogShakeDurationMs = 1200;
     private const int PetCatShakeDurationMs = 1400;
+    private const int PetGroomDryOffDurationMs = PetCatShakeDurationMs;
+    private const int PetStandNowMs = 0;
     private const int PetDanceAnimationGroupId = 3201;
     private const int PetDanceDurationMs = 4000;
     private const int PetDanceJoinMaxDelayMs = 3000;
@@ -264,6 +268,8 @@ public sealed class PlayerPet
     private const int PetSpeedBuffIconId = 3851;
     private const int PetSpeedBuffNameId = 116881;
     private const float PetSpeedBuffMovementSpeedBonus = 3f;
+    private const int PetSpeedBuffDurationSeconds = 10;
+    private const int PetSpeedBuffRefreshRemainingSeconds = 6;
     private const int PetTeleportCompositeEffectId = 46;
     private const int PetTrickIdeaCompositeEffectId = 5251;
     private const int PetTrickIdeaDelayMs = 2500;
@@ -428,6 +434,8 @@ public sealed class PlayerPet
         while (_queuedActions.TryDequeue(out var queuedAction))
             queuedAction();
 
+        UpdatePetSpeedBuff();
+        UpdatePetStand();
         UpdatePetCare();
     }
 
@@ -498,7 +506,7 @@ public sealed class PlayerPet
         if (_petState.ShakeAnimationAt != 0 && Environment.TickCount64 >= _petState.ShakeAnimationAt)
         {
             _petState.ShakeAnimationAt = 0;
-            EntityHelper.SetAnimation(_player, npc, PetDryOffAnimationGroupId);
+            PlayPetAnimation(npc, PetDryOffAnimationGroupId, (int)(_petState.ShakeEndAt - Environment.TickCount64));
         }
 
         if (_petState.ShakeEndAt != 0 && Environment.TickCount64 >= _petState.ShakeEndAt)
@@ -610,7 +618,7 @@ public sealed class PlayerPet
         if (_petState.RoamAt != 0)
             _petState.RoamAt = Math.Max(_petState.RoamAt, _petState.IdleAnimationEndAt + GetPetRoamDelayMs());
 
-        EntityHelper.SetAnimation(_player, npc, animationGroupId);
+        PlayPetAnimation(npc, animationGroupId, durationMs);
     }
 
     private (int AnimationId, int DurationMs) PickIdleAnimation(IReadOnlyList<(int AnimationId, int DurationMs)> animations)
@@ -702,7 +710,7 @@ public sealed class PlayerPet
             _petState.StayUntil = 0;
             _petState.RestLoopAt = 0;
             EntityHelper.SetBaseAnimation(_player, npc, PetStandAnimationGroupId);
-            EntityHelper.SetAnimation(_player, npc, _petState.RestPosture.ExitAnimationId);
+            PlayPetAnimation(npc, _petState.RestPosture.ExitAnimationId, _petState.RestPosture.ExitDurationMs);
             _petState.RestPosture = null;
             return true;
         }
@@ -813,7 +821,7 @@ public sealed class PlayerPet
         if (Vector3.Distance(petPosition, goal) <= PetInvestigateStopDistance)
         {
             _petState.IdleAnimationEndAt = Environment.TickCount64 + PetNoticeLookMs;
-            EntityHelper.SetAnimation(_player, npc, PetSniffAnimationGroupId);
+            PlayPetAnimation(npc, PetSniffAnimationGroupId, PetNoticeLookMs);
         }
 
         return false;
@@ -965,7 +973,7 @@ public sealed class PlayerPet
             _petState.TreasureChestAt = Environment.TickCount64 + PetTreasureChestDigDelayMs;
             _petState.TreasureDigEndAt = Environment.TickCount64 + PetDigDurationMs;
             EntityHelper.SetWalkAnimation(_player, npc, PetWalkAnimationGroupId);
-            EntityHelper.SetAnimation(_player, npc, PetDiggingAnimationGroupId);
+            PlayPetAnimation(npc, PetDiggingAnimationGroupId, PetDigDurationMs);
         }
 
         if (_petState.TreasureChestAt != 0 && Environment.TickCount64 >= _petState.TreasureChestAt)
@@ -979,7 +987,6 @@ public sealed class PlayerPet
             _petState.TreasureDigEndAt = 0;
             _petState.TreasurePending = false;
             _petActionActive = false;
-            EntityHelper.SetAnimation(_player, npc, PetStandAnimationGroupId);
         }
     }
 
@@ -1062,13 +1069,7 @@ public sealed class PlayerPet
         }
 
         if (_petState.IdleAnimationEndAt != 0 && Environment.TickCount64 < _petState.IdleAnimationEndAt)
-        {
-            if (ownerDistance <= PetCatchUpStartDistance)
-                return;
-
-            _petState.IdleAnimationEndAt = 0;
-            EntityHelper.SetBaseAnimation(_player, npc, PetStandAnimationGroupId);
-        }
+            return;
 
         if (ownerMoving || _petState.OwnerMoving)
         {
@@ -1226,6 +1227,9 @@ public sealed class PlayerPet
 
     private void WarpPet(Npc npc, Vector3 position)
     {
+        if (_petState.StandAt != 0)
+            StandPet(npc);
+
         var rotation = GetFacingOwnerRotation(position);
 
         npc.MoveTo(position, direct: true);
@@ -1267,6 +1271,9 @@ public sealed class PlayerPet
     private void MovePet(Npc npc, Vector3 goal, float speed, List<MapNode>? route = null)
     {
         _petState.FollowGoal = goal;
+
+        if (_petState.StandAt != 0)
+            StandPet(npc);
 
         EntityHelper.SetSpeed(_player, npc, speed);
 
@@ -1318,7 +1325,30 @@ public sealed class PlayerPet
     private void StartPetAction(Npc npc)
     {
         _petActionActive = true;
+        _petState.StandAt = 0;
         StopPet(npc);
+    }
+
+    private void PlayPetAnimation(Npc npc, int animationGroupId, int durationMs)
+    {
+        EntityHelper.SetAnimation(_player, npc, animationGroupId);
+        QueuePetStand(durationMs);
+    }
+
+    private void QueuePetStand(int delayMs) => _petState.StandAt = Environment.TickCount64 + delayMs;
+
+    private void UpdatePetStand()
+    {
+        if (Pet is not { } npc || _petState.StandAt == 0 || Environment.TickCount64 < _petState.StandAt)
+            return;
+
+        StandPet(npc);
+    }
+
+    private void StandPet(Npc npc)
+    {
+        _petState.StandAt = 0;
+        EntityHelper.SetAnimation(_player, npc, PetStandAnimationGroupId);
     }
 
     private void FinishPetAction(Npc npc)
@@ -1393,7 +1423,7 @@ public sealed class PlayerPet
             if (!started && Environment.TickCount64 >= startAt)
             {
                 started = true;
-                EntityHelper.SetAnimation(_player, npc, petTrickDefinition.AnimationId);
+                PlayPetAnimation(npc, petTrickDefinition.AnimationId, petTrickDefinition.DurationMs);
             }
 
             if (!cheered && Environment.TickCount64 >= cheerAt)
@@ -1417,7 +1447,7 @@ public sealed class PlayerPet
                 NameId = petTrickInfo.NameId
             });
             UnlockPetActions();
-            EntityHelper.SetAnimation(_player, npc, PetVocalizePlayfulAnimationGroupId);
+            PlayPetAnimation(npc, PetVocalizePlayfulAnimationGroupId, PetVocalizePlayfulDurationMs);
         };
     }
 
@@ -1457,6 +1487,7 @@ public sealed class PlayerPet
                 return;
 
             FinishPetAction(npc);
+            QueuePetStand(PetStandNowMs);
             PetHelper.UnequipItem(_player, npc, PetFoodBowlSlot);
             _player.SendTunneled(new PetUtilityNotifyPacket { PetId = _player.ActivePetId, NotificationType = PetUtilityFeedFinishedNotificationType });
             UpdatePetHappyThoughtBubble(npc, petClientInfo);
@@ -1517,6 +1548,7 @@ public sealed class PlayerPet
         FinishPetAction(npc);
         _petGroomingActive = false;
         EntityHelper.QueueAnimation(npc, PetDryOffAnimationGroupId, loopCount: PetLoopOnce, unknown6: true, unknown7: true, unknown8: false);
+        QueuePetStand(PetGroomDryOffDurationMs);
         _player.SendTunneled(new PetUtilityNotifyPacket { PetId = _player.ActivePetId, NotificationType = PetUtilityGroomFinishedNotificationType });
 
         if (petClientInfo is not null)
@@ -1552,31 +1584,26 @@ public sealed class PlayerPet
         var petClientInfo = _player.GetActivePetClientInfo();
         var active = npc is not null && petClientInfo is not null && !petClientInfo.IsVanityPet && petClientInfo.Mood >= PetHelper.PetHappyMinMood;
 
-        if (active && npc is not null && _petSpeedBuffEffectId == 0)
-        {
-            _petSpeedBuffEffectId = _player.AddEffect(new PlayerEffect
-            {
-                WorldEffectId = PetSpeedBuffCompositeEffectId,
-                BuffIconId = PetSpeedBuffIconId,
-                BuffNameId = PetSpeedBuffNameId,
-                BuffDefinitionId = PetSpeedBuffDefinitionId,
-                SourceGuid = npc.Guid,
-                MovementSpeedBonus = PetSpeedBuffMovementSpeedBonus
-            });
-        }
-        else if (!active && _petSpeedBuffEffectId != 0)
-        {
-            RemovePetSpeedBuff();
-        }
-    }
-
-    public void RemovePetSpeedBuff()
-    {
-        if (_petSpeedBuffEffectId == 0)
+        if (!active || npc is null || Environment.TickCount64 < _petSpeedBuffRefreshAt)
             return;
 
-        _player.RemoveEffect(_petSpeedBuffEffectId);
-        _petSpeedBuffEffectId = 0;
+        var expiresAt = DateTimeOffset.UtcNow.AddSeconds(PetSpeedBuffDurationSeconds);
+
+        _petSpeedBuffRefreshAt = Environment.TickCount64 + (PetSpeedBuffDurationSeconds - PetSpeedBuffRefreshRemainingSeconds) * PetHelper.MillisecondsPerSecond;
+
+        if (_petSpeedBuffEffectId != 0 && _player.RefreshEffect(_petSpeedBuffEffectId, expiresAt))
+            return;
+
+        _petSpeedBuffEffectId = _player.AddEffect(new PlayerEffect
+        {
+            ExpiresAt = expiresAt,
+            WorldEffectId = PetSpeedBuffCompositeEffectId,
+            BuffIconId = PetSpeedBuffIconId,
+            BuffNameId = PetSpeedBuffNameId,
+            BuffDefinitionId = PetSpeedBuffDefinitionId,
+            SourceGuid = npc.Guid,
+            MovementSpeedBonus = PetSpeedBuffMovementSpeedBonus
+        });
     }
 
     public void UnlockPetActions()
