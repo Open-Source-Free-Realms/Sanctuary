@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 
+using Sanctuary.Game.Resources.Definitions.QuestGoals;
+
 namespace Sanctuary.Game.Resources.Definitions;
 
 public sealed class QuestDefinition
@@ -43,7 +45,8 @@ public sealed class QuestDefinition
     public int NotificationActive { get; set; } = 6;
 
     // The final goal's line, since a quest can end back at its giver.
-    public int TurnInDialogueId => Goals.Count > 0 ? Goals[^1].DialogueId : 0;
+    public int TurnInDialogueId =>
+        Goals.Count > 0 && Goals[^1].ConversationFor(TargetGuid) is { Count: > 0 } lines ? lines[^1].TextId : 0;
 
     // Shared by the offer flow and the giver's badge so the two can't drift.
     public bool IsOfferableFor(IReadOnlyDictionary<int, bool> playerQuests)

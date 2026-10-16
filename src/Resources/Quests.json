@@ -18,10 +18,11 @@
     "ExcludesQuestIds": [2564],
     "Goals": [
       {
+        "Type": 0,
         "NameId": 94359,
         "DescriptionId": 94248,
         "DialogueId": 94388,
-        "TargetGuid": 100000002049
+        "Targets": [{ "Guid": 100000002049 }]
       }
     ]
   },
@@ -43,16 +44,18 @@
     "NotificationActive": 6,
     "Goals": [
       {
+        "Type": 0,
         "NameId": 100103,
         "DescriptionId": 100104,
         "DialogueId": 384144,
-        "TargetGuid": 100000003018
+        "Targets": [{ "Guid": 100000003018 }]
       },
       {
+        "Type": 0,
         "NameId": 94511,
         "DescriptionId": 94512,
         "DialogueId": 94257,
-        "TargetGuid": 100000002049
+        "Targets": [{ "Guid": 100000002049 }]
       }
     ]
   },
@@ -74,10 +77,11 @@
     "ExcludesQuestIds": [2563],
     "Goals": [
       {
+        "Type": 0,
         "NameId": 115453,
         "DescriptionId": 104099,
         "DialogueId": 104100,
-        "TargetGuid": 100000002889
+        "Targets": [{ "Guid": 100000002889 }]
       }
     ]
   },
@@ -99,14 +103,16 @@
     "NotificationActive": 6,
     "Goals": [
       {
+        "Type": 0,
         "NameId": 46621,
         "DialogueId": 140679,
-        "TargetGuid": 100000003016
+        "Targets": [{ "Guid": 100000003016 }]
       },
       {
+        "Type": 0,
         "NameId": 74455,
         "DialogueId": 73239,
-        "TargetGuid": 100000002335
+        "Targets": [{ "Guid": 100000002335 }]
       }
     ]
   },
@@ -135,9 +141,10 @@
         "CollectNodeType": "hastis-homework"
       },
       {
+        "Type": 0,
         "NameId": 74455,
         "DialogueId": 72906,
-        "TargetGuid": 100000002335
+        "Targets": [{ "Guid": 100000002335 }]
       }
     ]
   },
@@ -159,9 +166,10 @@
     "NotificationActive": 6,
     "Goals": [
       {
+        "Type": 0,
         "NameId": 115619,
         "DialogueId": 104148,
-        "TargetGuid": 100000033082
+        "Targets": [{ "Guid": 100000033082 }]
       }
     ]
   },
@@ -183,9 +191,10 @@
     "NotificationActive": 6,
     "Goals": [
       {
+        "Type": 0,
         "NameId": 104155,
         "DialogueId": 104156,
-        "TargetGuid": 100000033083
+        "Targets": [{ "Guid": 100000033083 }]
       }
     ]
   },
@@ -207,24 +216,28 @@
     "NotificationActive": 6,
     "Goals": [
       {
+        "Type": 0,
         "NameId": 390798,
         "DialogueId": 390817,
-        "TargetGuid": 100000040011
+        "Targets": [{ "Guid": 100000040011 }]
       },
       {
+        "Type": 0,
         "NameId": 390800,
         "DialogueId": 390820,
-        "TargetGuid": 100000040012
+        "Targets": [{ "Guid": 100000040012 }]
       },
       {
+        "Type": 0,
         "NameId": 390802,
         "DialogueId": 390822,
-        "TargetGuid": 100000002359
+        "Targets": [{ "Guid": 100000002359 }]
       },
       {
+        "Type": 0,
         "NameId": 390804,
         "DialogueId": 390789,
-        "TargetGuid": 100000002419
+        "Targets": [{ "Guid": 100000002419 }]
       }
     ]
   },
@@ -246,14 +259,16 @@
     "NotificationActive": 6,
     "Goals": [
       {
+        "Type": 0,
         "NameId": 390850,
         "DialogueId": 390855,
-        "TargetGuid": 100000001419
+        "Targets": [{ "Guid": 100000001419 }]
       },
       {
+        "Type": 0,
         "NameId": 390804,
         "DialogueId": 390847,
-        "TargetGuid": 100000002419
+        "Targets": [{ "Guid": 100000002419 }]
       }
     ]
   },
@@ -281,14 +296,16 @@
         "ReachRadius": 15
       },
       {
+        "Type": 0,
         "NameId": 93310,
         "DialogueId": 93316,
-        "TargetGuid": 100000001885
+        "Targets": [{ "Guid": 100000001885 }]
       },
       {
+        "Type": 0,
         "NameId": 101743,
         "DialogueId": 93335,
-        "TargetGuid": 100000001748
+        "Targets": [{ "Guid": 100000001748 }]
       }
     ]
   },
@@ -310,14 +327,16 @@
     "NotificationActive": 6,
     "Goals": [
       {
+        "Type": 0,
         "NameId": 93405,
         "DialogueId": 93409,
-        "TargetGuid": 100000001756
+        "Targets": [{ "Guid": 100000001756 }]
       },
       {
+        "Type": 0,
         "NameId": 93407,
         "DialogueId": 93401,
-        "TargetGuid": 100000001748
+        "Targets": [{ "Guid": 100000001748 }]
       }
     ]
   },
@@ -338,29 +357,34 @@
     "NotificationActive": 6,
     "Goals": [
       {
+        "Type": 0,
         "NameId": 389708,
         "DialogueId": 389904,
-        "TargetGuid": 100000040016
+        "Targets": [{ "Guid": 100000040016 }]
       },
       {
+        "Type": 0,
         "NameId": 389709,
         "DialogueId": 389905,
-        "TargetGuid": 100000040017
+        "Targets": [{ "Guid": 100000040017 }]
       },
       {
+        "Type": 0,
         "NameId": 389710,
         "DialogueId": 389910,
-        "TargetGuid": 100000040018
+        "Targets": [{ "Guid": 100000040018 }]
       },
       {
+        "Type": 0,
         "NameId": 389712,
         "DialogueId": 389911,
-        "TargetGuid": 100000040019
+        "Targets": [{ "Guid": 100000040019 }]
       },
       {
+        "Type": 0,
         "NameId": 38127,
         "DialogueId": 45612,
-        "TargetGuid": 100000003380
+        "Targets": [{ "Guid": 100000003380 }]
       }
     ]
   },
@@ -383,24 +407,28 @@
     "NotificationActive": 6,
     "Goals": [
       {
+        "Type": 0,
         "NameId": 38049,
         "DialogueId": 389967,
-        "TargetGuid": 100000003389
+        "Targets": [{ "Guid": 100000003389 }]
       },
       {
+        "Type": 0,
         "NameId": 38051,
         "DialogueId": 389970,
-        "TargetGuid": 100000003388
+        "Targets": [{ "Guid": 100000003388 }]
       },
       {
+        "Type": 0,
         "NameId": 38053,
         "DialogueId": 390019,
-        "TargetGuid": 100000003386
+        "Targets": [{ "Guid": 100000003386 }]
       },
       {
+        "Type": 0,
         "NameId": 390017,
         "DialogueId": 389953,
-        "TargetGuid": 100000003386
+        "Targets": [{ "Guid": 100000003386 }]
       }
     ]
   },
@@ -422,14 +450,16 @@
     "NotificationActive": 6,
     "Goals": [
       {
+        "Type": 0,
         "NameId": 38154,
         "DialogueId": 38163,
-        "TargetGuid": 100000003370
+        "Targets": [{ "Guid": 100000003370 }]
       },
       {
+        "Type": 0,
         "NameId": 38156,
         "DialogueId": 2134,
-        "TargetGuid": 100000003379
+        "Targets": [{ "Guid": 100000003379 }]
       }
     ]
   },
@@ -451,29 +481,34 @@
     "NotificationActive": 6,
     "Goals": [
       {
+        "Type": 0,
         "NameId": 38393,
         "DialogueId": 38511,
-        "TargetGuid": 100000003097
+        "Targets": [{ "Guid": 100000003097 }]
       },
       {
+        "Type": 0,
         "NameId": 38400,
         "DialogueId": 38402,
-        "TargetGuid": 100000003113
+        "Targets": [{ "Guid": 100000003113 }]
       },
       {
+        "Type": 0,
         "NameId": 38442,
         "DialogueId": 38511,
-        "TargetGuid": 100000003095
+        "Targets": [{ "Guid": 100000003095 }]
       },
       {
+        "Type": 0,
         "NameId": 38515,
         "DialogueId": 38530,
-        "TargetGuid": 100000003108
+        "Targets": [{ "Guid": 100000003108 }]
       },
       {
+        "Type": 0,
         "NameId": 38518,
         "DialogueId": 9585,
-        "TargetGuid": 100000003145
+        "Targets": [{ "Guid": 100000003145 }]
       }
     ]
   },
@@ -496,9 +531,10 @@
     "NotificationActive": 6,
     "Goals": [
       {
+        "Type": 0,
         "NameId": 70110,
         "DialogueId": 70105,
-        "TargetGuid": 100000003120
+        "Targets": [{ "Guid": 100000003120 }]
       }
     ]
   },
@@ -533,9 +569,10 @@
         "CollectNodeType": "smashing-chisels"
       },
       {
+        "Type": 0,
         "NameId": 70230,
         "DialogueId": 70196,
-        "TargetGuid": 100000003120
+        "Targets": [{ "Guid": 100000003120 }]
       }
     ]
   },
@@ -563,9 +600,10 @@
         "CollectNodeType": "box-o-rocks"
       },
       {
+        "Type": 0,
         "NameId": 70291,
         "DialogueId": 70202,
-        "TargetGuid": 100000003145
+        "Targets": [{ "Guid": 100000003145 }]
       }
     ]
   },
@@ -586,24 +624,27 @@
     "NotificationActive": 6,
     "Goals": [
       {
+        "Type": 0,
         "NameId": 101402,
-        "TargetGuid": 100000001777,
+        "Targets": [{ "Guid": 100000001777 }],
         "Dialogue": [
           { "TextId": 101412, "ResponseTextId": 101413 }
         ]
       },
       {
+        "Type": 0,
         "NameId": 101404,
-        "TargetGuid": 100000001758,
+        "Targets": [{ "Guid": 100000001758 }],
         "Dialogue": [
           { "TextId": 101414, "ResponseTextId": 101415 },
           { "TextId": 101416, "ResponseTextId": 103597 }
         ]
       },
       {
+        "Type": 0,
         "NameId": 101406,
         "DialogueId": 101411,
-        "TargetGuid": 100000001964
+        "Targets": [{ "Guid": 100000001964 }]
       }
     ]
   },
@@ -630,9 +671,10 @@
         "CollectNodeType": "tin-ore"
       },
       {
+        "Type": 0,
         "NameId": 400426,
         "DialogueId": 400436,
-        "TargetGuid": 100000001925
+        "Targets": [{ "Guid": 100000001925 }]
       }
     ]
   },
@@ -654,10 +696,11 @@
     "NotificationActive": 6,
     "Goals": [
       {
+        "Type": 0,
         "NameId": 385602,
         "DescriptionId": 385603,
         "DialogueId": 385599,
-        "TargetGuid": 100000004355
+        "Targets": [{ "Guid": 100000004355 }]
       }
     ]
   },
@@ -679,34 +722,39 @@
     "NotificationActive": 6,
     "Goals": [
       {
+        "Type": 0,
         "NameId": 74204,
         "DescriptionId": 74205,
         "DialogueId": 74217,
-        "TargetGuid": 100000002280
+        "Targets": [{ "Guid": 100000002280 }]
       },
       {
+        "Type": 0,
         "NameId": 74206,
         "DescriptionId": 74207,
         "DialogueId": 74222,
-        "TargetGuid": 100000002222
+        "Targets": [{ "Guid": 100000002222 }]
       },
       {
+        "Type": 0,
         "NameId": 74208,
         "DescriptionId": 74209,
         "DialogueId": 74214,
-        "TargetGuid": 100000002187
+        "Targets": [{ "Guid": 100000002187 }]
       },
       {
+        "Type": 0,
         "NameId": 74210,
         "DescriptionId": 74211,
         "DialogueId": 74226,
-        "TargetGuid": 100000002185
+        "Targets": [{ "Guid": 100000002185 }]
       },
       {
+        "Type": 0,
         "NameId": 74212,
         "DescriptionId": 74213,
         "DialogueId": 74201,
-        "TargetGuid": 100000004355
+        "Targets": [{ "Guid": 100000004355 }]
       }
     ]
   },
@@ -728,9 +776,10 @@
     "NotificationActive": 6,
     "Goals": [
       {
+        "Type": 0,
         "NameId": 440471,
         "DialogueId": 440468,
-        "TargetGuid": 100000003841
+        "Targets": [{ "Guid": 100000003841 }]
       }
     ]
   },
@@ -752,23 +801,25 @@
     "NotificationActive": 6,
     "Goals": [
       {
+        "Type": 0,
         "NameId": 438901,
-        "TargetGuid": 100000003842,
+        "Targets": [{ "Guid": 100000003842 }],
         "Dialogue": [
           { "TextId": 438967, "ResponseTextId": 423585 }
         ]
       },
       {
+        "Type": 0,
         "NameId": 438499,
-        "TargetGuid": 100000003841,
+        "Targets": [{ "Guid": 100000003841 }],
         "Dialogue": [
           { "TextId": 438969, "ResponseTextId": 428407 }
         ]
       },
       {
+        "Type": 0,
         "NameId": 438985,
         "RequiredCount": 3,
-        "TargetGuid": 100000040032,
         "Targets": [
           { "Guid": 100000040032, "DialogueId": 438971, "ResponseId": 438972 },
           { "Guid": 100000040033, "DialogueId": 438973, "ResponseId": 438974 },
@@ -776,9 +827,10 @@
         ]
       },
       {
+        "Type": 0,
         "NameId": 437816,
         "DialogueId": 438842,
-        "TargetGuid": 100000003840
+        "Targets": [{ "Guid": 100000003840 }]
       }
     ]
   }

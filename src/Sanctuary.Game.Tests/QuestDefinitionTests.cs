@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using Sanctuary.Game.Resources;
 using Sanctuary.Game.Resources.Definitions;
+using Sanctuary.Game.Resources.Definitions.QuestGoals;
 
 namespace Sanctuary.Game.Tests;
 
@@ -23,10 +25,10 @@ public sealed class QuestDefinitionTests
                 "QuestId": 1,
                 "TargetGuid": 500,
                 "Goals": [
-                  { "NameId": 10 },
-                  { "NameId": 11, "TargetGuid": 600 },
+                  { "Type": 0, "NameId": 10 },
+                  { "NameId": 11, "Type": 0, "Targets": [{ "Guid": 600 }] },
                   { "NameId": 12, "ReachPosition": [1, 2, 3], "Type": 1 },
-                  { "Type": "Collect", "NameId": 13, "CollectNodeType": "tin-ore", "RequiredCount": 5 }
+                  { "Type": 2, "NameId": 13, "CollectNodeType": "tin-ore", "RequiredCount": 5 }
                 ]
               }
             ]
@@ -35,9 +37,9 @@ public sealed class QuestDefinitionTests
         Assert.IsTrue(quests.TryGet(1, out var quest));
 
         var defaulted = (TalkToNpcGoal)quest.Goals[0];
-        Assert.AreEqual(500UL, defaulted.TargetGuid, "A talk goal with no NPC should resolve to the quest's TargetGuid.");
-        Assert.AreEqual(600UL, ((TalkToNpcGoal)quest.Goals[1]).TargetGuid);
-        Assert.AreEqual(3, ((ReachLocationGoal)quest.Goals[2]).ReachPosition.Length);
+        CollectionAssert.AreEqual(new[] { 500UL }, defaulted.AllTalkTargetGuids().ToArray(), "A talk goal with no NPC should resolve to the quest's TargetGuid.");
+        CollectionAssert.AreEqual(new[] { 600UL }, ((TalkToNpcGoal)quest.Goals[1]).AllTalkTargetGuids().ToArray());
+        Assert.AreEqual(new Vector3(1, 2, 3), ((ReachLocationGoal)quest.Goals[2]).ReachPosition);
 
         var collect = (CollectGoal)quest.Goals[3];
         Assert.AreEqual("tin-ore", collect.CollectNodeType);
@@ -53,6 +55,49 @@ public sealed class QuestDefinitionTests
         var quests = new QuestDefinitionCollection(NullLogger.Instance);
 
         Assert.IsFalse(quests.Load(WriteTemp("""[ { "QuestId": 1, "Goals": [ { "Type": 99 } ] } ]""")));
+    }
+
+    [TestMethod]
+    public void Load_RejectsAGoalWithoutAType()
+    {
+        var quests = new QuestDefinitionCollection(NullLogger.Instance);
+
+        Assert.IsFalse(quests.Load(WriteTemp("""[ { "QuestId": 1, "Goals": [ { "NameId": 10 } ] } ]""")));
+    }
+
+    [TestMethod]
+    public void Load_MakesExclusionsSymmetric()
+    {
+        var quests = LoadQuests("""
+            [
+              { "QuestId": 1, "TargetGuid": 5, "ExcludesQuestIds": [2], "Goals": [ { "Type": 0, "NameId": 10 } ] },
+              { "QuestId": 2, "TargetGuid": 5, "Goals": [ { "Type": 0, "NameId": 20 } ] }
+            ]
+            """);
+
+        Assert.IsTrue(quests.TryGet(2, out var second));
+        CollectionAssert.Contains(second.ExcludesQuestIds, 1);
+        Assert.IsFalse(second.IsOfferableFor(new Dictionary<int, bool> { [1] = false }));
+    }
+
+    [TestMethod]
+    public void TurnInDialogueId_UsesTheLastLineOfTheFinalGoalsConversation()
+    {
+        var quests = LoadQuests("""
+            [
+              {
+                "QuestId": 1,
+                "TargetGuid": 5,
+                "Goals": [
+                  { "Type": 0, "NameId": 10, "DialogueId": 100 },
+                  { "Type": 0, "NameId": 11, "Dialogue": [ { "TextId": 200 }, { "TextId": 201 } ] }
+                ]
+              }
+            ]
+            """);
+
+        Assert.IsTrue(quests.TryGet(1, out var quest));
+        Assert.AreEqual(201, quest.TurnInDialogueId);
     }
 
     [TestMethod]
