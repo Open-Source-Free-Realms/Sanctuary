@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
+using Microsoft.EntityFrameworkCore;
+
+using Sanctuary.Core.Helpers;
+using Sanctuary.Database;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.ChatCommands;
 using Sanctuary.Game.Resources.Definitions;
@@ -84,9 +88,30 @@ public static class HousingHelper
         WhenCreated = DateTimeOffset.UtcNow
     };
 
-    public static HousingPacketInstanceList GetInstanceList(IResourceManager resourceManager, Player player) => new()
+    public static HousingPacketInstanceList GetInstanceList(IResourceManager resourceManager, IDbContextFactory<DatabaseContext> dbContextFactory, Player player)
     {
-        PlayerGuid = player.Guid,
-        Instances = GetOwnedHouses(resourceManager, player).Select(house => GetInstanceInfo(player.Guid, player.Name.FullName, house)).ToList()
-    };
+        var characterId = GuidHelper.GetPlayerId(player.Guid);
+
+        using var dbContext = dbContextFactory.CreateDbContext();
+
+        var dbHouses = dbContext.Houses.AsNoTracking().Where(house => house.CharacterId == characterId).ToDictionary(house => house.Id);
+
+        return new HousingPacketInstanceList
+        {
+            PlayerGuid = player.Guid,
+            Instances = GetOwnedHouses(resourceManager, player).Select(house =>
+            {
+                var instanceInfo = GetInstanceInfo(player.Guid, player.Name.FullName, house);
+
+                if (dbHouses.TryGetValue(house.ZoneId, out var dbHouse))
+                {
+                    instanceInfo.HouseName = dbHouse.Name;
+                    instanceInfo.IsLocked = dbHouse.IsLocked;
+                    instanceInfo.IsFloraAllowed = dbHouse.IsFloraAllowed;
+                }
+
+                return instanceInfo;
+            }).ToList()
+        };
+    }
 }

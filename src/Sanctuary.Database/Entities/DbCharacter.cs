@@ -68,6 +68,7 @@ public class DbCharacter
     public ICollection<DbTitle> Titles { get; set; } = new HashSet<DbTitle>();
     public ICollection<DbMount> Mounts { get; set; } = new HashSet<DbMount>();
     public ICollection<DbPet> Pets { get; set; } = new HashSet<DbPet>();
+    public ICollection<DbHouse> Houses { get; set; } = new HashSet<DbHouse>();
     public ICollection<DbFriend> Friends { get; set; } = new HashSet<DbFriend>();
     public ICollection<DbIgnore> Ignores { get; set; } = new HashSet<DbIgnore>();
     public ICollection<DbProfile> Profiles { get; set; } = new HashSet<DbProfile>();

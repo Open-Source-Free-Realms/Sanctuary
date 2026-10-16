@@ -9,12 +9,14 @@ using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Collections;
 using Sanctuary.Core.Extensions;
 using Sanctuary.Core.IO;
+using Sanctuary.Database;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Resources.Definitions;
@@ -33,6 +35,7 @@ public abstract class BaseZone : IZone, IDisposable
 {
     private readonly ILogger _logger;
     protected readonly IResourceManager _resourceManager;
+    protected readonly IDbContextFactory<DatabaseContext> _dbContextFactory;
     private readonly IZoneManager _zoneManager;
     private readonly IScriptManager _scriptManager;
     private readonly ScriptRuntime _scriptRuntime;
@@ -102,6 +105,7 @@ public abstract class BaseZone : IZone, IDisposable
     {
         _zoneDefinition = zoneDefinition;
         _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
+        _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
         _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
 
         var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
@@ -281,7 +285,7 @@ public abstract class BaseZone : IZone, IDisposable
     {
         SendQuickChatData(player);
 
-        player.SendTunneled(HousingHelper.GetInstanceList(_resourceManager, player));
+        player.SendTunneled(HousingHelper.GetInstanceList(_resourceManager, _dbContextFactory, player));
 
         SendUpdateStat(player);
 
