@@ -223,6 +223,7 @@ public abstract class BaseZone : IZone, IDisposable
 
         _started = true;
 
+        SpawnZoneNpcs();
         GetOrCreateScriptContext().FireEvent("start");
         ActivateCollectionNodePools();
         CreateNpcConversationGroups();
@@ -279,6 +280,8 @@ public abstract class BaseZone : IZone, IDisposable
     public virtual void OnClientIsReady(Player player)
     {
         SendQuickChatData(player);
+
+        player.SendTunneled(HousingHelper.GetInstanceList(_resourceManager, player));
 
         SendUpdateStat(player);
 
@@ -745,6 +748,15 @@ public abstract class BaseZone : IZone, IDisposable
     #endregion
 
     #region Scripting API
+
+    private void SpawnZoneNpcs()
+    {
+        if (!_resourceManager.ZoneNpcs.TryGetValue(Name, out var zoneNpcs))
+            return;
+
+        foreach (var spawn in zoneNpcs.Spawns)
+            TrySpawnNpc(spawn.NpcId, spawn.Guid, spawn.Position.X, spawn.Position.Y, spawn.Position.Z, spawn.Heading, 0f, 0f, out _);
+    }
 
     public bool TrySpawnNpc(int npcId, ulong? npcGuid, float x, float y, float z, float heading, float pitch, float roll, [MaybeNullWhen(false)] out IScriptableNpc npc)
     {

@@ -32,6 +32,8 @@ public static class BaseHousingPacketHandler
         {
             ClientHousingPacketSetEditMode.OpCode => ClientHousingPacketSetEditModeHandler.HandlePacket(connection, reader.Span),
             ClientHousingPacketEnterRequest.OpCode => ClientHousingPacketEnterRequestHandler.HandlePacket(connection, reader.Span),
+            ClientHousingPacketLeaveHouse.OpCode => ClientHousingPacketLeaveHouseHandler.HandlePacket(connection, reader.Span),
+            ClientHousingPacketRequestPlayerHouses.OpCode => ClientHousingPacketRequestPlayerHousesHandler.HandlePacket(connection, reader.Span),
             _ => true // housing not implemented
         };
     }

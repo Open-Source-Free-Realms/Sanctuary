@@ -1,0 +1,177 @@
+﻿{
+  "Definitions": [
+    {
+      "Id": 40030,
+      "NameId": 4826,
+      "ModelId": 271,
+      "ModelFileName": "invisible_cube.adr",
+      "Scale": 1.0,
+      "Name": "Exit",
+      "HideNamePlate": true,
+      "TerrainObjectId": 1278710833,
+      "ReplaceTerrainObject": false,
+      "Disposition": 1,
+      "HasCursor": true,
+      "CursorId": 17,
+      "RelevanceUnknown2": false,
+      "Notifications": [
+        {
+          "IsCompact": false,
+          "NotificationType": 7,
+          "IconId": 102,
+          "IconState": 186,
+          "Unknown": 0,
+          "NameId": 4826,
+          "ReferenceId": 0,
+          "Unknown3": true,
+          "Unknown2": 0,
+          "Enabled": true
+        }
+      ],
+      "AutoSelectSingleInteraction": true,
+      "InteractionList": {
+        "Unknown": true,
+        "Interactions": [
+          {
+            "Id": 4490,
+            "IconId": 9380,
+            "ButtonText": 4826,
+            "Type": 34,
+            "Param1": 0,
+            "Param2": 0,
+            "TooltipId": 0
+          }
+        ],
+        "Name": "",
+        "Unknown2": true
+      },
+      "InteractionUnknown": false
+    },
+    {
+      "Id": 40043,
+      "NameId": 4826,
+      "ModelId": 271,
+      "ModelFileName": "invisible_cube.adr",
+      "Scale": 1.0,
+      "Name": "Exit",
+      "HideNamePlate": true,
+      "TerrainObjectId": 1278968038,
+      "ReplaceTerrainObject": false,
+      "Disposition": 1,
+      "HasCursor": true,
+      "CursorId": 17,
+      "RelevanceUnknown2": false,
+      "Notifications": [
+        {
+          "IsCompact": false,
+          "NotificationType": 7,
+          "IconId": 102,
+          "IconState": 186,
+          "Unknown": 0,
+          "NameId": 4826,
+          "ReferenceId": 0,
+          "Unknown3": true,
+          "Unknown2": 0,
+          "Enabled": true
+        }
+      ],
+      "AutoSelectSingleInteraction": true,
+      "InteractionList": {
+        "Unknown": true,
+        "Interactions": [
+          {
+            "Id": 4490,
+            "IconId": 9380,
+            "ButtonText": 4826,
+            "Type": 34,
+            "Param1": 0,
+            "Param2": 0,
+            "TooltipId": 0
+          }
+        ],
+        "Name": "",
+        "Unknown2": true
+      },
+      "InteractionUnknown": false
+    },
+    {
+      "Id": 40044,
+      "NameId": 4826,
+      "ModelId": 271,
+      "ModelFileName": "invisible_cube.adr",
+      "Scale": 1.0,
+      "Name": "Exit",
+      "HideNamePlate": true,
+      "TerrainObjectId": 1278724135,
+      "ReplaceTerrainObject": false,
+      "Disposition": 1,
+      "HasCursor": true,
+      "CursorId": 17,
+      "RelevanceUnknown2": false,
+      "Notifications": [
+        {
+          "IsCompact": false,
+          "NotificationType": 7,
+          "IconId": 102,
+          "IconState": 186,
+          "Unknown": 0,
+          "NameId": 4826,
+          "ReferenceId": 0,
+          "Unknown3": true,
+          "Unknown2": 0,
+          "Enabled": true
+        }
+      ],
+      "AutoSelectSingleInteraction": true,
+      "InteractionList": {
+        "Unknown": true,
+        "Interactions": [
+          {
+            "Id": 4490,
+            "IconId": 9380,
+            "ButtonText": 4826,
+            "Type": 34,
+            "Param1": 0,
+            "Param2": 0,
+            "TooltipId": 0
+          }
+        ],
+        "Name": "",
+        "Unknown2": true
+      },
+      "InteractionUnknown": false
+    }
+  ],
+  "Spawns": [
+    {
+      "NpcId": 40030,
+      "Guid": 1278710833,
+      "Position": [
+        448.32,
+        -1,
+        432.28
+      ],
+      "Heading": -1.571
+    },
+    {
+      "NpcId": 40043,
+      "Guid": 1278968038,
+      "Position": [
+        372.73,
+        -1.01,
+        387.52
+      ],
+      "Heading": 0
+    },
+    {
+      "NpcId": 40044,
+      "Guid": 1278724135,
+      "Position": [
+        329.07,
+        -1,
+        455.25
+      ],
+      "Heading": -1.5708
+    }
+  ]
+}

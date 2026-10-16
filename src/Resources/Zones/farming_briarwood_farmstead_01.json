@@ -1,0 +1,23 @@
+{
+  "$type": "Housing",
+  "Id": 139,
+  "Name": "farming_briarwood_farmstead_01",
+  "Type": "Housing",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 32,
+  "EndLongitude": 32,
+  "Sky": "sky_wilds24.xml",
+  "SpawnRotation": [
+    -0.9985,
+    0,
+    -0.0551,
+    0
+  ],
+  "SpawnPosition": [
+    1408.65,
+    0.07,
+    752.07
+  ]
+}

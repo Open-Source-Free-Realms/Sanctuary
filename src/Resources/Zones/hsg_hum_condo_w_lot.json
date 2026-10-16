@@ -1,0 +1,23 @@
+{
+  "$type": "Housing",
+  "Id": 25,
+  "Name": "hsg_hum_condo_w_lot",
+  "Type": "Housing",
+  "TileSize": 64,
+  "StartLatitude": -8,
+  "StartLongitude": -8,
+  "EndLatitude": 17,
+  "EndLongitude": 15,
+  "Sky": "sky_wilds24.xml",
+  "SpawnPosition": [
+    86,
+    -0.87,
+    -30.9
+  ],
+  "SpawnRotation": [
+    0.9975,
+    0,
+    0.0701,
+    0
+  ]
+}

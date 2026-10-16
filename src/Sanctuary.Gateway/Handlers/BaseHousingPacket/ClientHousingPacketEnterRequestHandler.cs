@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Game;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
@@ -13,65 +14,38 @@ namespace Sanctuary.Gateway.Handlers;
 public static class ClientHousingPacketEnterRequestHandler
 {
     private static ILogger _logger = null!;
-    private static IZoneManager _zoneManager = null!;
+    private static IResourceManager _resourceManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
         var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
         _logger = loggerFactory.CreateLogger(nameof(ClientHousingPacketEnterRequestHandler));
 
-        _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
+        _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
     {
-        if (!ClientHousingPacketEnterRequest.TryDeserialize(data, out var packet))
+        if (!ClientHousingPacketEnterRequest.TryDeserialize(data, out var clientHousingPacketEnterRequest))
         {
             _logger.LogError("Failed to deserialize {packet}.", nameof(ClientHousingPacketEnterRequest));
             return false;
         }
 
-        _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(ClientHousingPacketEnterRequest), packet);
+        _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(ClientHousingPacketEnterRequest), clientHousingPacketEnterRequest);
 
-        // TEST
-        /* var packetClientBeginZoning = new PacketClientBeginZoning
+        var player = connection.Player;
+
+        if (!HousingHelper.TryGetOwnedHouse(_resourceManager, player, clientHousingPacketEnterRequest.HouseGuid, out var houseDefinition)
+            || !HousingHelper.CanEnterHouseZone(_resourceManager, player, houseDefinition.ZoneId)
+            || !_resourceManager.Zones.TryGetValue(houseDefinition.ZoneId, out var zoneDefinition))
         {
-            Name = "hsg_emptylot_seaside_beach_01",
-            Type = 2,
-            Position = new(440.632f, -0.071f, 432.801f, 1.0f),
-            Rotation = new(-0.9999741f, 0.0f, -0.0072035603f, 0.0f),
-            Sky = "sky_seaside24.xml",
-            Unknown = 1,
-            Id = 1,
-            GeometryId = 214,
-            OverrideUpdateRadius = true
-        }; */
+            _logger.LogWarning("{player} requested a house they do not own. ( {houseGuid} )", player.Guid, clientHousingPacketEnterRequest.HouseGuid);
+            return true;
+        }
 
-        /* var packetClientBeginZoning = new PacketClientBeginZoning
-        {
-            Name = "hsg_emptylot_seaside_cliffs_01",
-            Type = 2,
-            Position = new(568.8f, 50.8f, 517.9f, 1.0f),
-            Rotation = new(-1.0f, 0.0f, 0.0f, 0.0f),
-            Sky = "sky_seaside24.xml",
-            Unknown = 1,
-            Id = 1,
-            GeometryId = 214,
-            Unknown5 = true
-        }; */
-
-        /* connection.SendTunneled(packetClientBeginZoning);
-
-        connection.Player.Zone.RemoveEntity(connection.Player);
-
-        var test = _zoneManager.Get(packetClientBeginZoning.Id);
-
-        if (test is null)
-            throw new ArgumentNullException(nameof(test));
-
-        connection.Player.Zone = test;
-
-        test.AddPlayer(connection.Player); */
+        if (!player.TeleportToZone(zoneDefinition.Id, player.Guid, zoneDefinition.SpawnPosition, zoneDefinition.SpawnRotation))
+            _logger.LogWarning("{player} could not enter house {house}.", player.Guid, houseDefinition.Id);
 
         return true;
     }

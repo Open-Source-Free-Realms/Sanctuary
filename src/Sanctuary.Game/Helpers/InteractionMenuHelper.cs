@@ -26,6 +26,7 @@ public static class InteractionMenuHelper
             {
                 MerchantInteraction.Type => MerchantInteraction.Data.Id,
                 SnowballInteraction.Type => SnowballInteraction.Data.Id,
+                ExitInteraction.Type => ExitInteraction.Data.Id,
                 _ => interaction.Id
             };
             commandPacketInteractionList.List.Interactions.Add(new InteractionData

@@ -1,0 +1,23 @@
+{
+  "$type": "Housing",
+  "Id": 123,
+  "Name": "hsg_hum_deluxe_01",
+  "Type": "Housing",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 12,
+  "EndLongitude": 12,
+  "Sky": "sky_wilds24.xml",
+  "SpawnPosition": [
+    446.72,
+    -0.43,
+    405.81
+  ],
+  "SpawnRotation": [
+    -1.0,
+    0,
+    -0.0002,
+    0
+  ]
+}

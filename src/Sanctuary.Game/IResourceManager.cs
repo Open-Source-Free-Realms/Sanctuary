@@ -32,6 +32,8 @@ public interface IResourceManager
     StoreBundleCategoryGroupDefinitionCollection StoreBundleCategoryGroups { get; }
 
     ZoneDefinitionCollection Zones { get; }
+    HouseDefinitionCollection Houses { get; }
+    ZoneNpcsCollection ZoneNpcs { get; }
     MountDefinitionCollection Mounts { get; }
     PetDefinitionCollection Pets { get; }
     PlayerTitleCollection PlayerTitles { get; }
