@@ -118,7 +118,8 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
             }
 
             if (clientItemDefinition.Type == 1 || clientItemDefinition.Type == ItemDefinitionHelper.PetClothingItemType
-                || clientItemDefinition.Type == ItemDefinitionHelper.PetUtilityItemType || clientItemDefinition.Type == 12)
+                || clientItemDefinition.Type == ItemDefinitionHelper.PetUtilityItemType || clientItemDefinition.Type == 12
+                || clientItemDefinition.Type == ItemDefinitionHelper.HouseItemType)
             {
                 var totalQuantity = orderDetail.Quantity * bundleEntry.Quantity;
 
@@ -191,6 +192,8 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
                         clientUpdatePacketItemAdd.Payload = writer.Buffer;
 
                         connection.SendTunneled(clientUpdatePacketItemAdd);
+
+                        HousingHelper.NotifyHouseAdded(_resourceManager, _dbContextFactory, connection.Player, itemDefinition);
                     }
                     else
                     {

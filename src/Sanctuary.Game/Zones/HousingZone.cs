@@ -39,6 +39,9 @@ public sealed class HousingZone : BaseZone
 
         SendShopData(player);
         SendHousingZoneData(player);
+
+        if (PetAutospawn && IsOwner(player) && player.Pet is null)
+            player.PlayerPet.QueueAction(() => player.PlayerPet.SummonPet(player.ActivePetId));
     }
 
     public bool IsOwner(Player player) => OwnerId == player.Guid && !player.IsPreviewingHouse;

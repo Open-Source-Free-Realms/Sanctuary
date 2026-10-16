@@ -10,7 +10,6 @@ using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game.Entities;
-using Sanctuary.Game.ChatCommands;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Zones;
 using Sanctuary.Game.Zones;
@@ -24,8 +23,6 @@ public static class HousingHelper
     private const int HouseDefinitionIdBits = 8;
     private const ulong HouseDefinitionIdMask = (1UL << HouseDefinitionIdBits) - 1;
 
-    private const int HouseItemType = 16;
-
     private const int MaxFixtureCount = 9999;
     private const int MaxLandmarkCount = 100;
 
@@ -37,10 +34,39 @@ public static class HousingHelper
     public static IEnumerable<HouseDefinition> GetStarterHouses(IResourceManager resourceManager) =>
         resourceManager.Houses.Values.Where(house => house.IsStarter).OrderBy(house => house.Id);
 
-    public static IEnumerable<HouseDefinition> GetOwnedHouses(IResourceManager resourceManager, Player player) =>
-        player.ChatCommandRole == ChatCommandRole.Player
-            ? GetStarterHouses(resourceManager)
-            : resourceManager.Houses.Values.Where(house => CanEnterHouseZone(resourceManager, player, house.ZoneId)).OrderBy(house => house.Id);
+    public static IEnumerable<HouseDefinition> GetOwnedHouses(IResourceManager resourceManager, Player player)
+    {
+#if DEBUG
+        if (IsStaff(player))
+            return resourceManager.Houses.Values.Where(house => CanEnterHouseZone(resourceManager, player, house.ZoneId)).OrderBy(house => house.Id);
+#endif
+
+        var houseNameIds = player.Items
+            .Select(clientItem => resourceManager.ClientItemDefinitions.TryGetValue(clientItem.Definition, out var clientItemDefinition) && clientItemDefinition.Type == ItemDefinitionHelper.HouseItemType ? clientItemDefinition.NameId : 0)
+            .ToHashSet();
+
+        return resourceManager.Houses.Values.Where(house => house.IsStarter || houseNameIds.Contains(house.NameId)).OrderBy(house => house.Id);
+    }
+
+    public static void NotifyHouseAdded(IResourceManager resourceManager, IDbContextFactory<DatabaseContext> dbContextFactory, Player player, ClientItemDefinition clientItemDefinition)
+    {
+        if (clientItemDefinition.Type != ItemDefinitionHelper.HouseItemType)
+            return;
+
+        var houseDefinition = resourceManager.Houses.Values.OrderBy(house => house.Id).FirstOrDefault(house => house.NameId == clientItemDefinition.NameId);
+
+        if (houseDefinition is null)
+            return;
+
+        player.SendTunneled(new HousingPacketNotifyHouseAdded
+        {
+            NameId = houseDefinition.NameId,
+            HouseGuid = GetHouseGuid(player.Guid, houseDefinition),
+            OwnerGuid = player.Guid
+        });
+
+        player.SendTunneled(GetInstanceList(resourceManager, dbContextFactory, player));
+    }
 
     public static bool TryGetHouseDefinition(IResourceManager resourceManager, int zoneDefinitionId, [MaybeNullWhen(false)] out HouseDefinition houseDefinition)
     {
@@ -67,7 +93,9 @@ public static class HousingHelper
     public static bool CanEnterHouseZone(IResourceManager resourceManager, Player player, int zoneDefinitionId) =>
         resourceManager.Zones.TryGetValue(zoneDefinitionId, out var zoneDefinition)
         && zoneDefinition is HousingZoneDefinition { IsBroken: false } housingZoneDefinition
-        && (!housingZoneDefinition.StaffOnly || player.ChatCommandRole != ChatCommandRole.Player);
+        && (!housingZoneDefinition.StaffOnly || IsStaff(player));
+
+    private static bool IsStaff(Player player) => player.IsAdmin || player.IsMod;
 
     public static ulong GetHouseOwnerGuid(ulong houseGuid) => houseGuid >> HouseDefinitionIdBits;
 
@@ -108,7 +136,7 @@ public static class HousingHelper
 
     public static bool TryPreviewHouse(IResourceManager resourceManager, Player player, int itemDefinitionId, out HousingError housingError)
     {
-        var houseDefinition = resourceManager.ClientItemDefinitions.TryGetValue(itemDefinitionId, out var clientItemDefinition) && clientItemDefinition.Type == HouseItemType
+        var houseDefinition = resourceManager.ClientItemDefinitions.TryGetValue(itemDefinitionId, out var clientItemDefinition) && clientItemDefinition.Type == ItemDefinitionHelper.HouseItemType
             ? resourceManager.Houses.Values.OrderBy(house => house.Id).FirstOrDefault(house => house.NameId == clientItemDefinition.NameId)
             : null;
 

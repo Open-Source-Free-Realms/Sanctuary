@@ -9,6 +9,7 @@ using Sanctuary.Core.IO;
 using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Resources.Definitions.Rewards;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -116,6 +117,8 @@ public class RewardManager : IRewardManager
             itemDefinition.Serialize(writer);
 
             player.SendTunneled(new ClientUpdatePacketItemAdd { Payload = writer.Buffer });
+
+            HousingHelper.NotifyHouseAdded(_resourceManager, _dbContextFactory, player, itemDefinition);
         }
         else
         {
