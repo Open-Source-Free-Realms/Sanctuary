@@ -23,8 +23,7 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     QuestId = table.Column<int>(type: "INTEGER", nullable: false),
                     CharacterId = table.Column<ulong>(type: "INTEGER", nullable: false),
                     Completed = table.Column<bool>(type: "INTEGER", nullable: false),
-                    GoalProgress = table.Column<int>(type: "INTEGER", nullable: false),
-                    GoalCount = table.Column<int>(type: "INTEGER", nullable: false)
+                    CurrentGoalId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -37,6 +36,32 @@ namespace Sanctuary.Database.Sqlite.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "CharacterQuestProgress",
+                columns: table => new
+                {
+                    QuestId = table.Column<int>(type: "INTEGER", nullable: false),
+                    CharacterId = table.Column<ulong>(type: "INTEGER", nullable: false),
+                    GoalId = table.Column<int>(type: "INTEGER", nullable: false),
+                    TargetId = table.Column<ulong>(type: "INTEGER", nullable: false),
+                    Count = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CharacterQuestProgress", x => new { x.CharacterId, x.QuestId, x.GoalId, x.TargetId });
+                    table.ForeignKey(
+                        name: "FK_CharacterQuestProgress_CharacterQuests_QuestId_CharacterId",
+                        columns: x => new { x.QuestId, x.CharacterId },
+                        principalTable: "CharacterQuests",
+                        principalColumns: new[] { "QuestId", "CharacterId" },
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CharacterQuestProgress_QuestId_CharacterId",
+                table: "CharacterQuestProgress",
+                columns: new[] { "QuestId", "CharacterId" });
+
             migrationBuilder.CreateIndex(
                 name: "IX_CharacterQuests_CharacterId",
                 table: "CharacterQuests",
@@ -46,6 +71,9 @@ namespace Sanctuary.Database.Sqlite.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "CharacterQuestProgress");
+
             migrationBuilder.DropTable(
                 name: "CharacterQuests");
 

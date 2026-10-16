@@ -13,5 +13,11 @@ public sealed class DbCharacterQuestConfiguration : IEntityTypeConfiguration<DbC
         builder.Property(q => q.QuestId).IsRequired().ValueGeneratedNever();
 
         builder.Property(q => q.Completed).IsRequired();
+        builder.Property(q => q.CurrentGoalId).IsRequired();
+
+        builder.HasMany(q => q.Progress)
+            .WithOne(p => p.Quest)
+            .HasForeignKey(p => new { p.QuestId, p.CharacterId })
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

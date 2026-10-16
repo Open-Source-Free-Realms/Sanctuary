@@ -11,14 +11,35 @@ using Sanctuary.Database.Sqlite;
 namespace Sanctuary.Database.Sqlite.Migrations
 {
     [DbContext(typeof(SqliteDatabaseContext))]
-    [Migration("20260811000000_AddCharacterQuests")]
+    [Migration("20261016164521_AddCharacterQuests")]
     partial class AddCharacterQuests
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.9");
+            modelBuilder.HasAnnotation("ProductVersion", "9.0.17");
+
+            modelBuilder.Entity("DbItemDbPet", b =>
+                {
+                    b.Property<int>("ItemsId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<ulong>("ItemsCharacterId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PetsId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<ulong>("PetsCharacterId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ItemsId", "ItemsCharacterId", "PetsId", "PetsCharacterId");
+
+                    b.HasIndex("PetsId", "PetsCharacterId");
+
+                    b.ToTable("PetItems", (string)null);
+                });
 
             modelBuilder.Entity("DbItemDbProfile", b =>
                 {
@@ -95,7 +116,7 @@ namespace Sanctuary.Database.Sqlite.Migrations
 
                     b.Property<string>("FullName")
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasMaxLength(32)
+                        .HasMaxLength(33)
                         .HasColumnType("TEXT")
                         .HasComputedColumnSql("CONCAT_WS(' ', FirstName, NULLIF(LastName, ''))", true);
 
@@ -201,10 +222,7 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     b.Property<bool>("Completed")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("GoalCount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("GoalProgress")
+                    b.Property<int>("CurrentGoalId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("QuestId", "CharacterId");
@@ -212,6 +230,51 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     b.HasIndex("CharacterId");
 
                     b.ToTable("CharacterQuests");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbCharacterQuestProgress", b =>
+                {
+                    b.Property<ulong>("CharacterId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("QuestId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("GoalId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<ulong>("TargetId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Count")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("CharacterId", "QuestId", "GoalId", "TargetId");
+
+                    b.HasIndex("QuestId", "CharacterId");
+
+                    b.ToTable("CharacterQuestProgress");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbCollectionEntry", b =>
+                {
+                    b.Property<ulong>("CharacterId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("CollectionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("EntryId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset>("Collected")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("DATE()");
+
+                    b.HasKey("CharacterId", "CollectionId", "EntryId");
+
+                    b.ToTable("CollectionEntries");
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbFriend", b =>
@@ -370,6 +433,88 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     b.ToTable("Mounts");
                 });
 
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbPet", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<ulong>("CharacterId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("BrushItemId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ConditionerItemId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("DATE()");
+
+                    b.Property<int>("Definition")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("EquippedPetTrick1")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("EquippedPetTrick2")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("EquippedPetTrick3")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("EquippedPetTrick4")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("FoodBowlItemId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("FoodItemId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<float>("Hunger")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("Hygiene")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("Mood")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
+                    b.Property<float>("Play")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("ShampooItemId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Tint")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ToyItemId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Trait")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset?>("TreasureFoundAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("VitaminItemId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id", "CharacterId");
+
+                    b.HasIndex("CharacterId");
+
+                    b.ToTable("Pets");
+                });
+
             modelBuilder.Entity("Sanctuary.Database.Entities.DbProfile", b =>
                 {
                     b.Property<int>("Id")
@@ -471,6 +616,21 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("DbItemDbPet", b =>
+                {
+                    b.HasOne("Sanctuary.Database.Entities.DbItem", null)
+                        .WithMany()
+                        .HasForeignKey("ItemsId", "ItemsCharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Sanctuary.Database.Entities.DbPet", null)
+                        .WithMany()
+                        .HasForeignKey("PetsId", "PetsCharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("DbItemDbProfile", b =>
                 {
                     b.HasOne("Sanctuary.Database.Entities.DbItem", null)
@@ -508,6 +668,28 @@ namespace Sanctuary.Database.Sqlite.Migrations
                 {
                     b.HasOne("Sanctuary.Database.Entities.DbCharacter", "Character")
                         .WithMany("Quests")
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Character");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbCharacterQuestProgress", b =>
+                {
+                    b.HasOne("Sanctuary.Database.Entities.DbCharacterQuest", "Quest")
+                        .WithMany("Progress")
+                        .HasForeignKey("QuestId", "CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Quest");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbCollectionEntry", b =>
+                {
+                    b.HasOne("Sanctuary.Database.Entities.DbCharacter", "Character")
+                        .WithMany("CollectionEntries")
                         .HasForeignKey("CharacterId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -586,6 +768,17 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     b.Navigation("Character");
                 });
 
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbPet", b =>
+                {
+                    b.HasOne("Sanctuary.Database.Entities.DbCharacter", "Character")
+                        .WithMany("Pets")
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Character");
+                });
+
             modelBuilder.Entity("Sanctuary.Database.Entities.DbProfile", b =>
                 {
                     b.HasOne("Sanctuary.Database.Entities.DbCharacter", "Character")
@@ -610,6 +803,8 @@ namespace Sanctuary.Database.Sqlite.Migrations
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbCharacter", b =>
                 {
+                    b.Navigation("CollectionEntries");
+
                     b.Navigation("Friends");
 
                     b.Navigation("Ignores");
@@ -618,11 +813,18 @@ namespace Sanctuary.Database.Sqlite.Migrations
 
                     b.Navigation("Mounts");
 
+                    b.Navigation("Pets");
+
                     b.Navigation("Profiles");
 
                     b.Navigation("Quests");
 
                     b.Navigation("Titles");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbCharacterQuest", b =>
+                {
+                    b.Navigation("Progress");
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbGuild", b =>
