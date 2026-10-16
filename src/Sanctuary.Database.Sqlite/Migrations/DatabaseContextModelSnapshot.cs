@@ -341,6 +341,9 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     b.Property<DateTimeOffset?>("PublishedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("ZoneId")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id", "CharacterId");
 
                     b.HasIndex("CharacterId");
@@ -423,8 +426,7 @@ namespace Sanctuary.Database.Sqlite.Migrations
 
                     b.HasIndex("CharacterId");
 
-                    b.HasIndex("Tint", "Definition", "CharacterId")
-                        .IsUnique();
+                    b.HasIndex("Tint", "Definition", "CharacterId");
 
                     b.ToTable("Items");
                 });

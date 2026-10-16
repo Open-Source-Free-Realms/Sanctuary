@@ -7,6 +7,8 @@ public class DbHouse
 {
     public int Id { get; set; }
 
+    public int ZoneId { get; set; }
+
     public string Name { get; set; } = string.Empty;
 
     public bool IsLocked { get; set; }

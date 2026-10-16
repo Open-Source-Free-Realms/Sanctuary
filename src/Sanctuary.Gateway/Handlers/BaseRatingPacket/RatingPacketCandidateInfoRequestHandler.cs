@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
-using Sanctuary.Game;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
@@ -18,7 +17,6 @@ namespace Sanctuary.Gateway.Handlers;
 public static class RatingPacketCandidateInfoRequestHandler
 {
     private static ILogger _logger = null!;
-    private static IResourceManager _resourceManager = null!;
     private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
@@ -26,7 +24,6 @@ public static class RatingPacketCandidateInfoRequestHandler
         var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
         _logger = loggerFactory.CreateLogger(nameof(RatingPacketCandidateInfoRequestHandler));
 
-        _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
         _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
     }
 
@@ -55,11 +52,10 @@ public static class RatingPacketCandidateInfoRequestHandler
 
             foreach (var dbHouse in HousingHelper.GetPublishedHouses(dbContext).AsNoTracking().Where(house => house.CharacterId == ownerId))
             {
-                if (HousingHelper.TryGetHouseGuid(_resourceManager, dbHouse, out var houseGuid))
-                    ratingPacketCandidateInfoReply.Candidates.Add(HousingHelper.GetCandidateRatingInfo(houseGuid, dbHouse, player.Guid));
+                ratingPacketCandidateInfoReply.Candidates.Add(HousingHelper.GetCandidateRatingInfo(HousingHelper.GetHouseGuid(dbHouse), dbHouse, player.Guid));
             }
         }
-        else if (HousingHelper.TryGetHouse(_resourceManager, dbContext, ratingPacketCandidateInfoRequest.InstanceGuid, out var houseGuid, out var dbHouse)
+        else if (HousingHelper.TryGetHouse(dbContext, ratingPacketCandidateInfoRequest.InstanceGuid, out var houseGuid, out var dbHouse)
             && dbHouse.IsPublished)
         {
             ratingPacketCandidateInfoReply.Candidates.Add(HousingHelper.GetCandidateRatingInfo(houseGuid, dbHouse, player.Guid));

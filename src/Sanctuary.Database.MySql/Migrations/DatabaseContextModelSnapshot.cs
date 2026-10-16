@@ -350,6 +350,9 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.Property<DateTimeOffset?>("PublishedAt")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<int>("ZoneId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id", "CharacterId");
 
                     b.HasIndex("CharacterId");
@@ -432,8 +435,7 @@ namespace Sanctuary.Database.MySql.Migrations
 
                     b.HasIndex("CharacterId");
 
-                    b.HasIndex("Tint", "Definition", "CharacterId")
-                        .IsUnique();
+                    b.HasIndex("Tint", "Definition", "CharacterId");
 
                     b.ToTable("Items");
                 });

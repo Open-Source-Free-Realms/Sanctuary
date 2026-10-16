@@ -49,8 +49,8 @@ public static class RatingPacketAddCandidateHandler
 
         if (ratingPacketAddCandidate.OwnerGuid != player.Guid
             || !ulong.TryParse(ratingPacketAddCandidate.InstanceGuid, CultureInfo.InvariantCulture, out var houseGuid)
-            || !HousingHelper.TryGetOwnedHouse(_resourceManager, player, houseGuid, out var houseDefinition)
-            || HousingHelper.IsStaffOnlyHouse(_resourceManager, houseDefinition))
+            || !HousingHelper.TryGetOwnedHouse(_resourceManager, player, houseGuid, out var ownedHouse)
+            || HousingHelper.IsStaffOnlyHouse(_resourceManager, ownedHouse.Definition))
         {
             _logger.LogWarning("{player} could not publish house {houseGuid}.", player.Guid, ratingPacketAddCandidate.InstanceGuid);
             return true;
@@ -61,13 +61,14 @@ public static class RatingPacketAddCandidateHandler
         using var dbContext = _dbContextFactory.CreateDbContext();
 
         var dbHouse = dbContext.Houses.Include(house => house.Votes)
-            .FirstOrDefault(house => house.Id == houseDefinition.ZoneId && house.CharacterId == characterId);
+            .FirstOrDefault(house => house.Id == ownedHouse.Key && house.CharacterId == characterId);
 
         if (dbHouse is null)
         {
             dbHouse = new DbHouse
             {
-                Id = houseDefinition.ZoneId,
+                Id = ownedHouse.Key,
+                ZoneId = ownedHouse.Definition.ZoneId,
                 CharacterId = characterId
             };
 

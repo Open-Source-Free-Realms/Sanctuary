@@ -47,6 +47,9 @@ public static class ItemDefinitionHelper
         player.SendTunneled(playerUpdatePacketItemDefinitionRequest);
     }
 
+    public static bool IsStackable(ClientItemDefinition clientItemDefinition) =>
+        clientItemDefinition.Type != HouseItemType;
+
     private static bool HasTintChoice(IResourceManager resourceManager, ClientItemDefinition clientItemDefinition) =>
         resourceManager.Stores.Values.Any(storeDefinition => storeDefinition.Bundles.Values.Any(appStoreBundleDefinition =>
             appStoreBundleDefinition.IsTintable && appStoreBundleDefinition.Entries.Any(entry => entry.MarketingItemId == clientItemDefinition.Id)));

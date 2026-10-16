@@ -11,6 +11,7 @@ public sealed class DbHouseConfiguration : IEntityTypeConfiguration<DbHouse>
     {
         builder.HasKey(h => new { h.Id, h.CharacterId });
         builder.Property(h => h.Id).IsRequired().ValueGeneratedNever();
+        builder.Property(h => h.ZoneId).IsRequired();
 
         builder.Property(h => h.Name).IsRequired().HasMaxLength(32);
         builder.Property(h => h.IsLocked).IsRequired();

@@ -50,7 +50,11 @@ public class HouseCommand : IChatCommand
             return true;
         }
 
-        if (!invoker.TeleportToZone(zoneDefinition.Id, invoker.Guid, zoneDefinition.SpawnPosition, zoneDefinition.SpawnRotation))
+        var houseKey = HousingHelper.TryGetHouseDefinition(_resourceManager, zoneDefinition.Id, out var houseDefinition)
+            ? HousingHelper.GetReservedHouseKey(houseDefinition)
+            : HousingHelper.PreviewHouseKey;
+
+        if (!invoker.TeleportToZone(zoneDefinition.Id, HousingHelper.GetHouseGuid(invoker.Guid, houseKey), zoneDefinition.SpawnPosition, zoneDefinition.SpawnRotation))
             ChatHelper.SendSystemMessage(invoker, $"Could not visit {zoneName}.");
 
         return true;

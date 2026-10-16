@@ -130,8 +130,9 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
                     return SendOrderResult(connection, packetInGamePurchasePlaceOrderResponse, InGamePurchaseOrderResult.OrderFailure);
                 }
 
-                var dbItem = dbCharacter.Items.SingleOrDefault(i =>
-                    i.Definition == clientItemDefinition.Id && i.Tint == orderDetailTint);
+                var dbItem = ItemDefinitionHelper.IsStackable(clientItemDefinition)
+                    ? dbCharacter.Items.SingleOrDefault(i => i.Definition == clientItemDefinition.Id && i.Tint == orderDetailTint)
+                    : null;
 
                 if (dbItem is not null)
                 {
@@ -156,7 +157,7 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
 
                 pendingUpdates.Add(() =>
                 {
-                    var clientItem = connection.Player.Items.SingleOrDefault(x => x.Definition == itemDefinition.Id && x.Tint == orderDetailTint);
+                    var clientItem = connection.Player.Items.SingleOrDefault(x => x.Id == savedItem.Id);
 
                     var addItem = false;
 
@@ -193,7 +194,7 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
 
                         connection.SendTunneled(clientUpdatePacketItemAdd);
 
-                        HousingHelper.NotifyHouseAdded(_resourceManager, _dbContextFactory, connection.Player, itemDefinition);
+                        HousingHelper.NotifyHouseAdded(_resourceManager, _dbContextFactory, connection.Player, itemDefinition, clientItem.Id);
                     }
                     else
                     {

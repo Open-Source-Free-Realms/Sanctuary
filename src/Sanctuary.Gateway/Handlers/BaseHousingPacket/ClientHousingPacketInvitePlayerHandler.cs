@@ -16,7 +16,6 @@ namespace Sanctuary.Gateway.Handlers;
 public static class ClientHousingPacketInvitePlayerHandler
 {
     private static ILogger _logger = null!;
-    private static IResourceManager _resourceManager = null!;
     private static IZoneManager _zoneManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
@@ -24,7 +23,6 @@ public static class ClientHousingPacketInvitePlayerHandler
         var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
         _logger = loggerFactory.CreateLogger(nameof(ClientHousingPacketInvitePlayerHandler));
 
-        _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
         _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
     }
 
@@ -40,15 +38,12 @@ public static class ClientHousingPacketInvitePlayerHandler
 
         var player = connection.Player;
 
-        if (player.Zone is not HousingZone housingZone || !housingZone.IsOwner(player)
-            || !HousingHelper.TryGetHouseDefinition(_resourceManager, housingZone.DefinitionId, out var houseDefinition)
+        if (player.Zone is not HousingZone { OwnerId: { } houseGuid } housingZone || !housingZone.IsOwner(player)
             || !_zoneManager.TryGetPlayer(clientHousingPacketInvitePlayer.InviteeGuid, out var invitee))
         {
             _logger.LogWarning("{player} could not invite {invitee}.", player.Guid, clientHousingPacketInvitePlayer.InviteeGuid);
             return true;
         }
-
-        var houseGuid = HousingHelper.GetHouseGuid(player.Guid, houseDefinition);
 
         invitee.HouseInvites.Add(houseGuid);
 

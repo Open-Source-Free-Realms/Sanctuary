@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Database.Entities;
-using Sanctuary.Game;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
@@ -23,7 +22,6 @@ public static class RatingPacketAddVoteHandler
     private const int MaxCategoryLength = 32;
 
     private static ILogger _logger = null!;
-    private static IResourceManager _resourceManager = null!;
     private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
@@ -31,7 +29,6 @@ public static class RatingPacketAddVoteHandler
         var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
         _logger = loggerFactory.CreateLogger(nameof(RatingPacketAddVoteHandler));
 
-        _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
         _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
     }
 
@@ -49,7 +46,7 @@ public static class RatingPacketAddVoteHandler
 
         using var dbContext = _dbContextFactory.CreateDbContext();
 
-        if (!HousingHelper.TryGetHouse(_resourceManager, dbContext, ratingPacketAddVote.HouseGuid, out var houseGuid, out var dbHouse)
+        if (!HousingHelper.TryGetHouse(dbContext, ratingPacketAddVote.HouseGuid, out var houseGuid, out var dbHouse)
             || !HousingHelper.CanVote(dbHouse, player.Guid)
             || ratingPacketAddVote.Rating is < MinRating or > MaxRating)
         {

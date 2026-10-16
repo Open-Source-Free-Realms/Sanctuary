@@ -75,18 +75,13 @@ public static class PacketWorldTeleportRequestHandler
 
     private static void TeleportToFriendZone(GatewayConnection connection, Player friend)
     {
-        if (friend.Zone is HousingZone { OwnerId: { } ownerGuid } housingZone)
+        if (friend.Zone is HousingZone { OwnerId: { } houseGuid })
         {
             if (friend.IsPreviewingHouse)
             {
                 connection.SendTunneled(new HousingPacketHousingError { Error = HousingError.PermissionDenied });
                 return;
             }
-
-            if (!HousingHelper.TryGetHouseDefinition(_resourceManager, housingZone.DefinitionId, out var houseDefinition))
-                return;
-
-            var houseGuid = HousingHelper.GetHouseGuid(ownerGuid, houseDefinition);
 
             if (!HousingHelper.TryEnterHouse(_resourceManager, _dbContextFactory, _zoneManager, connection.Player, houseGuid, out var housingError))
                 connection.SendTunneled(new HousingPacketHousingError { Error = housingError });
