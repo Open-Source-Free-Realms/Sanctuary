@@ -1,4 +1,4 @@
-[
+﻿[
   {
     "Comment": "Penguin Badge",
     "Id": 1,
@@ -193973,7 +193973,7 @@
     "NameId": 69965,
     "DescriptionId": 69980,
     "Icon": {
-      "Id": 6846
+      "Id": 6881
     },
     "MaxStackSize": -1,
     "MinProfileRank": 1,
@@ -309299,7 +309299,7 @@
     "NameId": 69968,
     "DescriptionId": 1114,
     "Icon": {
-      "Id": 5653
+      "Id": 6845
     },
     "MaxStackSize": -1,
     "MinProfileRank": 1,
@@ -309452,7 +309452,7 @@
     "NameId": 69977,
     "DescriptionId": 1114,
     "Icon": {
-      "Id": 5653
+      "Id": 6948
     },
     "MaxStackSize": -1,
     "MinProfileRank": 1,
@@ -309469,7 +309469,7 @@
     "NameId": 69978,
     "DescriptionId": 1114,
     "Icon": {
-      "Id": 5653
+      "Id": 6985
     },
     "MaxStackSize": -1,
     "MinProfileRank": 1,
@@ -1270478,5 +1270478,50 @@
     "Rarity": 3,
     "TextureAlias": "figgypuddingman",
     "ModelName": "fruitcake_m_basic.adr"
+  },
+  {
+    "Comment": "Snowdays Lot",
+    "Id": 950107,
+    "Type": 16,
+    "NameId": 441205,
+    "DescriptionId": 1114,
+    "Icon": {
+      "Id": 8228
+    },
+    "MaxStackSize": -1,
+    "MinProfileRank": 1,
+    "TintAlias": "dyetint",
+    "MemberDiscount": 10,
+    "Rarity": 2
+  },
+  {
+    "Comment": "Sunstone Valley Lot",
+    "Id": 950108,
+    "Type": 16,
+    "NameId": 394,
+    "DescriptionId": 1114,
+    "Icon": {
+      "Id": 7680
+    },
+    "MaxStackSize": -1,
+    "MinProfileRank": 1,
+    "TintAlias": "dyetint",
+    "MemberDiscount": 10,
+    "Rarity": 2
+  },
+  {
+    "Comment": "Sunstone Dam Lot",
+    "Id": 950109,
+    "Type": 16,
+    "NameId": 33944,
+    "DescriptionId": 1114,
+    "Icon": {
+      "Id": 7957
+    },
+    "MaxStackSize": -1,
+    "MinProfileRank": 1,
+    "TintAlias": "dyetint",
+    "MemberDiscount": 10,
+    "Rarity": 2
   }
 ]
