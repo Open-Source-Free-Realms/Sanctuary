@@ -650,7 +650,7 @@ public sealed class Player : ClientPcData, IEntity
 
     public bool TeleportToZone(int zoneDefinitionId, ulong? ownerId, Vector4 position, Quaternion rotation)
     {
-        if (Zone.DefinitionId == zoneDefinitionId && Zone.OwnerId == ownerId)
+        if (Zone.DefinitionId == zoneDefinitionId && Zone.OwnerId == ownerId && !IsPreviewingHouse)
             return true;
 
         if (Zone is WorldZone)

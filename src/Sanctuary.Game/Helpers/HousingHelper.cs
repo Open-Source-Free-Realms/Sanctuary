@@ -123,9 +123,12 @@ public static class HousingHelper
         }
 
         player.HouseInvites.Remove(houseGuid);
+
+        var isTeleported = player.TeleportToZone(zoneDefinition.Id, ownerGuid, zoneDefinition.SpawnPosition, zoneDefinition.SpawnRotation);
+
         player.IsPreviewingHouse = false;
 
-        if (!player.TeleportToZone(zoneDefinition.Id, ownerGuid, zoneDefinition.SpawnPosition, zoneDefinition.SpawnRotation))
+        if (!isTeleported)
         {
             housingError = HousingError.ZoneFailedToLaunch;
             return false;
