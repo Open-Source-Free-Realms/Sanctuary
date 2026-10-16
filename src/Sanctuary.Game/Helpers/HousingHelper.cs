@@ -18,6 +18,9 @@ public static class HousingHelper
     private const int HouseDefinitionIdBits = 8;
     private const ulong HouseDefinitionIdMask = (1UL << HouseDefinitionIdBits) - 1;
 
+    private const int MaxFixtureCount = 9999;
+    private const int MaxLandmarkCount = 100;
+
     public static IEnumerable<HouseDefinition> GetStarterHouses(IResourceManager resourceManager) =>
         resourceManager.Houses.Values.Where(house => house.IsStarter).OrderBy(house => house.Id);
 
@@ -56,6 +59,19 @@ public static class HousingHelper
     public static bool TryLeaveHouse(Player player, IZoneManager zoneManager) =>
         player.Zone is HousingZone
         && player.TeleportToZone(zoneManager.StartingZoneDefinitionId, null, player.StartingZonePosition, player.StartingZoneRotation);
+
+    public static PlayerHousingInstanceData GetInstanceData(ulong ownerGuid, string ownerName, HouseDefinition houseDefinition) => new()
+    {
+        HouseGuid = GetHouseGuid(ownerGuid, houseDefinition),
+        OwnerGuid = ownerGuid,
+        OwnerName = ownerName,
+        NameId = houseDefinition.NameId,
+        IconId = houseDefinition.Icon,
+        MaxFixtureCount = MaxFixtureCount,
+        MaxLandmarkCount = MaxLandmarkCount,
+        IsFloraAllowed = true,
+        BuildAreas = houseDefinition.BuildAreas
+    };
 
     public static PlayerHousingInstanceInfo GetInstanceInfo(ulong ownerGuid, string ownerName, HouseDefinition houseDefinition) => new()
     {

@@ -32,10 +32,17 @@ public sealed class HousingZone : BaseZone
 
         var owner = player.Guid == ownerGuid ? player : Players.FirstOrDefault(zonePlayer => zonePlayer.Guid == ownerGuid);
 
+        var ownerName = owner?.Name.FullName ?? string.Empty;
+
         player.SendTunneled(new HousingPacketZoneData
         {
             HeadSize = HousingZoneHeadSize,
-            InstanceInfo = HousingHelper.GetInstanceInfo(ownerGuid, owner?.Name.FullName ?? string.Empty, houseDefinition)
+            InstanceInfo = HousingHelper.GetInstanceInfo(ownerGuid, ownerName, houseDefinition)
+        });
+
+        player.SendTunneled(new HousingPacketInstanceData
+        {
+            InstanceData = HousingHelper.GetInstanceData(ownerGuid, ownerName, houseDefinition)
         });
     }
 }
