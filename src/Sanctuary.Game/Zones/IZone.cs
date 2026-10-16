@@ -5,6 +5,7 @@ using System.Numerics;
 
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Resources.Definitions;
+using Sanctuary.Game.Routines;
 using Sanctuary.Scripting;
 using Sanctuary.UdpLibrary;
 using Sanctuary.Game.Pathfinding;
@@ -21,6 +22,8 @@ public interface IZone : IScriptableZone, IDisposable
     Quaternion SpawnRotation { get; }
 
     string? Sky { get; }
+
+    RoutineManager Routines { get; }
 
     #region Events
 
