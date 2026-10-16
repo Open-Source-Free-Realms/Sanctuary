@@ -36,16 +36,11 @@ public static class HousingHelper
 
     public static IEnumerable<HouseDefinition> GetOwnedHouses(IResourceManager resourceManager, Player player)
     {
-#if DEBUG
-        if (IsStaff(player))
-            return resourceManager.Houses.Values.Where(house => CanEnterHouseZone(resourceManager, player, house.ZoneId)).OrderBy(house => house.Id);
-#endif
-
         var houseNameIds = player.Items
             .Select(clientItem => resourceManager.ClientItemDefinitions.TryGetValue(clientItem.Definition, out var clientItemDefinition) && clientItemDefinition.Type == ItemDefinitionHelper.HouseItemType ? clientItemDefinition.NameId : 0)
             .ToHashSet();
 
-        return resourceManager.Houses.Values.Where(house => house.IsStarter || houseNameIds.Contains(house.NameId)).OrderBy(house => house.Id);
+        return resourceManager.Houses.Values.Where(house => house.IsStarter || houseNameIds.Contains(house.NameId) || IsStaffHouse(resourceManager, player, house)).OrderBy(house => house.Id);
     }
 
     public static void NotifyHouseAdded(IResourceManager resourceManager, IDbContextFactory<DatabaseContext> dbContextFactory, Player player, ClientItemDefinition clientItemDefinition)
@@ -96,6 +91,12 @@ public static class HousingHelper
         && (!housingZoneDefinition.StaffOnly || IsStaff(player));
 
     private static bool IsStaff(Player player) => player.IsAdmin || player.IsMod;
+
+    private static bool IsStaffHouse(IResourceManager resourceManager, Player player, HouseDefinition houseDefinition) =>
+        IsStaff(player) && IsStaffOnlyHouse(resourceManager, houseDefinition);
+
+    public static bool IsStaffOnlyHouse(IResourceManager resourceManager, HouseDefinition houseDefinition) =>
+        resourceManager.Zones.TryGetValue(houseDefinition.ZoneId, out var zoneDefinition) && zoneDefinition is HousingZoneDefinition { StaffOnly: true };
 
     public static ulong GetHouseOwnerGuid(ulong houseGuid) => houseGuid >> HouseDefinitionIdBits;
 

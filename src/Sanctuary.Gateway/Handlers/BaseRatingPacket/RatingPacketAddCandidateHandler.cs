@@ -49,7 +49,8 @@ public static class RatingPacketAddCandidateHandler
 
         if (ratingPacketAddCandidate.OwnerGuid != player.Guid
             || !ulong.TryParse(ratingPacketAddCandidate.InstanceGuid, CultureInfo.InvariantCulture, out var houseGuid)
-            || !HousingHelper.TryGetOwnedHouse(_resourceManager, player, houseGuid, out var houseDefinition))
+            || !HousingHelper.TryGetOwnedHouse(_resourceManager, player, houseGuid, out var houseDefinition)
+            || HousingHelper.IsStaffOnlyHouse(_resourceManager, houseDefinition))
         {
             _logger.LogWarning("{player} could not publish house {houseGuid}.", player.Guid, ratingPacketAddCandidate.InstanceGuid);
             return true;
