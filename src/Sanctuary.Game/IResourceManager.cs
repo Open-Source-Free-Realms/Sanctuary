@@ -1,4 +1,4 @@
-﻿using Sanctuary.Game.Resources;
+using Sanctuary.Game.Resources;
 
 namespace Sanctuary.Game;
 
@@ -14,6 +14,7 @@ public interface IResourceManager
 
     ClientItemDefinitionCollection ClientItemDefinitions { get; }
     CollectionDefinitionCollection Collections { get; }
+    CollectionCoinDefinitionCollection CollectionCoins { get; }
     CollectionNodePoolDefinitionCollection CollectionNodePools { get; }
     CollectionNodeTypeDefinitionCollection CollectionNodeTypes { get; }
     CollectionNodeSpawnDefinitionCollection CollectionNodeSpawns { get; }
@@ -21,6 +22,7 @@ public interface IResourceManager
     CoinStoreItemCollection CoinStoreItems { get; }
 
     ItemClassDefinitionCollection ItemClasses { get; }
+    EquipmentSlotDefinitionCollection EquipmentSlots { get; }
     ItemCategoryDefinitionCollection ItemCategories { get; }
     ItemCategoryGroupDefinitionCollection ItemCategoryGroups { get; }
 
@@ -31,6 +33,7 @@ public interface IResourceManager
 
     ZoneDefinitionCollection Zones { get; }
     MountDefinitionCollection Mounts { get; }
+    PetDefinitionCollection Pets { get; }
     PlayerTitleCollection PlayerTitles { get; }
     ProfileDefinitionCollection Profiles { get; }
     QuickChatDefinitionCollection QuickChats { get; }
@@ -38,7 +41,11 @@ public interface IResourceManager
     ConsumableCollection Consumables { get; }
     NpcDefinitionCollection Npcs { get; }
     NameFilterCollection NameFilter { get; }
+    NpcMovementDefinitionCollection NpcMovements { get; }
+    NpcAmbientDefinitionCollection NpcAmbient { get; }
     MapGraphCollection Maps { get; }
+    TerrainCollection Terrains { get; }
+    NavMeshCollection NavMeshes { get; }
 
     RewardTableDefinitionCollection RewardTables { get; }
 
@@ -46,4 +53,6 @@ public interface IResourceManager
     JobKitDefinitionCollection CombatJobs { get; }
 
     bool Load();
+
+    bool LoadZoneGeometry();
 }

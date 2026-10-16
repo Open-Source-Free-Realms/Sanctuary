@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 using Collections.Pooled;
 
@@ -56,6 +57,8 @@ public class UdpManager<TConnection> : IUdpManager, IDisposable where TConnectio
     public readonly IServiceProvider _serviceProvider;
 
     private readonly IUdpDriver _driver;
+
+    private readonly List<UdpConnection> _dueConnections = [];
 
     protected UdpClockStamp LastEmptySocketBufferStamp;
 
@@ -281,8 +284,7 @@ public class UdpManager<TConnection> : IUdpManager, IDisposable where TConnectio
 
             if (Params.EventQueuing && EventList.Count > 0)
             {
-                // if we have events queued and we are not in queuing mode, we must deliver those events
-                // before we can actually do a give time (this should only happen when the queuing mode is changed on the fly)
+                // Deliver application callbacks outside ProcessRawPacket/GiveTime's connection locks.
                 DeliverEvents(maxPollingTime);
                 return true;
             }
@@ -387,9 +389,18 @@ public class UdpManager<TConnection> : IUdpManager, IDisposable where TConnectio
                         if (top is null)
                             break;
 
-                        top.GiveTime();
+                        if (Params.ParallelConnectionGiveTime)
+                            _dueConnections.Add(top);
+                        else
+                            top.GiveTime();
 
                         processed++;
+                    }
+
+                    if (_dueConnections.Count > 0)
+                    {
+                        Parallel.ForEach(_dueConnections, dueConnection => dueConnection.GiveTime());
+                        _dueConnections.Clear();
                     }
 
                     lock (_statsGuard)
@@ -433,7 +444,7 @@ public class UdpManager<TConnection> : IUdpManager, IDisposable where TConnectio
                         if (ce.Payload is null)
                             break;
 
-                        ce.Source?.OnRoutePacket(ce.Payload.GetDataPtr());
+                        ce.Source?.OnRoutePacket(ce.Payload.GetDataPtr().Slice(0, ce.Payload.GetDataLen()));
                     }
                     break;
 
@@ -689,10 +700,10 @@ public class UdpManager<TConnection> : IUdpManager, IDisposable where TConnectio
 
     public void ActualSend(ReadOnlySpan<byte> data, int dataLen, SocketAddress socketAddress)
     {
-        LastSendTime = CachedClock;
+        Interlocked.Exchange(ref LastSendTime, CachedClock);
 
-        ManagerStats.BytesSent += dataLen;
-        ManagerStats.PacketsSent++;
+        Interlocked.Add(ref ManagerStats.BytesSent, dataLen);
+        Interlocked.Increment(ref ManagerStats.PacketsSent);
 
         // TODO: Simulation
 
@@ -907,10 +918,10 @@ public class UdpManager<TConnection> : IUdpManager, IDisposable where TConnectio
         {
             var ce = EventList.First?.Value;
 
-            if (ce is not null && ce.Payload is not null)
+            if (ce is not null)
             {
                 EventList.RemoveFirst();
-                EventListBytes -= ce.Payload.GetDataLen();
+                EventListBytes -= ce.Payload?.GetDataLen() ?? 0;
             }
 
             return ce;

@@ -51,12 +51,11 @@ public sealed class CollectionNodeTypeDefinitionCollection : ObservableConcurren
 
                 entry.Key = entry.Key.Trim().ToLowerInvariant();
 
-                var totalDropWeight = entry.DropTable.Sum(drop => (long)drop.Weight);
+                entry.ExtraCompositeEffectIds ??= [];
 
-                if (entry.ModelId <= 0 || entry.DropTable.Count == 0 ||
-                    entry.DropTable.Any(drop => drop.ItemDefinitionId <= 0 || drop.Weight <= 0) ||
-                    totalDropWeight > int.MaxValue ||
-                    entry.DropTable.Select(drop => drop.ItemDefinitionId).Distinct().Count() != entry.DropTable.Count ||
+                if (entry.ModelId <= 0 ||
+                    entry.ExtraCompositeEffectIds.Any(effectId => effectId <= 0) ||
+                    entry.ExtraCompositeEffectIds.Distinct().Count() != entry.ExtraCompositeEffectIds.Length ||
                     !loaded.TryAdd(entry.Key, entry))
                 {
                     _logger.LogError("Invalid or duplicate collection node type in \"{file}\".", filePath);

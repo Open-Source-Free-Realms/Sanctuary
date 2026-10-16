@@ -17,10 +17,31 @@ namespace Sanctuary.Database.MySql.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.9")
+                .HasAnnotation("ProductVersion", "9.0.17")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+
+            modelBuilder.Entity("DbItemDbPet", b =>
+                {
+                    b.Property<int>("ItemsId")
+                        .HasColumnType("int");
+
+                    b.Property<ulong>("ItemsCharacterId")
+                        .HasColumnType("bigint unsigned");
+
+                    b.Property<int>("PetsId")
+                        .HasColumnType("int");
+
+                    b.Property<ulong>("PetsCharacterId")
+                        .HasColumnType("bigint unsigned");
+
+                    b.HasKey("ItemsId", "ItemsCharacterId", "PetsId", "PetsCharacterId");
+
+                    b.HasIndex("PetsId", "PetsCharacterId");
+
+                    b.ToTable("PetItems", (string)null);
+                });
 
             modelBuilder.Entity("DbItemDbProfile", b =>
                 {
@@ -191,6 +212,27 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.ToTable("Characters");
                 });
 
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbCollectionEntry", b =>
+                {
+                    b.Property<ulong>("CharacterId")
+                        .HasColumnType("bigint unsigned");
+
+                    b.Property<int>("CollectionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EntryId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("Collected")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.HasKey("CharacterId", "CollectionId", "EntryId");
+
+                    b.ToTable("CollectionEntries");
+                });
+
             modelBuilder.Entity("Sanctuary.Database.Entities.DbFriend", b =>
                 {
                     b.Property<ulong>("FriendCharacterId")
@@ -349,6 +391,88 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.ToTable("Mounts");
                 });
 
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbPet", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<ulong>("CharacterId")
+                        .HasColumnType("bigint unsigned");
+
+                    b.Property<int>("BrushItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ConditionerItemId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<int>("Definition")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EquippedPetTrick1")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EquippedPetTrick2")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EquippedPetTrick3")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EquippedPetTrick4")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FoodBowlItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FoodItemId")
+                        .HasColumnType("int");
+
+                    b.Property<float>("Hunger")
+                        .HasColumnType("float");
+
+                    b.Property<float>("Hygiene")
+                        .HasColumnType("float");
+
+                    b.Property<float>("Mood")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)");
+
+                    b.Property<float>("Play")
+                        .HasColumnType("float");
+
+                    b.Property<int>("ShampooItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Tint")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ToyItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Trait")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset?>("TreasureFoundAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("VitaminItemId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id", "CharacterId");
+
+                    b.HasIndex("CharacterId");
+
+                    b.ToTable("Pets");
+                });
+
             modelBuilder.Entity("Sanctuary.Database.Entities.DbProfile", b =>
                 {
                     b.Property<int>("Id")
@@ -452,6 +576,21 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("DbItemDbPet", b =>
+                {
+                    b.HasOne("Sanctuary.Database.Entities.DbItem", null)
+                        .WithMany()
+                        .HasForeignKey("ItemsId", "ItemsCharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Sanctuary.Database.Entities.DbPet", null)
+                        .WithMany()
+                        .HasForeignKey("PetsId", "PetsCharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("DbItemDbProfile", b =>
                 {
                     b.HasOne("Sanctuary.Database.Entities.DbItem", null)
@@ -483,6 +622,17 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.Navigation("GuildMember");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbCollectionEntry", b =>
+                {
+                    b.HasOne("Sanctuary.Database.Entities.DbCharacter", "Character")
+                        .WithMany("CollectionEntries")
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Character");
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbFriend", b =>
@@ -556,6 +706,17 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.Navigation("Character");
                 });
 
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbPet", b =>
+                {
+                    b.HasOne("Sanctuary.Database.Entities.DbCharacter", "Character")
+                        .WithMany("Pets")
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Character");
+                });
+
             modelBuilder.Entity("Sanctuary.Database.Entities.DbProfile", b =>
                 {
                     b.HasOne("Sanctuary.Database.Entities.DbCharacter", "Character")
@@ -580,6 +741,8 @@ namespace Sanctuary.Database.MySql.Migrations
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbCharacter", b =>
                 {
+                    b.Navigation("CollectionEntries");
+
                     b.Navigation("Friends");
 
                     b.Navigation("Ignores");
@@ -587,6 +750,8 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.Navigation("Items");
 
                     b.Navigation("Mounts");
+
+                    b.Navigation("Pets");
 
                     b.Navigation("Profiles");
 

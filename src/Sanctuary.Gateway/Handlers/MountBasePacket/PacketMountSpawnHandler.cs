@@ -5,6 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Game;
+using Sanctuary.Game.Entities;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -15,6 +17,8 @@ namespace Sanctuary.Gateway.Handlers;
 public static class PacketMountSpawnHandler
 {
     private static ILogger _logger = null!;
+
+    private const int MountTeleportCompositeEffectId = 46;
     private static IResourceManager _resourceManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
@@ -27,15 +31,15 @@ public static class PacketMountSpawnHandler
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
     {
-        if (!PacketMountSpawn.TryDeserialize(data, out var packet))
+        if (!PacketMountSpawn.TryDeserialize(data, out var packetMountSpawn))
         {
             _logger.LogError("Failed to deserialize {packet}.", nameof(PacketMountSpawn));
             return false;
         }
 
-        _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(PacketMountSpawn), packet);
+        _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(PacketMountSpawn), packetMountSpawn);
 
-        var mountInfo = connection.Player.Mounts.SingleOrDefault(x => x.Id == packet.Id);
+        var mountInfo = connection.Player.Mounts.SingleOrDefault(x => x.Id == packetMountSpawn.Id);
 
         if (mountInfo is null)
             return true;
@@ -43,6 +47,16 @@ public static class PacketMountSpawnHandler
         SpawnMount(connection, mountInfo);
 
         return true;
+    }
+
+    public static void SendMountResponse(Player player, Mount mount)
+    {
+        var packetMountResponse = mount.GetMountResponsePacket();
+        packetMountResponse.CompositeEffectId = MountTeleportCompositeEffectId;
+
+        player.SendTunneledToVisible(packetMountResponse, sendToSelf: true);
+
+        mount.RiderSeated = true;
     }
 
     public static void SpawnMount(GatewayConnection connection, PacketMountInfo mountInfo)
@@ -56,37 +70,31 @@ public static class PacketMountSpawnHandler
             return;
 
         mount.Visible = true;
-
         mount.NameId = mountDefinition.NameId;
         mount.ModelId = mountDefinition.ModelId;
-
         mount.TextureAlias = mountDefinition.TextureAlias;
         mount.TintAlias = mountDefinition.TintAlias;
         mount.TintId = mountInfo.TintId;
-
-        mount.Scale = 1f;
-        mount.Disposition = 1;
-
         mount.HideNamePlate = true;
-
         mount.ImageSetId = mountDefinition.ImageSetId;
-
         mount.Seat = 0;
         mount.QueuePosition = 1;
 
+        BoomboxHelper.PauseDance(connection.Player);
         connection.Player.Mount = mount;
 
         connection.Player.UpdatePosition(connection.Player.Position, connection.Player.Rotation);
 
-        foreach (var visiblePlayer in connection.Player.VisiblePlayers)
-            visiblePlayer.Value.OnAddVisiblePlayers([connection.Player]);
+        mountInfo.Guid = mount.Guid;
 
-        connection.Player.SendTunneled(mount.GetAddNpcPacket());
+        connection.Player.SendTunneled(new PacketMountList
+        {
+            Mounts = connection.Player.Mounts
+        });
 
-        var mountResponse = mount.GetMountResponsePacket();
-        mountResponse.CompositeEffectId = 46; // PFX_Teleport_Flash
+        connection.Player.SendTunneledToVisible(mount.GetAddNpcPacket(), sendToSelf: true);
 
-        connection.Player.SendTunneledToVisible(mountResponse, sendToSelf: true);
+        SendMountResponse(connection.Player, mount);
 
         var mountStats = mountDefinition.Stats;
 
@@ -103,9 +111,9 @@ public static class PacketMountSpawnHandler
             mountStats.GlideAccel = 4f;
         }
 
-        connection.Player.UpdateCharacterStats(
-            CharacterStats.MaxMovementSpeed.Set(mountStats.MaxMovementSpeed),
+        connection.Player.SetMountMovementSpeed(mountStats.MaxMovementSpeed);
 
+        connection.Player.UpdateCharacterStats(
             CharacterStats.GlideDefaultForwardSpeed.Set(mountStats.GlideDefaultForwardSpeed),
             CharacterStats.GlideMinForwardSpeed.Set(mountStats.GlideMinForwardSpeed),
             CharacterStats.GlideMaxForwardSpeed.Set(mountStats.GlideMaxForwardSpeed),

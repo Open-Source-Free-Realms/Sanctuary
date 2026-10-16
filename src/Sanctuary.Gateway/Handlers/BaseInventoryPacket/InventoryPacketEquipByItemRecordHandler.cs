@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 
 using Microsoft.EntityFrameworkCore;
@@ -32,19 +32,19 @@ public static class InventoryPacketEquipByItemRecordHandler
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
     {
-        if (!InventoryPacketEquipByItemRecord.TryDeserialize(data, out var packet))
+        if (!InventoryPacketEquipByItemRecord.TryDeserialize(data, out var inventoryPacketEquipByItemRecord))
         {
             _logger.LogError("Failed to deserialize {packet}.", nameof(InventoryPacketEquipByItemRecord));
             return false;
         }
 
-        _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(InventoryPacketEquipByItemRecord), packet);
+        _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(InventoryPacketEquipByItemRecord), inventoryPacketEquipByItemRecord);
 
-        var clientItem = connection.Player.Items.SingleOrDefault(x => x.Definition == packet.ItemRecord.Definition && x.Tint == packet.ItemRecord.Tint);
+        var clientItem = connection.Player.Items.SingleOrDefault(x => x.Definition == inventoryPacketEquipByItemRecord.ItemRecord.Definition && x.Tint == inventoryPacketEquipByItemRecord.ItemRecord.Tint);
 
         if (clientItem is null)
         {
-            _logger.LogWarning("User tried to equip unknown item. {definition} {tint}", packet.ItemRecord.Definition, packet.ItemRecord.Tint);
+            _logger.LogWarning("User tried to equip unknown item. {definition} {tint}", inventoryPacketEquipByItemRecord.ItemRecord.Definition, inventoryPacketEquipByItemRecord.ItemRecord.Tint);
             return true;
         }
 
@@ -58,34 +58,22 @@ public static class InventoryPacketEquipByItemRecordHandler
         if (clientItemDefinition.Type != 1)
             return true;
 
-        var profile = connection.Player.Profiles.SingleOrDefault(x => x.Id == packet.ProfileId);
+        if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out var itemClass))
+        {
+            _logger.LogWarning("User tried to equip item with unknown class. {id} {definition} {class}",
+                clientItem.Id, clientItem.Definition, clientItemDefinition.Class);
+            return true;
+        }
+
+        var profile = connection.Player.Profiles.SingleOrDefault(x => x.Id == inventoryPacketEquipByItemRecord.ProfileId);
 
         if (profile is null)
         {
-            _logger.LogWarning("Invalid player profile. {id} {profile}", clientItem.Id, packet.ProfileId);
+            _logger.LogWarning("Invalid player profile. {id} {profile}", clientItem.Id, inventoryPacketEquipByItemRecord.ProfileId);
             return true;
         }
 
-        using var dbContext = _dbContextFactory.CreateDbContext();
-
-        var dbProfile = dbContext.Profiles
-            .Include(x => x.Items)
-            .SingleOrDefault(x => x.CharacterId == GuidHelper.GetPlayerId(connection.Player.Guid) && x.Id == packet.ProfileId);
-
-        if (dbProfile is null)
-        {
-            _logger.LogWarning("Invalid database profile.");
-            return true;
-        }
-
-        var dbItem = dbContext.Items
-            .SingleOrDefault(x => x.CharacterId == GuidHelper.GetPlayerId(connection.Player.Guid) && x.Id == clientItem.Id);
-
-        if (dbItem is null)
-        {
-            _logger.LogWarning("Invalid database item.");
-            return true;
-        }
+        int? oldItemId = null;
 
         if (!profile.Items.TryGetValue(clientItemDefinition.Slot, out var profileItem))
         {
@@ -95,32 +83,58 @@ public static class InventoryPacketEquipByItemRecordHandler
             profileItem.Slot = clientItemDefinition.Slot;
 
             profile.Items.Add(profileItem.Slot, profileItem);
-
-            dbProfile.Items.Add(dbItem);
         }
         else
         {
-            var dbItemOld = dbContext.Items
-                .SingleOrDefault(x => x.CharacterId == GuidHelper.GetPlayerId(connection.Player.Guid) && x.Id == profileItem.Id);
-
-            if (dbItemOld is null)
-            {
-                _logger.LogWarning("Invalid database item.");
-                return true;
-            }
+            oldItemId = profileItem.Id;
 
             profileItem.Id = clientItem.Id;
             profileItem.Slot = clientItemDefinition.Slot;
+        }
+
+        var characterId = GuidHelper.GetPlayerId(connection.Player.Guid);
+        var profileId = inventoryPacketEquipByItemRecord.ProfileId;
+        var itemId = clientItem.Id;
+
+        connection.QueueWork(() =>
+        {
+            using var dbContext = _dbContextFactory.CreateDbContext();
+
+            var dbProfile = dbContext.Profiles
+                .Include(x => x.Items)
+                .SingleOrDefault(x => x.CharacterId == characterId && x.Id == profileId);
+
+            if (dbProfile is null)
+            {
+                _logger.LogWarning("Invalid database profile.");
+                return;
+            }
+
+            var dbItem = dbContext.Items
+                .SingleOrDefault(x => x.CharacterId == characterId && x.Id == itemId);
+
+            if (dbItem is null)
+            {
+                _logger.LogWarning("Invalid database item.");
+                return;
+            }
+
+            if (oldItemId is not null)
+            {
+                var dbItemOld = dbProfile.Items.SingleOrDefault(x => x.Id == oldItemId);
+
+                if (dbItemOld is not null)
+                    dbProfile.Items.Remove(dbItemOld);
+            }
 
             dbProfile.Items.Add(dbItem);
-            dbProfile.Items.Remove(dbItemOld);
-        }
 
-        if (dbContext.SaveChanges() <= 0)
-        {
-            _logger.LogWarning("Failed to save to database.");
-            return true;
-        }
+            if (dbContext.SaveChanges() <= 0)
+            {
+                _logger.LogWarning("Failed to save to database.");
+                return;
+            }
+        });
 
         var clientUpdatePacketEquipItem = new ClientUpdatePacketEquipItem();
 
@@ -131,9 +145,9 @@ public static class InventoryPacketEquipByItemRecordHandler
         clientUpdatePacketEquipItem.Attachment.TintAlias = clientItemDefinition.TintAlias;
         clientUpdatePacketEquipItem.Attachment.TintId = clientItem.Tint == 0 ? clientItemDefinition.Icon.TintId : clientItem.Tint;
         clientUpdatePacketEquipItem.Attachment.CompositeEffectId = clientItemDefinition.CompositeEffectId;
-        clientUpdatePacketEquipItem.Attachment.Slot = packet.Slot;
+        clientUpdatePacketEquipItem.Attachment.Slot = inventoryPacketEquipByItemRecord.Slot;
 
-        clientUpdatePacketEquipItem.ProfileId = packet.ProfileId;
+        clientUpdatePacketEquipItem.ProfileId = inventoryPacketEquipByItemRecord.ProfileId;
 
         clientUpdatePacketEquipItem.Equip = true;
 
@@ -149,17 +163,15 @@ public static class InventoryPacketEquipByItemRecordHandler
 
         playerUpdatePacketEquipItemChange.ProfileId = connection.Player.ActiveProfileId;
 
-        if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out var itemClass))
-        {
-            _logger.LogWarning("User tried to equip unknown item class. {id} {definition}", clientItem.Id, clientItemDefinition.Class);
-            return true;
-        }
+        playerUpdatePacketEquipItemChange.ItemClassId = clientItemDefinition.Class;
+        playerUpdatePacketEquipItemChange.WieldType = connection.Player.GetWieldType();
 
-        playerUpdatePacketEquipItemChange.WieldType = itemClass.WieldType;
-
-        connection.Player.SendTunneledToVisible(playerUpdatePacketEquipItemChange);
+        if (inventoryPacketEquipByItemRecord.ProfileId == connection.Player.ActiveProfileId)
+            connection.Player.SendTunneledToVisible(playerUpdatePacketEquipItemChange);
 
         connection.Player.SendToolbar();
+
+        connection.Player.RefreshWeaponFlair(inventoryPacketEquipByItemRecord.ProfileId, inventoryPacketEquipByItemRecord.Slot);
 
         return true;
     }

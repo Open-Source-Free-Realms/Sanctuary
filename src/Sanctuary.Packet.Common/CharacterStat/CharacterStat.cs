@@ -37,19 +37,9 @@ public class CharacterStat : ISerializableType
         _value = value;
     }
 
-    public CharacterStat Set(int value)
-    {
-        _value = value;
+    public CharacterStat Set(int value) => new(_id, value);
 
-        return this;
-    }
-
-    public CharacterStat Set(float value)
-    {
-        _value = value;
-
-        return this;
-    }
+    public CharacterStat Set(float value) => new(_id, value);
 
     public void Serialize(PacketWriter writer)
     {

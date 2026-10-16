@@ -1,9 +1,11 @@
-﻿using Sanctuary.Core.IO;
+using System;
+
+using Sanctuary.Core.IO;
 using Sanctuary.Packet.Common;
 
 namespace Sanctuary.Packet;
 
-public class CommandPacketInteractionList : BaseCommandPacket, ISerializablePacket
+public class CommandPacketInteractionList : BaseCommandPacket, ISerializablePacket, IDeserializable<CommandPacketInteractionList>
 {
     public new const short OpCode = 9;
 
@@ -27,4 +29,14 @@ public class CommandPacketInteractionList : BaseCommandPacket, ISerializablePack
 
         return writer.Buffer;
     }
+
+    public static bool TryDeserialize(ReadOnlySpan<byte> data, out CommandPacketInteractionList value)
+    {
+        value = new CommandPacketInteractionList();
+        var reader = new PacketReader(data);
+        if (!value.TryRead(ref reader) || !value.List.TryRead(ref reader) || !reader.TryRead(out value.Unknown))
+            return false;
+        return reader.RemainingLength == 0;
+    }
+
 }

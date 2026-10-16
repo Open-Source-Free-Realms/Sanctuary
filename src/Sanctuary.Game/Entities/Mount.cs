@@ -14,10 +14,12 @@ public class Mount : Npc
 
     public int Seat { get; set; }
     public int QueuePosition { get; set; }
+    public bool RiderSeated { get; set; }
 
     public Mount(IZone zone, Player rider, MountDefinition definition) : base(zone)
     {
         Rider = rider;
+        PositionSendIntervalMs = FollowerPositionIntervalMs;
         Definition = definition;
     }
 
@@ -48,6 +50,8 @@ public class Mount : Npc
 
         return true;
     }
+
+    protected override bool SendsPositionTo(Player player) => player != Rider;
 
     public override PlayerUpdatePacketAddNpc GetAddNpcPacket()
     {

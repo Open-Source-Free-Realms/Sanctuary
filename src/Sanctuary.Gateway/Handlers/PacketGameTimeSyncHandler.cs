@@ -13,6 +13,9 @@ public static class PacketGameTimeSyncHandler
 {
     private static ILogger _logger = null!;
 
+    private const int ServerRate = 8;
+    private const long GameTimeEpoch = 1221361670;
+
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
         var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
@@ -29,11 +32,8 @@ public static class PacketGameTimeSyncHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(PacketGameTimeSync), packet);
 
-        var time = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
-                   - connection.Player.TimezoneOffset;
-
-        packet.Time = time;
-        packet.ServerRate = 8;
+        packet.Time = ServerRate * (DateTimeOffset.UtcNow.ToUnixTimeSeconds() - GameTimeEpoch);
+        packet.ServerRate = ServerRate;
         packet.UseClientTime = false;
 
         connection.SendTunneled(packet);

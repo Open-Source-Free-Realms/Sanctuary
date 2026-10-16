@@ -80,7 +80,8 @@ builder.ConfigureServices((hostBuilderContext, serviceCollection) =>
             MaxConnections = 2000,
             KeepAliveDelay = 29000,
             Port = serverOptions.Port,
-            ProtocolName = "CGAPI_527"
+            ProtocolName = "CGAPI_527",
+            ParallelConnectionGiveTime = true
         };
 
         if (serverOptions.UseCompression)

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -8,7 +8,11 @@ using System.Numerics;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Collections;
+using Sanctuary.Core.Extensions;
 using Sanctuary.Game.Pathfinding;
+using Sanctuary.Game.Resources.Definitions;
+using Sanctuary.Game.Helpers;
+using Sanctuary.Game.Interactions;
 using Sanctuary.Game.Routines;
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
@@ -31,11 +35,15 @@ public class Npc : IScriptableNpc, IEntity
 
     public bool Visible { get; set; }
 
+    public bool Collidable { get; private set; } = true;
+
     public IZone Zone { get; set; }
     public ZoneTile ZoneTile { get; protected set; } = ZoneTile.Empty;
     public ConcurrentDictionary<ulong, Npc> VisibleNpcs { get; } = [];
     public ConcurrentDictionary<ulong, Player> VisiblePlayers { get; } = [];
     public ILogger Logger => Zone.Logger;
+
+    public RoutineManager Routines { get; }
     public ScriptRuntime ScriptRuntime => Zone.ScriptRuntime;
 
     public int NameId { get; set; }
@@ -47,12 +55,15 @@ public class Npc : IScriptableNpc, IEntity
 
     public int ModelId { get; set; }
     public int TerrainObjectId { get; set; }
+    public bool ReplaceTerrainObject { get; set; }
 
     public string? TextureAlias { get; set; }
     public string? TintAlias { get; set; }
     public int TintId { get; set; }
 
-    public float Scale { get; set; }
+    public float Scale { get; set; } = 1f;
+
+    public Vector4? Tilt { get; set; }
 
     /// <summary>
     /// 0 - Hostile
@@ -62,7 +73,8 @@ public class Npc : IScriptableNpc, IEntity
     public int Disposition { get; set; } = 1;
 
     public Action<Player>? InteractAction { get; set; }
-    public RoutineManager Routines { get; }
+    public Action? UpdateEverySecondAction { get; set; }
+    public Action? UpdateEveryTickAction { get; set; }
 
     public int Animation { get; set; } = 1;
 
@@ -70,16 +82,29 @@ public class Npc : IScriptableNpc, IEntity
 
     public int InteractRange { get; set; } = 100;
     public bool IsInteractable { get; set; } = true;
+    public bool OpensAtlas { get; set; }
+    public bool AutoSelectSingleInteraction { get; set; }
+    public List<InteractionData> Interactions { get; } = [];
 
-    public int MovementType => 2;
+    private const int DefaultMovementType = 2;
+    private const int PlacedObjectMovementType = 0;
+
+    public int MovementType => Tilt.HasValue ? PlacedObjectMovementType : DefaultMovementType;
 
     public int AreaDefinitionId { get; set; }
 
     public int ImageSetId { get; set; }
 
     public byte CursorId { get; set; }
+    public bool? HasCursor { get; set; }
+    public bool RelevanceUnknown2 { get; set; }
+    public InteractionList? InteractionList { get; set; }
+    public bool InteractionUnknown { get; set; }
+    public MerchantList? MerchantList { get; set; }
+    public NpcAbilityDefinition? Ability { get; set; }
 
     public NotificationInfo? Notification { get; set; }
+    public List<NotificationInfo> Notifications { get; set; } = [];
 
     public List<CharacterAttachmentData> Attachments { get; set; } = [];
 
@@ -89,11 +114,30 @@ public class Npc : IScriptableNpc, IEntity
     public float WaypointTolerance { get; set; } = 0f;
     public float Speed { get; set; } = 6.25f;
 
+    public int PositionUpdateIntervalMs { get; set; }
+
+    public NpcMovementController? MovementController { get; set; }
+
+    public NpcAmbientController? AmbientController { get; set; }
+
+    public bool IsMoving => _pathMoving || !_path.IsEmpty;
+
+    private const int HostileDisposition = 0;
+    private const byte MovingPositionState = 0;
+    private const byte StoppedPositionState = 1;
+    private const float GroundStepHeight = 3f;
+    private const float GroundMaxDrop = 20f;
+
+    private readonly PathState _path = new();
+    private bool _pathMoving;
+    private long _nextPositionSendAt;
+
     private PathBuilder? _pathBuilder;
 
     public Npc(IZone zone)
     {
         Zone = zone;
+
         Routines = new RoutineManager(Logger);
     }
 
@@ -101,8 +145,32 @@ public class Npc : IScriptableNpc, IEntity
 
     public void OnInteract(Player player)
     {
+        if (OpensAtlas)
+        {
+            var executeScriptPacket = OpenAtlasInteraction.GetAtlasPacket(this, player);
+            if (executeScriptPacket is not null)
+                player.SendTunneled(executeScriptPacket);
+            return;
+        }
+
+        if (InteractionList is not null)
+        {
+            if (InteractionMenuHelper.CanInteract(this, player))
+                player.SendTunneled(InteractionMenuHelper.GetInteractionListPacket(Guid, InteractionList, InteractionUnknown));
+            return;
+        }
+
+        if (Interactions.Count > 0)
+        {
+            if (InteractionMenuHelper.CanInteract(this, player))
+                player.SendTunneled(InteractionMenuHelper.GetInteractionListPacket(Guid, Name, Interactions, autoSelectSingle: AutoSelectSingleInteraction));
+            return;
+        }
+
         InteractAction?.Invoke(player);
     }
+
+    public virtual bool IsVisibleTo(Player player) => true;
 
     public virtual void OnAddVisibleNpcs(params IEnumerable<Npc> npcs)
     {
@@ -113,7 +181,10 @@ public class Npc : IScriptableNpc, IEntity
     public virtual void OnAddVisiblePlayers(params IEnumerable<Player> players)
     {
         foreach (var player in players)
-            VisiblePlayers.TryAdd(player.Guid, player);
+        {
+            if (IsVisibleTo(player))
+                VisiblePlayers.TryAdd(player.Guid, player);
+        }
     }
 
     public virtual void OnRemoveVisibleNpcs(params IEnumerable<Npc> npcs)
@@ -136,20 +207,84 @@ public class Npc : IScriptableNpc, IEntity
     {
         Routines.OnTick();
 
+        UpdateEveryTickAction?.Invoke();
         if (!_scripts.IsEmpty)
             GetOrCreateScriptContext().FireEvent("tick");
+
+        MovementController?.Update();
+        AmbientController?.Update();
+
+        var currentPosition = Position.ToVector3();
+        var result = PathFollower.Advance(_path, currentPosition, Speed, WaypointTolerance, Zone.TickDeltaSeconds);
+
+        if (result.Moved)
+        {
+            _pathMoving = true;
+            var rotation = result.NewRotation!.Value;
+            var newPosition = Zone.GetGroundPosition(result.NewPosition, GroundStepHeight, GroundMaxDrop);
+
+            if (PositionUpdateIntervalMs == 0 || Environment.TickCount64 >= _nextPositionSendAt)
+            {
+                _nextPositionSendAt = Environment.TickCount64 + PositionUpdateIntervalMs;
+                UpdatePosition(newPosition.ToVector4(), rotation, MovingPositionState);
+            }
+            else
+            {
+                Position = newPosition.ToVector4();
+                Rotation = rotation;
+
+                if (Visible)
+                    UpdateZoneTile();
+            }
+        }
+        else if (_pathMoving && result.Arrived)
+        {
+            _pathMoving = false;
+            UpdatePosition(Position, Rotation, StoppedPositionState);
+        }
     }
 
     public void UpdateEverySecond()
     {
         Routines.OnSecond();
 
+        UpdateEverySecondAction?.Invoke();
+
         if (!_scripts.IsEmpty)
             GetOrCreateScriptContext().FireEvent("second");
     }
 
-    public void UpdatePosition(Vector4 position, Quaternion rotation, bool updateZoneArea = true)
+    protected virtual bool SendsPositionTo(Player player) => true;
+
+    public const int FollowerPositionIntervalMs = 500;
+
+    public int PositionSendIntervalMs { get; set; }
+    private long _nextPositionSendAllowedAt;
+    private byte _lastSentPositionState;
+
+    private void SendExpectedSpeed()
     {
+        if (VisiblePlayers.IsEmpty)
+            return;
+
+        var playerUpdatePacketExpectedSpeed = new PlayerUpdatePacketExpectedSpeed
+        {
+            Guid = Guid,
+            ExpectedSpeed = Speed
+        };
+
+        var data = Player.SerializeTunneled(playerUpdatePacketExpectedSpeed);
+
+        foreach (var visiblePlayer in VisiblePlayers)
+            visiblePlayer.Value.SendSerialized(data);
+    }
+
+    public void UpdatePosition(Vector4 position, Quaternion rotation, bool updateZoneArea = true) =>
+        UpdatePosition(position, rotation, StoppedPositionState);
+
+    private void UpdatePosition(Vector4 position, Quaternion rotation, byte state)
+    {
+
         Position = position;
         Rotation = rotation;
 
@@ -158,18 +293,37 @@ public class Npc : IScriptableNpc, IEntity
             UpdateZoneTile();
         }
 
-        var packet = new PlayerUpdatePacketUpdatePosition
+        var playerUpdatePacketUpdatePosition = new PlayerUpdatePacketUpdatePosition
         {
             Guid = Guid,
             Position = position,
             Rotation = rotation,
-            State = 1,
+            State = state,
             Unknown = 0
         };
 
+        if (PositionSendIntervalMs > 0)
+        {
+            var now = Environment.TickCount64;
+
+            if (state == _lastSentPositionState && now < _nextPositionSendAllowedAt)
+                return;
+
+            _lastSentPositionState = state;
+            _nextPositionSendAllowedAt = now + PositionSendIntervalMs;
+        }
+
+        if (VisiblePlayers.IsEmpty)
+            return;
+
+        var data = Player.SerializeTunneled(playerUpdatePacketUpdatePosition);
+
         foreach (var visiblePlayer in VisiblePlayers)
         {
-            visiblePlayer.Value.SendTunneled(packet);
+            if (!SendsPositionTo(visiblePlayer.Value))
+                continue;
+
+            visiblePlayer.Value.SendSerialized(data);
         }
     }
 
@@ -194,7 +348,7 @@ public class Npc : IScriptableNpc, IEntity
 
     public virtual PlayerUpdatePacketAddNpc GetAddNpcPacket()
     {
-        var packet = new PlayerUpdatePacketAddNpc
+        var playerUpdatePacketAddNpc = new PlayerUpdatePacketAddNpc
         {
             Guid = Guid,
 
@@ -221,7 +375,7 @@ public class Npc : IScriptableNpc, IEntity
 
             Animation = Animation,
 
-            Unknown16 = default,
+            HideHealthBar = Disposition != HostileDisposition,
             VerticalOffset = VerticalOffset,
 
             CompositeEffectId = CompositeEffectId,
@@ -249,7 +403,7 @@ public class Npc : IScriptableNpc, IEntity
             StandAnimId = default, // Idle GroupAnimId
 
             Unknown33 = default,
-            Unknown34 = default,
+            Unknown34 = Tilt.HasValue,
 
             SubTextNameId = SubTextNameId,
 
@@ -262,13 +416,13 @@ public class Npc : IScriptableNpc, IEntity
             Unknown39 = default,
             Unknown40 = default,
             Unknown41 = default,
-            Unknown42 = default,
+            DisableCollision = !Collidable,
 
-            HasTilt = default,
+            HasTilt = Tilt.HasValue,
 
             // playerUpdatePacketAddNpc.Customization = TODO
 
-            Tilt = default,
+            Tilt = Tilt ?? default,
 
             NameColor = default,
 
@@ -300,7 +454,7 @@ public class Npc : IScriptableNpc, IEntity
             // playerUpdatePacketAddNpc.Hair = TODO
             // playerUpdatePacketAddNpc.ModelCustomization = TODO
 
-            ReplaceTerrainObject = default,
+            ReplaceTerrainObject = ReplaceTerrainObject,
 
             Unknown63 = default,
             Unknown64 = 3050,
@@ -317,7 +471,7 @@ public class Npc : IScriptableNpc, IEntity
             NameplateImageId = NameplateImageId
         };
 
-        return packet;
+        return playerUpdatePacketAddNpc;
     }
 
     #region Equatable
@@ -403,7 +557,7 @@ public class Npc : IScriptableNpc, IEntity
 
     public void Say(string message)
     {
-        var packet = new PacketChat
+        var packetChat = new PacketChat
         {
             Channel = ChatChannel.WorldSay,
             FromGuid = Guid,
@@ -412,26 +566,161 @@ public class Npc : IScriptableNpc, IEntity
         };
 
         foreach (var visiblePlayer in VisiblePlayers)
-            visiblePlayer.Value.SendTunneled(packet);
+            visiblePlayer.Value.SendTunneled(packetChat);
     }
 
     public void SayLocalized(int stringId)
     {
-        var packet = new ChatPacketFromStringId
+        var chatPacketFromStringId = new ChatPacketFromStringId
         {
             SpeakerGuid = Guid,
             StringId = stringId
         };
 
         foreach (var visiblePlayer in VisiblePlayers)
-            visiblePlayer.Value.SendTunneled(packet);
+            visiblePlayer.Value.SendTunneled(chatPacketFromStringId);
     }
 
     public void MoveTo(float x, float y, float z, bool direct)
     {
         MoveTo(new Vector3(x, y, z), direct);
     }
-    
+
+    private const byte SetBaseAnimationFlag = 1;
+
+    public void SetBaseAnimation(int animationId)
+    {
+        Animation = animationId;
+
+        var playerUpdatePacketSetAnimation = new PlayerUpdatePacketSetAnimation
+        {
+            Guid = Guid,
+            AnimationId = animationId,
+            Flags = SetBaseAnimationFlag
+        };
+
+        foreach (var visiblePlayer in VisiblePlayers)
+            visiblePlayer.Value.SendTunneled(playerUpdatePacketSetAnimation);
+    }
+
+    public void PlayAnimation(int animationId)
+    {
+        var playerUpdatePacketSetAnimation = new PlayerUpdatePacketSetAnimation
+        {
+            Guid = Guid,
+            AnimationId = animationId
+        };
+
+        foreach (var visiblePlayer in VisiblePlayers)
+            visiblePlayer.Value.SendTunneled(playerUpdatePacketSetAnimation);
+    }
+
+    public IReadOnlyList<ulong> GetNearbyPlayerGuids(float radius)
+    {
+        var nearbyPlayerGuids = new List<ulong>();
+
+        foreach (var visiblePlayer in VisiblePlayers)
+        {
+            if (visiblePlayer.Value.Position.IsInRange(Position, radius))
+                nearbyPlayerGuids.Add(visiblePlayer.Key);
+        }
+
+        return nearbyPlayerGuids;
+    }
+
+    public IReadOnlyList<ulong> GetPlayerGuidsOnTop(float horizontalRadius, float minHeight, float maxHeight)
+    {
+        var playerGuidsOnTop = new List<ulong>();
+
+        foreach (var visiblePlayer in VisiblePlayers)
+        {
+            var offset = visiblePlayer.Value.Position - Position;
+            var horizontalDistance = MathF.Sqrt(offset.X * offset.X + offset.Z * offset.Z);
+
+            if (horizontalDistance <= horizontalRadius && offset.Y >= minHeight && offset.Y <= maxHeight)
+                playerGuidsOnTop.Add(visiblePlayer.Key);
+        }
+
+        return playerGuidsOnTop;
+    }
+
+    public void SetCollidable(bool collidable)
+    {
+        Collidable = collidable;
+
+        var playerUpdatePacketSetCollidable = new PlayerUpdatePacketSetCollidable
+        {
+            Guid = Guid,
+            Collidable = collidable
+        };
+
+        foreach (var visiblePlayer in VisiblePlayers)
+            visiblePlayer.Value.SendTunneled(playerUpdatePacketSetCollidable);
+    }
+
+    public int AddEffectTag(int compositeEffectId)
+    {
+        var tagId = EffectTagIdGenerator.Next();
+
+        var playerUpdatePacketAddEffectTagCompositeEffect = new PlayerUpdatePacketAddEffectTagCompositeEffect
+        {
+            Guid = Guid,
+            TagId = tagId,
+            CompositeEffectId = compositeEffectId,
+            SourceGuid = Guid
+        };
+
+        foreach (var visiblePlayer in VisiblePlayers)
+            visiblePlayer.Value.SendTunneled(playerUpdatePacketAddEffectTagCompositeEffect);
+
+        return tagId;
+    }
+
+    public void RemoveEffectTag(int tagId)
+    {
+        var playerUpdatePacketRemoveEffectTagCompositeEffect = new PlayerUpdatePacketRemoveEffectTagCompositeEffect
+        {
+            Guid = Guid,
+            TagId = tagId
+        };
+
+        foreach (var visiblePlayer in VisiblePlayers)
+            visiblePlayer.Value.SendTunneled(playerUpdatePacketRemoveEffectTagCompositeEffect);
+    }
+
+    private const int ScriptedWalkUpdateIntervalMs = 1000;
+
+    private const float ScriptedWalkWaypointTolerance = 0.25f;
+
+    public void SetSpeed(float speed)
+    {
+        Speed = speed;
+
+        if (PositionUpdateIntervalMs == 0)
+            PositionUpdateIntervalMs = ScriptedWalkUpdateIntervalMs;
+
+        if (WaypointTolerance == 0)
+            WaypointTolerance = ScriptedWalkWaypointTolerance;
+    }
+
+    public void SetHeading(float heading) =>
+        UpdatePosition(Position, QuaternionExtensions.FromHeading(heading), StoppedPositionState);
+
+    public void PlayEffect(int compositeEffectId)
+    {
+        var playerUpdatePacketPlayCompositeEffect = new PlayerUpdatePacketPlayCompositeEffect
+        {
+            Guid = Guid,
+            CompositeEffectId = compositeEffectId,
+            Position = Position
+        };
+
+        foreach (var visiblePlayer in VisiblePlayers)
+            visiblePlayer.Value.SendTunneled(playerUpdatePacketPlayCompositeEffect);
+    }
+
+    public void Remove(int compositeEffectId) => EntityHelper.RemovePlayerGracefully(this, compositeEffectId: compositeEffectId);
+
     #endregion
 
     public virtual void Dispose()
@@ -444,17 +733,6 @@ public class Npc : IScriptableNpc, IEntity
         Zone.ScriptManager.DeleteContext(this);
     }
 
-    protected void DisposeGracefully(bool animate, int delay, int effectDelay, int compositeEffectId, int duration)
-    {
-        foreach (var visiblePlayer in VisiblePlayers)
-        {
-            visiblePlayer.Value.OnRemoveVisibleNpcGracefully(
-                this, animate, delay, effectDelay, compositeEffectId, duration);
-        }
-
-        RemoveFromZone();
-    }
-
     private void RemoveFromZone()
     {
         ZoneTile.Entities.Remove(Guid, out _);
@@ -464,42 +742,67 @@ public class Npc : IScriptableNpc, IEntity
 
     public void MoveTo(Vector3 goalPosition, bool direct = false)
     {
-        Queue<Vector3> waypoints;
+        StartLeg();
+
+        if (!direct)
+        {
+            var navMeshWaypoints = new Queue<Vector3>();
+
+            if (Zone.TryFindRoute(Position.ToVector3(), goalPosition, navMeshWaypoints))
+            {
+                _path.Set(navMeshWaypoints);
+                return;
+            }
+        }
 
         if (direct || Zone.Pathfinder is null)
         {
-            waypoints = new Queue<Vector3>();
-            waypoints.Enqueue(goalPosition);
+            _path.SetTarget(goalPosition);
+            return;
         }
-        else
+
+        _pathBuilder ??= new PathBuilder(Zone.Pathfinder);
+
+        SetPath(goalPosition, _pathBuilder.TryRecompute(Position.ToVector3(), goalPosition));
+    }
+
+    public void MoveTo(Queue<Vector3> waypoints)
+    {
+        StartLeg();
+        _path.Set(waypoints);
+    }
+
+    public void MoveTo(Vector3 goalPosition, List<MapNode> route)
+    {
+        if (Zone.Pathfinder is null)
         {
-            _pathBuilder ??= new PathBuilder(Zone.Pathfinder);
-
-            var currentPosition = new Vector3(Position.X, Position.Y, Position.Z);
-            var newWaypoints = _pathBuilder.TryRecompute(currentPosition, goalPosition);
-
-            // Close enough to what's already running - leave the in-flight routine (and its
-            // own path) alone rather than replacing it with a fresh, empty one.
-            if (newWaypoints is null)
-                return;
-
-            waypoints = newWaypoints;
+            _path.SetTarget(goalPosition);
+            return;
         }
 
-        var path = new PathState();
+        _pathBuilder ??= new PathBuilder(Zone.Pathfinder);
 
-        Routines.SetRoutine("move", new DelegateRoutine(
-            onStart: () => path.Set(waypoints),
-            onStep: () =>
-            {
-                var currentPosition = new Vector3(Position.X, Position.Y, Position.Z);
-                var result = PathFollower.Advance(path, currentPosition, Speed, WaypointTolerance, Zone.TickDeltaSeconds);
+        SetPath(goalPosition, _pathBuilder.TryRecompute(Position.ToVector3(), goalPosition, route));
+    }
 
-                if (result.Moved)
-                    UpdatePosition(new Vector4(result.NewPosition, 1f), result.NewRotation!.Value);
+    public void StopMoving() => _path.Clear();
 
-                return result.Arrived;
-            }),
-            Cadence.Tick);
+    private void StartLeg()
+    {
+        if (PositionUpdateIntervalMs == 0)
+            return;
+
+        _nextPositionSendAt = Environment.TickCount64;
+        SendExpectedSpeed();
+    }
+
+    public void SetPositionY(float y) => Position = Position with { Y = y };
+
+    private void SetPath(Vector3 goalPosition, Queue<Vector3>? newWaypoints)
+    {
+        if (newWaypoints is not null)
+            _path.Set(newWaypoints);
+        else
+            _path.SetGoal(goalPosition);
     }
 }

@@ -1,11 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using Sanctuary.Core.IO;
 using Sanctuary.Game;
+using Sanctuary.Game.Entities;
+using Sanctuary.Game.Helpers;
+using Sanctuary.Core.IO;
 using Sanctuary.Packet;
+using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
 
 namespace Sanctuary.Gateway.Handlers;
@@ -13,6 +18,8 @@ namespace Sanctuary.Gateway.Handlers;
 [PacketHandler]
 public static class PlayerUpdatePacketItemDefinitionRequestHandler
 {
+    private const int CoinStoreItemDefinitionBatchSize = 100;
+
     private static ILogger _logger = null!;
     private static IResourceManager _resourceManager = null!;
 
@@ -26,28 +33,57 @@ public static class PlayerUpdatePacketItemDefinitionRequestHandler
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
     {
-        if (!PlayerUpdatePacketItemDefinitionRequest.TryDeserialize(data, out var packet))
+        if (!PlayerUpdatePacketItemDefinitionRequest.TryDeserialize(data, out var playerUpdatePacketItemDefinitionRequest))
         {
             _logger.LogError("Failed to deserialize {packet}.", nameof(PlayerUpdatePacketItemDefinitionRequest));
             return false;
         }
 
-        _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(PlayerUpdatePacketItemDefinitionRequest), packet);
+        _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(PlayerUpdatePacketItemDefinitionRequest), playerUpdatePacketItemDefinitionRequest);
 
-        if (!_resourceManager.ClientItemDefinitions.TryGetValue(packet.Id, out var clientItemDefinition))
+        if (!_resourceManager.ClientItemDefinitions.TryGetValue(playerUpdatePacketItemDefinitionRequest.Id, out var clientItemDefinition))
         {
-            _logger.LogWarning("Received request for unknown item definition. Id: {id}", packet.Id);
+            _logger.LogWarning("Received request for unknown item definition. Id: {id}", playerUpdatePacketItemDefinitionRequest.Id);
             return true;
+        }
+
+        if (_resourceManager.CoinStoreItems.TryGetValue(clientItemDefinition.Id, out var itemDefinitionMetaData))
+        {
+            SendCoinStoreItemDefinitions(connection.Player, itemDefinitionMetaData);
+            return true;
+        }
+
+        ItemDefinitionHelper.SendItemDefinition(connection.Player, _resourceManager, clientItemDefinition);
+
+        return true;
+    }
+
+    private static void SendCoinStoreItemDefinitions(Player player, ItemDefinitionMetaData requestedItemDefinitionMetaData)
+    {
+        var clientItemDefinitions = new List<ClientItemDefinition>();
+
+        foreach (var coinStoreItem in _resourceManager.CoinStoreItems.Values
+            .Where(x => x.CategoryId == requestedItemDefinitionMetaData.CategoryId)
+            .SkipWhile(x => x.Id != requestedItemDefinitionMetaData.Id))
+        {
+            if (clientItemDefinitions.Count >= CoinStoreItemDefinitionBatchSize)
+                break;
+
+            if (!player.SentCoinStoreItemDefinitionIds.TryAdd(coinStoreItem.Id) && coinStoreItem.Id != requestedItemDefinitionMetaData.Id)
+                continue;
+
+            if (_resourceManager.ClientItemDefinitions.TryGetValue(coinStoreItem.Id, out var clientItemDefinition))
+                clientItemDefinitions.Add(clientItemDefinition);
         }
 
         using var writer = new PacketWriter();
 
-        clientItemDefinition.Serialize(writer);
+        writer.Write(clientItemDefinitions);
 
-        packet.Payload = writer.Buffer;
+        var playerUpdatePacketItemDefinitions = new PlayerUpdatePacketItemDefinitions();
 
-        connection.SendTunneled(packet);
+        playerUpdatePacketItemDefinitions.Payload = writer.Buffer;
 
-        return true;
+        player.SendTunneled(playerUpdatePacketItemDefinitions);
     }
 }

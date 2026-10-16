@@ -127,6 +127,31 @@ public sealed class CollectionNodeSpawnDefinitionCollectionTests
     }
 
     [TestMethod]
+    public void TryAddPersistent_RejectsNonFinitePlacementData()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), $"sanctuary-collections-{Guid.NewGuid():N}");
+        var zoneDirectory = Path.Combine(directory, "1");
+        Directory.CreateDirectory(zoneDirectory);
+        File.WriteAllText(Path.Combine(zoneDirectory, "test-pool.json"), "[]");
+
+        try
+        {
+            var collection = new CollectionNodeSpawnDefinitionCollection(NullLogger.Instance);
+            Assert.IsTrue(collection.Load(directory));
+
+            Assert.IsFalse(collection.TryAddPersistent(
+                "test-pool", 1, new Vector4(float.NaN, 2, 3, 1), 0.5f, out _));
+            Assert.IsFalse(collection.TryAddPersistent(
+                "test-pool", 1, new Vector4(1, 2, 3, 1), float.PositiveInfinity, out _));
+            Assert.AreEqual(0, collection.Count);
+        }
+        finally
+        {
+            Directory.Delete(directory, true);
+        }
+    }
+
+    [TestMethod]
     public void Load_RejectsDuplicateIdsAcrossPoolFiles()
     {
         var directory = Path.Combine(Path.GetTempPath(), $"sanctuary-collections-{Guid.NewGuid():N}");

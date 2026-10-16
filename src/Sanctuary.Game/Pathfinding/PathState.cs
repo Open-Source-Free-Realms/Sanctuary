@@ -17,6 +17,41 @@ public sealed class PathState
     }
 
 
+    public void SetGoal(Vector3 goalPosition)
+    {
+        lock (_lock)
+        {
+            var waypoints = new Queue<Vector3>(_waypoints.Count);
+            var keepCount = _waypoints.Count - 1;
+
+            foreach (var waypoint in _waypoints)
+            {
+                if (keepCount-- <= 0)
+                    break;
+
+                waypoints.Enqueue(waypoint);
+            }
+
+            waypoints.Enqueue(goalPosition);
+            _waypoints = waypoints;
+        }
+    }
+
+    public void SetTarget(Vector3 targetPosition)
+    {
+        lock (_lock)
+        {
+            _waypoints.Clear();
+            _waypoints.Enqueue(targetPosition);
+        }
+    }
+
+    public void Clear()
+    {
+        lock (_lock)
+            _waypoints.Clear();
+    }
+
     public bool TryGetCurrentTarget(out Vector3 targetPosition)
     {
         lock (_lock)

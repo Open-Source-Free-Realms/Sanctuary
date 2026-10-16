@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Numerics;
 using System.Text;
+using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -17,6 +18,7 @@ using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game;
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Gateway.Handlers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -35,6 +37,9 @@ public class GatewayConnection : UdpConnection
     private readonly IServiceProvider _serviceProvider;
     private readonly IResourceManager _resourceManager;
     private readonly IDbContextFactory<DatabaseContext> _dbContextFactory;
+
+    private readonly object _workLock = new();
+    private Task _workTail = Task.CompletedTask;
 
     private ICipher _cipher;
 #pragma warning disable CS0649
@@ -86,6 +91,24 @@ public class GatewayConnection : UdpConnection
         SavePlayerToDatabase();
 
         Player.Dispose();
+    }
+
+    public void QueueWork(Action work)
+    {
+        lock (_workLock)
+        {
+            _workTail = _workTail.ContinueWith(_ =>
+            {
+                try
+                {
+                    work();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "{connection} queued work failed.", this);
+                }
+            }, TaskScheduler.Default);
+        }
     }
 
     public override void OnRoutePacket(Span<byte> data)
@@ -151,19 +174,19 @@ public class GatewayConnection : UdpConnection
         _logger.LogError("[PacketCorrupt] Guid: {guid}, Reason: {reason}, Data: {data}", Player?.Guid, reason, Convert.ToHexString(data));
     }
 
-    public void SendTunneled(ISerializablePacket packet, bool reliable = true, bool secure = false)
+    public void SendTunneled(ISerializablePacket serializablePacket, bool reliable = true, bool secure = false)
     {
-        var packetTunneled = new PacketTunneledClientPacket
+        var packetTunneledClientPacket = new PacketTunneledClientPacket
         {
-            Payload = packet.Serialize()
+            Payload = serializablePacket.Serialize()
         };
 
-        Send(packetTunneled, reliable, secure);
+        Send(packetTunneledClientPacket, reliable, secure);
     }
 
-    public void Send(ISerializablePacket packet, bool reliable = true, bool secure = false)
+    public void Send(ISerializablePacket serializablePacket, bool reliable = true, bool secure = false)
     {
-        var data = packet.Serialize();
+        var data = serializablePacket.Serialize();
 
         if (secure)
             InternalSendSecure(data);
@@ -214,6 +237,8 @@ public class GatewayConnection : UdpConnection
         }
 
         Player = player;
+        player.LoginStartedAt = DateTimeOffset.UtcNow;
+        player.SecondsSinceLastLogin = WelcomeScreenHelper.SecondsSinceLastLogin(dbCharacter.LastLogin, player.LoginStartedAt);
 
         // Start - ClientPcData
 
@@ -344,6 +369,9 @@ public class GatewayConnection : UdpConnection
             });
         }
 
+        foreach (var collectionEntry in dbCharacter.CollectionEntries)
+            Player.CollectedCollectionEntryIds.TryAdd(collectionEntry.EntryId);
+
         Player.Gender = dbCharacter.Gender;
 
         foreach (var dbMount in dbCharacter.Mounts)
@@ -365,9 +393,21 @@ public class GatewayConnection : UdpConnection
             });
         }
 
+        foreach (var dbPet in dbCharacter.Pets)
+        {
+            if (!_resourceManager.ClientItemDefinitions.TryGetValue(dbPet.Definition, out var clientItemDefinition) ||
+                !PetHelper.TryGetModel(_resourceManager, clientItemDefinition, out var modelDefinition))
+            {
+                continue;
+            }
+
+            PetHelper.AddPet(Player, _resourceManager, dbPet, clientItemDefinition, modelDefinition);
+        }
+
         // TODO
 
         // Start - Store on DB
+
         var clientActionBar = new ClientActionBar();
 
         clientActionBar.Id = 2; // ItemActionBar
@@ -531,14 +571,16 @@ public class GatewayConnection : UdpConnection
 
         dbCharacter.ActiveTitleId = Player.ActiveTitle;
 
-        if (dbCharacter.LastLogin.HasValue)
-            dbCharacter.PlayTime += (int)(DateTimeOffset.UtcNow - dbCharacter.LastLogin.Value).TotalMinutes;
+        dbCharacter.PlayTime += (int)Math.Max(0, (DateTimeOffset.UtcNow - Player.LoginStartedAt).TotalMinutes);
 
         // End ClientPcData
 
         dbCharacter.ChatBubbleForegroundColor = Player.ChatBubbleForegroundColor;
         dbCharacter.ChatBubbleBackgroundColor = Player.ChatBubbleBackgroundColor;
         dbCharacter.ChatBubbleSize = Player.ChatBubbleSize;
+
+        foreach (var dbPet in dbContext.Pets.Where(pet => pet.CharacterId == dbCharacter.Id))
+            PetHelper.SavePetState(Player, dbPet);
 
         if (dbContext.SaveChanges() <= 0)
             _logger.LogError("Failed to save character data to database");
@@ -607,9 +649,10 @@ public class GatewayConnection : UdpConnection
             .Select(item => item.Definition)
             .ToHashSet();
 
-        // TODO: Include persisted non-inventory progress here when direct collections such as
-        // adventure coins have a database representation.
-        Player.Collections = _resourceManager.Collections.CreateClientCollections(Player.Guid, ownedItemDefinitionIds);
+        var collectedEntryIds = Player.CollectedCollectionEntryIds.ToHashSet();
+
+        Player.Collections = _resourceManager.Collections.CreateClientCollections(
+            Player.Guid, ownedItemDefinitionIds, collectedEntryIds);
 
         var packetSendSelfToClient = new PacketSendSelfToClient();
 
