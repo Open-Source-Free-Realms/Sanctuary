@@ -77,6 +77,12 @@ public static class PacketWorldTeleportRequestHandler
     {
         if (friend.Zone is HousingZone { OwnerId: { } ownerGuid } housingZone)
         {
+            if (friend.IsPreviewingHouse)
+            {
+                connection.SendTunneled(new HousingPacketHousingError { Error = HousingError.PermissionDenied });
+                return;
+            }
+
             if (!HousingHelper.TryGetHouseDefinition(_resourceManager, housingZone.DefinitionId, out var houseDefinition))
                 return;
 

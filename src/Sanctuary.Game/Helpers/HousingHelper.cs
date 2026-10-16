@@ -24,6 +24,8 @@ public static class HousingHelper
     private const int HouseDefinitionIdBits = 8;
     private const ulong HouseDefinitionIdMask = (1UL << HouseDefinitionIdBits) - 1;
 
+    private const int HouseItemType = 16;
+
     private const int MaxFixtureCount = 9999;
     private const int MaxLandmarkCount = 100;
 
@@ -92,9 +94,36 @@ public static class HousingHelper
         }
 
         player.HouseInvites.Remove(houseGuid);
+        player.IsPreviewingHouse = false;
 
         if (!player.TeleportToZone(zoneDefinition.Id, ownerGuid, zoneDefinition.SpawnPosition, zoneDefinition.SpawnRotation))
         {
+            housingError = HousingError.ZoneFailedToLaunch;
+            return false;
+        }
+
+        housingError = default;
+        return true;
+    }
+
+    public static bool TryPreviewHouse(IResourceManager resourceManager, Player player, int itemDefinitionId, out HousingError housingError)
+    {
+        var houseDefinition = resourceManager.ClientItemDefinitions.TryGetValue(itemDefinitionId, out var clientItemDefinition) && clientItemDefinition.Type == HouseItemType
+            ? resourceManager.Houses.Values.OrderBy(house => house.Id).FirstOrDefault(house => house.NameId == clientItemDefinition.NameId)
+            : null;
+
+        if (houseDefinition is null || !CanEnterHouseZone(resourceManager, player, houseDefinition.ZoneId)
+            || !resourceManager.Zones.TryGetValue(houseDefinition.ZoneId, out var zoneDefinition))
+        {
+            housingError = HousingError.ZoneNotFound;
+            return false;
+        }
+
+        player.IsPreviewingHouse = true;
+
+        if (!player.TeleportToZone(zoneDefinition.Id, player.Guid, zoneDefinition.SpawnPosition, zoneDefinition.SpawnRotation))
+        {
+            player.IsPreviewingHouse = false;
             housingError = HousingError.ZoneFailedToLaunch;
             return false;
         }
@@ -112,9 +141,15 @@ public static class HousingHelper
         return dbContext.Houses.AsNoTracking().Any(house => house.Id == zoneDefinitionId && house.CharacterId == characterId && house.IsLocked && !house.IsPublished);
     }
 
-    public static bool TryLeaveHouse(Player player, IZoneManager zoneManager) =>
-        player.Zone is HousingZone
-        && player.TeleportToZone(zoneManager.StartingZoneDefinitionId, null, player.StartingZonePosition, player.StartingZoneRotation);
+    public static bool TryLeaveHouse(Player player, IZoneManager zoneManager)
+    {
+        if (player.Zone is not HousingZone)
+            return false;
+
+        player.IsPreviewingHouse = false;
+
+        return player.TeleportToZone(zoneManager.StartingZoneDefinitionId, null, player.StartingZonePosition, player.StartingZoneRotation);
+    }
 
     public static PlayerHousingInstanceData GetInstanceData(ulong ownerGuid, string ownerName, HouseDefinition houseDefinition) => new()
     {
@@ -247,8 +282,15 @@ public static class HousingHelper
 
         foreach (var dbHouse in dbHouses)
         {
-            if (TryGetHouseGuid(resourceManager, dbHouse, out var houseGuid))
-                ratingDataEntries.Add(GetRatingDataEntry(houseGuid, dbHouse));
+            if (!TryGetHouseGuid(resourceManager, dbHouse, out var houseGuid))
+                continue;
+
+            var ratingDataEntry = GetRatingDataEntry(houseGuid, dbHouse);
+
+            if (TryGetHouseDefinition(resourceManager, dbHouse.Id, out var houseDefinition))
+                ratingDataEntry.Snapshot = houseDefinition.Snapshot;
+
+            ratingDataEntries.Add(ratingDataEntry);
         }
 
         return ratingDataEntries;

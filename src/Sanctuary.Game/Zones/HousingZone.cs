@@ -41,7 +41,7 @@ public sealed class HousingZone : BaseZone
         SendHousingZoneData(player);
     }
 
-    public bool IsOwner(Player player) => OwnerId == player.Guid;
+    public bool IsOwner(Player player) => OwnerId == player.Guid && !player.IsPreviewingHouse;
 
     public void SetEditMode(Player player, bool inEditMode)
     {
@@ -165,6 +165,7 @@ public sealed class HousingZone : BaseZone
 
         player.SendTunneled(new HousingPacketZoneData
         {
+            IsPreview = player.IsPreviewingHouse,
             HeadSize = HousingZoneHeadSize,
             InstanceInfo = instanceInfo
         });
@@ -182,6 +183,7 @@ public sealed class HousingZone : BaseZone
         instanceData.Name = HouseName;
         instanceData.IsLocked = IsLocked;
         instanceData.IsFloraAllowed = IsFloraAllowed;
+        instanceData.Preview = player.IsPreviewingHouse;
 
         player.SendTunneled(new HousingPacketInstanceData
         {

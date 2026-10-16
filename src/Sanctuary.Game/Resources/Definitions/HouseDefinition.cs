@@ -13,6 +13,7 @@ public class HouseDefinition
 
     public int NameId { get; set; }
     public int ZoneId { get; set; }
+    public string Snapshot { get; set; } = string.Empty;
     public bool IsStarter { get; set; }
 
     public int Icon { get; set; }

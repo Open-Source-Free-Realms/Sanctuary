@@ -340,6 +340,7 @@ public abstract class BaseZone : IZone, IDisposable
         SendIgnoreList(player);
 
         UpdateFriendStatus(player);
+        UpdateFriendLocality(player);
     }
 
     public virtual void OnClientFinishedLoading(Player player)
@@ -652,6 +653,9 @@ public abstract class BaseZone : IZone, IDisposable
 
     private void SendFriendList(Player player)
     {
+        foreach (var friend in player.Friends)
+            SetFriendLocality(friend, _zoneManager.TryGetPlayer(friend.Guid, out var friendPlayer) && friendPlayer.Zone == _zoneManager.StartingZone);
+
         var friendListPacket = new FriendListPacket();
 
         friendListPacket.Friends = player.Friends;
@@ -666,6 +670,33 @@ public abstract class BaseZone : IZone, IDisposable
         ignoreListPacket.Ignores = player.Ignores;
 
         player.SendTunneled(ignoreListPacket);
+    }
+
+    private void UpdateFriendLocality(Player player)
+    {
+        var isLocal = this == _zoneManager.StartingZone;
+
+        foreach (var friend in player.Friends)
+        {
+            if (!_zoneManager.TryGetPlayer(friend.Guid, out var friendPlayer))
+                continue;
+
+            var otherFriend = friendPlayer.Friends.FirstOrDefault(x => x.Guid == player.Guid);
+
+            if (otherFriend is null || otherFriend.IsLocal == isLocal)
+                continue;
+
+            SetFriendLocality(otherFriend, isLocal);
+
+            friendPlayer.SendTunneled(new FriendListPacket { Friends = friendPlayer.Friends });
+        }
+    }
+
+    private static void SetFriendLocality(FriendData friend, bool isLocal)
+    {
+        friend.IsLocal = isLocal;
+        friend.IsInStaticZone = isLocal;
+        friend.InEncounter = !isLocal;
     }
 
     private void UpdateFriendStatus(Player player)

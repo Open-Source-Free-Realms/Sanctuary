@@ -42,6 +42,8 @@ public static class BaseHousingPacketHandler
             ClientHousingPacketInvitePlayer.OpCode => ClientHousingPacketInvitePlayerHandler.HandlePacket(connection, reader.Span),
             ClientHousingPacketDeclineInvite.OpCode => ClientHousingPacketDeclineInviteHandler.HandlePacket(connection, reader.Span),
             ClientHousingPacketRequestVisitToNeighbor.OpCode => ClientHousingPacketRequestVisitToNeighborHandler.HandlePacket(connection, reader.Span),
+            ClientHousingPacketPreviewByItemDefinitionIdRequest.OpCode => ClientHousingPacketPreviewByItemDefinitionIdRequestHandler.HandlePacket(connection, reader.Span),
+            ClientHousingPacketRequestGrant.OpCode => ClientHousingPacketRequestGrantHandler.HandlePacket(connection, reader.Span),
             _ => true // housing not implemented
         };
     }
