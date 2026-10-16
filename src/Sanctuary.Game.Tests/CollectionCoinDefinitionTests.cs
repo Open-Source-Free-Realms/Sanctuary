@@ -61,6 +61,8 @@ public sealed class CollectionCoinDefinitionTests
 
     private static WorldZone CreateZone()
     {
+        Directory.CreateDirectory(ResourceManager.BaseDirectory);
+
         var services = new ServiceCollection();
 
         services.AddSingleton<ILoggerFactory>(NullLoggerFactory.Instance);
