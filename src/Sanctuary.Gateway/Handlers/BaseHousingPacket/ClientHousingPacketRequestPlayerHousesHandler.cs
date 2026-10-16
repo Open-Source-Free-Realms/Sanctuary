@@ -18,6 +18,7 @@ public static class ClientHousingPacketRequestPlayerHousesHandler
     private static ILogger _logger = null!;
     private static IResourceManager _resourceManager = null!;
     private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
+    private static IZoneManager _zoneManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -26,6 +27,7 @@ public static class ClientHousingPacketRequestPlayerHousesHandler
 
         _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
         _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
+        _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -38,7 +40,15 @@ public static class ClientHousingPacketRequestPlayerHousesHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(ClientHousingPacketRequestPlayerHouses), clientHousingPacketRequestPlayerHouses);
 
-        var housingPacketInstanceList = HousingHelper.GetInstanceList(_resourceManager, _dbContextFactory, connection.Player);
+        var houseOwner = connection.Player;
+
+        if (clientHousingPacketRequestPlayerHouses.PlayerGuid != houseOwner.Guid && !_zoneManager.TryGetPlayer(clientHousingPacketRequestPlayerHouses.PlayerGuid, out houseOwner))
+        {
+            _logger.LogWarning("{player} requested the houses of {owner}, who is not online.", connection.Player.Guid, clientHousingPacketRequestPlayerHouses.PlayerGuid);
+            return true;
+        }
+
+        var housingPacketInstanceList = HousingHelper.GetInstanceList(_resourceManager, _dbContextFactory, houseOwner);
 
         connection.SendTunneled(housingPacketInstanceList);
 

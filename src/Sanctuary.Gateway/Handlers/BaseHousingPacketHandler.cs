@@ -39,6 +39,9 @@ public static class BaseHousingPacketHandler
             ClientHousingPacketTogglePetAutospawn.OpCode => ClientHousingPacketTogglePetAutospawnHandler.HandlePacket(connection, reader.Span),
             ClientHousingPacketRequestName.OpCode => ClientHousingPacketRequestNameHandler.HandlePacket(connection, reader.Span),
             ClientHousingPacketLockHouse.OpCode => ClientHousingPacketLockHouseHandler.HandlePacket(connection, reader.Span),
+            ClientHousingPacketInvitePlayer.OpCode => ClientHousingPacketInvitePlayerHandler.HandlePacket(connection, reader.Span),
+            ClientHousingPacketDeclineInvite.OpCode => ClientHousingPacketDeclineInviteHandler.HandlePacket(connection, reader.Span),
+            ClientHousingPacketRequestVisitToNeighbor.OpCode => ClientHousingPacketRequestVisitToNeighborHandler.HandlePacket(connection, reader.Span),
             _ => true // housing not implemented
         };
     }

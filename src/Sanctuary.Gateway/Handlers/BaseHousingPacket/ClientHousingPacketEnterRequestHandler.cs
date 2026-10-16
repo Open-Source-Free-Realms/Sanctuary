@@ -1,11 +1,14 @@
 ﻿using System;
 
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using Sanctuary.Database;
 using Sanctuary.Game;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
+using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
 
 namespace Sanctuary.Gateway.Handlers;
@@ -15,6 +18,8 @@ public static class ClientHousingPacketEnterRequestHandler
 {
     private static ILogger _logger = null!;
     private static IResourceManager _resourceManager = null!;
+    private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
+    private static IZoneManager _zoneManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -22,6 +27,8 @@ public static class ClientHousingPacketEnterRequestHandler
         _logger = loggerFactory.CreateLogger(nameof(ClientHousingPacketEnterRequestHandler));
 
         _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
+        _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
+        _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -36,16 +43,12 @@ public static class ClientHousingPacketEnterRequestHandler
 
         var player = connection.Player;
 
-        if (!HousingHelper.TryGetOwnedHouse(_resourceManager, player, clientHousingPacketEnterRequest.HouseGuid, out var houseDefinition)
-            || !HousingHelper.CanEnterHouseZone(_resourceManager, player, houseDefinition.ZoneId)
-            || !_resourceManager.Zones.TryGetValue(houseDefinition.ZoneId, out var zoneDefinition))
+        if (!HousingHelper.TryEnterHouse(_resourceManager, _dbContextFactory, _zoneManager, player, clientHousingPacketEnterRequest.HouseGuid, out var housingError))
         {
-            _logger.LogWarning("{player} requested a house they do not own. ( {houseGuid} )", player.Guid, clientHousingPacketEnterRequest.HouseGuid);
-            return true;
-        }
+            _logger.LogWarning("{player} could not enter house {houseGuid}. ( {error} )", player.Guid, clientHousingPacketEnterRequest.HouseGuid, housingError);
 
-        if (!player.TeleportToZone(zoneDefinition.Id, player.Guid, zoneDefinition.SpawnPosition, zoneDefinition.SpawnRotation))
-            _logger.LogWarning("{player} could not enter house {house}.", player.Guid, houseDefinition.Id);
+            connection.SendTunneled(new HousingPacketHousingError { Error = housingError });
+        }
 
         return true;
     }

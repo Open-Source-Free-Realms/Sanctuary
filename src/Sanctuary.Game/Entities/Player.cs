@@ -80,6 +80,8 @@ public sealed class Player : ClientPcData, IEntity
     public Dictionary<int, PetTrait> PetTraits { get; } = [];
     public Dictionary<int, DateTimeOffset> PetTreasureFoundAt { get; } = [];
 
+    public HashSet<ulong> HouseInvites { get; } = [];
+
     public PetClientInfo? GetPetClientInfo(int petId) => Pets.FirstOrDefault(petClientInfo => petClientInfo.Id == petId);
 
     public PetClientInfo? GetActivePetClientInfo() => GetPetClientInfo(ActivePetId);

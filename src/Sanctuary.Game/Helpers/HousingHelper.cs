@@ -60,6 +60,51 @@ public static class HousingHelper
         && zoneDefinition is HousingZoneDefinition { IsBroken: false } housingZoneDefinition
         && (!housingZoneDefinition.StaffOnly || player.ChatCommandRole != ChatCommandRole.Player);
 
+    public static ulong GetHouseOwnerGuid(ulong houseGuid) => houseGuid >> HouseDefinitionIdBits;
+
+    public static bool TryEnterHouse(IResourceManager resourceManager, IDbContextFactory<DatabaseContext> dbContextFactory, IZoneManager zoneManager,
+        Player player, ulong houseGuid, out HousingError housingError)
+    {
+        var ownerGuid = GetHouseOwnerGuid(houseGuid);
+        var houseDefinitionId = (int)(houseGuid & HouseDefinitionIdMask);
+
+        var owner = ownerGuid == player.Guid ? player : zoneManager.TryGetPlayer(ownerGuid, out var onlineOwner) ? onlineOwner : null;
+        var houseDefinition = (owner is null ? GetStarterHouses(resourceManager) : GetOwnedHouses(resourceManager, owner)).FirstOrDefault(house => house.Id == houseDefinitionId);
+
+        if (houseDefinition is null || !CanEnterHouseZone(resourceManager, player, houseDefinition.ZoneId)
+            || !resourceManager.Zones.TryGetValue(houseDefinition.ZoneId, out var zoneDefinition))
+        {
+            housingError = HousingError.ZoneNotFound;
+            return false;
+        }
+
+        if (ownerGuid != player.Guid && !player.HouseInvites.Contains(houseGuid) && IsHouseLocked(dbContextFactory, ownerGuid, houseDefinition.ZoneId))
+        {
+            housingError = HousingError.PermissionDenied;
+            return false;
+        }
+
+        player.HouseInvites.Remove(houseGuid);
+
+        if (!player.TeleportToZone(zoneDefinition.Id, ownerGuid, zoneDefinition.SpawnPosition, zoneDefinition.SpawnRotation))
+        {
+            housingError = HousingError.ZoneFailedToLaunch;
+            return false;
+        }
+
+        housingError = default;
+        return true;
+    }
+
+    public static bool IsHouseLocked(IDbContextFactory<DatabaseContext> dbContextFactory, ulong ownerGuid, int zoneDefinitionId)
+    {
+        var characterId = GuidHelper.GetPlayerId(ownerGuid);
+
+        using var dbContext = dbContextFactory.CreateDbContext();
+
+        return dbContext.Houses.AsNoTracking().Any(house => house.Id == zoneDefinitionId && house.CharacterId == characterId && house.IsLocked);
+    }
+
     public static bool TryLeaveHouse(Player player, IZoneManager zoneManager) =>
         player.Zone is HousingZone
         && player.TeleportToZone(zoneManager.StartingZoneDefinitionId, null, player.StartingZonePosition, player.StartingZoneRotation);
