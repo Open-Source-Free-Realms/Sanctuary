@@ -211,12 +211,24 @@ public static class HousingHelper
 
         var dbHouses = dbContext.Houses.AsNoTracking().Include(house => house.Votes).Where(house => house.CharacterId == characterId).ToDictionary(house => house.Id);
 
+        var characterCreated = dbContext.Characters.AsNoTracking().Where(character => character.Id == characterId).Select(character => character.Created).FirstOrDefault();
+
+        var houseItemCreated = new Dictionary<int, DateTimeOffset>();
+
+        foreach (var dbItem in dbContext.Items.AsNoTracking().Where(item => item.CharacterId == characterId).ToList())
+        {
+            if (resourceManager.ClientItemDefinitions.TryGetValue(dbItem.Definition, out var clientItemDefinition) && clientItemDefinition.Type == ItemDefinitionHelper.HouseItemType)
+                houseItemCreated[clientItemDefinition.NameId] = dbItem.Created;
+        }
+
         return new HousingPacketInstanceList
         {
             PlayerGuid = player.Guid,
             Instances = GetOwnedHouses(resourceManager, player).Select(house =>
             {
                 var instanceInfo = GetInstanceInfo(player.Guid, player.Name.FullName, house);
+
+                instanceInfo.WhenCreated = houseItemCreated.TryGetValue(house.NameId, out var houseCreated) ? houseCreated : characterCreated;
 
                 if (dbHouses.TryGetValue(house.ZoneId, out var dbHouse))
                 {
