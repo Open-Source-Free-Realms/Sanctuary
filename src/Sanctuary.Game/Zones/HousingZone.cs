@@ -155,6 +155,14 @@ public sealed class HousingZone : BaseZone
         instanceInfo.IsLocked = IsLocked;
         instanceInfo.IsFloraAllowed = IsFloraAllowed;
 
+        using var dbContext = _dbContextFactory.CreateDbContext();
+
+        var dbHouse = dbContext.Houses.AsNoTracking().Include(house => house.Votes)
+            .FirstOrDefault(house => house.Id == DefinitionId && house.CharacterId == GuidHelper.GetPlayerId(ownerGuid));
+
+        if (dbHouse is not null)
+            HousingHelper.SetRatingInfo(instanceInfo, dbHouse, player.Guid);
+
         player.SendTunneled(new HousingPacketZoneData
         {
             HeadSize = HousingZoneHeadSize,

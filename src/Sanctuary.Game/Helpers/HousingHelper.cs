@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
 
 using Microsoft.EntityFrameworkCore;
 
 using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
+using Sanctuary.Database.Entities;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.ChatCommands;
 using Sanctuary.Game.Resources.Definitions;
@@ -24,6 +26,11 @@ public static class HousingHelper
 
     private const int MaxFixtureCount = 9999;
     private const int MaxLandmarkCount = 100;
+
+    public const string RatingSystem = "Housing";
+    public const int MaxRatingEntryCount = 50;
+
+    private const float DefaultRating = 3.0f;
 
     public static IEnumerable<HouseDefinition> GetStarterHouses(IResourceManager resourceManager) =>
         resourceManager.Houses.Values.Where(house => house.IsStarter).OrderBy(house => house.Id);
@@ -102,7 +109,7 @@ public static class HousingHelper
 
         using var dbContext = dbContextFactory.CreateDbContext();
 
-        return dbContext.Houses.AsNoTracking().Any(house => house.Id == zoneDefinitionId && house.CharacterId == characterId && house.IsLocked);
+        return dbContext.Houses.AsNoTracking().Any(house => house.Id == zoneDefinitionId && house.CharacterId == characterId && house.IsLocked && !house.IsPublished);
     }
 
     public static bool TryLeaveHouse(Player player, IZoneManager zoneManager) =>
@@ -139,7 +146,7 @@ public static class HousingHelper
 
         using var dbContext = dbContextFactory.CreateDbContext();
 
-        var dbHouses = dbContext.Houses.AsNoTracking().Where(house => house.CharacterId == characterId).ToDictionary(house => house.Id);
+        var dbHouses = dbContext.Houses.AsNoTracking().Include(house => house.Votes).Where(house => house.CharacterId == characterId).ToDictionary(house => house.Id);
 
         return new HousingPacketInstanceList
         {
@@ -153,10 +160,123 @@ public static class HousingHelper
                     instanceInfo.HouseName = dbHouse.Name;
                     instanceInfo.IsLocked = dbHouse.IsLocked;
                     instanceInfo.IsFloraAllowed = dbHouse.IsFloraAllowed;
+
+                    SetRatingInfo(instanceInfo, dbHouse, player.Guid);
                 }
 
                 return instanceInfo;
             }).ToList()
         };
+    }
+
+    public static string GetRatingHouseGuid(ulong houseGuid) => houseGuid.ToString(CultureInfo.InvariantCulture);
+
+    public static IQueryable<DbHouse> GetPublishedHouses(DatabaseContext dbContext) =>
+        dbContext.Houses.Include(house => house.Votes).Include(house => house.Character).Where(house => house.IsPublished);
+
+    public static bool TryGetHouse(IResourceManager resourceManager, DatabaseContext dbContext, string ratingHouseGuid,
+        out ulong houseGuid, [MaybeNullWhen(false)] out DbHouse dbHouse)
+    {
+        dbHouse = null;
+
+        if (!ulong.TryParse(ratingHouseGuid, CultureInfo.InvariantCulture, out houseGuid))
+            return false;
+
+        var houseDefinitionId = (int)(houseGuid & HouseDefinitionIdMask);
+
+        var houseDefinition = resourceManager.Houses.Values.FirstOrDefault(house => house.Id == houseDefinitionId);
+
+        if (houseDefinition is null)
+            return false;
+
+        var characterId = GuidHelper.GetPlayerId(GetHouseOwnerGuid(houseGuid));
+
+        dbHouse = dbContext.Houses.Include(house => house.Votes).Include(house => house.Character)
+            .FirstOrDefault(house => house.Id == houseDefinition.ZoneId && house.CharacterId == characterId);
+
+        return dbHouse is not null;
+    }
+
+    public static bool TryGetHouseGuid(IResourceManager resourceManager, DbHouse dbHouse, out ulong houseGuid)
+    {
+        if (!TryGetHouseDefinition(resourceManager, dbHouse.Id, out var houseDefinition))
+        {
+            houseGuid = default;
+            return false;
+        }
+
+        houseGuid = GetHouseGuid(GuidHelper.GetPlayerGuid(dbHouse.CharacterId), houseDefinition);
+        return true;
+    }
+
+    public static float GetRating(DbHouse dbHouse) => dbHouse.Votes.Count == 0 ? DefaultRating : dbHouse.Votes.Average(vote => vote.Rating);
+
+    public static bool CanVote(DbHouse dbHouse, ulong voterGuid)
+    {
+        var voterId = GuidHelper.GetPlayerId(voterGuid);
+
+        return dbHouse.IsPublished && dbHouse.CharacterId != voterId && dbHouse.Votes.All(vote => vote.VoterId != voterId);
+    }
+
+    public static CandidateRatingInfo GetCandidateRatingInfo(ulong houseGuid, DbHouse dbHouse, ulong requesterGuid) => new()
+    {
+        InstanceGuid = GetRatingHouseGuid(houseGuid),
+        Description = dbHouse.Description,
+        KeywordList = dbHouse.Keywords,
+        Rating = GetRating(dbHouse),
+        Votes = dbHouse.Votes.Count,
+        HasRating = dbHouse.IsPublished,
+        CanVote = CanVote(dbHouse, requesterGuid)
+    };
+
+    public static RatingDataEntry GetRatingDataEntry(ulong houseGuid, DbHouse dbHouse) => new()
+    {
+        HouseGuid = GetRatingHouseGuid(houseGuid),
+        OwnerName = dbHouse.Character.FullName,
+        HouseName = dbHouse.Name,
+        OwnerGuid = GuidHelper.GetPlayerGuid(dbHouse.CharacterId),
+        Description = dbHouse.Description,
+        KeywordList = dbHouse.Keywords,
+        Rating = GetRating(dbHouse),
+        NumVotes = dbHouse.Votes.Count
+    };
+
+    public static List<RatingDataEntry> GetRatingDataEntries(IResourceManager resourceManager, IEnumerable<DbHouse> dbHouses)
+    {
+        var ratingDataEntries = new List<RatingDataEntry>();
+
+        foreach (var dbHouse in dbHouses)
+        {
+            if (TryGetHouseGuid(resourceManager, dbHouse, out var houseGuid))
+                ratingDataEntries.Add(GetRatingDataEntry(houseGuid, dbHouse));
+        }
+
+        return ratingDataEntries;
+    }
+
+    public static void SendCandidateInfo(Player player, ulong houseGuid, DbHouse dbHouse)
+    {
+        var players = player.Zone is HousingZone { OwnerId: { } ownerGuid } housingZone && ownerGuid == GetHouseOwnerGuid(houseGuid) && housingZone.DefinitionId == dbHouse.Id
+            ? housingZone.Players
+            : [player];
+
+        foreach (var zonePlayer in players)
+        {
+            zonePlayer.SendTunneled(new RatingPacketCandidateInfoReply
+            {
+                Guid = zonePlayer.Guid,
+                Candidates = [GetCandidateRatingInfo(houseGuid, dbHouse, zonePlayer.Guid)]
+            });
+        }
+    }
+
+    public static void SetRatingInfo(PlayerHousingInstanceInfo instanceInfo, DbHouse dbHouse, ulong requesterGuid)
+    {
+        instanceInfo.Description = dbHouse.Description;
+        instanceInfo.KeywordList = dbHouse.Keywords;
+        instanceInfo.Rating = GetRating(dbHouse);
+        instanceInfo.Votes = dbHouse.Votes.Count;
+        instanceInfo.HasRating = dbHouse.IsPublished;
+        instanceInfo.CanVote = CanVote(dbHouse, requesterGuid);
     }
 }

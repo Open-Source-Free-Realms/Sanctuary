@@ -320,11 +320,24 @@ namespace Sanctuary.Database.MySql.Migrations
                         .HasColumnType("datetime(6)")
                         .HasDefaultValueSql("NOW()");
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
+
                     b.Property<bool>("IsFloraAllowed")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<bool>("IsLocked")
                         .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsPublished")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Keywords")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar(128)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -334,11 +347,43 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.Property<bool>("PetAutospawn")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<DateTimeOffset?>("PublishedAt")
+                        .HasColumnType("datetime(6)");
+
                     b.HasKey("Id", "CharacterId");
 
                     b.HasIndex("CharacterId");
 
                     b.ToTable("Houses");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbHouseVote", b =>
+                {
+                    b.Property<int>("HouseId")
+                        .HasColumnType("int");
+
+                    b.Property<ulong>("CharacterId")
+                        .HasColumnType("bigint unsigned");
+
+                    b.Property<ulong>("VoterId")
+                        .HasColumnType("bigint unsigned");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<float>("Rating")
+                        .HasColumnType("float");
+
+                    b.HasKey("HouseId", "CharacterId", "VoterId");
+
+                    b.ToTable("HouseVotes");
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbIgnore", b =>
@@ -710,6 +755,17 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.Navigation("Character");
                 });
 
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbHouseVote", b =>
+                {
+                    b.HasOne("Sanctuary.Database.Entities.DbHouse", "House")
+                        .WithMany("Votes")
+                        .HasForeignKey("HouseId", "CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("House");
+                });
+
             modelBuilder.Entity("Sanctuary.Database.Entities.DbIgnore", b =>
                 {
                     b.HasOne("Sanctuary.Database.Entities.DbCharacter", "Character")
@@ -814,6 +870,11 @@ namespace Sanctuary.Database.MySql.Migrations
                 {
                     b.Navigation("Character")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbHouse", b =>
+                {
+                    b.Navigation("Votes");
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbUser", b =>

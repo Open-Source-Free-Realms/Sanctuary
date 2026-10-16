@@ -16,7 +16,16 @@ public sealed class DbHouseConfiguration : IEntityTypeConfiguration<DbHouse>
         builder.Property(h => h.IsLocked).IsRequired();
         builder.Property(h => h.IsFloraAllowed).IsRequired();
         builder.Property(h => h.PetAutospawn).IsRequired();
+        builder.Property(h => h.IsPublished).IsRequired();
+        builder.Property(h => h.Description).IsRequired().HasMaxLength(256);
+        builder.Property(h => h.Keywords).IsRequired().HasMaxLength(128);
+        builder.Property(h => h.PublishedAt).IsRequired(false);
 
         builder.Property(h => h.Created).IsRequired().HasDefaultValueSql("NOW()");
+
+        builder.HasMany(h => h.Votes)
+            .WithOne(v => v.House)
+            .HasForeignKey(v => new { v.HouseId, v.CharacterId })
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
