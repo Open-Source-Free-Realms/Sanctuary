@@ -33,7 +33,7 @@ public static class ClientHousingPacketTogglePetAutospawnHandler
         if (connection.Player.Zone is not HousingZone housingZone || !housingZone.IsOwner(connection.Player))
             return true;
 
-        housingZone.SetPetAutospawn(!housingZone.PetAutospawn);
+        housingZone.SetPetAutospawn(connection.Player, !housingZone.PetAutospawn);
 
         return true;
     }

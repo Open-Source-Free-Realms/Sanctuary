@@ -298,6 +298,7 @@
   },
   {
     "Id": 24,
+    "NoHousePets": true,
     "IsStarter": true,
     "NameId": 420151,
     "ZoneId": 24,
@@ -434,6 +435,7 @@
   },
   {
     "Id": 33,
+    "NoHousePets": true,
     "NameId": 435461,
     "ZoneId": 139,
     "Icon": 36591,
@@ -448,6 +450,7 @@
   },
   {
     "Id": 34,
+    "NoHousePets": true,
     "NameId": 5409,
     "ZoneId": 138,
     "Icon": 35450,

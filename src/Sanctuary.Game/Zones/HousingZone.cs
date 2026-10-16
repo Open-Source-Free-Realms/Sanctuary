@@ -1,20 +1,35 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Numerics;
 
 using Microsoft.EntityFrameworkCore;
 
+using Sanctuary.Core.Extensions;
 using Sanctuary.Core.Helpers;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
+using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Zones;
 using Sanctuary.Packet;
+using Sanctuary.Packet.Common;
 
 namespace Sanctuary.Game.Zones;
 
 public sealed class HousingZone : BaseZone
 {
     private const int HousingZoneHeadSize = 10;
+
+    private const float HousePetSpeed = 6f;
+    private const int HousePetUpdateIntervalMs = 500;
+    private const float HousePetMinLegDistance = 5f;
+    private const float HousePetMaxLegDistance = 20f;
+    private const int HousePetMinPauseMs = 1000;
+    private const int HousePetMaxPauseMs = 3000;
+    private const float HousePetSpawnRadius = 1.5f;
+    private readonly Dictionary<int, Npc> _housePets = [];
 
     private bool _isHouseLoaded;
 
@@ -40,8 +55,8 @@ public sealed class HousingZone : BaseZone
         SendShopData(player);
         SendHousingZoneData(player);
 
-        if (PetAutospawn && IsOwner(player) && player.Pet is null)
-            player.PlayerPet.QueueAction(() => player.PlayerPet.SummonPet(player.ActivePetId));
+        if (PetAutospawn && IsOwner(player))
+            SpawnHousePets(player);
     }
 
     public bool IsOwner(Player player) => OwnerId == player.Guid && !player.IsPreviewingHouse;
@@ -65,7 +80,15 @@ public sealed class HousingZone : BaseZone
             SendZoneData(player);
     }
 
-    public void SetPetAutospawn(bool petAutospawn) => UpdateHouse(dbHouse => dbHouse.PetAutospawn = petAutospawn);
+    public void SetPetAutospawn(Player player, bool petAutospawn)
+    {
+        UpdateHouse(dbHouse => dbHouse.PetAutospawn = petAutospawn);
+
+        if (PetAutospawn)
+            SpawnHousePets(player);
+        else
+            RemoveHousePets();
+    }
 
     public void SendHouseInfo(Player player)
     {
@@ -76,6 +99,88 @@ public sealed class HousingZone : BaseZone
             IsFloraAllowed = IsFloraAllowed,
             PetAutospawn = PetAutospawn
         });
+    }
+
+    private void SpawnHousePets(Player owner)
+    {
+        if (!HousingHelper.TryGetHouseDefinition(_resourceManager, DefinitionId, out var houseDefinition)
+            || houseDefinition.NoHousePets || houseDefinition.BuildAreas.Count == 0 || !_resourceManager.Zones.TryGetValue(DefinitionId, out var zoneDefinition))
+            return;
+
+        var spawnPosition = zoneDefinition.SpawnPosition;
+
+        foreach (var petClientInfo in owner.Pets)
+        {
+            if (petClientInfo.Id == owner.ActivePetId || _housePets.ContainsKey(petClientInfo.Id)
+                || !PetHelper.TryGetPetModel(_resourceManager, owner, petClientInfo.Id, out _, out var clientItemDefinition, out var modelDefinition)
+                || !TryCreateNpc(out var npc))
+            {
+                continue;
+            }
+
+            PetHelper.ApplyPetAppearance(_resourceManager, owner, npc, petClientInfo, clientItemDefinition, modelDefinition);
+
+            var heading = Random.Shared.NextSingle() * MathF.Tau;
+            var position = new Vector4(spawnPosition.X + MathF.Sin(heading) * HousePetSpawnRadius, spawnPosition.Y,
+                spawnPosition.Z + MathF.Cos(heading) * HousePetSpawnRadius, 1f);
+
+            npc.Visible = true;
+            npc.UpdatePosition(position, QuaternionExtensions.FromHeading(heading));
+            npc.MovementController = CreateHousePetMovement(npc, houseDefinition.BuildAreas[0]);
+
+            _housePets[petClientInfo.Id] = npc;
+        }
+    }
+
+    public bool TryTakeHousePet(int petId, [MaybeNullWhen(false)] out Npc npc)
+    {
+        if (!_housePets.Remove(petId, out npc))
+            return false;
+
+        npc.MovementController = null;
+        return true;
+    }
+
+    public bool TryReturnHousePet(Player player, int petId, Npc npc)
+    {
+        if (!PetAutospawn || !IsOwner(player) || _housePets.ContainsKey(petId)
+            || !HousingHelper.TryGetHouseDefinition(_resourceManager, DefinitionId, out var houseDefinition)
+            || houseDefinition.NoHousePets || houseDefinition.BuildAreas.Count == 0)
+        {
+            return false;
+        }
+
+        npc.PositionSendIntervalMs = default;
+        npc.MovementController = CreateHousePetMovement(npc, houseDefinition.BuildAreas[0]);
+        _housePets[petId] = npc;
+        return true;
+    }
+
+    private static NpcMovementController CreateHousePetMovement(Npc npc, BoundingBox buildArea) => new(npc, new NpcMovementDefinition
+    {
+        Type = NpcMovementType.Wander,
+        Speed = HousePetSpeed,
+        UpdateIntervalMs = HousePetUpdateIntervalMs,
+        Radius = Vector3.Distance(buildArea.Min.ToVector3(), buildArea.Max.ToVector3()),
+        MinLegDistance = HousePetMinLegDistance,
+        MaxLegDistance = HousePetMaxLegDistance,
+        MinPauseMs = HousePetMinPauseMs,
+        MaxPauseMs = HousePetMaxPauseMs,
+        Area =
+        [
+            [buildArea.Min.X, buildArea.Min.Y, buildArea.Min.Z],
+            [buildArea.Max.X, buildArea.Min.Y, buildArea.Min.Z],
+            [buildArea.Max.X, buildArea.Min.Y, buildArea.Max.Z],
+            [buildArea.Min.X, buildArea.Min.Y, buildArea.Max.Z]
+        ]
+    });
+
+    private void RemoveHousePets()
+    {
+        foreach (var npc in _housePets.Values)
+            EntityHelper.RemovePlayerGracefully(npc);
+
+        _housePets.Clear();
     }
 
     private void LoadHouse()
