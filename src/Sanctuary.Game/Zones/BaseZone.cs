@@ -15,6 +15,7 @@ using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Collections;
 using Sanctuary.Core.Extensions;
+using Sanctuary.Core.Helpers;
 using Sanctuary.Core.IO;
 using Sanctuary.Database;
 using Sanctuary.Game.Entities;
@@ -46,7 +47,7 @@ public abstract class BaseZone : IZone, IDisposable
     private readonly Dictionary<int, ZoneTile> _tiles;
 
     private readonly object _npcGuidLock = new();
-    private ulong _nextNpcGuid = NpcBaseGuid;
+    private ulong _nextNpcCounter = FirstNpcCounter;
 
     private readonly ConcurrentDictionary<ulong, Npc> _npcs = new();
     private readonly ConcurrentDictionary<ulong, Player> _players = new();
@@ -60,7 +61,7 @@ public abstract class BaseZone : IZone, IDisposable
 
     public float TickDeltaSeconds => 1f / FrameRate;
 
-    private const ulong NpcBaseGuid = 100_000_000_000u;
+    private const ulong FirstNpcCounter = 1;
 
     private readonly record struct CollectionNodePoolRefill(string PoolKey, int CollectedHardPointId);
 
@@ -1662,15 +1663,18 @@ public abstract class BaseZone : IZone, IDisposable
 
     private ulong GetNpcGuid(ulong? guid)
     {
+        var instanceId = OwnerId is null ? GuidHelper.OpenWorldInstanceId : (ulong)Id;
+
         lock (_npcGuidLock)
         {
             if (guid.HasValue)
             {
-                _nextNpcGuid = Math.Max(_nextNpcGuid, guid.Value + 1);
-                return guid.Value;
+                var counter = GuidHelper.GetNpcCounter(guid.Value);
+                _nextNpcCounter = Math.Max(_nextNpcCounter, counter + 1);
+                return GuidHelper.GetNpcGuid(counter, instanceId);
             }
 
-            return _nextNpcGuid++;
+            return GuidHelper.GetNpcGuid(_nextNpcCounter++, instanceId);
         }
     }
 
