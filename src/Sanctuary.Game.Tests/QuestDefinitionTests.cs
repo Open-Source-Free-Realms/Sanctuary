@@ -23,10 +23,10 @@ public sealed class QuestDefinitionTests
             [
               {
                 "QuestId": 1,
-                "TargetGuid": 500,
+                "TargetNpcId": 500,
                 "Goals": [
                   { "Type": 0, "NameId": 10 },
-                  { "NameId": 11, "Type": 0, "Targets": [{ "Guid": 600 }] },
+                  { "NameId": 11, "Type": 0, "Targets": [{ "NpcId": 600 }] },
                   { "NameId": 12, "ReachPosition": [1, 2, 3], "Type": 1 },
                   { "Type": 2, "NameId": 13, "CollectNodeType": "tin-ore", "RequiredCount": 5 }
                 ]
@@ -37,8 +37,8 @@ public sealed class QuestDefinitionTests
         Assert.IsTrue(quests.TryGet(1, out var quest));
 
         var defaulted = (TalkToNpcGoal)quest.Goals[0];
-        CollectionAssert.AreEqual(new[] { 500UL }, defaulted.AllTalkTargetGuids().ToArray(), "A talk goal with no NPC should resolve to the quest's TargetGuid.");
-        CollectionAssert.AreEqual(new[] { 600UL }, ((TalkToNpcGoal)quest.Goals[1]).AllTalkTargetGuids().ToArray());
+        CollectionAssert.AreEqual(new[] { 500 }, defaulted.AllTalkTargetNpcIds().ToArray(), "A talk goal with no NPC should resolve to the quest's TargetNpcId.");
+        CollectionAssert.AreEqual(new[] { 600 }, ((TalkToNpcGoal)quest.Goals[1]).AllTalkTargetNpcIds().ToArray());
         Assert.AreEqual(new Vector3(1, 2, 3), ((ReachLocationGoal)quest.Goals[2]).ReachPosition);
 
         var collect = (CollectGoal)quest.Goals[3];
@@ -70,8 +70,8 @@ public sealed class QuestDefinitionTests
     {
         var quests = LoadQuests("""
             [
-              { "QuestId": 1, "TargetGuid": 5, "ExcludesQuestIds": [2], "Goals": [ { "Type": 0, "NameId": 10 } ] },
-              { "QuestId": 2, "TargetGuid": 5, "Goals": [ { "Type": 0, "NameId": 20 } ] }
+              { "QuestId": 1, "TargetNpcId": 5, "ExcludesQuestIds": [2], "Goals": [ { "Type": 0, "NameId": 10 } ] },
+              { "QuestId": 2, "TargetNpcId": 5, "Goals": [ { "Type": 0, "NameId": 20 } ] }
             ]
             """);
 
@@ -87,7 +87,7 @@ public sealed class QuestDefinitionTests
             [
               {
                 "QuestId": 1,
-                "TargetGuid": 5,
+                "TargetNpcId": 5,
                 "Goals": [
                   { "Type": 0, "NameId": 10, "DialogueId": 100 },
                   { "Type": 0, "NameId": 11, "Dialogue": [ { "TextId": 200 }, { "TextId": 201 } ] }
@@ -133,7 +133,7 @@ public sealed class QuestDefinitionTests
         Assert.IsFalse(quests.Quests.Values.Any(quest => quest.PrerequisiteQuestId == 0 || quest.NextQuestId == 0),
             "Use null, not 0, for no prerequisite or next quest.");
         Assert.IsFalse(quests.Quests.Values.SelectMany(quest => quest.Goals).OfType<TalkToNpcGoal>()
-            .Any(goal => !goal.AllTalkTargetGuids().Any()));
+            .Any(goal => !goal.AllTalkTargetNpcIds().Any()));
     }
 
     private static QuestDefinitionCollection LoadQuests(string json)

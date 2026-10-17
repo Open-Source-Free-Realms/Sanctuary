@@ -24,7 +24,7 @@ public abstract class QuestGoal
     public byte CursorId { get; set; } = 17;
     public int InteractRange { get; set; } = 12;
 
-    public virtual IReadOnlyList<QuestDialogueLine> ConversationFor(ulong npcGuid)
+    public virtual IReadOnlyList<QuestDialogueLine> ConversationFor(int npcId)
     {
         if (Dialogue.Count > 0)
             return Dialogue;

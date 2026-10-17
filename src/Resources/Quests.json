@@ -7,8 +7,8 @@
     "GiverDialogueId": 94246,
     "ObjectiveDescriptionId": 94248,
     "IconId": 43278,
-    "GiverGuid": 100000002045,
-    "TargetGuid": 100000002049,
+    "GiverNpcId": 2045,
+    "TargetNpcId": 2049,
     "RewardCoins": 5,
     "RewardExperience": 60,
     "RewardItems": [],
@@ -22,7 +22,7 @@
         "NameId": 94359,
         "DescriptionId": 94248,
         "DialogueId": 94388,
-        "Targets": [{ "Guid": 100000002049 }]
+        "Targets": [{ "NpcId": 2049 }]
       }
     ]
   },
@@ -34,8 +34,8 @@
     "GiverDialogueId": 94254,
     "ObjectiveDescriptionId": 100080,
     "IconId": 43278,
-    "GiverGuid": 100000002049,
-    "TargetGuid": 100000003018,
+    "GiverNpcId": 2049,
+    "TargetNpcId": 3018,
     "RewardCoins": 7,
     "RewardExperience": 70,
     "RewardItems": [],
@@ -48,14 +48,14 @@
         "NameId": 100103,
         "DescriptionId": 100104,
         "DialogueId": 384144,
-        "Targets": [{ "Guid": 100000003018 }]
+        "Targets": [{ "NpcId": 3018 }]
       },
       {
         "Type": 0,
         "NameId": 94511,
         "DescriptionId": 94512,
         "DialogueId": 94257,
-        "Targets": [{ "Guid": 100000002049 }]
+        "Targets": [{ "NpcId": 2049 }]
       }
     ]
   },
@@ -67,8 +67,8 @@
     "GiverDialogueId": 104097,
     "ObjectiveDescriptionId": 104099,
     "IconId": 43278,
-    "GiverGuid": 100000002912,
-    "TargetGuid": 100000002889,
+    "GiverNpcId": 2912,
+    "TargetNpcId": 2889,
     "RewardCoins": 5,
     "RewardExperience": 60,
     "RewardItems": [],
@@ -81,7 +81,7 @@
         "NameId": 115453,
         "DescriptionId": 104099,
         "DialogueId": 104100,
-        "Targets": [{ "Guid": 100000002889 }]
+        "Targets": [{ "NpcId": 2889 }]
       }
     ]
   },
@@ -93,8 +93,8 @@
     "GiverDialogueId": 46279,
     "ObjectiveDescriptionId": 46621,
     "IconId": 43278,
-    "GiverGuid": 100000002335,
-    "TargetGuid": 100000002335,
+    "GiverNpcId": 2335,
+    "TargetNpcId": 2335,
     "RewardCoins": 30,
     "RewardExperience": 50,
     "RewardItems": [],
@@ -106,13 +106,13 @@
         "Type": 0,
         "NameId": 46621,
         "DialogueId": 140679,
-        "Targets": [{ "Guid": 100000003016 }]
+        "Targets": [{ "NpcId": 3016 }]
       },
       {
         "Type": 0,
         "NameId": 74455,
         "DialogueId": 73239,
-        "Targets": [{ "Guid": 100000002335 }]
+        "Targets": [{ "NpcId": 2335 }]
       }
     ]
   },
@@ -124,8 +124,8 @@
     "GiverDialogueId": 74436,
     "ObjectiveDescriptionId": 74456,
     "IconId": 43278,
-    "GiverGuid": 100000002335,
-    "TargetGuid": 100000002335,
+    "GiverNpcId": 2335,
+    "TargetNpcId": 2335,
     "RewardCoins": 30,
     "RewardExperience": 100,
     "RewardItems": [],
@@ -144,7 +144,7 @@
         "Type": 0,
         "NameId": 74455,
         "DialogueId": 72906,
-        "Targets": [{ "Guid": 100000002335 }]
+        "Targets": [{ "NpcId": 2335 }]
       }
     ]
   },
@@ -156,8 +156,8 @@
     "GiverDialogueId": 104145,
     "ObjectiveDescriptionId": 104147,
     "IconId": 43278,
-    "GiverGuid": 100000002912,
-    "TargetGuid": 100000033082,
+    "GiverNpcId": 2912,
+    "TargetNpcId": 34006,
     "RewardCoins": 6,
     "RewardExperience": 50,
     "RewardItems": [75289],
@@ -169,7 +169,7 @@
         "Type": 0,
         "NameId": 115619,
         "DialogueId": 104148,
-        "Targets": [{ "Guid": 100000033082 }]
+        "Targets": [{ "NpcId": 34006 }]
       }
     ]
   },
@@ -181,8 +181,8 @@
     "GiverDialogueId": 104153,
     "ObjectiveDescriptionId": 104155,
     "IconId": 43278,
-    "GiverGuid": 100000033082,
-    "TargetGuid": 100000033083,
+    "GiverNpcId": 34006,
+    "TargetNpcId": 33741,
     "RewardCoins": 15,
     "RewardExperience": 63,
     "RewardItems": [75855],
@@ -194,7 +194,7 @@
         "Type": 0,
         "NameId": 104155,
         "DialogueId": 104156,
-        "Targets": [{ "Guid": 100000033083 }]
+        "Targets": [{ "NpcId": 33741 }]
       }
     ]
   },
@@ -206,8 +206,8 @@
     "GiverDialogueId": 390786,
     "ObjectiveDescriptionId": 390797,
     "IconId": 43278,
-    "GiverGuid": 100000002419,
-    "TargetGuid": 100000002419,
+    "GiverNpcId": 2419,
+    "TargetNpcId": 2419,
     "RewardCoins": 36,
     "RewardExperience": 100,
     "RewardItems": [],
@@ -219,25 +219,25 @@
         "Type": 0,
         "NameId": 390798,
         "DialogueId": 390817,
-        "Targets": [{ "Guid": 100000040011 }]
+        "Targets": [{ "NpcId": 33373 }]
       },
       {
         "Type": 0,
         "NameId": 390800,
         "DialogueId": 390820,
-        "Targets": [{ "Guid": 100000040012 }]
+        "Targets": [{ "NpcId": 33146 }]
       },
       {
         "Type": 0,
         "NameId": 390802,
         "DialogueId": 390822,
-        "Targets": [{ "Guid": 100000002359 }]
+        "Targets": [{ "NpcId": 2359 }]
       },
       {
         "Type": 0,
         "NameId": 390804,
         "DialogueId": 390789,
-        "Targets": [{ "Guid": 100000002419 }]
+        "Targets": [{ "NpcId": 2419 }]
       }
     ]
   },
@@ -249,8 +249,8 @@
     "GiverDialogueId": 390844,
     "ObjectiveDescriptionId": 390849,
     "IconId": 43278,
-    "GiverGuid": 100000002419,
-    "TargetGuid": 100000002419,
+    "GiverNpcId": 2419,
+    "TargetNpcId": 2419,
     "RewardCoins": 24,
     "RewardExperience": 80,
     "RewardItems": [],
@@ -262,13 +262,13 @@
         "Type": 0,
         "NameId": 390850,
         "DialogueId": 390855,
-        "Targets": [{ "Guid": 100000001419 }]
+        "Targets": [{ "NpcId": 1419 }]
       },
       {
         "Type": 0,
         "NameId": 390804,
         "DialogueId": 390847,
-        "Targets": [{ "Guid": 100000002419 }]
+        "Targets": [{ "NpcId": 2419 }]
       }
     ]
   },
@@ -280,8 +280,8 @@
     "GiverDialogueId": 93282,
     "ObjectiveDescriptionId": 93291,
     "IconId": 43278,
-    "GiverGuid": 100000001885,
-    "TargetGuid": 100000001748,
+    "GiverNpcId": 1885,
+    "TargetNpcId": 1748,
     "RewardCoins": 30,
     "RewardExperience": 80,
     "RewardItems": [],
@@ -299,13 +299,13 @@
         "Type": 0,
         "NameId": 93310,
         "DialogueId": 93316,
-        "Targets": [{ "Guid": 100000001885 }]
+        "Targets": [{ "NpcId": 1885 }]
       },
       {
         "Type": 0,
         "NameId": 101743,
         "DialogueId": 93335,
-        "Targets": [{ "Guid": 100000001748 }]
+        "Targets": [{ "NpcId": 1748 }]
       }
     ]
   },
@@ -317,8 +317,8 @@
     "GiverDialogueId": 93398,
     "ObjectiveDescriptionId": 93400,
     "IconId": 43278,
-    "GiverGuid": 100000001748,
-    "TargetGuid": 100000001748,
+    "GiverNpcId": 1748,
+    "TargetNpcId": 1748,
     "RewardCoins": 30,
     "RewardExperience": 80,
     "RewardItems": [],
@@ -330,13 +330,13 @@
         "Type": 0,
         "NameId": 93405,
         "DialogueId": 93409,
-        "Targets": [{ "Guid": 100000001756 }]
+        "Targets": [{ "NpcId": 1756 }]
       },
       {
         "Type": 0,
         "NameId": 93407,
         "DialogueId": 93401,
-        "Targets": [{ "Guid": 100000001748 }]
+        "Targets": [{ "NpcId": 1748 }]
       }
     ]
   },
@@ -348,8 +348,8 @@
     "GiverDialogueId": 38042,
     "ObjectiveDescriptionId": 116709,
     "IconId": 43278,
-    "GiverGuid": 100000003380,
-    "TargetGuid": 100000003380,
+    "GiverNpcId": 3380,
+    "TargetNpcId": 3380,
     "RewardCoins": 2,
     "RewardExperience": 90,
     "RewardItems": [29361],
@@ -360,31 +360,31 @@
         "Type": 0,
         "NameId": 389708,
         "DialogueId": 389904,
-        "Targets": [{ "Guid": 100000040016 }]
+        "Targets": [{ "NpcId": 40016 }]
       },
       {
         "Type": 0,
         "NameId": 389709,
         "DialogueId": 389905,
-        "Targets": [{ "Guid": 100000040017 }]
+        "Targets": [{ "NpcId": 40017 }]
       },
       {
         "Type": 0,
         "NameId": 389710,
         "DialogueId": 389910,
-        "Targets": [{ "Guid": 100000040018 }]
+        "Targets": [{ "NpcId": 40018 }]
       },
       {
         "Type": 0,
         "NameId": 389712,
         "DialogueId": 389911,
-        "Targets": [{ "Guid": 100000040019 }]
+        "Targets": [{ "NpcId": 40019 }]
       },
       {
         "Type": 0,
         "NameId": 38127,
         "DialogueId": 45612,
-        "Targets": [{ "Guid": 100000003380 }]
+        "Targets": [{ "NpcId": 3380 }]
       }
     ]
   },
@@ -396,8 +396,8 @@
     "GiverDialogueId": 389950,
     "ObjectiveDescriptionId": 389952,
     "IconId": 43278,
-    "GiverGuid": 100000003380,
-    "TargetGuid": 100000003386,
+    "GiverNpcId": 3380,
+    "TargetNpcId": 3386,
     "RewardCoins": 5,
     "RewardExperience": 90,
     "RewardItems": [11014, 11014, 11014, 11014, 11014],
@@ -410,25 +410,25 @@
         "Type": 0,
         "NameId": 38049,
         "DialogueId": 389967,
-        "Targets": [{ "Guid": 100000003389 }]
+        "Targets": [{ "NpcId": 3389 }]
       },
       {
         "Type": 0,
         "NameId": 38051,
         "DialogueId": 389970,
-        "Targets": [{ "Guid": 100000003388 }]
+        "Targets": [{ "NpcId": 3388 }]
       },
       {
         "Type": 0,
         "NameId": 38053,
         "DialogueId": 390019,
-        "Targets": [{ "Guid": 100000003386 }]
+        "Targets": [{ "NpcId": 3386 }]
       },
       {
         "Type": 0,
         "NameId": 390017,
         "DialogueId": 389953,
-        "Targets": [{ "Guid": 100000003386 }]
+        "Targets": [{ "NpcId": 3386 }]
       }
     ]
   },
@@ -440,8 +440,8 @@
     "GiverDialogueId": 38142,
     "ObjectiveDescriptionId": 116723,
     "IconId": 43278,
-    "GiverGuid": 100000003386,
-    "TargetGuid": 100000003379,
+    "GiverNpcId": 3386,
+    "TargetNpcId": 3379,
     "RewardCoins": 2,
     "RewardExperience": 80,
     "RewardItems": [7289],
@@ -453,13 +453,13 @@
         "Type": 0,
         "NameId": 38154,
         "DialogueId": 38163,
-        "Targets": [{ "Guid": 100000003370 }]
+        "Targets": [{ "NpcId": 3370 }]
       },
       {
         "Type": 0,
         "NameId": 38156,
         "DialogueId": 2134,
-        "Targets": [{ "Guid": 100000003379 }]
+        "Targets": [{ "NpcId": 3379 }]
       }
     ]
   },
@@ -471,8 +471,8 @@
     "GiverDialogueId": 38384,
     "ObjectiveDescriptionId": 38386,
     "IconId": 43278,
-    "GiverGuid": 100000003145,
-    "TargetGuid": 100000003145,
+    "GiverNpcId": 3145,
+    "TargetNpcId": 3145,
     "RewardCoins": 30,
     "RewardExperience": 90,
     "RewardItems": [],
@@ -484,31 +484,31 @@
         "Type": 0,
         "NameId": 38393,
         "DialogueId": 38511,
-        "Targets": [{ "Guid": 100000003097 }]
+        "Targets": [{ "NpcId": 3097 }]
       },
       {
         "Type": 0,
         "NameId": 38400,
         "DialogueId": 38402,
-        "Targets": [{ "Guid": 100000003113 }]
+        "Targets": [{ "NpcId": 3113 }]
       },
       {
         "Type": 0,
         "NameId": 38442,
         "DialogueId": 38511,
-        "Targets": [{ "Guid": 100000003095 }]
+        "Targets": [{ "NpcId": 3095 }]
       },
       {
         "Type": 0,
         "NameId": 38515,
         "DialogueId": 38530,
-        "Targets": [{ "Guid": 100000003108 }]
+        "Targets": [{ "NpcId": 3108 }]
       },
       {
         "Type": 0,
         "NameId": 38518,
         "DialogueId": 9585,
-        "Targets": [{ "Guid": 100000003145 }]
+        "Targets": [{ "NpcId": 3145 }]
       }
     ]
   },
@@ -520,8 +520,8 @@
     "GiverDialogueId": 70102,
     "ObjectiveDescriptionId": 70109,
     "IconId": 43278,
-    "GiverGuid": 100000003145,
-    "TargetGuid": 100000003120,
+    "GiverNpcId": 3145,
+    "TargetNpcId": 3120,
     "RewardCoins": 30,
     "RewardExperience": 90,
     "RewardItems": [],
@@ -534,7 +534,7 @@
         "Type": 0,
         "NameId": 70110,
         "DialogueId": 70105,
-        "Targets": [{ "Guid": 100000003120 }]
+        "Targets": [{ "NpcId": 3120 }]
       }
     ]
   },
@@ -546,8 +546,8 @@
     "GiverDialogueId": 70299,
     "ObjectiveDescriptionId": 70219,
     "IconId": 43278,
-    "GiverGuid": 100000003120,
-    "TargetGuid": 100000003120,
+    "GiverNpcId": 3120,
+    "TargetNpcId": 3120,
     "RewardCoins": 30,
     "RewardExperience": 100,
     "RewardItems": [],
@@ -572,7 +572,7 @@
         "Type": 0,
         "NameId": 70230,
         "DialogueId": 70196,
-        "Targets": [{ "Guid": 100000003120 }]
+        "Targets": [{ "NpcId": 3120 }]
       }
     ]
   },
@@ -584,8 +584,8 @@
     "GiverDialogueId": 70505,
     "ObjectiveDescriptionId": 70288,
     "IconId": 43278,
-    "GiverGuid": 100000003120,
-    "TargetGuid": 100000003145,
+    "GiverNpcId": 3120,
+    "TargetNpcId": 3145,
     "RewardCoins": 30,
     "RewardExperience": 100,
     "RewardItems": [],
@@ -603,7 +603,7 @@
         "Type": 0,
         "NameId": 70291,
         "DialogueId": 70202,
-        "Targets": [{ "Guid": 100000003145 }]
+        "Targets": [{ "NpcId": 3145 }]
       }
     ]
   },
@@ -615,8 +615,8 @@
     "GiverDialogueId": 101408,
     "ObjectiveDescriptionId": 101401,
     "IconId": 43278,
-    "GiverGuid": 100000001964,
-    "TargetGuid": 100000001964,
+    "GiverNpcId": 1964,
+    "TargetNpcId": 1964,
     "RewardCoins": 30,
     "RewardExperience": 80,
     "RewardItems": [],
@@ -626,7 +626,7 @@
       {
         "Type": 0,
         "NameId": 101402,
-        "Targets": [{ "Guid": 100000001777 }],
+        "Targets": [{ "NpcId": 1777 }],
         "Dialogue": [
           { "TextId": 101412, "ResponseTextId": 101413 }
         ]
@@ -634,7 +634,7 @@
       {
         "Type": 0,
         "NameId": 101404,
-        "Targets": [{ "Guid": 100000001758 }],
+        "Targets": [{ "NpcId": 1758 }],
         "Dialogue": [
           { "TextId": 101414, "ResponseTextId": 101415 },
           { "TextId": 101416, "ResponseTextId": 103597 }
@@ -644,7 +644,7 @@
         "Type": 0,
         "NameId": 101406,
         "DialogueId": 101411,
-        "Targets": [{ "Guid": 100000001964 }]
+        "Targets": [{ "NpcId": 1964 }]
       }
     ]
   },
@@ -656,8 +656,8 @@
     "GiverDialogueId": 400433,
     "ObjectiveDescriptionId": 400427,
     "IconId": 43278,
-    "GiverGuid": 100000001925,
-    "TargetGuid": 100000001925,
+    "GiverNpcId": 1925,
+    "TargetNpcId": 1925,
     "RewardCoins": 0,
     "RewardExperience": 90,
     "RewardItems": [15916],
@@ -674,7 +674,7 @@
         "Type": 0,
         "NameId": 400426,
         "DialogueId": 400436,
-        "Targets": [{ "Guid": 100000001925 }]
+        "Targets": [{ "NpcId": 1925 }]
       }
     ]
   },
@@ -686,8 +686,8 @@
     "GiverDialogueId": 385596,
     "ObjectiveDescriptionId": 385601,
     "IconId": 43278,
-    "GiverGuid": 100000002177,
-    "TargetGuid": 100000004355,
+    "GiverNpcId": 2177,
+    "TargetNpcId": 4355,
     "RewardCoins": 6,
     "RewardExperience": 60,
     "RewardItems": [],
@@ -700,7 +700,7 @@
         "NameId": 385602,
         "DescriptionId": 385603,
         "DialogueId": 385599,
-        "Targets": [{ "Guid": 100000004355 }]
+        "Targets": [{ "NpcId": 4355 }]
       }
     ]
   },
@@ -712,8 +712,8 @@
     "GiverDialogueId": 74198,
     "ObjectiveDescriptionId": 74228,
     "IconId": 43278,
-    "GiverGuid": 100000004355,
-    "TargetGuid": 100000004355,
+    "GiverNpcId": 4355,
+    "TargetNpcId": 4355,
     "RewardCoins": 30,
     "RewardExperience": 100,
     "RewardItems": [],
@@ -726,35 +726,35 @@
         "NameId": 74204,
         "DescriptionId": 74205,
         "DialogueId": 74217,
-        "Targets": [{ "Guid": 100000002280 }]
+        "Targets": [{ "NpcId": 2280 }]
       },
       {
         "Type": 0,
         "NameId": 74206,
         "DescriptionId": 74207,
         "DialogueId": 74222,
-        "Targets": [{ "Guid": 100000002222 }]
+        "Targets": [{ "NpcId": 2222 }]
       },
       {
         "Type": 0,
         "NameId": 74208,
         "DescriptionId": 74209,
         "DialogueId": 74214,
-        "Targets": [{ "Guid": 100000002187 }]
+        "Targets": [{ "NpcId": 2187 }]
       },
       {
         "Type": 0,
         "NameId": 74210,
         "DescriptionId": 74211,
         "DialogueId": 74226,
-        "Targets": [{ "Guid": 100000002185 }]
+        "Targets": [{ "NpcId": 2185 }]
       },
       {
         "Type": 0,
         "NameId": 74212,
         "DescriptionId": 74213,
         "DialogueId": 74201,
-        "Targets": [{ "Guid": 100000004355 }]
+        "Targets": [{ "NpcId": 4355 }]
       }
     ]
   },
@@ -766,8 +766,8 @@
     "GiverDialogueId": 440465,
     "ObjectiveDescriptionId": 440470,
     "IconId": 43278,
-    "GiverGuid": 100000001454,
-    "TargetGuid": 100000003841,
+    "GiverNpcId": 1454,
+    "TargetNpcId": 3841,
     "RewardCoins": 0,
     "RewardExperience": 120,
     "RewardItems": [],
@@ -779,7 +779,7 @@
         "Type": 0,
         "NameId": 440471,
         "DialogueId": 440468,
-        "Targets": [{ "Guid": 100000003841 }]
+        "Targets": [{ "NpcId": 3841 }]
       }
     ]
   },
@@ -791,8 +791,8 @@
     "GiverDialogueId": 438839,
     "ObjectiveDescriptionId": 438900,
     "IconId": 43278,
-    "GiverGuid": 100000003840,
-    "TargetGuid": 100000003840,
+    "GiverNpcId": 3840,
+    "TargetNpcId": 3840,
     "RewardCoins": 20,
     "RewardExperience": 140,
     "RewardItems": [],
@@ -803,7 +803,7 @@
       {
         "Type": 0,
         "NameId": 438901,
-        "Targets": [{ "Guid": 100000003842 }],
+        "Targets": [{ "NpcId": 3842 }],
         "Dialogue": [
           { "TextId": 438967, "ResponseTextId": 423585 }
         ]
@@ -811,7 +811,7 @@
       {
         "Type": 0,
         "NameId": 438499,
-        "Targets": [{ "Guid": 100000003841 }],
+        "Targets": [{ "NpcId": 3841 }],
         "Dialogue": [
           { "TextId": 438969, "ResponseTextId": 428407 }
         ]
@@ -821,16 +821,16 @@
         "NameId": 438985,
         "RequiredCount": 3,
         "Targets": [
-          { "Guid": 100000040032, "DialogueId": 438971, "ResponseId": 438972 },
-          { "Guid": 100000040033, "DialogueId": 438973, "ResponseId": 438974 },
-          { "Guid": 100000040034, "DialogueId": 438975, "ResponseId": 8136 }
+          { "NpcId": 40032, "DialogueId": 438971, "ResponseId": 438972 },
+          { "NpcId": 40033, "DialogueId": 438973, "ResponseId": 438974 },
+          { "NpcId": 40034, "DialogueId": 438975, "ResponseId": 8136 }
         ]
       },
       {
         "Type": 0,
         "NameId": 437816,
         "DialogueId": 438842,
-        "Targets": [{ "Guid": 100000003840 }]
+        "Targets": [{ "NpcId": 3840 }]
       }
     ]
   }

@@ -19,9 +19,9 @@ public class QuestDefinitionCollection
 
     public ConcurrentDictionary<int, QuestDefinition> Quests { get; } = new();
 
-    // NPC guid -> the quests it offers, and the quests it is a goal target or turn-in for.
-    public ConcurrentDictionary<ulong, List<int>> ByGiver { get; } = new();
-    public ConcurrentDictionary<ulong, List<int>> ByTarget { get; } = new();
+    // NPC definition id -> the quests it offers, and the quests it is a goal target or turn-in for.
+    public ConcurrentDictionary<int, List<int>> ByGiver { get; } = new();
+    public ConcurrentDictionary<int, List<int>> ByTarget { get; } = new();
 
     public QuestDefinitionCollection(ILogger logger)
     {
@@ -30,13 +30,13 @@ public class QuestDefinitionCollection
 
     public bool TryGet(int questId, out QuestDefinition definition) => Quests.TryGetValue(questId, out definition!);
 
-    public bool TryGetNpcInteractRange(ulong npcGuid, out int interactRange)
+    public bool TryGetNpcInteractRange(int npcId, out int interactRange)
     {
         interactRange = int.MaxValue;
 
         foreach (var index in new[] { ByGiver, ByTarget })
         {
-            if (!index.TryGetValue(npcGuid, out var questIds))
+            if (!index.TryGetValue(npcId, out var questIds))
                 continue;
 
             foreach (var questId in questIds)
@@ -97,11 +97,11 @@ public class QuestDefinitionCollection
                     continue;
                 }
 
-                if (entry.GiverGuid != 0)
-                    ByGiver.GetOrAdd(entry.GiverGuid, _ => []).Add(entry.QuestId);
+                if (entry.GiverNpcId != 0)
+                    ByGiver.GetOrAdd(entry.GiverNpcId, _ => []).Add(entry.QuestId);
 
-                if (entry.TargetGuid != 0)
-                    ByTarget.GetOrAdd(entry.TargetGuid, _ => []).Add(entry.QuestId);
+                if (entry.TargetNpcId != 0)
+                    ByTarget.GetOrAdd(entry.TargetNpcId, _ => []).Add(entry.QuestId);
 
                 IndexGoals(entry, filePath);
             }
@@ -133,19 +133,19 @@ public class QuestDefinitionCollection
             {
                 case TalkToNpcGoal talkGoal:
                     if (talkGoal.Targets.Count == 0)
-                        talkGoal.Targets.Add(new TalkTarget { Guid = quest.TargetGuid });
+                        talkGoal.Targets.Add(new TalkTarget { NpcId = quest.TargetNpcId });
 
                     // Intermediate goals can point at NPCs that are neither the giver nor the turn-in target, and
                     // every NPC of a counted talk goal has to be clickable, so index them all.
-                    foreach (var targetGuid in talkGoal.AllTalkTargetGuids())
+                    foreach (var targetNpcId in talkGoal.AllTalkTargetNpcIds())
                     {
-                        var questIds = ByTarget.GetOrAdd(targetGuid, _ => []);
+                        var questIds = ByTarget.GetOrAdd(targetNpcId, _ => []);
 
                         if (!questIds.Contains(quest.QuestId))
                             questIds.Add(quest.QuestId);
                     }
 
-                    if (!talkGoal.AllTalkTargetGuids().Any())
+                    if (!talkGoal.AllTalkTargetNpcIds().Any())
                         _logger.LogWarning("Talk goal on quest {id} has no NPC to talk to in \"{file}\"; it can never be credited.", quest.QuestId, filePath);
                     break;
 

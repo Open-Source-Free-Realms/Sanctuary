@@ -12,21 +12,21 @@ public sealed class TalkToNpcGoal : QuestGoal
 
     public bool IsCounted => RequiredCount > 1;
 
-    public IEnumerable<ulong> AllTalkTargetGuids() =>
-        Targets.Select(target => target.Guid).Where(guid => guid != 0).Distinct();
+    public IEnumerable<int> AllTalkTargetNpcIds() =>
+        Targets.Select(target => target.NpcId).Where(npcId => npcId != 0).Distinct();
 
     // The authored Dialogue, else this NPC's own line, else DialogueId. Empty = say nothing.
-    public override IReadOnlyList<QuestDialogueLine> ConversationFor(ulong npcGuid)
+    public override IReadOnlyList<QuestDialogueLine> ConversationFor(int npcId)
     {
         if (Dialogue.Count > 0)
             return Dialogue;
 
         foreach (var target in Targets)
         {
-            if (target.Guid == npcGuid && target.DialogueId != 0)
+            if (target.NpcId == npcId && target.DialogueId != 0)
                 return [new QuestDialogueLine { TextId = target.DialogueId, ResponseTextId = target.ResponseId }];
         }
 
-        return base.ConversationFor(npcGuid);
+        return base.ConversationFor(npcId);
     }
 }

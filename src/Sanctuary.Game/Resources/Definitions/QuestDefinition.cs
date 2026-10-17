@@ -20,10 +20,10 @@ public sealed class QuestDefinition
     // In the order they complete. A quest with none is rejected at load.
     public List<QuestGoal> Goals { get; set; } = [];
 
-    public ulong GiverGuid { get; set; }
+    public int GiverNpcId { get; set; }
 
     // The turn-in NPC, and the fallback for a goal that names no NPC of its own.
-    public ulong TargetGuid { get; set; }
+    public int TargetNpcId { get; set; }
 
     public int RewardCoins { get; set; }
 
@@ -46,7 +46,7 @@ public sealed class QuestDefinition
 
     // The final goal's line, since a quest can end back at its giver.
     public int TurnInDialogueId =>
-        Goals.Count > 0 && Goals[^1].ConversationFor(TargetGuid) is { Count: > 0 } lines ? lines[^1].TextId : 0;
+        Goals.Count > 0 && Goals[^1].ConversationFor(TargetNpcId) is { Count: > 0 } lines ? lines[^1].TextId : 0;
 
     // Shared by the offer flow and the giver's badge so the two can't drift.
     public bool IsOfferableFor(IReadOnlyDictionary<int, bool> playerQuests)
