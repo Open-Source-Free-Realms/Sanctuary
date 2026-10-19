@@ -16,6 +16,7 @@ using Sanctuary.Game;
 using Sanctuary.Game.ChatCommands;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Interactions;
+using Sanctuary.Game.Quests;
 using Sanctuary.Game.Resources.Definitions.Combat;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.QuestGoals;
@@ -111,7 +112,7 @@ public sealed class Player : ClientPcData, IEntity
     public ulong PendingDialogueNpcGuid { get; set; }
 
     public ulong TalkingNpcGuid { get; set; }
-    public int TalkAnimationTicket { get; set; }
+    public DateTimeOffset TalkAnimationEndsAt { get; set; }
 
     public int ActiveQuestId { get; set; }
 
@@ -368,6 +369,10 @@ public sealed class Player : ClientPcData, IEntity
         var now = DateTimeOffset.UtcNow;
 
         TickEffects(now);
+
+        if (TalkingNpcGuid != 0 && now >= TalkAnimationEndsAt)
+            QuestDialogue.StopTalkAnimation(this);
+
         PlayerPet.UpdateEveryTick();
         SendVisiblePositions();
 

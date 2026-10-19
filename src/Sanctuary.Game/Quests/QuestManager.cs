@@ -7,14 +7,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Extensions;
-using Sanctuary.Core.IO;
 using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game.Entities;
-using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Interactions;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.QuestGoals;
+using Sanctuary.Game.Resources.Definitions.Rewards;
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -26,12 +25,14 @@ public sealed class QuestManager : IQuestManager
     public const int AllGoalsDoneGoalId = 0;
 
     private readonly IResourceManager _resourceManager;
+    private readonly IRewardManager _rewardManager;
     private readonly IDbContextFactory<DatabaseContext> _dbContextFactory;
     private readonly ILogger<QuestManager> _logger;
 
-    public QuestManager(IResourceManager resourceManager, IDbContextFactory<DatabaseContext> dbContextFactory, ILogger<QuestManager> logger)
+    public QuestManager(IResourceManager resourceManager, IRewardManager rewardManager, IDbContextFactory<DatabaseContext> dbContextFactory, ILogger<QuestManager> logger)
     {
         _resourceManager = resourceManager;
+        _rewardManager = rewardManager;
         _dbContextFactory = dbContextFactory;
         _logger = logger;
     }
@@ -466,28 +467,12 @@ public sealed class QuestManager : IQuestManager
 
     public void RefreshQuestNotification(Player player, ulong npcGuid)
     {
-        if (npcGuid == 0 || !player.Zone.TryGetNpc(npcGuid, out var npc))
+        if (!player.VisibleNpcs.TryGetValue(npcGuid, out var npc))
             return;
 
-        var imageId = player.GetNotificationImageId(npc);
-
-        player.SendTunneled(new PlayerUpdatePacketRemovePlayer { Guid = npc.Guid });
-
-        var addNpcPacket = npc.GetAddNpcPacket();
-        addNpcPacket.NotificationImageSetId = imageId;
-        player.SendTunneled(addNpcPacket);
-
-        var relevance = InteractionMenuHelper.GetNpcRelevancePacket([npc]);
-        if (relevance.Entries.Count > 0)
-            player.SendTunneled(relevance);
-
-        if (imageId == 0)
-        {
-            player.SendTunneled(new PlayerUpdatePacketRemoveNotifications { Notifications = { new RemoveNotificationInfo { Guid = npc.Guid } } });
-            return;
-        }
-
-        player.SendTunneled(new PlayerUpdatePacketAddNotifications { Notifications = { Player.GetQuestNotification(npc, imageId) } });
+        player.SendTunneled(new PlayerUpdatePacketRemoveNotifications { Notifications = { new RemoveNotificationInfo { Guid = npc.Guid } } });
+        player.OnRemoveVisibleNpcs(npc);
+        player.OnAddVisibleNpcs(npc);
     }
 
     private const float DefaultOfferCameraDistance = 6f;
@@ -619,29 +604,9 @@ public sealed class QuestManager : IQuestManager
 
     private static ulong NearestUntalkedTarget(Player player, TalkToNpcGoal goal)
     {
-        ulong nearest = 0;
-        var best = float.MaxValue;
+        var untalkedNpcIds = goal.AllTalkTargetNpcIds().Where(npcId => !player.TalkedQuestNpcs.Contains(npcId)).ToHashSet();
 
-        foreach (var npcId in goal.AllTalkTargetNpcIds())
-        {
-            if (player.TalkedQuestNpcs.Contains(npcId))
-                continue;
-
-            if (NearestNpc(player, npcId) is not { } npc)
-                continue;
-
-            var dx = npc.Position.X - player.Position.X;
-            var dz = npc.Position.Z - player.Position.Z;
-            var distance = dx * dx + dz * dz;
-
-            if (distance < best)
-            {
-                best = distance;
-                nearest = npc.Guid;
-            }
-        }
-
-        return nearest;
+        return NearestNpc(player, npc => untalkedNpcIds.Contains(npc.DefinitionId))?.Guid ?? 0;
     }
     private void CompleteGoal(Player player, QuestDefinition quest, int goalIndex, Npc? spokenBy = null)
     {
@@ -786,14 +751,16 @@ public sealed class QuestManager : IQuestManager
         });
     }
 
-    private static Npc? NearestNpc(Player player, int npcId)
+    private static Npc? NearestNpc(Player player, int npcId) => NearestNpc(player, npc => npc.DefinitionId == npcId);
+
+    private static Npc? NearestNpc(Player player, Func<Npc, bool> match)
     {
         Npc? nearest = null;
         var best = float.MaxValue;
 
         foreach (var npc in player.Zone.Npcs)
         {
-            if (npc.DefinitionId != npcId)
+            if (!match(npc))
                 continue;
 
             var dx = npc.Position.X - player.Position.X;
@@ -844,32 +811,10 @@ public sealed class QuestManager : IQuestManager
         return NearestNpcGuid(player, GoalTargetNpcId(quest, goalIndex));
     }
 
-    private static CollectionNode? NearestCollectionNode(Player player, string nodeType)
-    {
-        if (string.IsNullOrEmpty(nodeType))
-            return null;
-
-        CollectionNode? nearest = null;
-        var best = float.MaxValue;
-
-        foreach (var npc in player.Zone.Npcs)
-        {
-            if (npc is not CollectionNode node || node.TypeDefinition.Key != nodeType)
-                continue;
-
-            var dx = node.Position.X - player.Position.X;
-            var dz = node.Position.Z - player.Position.Z;
-            var distance = dx * dx + dz * dz;
-
-            if (distance < best)
-            {
-                best = distance;
-                nearest = node;
-            }
-        }
-
-        return nearest;
-    }
+    private static Npc? NearestCollectionNode(Player player, string nodeType)
+        => string.IsNullOrEmpty(nodeType)
+            ? null
+            : NearestNpc(player, npc => npc is CollectionNode node && node.TypeDefinition.Key == nodeType);
     private void SendObjectiveForGoal(Player player, QuestDefinition quest, int goalIndex)
     {
         var goals = quest.Goals;
@@ -988,22 +933,7 @@ public sealed class QuestManager : IQuestManager
     {
         var coins = quest.RewardCoins;
         if (coins > 0)
-        {
-            int newTotal;
-            using (var db = _dbContextFactory.CreateDbContext())
-            {
-                var dbCharacter = db.Characters.FirstOrDefault(c => c.Id == player.CharacterId);
-                if (dbCharacter is null)
-                    return;
-
-                dbCharacter.Coins += coins;
-                db.SaveChanges();
-                newTotal = dbCharacter.Coins;
-            }
-
-            player.Coins = newTotal;
-            player.SendTunneled(new ClientUpdatePacketCoinCount { Coins = newTotal });
-        }
+            _rewardManager.TryGrantCurrency(player, CurrencyType.Coins, coins);
 
         var experience = quest.RewardExperience;
 
@@ -1042,67 +972,8 @@ public sealed class QuestManager : IQuestManager
 
         foreach (var itemDefinitionId in quest.RewardItems)
         {
-            GrantItem(player, itemDefinitionId);
-
-            player.SendTunneled(new RewardNonBundledItemPacket { ItemDefinitionId = itemDefinitionId, Quantity = 1 });
-        }
-    }
-
-    private void GrantItem(Player player, int definitionId)
-    {
-        if (!_resourceManager.ClientItemDefinitions.TryGetValue(definitionId, out var itemDef))
-            return;
-
-        int tint = itemDef.IsTintable ? 0 : itemDef.Icon.TintId;
-
-        int itemId, count;
-        using (var db = _dbContextFactory.CreateDbContext())
-        {
-            var row = db.Characters
-                .Where(c => c.Id == player.CharacterId)
-                .Select(c => new
-                {
-                    Character = c,
-                    Item = c.Items.FirstOrDefault(i => i.Definition == definitionId && i.Tint == tint),
-                    NextId = c.Items.Max(i => (int?)i.Id) ?? 0
-                })
-                .FirstOrDefault();
-
-            if (row is null)
-                return;
-
-            if (row.Item is not null)
-            {
-                row.Item.Count += 1;
-                itemId = row.Item.Id;
-                count = row.Item.Count;
-            }
-            else
-            {
-                var dbItem = new DbItem { Id = row.NextId + 1, Definition = definitionId, Tint = tint, Count = 1 };
-                row.Character.Items.Add(dbItem);
-                itemId = dbItem.Id;
-                count = 1;
-            }
-
-            db.SaveChanges();
-        }
-
-        var clientItem = player.Items.FirstOrDefault(x => x.Definition == definitionId && x.Tint == tint);
-        if (clientItem is not null)
-        {
-            clientItem.Count = count;
-            player.SendTunneled(new ClientUpdatePacketItemUpdate { ItemGuid = clientItem.Id, Count = clientItem.Count });
-        }
-        else
-        {
-            clientItem = new ClientItem { Id = itemId, Tint = tint, Count = count, Definition = definitionId };
-            player.Items.Add(clientItem);
-
-            using var writer = new PacketWriter();
-            clientItem.Serialize(writer);
-            itemDef.Serialize(writer);
-            player.SendTunneled(new ClientUpdatePacketItemAdd { Payload = writer.Buffer });
+            if (_resourceManager.ClientItemDefinitions.TryGetValue(itemDefinitionId, out var itemDefinition))
+                _rewardManager.TryGrantItem(player, itemDefinitionId, itemDefinition.IsTintable ? 0 : itemDefinition.Icon.TintId);
         }
     }
 }

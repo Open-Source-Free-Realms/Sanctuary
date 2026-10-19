@@ -1,5 +1,5 @@
+using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Resources.Definitions;
@@ -34,22 +34,13 @@ public static class QuestDialogue
             StopTalkAnimation(player);
 
         player.TalkingNpcGuid = npcGuid;
-
-        var ticket = ++player.TalkAnimationTicket;
+        player.TalkAnimationEndsAt = DateTimeOffset.UtcNow.AddMilliseconds(TalkAnimationMs);
 
         player.SendTunneled(new PlayerUpdatePacketSetAnimation
         {
             Guid = npcGuid,
             AnimationId = TalkAnimationId,
             Flags = SetBaseAnimation
-        });
-
-        _ = Task.Run(async () =>
-        {
-            await Task.Delay(TalkAnimationMs);
-
-            if (player.TalkAnimationTicket == ticket)
-                StopTalkAnimation(player);
         });
     }
 
@@ -60,7 +51,6 @@ public static class QuestDialogue
 
         var npcGuid = player.TalkingNpcGuid;
         player.TalkingNpcGuid = 0;
-        player.TalkAnimationTicket++;
 
         player.SendTunneled(new PlayerUpdatePacketSetAnimation
         {
