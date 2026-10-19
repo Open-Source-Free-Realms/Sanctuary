@@ -35,7 +35,7 @@
     "ObjectiveDescriptionId": 100080,
     "IconId": 43278,
     "GiverNpcId": 2049,
-    "TargetNpcId": 3018,
+    "TargetNpcId": 2049,
     "RewardCoins": 7,
     "RewardExperience": 70,
     "RewardItems": [],
