@@ -17,6 +17,8 @@ public sealed class QuestDefinition
 
     public int IconId { get; set; }
 
+    public float? CameraDistance { get; set; }
+
     // In the order they complete. A quest with none is rejected at load.
     public List<QuestGoal> Goals { get; set; } = [];
 
@@ -32,6 +34,8 @@ public sealed class QuestDefinition
 
     // Item definition ids.
     public List<int> RewardItems { get; set; } = [];
+
+    public int RewardCollectionId { get; set; }
 
     public int? PrerequisiteQuestId { get; set; }
     public int? NextQuestId { get; set; }

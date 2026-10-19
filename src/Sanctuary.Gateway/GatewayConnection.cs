@@ -277,6 +277,35 @@ public class GatewayConnection : UdpConnection
 
         Player.Coins = dbCharacter.Coins;
 
+        Player.CharacterId = dbCharacter.Id;
+
+        Player.ActiveQuestId = dbCharacter.ActiveQuestId ?? 0;
+
+        foreach (var dbQuest in dbCharacter.Quests)
+        {
+            Player.Quests[dbQuest.QuestId] = dbQuest.Completed;
+
+            if (dbQuest.Completed || !_resourceManager.Quests.TryGet(dbQuest.QuestId, out var questDefinition))
+                continue;
+
+            var goalIndex = questDefinition.Goals.FindIndex(goal => goal.NameId == dbQuest.CurrentGoalId);
+            if (goalIndex > 0)
+                Player.QuestGoalProgress[dbQuest.QuestId] = goalIndex;
+
+            var goalCount = 0;
+
+            foreach (var progress in dbQuest.Progress.Where(progress => progress.GoalId == dbQuest.CurrentGoalId))
+            {
+                if (progress.TargetId != 0)
+                    Player.TalkedQuestNpcs.Add((int)progress.TargetId);
+
+                goalCount += progress.Count;
+            }
+
+            if (goalCount > 0)
+                Player.QuestCollectProgress[dbQuest.QuestId] = goalCount;
+        }
+
         Player.Birthday = dbCharacter.Created;
         Player.PlayTime = dbCharacter.PlayTime;
 

@@ -15,6 +15,7 @@ using Sanctuary.Database.Entities;
 using Sanctuary.Game;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
+using Sanctuary.Game.Quests;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Rewards;
 using Sanctuary.Packet;
@@ -32,6 +33,7 @@ public static class CommandPacketInteractRequestHandler
     private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
     private static IResourceManager _resourceManager = null!;
     private static IRewardManager _rewardManager = null!;
+    private static IQuestManager _questManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -40,6 +42,7 @@ public static class CommandPacketInteractRequestHandler
         _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
         _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
         _rewardManager = serviceProvider.GetRequiredService<IRewardManager>();
+        _questManager = serviceProvider.GetRequiredService<IQuestManager>();
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -67,6 +70,14 @@ public static class CommandPacketInteractRequestHandler
         }
         if (entity is CollectionCoin collectionCoin)
             return HandleCollectionCoin(connection, collectionCoin);
+
+        if (entity is Npc npc && _questManager.IsQuestNpc(npc.DefinitionId))
+        {
+            connection.Player.LastInteractNpcGuid = npc.Guid;
+            connection.Player.LastInteractAt = DateTime.UtcNow;
+            _questManager.OnNpcInteract(connection.Player, npc);
+            return true;
+        }
 
         entity.OnInteract(connection.Player);
         return true;
@@ -223,6 +234,13 @@ public static class CommandPacketInteractRequestHandler
 
         try
         {
+            if (!node.PoolDefinition.HasDrop)
+            {
+                node.CompleteCollection();
+                _questManager.OnCollectionNodeGathered(connection.Player, node);
+                return true;
+            }
+
             var drop = node.PoolDefinition.Table.SelectRandom();
             var itemDefinitionId = drop.ItemDefinitionId;
 
@@ -309,6 +327,8 @@ public static class CommandPacketInteractRequestHandler
 
             node.CompleteCollection();
             nodeCompleted = true;
+
+            _questManager.OnCollectionNodeGathered(connection.Player, node);
 
             if (!SendCollectionProgress(connection, collectionProgress))
                 SendCollectionRewardToast(connection, clientItem, itemDefinition, node);
