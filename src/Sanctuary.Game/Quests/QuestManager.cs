@@ -1028,8 +1028,6 @@ public sealed class QuestManager : IQuestManager
         }
 
         var experience = quest.RewardExperience;
-        if (experience > 0)
-            player.AwardXp(experience);
 
         var grantedCollection = quest.RewardCollectionId != 0 &&
             _resourceManager.Collections.TryGetValue(quest.RewardCollectionId, out var rewardedCollection)
