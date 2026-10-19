@@ -22,6 +22,8 @@ namespace Sanctuary.Game.Quests;
 
 public sealed class QuestManager : IQuestManager
 {
+    public const int AllGoalsDoneGoalId = 0;
+
     private readonly IResourceManager _resourceManager;
     private readonly IDbContextFactory<DatabaseContext> _dbContextFactory;
     private readonly ILogger<QuestManager> _logger;
@@ -62,7 +64,7 @@ public sealed class QuestManager : IQuestManager
             if (completed || !quests.TryGet(questId, out var activeQuest))
                 continue;
 
-            if (!AdvancesHere(player, activeQuest, npc, out _))
+            if (!AdvancesHere(player, activeQuest, npc, out _) && !TurnsInHere(player, activeQuest, npc))
                 continue;
 
             var quest = activeQuest;
@@ -114,8 +116,18 @@ public sealed class QuestManager : IQuestManager
         return GoalTargetNpcId(quest, goalIndex) == npc.DefinitionId;
     }
 
+    private static bool TurnsInHere(Player player, QuestDefinition quest, Npc npc)
+        => player.QuestGoalProgress.TryGetValue(quest.QuestId, out var done) && done >= quest.Goals.Count
+            && GoalTargetNpcId(quest, quest.Goals.Count - 1) == npc.DefinitionId;
+
     private void AdvanceAtNpc(Player player, QuestDefinition quest, Npc npc)
     {
+        if (TurnsInHere(player, quest, npc))
+        {
+            TurnIn(player, quest);
+            return;
+        }
+
         if (!AdvancesHere(player, quest, npc, out var goalIndex))
             return;
 
@@ -670,7 +682,7 @@ public sealed class QuestManager : IQuestManager
         int done = goalIndex + 1;
         player.QuestGoalProgress[quest.QuestId] = done;
 
-        UpdateCharacterQuest(player, quest.QuestId, q => q.CurrentGoalId = goals[Math.Min(done, goals.Count - 1)].NameId);
+        UpdateCharacterQuest(player, quest.QuestId, q => q.CurrentGoalId = done < goals.Count ? goals[done].NameId : AllGoalsDoneGoalId);
         ClearGoalProgress(player, quest.QuestId);
 
         if (done >= goals.Count)

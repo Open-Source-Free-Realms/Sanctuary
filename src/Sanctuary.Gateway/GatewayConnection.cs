@@ -19,6 +19,7 @@ using Sanctuary.Database.Entities;
 using Sanctuary.Game;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
+using Sanctuary.Game.Quests;
 using Sanctuary.Gateway.Handlers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -283,12 +284,32 @@ public class GatewayConnection : UdpConnection
 
         foreach (var dbQuest in dbCharacter.Quests)
         {
-            Player.Quests[dbQuest.QuestId] = dbQuest.Completed;
-
-            if (dbQuest.Completed || !_resourceManager.Quests.TryGet(dbQuest.QuestId, out var questDefinition))
+            if (dbQuest.Completed)
+            {
+                Player.Quests[dbQuest.QuestId] = true;
                 continue;
+            }
 
-            var goalIndex = questDefinition.Goals.FindIndex(goal => goal.NameId == dbQuest.CurrentGoalId);
+            if (!_resourceManager.Quests.TryGet(dbQuest.QuestId, out var questDefinition))
+            {
+                _logger.LogWarning("Character {character} has quest {quest} in progress, but it no longer exists. Skipping it.",
+                    dbCharacter.Id, dbQuest.QuestId);
+                continue;
+            }
+
+            Player.Quests[dbQuest.QuestId] = false;
+
+            var goalIndex = dbQuest.CurrentGoalId == QuestManager.AllGoalsDoneGoalId
+                ? questDefinition.Goals.Count
+                : questDefinition.Goals.FindIndex(goal => goal.NameId == dbQuest.CurrentGoalId);
+
+            if (goalIndex < 0)
+            {
+                _logger.LogWarning("Character {character} was on goal {goal} of quest {quest}, which no longer has that goal. Restarting the quest from its first goal.",
+                    dbCharacter.Id, dbQuest.CurrentGoalId, dbQuest.QuestId);
+                continue;
+            }
+
             if (goalIndex > 0)
                 Player.QuestGoalProgress[dbQuest.QuestId] = goalIndex;
 
