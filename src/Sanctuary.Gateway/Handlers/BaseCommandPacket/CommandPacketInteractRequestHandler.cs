@@ -402,10 +402,8 @@ public static class CommandPacketInteractRequestHandler
     {
         var notificationId = Environment.TickCount & int.MaxValue;
 
-        var packet = new RewardBundlePacket
-        {
-            Unknown8 = itemDefinition.DescriptionId
-        };
+        var packet = new RewardBundlePacket();
+        packet.RewardBundle.DescriptionId = itemDefinition.DescriptionId;
         packet.RewardBundle.SourceGuid = node.Guid ^ (uint)notificationId;
         packet.RewardBundle.PlayerGuid = connection.Player.Guid;
         packet.RewardBundle.IconId = itemDefinition.Icon.Id;
