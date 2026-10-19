@@ -11,6 +11,7 @@ using Sanctuary.Core.IO;
 using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Interactions;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.QuestGoals;
@@ -476,18 +477,9 @@ public sealed class QuestManager : IQuestManager
         addNpcPacket.NotificationImageSetId = imageId;
         player.SendTunneled(addNpcPacket);
 
-        if (npc.CursorId != 0)
-        {
-            var relevance = new PlayerUpdatePacketNpcRelevance();
-            relevance.Entries.Add(new PlayerUpdatePacketNpcRelevance.Entry
-            {
-                Guid = npc.Guid,
-                HasCursor = true,
-                CursorId = npc.CursorId,
-                Unknown2 = imageId != 0
-            });
+        var relevance = InteractionMenuHelper.GetNpcRelevancePacket([npc]);
+        if (relevance.Entries.Count > 0)
             player.SendTunneled(relevance);
-        }
 
         if (imageId == 0)
         {
@@ -495,21 +487,7 @@ public sealed class QuestManager : IQuestManager
             return;
         }
 
-        player.SendTunneled(new PlayerUpdatePacketAddNotifications
-        {
-            Notifications =
-            {
-                new NotificationInfo
-                {
-                    Guid = npc.Guid,
-                    IsCompact = false,
-                    IconState = imageId,
-                    NameId = npc.NameId,
-                    ReferenceId = npc.SubTextNameId,
-                    Enabled = false,
-                }
-            }
-        });
+        player.SendTunneled(new PlayerUpdatePacketAddNotifications { Notifications = { Player.GetQuestNotification(npc, imageId) } });
     }
 
     private const float DefaultOfferCameraDistance = 6f;

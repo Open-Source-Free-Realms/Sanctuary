@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Numerics;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Game;
-using Sanctuary.Game.Entities;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
@@ -47,7 +46,7 @@ public static class CommandPacketInteractionSelectHandler
             if (!connection.Player.VisibleNpcs.TryGetValue(packet.Guid, out var menuNpc))
                 return true;
 
-            if (!IsInInteractRange(connection.Player, menuNpc))
+            if (!InteractionMenuHelper.CanInteract(menuNpc, connection.Player))
                 return true;
 
             action(connection.Player);
@@ -76,13 +75,5 @@ public static class CommandPacketInteractionSelectHandler
         }
 
         return true;
-    }
-
-    private static bool IsInInteractRange(Player player, Npc npc)
-    {
-        var playerPosition = new Vector3(player.Position.X, player.Position.Y, player.Position.Z);
-        var npcPosition = new Vector3(npc.Position.X, npc.Position.Y, npc.Position.Z);
-
-        return Vector3.Distance(playerPosition, npcPosition) <= npc.InteractRange;
     }
 }

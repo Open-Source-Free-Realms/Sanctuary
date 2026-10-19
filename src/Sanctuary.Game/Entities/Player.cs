@@ -802,15 +802,7 @@ public sealed class Player : ClientPcData, IEntity
             var questImageId = GetNotificationImageId(npc);
             if (questImageId != 0)
             {
-                playerUpdatePacketAddNotifications.Notifications.Add(new NotificationInfo
-                {
-                    Guid = npc.Guid,
-                    IsCompact = false,
-                    IconState = questImageId,
-                    NameId = npc.NameId,
-                    ReferenceId = npc.SubTextNameId,
-                    Enabled = false,
-                });
+                playerUpdatePacketAddNotifications.Notifications.Add(GetQuestNotification(npc, questImageId));
             }
             else if (npc.Notification is not null)
             {
@@ -849,6 +841,16 @@ public sealed class Player : ClientPcData, IEntity
 
         return npc.Notification?.IconState ?? 0;
     }
+
+    public static NotificationInfo GetQuestNotification(Npc npc, int imageId) => new()
+    {
+        Guid = npc.Guid,
+        IsCompact = false,
+        IconState = imageId,
+        NameId = npc.NameId,
+        ReferenceId = npc.SubTextNameId,
+        Enabled = false
+    };
 
     public void OnAddVisiblePlayers(params IEnumerable<Player> players)
     {
@@ -1587,11 +1589,7 @@ public sealed class Player : ClientPcData, IEntity
 
     public void SendInteractionMenu(Npc npc, IReadOnlyList<NpcInteractionOption> options)
     {
-        var packet = new CommandPacketInteractionList();
-
-        packet.List.Guid = npc.Guid;
-        packet.List.Name = npc.Name ?? string.Empty;
-
+        var interactions = new List<InteractionData>(options.Count);
         var actions = new Dictionary<int, Action<Player>>(options.Count);
 
         for (var i = 0; i < options.Count; i++)
@@ -1599,7 +1597,7 @@ public sealed class Player : ClientPcData, IEntity
             var option = options[i];
             var id = NpcInteractionIdBase + i;
 
-            packet.List.Interactions.Add(new InteractionData
+            interactions.Add(new InteractionData
             {
                 Id = id,
                 IconId = option.IconId,
@@ -1612,6 +1610,6 @@ public sealed class Player : ClientPcData, IEntity
 
         OpenInteractionMenu = new InteractionMenu(npc.Guid, actions);
 
-        SendTunneled(packet);
+        SendTunneled(InteractionMenuHelper.GetInteractionListPacket(npc.Guid, npc.Name, interactions));
     }
 }
