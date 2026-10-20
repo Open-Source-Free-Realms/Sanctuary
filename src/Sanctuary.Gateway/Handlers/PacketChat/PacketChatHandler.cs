@@ -133,9 +133,41 @@ public static class PacketChatHandler
                 }
                 break;
 
+            case ChatChannel.WorldArea:
+                {
+                    packet.AreaNameId = connection.Player.ChatAreaNameId;
+
+                    _chatLogger.LogInformation("{Channel}|Area: {AreaNameId}, From: \"{FromName}\" ({FromGuid}), Msg: \"{Message}\"",
+                        packet.Channel,
+                        packet.AreaNameId,
+                        packet.FromName,
+                        packet.FromGuid,
+                        packet.Message
+                    );
+
+                    connection.Player.SendTunneled(packet);
+
+                    if (packet.AreaNameId == 0)
+                        break;
+
+                    foreach (var zonePlayer in connection.Player.Zone.Players)
+                    {
+                        if (zonePlayer.Guid == connection.Player.Guid || zonePlayer.ChatAreaNameId != packet.AreaNameId)
+                            continue;
+
+                        if (!zonePlayer.IsChatChannelOn(packet.Channel))
+                            continue;
+
+                        if (zonePlayer.Ignores.Any(x => x.Guid == connection.Player.Guid))
+                            continue;
+
+                        zonePlayer.SendTunneled(packet);
+                    }
+                }
+                break;
+
             case ChatChannel.WorldTrade:
             case ChatChannel.WorldLfg:
-            case ChatChannel.WorldArea:
             case ChatChannel.WorldMembersOnly:
                 {
                     _chatLogger.LogInformation("{Channel}|Area: {AreaNameId}, From: \"{FromName}\" ({FromGuid}), Msg: \"{Message}\"",
@@ -148,42 +180,15 @@ public static class PacketChatHandler
 
                     connection.Player.SendTunneled(packet);
 
-                    foreach (var visiblePlayer in connection.Player.VisiblePlayers)
+                    foreach (var zonePlayer in connection.Player.Zone.Players)
                     {
-                        if (visiblePlayer.Value.ChatChannelStatus.TryGetValue(packet.Channel, out var channelStatus) && !channelStatus)
+                        if (zonePlayer.Guid == connection.Player.Guid || !zonePlayer.IsChatChannelOn(packet.Channel))
                             continue;
 
-                        if (visiblePlayer.Value.Ignores.Any(x => x.Guid == connection.Player.Guid))
+                        if (zonePlayer.Ignores.Any(x => x.Guid == connection.Player.Guid))
                             continue;
 
-                        visiblePlayer.Value.SendTunneled(packet);
-                    }
-                }
-                break;
-
-            case ChatChannel.GuildSay:
-                {
-                    if (connection.Player.GuildData is null)
-                        break;
-
-                    packet.GuildGuid = connection.Player.GuildData.Guid;
-
-                    _chatLogger.LogInformation("GuildSay|GuildGuid: {GuildGuid}, From: \"{FromName}\" ({FromGuid}), Msg: \"{Message}\"",
-                        packet.GuildGuid,
-                        packet.FromName,
-                        packet.FromGuid,
-                        packet.Message
-                    );
-
-                    foreach (var member in connection.Player.GuildData.Members.Values)
-                    {
-                        if (!_zoneManager.TryGetPlayer(member.Guid, out var guildPlayer))
-                            continue;
-
-                        if (guildPlayer.Guid != connection.Player.Guid && guildPlayer.Ignores.Any(x => x.Guid == connection.Player.Guid))
-                            continue;
-
-                        guildPlayer.SendTunneled(packet);
+                        zonePlayer.SendTunneled(packet);
                     }
                 }
                 break;

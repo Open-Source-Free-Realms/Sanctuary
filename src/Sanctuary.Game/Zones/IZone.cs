@@ -73,6 +73,9 @@ public interface IZone : IScriptableZone, IDisposable
 
     #region Zone System
 
+    bool HasEnvironmentData { get; }
+    bool IsOutOfBounds(ZoneTile zoneTile);
+    bool IsOutOfBounds(Vector4 position);
     ZoneTile GetTileFromPosition(Vector4 position);
     void UpdateEntityZoneTile(IEntity entity, ZoneTile from, ZoneTile to);
 
