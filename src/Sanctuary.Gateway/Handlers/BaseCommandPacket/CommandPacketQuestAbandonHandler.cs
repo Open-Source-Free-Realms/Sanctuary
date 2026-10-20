@@ -30,6 +30,8 @@ public static class CommandPacketQuestAbandonHandler
         reader.TryRead(out short _);
         reader.TryRead(out int questId);
 
+        _logger.LogTrace("Received CommandPacketQuestAbandon. ( QuestId: {questId}, Data: {data} )", questId, Convert.ToHexString(data));
+
         _questManager.AbandonQuest(connection.Player, questId);
         return true;
     }

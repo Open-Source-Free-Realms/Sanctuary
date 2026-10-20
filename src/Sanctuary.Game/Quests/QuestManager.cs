@@ -357,13 +357,7 @@ public sealed class QuestManager : IQuestManager
             return;
 
         if (!(player.Quests.TryGetValue(questId, out var completed) && !completed))
-        {
-            var active = player.Quests.Where(entry => !entry.Value).Select(entry => entry.Key).ToList();
-            if (active.Count != 1)
-                return;
-
-            questId = active[0];
-        }
+            return;
 
         if (!_resourceManager.Quests.TryGet(questId, out var quest))
             return;
