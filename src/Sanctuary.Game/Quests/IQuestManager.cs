@@ -11,7 +11,7 @@ public interface IQuestManager
 
     List<NpcInteractionOption> GetInteractionOptions(Player player, Npc npc);
 
-    void OnNpcInteract(Player player, Npc npc);
+    bool OnNpcInteract(Player player, Npc npc);
 
     void OnCollectionNodeGathered(Player player, CollectionNode node);
 

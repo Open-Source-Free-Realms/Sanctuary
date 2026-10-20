@@ -1592,7 +1592,7 @@ public sealed class Player : ClientPcData, IEntity
 
     private const int NpcInteractionIdBase = 1_000_000;
 
-    public void SendInteractionMenu(Npc npc, IReadOnlyList<NpcInteractionOption> options)
+    public void SendInteractionMenu(Npc npc, IReadOnlyList<NpcInteractionOption> options, IEnumerable<InteractionData>? npcInteractions = null)
     {
         var interactions = new List<InteractionData>(options.Count);
         var actions = new Dictionary<int, Action<Player>>(options.Count);
@@ -1612,6 +1612,9 @@ public sealed class Player : ClientPcData, IEntity
 
             actions[id] = option.Invoke;
         }
+
+        if (npcInteractions is not null)
+            interactions.AddRange(npcInteractions);
 
         OpenInteractionMenu = new InteractionMenu(npc.Guid, actions);
 

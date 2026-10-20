@@ -10,6 +10,7 @@ using Sanctuary.Core.Extensions;
 using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Interactions;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.QuestGoals;
@@ -139,18 +140,26 @@ public sealed class QuestManager : IQuestManager
             CompleteGoal(player, quest, goalIndex, npc);
     }
 
-    public void OnNpcInteract(Player player, Npc npc)
+    public bool OnNpcInteract(Player player, Npc npc)
     {
         var options = GetInteractionOptions(player, npc);
 
-        if (options.Count > 1)
+        if (options.Count == 0)
+            return false;
+
+        if (!InteractionMenuHelper.CanInteract(npc, player))
+            return true;
+
+        var npcInteractions = npc.InteractionList?.Interactions ?? npc.Interactions;
+
+        if (options.Count == 1 && npcInteractions.Count == 0)
         {
-            player.SendInteractionMenu(npc, options);
-            return;
+            options[0].Invoke(player);
+            return true;
         }
 
-        if (options.Count == 1)
-            options[0].Invoke(player);
+        player.SendInteractionMenu(npc, options, npcInteractions);
+        return true;
     }
 
     private const int CollectPickupEffect = 5386;
