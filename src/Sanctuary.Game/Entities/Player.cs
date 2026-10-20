@@ -100,7 +100,7 @@ public sealed class Player : ClientPcData, IEntity
 
     public DateTime LastQuestAcceptedAt { get; set; }
 
-    public Dictionary<int, bool> Quests { get; } = new();
+    public ConcurrentDictionary<int, bool> Quests { get; } = new();
 
     public Dictionary<int, int> QuestGoalProgress { get; } = new();
 

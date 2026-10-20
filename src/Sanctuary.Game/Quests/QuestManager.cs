@@ -373,7 +373,7 @@ public sealed class QuestManager : IQuestManager
         if (!_resourceManager.Quests.TryGet(questId, out var quest))
             return;
 
-        player.Quests.Remove(questId);
+        player.Quests.TryRemove(questId, out _);
         player.QuestCollectProgress.Remove(questId);
         ClearTalkProgress(player, quest);
         QuestDialogue.Clear(player);
