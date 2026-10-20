@@ -41,6 +41,7 @@ public abstract class BaseZone : IZone, IDisposable
 
     private const int VisibleTileRadius = 2;
     private readonly Dictionary<int, ZoneTile> _tiles;
+    protected readonly ZoneEnvironmentDefinition? _zoneEnvironment;
 
     private readonly object _npcGuidLock = new();
     private ulong _nextNpcGuid = NpcBaseGuid;
@@ -113,6 +114,8 @@ public abstract class BaseZone : IZone, IDisposable
 
         foreach (var script in _zoneDefinition.Scripts ?? [])
             _scripts.TryAdd(script);
+
+        _resourceManager.ZoneEnvironments.TryGetValue(Name, out _zoneEnvironment);
 
         _tiles = GenerateTiles();
 
@@ -1339,7 +1342,9 @@ public abstract class BaseZone : IZone, IDisposable
             {
                 var tileHash = ZoneTile.GetHash(longitude, latitude);
 
-                tiles.Add(tileHash, new ZoneTile(longitude, latitude));
+                var environmentId = _zoneEnvironment?.GetEnvironmentId(longitude, latitude) ?? default;
+
+                tiles.Add(tileHash, new ZoneTile(longitude, latitude, environmentId));
             }
         }
 
@@ -1366,6 +1371,18 @@ public abstract class BaseZone : IZone, IDisposable
         }
 
         return tiles;
+    }
+
+    public bool HasEnvironmentData => _zoneEnvironment is not null;
+
+    public bool IsOutOfBounds(ZoneTile zoneTile)
+    {
+        return _zoneEnvironment is not null && (zoneTile == ZoneTile.Empty || zoneTile.IsOutOfBounds);
+    }
+
+    public bool IsOutOfBounds(Vector4 position)
+    {
+        return IsOutOfBounds(GetTileFromPosition(position));
     }
 
     public ZoneTile GetTileFromPosition(Vector4 position)

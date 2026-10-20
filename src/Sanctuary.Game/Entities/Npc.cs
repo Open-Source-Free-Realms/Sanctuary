@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -270,7 +270,7 @@ public class Npc : IScriptableNpc, IEntity
             visiblePlayer.Value.SendSerialized(data);
     }
 
-    public void UpdatePosition(Vector4 position, Quaternion rotation, bool updateZoneArea = true) =>
+    public void UpdatePosition(Vector4 position, Quaternion rotation) =>
         UpdatePosition(position, rotation, StoppedPositionState);
 
     private void UpdatePosition(Vector4 position, Quaternion rotation, byte state)

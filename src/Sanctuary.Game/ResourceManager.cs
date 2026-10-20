@@ -45,6 +45,7 @@ public class ResourceManager : IResourceManager, IDisposable
     public static readonly string StoreBundleCategoryGroupsFile = Path.Combine(BaseDirectory, "StoreBundleCategoryGroups.json");
 
     public static readonly string ZonesDirectory = Path.Combine(BaseDirectory, "Zones");
+    public static readonly string ZoneEnvironmentsDirectory = Path.Combine(ZonesDirectory, "Environments");
     public static readonly string HousesFile = Path.Combine(BaseDirectory, "Houses.json");
     public static readonly string PetsFile = Path.Combine(BaseDirectory, "Pets.json");
     public static readonly string MountsFile = Path.Combine(BaseDirectory, "Mounts.json");
@@ -94,6 +95,7 @@ public class ResourceManager : IResourceManager, IDisposable
     public StoreBundleCategoryGroupDefinitionCollection StoreBundleCategoryGroups { get; }
 
     public ZoneDefinitionCollection Zones { get; }
+    public ZoneEnvironmentCollection ZoneEnvironments { get; }
     public HouseDefinitionCollection Houses { get; }
     public MountDefinitionCollection Mounts { get; }
     public PetDefinitionCollection Pets { get; }
@@ -155,6 +157,7 @@ public class ResourceManager : IResourceManager, IDisposable
         StoreBundleCategoryGroups = new(_logger);
 
         Zones = new(_logger);
+        ZoneEnvironments = new(_logger);
         Houses = new(_logger);
         Mounts = new(_logger);
         Pets = new(_logger);
@@ -320,6 +323,9 @@ public class ResourceManager : IResourceManager, IDisposable
             return false;
 
         if (!StoreBundleCategoryGroups.Load(StoreBundleCategoryGroupsFile))
+            return false;
+
+        if (!ZoneEnvironments.Load(ZoneEnvironmentsDirectory))
             return false;
 
         if (!Zones.Load(ZonesDirectory))

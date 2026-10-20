@@ -270,6 +270,14 @@ public class GatewayConnection : UdpConnection
             ? new Quaternion(dbCharacter.RotationX.Value, 0f, dbCharacter.RotationZ.Value, 0f)
             : startingZone.SpawnRotation;
 
+        if (startingZone.IsOutOfBounds(position))
+        {
+            _logger.LogWarning("{name} was saved out of bounds at {position}, moving to the zone spawn.", dbCharacter.FullName, position);
+
+            position = startingZone.SpawnPosition;
+            rotation = startingZone.SpawnRotation;
+        }
+
         Player.UpdatePosition(position, rotation);
 
         Player.Name.FirstName = dbCharacter.FirstName;
@@ -551,8 +559,8 @@ public class GatewayConnection : UdpConnection
 
         if (Player.Zone == _zoneManager.StartingZone)
         {
-            position = Player.Position;
-            rotation = Player.Rotation;
+            position = Player.Zone.IsOutOfBounds(Player.Position) ? _zoneManager.StartingZone.SpawnPosition : Player.Position;
+            rotation = Player.Zone.IsOutOfBounds(Player.Position) ? _zoneManager.StartingZone.SpawnRotation : Player.Rotation;
         }
         else
         {
