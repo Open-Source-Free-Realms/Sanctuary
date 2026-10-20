@@ -305,13 +305,16 @@ public sealed class QuestManager : IQuestManager
         player.SendTunneled(new CommandPacketQuestDialogComplete());
     }
 
-    public void CompleteQuest(Player player, int questId)
+    public bool CompleteQuest(Player player, int questId)
     {
         if (!_resourceManager.Quests.TryGet(questId, out var quest))
-            return;
+            return false;
 
-        if (player.Quests.TryGetValue(questId, out var done) && done)
-            return;
+        if (!(player.Quests.TryGetValue(questId, out var completed) && !completed))
+            return false;
+
+        if (!(player.QuestGoalProgress.TryGetValue(questId, out var goalsDone) && goalsDone >= quest.Goals.Count))
+            return false;
 
         player.Quests[questId] = true;
         player.QuestCollectProgress.Remove(questId);
@@ -341,6 +344,7 @@ public sealed class QuestManager : IQuestManager
             RefreshQuestNotifications(player, next.GiverNpcId);
 
         RefreshObjectiveTarget(player);
+        return true;
     }
 
     public void AbandonQuest(Player player, int questId)
@@ -364,6 +368,9 @@ public sealed class QuestManager : IQuestManager
         player.QuestCollectProgress.Remove(questId);
         ClearTalkProgress(player, quest);
         QuestDialogue.Clear(player);
+
+        if (player.PendingTurnInQuestId == questId)
+            player.PendingTurnInQuestId = 0;
 
         var wasActive = player.ActiveQuestId == questId;
         if (wasActive)
@@ -671,7 +678,7 @@ public sealed class QuestManager : IQuestManager
 
         player.SendTunneled(end);
 
-        player.PendingQuestEndAction = () => CompleteQuest(player, quest.QuestId);
+        player.PendingTurnInQuestId = quest.QuestId;
     }
 
     private static void SendQuestAdd(Player player, QuestDefinition quest, int helperTextId, float completedPercentage = 0f, bool suppressStartBanner = false, bool showInTracker = false)

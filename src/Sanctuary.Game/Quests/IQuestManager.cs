@@ -19,7 +19,7 @@ public interface IQuestManager
 
     void AcceptQuest(Player player, int questId);
 
-    void CompleteQuest(Player player, int questId);
+    bool CompleteQuest(Player player, int questId);
 
     void AbandonQuest(Player player, int questId);
 

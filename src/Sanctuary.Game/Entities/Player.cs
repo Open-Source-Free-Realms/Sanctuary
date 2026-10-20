@@ -116,7 +116,7 @@ public sealed class Player : ClientPcData, IEntity
 
     public int ActiveQuestId { get; set; }
 
-    public System.Action? PendingQuestEndAction { get; set; }
+    public int PendingTurnInQuestId { get; set; }
 
     public ConcurrentDictionary<ChatChannel, bool> ChatChannelStatus { get; set; } = [];
 
