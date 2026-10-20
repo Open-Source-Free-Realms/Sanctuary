@@ -174,6 +174,9 @@ public class QuestDefinitionCollection
                 case ReachLocationGoal reachGoal:
                     if (reachGoal.ReachPosition == Vector3.Zero)
                         _logger.LogWarning("Reach goal on quest {id} has no ReachPosition in \"{file}\"; it can never be credited.", quest.QuestId, filePath);
+
+                    if (reachGoal.ReachRadius <= 0)
+                        _logger.LogWarning("Reach goal on quest {id} has a ReachRadius of {radius} in \"{file}\"; it can never be credited.", quest.QuestId, reachGoal.ReachRadius, filePath);
                     break;
 
                 case CollectGoal collectGoal:

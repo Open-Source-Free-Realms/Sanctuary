@@ -201,8 +201,6 @@ public sealed class QuestManager : IQuestManager
             return;
         }
     }
-    private const float DefaultReachRadius = 12f;
-
     public void OnPlayerMoved(Player player)
     {
         foreach (var (questId, quest, done, activeGoal) in ActiveGoals(player))
@@ -210,10 +208,7 @@ public sealed class QuestManager : IQuestManager
             if (activeGoal is not ReachLocationGoal goal || goal.ReachPosition == Vector3.Zero)
                 continue;
 
-            var radius = goal.ReachRadius > 0 ? goal.ReachRadius : DefaultReachRadius;
-            var target = goal.ReachPosition;
-
-            if (!player.Position.IsInCircle(target, radius))
+            if (!player.Position.IsInCircle(goal.ReachPosition, goal.ReachRadius))
                 continue;
 
             CompleteGoal(player, quest, done);
