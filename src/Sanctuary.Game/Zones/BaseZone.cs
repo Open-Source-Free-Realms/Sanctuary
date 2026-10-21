@@ -9,6 +9,8 @@ using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 
+using DotRecast.Detour;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -94,6 +96,9 @@ public abstract class BaseZone : IZone, IDisposable
     private readonly NavMeshPathfinder? _navMeshPathfinder;
     private readonly NavMeshPathfinder? _clientNavMeshPathfinder;
 
+    public DtNavMeshQuery? NavMeshQuery { get; }
+    public IDtQueryFilter NavMeshFilter { get; } = new DtQueryDefaultFilter();
+
     private const float RoadRouteMinDistance = 50f;
     private const float RouteReachDistance = 1f;
 
@@ -138,6 +143,7 @@ public abstract class BaseZone : IZone, IDisposable
         {
             _navMeshPathfinder = new NavMeshPathfinder(navMesh);
             _clientNavMeshPathfinder = new NavMeshPathfinder(navMesh);
+            NavMeshQuery = new DtNavMeshQuery(navMesh);
         }
     }
 

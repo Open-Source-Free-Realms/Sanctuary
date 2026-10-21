@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Sanctuary.Core.Collections;
 using Sanctuary.Core.Extensions;
 using Sanctuary.Game.Pathfinding;
+using Sanctuary.Game.Pathing;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Interactions;
@@ -19,6 +20,9 @@ using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Chat;
 using Sanctuary.Scripting;
+using System.Security.Cryptography;
+
+using PathFollower = Sanctuary.Game.Pathing.PathFollower;
 
 namespace Sanctuary.Game.Entities;
 
@@ -123,6 +127,8 @@ public class Npc : IScriptableNpc, IEntity
     public bool IsMoving => _pathMoving || !_path.IsEmpty;
 
     private const int HostileDisposition = 0;
+
+    // TODO: this can probably be an enum.
     private const byte MovingPositionState = 0;
     private const byte StoppedPositionState = 1;
     private const float GroundStepHeight = 3f;
@@ -134,11 +140,24 @@ public class Npc : IScriptableNpc, IEntity
 
     private PathBuilder? _pathBuilder;
 
+    // TODO: Maybe this goes into 'json' config
+    private const int MaxSearchIterations = 1024;
+    private const float ChaseFrequency = 2f;
+    private readonly Pathfinder? _pathfinder;
+    private readonly PathFollower? _pathFollower;
+
     public Npc(IZone zone)
     {
         Zone = zone;
 
         Routines = new RoutineManager(Logger);
+
+        // TODO: these need to be rebuilt/reset on zone change in the future.
+        if (zone.NavMeshQuery is not null)
+        {
+            _pathfinder = new Pathfinder(zone.NavMeshQuery, zone.NavMeshFilter, MaxSearchIterations);
+            _pathFollower = new PathFollower(zone.NavMeshQuery);
+        }
     }
 
     #region Events
@@ -215,7 +234,7 @@ public class Npc : IScriptableNpc, IEntity
         AmbientController?.Update();
 
         var currentPosition = Position.ToVector3();
-        var result = PathFollower.Advance(_path, currentPosition, Speed, WaypointTolerance, Zone.TickDeltaSeconds);
+        var result = Pathfinding.PathFollower.Advance(_path, currentPosition, Speed, WaypointTolerance, Zone.TickDeltaSeconds);
 
         if (result.Moved)
         {
@@ -584,6 +603,89 @@ public class Npc : IScriptableNpc, IEntity
     public void MoveTo(float x, float y, float z, bool direct)
     {
         MoveTo(new Vector3(x, y, z), direct);
+    }
+
+    public void MoveTo(Vector3 goalPosition)
+    {
+        if (_pathfinder is null || _pathFollower is null)
+            return;
+
+        if (!_pathfinder.TryFindPath(Position.ToVector3(), goalPosition, out var path))
+            return;
+
+        Routines.SetRoutine(
+            "Movement",
+            new DelegateRoutine(
+                onStart: () => _pathFollower.SetPath(path),
+                onStep: () => StepPathFollower(),
+                onEnd: () => _pathFollower.Stop()
+            ),
+            Cadence.Tick
+        );
+    }
+
+    public void Chase(IEntity target)
+    {
+        if (_pathfinder is null || _pathFollower is null)
+            return;
+
+        Routines.SetRoutine("Movement",
+            new ParallelRoutine(
+                [
+                    // NOTE: We can use a parallel routine to give us low-frequency behavior here. It'll have to wait for the
+                    // 'WaitRoutine' to finish. Combining this with a repeat routine (infinite until stopped), we get a rate-limited
+                    // motion planner. 
+                    // 
+                    // NOTE: Hard planning frequencies/periods are not enforced and we expect that these will diverge by about a tick
+                    // due to rounding.
+                    new RepeatRoutine(
+                        new ParallelRoutine(
+                            [
+                                new DelegateRoutine(onStep: () =>
+                                    {
+                                        if (_pathfinder.TryFindPath(Position.ToVector3(), target.Position.ToVector3(), out var path))
+                                            _pathFollower.SetPath(path);
+
+                                        return true;
+                                    }
+                                ),
+                                new WaitRoutine(1f / ChaseFrequency)
+                            ]
+                        )
+                    ),
+                    new DelegateRoutine(
+                        // NOTE: We force return false here to keep the NPC always chasing. 
+                        onStep: () =>
+                        {
+                            StepPathFollower();
+                            return false;
+
+
+                        },
+                        onEnd: () => _pathFollower.Stop()
+                    ),
+                ]
+            ),
+            Cadence.Tick
+        );
+    }
+
+
+    private bool StepPathFollower()
+    {
+        if (!_pathFollower.HasPath)
+            return true;
+
+        var currentPosition = Position.ToVector3();
+        var newPosition = _pathFollower.Advance(currentPosition, Speed * Zone.TickDeltaSeconds, out var arrived);
+
+
+        // TODO: maybe put this in the path follower directly and create a Pose record for entitys to use...
+        var rotation = (newPosition - currentPosition).LengthSquared() > 0f ? (newPosition - currentPosition).ToFlatRotation() : Rotation;
+
+        UpdatePosition(newPosition.ToVector4(), rotation, arrived ? StoppedPositionState : MovingPositionState);
+
+        return arrived;
     }
 
     private const byte SetBaseAnimationFlag = 1;

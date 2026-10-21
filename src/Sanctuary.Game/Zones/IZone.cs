@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
+using DotRecast.Detour;
+
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Routines;
@@ -94,6 +96,10 @@ public interface IZone : IScriptableZone, IDisposable
     Vector3 GetGroundPosition(Vector3 position, float maxStepUp, float maxDrop);
 
     bool HasNavMesh { get; }
+
+    DtNavMeshQuery? NavMeshQuery { get; }
+
+    IDtQueryFilter NavMeshFilter { get; }
 
     bool TryFindNavMeshPath(Vector3 start, Vector3 goal, Queue<Vector3> waypoints);
 
