@@ -616,7 +616,7 @@ public class Npc : IScriptableNpc, IEntity
         Routines.SetRoutine(
             "Movement",
             new DelegateRoutine(
-                onStart: () => _pathFollower.SetPath(path),
+                onStart: () => _pathFollower.SetPath(path, 0f), // TODO: Magic number!
                 onStep: () => StepPathFollower(),
                 onEnd: () => _pathFollower.Stop()
             ),
@@ -644,8 +644,8 @@ public class Npc : IScriptableNpc, IEntity
                                 new DelegateRoutine(onStep: () =>
                                     {
                                         if (_pathfinder.TryFindPath(Position.ToVector3(), target.Position.ToVector3(), out var path))
-                                            _pathFollower.SetPath(path);
-
+                                            _pathFollower.SetPath(path, 1f); // TODO: Magic number!
+ 
                                         return true;
                                     }
                                 ),

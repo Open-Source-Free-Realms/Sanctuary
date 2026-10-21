@@ -13,6 +13,7 @@ public sealed class Pathfinder
     // specific per entity or something
     private const int MaxPathPolygons = 256;
     private const int MaxStraightPathPoints = 64;
+    private const int MaxRaycastPolygons = 256;
 
     private static readonly RcVec3f NearestPolygonExtents = new(2f, 4f, 2f);
 
@@ -38,8 +39,24 @@ public sealed class Pathfinder
         Query.FindNearestPoly(startPosition.ToRecast(), NearestPolygonExtents, Filter, out var startPolygon, out var start, out _);
         Query.FindNearestPoly(goalPosition.ToRecast(), NearestPolygonExtents, Filter, out var goalPolygon, out var goal, out _);
 
+
+
         if (startPolygon == 0 || goalPolygon == 0)
             return false;
+
+
+        // NOTE: There's basiscally no point in running A* (below) if there is a straight line to the path. 
+        // TODO: Play around with pathfinding and make sure the filter actually fits Free Realms' retail behavior!
+        var raycastPolygons = new long[MaxRaycastPolygons];
+
+        if (Query.Raycast(startPolygon, start, goal, Filter, out var hit, out _, raycastPolygons, out var raycastCount, MaxRaycastPolygons).Succeeded()
+            && hit == float.MaxValue
+            && raycastCount > 0
+            && raycastPolygons[raycastCount - 1] == goalPolygon)
+        {
+            path = new NavPath([goal.ToVector3()], true);
+            return true;
+        }
 
         if (Query.InitSlicedFindPath(startPolygon, goalPolygon, start, goal, Filter, 0).Failed())
             return false;

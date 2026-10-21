@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 
 using DotRecast.Core.Numerics;
@@ -18,21 +19,25 @@ public sealed class PathFollower
     public NavPath? Path { get; private set; }
     public bool HasPath => Path is not null;
 
+    private float _stopTolerance;
+
     public PathFollower(DtNavMeshQuery query)
     {
         _query = query;
     }
 
-    public void SetPath(NavPath path)
+    public void SetPath(NavPath path, float stopTolerance = 0f)
     {
         Path = path;
         _waypoint = 0;
+        _stopTolerance = stopTolerance;
     }
 
     public void Stop()
     {
         Path = null;
         _waypoint = 0;
+        _stopTolerance = 0f;
     }
 
     public Vector3 Advance(Vector3 position, float distance, out bool arrived)
@@ -50,9 +55,21 @@ public sealed class PathFollower
             var toWaypoint = waypoint - position;
             var length = new Vector2(toWaypoint.X, toWaypoint.Z).Length();
 
-            if (length > distance)
+            var isGoal = _waypoint == path.Waypoints.Count - 1;
+            var reach = isGoal ? MathF.Max(0f, length - _stopTolerance) : length;
+
+            if (reach > distance)
             {
                 position += toWaypoint * (distance / length);
+                break;
+            }
+
+            if (isGoal)
+            {
+                if (length > 0f)
+                    position += toWaypoint * (reach / length);
+
+                arrived = true;
                 break;
             }
 
@@ -61,11 +78,8 @@ public sealed class PathFollower
             _waypoint++;
         }
 
-        if (_waypoint >= path.Waypoints.Count)
-        {
-            arrived = true;
+        if (arrived)
             Stop();
-        }
 
         return SnapToGround(position);
     }
