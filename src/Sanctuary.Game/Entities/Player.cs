@@ -16,6 +16,7 @@ using Sanctuary.Game;
 using Sanctuary.Game.ChatCommands;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Interactions;
+using Sanctuary.Game.MiniGames;
 using Sanctuary.Game.Resources.Definitions.Combat;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Zones;
@@ -43,6 +44,8 @@ public sealed class Player : ClientPcData, IEntity
     private const int ActionBarSlotUnknown6 = 4;
     private const int ActionBarSlotUnknown7 = 15;
     private const float OnFootMovementSpeed = 8f;
+    private const int ActivateProfileAnimation = 3001;
+    private const int ActivateProfileCompositeEffect = 4005;
 
     private readonly UdpConnection _connection;
     private readonly IResourceManager _resourceManager;
@@ -74,6 +77,7 @@ public sealed class Player : ClientPcData, IEntity
         Profiles.FirstOrDefault(x => x.Id == ActiveProfileId) ?? Profiles.First();
 
     public Mount? Mount { get; set; }
+    public MiniGameUiSession? MiniGameUiSession { get; set; }
     public PlayerPet PlayerPet { get; }
     public Npc? Pet => PlayerPet.Pet;
     public Dictionary<int, int> PetDefinitions { get; } = [];
@@ -184,6 +188,7 @@ public sealed class Player : ClientPcData, IEntity
     public ConcurrentSet<OneTimeNotification> SeenOneTimeNotifications { get; } = [];
 
     public bool ShopDataSent { get; set; }
+    public bool ActivitiesSent { get; set; }
     public ConcurrentSet<int> SentCoinStoreItemDefinitionIds { get; } = [];
 
     public Player(BaseZone zone, UdpConnection connection, IResourceManager resourceManager, IZoneManager zoneManager)
@@ -1493,6 +1498,60 @@ public sealed class Player : ClientPcData, IEntity
         UpdatePosition(position, rotation);
     }
 
+    public void ActivateProfile(ClientPcProfile profile)
+    {
+        ClearWeaponFlairOverride();
+        ActiveProfileId = profile.Id;
+
+        var clientUpdatePacketActivateProfile = new ClientUpdatePacketActivateProfile();
+
+        using var packetWriter = new PacketWriter();
+
+        profile.Serialize(packetWriter);
+
+        clientUpdatePacketActivateProfile.Payload = packetWriter.Buffer;
+
+        clientUpdatePacketActivateProfile.Attachments = GetAttachments();
+
+        clientUpdatePacketActivateProfile.Animation = ActivateProfileAnimation;
+        clientUpdatePacketActivateProfile.CompositeEffect = ActivateProfileCompositeEffect;
+
+        SendTunneled(clientUpdatePacketActivateProfile);
+
+        var playerUpdatePacketEquippedItemsChange = new PlayerUpdatePacketEquippedItemsChange();
+
+        playerUpdatePacketEquippedItemsChange.Guid = Guid;
+
+        playerUpdatePacketEquippedItemsChange.Attachments = clientUpdatePacketActivateProfile.Attachments;
+
+        SendTunneledToVisible(playerUpdatePacketEquippedItemsChange);
+
+        SendToolbar();
+
+        var friendStatusPacket = new FriendStatusPacket
+        {
+            Guid = Guid,
+            Status =
+            {
+                ProfileId = ActiveProfile.Id,
+                ProfileRank = ActiveProfile.Rank,
+                ProfileIconId = ActiveProfile.Icon,
+                ProfileNameId = ActiveProfile.NameId,
+                ProfileBackgroundImageId = ActiveProfile.BadgeImageSet
+            }
+        };
+
+        foreach (var friend in Friends)
+        {
+            if (!_zoneManager.TryGetPlayer(friend.Guid, out var friendPlayer))
+                continue;
+
+            friendPlayer.SendTunneled(friendStatusPacket);
+        }
+
+        ActivityHelper.SendActivities(this, _resourceManager);
+    }
+
     public void Dispose()
     {
         PlayerPet.Dispose();
@@ -1501,6 +1560,8 @@ public sealed class Player : ClientPcData, IEntity
 
         Mount?.Dispose();
         Mount = null;
+
+        MiniGameUiSession = null;
 
         ZoneTile.Entities.Remove(Guid, out _);
         Zone.TryRemovePlayer(Guid);

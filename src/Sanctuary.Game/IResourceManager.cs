@@ -38,6 +38,11 @@ public interface IResourceManager
     ProfileDefinitionCollection Profiles { get; }
     QuickChatDefinitionCollection QuickChats { get; }
     PointOfInterestDefinitionCollection PointOfInterests { get; }
+    ActivityDefinitionCollection Activities { get; }
+    RequirementSetDefinitionCollection RequirementSets { get; }
+    MiniGameDefinitionCollection MiniGames { get; }
+    ActivityProfileTypeCollection ActivityProfileTypes { get; }
+    MiniGameNpcDefinitionCollection MiniGameNpcs { get; }
     ConsumableCollection Consumables { get; }
     NpcDefinitionCollection Npcs { get; }
     NameFilterCollection NameFilter { get; }

@@ -1,0 +1,54 @@
+using System.Numerics;
+
+using Sanctuary.Game.Entities;
+using Sanctuary.Game.Zones;
+using Sanctuary.Packet;
+
+namespace Sanctuary.Game.MiniGames.CombatEncounters;
+
+public abstract class CombatEncounter
+{
+    private const byte EncounterZoningUnknown = 3;
+    private const int EncounterZoningGeometryId = 96;
+
+    public abstract MiniGameUiDefinition Definition { get; }
+
+    public abstract int ZoneDefinitionId { get; }
+
+    public abstract Vector4 EntryPosition { get; }
+
+    public abstract Quaternion EntryRotation { get; }
+
+    public virtual void OnGo(Player player, MiniGameUiSession miniGameUiSession, IZoneManager zoneManager)
+    {
+        if (player.Mount is not null)
+            player.Dismount();
+
+        if (player.Zone is WorldZone)
+        {
+            player.StartingZonePosition = player.Position;
+            player.StartingZoneRotation = player.Rotation;
+        }
+
+        if (!zoneManager.TryMovePlayerToZone(ZoneDefinitionId, player.Guid, player, EntryPosition, EntryRotation, out var zone))
+            return;
+
+        miniGameUiSession.State = MiniGameUiState.Entering;
+
+        player.SendTunneled(new PacketClientBeginZoning
+        {
+            Name = zone.Name,
+            Position = EntryPosition,
+            Rotation = EntryRotation,
+            Sky = zone.Sky,
+            Unknown = EncounterZoningUnknown,
+            GeometryId = EncounterZoningGeometryId,
+            OverrideUpdateRadius = true
+        });
+    }
+
+    public virtual void OnClose(Player player, MiniGameUiSession miniGameUiSession, IZoneManager zoneManager)
+    {
+        player.TeleportToZone(zoneManager.StartingZone, player.StartingZonePosition, player.StartingZoneRotation);
+    }
+}

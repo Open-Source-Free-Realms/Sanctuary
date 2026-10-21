@@ -1,0 +1,102 @@
+[
+  {
+    "NameId": 104067,
+    "Comment": "Frostfang Growler",
+    "Buttons": [
+      {
+        "Id": 4891,
+        "IconId": 1345,
+        "ButtonText": 3301,
+        "Type": "Encounter",
+        "Param1": 174
+      }
+    ]
+  },
+  {
+    "NameId": 37938,
+    "Comment": "Demolition Derby sign-up",
+    "Buttons": [
+      {
+        "Id": 3606,
+        "IconId": 7549,
+        "ButtonText": 37938,
+        "Type": "MiniGame",
+        "Param1": 39
+      }
+    ]
+  },
+  {
+    "NameId": 17958,
+    "Comment": "Kart racing sign-up",
+    "Buttons": [
+      {
+        "Id": 413,
+        "IconId": 7567,
+        "ButtonText": 17958,
+        "Type": "MiniGame",
+        "Param1": 28
+      },
+      {
+        "Id": 5154,
+        "IconId": 18421,
+        "ButtonText": 117324,
+        "Type": "MiniGame",
+        "Param1": 278
+      }
+    ]
+  },
+  {
+    "NameId": 416258,
+    "Comment": "Left Side Soccer Gate",
+    "Buttons": [
+      {
+        "Id": 7797,
+        "IconId": 1317,
+        "ButtonText": 37944,
+        "Type": "MiniGame",
+        "Param1": 61
+      },
+      {
+        "Id": 7798,
+        "IconId": 1317,
+        "ButtonText": 37945,
+        "Type": "MiniGame",
+        "Param1": 62
+      },
+      {
+        "Id": 7801,
+        "IconId": 1317,
+        "ButtonText": 37946,
+        "Type": "MiniGame",
+        "Param1": 63
+      }
+    ]
+  },
+  {
+    "NameId": 416257,
+    "Comment": "Right Side Soccer Gate (buttons mirrored from the left gate, not captured)",
+    "Buttons": [
+      {
+        "Id": 7797,
+        "IconId": 1317,
+        "ButtonText": 37944,
+        "Type": "MiniGame",
+        "Param1": 61
+      },
+      {
+        "Id": 7798,
+        "IconId": 1317,
+        "ButtonText": 37945,
+        "Type": "MiniGame",
+        "Param1": 62
+      },
+      {
+        "Id": 7801,
+        "IconId": 1317,
+        "ButtonText": 37946,
+        "Type": "MiniGame",
+        "Param1": 63
+      }
+    ]
+  }
+]

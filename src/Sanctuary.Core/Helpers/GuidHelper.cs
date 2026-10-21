@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace Sanctuary.Core.Helpers;
 
@@ -8,8 +9,16 @@ public static class GuidHelper
     private enum GuidType : byte
     {
         Player = 1,
+        Encounter = 0xE,
 
         Max = 15
+    }
+
+    private static ulong _encounterId;
+
+    public static int GetNextEncounterId()
+    {
+        return checked((int)GetGuid(GuidType.Encounter, Interlocked.Increment(ref _encounterId)));
     }
 
     public static ulong GetPlayerGuid(ulong id)
