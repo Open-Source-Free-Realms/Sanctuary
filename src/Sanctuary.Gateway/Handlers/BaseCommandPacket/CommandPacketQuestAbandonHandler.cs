@@ -3,8 +3,8 @@ using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using Sanctuary.Core.IO;
 using Sanctuary.Game.Quests;
+using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
 namespace Sanctuary.Gateway.Handlers;
@@ -25,12 +25,13 @@ public static class CommandPacketQuestAbandonHandler
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
     {
-        var reader = new PacketReader(data);
-        reader.TryRead(out short _);
-        reader.TryRead(out short _);
-        reader.TryRead(out int questId);
+        if (!CommandPacketQuestAbandon.TryDeserialize(data, out var packet))
+        {
+            _logger.LogError("Failed to deserialize {packet}.", nameof(CommandPacketQuestAbandon));
+            return false;
+        }
 
-        _questManager.AbandonQuest(connection.Player, questId);
+        _questManager.AbandonQuest(connection.Player, packet.QuestId);
         return true;
     }
 }

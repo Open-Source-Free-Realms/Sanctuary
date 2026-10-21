@@ -44,7 +44,7 @@ public static class BaseCommandPacketHandler
             CommandPacketIgnoreRequest.OpCode => CommandPacketIgnoreRequestHandler.HandlePacket(connection, reader.Span),
             CommandPacketChatChannelOn.OpCode => CommandPacketChatChannelOnHandler.HandlePacket(connection, reader.Span),
             CommandPacketChatChannelOff.OpCode => CommandPacketChatChannelOffHandler.HandlePacket(connection, reader.Span),
-            23 => CommandPacketQuestAbandonHandler.HandlePacket(connection, reader.Span),
+            CommandPacketQuestAbandon.OpCode => CommandPacketQuestAbandonHandler.HandlePacket(connection, reader.Span),
             _ => false
         };
     }
