@@ -14,7 +14,7 @@ public interface IScriptableNpc : IScriptable
 
     void Say(string message);
     void SayLocalized(int stringId);
-    void MoveTo(float x, float y, float z, bool direct);
+    void TryMoveTo(float x, float y, float z, bool direct);
 
     void SetHeading(float heading);
 

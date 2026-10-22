@@ -143,7 +143,7 @@ public class NavNpcToChatCommand : IChatCommand
                 if (report)
                     ReportPath(invoker, npc, goal, npcs.Count);
 
-                npc.MoveTo(goal);
+                npc.TryMoveTo(goal);
                 return true;
             }, Cadence.Tick);
         }

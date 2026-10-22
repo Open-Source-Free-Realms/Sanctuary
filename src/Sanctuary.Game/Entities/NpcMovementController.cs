@@ -80,7 +80,7 @@ public sealed class NpcMovementController
 
         if (position.DistanceSquaredXZ(_home) > _definition.Radius * _definition.Radius)
         {
-            _npc.MoveTo(_home);
+            _npc.TryMoveTo(_home);
             return true;
         }
 
@@ -95,7 +95,7 @@ public sealed class NpcMovementController
             if (!IsInArea(goal) || IsNearRecentSpot(goal))
                 continue;
 
-            if (!_npc.MoveTo(goal))
+            if (!_npc.TryMoveTo(goal))
                 continue;
 
             RememberSpot(position);
@@ -134,7 +134,7 @@ public sealed class NpcMovementController
         {
             var goal = position + Vector3.Transform(away, Quaternion.CreateFromAxisAngle(Vector3.UnitY, turn)) * _definition.FleeLegDistance;
 
-            if (!IsInArea(goal) || !_npc.MoveTo(goal))
+            if (!IsInArea(goal) || !_npc.TryMoveTo(goal))
                 continue;
 
             _npc.SetSpeed(_definition.FleeSpeed);
@@ -183,7 +183,7 @@ public sealed class NpcMovementController
             point = GetPatrolPoint(_patrolIndex);
         }
 
-        _npc.MoveTo(point);
+        _npc.TryMoveTo(point);
         return true;
     }
 

@@ -1,14 +1,12 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 
 using Sanctuary.Core.Extensions;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game.Helpers;
-using Sanctuary.Game.Pathfinding;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
@@ -27,7 +25,6 @@ public sealed class PlayerPet
     private bool _petGroomingActive;
     private int _petSpeedBuffEffectId;
     private long _petSpeedBuffRefreshAt;
-    private readonly Queue<Vector3> _petNavMeshWaypoints = new();
     private PetState _petState = new();
     private readonly ConcurrentQueue<Action> _queuedActions = new();
 
@@ -118,10 +115,6 @@ public sealed class PlayerPet
     private const float PetCatchUpGain = 0.5f;
     private const float PetCatchUpStartDistance = 10f;
     private const float PetCatchUpStopDistance = 2f;
-    private const float PetPathfindDistance = 15f;
-    private const float PetPathfindDistanceSquared = PetPathfindDistance * PetPathfindDistance;
-    private const float PetPathfindMaxNodeDistance = 15f;
-    private const float PetPathfindMaxNodeDistanceSquared = PetPathfindMaxNodeDistance * PetPathfindMaxNodeDistance;
     private const int PetOwnerStoppedDelayMs = 750;
     private const float PetMovedDistanceSquared = 0.0001f;
     private const float PetFacingMinDistanceSquared = 0.01f;
@@ -171,7 +164,6 @@ public sealed class PlayerPet
     private const float PetSummonSideDistance = 2f;
     private const float PetWarpHeight = 6f;
     private const float PetMaxStepDownHeight = 3f;
-    private const float PetMaxStepUpHeight = 1f;
     private const float PetStopArrivedDistanceSquared = 0.25f;
     private const int PetStopSettleMs = 500;
     private const int PetDogShakeDurationMs = 1200;
@@ -361,8 +353,6 @@ public sealed class PlayerPet
         npc.Disposition = PetNpcDisposition;
         var followSide = GetRandomPetSide();
         var ownerPosition = _player.Position.ToVector3();
-        var summonPosition = GetPetStandPosition(_player.Zone, ownerPosition,
-            ownerPosition + Vector3.Cross(Vector3.UnitY, _player.GetFacingDirection()) * PetSummonSideDistance * followSide);
         npc.Visible = true;
         npc.UpdateEverySecondAction = () =>
         {
@@ -374,8 +364,6 @@ public sealed class PlayerPet
         _petState = new PetState
         {
             FollowSide = followSide,
-            FollowGoal = summonPosition,
-            LastPosition = summonPosition,
             OwnerLastPosition = ownerPosition,
             OwnerTickPosition = ownerPosition,
             IdleAnimationAt = Environment.TickCount64 + GetPetIdleAnimationDelayMs(),
@@ -388,7 +376,9 @@ public sealed class PlayerPet
         _player.ActivePetId = id;
         _player.ActivePetGuid = npc.Guid;
         _summonedPetId = id;
-        npc.UpdatePosition(summonPosition.ToVector4(), _player.Rotation);
+        SpawnPetBesideOwner(npc, ownerPosition, PetSummonSideDistance, followSide, _player.Rotation);
+        _petState.FollowGoal = npc.Position.ToVector3();
+        _petState.LastPosition = npc.Position.ToVector3();
         SendPetList();
 
         _player.SendTunneledToVisible(new PlayerUpdatePacketPlayCompositeEffect
@@ -790,14 +780,12 @@ public sealed class PlayerPet
             ? targetPosition + Vector3.Normalize(fromTarget) * PetInvestigateStopDistance
             : targetPosition;
 
-        if (!npc.Zone.TryGetWalkableGoal(petPosition, goal, PetMaxStepUpHeight, PetMaxStepDownHeight, out goal))
+        if (!TryMovePet(npc, goal, _player.Stats[CharacterStatId.MaxMovementSpeed].Float))
             return;
 
         _petState.InvestigateGoal = goal;
         _petState.InvestigateGiveUpAt = Environment.TickCount64 + PetInvestigateTimeoutMs;
         _petState.IdleAnimationEndAt = 0;
-
-        MovePet(npc, goal, _player.Stats[CharacterStatId.MaxMovementSpeed].Float);
     }
 
     private bool UpdatePetInvestigate(Npc npc)
@@ -895,13 +883,11 @@ public sealed class PlayerPet
             var distance = PetTreasureSniffMinDistance + Random.Shared.NextSingle() * (PetTreasureSniffMaxDistance - PetTreasureSniffMinDistance);
             var direction = Vector3.Transform(_petState.TreasureDirection, Quaternion.CreateFromAxisAngle(Vector3.UnitY, turn));
 
-            if (!npc.Zone.TryGetWalkableGoal(petPosition, petPosition + direction * distance, PetMaxStepUpHeight, PetMaxStepDownHeight, out var goal))
+            if (!TryMovePet(npc, petPosition + direction * distance, PetTreasureSniffSpeed))
                 continue;
 
             _petState.TreasureDirection = direction;
             _petState.TreasureDigAt = Environment.TickCount64 + (long)(distance / PetTreasureSniffSpeed * PetHelper.MillisecondsPerSecond);
-
-            MovePet(npc, goal, PetTreasureSniffSpeed);
             return;
         }
 
@@ -927,7 +913,7 @@ public sealed class PlayerPet
             return;
 
         var petPosition = npc.Position.ToVector3();
-        var position = GetPetStandPosition(npc.Zone, petPosition, petPosition + _petState.TreasureDirection * PetTreasureChestDistance);
+        var chestSpot = petPosition + _petState.TreasureDirection * PetTreasureChestDistance;
         var despawnAt = Environment.TickCount64 + PetTreasureChestLifetimeMs;
 
         chest.NameId = chestTier.NameId;
@@ -946,7 +932,8 @@ public sealed class PlayerPet
             if (Environment.TickCount64 >= despawnAt && chest.TryOpen())
                 EntityHelper.RemovePlayerGracefully(chest, animate: true);
         };
-        chest.UpdatePosition(position.ToVector4(), GetFacingOwnerRotation(position));
+        if (!chest.TrySpawnNear(chestSpot, GetFacingOwnerRotation(chestSpot)))
+            chest.UpdatePosition(petPosition.ToVector4(), GetFacingOwnerRotation(petPosition));
 
         EntityHelper.SetAnimation(_player, chest, PetTreasureChestSpawnAnimationId);
 
@@ -1041,28 +1028,11 @@ public sealed class PlayerPet
 
         var ownerMoving = Environment.TickCount64 - _petState.OwnerMovedAt < PetOwnerStoppedDelayMs;
 
-        var walkableToOwner = npc.Zone.HasGroundData
-            && npc.Zone.IsWalkable(petPosition, ownerPosition, PetMaxStepUpHeight, PetMaxStepDownHeight, out _);
-
-        if (!walkableToOwner && petPosition.Y - ownerPosition.Y > PetMaxStepDownHeight)
+        if (petPosition.Y - ownerPosition.Y > PetMaxStepDownHeight || ownerPosition.Y - petPosition.Y > PetWarpHeight)
         {
-            List<MapNode>? route = null;
-
-            if (ownerMoving && (npc.Zone.HasNavMesh
-                ? CanReachOverNavMesh(npc.Zone, petPosition, ownerPosition)
-                : TryFindPetRoute(npc, petPosition, ownerPosition, out route)))
-            {
-                MovePet(npc, ownerPosition, ownerSpeed, route);
-            }
-            else
+            if (!ownerMoving || !TryMovePet(npc, ownerPosition, ownerSpeed))
                 WarpPetBesideOwner(npc, ownerPosition);
 
-            return;
-        }
-
-        if (!walkableToOwner && ownerPosition.Y - petPosition.Y > PetWarpHeight)
-        {
-            WarpPetBesideOwner(npc, ownerPosition);
             return;
         }
 
@@ -1072,6 +1042,8 @@ public sealed class PlayerPet
         if (ownerMoving || _petState.OwnerMoving)
         {
             Vector3 goal;
+            Vector3? mirroredGoal = null;
+            Vector3 trailGoal;
 
             if (ownerMoving)
             {
@@ -1082,22 +1054,16 @@ public sealed class PlayerPet
                     _petState.FollowSide = Vector3.Dot(petPosition - ownerPosition, side) >= 0f ? PetRightSide : PetLeftSide;
 
                 goal = ownerPosition - facing * PetFollowBehindDistance + side * PetFollowSideDistance * _petState.FollowSide;
-
-                if (!npc.Zone.TryGetWalkableGoal(ownerPosition, goal, PetMaxStepUpHeight, PetMaxStepDownHeight, out goal))
-                    goal = GetOwnerTrailPosition(petPosition, PetFollowBehindDistance);
+                trailGoal = GetOwnerTrailPosition(petPosition, PetFollowBehindDistance);
             }
             else
             {
                 var angle = GetRandomPetSide() * (PetStopMinAngle + Random.Shared.NextSingle() * (PetStopMaxAngle - PetStopMinAngle));
 
                 goal = ownerPosition + Vector3.Transform(_player.GetFacingDirection(), Quaternion.CreateFromAxisAngle(Vector3.UnitY, angle)) * PetStopDistance;
+                mirroredGoal = ownerPosition + Vector3.Transform(_player.GetFacingDirection(), Quaternion.CreateFromAxisAngle(Vector3.UnitY, -angle)) * PetStopDistance;
+                trailGoal = GetOwnerTrailPosition(petPosition, PetStopDistance);
 
-                if (!npc.Zone.TryGetWalkableGoal(ownerPosition, goal, PetMaxStepUpHeight, PetMaxStepDownHeight, out goal)
-                    && !npc.Zone.TryGetWalkableGoal(ownerPosition,
-                        ownerPosition + Vector3.Transform(_player.GetFacingDirection(), Quaternion.CreateFromAxisAngle(Vector3.UnitY, -angle)) * PetStopDistance, PetMaxStepUpHeight, PetMaxStepDownHeight, out goal))
-                {
-                    goal = GetOwnerTrailPosition(petPosition, PetStopDistance);
-                }
                 _petState.RoamAt = 0;
                 _petState.StayUntil = 0;
                 _petState.RoamFirstHold = true;
@@ -1114,7 +1080,8 @@ public sealed class PlayerPet
                 ? MathF.Min(ownerSpeed + (goalDistance - PetCatchUpStopDistance) * PetCatchUpGain, ownerSpeed * PetCatchUpMaxSpeedMultiplier)
                 : ownerSpeed;
 
-            MovePet(npc, goal, followSpeed);
+            if (!TryMovePet(npc, goal, followSpeed) && (mirroredGoal is not { } mirrored || !TryMovePet(npc, mirrored, followSpeed)))
+                MovePet(npc, trailGoal, followSpeed);
 
             _petState.OwnerMoving = ownerMoving;
             _petState.LastPosition = petPosition;
@@ -1141,12 +1108,10 @@ public sealed class PlayerPet
                 var distance = Vector3.Distance(petPosition, goal);
 
                 if (distance < PetRoamMinMoveDistance || !IsPetPathClearOfOwner(petPosition, goal, ownerPosition)
-                    || !npc.Zone.TryGetWalkableGoal(petPosition, goal, PetMaxStepUpHeight, PetMaxStepDownHeight, out goal))
+                    || !TryMovePet(npc, goal, distance > PetRoamMaxDistance ? ownerSpeed : PetRoamWalkSpeed))
                 {
                     continue;
                 }
-
-                MovePet(npc, goal, distance > PetRoamMaxDistance ? ownerSpeed : PetRoamWalkSpeed);
 
                 _petState.RoamAt = 0;
                 _petState.LastPosition = petPosition;
@@ -1219,29 +1184,27 @@ public sealed class PlayerPet
         return ownerGroundedPositions[0];
     }
 
-    private void WarpPetBesideOwner(Npc npc, Vector3 ownerPosition) =>
-        WarpPet(npc, GetPetStandPosition(npc.Zone, ownerPosition,
-            ownerPosition + Vector3.Cross(Vector3.UnitY, _player.GetFacingDirection()) * PetWarpSideDistance * _petState.FollowSide));
-
-    private void WarpPet(Npc npc, Vector3 position)
+    private void WarpPetBesideOwner(Npc npc, Vector3 ownerPosition)
     {
         if (_petState.StandAt != 0)
             StandPet(npc);
 
-        var rotation = GetFacingOwnerRotation(position);
+        npc.Hide();
+        SpawnPetBesideOwner(npc, ownerPosition, PetWarpSideDistance, _petState.FollowSide);
 
-        npc.MoveTo(position, direct: true);
-        npc.UpdatePosition(position.ToVector4(), rotation);
-
-        foreach (var (_, visiblePlayer) in npc.VisiblePlayers)
-        {
-            visiblePlayer.OnRemoveVisibleNpcs(npc);
-            visiblePlayer.OnAddVisibleNpcs(npc);
-        }
+        var position = npc.Position.ToVector3();
 
         _petState.FollowGoal = position;
         _petState.LastPosition = position;
         _petState.FaceOwnerAt = PetFaceOwnerDone;
+    }
+
+    private void SpawnPetBesideOwner(Npc npc, Vector3 ownerPosition, float sideDistance, float side, Quaternion? rotation = null)
+    {
+        var besideOwner = ownerPosition + Vector3.Cross(Vector3.UnitY, _player.GetFacingDirection()) * sideDistance * side;
+
+        if (!npc.TrySpawnNear(besideOwner, rotation ?? GetFacingOwnerRotation(besideOwner)))
+            npc.UpdatePosition(ownerPosition.ToVector4(), rotation ?? GetFacingOwnerRotation(ownerPosition));
     }
 
     private Quaternion GetFacingOwnerRotation(Vector3 position)
@@ -1260,59 +1223,31 @@ public sealed class PlayerPet
         return Vector3.Distance(toOwner, path * along) >= PetRoamMinDistance;
     }
 
-    private static Vector3 GetPetStandPosition(IZone zone, Vector3 ownerPosition, Vector3 position) =>
-        zone.TryGetWalkableGoal(ownerPosition, position, PetMaxStepUpHeight, PetMaxStepDownHeight, out var standPosition) ? standPosition : ownerPosition;
-
-    private bool CanReachOverNavMesh(IZone zone, Vector3 start, Vector3 goal) =>
-        zone.TryFindReachableRoute(start, goal, _petNavMeshWaypoints, followRoads: true);
-
-    private void MovePet(Npc npc, Vector3 goal, float speed, List<MapNode>? route = null)
+    private bool TryMovePet(Npc npc, Vector3 goal, float speed)
     {
+        if (!npc.TryMoveTo(goal, allowPartial: false))
+            return false;
+
         _petState.FollowGoal = goal;
 
         if (_petState.StandAt != 0)
             StandPet(npc);
 
         EntityHelper.SetSpeed(_player, npc, speed);
-
-        var petPosition = npc.Position.ToVector3();
-
-        if (!npc.Zone.HasGroundData && goal.Y > petPosition.Y)
-        {
-            petPosition.Y = goal.Y;
-            npc.SetPositionY(goal.Y);
-        }
-
-        var walkableToGoal = npc.Zone.HasGroundData
-            && npc.Zone.IsWalkable(petPosition, goal, PetMaxStepUpHeight, PetMaxStepDownHeight, out _);
-
-        if (route is null && !walkableToGoal && npc.Zone.HasNavMesh)
-        {
-            if (CanReachOverNavMesh(npc.Zone, petPosition, goal))
-                npc.MoveTo(goal);
-            else if (Vector3.Distance(petPosition, _player.Position.ToVector3()) > PetCatchUpStartDistance)
-                WarpPetBesideOwner(npc, _player.Position.ToVector3());
-            else
-                StopPet(npc);
-
-            return;
-        }
-
-        if (route is null && !walkableToGoal && Vector3.DistanceSquared(petPosition, goal) > PetPathfindDistanceSquared)
-            TryFindPetRoute(npc, petPosition, goal, out route);
-
-        npc.MoveTo(goal, direct: route is null);
+        return true;
     }
 
-    private static bool TryFindPetRoute(Npc npc, Vector3 position, Vector3 goal, [NotNullWhen(true)] out List<MapNode>? route)
+    private void MovePet(Npc npc, Vector3 goal, float speed)
     {
-        route = npc.Zone.Pathfinder?.FindPath(position, goal);
+        if (TryMovePet(npc, goal, speed))
+            return;
 
-        if (route is [var firstNode, ..] && Vector3.DistanceSquared(position, firstNode.Position) <= PetPathfindMaxNodeDistanceSquared)
-            return true;
+        var ownerPosition = _player.Position.ToVector3();
 
-        route = null;
-        return false;
+        if (Vector3.Distance(npc.Position.ToVector3(), ownerPosition) > PetCatchUpStartDistance)
+            WarpPetBesideOwner(npc, ownerPosition);
+        else
+            StopPet(npc);
     }
 
     private static void StopPet(Npc npc) => npc.StopMoving();

@@ -136,6 +136,7 @@ public class Npc : IScriptableNpc, IEntity
         2f // Replanning frequency (Hz).
     );
     private const string MovementRoutineName = "Movement";
+    private const float DefaultSpawnMaxHeightOffset = 3f;
     private readonly Pathfinder? _pathfinder;
     private readonly PathFollower _pathFollower;
 
@@ -567,18 +568,18 @@ public class Npc : IScriptableNpc, IEntity
             visiblePlayer.Value.SendTunneled(chatPacketFromStringId);
     }
 
-    public void MoveTo(float x, float y, float z, bool direct)
+    public void TryMoveTo(float x, float y, float z, bool direct)
     {
-        MoveTo(new Vector3(x, y, z), direct);
+        TryMoveTo(new Vector3(x, y, z), direct);
     }
 
-    public bool MoveTo(Vector3 goalPosition, bool direct = false)
+    public bool TryMoveTo(Vector3 goalPosition, bool direct = false, bool allowPartial = true)
     {
         NavPath path;
 
         if (direct || _pathfinder is null)
             path = new NavPath([goalPosition], true);
-        else if (!_pathfinder.TryFindPath(Position.ToVector3(), goalPosition, out path))
+        else if (!_pathfinder.TryFindPath(Position.ToVector3(), goalPosition, out path) || (!allowPartial && !path.IsComplete))
             return false;
 
         Routines.SetRoutine(
@@ -659,9 +660,6 @@ public class Npc : IScriptableNpc, IEntity
             Cadence.Tick
         );
     }
-
-
-
 
     private bool StepPathFollower()
     {
@@ -828,5 +826,24 @@ public class Npc : IScriptableNpc, IEntity
         Zone.TryRemoveNpc(Guid);
     }
 
-    public void SetPositionY(float y) => Position = Position with { Y = y };
+    public bool TrySpawnNear(Vector3 position, Quaternion rotation, float maxHeightOffset = DefaultSpawnMaxHeightOffset)
+    {
+        var spawnPosition = position;
+
+        if (_pathfinder is not null
+            && (!_pathfinder.TryGetNearestWalkablePoint(position, out spawnPosition) || MathF.Abs(spawnPosition.Y - position.Y) > maxHeightOffset))
+        {
+            return false;
+        }
+
+        UpdatePosition(spawnPosition.ToVector4(), rotation);
+        return true;
+    }
+
+    public void Hide()
+    {
+        StopMoving();
+        Zone.UpdateEntityZoneTile(this, ZoneTile, ZoneTile.Empty);
+        ZoneTile = ZoneTile.Empty;
+    }
 }

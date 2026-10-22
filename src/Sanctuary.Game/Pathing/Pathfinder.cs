@@ -90,4 +90,11 @@ public sealed class Pathfinder
         return waypoints.Count > 0;
     }
 
+    public bool TryGetNearestWalkablePoint(Vector3 position, out Vector3 point)
+    {
+        Query.FindNearestPoly(position.ToRecast(), NearestPolygonExtents, Filter, out var polygon, out var nearest, out _);
+
+        point = polygon != 0 ? nearest.ToVector3() : position;
+        return polygon != 0;
+    }
 }
