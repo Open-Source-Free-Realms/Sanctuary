@@ -142,9 +142,21 @@ public class Npc : IScriptableNpc, IEntity
 
     // TODO: Maybe this goes into 'json' config
     private const int MaxSearchIterations = 1024;
-    private const float ChaseFrequency = 2f;
+
+    // TODO: Rename and potentially make settable per NPC.
+    private static readonly ChaseSettings TargetChaseSettings = new(
+        0.5f, // Minimum distance to target (u).
+        1.5f, // Maximum distance to target (u).
+        MathF.PI / 2f, // Spread angle for catching (rad).
+        0.2f, // Stopping tolerance (u).
+        2f // Replanning frequency (Hz).
+    );
+    private const string MovementRoutineName = "Movement";
     private readonly Pathfinder? _pathfinder;
     private readonly PathFollower? _pathFollower;
+
+    // TODO: May be worth re-evaluating this check at a later date.
+    public bool IsMoving => _pathFollower?.HasPath == true;
 
     public Npc(IZone zone)
     {
@@ -614,7 +626,7 @@ public class Npc : IScriptableNpc, IEntity
             return;
 
         Routines.SetRoutine(
-            "Movement",
+            MovementRoutineName,
             new DelegateRoutine(
                 onStart: () => _pathFollower.SetPath(path, 0f), // TODO: Magic number!
                 onStep: () => StepPathFollower(),
@@ -629,7 +641,12 @@ public class Npc : IScriptableNpc, IEntity
         if (_pathfinder is null || _pathFollower is null)
             return;
 
-        Routines.SetRoutine("Movement",
+
+        var chaseOffset = TargetChaseSettings.GetOffset(Position.ToVector3(), target.Position.ToVector3());
+
+        // TODO: Make a periodic routine that just accepts an arbitrary routine...
+        Routines.SetRoutine(
+            MovementRoutineName,
             new ParallelRoutine(
                 [
                     // NOTE: We can use a parallel routine to give us low-frequency behavior here. It'll have to wait for the
@@ -638,22 +655,27 @@ public class Npc : IScriptableNpc, IEntity
                     // 
                     // NOTE: Hard planning frequencies/periods are not enforced and we expect that these will diverge by about a tick
                     // due to rounding.
-                    new RepeatRoutine(
+                    new RepeatRoutine( // Low-frequency planning
                         new ParallelRoutine(
                             [
                                 new DelegateRoutine(onStep: () =>
                                     {
-                                        if (_pathfinder.TryFindPath(Position.ToVector3(), target.Position.ToVector3(), out var path))
-                                            _pathFollower.SetPath(path, 1f); // TODO: Magic number!
- 
+                                        var position = Position.ToVector3();
+                                        var targetPosition = target.Position.ToVector3();
+
+
+
+                                        if (_pathfinder.TryFindPath(position, targetPosition + chaseOffset, out var path))
+                                            _pathFollower.SetPath(path, TargetChaseSettings.StopTolerance);
+
                                         return true;
                                     }
                                 ),
-                                new WaitRoutine(1f / ChaseFrequency)
+                                new WaitRoutine(1f / TargetChaseSettings.ReplanFrequency)
                             ]
                         )
                     ),
-                    new DelegateRoutine(
+                    new DelegateRoutine( // High-frequency following
                         // NOTE: We force return false here to keep the NPC always chasing. 
                         onStep: () =>
                         {
@@ -669,6 +691,8 @@ public class Npc : IScriptableNpc, IEntity
             Cadence.Tick
         );
     }
+
+
 
 
     private bool StepPathFollower()
