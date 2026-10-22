@@ -12,7 +12,7 @@ public sealed class PathFollower
     private static readonly RcVec3f GroundExtents = new(0.5f, 2f, 0.5f);
     private static readonly DtQueryDefaultFilter GroundFilter = new();
 
-    private readonly DtNavMeshQuery _query;
+    private readonly DtNavMeshQuery? _query;
 
     private int _waypoint;
 
@@ -21,7 +21,7 @@ public sealed class PathFollower
 
     private float _stopTolerance;
 
-    public PathFollower(DtNavMeshQuery query)
+    public PathFollower(DtNavMeshQuery? query)
     {
         _query = query;
     }
@@ -86,6 +86,9 @@ public sealed class PathFollower
 
     private Vector3 SnapToGround(Vector3 position)
     {
+        if (_query is null)
+            return position;
+
         var point = position.ToRecast();
 
         _query.FindNearestPoly(point, GroundExtents, GroundFilter, out var polygon, out _, out _);

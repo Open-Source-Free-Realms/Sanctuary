@@ -10,20 +10,16 @@ namespace Sanctuary.Game.Entities;
 
 public sealed class NpcMovementController
 {
-    private const float WalkMaxStepUpHeight = 1f;
-    private const float WalkMaxStepDownHeight = 3f;
     private const int WanderPickAttempts = 8;
     private const int RecentSpotCount = 3;
     private const float WanderMaxTurn = MathF.PI * 5f / 9f;
     private static readonly float[] FleeTurns = [0f, MathF.PI / 4f, -MathF.PI / 4f, MathF.PI / 2f, -MathF.PI / 2f, MathF.PI * 3f / 4f, -MathF.PI * 3f / 4f];
     private const float PatrolArrivedDistanceSquared = 0.25f;
-    private const float WaypointTolerance = 0.25f;
-    private const float StraightRouteMaxLengthRatio = 1.2f;
+    private const float MillisecondsPerSecond = 1000f;
 
     private readonly Npc _npc;
     private readonly NpcMovementDefinition _definition;
     private readonly Vector3 _home;
-    private readonly Queue<Vector3> _navMeshWaypoints = new();
     private readonly Queue<Vector3> _recentSpots = new();
     private readonly List<Vector3> _area;
 
@@ -40,9 +36,10 @@ public sealed class NpcMovementController
 
         _area = definition.Area.ConvertAll(point => new Vector3(point[0], point[1], point[2]));
 
-        _npc.Speed = definition.Speed;
-        _npc.WaypointTolerance = WaypointTolerance;
-        _npc.PositionUpdateIntervalMs = definition.UpdateIntervalMs;
+        _npc.SetSpeed(definition.Speed);
+        _npc.PositionUpdateFrequency = definition.UpdateIntervalMs > 0
+            ? MillisecondsPerSecond / definition.UpdateIntervalMs
+            : Npc.DefaultPositionUpdateFrequency;
 
         if (definition.Type == NpcMovementType.Patrol)
             _patrolIndex = GetNearestPatrolPointIndex();
@@ -55,7 +52,7 @@ public sealed class NpcMovementController
         if (_fleeing && !_npc.IsMoving)
         {
             _fleeing = false;
-            _npc.Speed = _definition.Speed;
+            _npc.SetSpeed(_definition.Speed);
         }
 
         if (!_fleeing && _definition.FleeDistance > 0f && TryStartFlee())
@@ -98,7 +95,7 @@ public sealed class NpcMovementController
             if (!IsInArea(goal) || IsNearRecentSpot(goal))
                 continue;
 
-            if (!TryMoveToReachableGoal(position, goal))
+            if (!_npc.MoveTo(goal))
                 continue;
 
             RememberSpot(position);
@@ -137,58 +134,15 @@ public sealed class NpcMovementController
         {
             var goal = position + Vector3.Transform(away, Quaternion.CreateFromAxisAngle(Vector3.UnitY, turn)) * _definition.FleeLegDistance;
 
-            if (!IsInArea(goal))
+            if (!IsInArea(goal) || !_npc.MoveTo(goal))
                 continue;
 
-            var speed = _npc.Speed;
-            _npc.Speed = _definition.FleeSpeed;
-
-            if (!TryMoveToReachableGoal(position, goal))
-            {
-                _npc.Speed = speed;
-                continue;
-            }
-
+            _npc.SetSpeed(_definition.FleeSpeed);
             _fleeing = true;
             return true;
         }
 
         return false;
-    }
-
-    private bool TryMoveToReachableGoal(Vector3 position, Vector3 goal)
-    {
-        if (_npc.Zone.HasNavMesh)
-        {
-            if (!_npc.Zone.TryFindReachableRoute(position, goal, _navMeshWaypoints, followRoads: false)
-                || GetRouteLength(position) > StraightRouteMaxLengthRatio * MathF.Sqrt(position.DistanceSquaredXZ(goal)))
-            {
-                return false;
-            }
-
-            _npc.MoveTo(_npc.Zone.GetGroundPosition(goal, WalkMaxStepUpHeight, WalkMaxStepUpHeight + WalkMaxStepDownHeight), direct: true);
-            return true;
-        }
-
-        if (!_npc.Zone.TryGetWalkableGoal(position, goal, WalkMaxStepUpHeight, WalkMaxStepDownHeight, out var walkableGoal))
-            return false;
-
-        _npc.MoveTo(walkableGoal, direct: true);
-        return true;
-    }
-
-    private float GetRouteLength(Vector3 start)
-    {
-        var length = 0f;
-        var previous = start;
-
-        foreach (var waypoint in _navMeshWaypoints)
-        {
-            length += MathF.Sqrt(previous.DistanceSquaredXZ(waypoint));
-            previous = waypoint;
-        }
-
-        return length;
     }
 
     private bool IsInArea(Vector3 goal) =>

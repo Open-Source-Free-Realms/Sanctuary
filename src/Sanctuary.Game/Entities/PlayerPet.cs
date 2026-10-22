@@ -91,7 +91,6 @@ public sealed class PlayerPet
     private const float PetGroomHygienePerMovement = 1f / 65536f;
     private const float PetDefaultScale = 1f;
     private const int PetNpcDisposition = 2;
-    private const float PetWaypointTolerance = 0.5f;
     private const float PetFollowBehindDistance = 2f;
     private const float PetFollowSideDistance = 1.5f;
     private const float PetLeftSide = -1f;
@@ -336,7 +335,7 @@ public sealed class PlayerPet
         if (!_player.Zone.TryCreateNpc(out var npc))
             return;
 
-        npc.PositionSendIntervalMs = Npc.FollowerPositionIntervalMs;
+        npc.PositionUpdateFrequency = Npc.FollowerPositionUpdateFrequency;
         npc.Name = petClientInfo.Name;
         npc.NameId = petClientInfo.NameId;
         npc.ModelId = modelDefinition.Id;
@@ -360,7 +359,6 @@ public sealed class PlayerPet
         npc.IsInteractable = false;
         npc.Scale = modelDefinition.Scale > 0f ? modelDefinition.Scale : PetDefaultScale;
         npc.Disposition = PetNpcDisposition;
-        npc.WaypointTolerance = PetWaypointTolerance;
         var followSide = GetRandomPetSide();
         var ownerPosition = _player.Position.ToVector3();
         var summonPosition = GetPetStandPosition(_player.Zone, ownerPosition,
@@ -1291,7 +1289,7 @@ public sealed class PlayerPet
         if (route is null && !walkableToGoal && npc.Zone.HasNavMesh)
         {
             if (CanReachOverNavMesh(npc.Zone, petPosition, goal))
-                npc.MoveTo(new Queue<Vector3>(_petNavMeshWaypoints));
+                npc.MoveTo(goal);
             else if (Vector3.Distance(petPosition, _player.Position.ToVector3()) > PetCatchUpStartDistance)
                 WarpPetBesideOwner(npc, _player.Position.ToVector3());
             else
@@ -1303,10 +1301,7 @@ public sealed class PlayerPet
         if (route is null && !walkableToGoal && Vector3.DistanceSquared(petPosition, goal) > PetPathfindDistanceSquared)
             TryFindPetRoute(npc, petPosition, goal, out route);
 
-        if (route is null)
-            npc.MoveTo(goal, direct: true);
-        else
-            npc.MoveTo(goal, route);
+        npc.MoveTo(goal, direct: route is null);
     }
 
     private static bool TryFindPetRoute(Npc npc, Vector3 position, Vector3 goal, [NotNullWhen(true)] out List<MapNode>? route)

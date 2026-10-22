@@ -9,7 +9,6 @@ using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Collections;
 using Sanctuary.Core.Extensions;
-using Sanctuary.Game.Pathfinding;
 using Sanctuary.Game.Pathing;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Helpers;
@@ -21,8 +20,6 @@ using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Chat;
 using Sanctuary.Scripting;
 using System.Security.Cryptography;
-
-using PathFollower = Sanctuary.Game.Pathing.PathFollower;
 
 namespace Sanctuary.Game.Entities;
 
@@ -115,30 +112,17 @@ public class Npc : IScriptableNpc, IEntity
 
     private ConcurrentSet<string> _scripts { get; } = [];
 
-    public float WaypointTolerance { get; set; } = 0f;
     public float Speed { get; set; } = 6.25f;
-
-    public int PositionUpdateIntervalMs { get; set; }
 
     public NpcMovementController? MovementController { get; set; }
 
     public NpcAmbientController? AmbientController { get; set; }
-
-    public bool IsMoving => _pathMoving || !_path.IsEmpty;
 
     private const int HostileDisposition = 0;
 
     // TODO: this can probably be an enum.
     private const byte MovingPositionState = 0;
     private const byte StoppedPositionState = 1;
-    private const float GroundStepHeight = 3f;
-    private const float GroundMaxDrop = 20f;
-
-    private readonly PathState _path = new();
-    private bool _pathMoving;
-    private long _nextPositionSendAt;
-
-    private PathBuilder? _pathBuilder;
 
     // TODO: Maybe this goes into 'json' config
     private const int MaxSearchIterations = 1024;
@@ -153,10 +137,10 @@ public class Npc : IScriptableNpc, IEntity
     );
     private const string MovementRoutineName = "Movement";
     private readonly Pathfinder? _pathfinder;
-    private readonly PathFollower? _pathFollower;
+    private readonly PathFollower _pathFollower;
 
     // TODO: May be worth re-evaluating this check at a later date.
-    public bool IsMoving => _pathFollower?.HasPath == true;
+    public bool IsMoving => _pathFollower.HasPath;
 
     public Npc(IZone zone)
     {
@@ -166,10 +150,9 @@ public class Npc : IScriptableNpc, IEntity
 
         // TODO: these need to be rebuilt/reset on zone change in the future.
         if (zone.NavMeshQuery is not null)
-        {
             _pathfinder = new Pathfinder(zone.NavMeshQuery, zone.NavMeshFilter, MaxSearchIterations);
-            _pathFollower = new PathFollower(zone.NavMeshQuery);
-        }
+
+        _pathFollower = new PathFollower(zone.NavMeshQuery);
     }
 
     #region Events
@@ -244,35 +227,6 @@ public class Npc : IScriptableNpc, IEntity
 
         MovementController?.Update();
         AmbientController?.Update();
-
-        var currentPosition = Position.ToVector3();
-        var result = Pathfinding.PathFollower.Advance(_path, currentPosition, Speed, WaypointTolerance, Zone.TickDeltaSeconds);
-
-        if (result.Moved)
-        {
-            _pathMoving = true;
-            var rotation = result.NewRotation!.Value;
-            var newPosition = Zone.GetGroundPosition(result.NewPosition, GroundStepHeight, GroundMaxDrop);
-
-            if (PositionUpdateIntervalMs == 0 || Environment.TickCount64 >= _nextPositionSendAt)
-            {
-                _nextPositionSendAt = Environment.TickCount64 + PositionUpdateIntervalMs;
-                UpdatePosition(newPosition.ToVector4(), rotation, MovingPositionState);
-            }
-            else
-            {
-                Position = newPosition.ToVector4();
-                Rotation = rotation;
-
-                if (Visible)
-                    UpdateZoneTile();
-            }
-        }
-        else if (_pathMoving && result.Arrived)
-        {
-            _pathMoving = false;
-            UpdatePosition(Position, Rotation, StoppedPositionState);
-        }
     }
 
     public void UpdateEverySecond()
@@ -287,11 +241,12 @@ public class Npc : IScriptableNpc, IEntity
 
     protected virtual bool SendsPositionTo(Player player) => true;
 
-    public const int FollowerPositionIntervalMs = 500;
+    public const float DefaultPositionUpdateFrequency = 4f;
+    public const float FollowerPositionUpdateFrequency = 2f;
 
-    public int PositionSendIntervalMs { get; set; }
-    private long _nextPositionSendAllowedAt;
-    private byte _lastSentPositionState;
+    public float PositionUpdateFrequency { get; set; } = DefaultPositionUpdateFrequency;
+    private long _nextMovingPositionUpdateAt;
+    private byte _lastSentPositionState = StoppedPositionState;
 
     private void SendExpectedSpeed()
     {
@@ -333,16 +288,16 @@ public class Npc : IScriptableNpc, IEntity
             Unknown = 0
         };
 
-        if (PositionSendIntervalMs > 0)
-        {
-            var now = Environment.TickCount64;
+        var now = Environment.TickCount64;
 
-            if (state == _lastSentPositionState && now < _nextPositionSendAllowedAt)
-                return;
+        if (state == MovingPositionState && _lastSentPositionState == MovingPositionState
+            && PositionUpdateFrequency > 0f && now < _nextMovingPositionUpdateAt)
+            return;
 
-            _lastSentPositionState = state;
-            _nextPositionSendAllowedAt = now + PositionSendIntervalMs;
-        }
+        _lastSentPositionState = state;
+
+        if (state == MovingPositionState && PositionUpdateFrequency > 0f)
+            _nextMovingPositionUpdateAt = now + (long)(1000f / PositionUpdateFrequency);
 
         if (VisiblePlayers.IsEmpty)
             return;
@@ -617,13 +572,14 @@ public class Npc : IScriptableNpc, IEntity
         MoveTo(new Vector3(x, y, z), direct);
     }
 
-    public void MoveTo(Vector3 goalPosition)
+    public bool MoveTo(Vector3 goalPosition, bool direct = false)
     {
-        if (_pathfinder is null || _pathFollower is null)
-            return;
+        NavPath path;
 
-        if (!_pathfinder.TryFindPath(Position.ToVector3(), goalPosition, out var path))
-            return;
+        if (direct || _pathfinder is null)
+            path = new NavPath([goalPosition], true);
+        else if (!_pathfinder.TryFindPath(Position.ToVector3(), goalPosition, out path))
+            return false;
 
         Routines.SetRoutine(
             MovementRoutineName,
@@ -634,11 +590,23 @@ public class Npc : IScriptableNpc, IEntity
             ),
             Cadence.Tick
         );
+
+        return true;
+    }
+
+    public void StopMoving()
+    {
+        var wasMoving = IsMoving;
+
+        Routines.Cancel(MovementRoutineName);
+
+        if (wasMoving)
+            UpdatePosition(Position, Rotation, StoppedPositionState);
     }
 
     public void Chase(IEntity target)
     {
-        if (_pathfinder is null || _pathFollower is null)
+        if (_pathfinder is null)
             return;
 
 
@@ -814,19 +782,13 @@ public class Npc : IScriptableNpc, IEntity
             visiblePlayer.Value.SendTunneled(playerUpdatePacketRemoveEffectTagCompositeEffect);
     }
 
-    private const int ScriptedWalkUpdateIntervalMs = 1000;
-
-    private const float ScriptedWalkWaypointTolerance = 0.25f;
-
     public void SetSpeed(float speed)
     {
+        if (Speed == speed)
+            return;
+
         Speed = speed;
-
-        if (PositionUpdateIntervalMs == 0)
-            PositionUpdateIntervalMs = ScriptedWalkUpdateIntervalMs;
-
-        if (WaypointTolerance == 0)
-            WaypointTolerance = ScriptedWalkWaypointTolerance;
+        SendExpectedSpeed();
     }
 
     public void SetHeading(float heading) =>
@@ -866,69 +828,5 @@ public class Npc : IScriptableNpc, IEntity
         Zone.TryRemoveNpc(Guid);
     }
 
-    public void MoveTo(Vector3 goalPosition, bool direct = false)
-    {
-        StartLeg();
-
-        if (!direct)
-        {
-            var navMeshWaypoints = new Queue<Vector3>();
-
-            if (Zone.TryFindRoute(Position.ToVector3(), goalPosition, navMeshWaypoints))
-            {
-                _path.Set(navMeshWaypoints);
-                return;
-            }
-        }
-
-        if (direct || Zone.Pathfinder is null)
-        {
-            _path.SetTarget(goalPosition);
-            return;
-        }
-
-        _pathBuilder ??= new PathBuilder(Zone.Pathfinder);
-
-        SetPath(goalPosition, _pathBuilder.TryRecompute(Position.ToVector3(), goalPosition));
-    }
-
-    public void MoveTo(Queue<Vector3> waypoints)
-    {
-        StartLeg();
-        _path.Set(waypoints);
-    }
-
-    public void MoveTo(Vector3 goalPosition, List<MapNode> route)
-    {
-        if (Zone.Pathfinder is null)
-        {
-            _path.SetTarget(goalPosition);
-            return;
-        }
-
-        _pathBuilder ??= new PathBuilder(Zone.Pathfinder);
-
-        SetPath(goalPosition, _pathBuilder.TryRecompute(Position.ToVector3(), goalPosition, route));
-    }
-
-    public void StopMoving() => _path.Clear();
-
-    private void StartLeg()
-    {
-        if (PositionUpdateIntervalMs == 0)
-            return;
-
-        _nextPositionSendAt = Environment.TickCount64;
-        SendExpectedSpeed();
-    }
-
     public void SetPositionY(float y) => Position = Position with { Y = y };
-
-    private void SetPath(Vector3 goalPosition, Queue<Vector3>? newWaypoints)
-    {
-        if (newWaypoints is not null)
-            _path.Set(newWaypoints);
-        else
-            _path.SetGoal(goalPosition);
-    }
 }
