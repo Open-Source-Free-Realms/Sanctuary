@@ -35,8 +35,8 @@ public static class QuestEndReplyPacketHandler
 
         var player = connection.Player;
 
-        var pendingQuestId = player.PendingTurnInQuestId;
-        player.PendingTurnInQuestId = 0;
+        var pendingQuestId = player.Quests.PendingTurnInQuestId;
+        player.Quests.PendingTurnInQuestId = 0;
 
         if (pendingQuestId == 0 || pendingQuestId != packet.QuestId || !_questManager.CompleteQuest(player, packet.QuestId))
         {

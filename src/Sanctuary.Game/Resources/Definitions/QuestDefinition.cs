@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 
+using Sanctuary.Game.Quests;
 using Sanctuary.Game.Resources.Definitions.QuestGoals;
 
 namespace Sanctuary.Game.Resources.Definitions;
@@ -53,18 +54,18 @@ public sealed class QuestDefinition
         Goals.Count > 0 && Goals[^1].ConversationFor(TargetNpcId) is { Count: > 0 } lines ? lines[^1].TextId : 0;
 
     // Shared by the offer flow and the giver's badge so the two can't drift.
-    public bool IsOfferableFor(IReadOnlyDictionary<int, bool> playerQuests)
+    public bool IsOfferableFor(QuestLog playerQuests)
     {
-        if (playerQuests.ContainsKey(QuestId))
+        if (playerQuests.Contains(QuestId))
             return false;
 
         // Before the prerequisite, so exclusive branches that share one still lock each other out.
         foreach (var excludedId in ExcludesQuestIds)
-            if (playerQuests.ContainsKey(excludedId))
+            if (playerQuests.Contains(excludedId))
                 return false;
 
         if (PrerequisiteQuestId is { } prerequisiteQuestId)
-            return playerQuests.TryGetValue(prerequisiteQuestId, out var prerequisiteDone) && prerequisiteDone;
+            return playerQuests.IsCompleted(prerequisiteQuestId);
 
         return true;
     }

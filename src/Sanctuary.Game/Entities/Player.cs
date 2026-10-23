@@ -19,7 +19,6 @@ using Sanctuary.Game.Interactions;
 using Sanctuary.Game.Quests;
 using Sanctuary.Game.Resources.Definitions.Combat;
 using Sanctuary.Game.Resources.Definitions;
-using Sanctuary.Game.Resources.Definitions.QuestGoals;
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -98,25 +97,9 @@ public sealed class Player : ClientPcData, IEntity
     public ulong LastInteractNpcGuid { get; set; }
     public DateTime LastInteractAt { get; set; }
 
-    public DateTime LastQuestAcceptedAt { get; set; }
+    public QuestLog Quests { get; } = new();
 
-    public ConcurrentDictionary<int, bool> Quests { get; } = new();
-
-    public Dictionary<int, int> QuestGoalProgress { get; } = new();
-
-    public Dictionary<int, int> QuestCollectProgress { get; } = new();
-
-    public HashSet<int> TalkedQuestNpcs { get; } = new();
-
-    public Queue<QuestDialogueLine> PendingDialogue { get; } = new();
-    public ulong PendingDialogueNpcGuid { get; set; }
-
-    public ulong TalkingNpcGuid { get; set; }
-    public DateTimeOffset TalkAnimationEndsAt { get; set; }
-
-    public int ActiveQuestId { get; set; }
-
-    public int PendingTurnInQuestId { get; set; }
+    public QuestConversation QuestConversation { get; } = new();
 
     public ConcurrentDictionary<ChatChannel, bool> ChatChannelStatus { get; set; } = [];
 
@@ -370,7 +353,7 @@ public sealed class Player : ClientPcData, IEntity
 
         TickEffects(now);
 
-        if (TalkingNpcGuid != 0 && now >= TalkAnimationEndsAt)
+        if (QuestConversation.TalkingNpcGuid != 0 && now >= QuestConversation.TalkAnimationEndsAt)
             QuestDialogue.StopTalkAnimation(this);
 
         PlayerPet.UpdateEveryTick();
@@ -839,7 +822,7 @@ public sealed class Player : ClientPcData, IEntity
         {
             foreach (var questId in targetQuestIds)
             {
-                if (Quests.TryGetValue(questId, out var completed) && !completed && quests.TryGet(questId, out var quest))
+                if (Quests.TryGetInProgress(questId, out _) && quests.TryGet(questId, out var quest))
                     return quest.NotificationActive;
             }
         }

@@ -236,7 +236,7 @@ public static class CommandPacketInteractRequestHandler
             if (!node.PoolDefinition.HasDrop)
             {
                 node.CompleteCollection();
-                _questManager.OnCollectionNodeGathered(connection.Player, node);
+                _questManager.OnEvent(connection.Player, new NodeGatheredEvent(node));
                 return true;
             }
 
@@ -327,7 +327,7 @@ public static class CommandPacketInteractRequestHandler
             node.CompleteCollection();
             nodeCompleted = true;
 
-            _questManager.OnCollectionNodeGathered(connection.Player, node);
+            _questManager.OnEvent(connection.Player, new NodeGatheredEvent(node));
 
             if (!SendCollectionProgress(connection, collectionProgress))
                 SendCollectionRewardToast(connection, clientItem, itemDefinition, node);

@@ -30,11 +30,11 @@ public static class QuestDialogue
         if (npcGuid == 0)
             return;
 
-        if (player.TalkingNpcGuid != 0 && player.TalkingNpcGuid != npcGuid)
+        if (player.QuestConversation.TalkingNpcGuid != 0 && player.QuestConversation.TalkingNpcGuid != npcGuid)
             StopTalkAnimation(player);
 
-        player.TalkingNpcGuid = npcGuid;
-        player.TalkAnimationEndsAt = DateTimeOffset.UtcNow.AddMilliseconds(TalkAnimationMs);
+        player.QuestConversation.TalkingNpcGuid = npcGuid;
+        player.QuestConversation.TalkAnimationEndsAt = DateTimeOffset.UtcNow.AddMilliseconds(TalkAnimationMs);
 
         player.SendTunneled(new PlayerUpdatePacketSetAnimation
         {
@@ -46,11 +46,11 @@ public static class QuestDialogue
 
     public static void StopTalkAnimation(Player player)
     {
-        if (player.TalkingNpcGuid == 0)
+        if (player.QuestConversation.TalkingNpcGuid == 0)
             return;
 
-        var npcGuid = player.TalkingNpcGuid;
-        player.TalkingNpcGuid = 0;
+        var npcGuid = player.QuestConversation.TalkingNpcGuid;
+        player.QuestConversation.TalkingNpcGuid = 0;
 
         player.SendTunneled(new PlayerUpdatePacketSetAnimation
         {
@@ -62,38 +62,38 @@ public static class QuestDialogue
 
     public static void Begin(Player player, IReadOnlyList<QuestDialogueLine> lines, ulong npcGuid)
     {
-        player.PendingDialogue.Clear();
+        player.QuestConversation.PendingLines.Clear();
 
         if (lines.Count == 0)
             return;
 
-        player.PendingDialogueNpcGuid = npcGuid;
+        player.QuestConversation.NpcGuid = npcGuid;
 
         for (var i = 1; i < lines.Count; i++)
-            player.PendingDialogue.Enqueue(lines[i]);
+            player.QuestConversation.PendingLines.Enqueue(lines[i]);
 
         Show(player, lines[0], npcGuid, isLastTurn: lines.Count == 1);
     }
 
     public static bool TryAdvance(Player player)
     {
-        if (player.PendingDialogue.Count == 0)
+        if (player.QuestConversation.PendingLines.Count == 0)
         {
-            player.PendingDialogueNpcGuid = 0;
+            player.QuestConversation.NpcGuid = 0;
             StopTalkAnimation(player);
             return false;
         }
 
-        var line = player.PendingDialogue.Dequeue();
+        var line = player.QuestConversation.PendingLines.Dequeue();
 
-        Show(player, line, player.PendingDialogueNpcGuid, isLastTurn: player.PendingDialogue.Count == 0);
+        Show(player, line, player.QuestConversation.NpcGuid, isLastTurn: player.QuestConversation.PendingLines.Count == 0);
         return true;
     }
 
     public static void Clear(Player player)
     {
-        player.PendingDialogue.Clear();
-        player.PendingDialogueNpcGuid = 0;
+        player.QuestConversation.PendingLines.Clear();
+        player.QuestConversation.NpcGuid = 0;
         StopTalkAnimation(player);
     }
 

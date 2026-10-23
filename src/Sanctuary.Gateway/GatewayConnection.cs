@@ -280,13 +280,13 @@ public class GatewayConnection : UdpConnection
 
         Player.CharacterId = dbCharacter.Id;
 
-        Player.ActiveQuestId = dbCharacter.ActiveQuestId ?? 0;
+        Player.Quests.ActiveQuestId = dbCharacter.ActiveQuestId ?? 0;
 
         foreach (var dbQuest in dbCharacter.Quests)
         {
             if (dbQuest.Completed)
             {
-                Player.Quests[dbQuest.QuestId] = true;
+                Player.Quests.Add(new QuestProgress(dbQuest.QuestId) { Completed = true });
                 continue;
             }
 
@@ -297,7 +297,8 @@ public class GatewayConnection : UdpConnection
                 continue;
             }
 
-            Player.Quests[dbQuest.QuestId] = false;
+            var questProgress = new QuestProgress(dbQuest.QuestId);
+            Player.Quests.Add(questProgress);
 
             var goalIndex = dbQuest.CurrentGoalId == QuestManager.AllGoalsDoneGoalId
                 ? questDefinition.Goals.Count
@@ -307,24 +308,14 @@ public class GatewayConnection : UdpConnection
             {
                 _logger.LogWarning("Character {character} was on goal {goal} of quest {quest}, which no longer has that goal. Restarting the quest from its first goal.",
                     dbCharacter.Id, dbQuest.CurrentGoalId, dbQuest.QuestId);
+                questProgress.StartGoal(questDefinition, 0);
                 continue;
             }
 
-            if (goalIndex > 0)
-                Player.QuestGoalProgress[dbQuest.QuestId] = goalIndex;
-
-            var goalCount = 0;
+            questProgress.StartGoal(questDefinition, goalIndex);
 
             foreach (var progress in dbQuest.Progress.Where(progress => progress.GoalId == dbQuest.CurrentGoalId))
-            {
-                if (progress.TargetId != 0)
-                    Player.TalkedQuestNpcs.Add((int)progress.TargetId);
-
-                goalCount += progress.Count;
-            }
-
-            if (goalCount > 0)
-                Player.QuestCollectProgress[dbQuest.QuestId] = goalCount;
+                questProgress.Goal.Load(progress.TargetId, progress.Count);
         }
 
         Player.Birthday = dbCharacter.Created;

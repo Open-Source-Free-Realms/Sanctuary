@@ -13,9 +13,7 @@ public interface IQuestManager
 
     bool OnNpcInteract(Player player, Npc npc);
 
-    void OnCollectionNodeGathered(Player player, CollectionNode node);
-
-    void OnPlayerMoved(Player player);
+    void OnEvent(Player player, QuestEvent questEvent);
 
     void AcceptQuest(Player player, int questId);
 

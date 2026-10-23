@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
+using Sanctuary.Game.Quests;
+
 namespace Sanctuary.Game.Resources.Definitions.QuestGoals;
 
 // One checklist row within a quest. Goals complete in order.
@@ -23,6 +25,15 @@ public abstract class QuestGoal
     // collect pickups. Per-goal, since a quest can mix a distant landmark with a close-up pickup.
     public byte CursorId { get; set; } = 17;
     public int InteractRange { get; set; } = 12;
+
+    public int RequiredCount { get; set; }
+
+    public virtual GoalProgress CreateProgress() => new();
+
+    public abstract bool Matches(QuestDefinition quest, QuestEvent questEvent);
+
+    public virtual QuestGoalResult Progress(QuestDefinition quest, QuestEvent questEvent, GoalProgress progress)
+        => Matches(quest, questEvent) ? QuestGoalResult.Completed : QuestGoalResult.None;
 
     public virtual IReadOnlyList<QuestDialogueLine> ConversationFor(int npcId)
     {

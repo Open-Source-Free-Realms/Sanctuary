@@ -28,7 +28,7 @@ public static class SelectedQuestLockedPacketHandler
         }
 
         _logger.LogDebug("{player}'s tracked quest (QuestId={questId}) locked-state changed to {isLocked}.",
-            connection.Player.Name, connection.Player.ActiveQuestId, packet.IsLocked);
+            connection.Player.Name, connection.Player.Quests.ActiveQuestId, packet.IsLocked);
 
         return true;
     }
