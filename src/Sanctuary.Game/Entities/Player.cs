@@ -18,6 +18,7 @@ using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Interactions;
 using Sanctuary.Game.Resources.Definitions.Combat;
 using Sanctuary.Game.Resources.Definitions;
+using Sanctuary.Game.Routines;
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -49,6 +50,8 @@ public sealed class Player : ClientPcData, IEntity
     private readonly IZoneManager _zoneManager;
 
     public bool Visible { get; set; }
+
+    public RoutineManager Routines { get; }
 
     public IZone Zone { get; set; }
     public ZoneTile ZoneTile { get; private set; } = ZoneTile.Empty;
@@ -94,7 +97,6 @@ public sealed class Player : ClientPcData, IEntity
 
     public DateTimeOffset LoginStartedAt { get; set; }
 
-    public long NextClientPathRequestAt { get; set; }
     public int SecondsSinceLastLogin { get; set; } = -1;
     public ConcurrentSet<int> CollectedCollectionEntryIds { get; } = [];
 
@@ -194,6 +196,8 @@ public sealed class Player : ClientPcData, IEntity
         _resourceManager = resourceManager;
         _zoneManager = zoneManager;
         PlayerPet = new PlayerPet(this, resourceManager);
+
+        Routines = new RoutineManager(zone.Logger);
     }
 
     #region Connection
@@ -340,6 +344,8 @@ public sealed class Player : ClientPcData, IEntity
     {
         var now = DateTimeOffset.UtcNow;
 
+        Routines.OnTick();
+
         TickEffects(now);
         PlayerPet.UpdateEveryTick();
         SendVisiblePositions();
@@ -390,6 +396,8 @@ public sealed class Player : ClientPcData, IEntity
 
     public void UpdateEverySecond()
     {
+        Routines.OnSecond();
+
         SnowballInteraction.Update(this);
         UpdatePortrait();
     }
