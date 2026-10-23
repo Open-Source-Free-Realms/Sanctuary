@@ -1,7 +1,9 @@
 ﻿using System.Numerics;
 using System.Text.Json.Serialization;
 
+using Sanctuary.Core.Extensions;
 using Sanctuary.Core.IO;
+using Sanctuary.Game.Quests;
 
 namespace Sanctuary.Game.Resources.Definitions.QuestGoals;
 
@@ -12,4 +14,8 @@ public sealed class ReachLocationGoal : QuestGoal
     public Vector3 ReachPosition { get; set; }
 
     public float ReachRadius { get; set; } = 12f;
+
+    public override bool Matches(QuestDefinition quest, QuestEvent questEvent)
+        => ReachPosition != Vector3.Zero && questEvent is PlayerMovedEvent { Position: var position }
+            && position.IsInCircle(ReachPosition, ReachRadius);
 }

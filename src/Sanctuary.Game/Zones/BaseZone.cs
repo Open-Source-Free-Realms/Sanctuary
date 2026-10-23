@@ -870,6 +870,7 @@ public abstract class BaseZone : IZone, IDisposable
             ? new CollectionCoin(this, coinDefinition) { Guid = npcGuid }
             : new Npc(this) { Guid = npcGuid };
 
+        npc.DefinitionId = definition.Id;
         npc.NameId = definition.NameId;
         npc.Name = definition.Name;
         npc.ModelId = definition.ModelId;

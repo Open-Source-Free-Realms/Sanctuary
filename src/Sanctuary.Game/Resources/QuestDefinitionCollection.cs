@@ -30,6 +30,28 @@ public class QuestDefinitionCollection
 
     public bool TryGet(int questId, out QuestDefinition definition) => Quests.TryGetValue(questId, out definition!);
 
+    public bool TryGetNpcCursorId(int npcId, out byte cursorId)
+    {
+        cursorId = 0;
+
+        foreach (var index in new[] { ByGiver, ByTarget })
+        {
+            if (!index.TryGetValue(npcId, out var questIds))
+                continue;
+
+            foreach (var questId in questIds)
+                if (TryGet(questId, out var quest))
+                    foreach (var goal in quest.Goals)
+                        if (goal.CursorId != 0)
+                        {
+                            cursorId = goal.CursorId;
+                            return true;
+                        }
+        }
+
+        return false;
+    }
+
     public bool TryGetNpcInteractRange(int npcId, out int interactRange)
     {
         interactRange = int.MaxValue;

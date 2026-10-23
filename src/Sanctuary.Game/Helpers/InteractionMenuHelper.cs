@@ -85,6 +85,26 @@ public static class InteractionMenuHelper
         Enabled = definition.Enabled
     };
 
+    public static bool TryOpenMenu(Player player, Npc npc, IReadOnlyList<NpcInteractionOption> options)
+    {
+        if (options.Count == 0)
+            return false;
+
+        if (!CanInteract(npc, player))
+            return true;
+
+        var npcInteractions = npc.InteractionList?.Interactions ?? npc.Interactions;
+
+        if (options.Count == 1 && npcInteractions.Count == 0)
+        {
+            options[0].Invoke(player);
+            return true;
+        }
+
+        player.SendInteractionMenu(npc, options, npcInteractions);
+        return true;
+    }
+
     public static bool CanInteract(Npc npc, Player player)
     {
         if (!npc.IsInteractable || !ReferenceEquals(npc.Zone, player.Zone))
