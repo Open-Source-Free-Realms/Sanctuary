@@ -42,6 +42,8 @@ public static class ClientPathRequestPacketHandler
         if (clientPathRequestPacket.Guid != player.Guid)
             return true;
 
+        // TODO: This is a temporary "hacky" fix for marshalling logic to the tick thread. This needs to be changed
+        // to a proper marshalling system.
         player.Routines.SetRoutine($"ClientPath{clientPathRequestPacket.Type}", () =>
         {
             connection.SendTunneled(CreateReply(player.Zone, clientPathRequestPacket));

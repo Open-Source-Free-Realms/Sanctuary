@@ -43,6 +43,7 @@ public interface IResourceManager
     NameFilterCollection NameFilter { get; }
     NpcMovementDefinitionCollection NpcMovements { get; }
     NpcAmbientDefinitionCollection NpcAmbient { get; }
+    QuestDefinitionCollection Quests { get; }
     NavMeshCollection NavMeshes { get; }
 
     RewardTableDefinitionCollection RewardTables { get; }
