@@ -71,7 +71,7 @@ public class NavNpcToChatCommand : IChatCommand
         count = Math.Clamp(count, 1, MaxSpawnCount);
         radius = Math.Clamp(radius, 0f, MaxSpawnRadius);
 
-        if (!invoker.Zone.HasNavMesh)
+        if (invoker.Zone.NavMeshQuery is null)
         {
             ChatHelper.SendSystemMessage(invoker, "This zone has no navmesh, so the new pathfinder can't run here.");
             return true;

@@ -57,8 +57,6 @@ public class ResourceManager : IResourceManager, IDisposable
     public static readonly string NpcMovementsFile = Path.Combine(BaseDirectory, "NpcMovements.json");
     public static readonly string NpcAmbientFile = Path.Combine(BaseDirectory, "NpcAmbient.json");
     public static readonly string NameFilterFile = Path.Combine(BaseDirectory, "NameFilter.txt");
-    public static readonly string MapsDirectory = Path.Combine(BaseDirectory, "Maps");
-    public static readonly string TerrainDirectory = Path.Combine(BaseDirectory, "Terrain");
     public static readonly string NavMeshDirectory = Path.Combine(BaseDirectory, "NavMeshes");
     public static readonly string RewardTablesFile = Path.Combine(BaseDirectory, "Rewards.json");
     public static readonly string CombatAbilitiesFile = Path.Combine(BaseDirectory, "CombatAbilities.json");
@@ -105,8 +103,6 @@ public class ResourceManager : IResourceManager, IDisposable
     public NameFilterCollection NameFilter { get; }
     public NpcMovementDefinitionCollection NpcMovements { get; }
     public NpcAmbientDefinitionCollection NpcAmbient { get; }
-    public MapGraphCollection Maps { get; }
-    public TerrainCollection Terrains { get; }
     public NavMeshCollection NavMeshes { get; }
 
     public RewardTableDefinitionCollection RewardTables { get; }
@@ -165,8 +161,6 @@ public class ResourceManager : IResourceManager, IDisposable
         NameFilter = new(_logger);
         NpcMovements = new(_logger);
         NpcAmbient = new(_logger);
-        Maps = new(_logger);
-        Terrains = new(_logger);
         NavMeshes = new(_logger);
         RewardTables = new(_logger);
         CombatAbilities = new(_logger);
@@ -384,19 +378,7 @@ public class ResourceManager : IResourceManager, IDisposable
         return true;
     }
 
-    public bool LoadZoneGeometry()
-    {
-        if (!Maps.Load(MapsDirectory))
-            return false;
-
-        if (!Terrains.Load(TerrainDirectory))
-            return false;
-
-        if (!NavMeshes.Load(NavMeshDirectory))
-            return false;
-
-        return true;
-    }
+    public bool LoadNavMeshes() => NavMeshes.Load(NavMeshDirectory);
 
     private void _fileSystemWatcher_Changed(object sender, FileSystemEventArgs e)
     {
