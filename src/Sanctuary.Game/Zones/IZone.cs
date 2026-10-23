@@ -103,8 +103,6 @@ public interface IZone : IScriptableZone, IDisposable
 
     bool TryFindNavMeshPath(Vector3 start, Vector3 goal, Queue<Vector3> waypoints);
 
-    bool TryFindClientNavMeshPath(Vector3 start, Vector3 goal, Queue<Vector3> waypoints);
-
     bool TryFindRoute(Vector3 start, Vector3 goal, Queue<Vector3> waypoints);
 
     bool TryFindReachableRoute(Vector3 start, Vector3 goal, Queue<Vector3> waypoints, bool followRoads);

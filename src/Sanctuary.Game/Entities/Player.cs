@@ -97,7 +97,6 @@ public sealed class Player : ClientPcData, IEntity
 
     public DateTimeOffset LoginStartedAt { get; set; }
 
-    public long NextClientPathRequestAt { get; set; }
     public int SecondsSinceLastLogin { get; set; } = -1;
     public ConcurrentSet<int> CollectedCollectionEntryIds { get; } = [];
 

@@ -94,7 +94,6 @@ public abstract class BaseZone : IZone, IDisposable
 
     private readonly TerrainMesh? _terrainMesh;
     private readonly NavMeshPathfinder? _navMeshPathfinder;
-    private readonly NavMeshPathfinder? _clientNavMeshPathfinder;
 
     public DtNavMeshQuery? NavMeshQuery { get; }
     public IDtQueryFilter NavMeshFilter { get; } = new DtQueryDefaultFilter();
@@ -142,7 +141,6 @@ public abstract class BaseZone : IZone, IDisposable
         if (_resourceManager.NavMeshes.TryGetValue(Name, out var navMesh))
         {
             _navMeshPathfinder = new NavMeshPathfinder(navMesh);
-            _clientNavMeshPathfinder = new NavMeshPathfinder(navMesh);
             NavMeshQuery = new DtNavMeshQuery(navMesh);
         }
     }
@@ -190,9 +188,6 @@ public abstract class BaseZone : IZone, IDisposable
 
     public bool TryFindNavMeshPath(Vector3 start, Vector3 goal, Queue<Vector3> waypoints) =>
         _navMeshPathfinder is not null && _navMeshPathfinder.TryFindPath(start, goal, waypoints);
-
-    public bool TryFindClientNavMeshPath(Vector3 start, Vector3 goal, Queue<Vector3> waypoints) =>
-        _clientNavMeshPathfinder is not null && _clientNavMeshPathfinder.TryFindPath(start, goal, waypoints);
 
     public bool TryFindRoute(Vector3 start, Vector3 goal, Queue<Vector3> waypoints)
     {
