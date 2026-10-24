@@ -57,6 +57,7 @@ public class ResourceManager : IResourceManager, IDisposable
     public static readonly string NpcMovementsFile = Path.Combine(BaseDirectory, "NpcMovements.json");
     public static readonly string NpcAmbientFile = Path.Combine(BaseDirectory, "NpcAmbient.json");
     public static readonly string NameFilterFile = Path.Combine(BaseDirectory, "NameFilter.txt");
+    public static readonly string QuestsFile = Path.Combine(BaseDirectory, "Quests.json");
     public static readonly string MapsDirectory = Path.Combine(BaseDirectory, "Maps");
     public static readonly string TerrainDirectory = Path.Combine(BaseDirectory, "Terrain");
     public static readonly string NavMeshDirectory = Path.Combine(BaseDirectory, "NavMeshes");
@@ -105,6 +106,7 @@ public class ResourceManager : IResourceManager, IDisposable
     public NameFilterCollection NameFilter { get; }
     public NpcMovementDefinitionCollection NpcMovements { get; }
     public NpcAmbientDefinitionCollection NpcAmbient { get; }
+    public QuestDefinitionCollection Quests { get; }
     public MapGraphCollection Maps { get; }
     public TerrainCollection Terrains { get; }
     public NavMeshCollection NavMeshes { get; }
@@ -165,6 +167,7 @@ public class ResourceManager : IResourceManager, IDisposable
         NameFilter = new(_logger);
         NpcMovements = new(_logger);
         NpcAmbient = new(_logger);
+        Quests = new(_logger);
         Maps = new(_logger);
         Terrains = new(_logger);
         NavMeshes = new(_logger);
@@ -365,6 +368,9 @@ public class ResourceManager : IResourceManager, IDisposable
         if (!NpcAmbient.Load(NpcAmbientFile))
             return false;
 
+        if (!Quests.Load(QuestsFile))
+            return false;
+
         foreach (var coin in CollectionCoins.Values)
         {
             Collections.TryGetValue(coin.CollectionId, out var collection);
@@ -492,6 +498,8 @@ public class ResourceManager : IResourceManager, IDisposable
                 loaded = CombatAbilities.Load(CombatAbilitiesFile);
             else if (e.FullPath == CombatJobsFile)
                 loaded = CombatJobs.Load(CombatJobsFile);
+            else if (e.FullPath == QuestsFile)
+                loaded = Quests.Load(QuestsFile);
             else
                 _logger.LogWarning("Unknown file changed. File: {filepath}", e.FullPath);
 
