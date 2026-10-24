@@ -21,14 +21,23 @@ public sealed class SequentialRoutine : IRoutine
 
         _current = null;
 
-        Advance();
+        StartNext();
     }
 
     public bool OnStep()
     {
-        if (_current is null) return true;
-        if (!_current.OnStep()) return false;
-        return Advance();
+        while (_current is not null)
+        {
+            if (!_current.OnStep())
+            {
+                return false;
+            }
+
+            _current.OnEnd();
+            StartNext();
+        }
+
+        return true;
     }
 
     public void OnEnd()
@@ -39,13 +48,9 @@ public sealed class SequentialRoutine : IRoutine
         _pending.Clear();
     }
 
-    private bool Advance()
+    private void StartNext()
     {
-        _current?.OnEnd();
-
-        if (!_pending.TryDequeue(out _current)) return true;
-
-        _current.OnStart();
-        return false;
+        if (_pending.TryDequeue(out _current))
+            _current.OnStart();
     }
 }
