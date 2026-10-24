@@ -19,6 +19,7 @@ using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Zones;
+using Sanctuary.Game.Routines;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Scripting;
@@ -56,6 +57,7 @@ public abstract class BaseZone : IZone, IDisposable
     private const float TickRate = 1000f / FrameRate;
 
     public float TickDeltaSeconds => 1f / FrameRate;
+    public TimeSpan TickDelta => TimeSpan.FromMilliseconds(TickRate);
 
     private const ulong NpcBaseGuid = 100_000_000_000u;
 
@@ -71,6 +73,8 @@ public abstract class BaseZone : IZone, IDisposable
     public int DefinitionId => _zoneDefinition.Id;
     public string Name => _zoneDefinition.Name;
     public ILogger Logger => _logger;
+
+    public RoutineManager Routines { get; }
 
     public Vector4 SpawnPosition => _zoneDefinition.SpawnPosition;
     public Quaternion SpawnRotation => _zoneDefinition.SpawnRotation;
@@ -107,6 +111,8 @@ public abstract class BaseZone : IZone, IDisposable
         var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
 
         _logger = loggerFactory.CreateLogger($"Zone {Name} ({Id})");
+
+        Routines = new RoutineManager(_logger, TickDelta);
 
         _scriptManager = serviceProvider.GetRequiredService<IScriptManager>();
         _scriptRuntime = new ScriptRuntime(_logger);
@@ -1547,6 +1553,8 @@ public abstract class BaseZone : IZone, IDisposable
             try
             {
                 ProcessCollectionNodeRefills();
+
+                Routines.OnTick();
 
                 foreach (var entity in _entities)
                 {

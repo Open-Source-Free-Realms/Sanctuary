@@ -5,6 +5,7 @@ using System.Numerics;
 
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Resources.Definitions;
+using Sanctuary.Game.Routines;
 using Sanctuary.Scripting;
 using Sanctuary.UdpLibrary;
 using Sanctuary.Game.Pathfinding;
@@ -22,6 +23,8 @@ public interface IZone : IScriptableZone, IDisposable
 
     string? Sky { get; }
 
+    RoutineManager Routines { get; }
+
     #region Events
 
     void OnStart();
@@ -38,6 +41,7 @@ public interface IZone : IScriptableZone, IDisposable
     bool IsEmpty { get; }
 
     float TickDeltaSeconds { get; }
+    TimeSpan TickDelta { get; }
 
     bool TryGetNpc(ulong guid, [MaybeNullWhen(false)] out Npc npc);
     bool TryGetPlayer(ulong guid, [MaybeNullWhen(false)] out Player player);

@@ -1,12 +1,17 @@
 using System;
 using System.IO;
 
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Resources;
 using Sanctuary.Game.Resources.Definitions;
+using Sanctuary.Game.Resources.Definitions.Zones;
+using Sanctuary.Game.Zones;
+using Sanctuary.Scripting;
 
 namespace Sanctuary.Game.Tests;
 
@@ -43,12 +48,28 @@ public sealed class CollectionCoinDefinitionTests
             CollectionId = 10,
             EntryId = 20
         };
-        var coin = new CollectionCoin(null!, definition);
-        var collectedPlayer = new Player(null!, null!, null!, null!);
-        var otherPlayer = new Player(null!, null!, null!, null!);
+        using var zone = CreateZone();
+
+        var coin = new CollectionCoin(zone, definition);
+        var collectedPlayer = new Player(zone, null!, null!, null!);
+        var otherPlayer = new Player(zone, null!, null!, null!);
         collectedPlayer.CollectedCollectionEntryIds.TryAdd(definition.EntryId);
 
         Assert.IsFalse(coin.IsVisibleTo(collectedPlayer));
         Assert.IsTrue(coin.IsVisibleTo(otherPlayer));
+    }
+
+    private static WorldZone CreateZone()
+    {
+        Directory.CreateDirectory(ResourceManager.BaseDirectory);
+
+        var services = new ServiceCollection();
+
+        services.AddSingleton<ILoggerFactory>(NullLoggerFactory.Instance);
+        services.AddSingleton<IResourceManager>(new ResourceManager(NullLogger<ResourceManager>.Instance));
+        services.AddSingleton<IScriptManager>(new ScriptManager(NullLoggerFactory.Instance));
+        services.AddSingleton<IZoneManager, ZoneManager>();
+
+        return new WorldZone(new WorldZoneDefinition { Name = "Test" }, services.BuildServiceProvider());
     }
 }
