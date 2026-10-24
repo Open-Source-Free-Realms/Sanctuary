@@ -138,7 +138,7 @@ public class Npc : IScriptableNpc, IEntity
     {
         Zone = zone;
 
-        Routines = new RoutineManager(Logger);
+        Routines = new RoutineManager(Logger, zone.TickDelta);
     }
 
     #region Events
@@ -246,8 +246,6 @@ public class Npc : IScriptableNpc, IEntity
 
     public void UpdateEverySecond()
     {
-        Routines.OnSecond();
-
         UpdateEverySecondAction?.Invoke();
 
         if (!_scripts.IsEmpty)

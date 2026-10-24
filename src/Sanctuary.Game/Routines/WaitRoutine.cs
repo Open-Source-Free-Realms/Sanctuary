@@ -1,14 +1,19 @@
-using System.Diagnostics;
+using System;
 
 namespace Sanctuary.Game.Routines;
 
-public sealed class WaitRoutine : IRoutine
+public sealed class WaitRoutine : Routine
 {
-    private readonly double _seconds;
-    private readonly Stopwatch _stopwatch = new();
+    private readonly TimeSpan _duration;
+    private TimeSpan _elapsed;
 
-    public WaitRoutine(double seconds) => _seconds = seconds;
+    public WaitRoutine(double seconds) => _duration = TimeSpan.FromSeconds(seconds);
 
-    public void OnStart() => _stopwatch.Restart();
-    public bool OnStep() => _stopwatch.Elapsed.TotalSeconds >= _seconds;
+    protected override void OnStart() => _elapsed = TimeSpan.Zero;
+
+    protected override bool OnStep(TimeSpan delta)
+    {
+        _elapsed += delta;
+        return _elapsed >= _duration;
+    }
 }

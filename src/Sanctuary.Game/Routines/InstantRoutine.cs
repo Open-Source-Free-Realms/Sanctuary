@@ -2,7 +2,7 @@ using System;
 
 namespace Sanctuary.Game.Routines;
 
-public sealed class InstantRoutine : IRoutine
+public sealed class InstantRoutine : Routine
 {
     private readonly Action _action;
 
@@ -11,7 +11,7 @@ public sealed class InstantRoutine : IRoutine
         _action = action;
     }
 
-    public bool OnStep()
+    protected override bool OnStep(TimeSpan delta)
     {
         _action();
         return true;

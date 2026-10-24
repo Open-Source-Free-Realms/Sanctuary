@@ -1,15 +1,19 @@
+using System;
+
 namespace Sanctuary.Game.Routines;
 
-public sealed class DelayedRoutine : IRoutine
+public sealed class DelayedRoutine : Routine
 {
-    private readonly IRoutine _sequence;
+    private readonly SequentialRoutine _sequence;
 
-    public DelayedRoutine(IRoutine routine, double seconds)
+    public DelayedRoutine(Routine routine, double seconds)
     {
-        _sequence = new SequentialRoutine([new WaitRoutine(seconds), routine]);
+        _sequence = new SequentialRoutine(new WaitRoutine(seconds), routine);
     }
 
-    public void OnStart() => _sequence.OnStart();
-    public bool OnStep() => _sequence.OnStep();
-    public void OnEnd() => _sequence.OnEnd();
+    protected override void OnStart() => _sequence.Start();
+
+    protected override bool OnStep(TimeSpan delta) => _sequence.Step(delta);
+
+    protected override void OnInterrupted() => _sequence.Interrupt();
 }

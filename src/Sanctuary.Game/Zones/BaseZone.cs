@@ -57,6 +57,7 @@ public abstract class BaseZone : IZone, IDisposable
     private const float TickRate = 1000f / FrameRate;
 
     public float TickDeltaSeconds => 1f / FrameRate;
+    public TimeSpan TickDelta => TimeSpan.FromMilliseconds(TickRate);
 
     private const ulong NpcBaseGuid = 100_000_000_000u;
 
@@ -111,7 +112,7 @@ public abstract class BaseZone : IZone, IDisposable
 
         _logger = loggerFactory.CreateLogger($"Zone {Name} ({Id})");
 
-        Routines = new RoutineManager(_logger);
+        Routines = new RoutineManager(_logger, TickDelta);
 
         _scriptManager = serviceProvider.GetRequiredService<IScriptManager>();
         _scriptRuntime = new ScriptRuntime(_logger);
@@ -1577,8 +1578,6 @@ public abstract class BaseZone : IZone, IDisposable
                 {
                     entity.Value.UpdateEverySecond();
                 }
-
-                Routines.OnSecond();
 
                 UpdateEverySecond();
             }

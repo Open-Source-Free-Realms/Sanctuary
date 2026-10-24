@@ -1,55 +1,46 @@
+using System;
+
 namespace Sanctuary.Game.Routines;
 
-public sealed class RepeatRoutine : IRoutine
+public sealed class RepeatRoutine : Routine
 {
-    private readonly IRoutine _routine;
+    private readonly Routine _routine;
     private readonly int? _count;
-
     private int _completed;
-    private bool _innerRunning;
 
-    public RepeatRoutine(IRoutine routine, int? count = null)
+    public RepeatRoutine(Routine routine, int? count = null)
     {
         _routine = routine;
         _count = count;
     }
 
-    public void OnStart()
+    protected override void OnStart()
     {
         _completed = 0;
-        _innerRunning = _count is null or > 0;
 
-        if (_innerRunning)
-            _routine.OnStart();
+        if (_count is not <= 0)
+            _routine.Start();
     }
 
-    public bool OnStep()
+    protected override bool OnStep(TimeSpan delta)
     {
-        if (!_innerRunning)
+        if (_count is <= 0)
             return true;
 
-        if (!_routine.OnStep())
+        if (!_routine.Step(delta))
             return false;
 
-        _routine.OnEnd();
-        _innerRunning = false;
-        _completed++;
-
-        if (_count is not null && _completed >= _count)
+        if (!IsRunning)
             return true;
 
-        _routine.OnStart();
-        _innerRunning = true;
+        _completed++;
 
+        if (_completed >= _count)
+            return true;
+
+        _routine.Start();
         return false;
     }
 
-    public void OnEnd()
-    {
-        if (!_innerRunning)
-            return;
-
-        _innerRunning = false;
-        _routine.OnEnd();
-    }
+    protected override void OnInterrupted() => _routine.Interrupt();
 }

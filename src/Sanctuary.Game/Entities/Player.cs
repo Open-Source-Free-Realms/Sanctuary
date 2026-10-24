@@ -198,7 +198,7 @@ public sealed class Player : ClientPcData, IEntity
         _zoneManager = zoneManager;
         PlayerPet = new PlayerPet(this, resourceManager);
 
-        Routines = new RoutineManager(zone.Logger);
+        Routines = new RoutineManager(zone.Logger, zone.TickDelta);
     }
 
     #region Connection
@@ -397,8 +397,6 @@ public sealed class Player : ClientPcData, IEntity
 
     public void UpdateEverySecond()
     {
-        Routines.OnSecond();
-
         SnowballInteraction.Update(this);
         UpdatePortrait();
     }
