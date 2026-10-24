@@ -11,6 +11,9 @@ public sealed class InstantRoutine : IRoutine
         _action = action;
     }
 
-    public void OnStart() => _action();
-    public bool OnStep() => true;
+    public bool OnStep()
+    {
+        _action();
+        return true;
+    }
 }
