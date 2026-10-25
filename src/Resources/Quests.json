@@ -833,5 +833,60 @@
         "Targets": [{ "NpcId": 3840 }]
       }
     ]
+  },
+  {
+    "Name": "Noisy Neighbors - tell Flynn that Clara Chatterhag wants Bruce's concert turned down",
+    "QuestId": 3090,
+    "TitleId": 36810,
+    "DescriptionId": 36811,
+    "GiverDialogueId": 36809,
+    "ObjectiveDescriptionId": 385625,
+    "IconId": 43278,
+    "GiverNpcId": 33762,
+    "TargetNpcId": 3568,
+    "RewardCoins": 30,
+    "RewardExperience": 0,
+    "RewardItems": [],
+    "NextQuestId": 3091,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 36816,
+        "DialogueId": 36818,
+        "Targets": [{ "NpcId": 3568 }]
+      }
+    ]
+  },
+  {
+    "Name": "Noise Permit - find Flynn's lost concert permit around Snowhill",
+    "QuestId": 3091,
+    "TitleId": 36830,
+    "DescriptionId": 36831,
+    "GiverDialogueId": 36829,
+    "ObjectiveDescriptionId": 103958,
+    "IconId": 43278,
+    "GiverNpcId": 3568,
+    "TargetNpcId": 3568,
+    "RewardCoins": 26,
+    "RewardExperience": 0,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3090,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 36834,
+        "Targets": [{ "NpcId": 33678 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 36735,
+        "DialogueId": 36837,
+        "Targets": [{ "NpcId": 3568 }]
+      }
+    ]
   }
 ]
