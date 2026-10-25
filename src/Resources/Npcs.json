@@ -41358,5 +41358,15 @@
     "Name": "Vampire Cake",
     "ModelId": 3324,
     "ModelFileName": "mkt_cakes_vampire_01.adr"
+  },
+  {
+    "Id": 40013,
+    "NameId": 4217,
+    "Name": "Ice Block",
+    "ModelId": 68,
+    "ModelFileName": "sh_icecube_01.adr",
+    "Scale": 4,
+    "HasCursor": true,
+    "CursorId": 17
   }
 ]

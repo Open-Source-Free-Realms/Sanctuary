@@ -40,6 +40,7 @@
     "RewardExperience": 70,
     "RewardItems": [],
     "PrerequisiteQuestId": 2563,
+    "NextQuestId": 3290,
     "NotificationAvailable": 2,
     "NotificationActive": 6,
     "Goals": [
@@ -647,7 +648,7 @@
     ]
   },
   {
-    "Name": "Feminine Touch - Yancy Gilbert surveys the girls of Seaside",
+    "Name": "Feminine Touch",
     "QuestId": 3060,
     "TitleId": 101400,
     "DescriptionId": 101410,
@@ -691,7 +692,7 @@
     ]
   },
   {
-    "Name": "A Booming Problem - mine tin ore for Heddy Heathcliff's boom powder",
+    "Name": "A Booming Problem",
     "QuestId": 3061,
     "TitleId": 400355,
     "DescriptionId": 400356,
@@ -723,7 +724,7 @@
     ]
   },
   {
-    "Name": "The Party Pooper - cheer up Wugunbump at the Merry Vale chugawug camp",
+    "Name": "The Party Pooper",
     "QuestId": 3070,
     "TitleId": 385597,
     "DescriptionId": 385598,
@@ -749,7 +750,7 @@
     ]
   },
   {
-    "Name": "Suspicious Serenity - question the families of the missing Merry Vale children",
+    "Name": "Suspicious Serenity",
     "QuestId": 3071,
     "TitleId": 74199,
     "DescriptionId": 74200,
@@ -803,7 +804,7 @@
     ]
   },
   {
-    "Name": "Aiding our Allies - Arch Druid Camellia sends you to Headmaster Merk in Sunstone Valley",
+    "Name": "Aiding our Allies",
     "QuestId": 3080,
     "TitleId": 440466,
     "DescriptionId": 440467,
@@ -829,7 +830,7 @@
     ]
   },
   {
-    "Name": "Sobering Homecoming - regroup the Freewheelers for Dorn Geargrinder",
+    "Name": "Sobering Homecoming",
     "QuestId": 3081,
     "TitleId": 438840,
     "DescriptionId": 438841,
@@ -884,7 +885,7 @@
     ]
   },
   {
-    "Name": "Noisy Neighbors - tell Flynn that Clara Chatterhag wants Bruce's concert turned down",
+    "Name": "Noisy Neighbors",
     "QuestId": 3090,
     "TitleId": 36810,
     "DescriptionId": 36811,
@@ -910,7 +911,7 @@
     ]
   },
   {
-    "Name": "Noise Permit - find Flynn's lost concert permit around Snowhill",
+    "Name": "Noise Permit",
     "QuestId": 3091,
     "TitleId": 36830,
     "DescriptionId": 36831,
@@ -942,7 +943,7 @@
     ]
   },
   {
-    "Name": "Warm Welcome - Peppermint sends you to meet Honeydew near Skysong Ledge in Pony Vale",
+    "Name": "Warm Welcome",
     "QuestId": 3100,
     "TitleId": 413080,
     "DescriptionId": 413081,
@@ -967,7 +968,7 @@
     ]
   },
   {
-    "Name": "Ninja: The Ninja Path - Ty sends you to the Forest Troll Village to ask about the kidnapped pixies",
+    "Name": "Ninja: The Ninja Path",
     "QuestId": 3110,
     "TitleId": 20960,
     "DescriptionId": 20965,
@@ -992,7 +993,7 @@
     ]
   },
   {
-    "Name": "Touring Seaside - Cole sends you on a tour of Koodini, the Boardwalk and Diggy's cafe",
+    "Name": "Touring Seaside",
     "QuestId": 3022,
     "TitleId": 93420,
     "DescriptionId": 93421,
@@ -1040,7 +1041,7 @@
     ]
   },
   {
-    "Name": "Testing the Tour - answer Brenna's questions about the Seaside tour",
+    "Name": "Testing the Tour",
     "QuestId": 3023,
     "TitleId": 93447,
     "DescriptionId": 140239,
@@ -1093,7 +1094,7 @@
     ]
   },
   {
-    "Name": "Bigger Fish to Fry - Glerga sends her fish order to Waterwings in Lakeshore",
+    "Name": "Bigger Fish to Fry",
     "QuestId": 3120,
     "TitleId": 20836,
     "DescriptionId": 20839,
@@ -1118,7 +1119,7 @@
     ]
   },
   {
-    "Name": "A New Star is Born! - ask Joelle, Tarvie and Krissa to audition for Joona's show in Merry Vale",
+    "Name": "A New Star is Born!",
     "QuestId": 3131,
     "TitleId": 46709,
     "DescriptionId": 46710,
@@ -1165,7 +1166,7 @@
     ]
   },
   {
-    "Name": "Birthday Surprises - ask the ladies of Merry Vale what Dubawug should get Verna",
+    "Name": "Birthday Surprises",
     "QuestId": 3141,
     "TitleId": 387044,
     "DescriptionId": 387045,
@@ -1212,7 +1213,7 @@
     ]
   },
   {
-    "Name": "Electric Scouting - convince Electra Dozen to apply for the Seaside Talent Show for Sandi",
+    "Name": "Electric Scouting",
     "QuestId": 3150,
     "TitleId": 93923,
     "DescriptionId": 93924,
@@ -1244,7 +1245,7 @@
     ]
   },
   {
-    "Name": "Cargug, Cargug, Let Me In! - find out why the Nettleseed guards won't let Whigguma in",
+    "Name": "Cargug, Cargug, Let Me In!",
     "QuestId": 3160,
     "TitleId": 46954,
     "DescriptionId": 46955,
@@ -1324,7 +1325,7 @@
     ]
   },
   {
-    "Name": "A Change of Script - deliver Joona's rewritten scripts to his performers in Merry Vale",
+    "Name": "A Change of Script",
     "QuestId": 3130,
     "TitleId": 46674,
     "DescriptionId": 46675,
@@ -1385,7 +1386,7 @@
     ]
   },
   {
-    "Name": "Picking Petals - Verna wants to know if Dubawug remembered her birthday",
+    "Name": "Picking Petals",
     "QuestId": 3140,
     "TitleId": 387034,
     "DescriptionId": 387035,
@@ -1411,7 +1412,7 @@
     ]
   },
   {
-    "Name": "Fortune Find - Eni Mystique sends you to The Great Koodini in Seaside",
+    "Name": "Fortune Find",
     "QuestId": 3170,
     "TitleId": 100231,
     "DescriptionId": 100232,
@@ -1436,7 +1437,7 @@
     ]
   },
   {
-    "Name": "Fisher Poem - fetch Sanford a smoothie from Banani in return for a poem",
+    "Name": "Fisher Poem",
     "QuestId": 3180,
     "TitleId": 94562,
     "DescriptionId": 94572,
@@ -1468,7 +1469,7 @@
     ]
   },
   {
-    "Name": "Sister Feud - deliver Sandi's letter to her sister Snowi in Snowhill",
+    "Name": "Sister Feud",
     "QuestId": 3190,
     "TitleId": 94547,
     "DescriptionId": 94553,
@@ -1493,7 +1494,7 @@
     ]
   },
   {
-    "Name": "Delivery for Rimpadun - deliver Postchug Runalug's late sasparilla to Rimpadun in Merry Vale",
+    "Name": "Delivery for Rimpadun",
     "QuestId": 3200,
     "TitleId": 46566,
     "DescriptionId": 46567,
@@ -1524,7 +1525,7 @@
     ]
   },
   {
-    "Name": "Keep it Down! - ask the noisy pixies on the hill to quiet down for Dooba in Nettleseed",
+    "Name": "Keep it Down!",
     "QuestId": 3210,
     "TitleId": 38095,
     "DescriptionId": 38096,
@@ -1549,7 +1550,7 @@
     ]
   },
   {
-    "Name": "Asking the Expert - ask Jonathan, the turtle expert, for advice about Parr's turtle Snips",
+    "Name": "Asking the Expert",
     "QuestId": 3220,
     "TitleId": 47248,
     "DescriptionId": 47249,
@@ -1591,7 +1592,7 @@
     ]
   },
   {
-    "Name": "Washing it Down - talk Dooba into giving Gigafrug a mug of sasparilla",
+    "Name": "Washing it Down",
     "QuestId": 3230,
     "TitleId": 38841,
     "DescriptionId": 38842,
@@ -1632,7 +1633,7 @@
     ]
   },
   {
-    "Name": "Funding the Fun - take Brewmaster Wugawump's sasparilla bills to Postchug Runalug in Wugachug",
+    "Name": "Funding the Fun",
     "QuestId": 3240,
     "TitleId": 45181,
     "DescriptionId": 45182,
@@ -1664,7 +1665,7 @@
     ]
   },
   {
-    "Name": "The Search for Snorg - Guard Snapdragon asks you to find his old friend Snorg in Briarwood",
+    "Name": "The Search for Snorg",
     "QuestId": 3250,
     "TitleId": 46203,
     "DescriptionId": 46204,
@@ -1689,7 +1690,7 @@
     ]
   },
   {
-    "Name": "Meet the Mayor! - Frostpetal sends you to meet Mayor Crystalline",
+    "Name": "Meet the Mayor!",
     "QuestId": 3260,
     "TitleId": 5544,
     "DescriptionId": 5655,
@@ -1715,7 +1716,7 @@
     ]
   },
   {
-    "Name": "Hot Mess - Tevin sends you to Murphy at the Hot Springs",
+    "Name": "Hot Mess",
     "QuestId": 3261,
     "TitleId": 79019,
     "DescriptionId": 79020,
@@ -1741,7 +1742,7 @@
     ]
   },
   {
-    "Name": "Glugmort's Palate - Burnetta sends you to Glerga for worm soup to give Glugmort",
+    "Name": "Glugmort's Palate",
     "QuestId": 3270,
     "TitleId": 20550,
     "DescriptionId": 20551,
@@ -1773,7 +1774,7 @@
     ]
   },
   {
-    "Name": "Spinnerette - Gorg sends you to deal with the spider Spinnerette in southern Bristlewood",
+    "Name": "Spinnerette",
     "QuestId": 3271,
     "TitleId": 16111,
     "DescriptionId": 16121,
@@ -1808,7 +1809,7 @@
     ]
   },
   {
-    "Name": "Pirri's Sketches - take Pirri's hairstyle sketches to Inni Ki in Seaside",
+    "Name": "Pirri's Sketches",
     "QuestId": 3272,
     "TitleId": 46259,
     "DescriptionId": 46260,
@@ -1833,7 +1834,7 @@
     ]
   },
   {
-    "Name": "Done Deal - Wootmoot sends you to tell Sandi her talent services are no longer needed",
+    "Name": "Done Deal",
     "QuestId": 3273,
     "TitleId": 391804,
     "DescriptionId": 391805,
@@ -1858,7 +1859,7 @@
     ]
   },
   {
-    "Name": "Hooligan Hassles - Commander Kiggle sends you to help Henry at Farnum Farmstead",
+    "Name": "Hooligan Hassles",
     "QuestId": 3274,
     "TitleId": 74527,
     "DescriptionId": 74528,
@@ -1883,7 +1884,7 @@
     ]
   },
   {
-    "Name": "Seafoam's Sweet Tooth - Seafoam wants chocolate bread from Bordon Cloo in Sanctuary",
+    "Name": "Seafoam's Sweet Tooth",
     "QuestId": 3280,
     "TitleId": 15105,
     "DescriptionId": 15268,
@@ -1916,7 +1917,7 @@
     ]
   },
   {
-    "Name": "Seafoam is Picky - Seafoam wants a Booger Bar from Glerga at the Robgoblin Camp",
+    "Name": "Seafoam is Picky",
     "QuestId": 3281,
     "TitleId": 15107,
     "DescriptionId": 15108,
@@ -1950,7 +1951,7 @@
     ]
   },
   {
-    "Name": "Seafoam's Last Idea - ask Oggy in Wugachug to send Seafoam some snacks",
+    "Name": "Seafoam's Last Idea",
     "QuestId": 3282,
     "TitleId": 15109,
     "DescriptionId": 15110,
@@ -1983,7 +1984,7 @@
     ]
   },
   {
-    "Name": "Such a Show Off! - Sandi sends you to show off to her sister Snowi in Snowhill",
+    "Name": "Such a Show Off!",
     "QuestId": 3283,
     "TitleId": 391884,
     "DescriptionId": 391885,
@@ -2008,7 +2009,7 @@
     ]
   },
   {
-    "Name": "Broken Axle - Banter sends you to ask Crofti in Sanctuary for help with his wagon",
+    "Name": "Broken Axle",
     "QuestId": 3284,
     "TitleId": 10128,
     "DescriptionId": 10129,
@@ -2029,6 +2030,217 @@
         "DescriptionId": 14869,
         "DialogueId": 9527,
         "Targets": [{ "NpcId": 33416 }]
+      }
+    ]
+  },
+  {
+    "Name": "Back for More",
+    "QuestId": 3290,
+    "TitleId": 94263,
+    "DescriptionId": 94264,
+    "GiverDialogueId": 94262,
+    "ObjectiveDescriptionId": 94264,
+    "IconId": 43278,
+    "GiverNpcId": 2049,
+    "TargetNpcId": 2045,
+    "RewardCoins": 7,
+    "RewardExperience": 70,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 1801,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 100150,
+        "DescriptionId": 94264,
+        "DialogueId": 94265,
+        "Targets": [{ "NpcId": 2045 }]
+      }
+    ]
+  },
+  {
+    "Name": "Career Change",
+    "QuestId": 3291,
+    "TitleId": 36592,
+    "DescriptionId": 36593,
+    "GiverDialogueId": 36591,
+    "ObjectiveDescriptionId": 36593,
+    "IconId": 43278,
+    "GiverNpcId": 3069,
+    "TargetNpcId": 3069,
+    "RewardCoins": 5,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 36594,
+        "DescriptionId": 36593,
+        "DialogueId": 36598,
+        "Targets": [{ "NpcId": 33086 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 36596,
+        "DescriptionId": 36593,
+        "DialogueId": 36599,
+        "Targets": [{ "NpcId": 3069 }]
+      }
+    ]
+  },
+  {
+    "Name": "Flattery is Everything",
+    "QuestId": 3300,
+    "TitleId": 36840,
+    "DescriptionId": 36841,
+    "GiverDialogueId": 36839,
+    "ObjectiveDescriptionId": 103104,
+    "IconId": 43278,
+    "GiverNpcId": 33691,
+    "TargetNpcId": 33691,
+    "RewardCoins": 30,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "NextQuestId": 3301,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 36842,
+        "DescriptionId": 36843,
+        "DialogueId": 140713,
+        "Targets": [{ "NpcId": 4863 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 140711,
+        "DescriptionId": 36856,
+        "DialogueId": 9541,
+        "Targets": [{ "NpcId": 33691 }]
+      }
+    ]
+  },
+  {
+    "Name": "Getting the Girl",
+    "QuestId": 3301,
+    "TitleId": 36850,
+    "DescriptionId": 36851,
+    "GiverDialogueId": 36849,
+    "ObjectiveDescriptionId": 103108,
+    "IconId": 43278,
+    "GiverNpcId": 33691,
+    "TargetNpcId": 33691,
+    "RewardCoins": 30,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3300,
+    "NextQuestId": 3303,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 36855,
+        "DescriptionId": 36856,
+        "Targets": [{ "NpcId": 33647 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 36857,
+        "DescriptionId": 36843,
+        "DialogueId": 140715,
+        "Targets": [{ "NpcId": 4863 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 140711,
+        "DescriptionId": 36856,
+        "DialogueId": 9767,
+        "Targets": [{ "NpcId": 33691 }]
+      }
+    ]
+  },
+  {
+    "Name": "Encased in Ice",
+    "QuestId": 3302,
+    "TitleId": 91754,
+    "DescriptionId": 91755,
+    "GiverDialogueId": 91753,
+    "ObjectiveDescriptionId": 115028,
+    "IconId": 43278,
+    "GiverNpcId": 1419,
+    "TargetNpcId": 1421,
+    "RewardCoins": 15,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 91761,
+        "DescriptionId": 91762,
+        "Targets": [{ "NpcId": 33671 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 91763,
+        "DescriptionId": 91764,
+        "HideNpcIdsWhenDone": [40013],
+        "HideEffectId": 56,
+        "NpcEffectsUntilDone": [{ "NpcId": 1421, "EffectId": 5337 }],
+        "Targets": [{ "NpcId": 40013 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 91765,
+        "DescriptionId": 91766,
+        "DialogueId": 91756,
+        "Targets": [{ "NpcId": 1421 }]
+      }
+    ]
+  },
+  {
+    "Name": "Woe is Willie",
+    "QuestId": 3303,
+    "TitleId": 36873,
+    "DescriptionId": 36874,
+    "GiverDialogueId": 36872,
+    "ObjectiveDescriptionId": 104094,
+    "IconId": 43278,
+    "GiverNpcId": 33691,
+    "TargetNpcId": 33691,
+    "RewardCoins": 61,
+    "RewardExperience": 90,
+    "RewardItems": [3382],
+    "PrerequisiteQuestId": 3301,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 2,
+        "NameId": 36876,
+        "DescriptionId": 36877,
+        "RequiredCount": 1,
+        "CollectNodeType": "woe-is-willie-flowers"
+      },
+      {
+        "Type": 0,
+        "NameId": 36878,
+        "DescriptionId": 36843,
+        "DialogueId": 140719,
+        "Targets": [{ "NpcId": 4863 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 140711,
+        "DescriptionId": 36856,
+        "DialogueId": 9768,
+        "Targets": [{ "NpcId": 33691 }]
       }
     ]
   }

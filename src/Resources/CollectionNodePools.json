@@ -8133,5 +8133,12 @@
     "NodeType": "tin-ore",
     "MaxActiveNodes": 5,
     "RespawnSeconds": 30
+  },
+  {
+    "Key": "pixie-nursery-woe-is-willie-flowers",
+    "ZoneDefinitionId": 1,
+    "NodeType": "woe-is-willie-flowers",
+    "MaxActiveNodes": 1,
+    "RespawnSeconds": 10
   }
 ]
