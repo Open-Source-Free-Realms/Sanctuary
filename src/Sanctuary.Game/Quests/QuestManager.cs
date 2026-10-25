@@ -116,7 +116,19 @@ public sealed class QuestManager : IQuestManager
         if (!AdvancesHere(quest, progress, npc))
             return;
 
-        var goal = quest.Goals[progress.GoalIndex];
+        var goalIndex = progress.GoalIndex;
+        var goal = quest.Goals[goalIndex];
+
+        if (goal is TalkToNpcGoal { CompleteAfterDialogue: true })
+        {
+            QuestDialogue.Begin(player, goal.ConversationFor(npc.DefinitionId), npc.Guid, () =>
+            {
+                if (player.Quests.TryGetInProgress(quest.QuestId, out var current) && current.GoalIndex == goalIndex)
+                    CompleteGoal(player, quest, current, npc, playDialogue: false);
+            });
+            return;
+        }
+
         var result = goal.Progress(quest, new NpcTalkedEvent(npc), progress.Goal);
 
         ApplyProgress(player, quest, progress, result, npc);
@@ -622,7 +634,7 @@ public sealed class QuestManager : IQuestManager
         return NearestNpc(player, npc => untalkedNpcIds.Contains(npc.DefinitionId))?.Guid ?? 0;
     }
 
-    private void CompleteGoal(Player player, QuestDefinition quest, QuestProgress progress, Npc? spokenBy = null)
+    private void CompleteGoal(Player player, QuestDefinition quest, QuestProgress progress, Npc? spokenBy = null, bool playDialogue = true)
     {
         var goals = quest.Goals;
         var completedGoalIndex = progress.GoalIndex;
@@ -659,7 +671,7 @@ public sealed class QuestManager : IQuestManager
         SendObjectiveActivated(player, quest.QuestId, goals[progress.GoalIndex], restored: false);
         SendObjectiveForGoal(player, quest, progress.GoalIndex);
 
-        if (completedGoal is TalkToNpcGoal)
+        if (playDialogue && completedGoal is TalkToNpcGoal)
         {
             var speakerNpcId = spokenBy?.DefinitionId ?? quest.GoalTargetNpcId(completedGoalIndex);
             var speakerGuid = spokenBy?.Guid ?? NearestNpcGuid(player, speakerNpcId);

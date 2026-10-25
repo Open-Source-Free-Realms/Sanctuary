@@ -1,4 +1,6 @@
-﻿namespace Sanctuary.Game.Resources.Definitions.QuestGoals;
+﻿using System.Collections.Generic;
+
+namespace Sanctuary.Game.Resources.Definitions.QuestGoals;
 
 public sealed class QuestDialogueLine
 {
@@ -6,4 +8,6 @@ public sealed class QuestDialogueLine
 
     // 0 = the generic caption.
     public int ResponseTextId { get; set; }
+
+    public List<QuestDialogueChoice> Choices { get; set; } = [];
 }
