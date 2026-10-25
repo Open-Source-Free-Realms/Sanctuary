@@ -18,6 +18,8 @@ public interface IQuestManager
 
     bool CompleteQuest(Player player, int questId);
 
+    bool OfferNextQuest(Player player, int questId);
+
     void AbandonQuest(Player player, int questId);
 
     bool ResetQuest(Player player, int questId);

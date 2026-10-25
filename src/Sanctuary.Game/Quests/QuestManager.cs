@@ -311,6 +311,19 @@ public sealed class QuestManager : IQuestManager
         return true;
     }
 
+    public bool OfferNextQuest(Player player, int questId)
+    {
+        if (!_resourceManager.Quests.TryGet(questId, out var quest)
+            || quest.NextQuestId is not { } nextQuestId
+            || !_resourceManager.Quests.TryGet(nextQuestId, out var next)
+            || next.GiverNpcId != quest.GoalTargetNpcId(quest.Goals.Count - 1)
+            || !next.IsOfferableFor(player.Quests))
+            return false;
+
+        Offer(player, next);
+        return true;
+    }
+
     private static readonly TimeSpan AbandonBlockedAfterAccept = TimeSpan.FromSeconds(3);
 
     public void AbandonQuest(Player player, int questId)
@@ -556,7 +569,7 @@ public sealed class QuestManager : IQuestManager
         return states;
     }
 
-    private const float DefaultOfferCameraDistance = 6f;
+    private const float DefaultOfferCameraDistance = 0f;
 
     private void Offer(Player player, QuestDefinition quest)
     {
