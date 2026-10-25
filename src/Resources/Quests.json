@@ -1881,5 +1881,155 @@
         "Targets": [{ "NpcId": 3234 }]
       }
     ]
+  },
+  {
+    "Name": "Seafoam's Sweet Tooth - Seafoam wants chocolate bread from Bordon Cloo in Sanctuary",
+    "QuestId": 3280,
+    "TitleId": 15105,
+    "DescriptionId": 15268,
+    "GiverDialogueId": 24874,
+    "ObjectiveDescriptionId": 15268,
+    "IconId": 43278,
+    "GiverNpcId": 3547,
+    "TargetNpcId": 3547,
+    "RewardCoins": 6,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "NextQuestId": 3281,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 15832,
+        "DescriptionId": 15268,
+        "DialogueId": 15836,
+        "Targets": [{ "NpcId": 2416 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 15834,
+        "DescriptionId": 15835,
+        "DialogueId": 15813,
+        "Targets": [{ "NpcId": 3547 }]
+      }
+    ]
+  },
+  {
+    "Name": "Seafoam is Picky - Seafoam wants a Booger Bar from Glerga at the Robgoblin Camp",
+    "QuestId": 3281,
+    "TitleId": 15107,
+    "DescriptionId": 15108,
+    "GiverDialogueId": 24875,
+    "ObjectiveDescriptionId": 15108,
+    "IconId": 43278,
+    "GiverNpcId": 3547,
+    "TargetNpcId": 3547,
+    "RewardCoins": 61,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3280,
+    "NextQuestId": 3282,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 15861,
+        "DescriptionId": 15862,
+        "DialogueId": 15865,
+        "Targets": [{ "NpcId": 4064 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 15834,
+        "DescriptionId": 15835,
+        "DialogueId": 15867,
+        "Targets": [{ "NpcId": 3547 }]
+      }
+    ]
+  },
+  {
+    "Name": "Seafoam's Last Idea - ask Oggy in Wugachug to send Seafoam some snacks",
+    "QuestId": 3282,
+    "TitleId": 15109,
+    "DescriptionId": 15110,
+    "GiverDialogueId": 24876,
+    "ObjectiveDescriptionId": 15110,
+    "IconId": 43278,
+    "GiverNpcId": 3547,
+    "TargetNpcId": 3547,
+    "RewardCoins": 61,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3281,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 15926,
+        "DescriptionId": 15272,
+        "DialogueId": 15924,
+        "Targets": [{ "NpcId": 1658 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 15834,
+        "DescriptionId": 15835,
+        "DialogueId": 15930,
+        "Targets": [{ "NpcId": 3547 }]
+      }
+    ]
+  },
+  {
+    "Name": "Such a Show Off! - Sandi sends you to show off to her sister Snowi in Snowhill",
+    "QuestId": 3283,
+    "TitleId": 391884,
+    "DescriptionId": 391885,
+    "GiverDialogueId": 391883,
+    "ObjectiveDescriptionId": 391885,
+    "IconId": 43278,
+    "GiverNpcId": 1813,
+    "TargetNpcId": 3567,
+    "RewardCoins": 2,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 94549,
+        "DescriptionId": 391889,
+        "DialogueId": 391886,
+        "Targets": [{ "NpcId": 3567 }]
+      }
+    ]
+  },
+  {
+    "Name": "Broken Axle - Banter sends you to ask Crofti in Sanctuary for help with his wagon",
+    "QuestId": 3284,
+    "TitleId": 10128,
+    "DescriptionId": 10129,
+    "GiverDialogueId": 24841,
+    "ObjectiveDescriptionId": 10129,
+    "IconId": 43278,
+    "GiverNpcId": 33086,
+    "TargetNpcId": 33416,
+    "RewardCoins": 30,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 14868,
+        "DescriptionId": 14869,
+        "DialogueId": 9527,
+        "Targets": [{ "NpcId": 33416 }]
+      }
+    ]
   }
 ]
