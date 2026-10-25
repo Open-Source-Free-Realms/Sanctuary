@@ -158,7 +158,12 @@ public sealed class QuestDefinitionTests
         var log = new QuestLog();
 
         foreach (var (questId, completed) in quests)
-            log.Add(new QuestProgress(questId) { Completed = completed });
+        {
+            if (completed)
+                log.AddCompleted(questId);
+            else
+                log.Add(new QuestProgress(questId));
+        }
 
         return log;
     }

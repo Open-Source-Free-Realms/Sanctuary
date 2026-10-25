@@ -11,7 +11,7 @@ public sealed class QuestProgress
 
     public int QuestId { get; }
 
-    public bool Completed { get; set; }
+    public bool Completed { get; private set; }
 
     public int GoalIndex { get; private set; }
 
@@ -23,7 +23,9 @@ public sealed class QuestProgress
         Goal = goalIndex < quest.Goals.Count ? quest.Goals[goalIndex].CreateProgress() : new GoalProgress();
     }
 
-    public void Complete()
+    public void Advance(QuestDefinition quest) => StartGoal(quest, GoalIndex + 1);
+
+    internal void Complete()
     {
         Completed = true;
         Goal = new GoalProgress();

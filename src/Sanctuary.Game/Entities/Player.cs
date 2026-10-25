@@ -784,25 +784,25 @@ public sealed class Player : ClientPcData, IEntity
         var playerUpdatePacketAddNotifications = new PlayerUpdatePacketAddNotifications();
 
         foreach (var npc in visibleNpcs)
-        {
-            playerUpdatePacketAddNotifications.Notifications.AddRange(npc.Notifications);
-
-            var questImageId = GetNotificationImageId(npc);
-            if (questImageId != 0)
-            {
-                playerUpdatePacketAddNotifications.Notifications.Add(GetQuestNotification(npc, questImageId));
-            }
-            else if (npc.Notification is not null)
-            {
-                playerUpdatePacketAddNotifications.Notifications.Add(npc.Notification);
-            }
-        }
+            playerUpdatePacketAddNotifications.Notifications.AddRange(GetNotificationsFor(npc));
 
         if (playerUpdatePacketAddNotifications.Notifications.Count > 0)
             SendTunneled(playerUpdatePacketAddNotifications);
 
         foreach (var npc in visibleNpcs)
             VisibleNpcs.TryAdd(npc.Guid, npc);
+    }
+
+    public IEnumerable<NotificationInfo> GetNotificationsFor(Npc npc)
+    {
+        foreach (var notification in npc.Notifications)
+            yield return notification;
+
+        var questImageId = GetNotificationImageId(npc);
+        if (questImageId != 0)
+            yield return GetQuestNotification(npc, questImageId);
+        else if (npc.Notification is not null)
+            yield return npc.Notification;
     }
 
     public int GetNotificationImageId(Npc npc)

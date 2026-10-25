@@ -286,7 +286,7 @@ public class GatewayConnection : UdpConnection
         {
             if (dbQuest.Completed)
             {
-                Player.Quests.Add(new QuestProgress(dbQuest.QuestId) { Completed = true });
+                Player.Quests.AddCompleted(dbQuest.QuestId);
                 continue;
             }
 

@@ -9,6 +9,7 @@ namespace Sanctuary.Game.Quests;
 public sealed class QuestLog
 {
     private readonly ConcurrentDictionary<int, QuestProgress> _quests = new();
+    private readonly ConcurrentDictionary<int, QuestProgress> _inProgress = new();
 
     public int ActiveQuestId { get; set; }
 
@@ -18,18 +19,43 @@ public sealed class QuestLog
 
     public IEnumerable<QuestProgress> All => _quests.Values;
 
-    public IEnumerable<QuestProgress> InProgress => _quests.Values.Where(quest => !quest.Completed);
+    public IEnumerable<QuestProgress> InProgress => _inProgress.Values;
 
-    public int CompletedCount => _quests.Values.Count(quest => quest.Completed);
+    public int CompletedCount => _quests.Count - _inProgress.Count;
 
     public bool Contains(int questId) => _quests.ContainsKey(questId);
 
-    public bool IsCompleted(int questId) => _quests.TryGetValue(questId, out var quest) && quest.Completed;
+    public bool IsCompleted(int questId) => _quests.ContainsKey(questId) && !_inProgress.ContainsKey(questId);
 
     public bool TryGetInProgress(int questId, [MaybeNullWhen(false)] out QuestProgress quest)
-        => _quests.TryGetValue(questId, out quest) && !quest.Completed;
+        => _inProgress.TryGetValue(questId, out quest);
 
-    public void Add(QuestProgress quest) => _quests[quest.QuestId] = quest;
+    public void Add(QuestProgress quest)
+    {
+        _quests[quest.QuestId] = quest;
 
-    public bool Remove(int questId) => _quests.TryRemove(questId, out _);
+        if (quest.Completed)
+            _inProgress.TryRemove(quest.QuestId, out _);
+        else
+            _inProgress[quest.QuestId] = quest;
+    }
+
+    public void AddCompleted(int questId)
+    {
+        var quest = new QuestProgress(questId);
+        quest.Complete();
+        Add(quest);
+    }
+
+    public void Complete(int questId)
+    {
+        if (_inProgress.TryRemove(questId, out var quest))
+            quest.Complete();
+    }
+
+    public bool Remove(int questId)
+    {
+        _inProgress.TryRemove(questId, out _);
+        return _quests.TryRemove(questId, out _);
+    }
 }

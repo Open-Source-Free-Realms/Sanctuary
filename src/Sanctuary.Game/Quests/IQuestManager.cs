@@ -21,6 +21,8 @@ public interface IQuestManager
 
     void AbandonQuest(Player player, int questId);
 
+    bool ResetQuest(Player player, int questId);
+
     void SetActiveQuest(Player player, int questId);
 
     void RestoreJournal(Player player);
