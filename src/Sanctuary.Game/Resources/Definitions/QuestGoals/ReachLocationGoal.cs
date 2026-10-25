@@ -15,7 +15,13 @@ public sealed class ReachLocationGoal : QuestGoal
 
     public float ReachRadius { get; set; } = 12f;
 
+    public const int FabledRealmsZoneDefinitionId = 1;
+
+    public int ZoneDefinitionId { get; set; } = FabledRealmsZoneDefinitionId;
+
     public override bool Matches(QuestDefinition quest, QuestEvent questEvent)
-        => ReachPosition != Vector3.Zero && questEvent is PlayerMovedEvent { Position: var position }
+        => ReachPosition != Vector3.Zero
+            && questEvent is PlayerMovedEvent { Position: var position, ZoneDefinitionId: var zoneDefinitionId }
+            && zoneDefinitionId == ZoneDefinitionId
             && position.IsInCircle(ReachPosition, ReachRadius);
 }
