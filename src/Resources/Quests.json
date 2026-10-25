@@ -91,7 +91,7 @@
     "TitleId": 46280,
     "DescriptionId": 46621,
     "GiverDialogueId": 46279,
-    "ObjectiveDescriptionId": 46621,
+    "ObjectiveDescriptionId": 46281,
     "IconId": 43278,
     "GiverNpcId": 2335,
     "TargetNpcId": 2335,
@@ -256,7 +256,7 @@
     "TitleId": 390845,
     "DescriptionId": 390846,
     "GiverDialogueId": 390844,
-    "ObjectiveDescriptionId": 390849,
+    "ObjectiveDescriptionId": 390846,
     "IconId": 43278,
     "GiverNpcId": 2419,
     "TargetNpcId": 2419,
@@ -464,7 +464,7 @@
     "TitleId": 3787,
     "DescriptionId": 38144,
     "GiverDialogueId": 38142,
-    "ObjectiveDescriptionId": 116723,
+    "ObjectiveDescriptionId": 38144,
     "IconId": 43278,
     "GiverNpcId": 3386,
     "TargetNpcId": 3379,
@@ -551,7 +551,7 @@
     "TitleId": 70107,
     "DescriptionId": 70106,
     "GiverDialogueId": 70102,
-    "ObjectiveDescriptionId": 70109,
+    "ObjectiveDescriptionId": 70106,
     "IconId": 43278,
     "GiverNpcId": 3145,
     "TargetNpcId": 3120,
@@ -578,7 +578,7 @@
     "TitleId": 70218,
     "DescriptionId": 70219,
     "GiverDialogueId": 70299,
-    "ObjectiveDescriptionId": 70219,
+    "ObjectiveDescriptionId": 70301,
     "IconId": 43278,
     "GiverNpcId": 3120,
     "TargetNpcId": 3120,
@@ -619,7 +619,7 @@
     "TitleId": 70201,
     "DescriptionId": 70202,
     "GiverDialogueId": 70505,
-    "ObjectiveDescriptionId": 70288,
+    "ObjectiveDescriptionId": 70202,
     "IconId": 43278,
     "GiverNpcId": 3120,
     "TargetNpcId": 3145,
@@ -696,7 +696,7 @@
     "TitleId": 400355,
     "DescriptionId": 400356,
     "GiverDialogueId": 400433,
-    "ObjectiveDescriptionId": 400427,
+    "ObjectiveDescriptionId": 400435,
     "IconId": 43278,
     "GiverNpcId": 1925,
     "TargetNpcId": 1925,
@@ -1669,7 +1669,7 @@
     "TitleId": 46203,
     "DescriptionId": 46204,
     "GiverDialogueId": 46202,
-    "ObjectiveDescriptionId": 46219,
+    "ObjectiveDescriptionId": 46204,
     "IconId": 43278,
     "GiverNpcId": 33348,
     "TargetNpcId": 2740,
@@ -1685,6 +1685,200 @@
         "DescriptionId": 46219,
         "DialogueId": 46206,
         "Targets": [{ "NpcId": 2740 }]
+      }
+    ]
+  },
+  {
+    "Name": "Meet the Mayor! - Frostpetal sends you to meet Mayor Crystalline",
+    "QuestId": 3260,
+    "TitleId": 5544,
+    "DescriptionId": 5655,
+    "GiverDialogueId": 24825,
+    "ObjectiveDescriptionId": 103961,
+    "IconId": 43278,
+    "GiverNpcId": 33609,
+    "TargetNpcId": 33737,
+    "RewardCoins": 9,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "NextQuestId": 3261,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 72647,
+        "DescriptionId": 78762,
+        "DialogueId": 78760,
+        "Targets": [{ "NpcId": 33737 }]
+      }
+    ]
+  },
+  {
+    "Name": "Hot Mess - Tevin sends you to Murphy at the Hot Springs",
+    "QuestId": 3261,
+    "TitleId": 79019,
+    "DescriptionId": 79020,
+    "GiverDialogueId": 79018,
+    "ObjectiveDescriptionId": 79020,
+    "IconId": 43278,
+    "GiverNpcId": 33741,
+    "TargetNpcId": 33670,
+    "RewardCoins": 9,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3260,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 79025,
+        "DescriptionId": 79024,
+        "DialogueId": 79021,
+        "Targets": [{ "NpcId": 33670 }]
+      }
+    ]
+  },
+  {
+    "Name": "Glugmort's Palate - Burnetta sends you to Glerga for worm soup to give Glugmort",
+    "QuestId": 3270,
+    "TitleId": 20550,
+    "DescriptionId": 20551,
+    "GiverDialogueId": 24816,
+    "ObjectiveDescriptionId": 20551,
+    "IconId": 43278,
+    "GiverNpcId": 3476,
+    "TargetNpcId": 3474,
+    "RewardCoins": 24,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 15861,
+        "DescriptionId": 20562,
+        "DialogueId": 20560,
+        "Targets": [{ "NpcId": 4064 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 20563,
+        "DescriptionId": 20564,
+        "DialogueId": 20565,
+        "Targets": [{ "NpcId": 3474 }]
+      }
+    ]
+  },
+  {
+    "Name": "Spinnerette - Gorg sends you to deal with the spider Spinnerette in southern Bristlewood",
+    "QuestId": 3271,
+    "TitleId": 16111,
+    "DescriptionId": 16121,
+    "GiverDialogueId": 24895,
+    "ObjectiveDescriptionId": 16121,
+    "IconId": 43278,
+    "GiverNpcId": 2792,
+    "TargetNpcId": 2792,
+    "RewardCoins": 15,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 16127,
+        "DescriptionId": 16126,
+        "Targets": [{ "NpcId": 2714 }],
+        "Dialogue": [
+          { "TextId": 16132 },
+          { "TextId": 16134 }
+        ]
+      },
+      {
+        "Type": 0,
+        "NameId": 16138,
+        "DescriptionId": 16139,
+        "DialogueId": 16140,
+        "Targets": [{ "NpcId": 2792 }]
+      }
+    ]
+  },
+  {
+    "Name": "Pirri's Sketches - take Pirri's hairstyle sketches to Inni Ki in Seaside",
+    "QuestId": 3272,
+    "TitleId": 46259,
+    "DescriptionId": 46260,
+    "GiverDialogueId": 46258,
+    "ObjectiveDescriptionId": 46260,
+    "IconId": 43278,
+    "GiverNpcId": 2429,
+    "TargetNpcId": 1799,
+    "RewardCoins": 15,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 46268,
+        "DescriptionId": 46269,
+        "DialogueId": 46264,
+        "Targets": [{ "NpcId": 1799 }]
+      }
+    ]
+  },
+  {
+    "Name": "Done Deal - Wootmoot sends you to tell Sandi her talent services are no longer needed",
+    "QuestId": 3273,
+    "TitleId": 391804,
+    "DescriptionId": 391805,
+    "GiverDialogueId": 391803,
+    "ObjectiveDescriptionId": 391805,
+    "IconId": 43278,
+    "GiverNpcId": 1626,
+    "TargetNpcId": 1813,
+    "RewardCoins": 5,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 391809,
+        "DescriptionId": 391808,
+        "DialogueId": 391806,
+        "Targets": [{ "NpcId": 1813 }]
+      }
+    ]
+  },
+  {
+    "Name": "Hooligan Hassles - Commander Kiggle sends you to help Henry at Farnum Farmstead",
+    "QuestId": 3274,
+    "TitleId": 74527,
+    "DescriptionId": 74528,
+    "GiverDialogueId": 74526,
+    "ObjectiveDescriptionId": 74528,
+    "IconId": 43278,
+    "GiverNpcId": 2386,
+    "TargetNpcId": 3234,
+    "RewardCoins": 75,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 74532,
+        "DescriptionId": 74531,
+        "DialogueId": 74529,
+        "Targets": [{ "NpcId": 3234 }]
       }
     ]
   }
