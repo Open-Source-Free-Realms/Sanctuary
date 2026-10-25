@@ -32,6 +32,10 @@ public interface IQuestManager
 
     NotificationInfo? GetQuestBadge(Player player, Npc npc);
 
+    bool IsHiddenByQuest(Player player, Npc npc);
+
+    int GetQuestEffectId(Player player, Npc npc);
+
     void RefreshQuestNotification(Player player, ulong npcGuid);
 
     void RefreshObjectiveTarget(Player player);

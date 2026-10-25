@@ -191,6 +191,10 @@ public abstract class BaseZone : IZone, IDisposable
 
     public virtual NotificationInfo? GetQuestBadge(Player player, Npc npc) => null;
 
+    public virtual bool IsHiddenByQuest(Player player, Npc npc) => false;
+
+    public virtual int GetQuestEffectId(Player player, Npc npc) => 0;
+
     public bool TryFindRoute(Vector3 start, Vector3 goal, Queue<Vector3> waypoints)
     {
         if (Pathfinder is null || start.DistanceSquaredXZ(goal) < RoadRouteMinDistance * RoadRouteMinDistance)

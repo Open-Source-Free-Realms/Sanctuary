@@ -815,7 +815,7 @@ public sealed class Player : ClientPcData, IEntity
 
     public void OnAddVisibleNpcs(params IEnumerable<Npc> npcs)
     {
-        var visibleNpcs = npcs.Where(npc => npc.IsVisibleTo(this)).ToArray();
+        var visibleNpcs = npcs.Where(npc => npc.IsVisibleTo(this) && !Zone.IsHiddenByQuest(this, npc)).ToArray();
 
         foreach (var npc in visibleNpcs)
         {
@@ -829,6 +829,18 @@ public sealed class Player : ClientPcData, IEntity
 
             SendTunneled(playerUpdatePacketAddNpc);
             SendTunneled(new PlayerUpdatePacketUpdateCharacterState { Guid = npc.Guid, State = IdleCharacterState });
+
+            var questEffectId = Zone.GetQuestEffectId(this, npc);
+            if (questEffectId != 0)
+            {
+                SendTunneled(new PlayerUpdatePacketAddEffectTagCompositeEffect
+                {
+                    Guid = npc.Guid,
+                    TagId = EffectTagIdGenerator.Next(),
+                    CompositeEffectId = questEffectId,
+                    SourceGuid = npc.Guid
+                });
+            }
         }
 
         var playerUpdatePacketNpcRelevance = InteractionMenuHelper.GetNpcRelevancePacket(

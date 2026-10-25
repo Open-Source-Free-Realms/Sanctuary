@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Quests;
@@ -59,6 +60,44 @@ public sealed class QuestDefinition
         => goalIndex >= 0 && goalIndex < Goals.Count && Goals[goalIndex] is TalkToNpcGoal talkGoal
             ? talkGoal.TargetNpcId(this)
             : TargetNpcId;
+
+    public IEnumerable<int> StateNpcIds()
+        => Goals.SelectMany(goal => goal.HideNpcIdsWhenDone.Concat(goal.NpcEffectsUntilDone.Select(effect => effect.NpcId))).Distinct();
+
+    private int GoalsDoneFor(QuestLog playerQuests)
+    {
+        if (!playerQuests.Contains(QuestId))
+            return 0;
+
+        return playerQuests.TryGetInProgress(QuestId, out var progress) ? progress.GoalIndex : Goals.Count;
+    }
+
+    public bool HidesNpcFor(QuestLog playerQuests, int npcId)
+    {
+        var goalsDone = GoalsDoneFor(playerQuests);
+
+        for (var i = 0; i < goalsDone; i++)
+        {
+            if (Goals[i].HideNpcIdsWhenDone.Contains(npcId))
+                return true;
+        }
+
+        return false;
+    }
+
+    public int NpcEffectIdFor(QuestLog playerQuests, int npcId)
+    {
+        for (var i = GoalsDoneFor(playerQuests); i < Goals.Count; i++)
+        {
+            foreach (var effect in Goals[i].NpcEffectsUntilDone)
+            {
+                if (effect.NpcId == npcId)
+                    return effect.EffectId;
+            }
+        }
+
+        return 0;
+    }
 
     public bool IsWaitingOn(QuestProgress progress, Npc npc)
     {

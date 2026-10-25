@@ -457,6 +457,8 @@ public sealed class QuestManager : IQuestManager
         foreach (var goal in quest.Goals.OfType<TalkToNpcGoal>())
             npcIds.UnionWith(goal.AllTalkTargetNpcIds());
 
+        npcIds.UnionWith(quest.StateNpcIds());
+
         foreach (var excludedId in quest.ExcludesQuestIds)
         {
             if (!_resourceManager.Quests.TryGet(excludedId, out var excludedQuest))
@@ -468,6 +470,18 @@ public sealed class QuestManager : IQuestManager
 
         foreach (var npcId in npcIds)
             RefreshQuestNotifications(player, npcId);
+    }
+
+    private static void RemoveHiddenNpcs(Player player, QuestGoal goal)
+    {
+        foreach (var npcId in goal.HideNpcIdsWhenDone)
+        {
+            foreach (var npc in player.VisibleNpcs.Values.Where(npc => npc.DefinitionId == npcId).ToList())
+            {
+                player.SendTunneled(EntityHelper.GetRemovePlayerGracefullyPacket(npc.Guid, animate: true, compositeEffectId: goal.HideEffectId));
+                player.VisibleNpcs.TryRemove(npc.Guid, out _);
+            }
+        }
     }
 
     private void RefreshQuestNotifications(Player player, int npcId)
@@ -541,6 +555,50 @@ public sealed class QuestManager : IQuestManager
         }
 
         return 0;
+    }
+
+    public bool IsHiddenByQuest(Player player, Npc npc)
+    {
+        var quests = _resourceManager.Quests;
+
+        if (!quests.ByStateNpc.TryGetValue(npc.DefinitionId, out var questIds))
+            return false;
+
+        foreach (var questId in questIds)
+        {
+            if (quests.TryGet(questId, out var quest) && quest.HidesNpcFor(player.Quests, npc.DefinitionId))
+                return true;
+        }
+
+        return false;
+    }
+
+    public int GetQuestEffectId(Player player, Npc npc)
+    {
+        var quests = _resourceManager.Quests;
+
+        if (!quests.ByStateNpc.TryGetValue(npc.DefinitionId, out var questIds))
+            return 0;
+
+        foreach (var questId in questIds)
+        {
+            if (quests.TryGet(questId, out var quest) && quest.NpcEffectIdFor(player.Quests, npc.DefinitionId) is var effectId and not 0)
+                return effectId;
+        }
+
+        return 0;
+    }
+
+    private static void RefreshNpcEffects(Player player, QuestGoal goal)
+    {
+        foreach (var effect in goal.NpcEffectsUntilDone)
+        {
+            foreach (var npc in player.VisibleNpcs.Values.Where(npc => npc.DefinitionId == effect.NpcId).ToList())
+            {
+                player.OnRemoveVisibleNpcs(npc);
+                player.OnAddVisibleNpcs(npc);
+            }
+        }
     }
 
     private HashSet<int> QuestBadgeIconStates(Npc npc)
@@ -668,6 +726,8 @@ public sealed class QuestManager : IQuestManager
         SaveQuestRow(player, quest.QuestId, q => q.CurrentGoalId = isFinalGoal ? AllGoalsDoneGoalId : goals[progress.GoalIndex].NameId);
         DeleteSavedGoalProgress(player, quest.QuestId);
 
+        RemoveHiddenNpcs(player, completedGoal);
+        RefreshNpcEffects(player, completedGoal);
         RefreshQuestNotifications(player, quest);
 
         if (isFinalGoal)

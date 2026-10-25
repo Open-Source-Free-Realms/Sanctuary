@@ -22,6 +22,7 @@ public class QuestDefinitionCollection
     // NPC definition id -> the quests it offers, and the quests it is a goal target or turn-in for.
     public ConcurrentDictionary<int, List<int>> ByGiver { get; } = new();
     public ConcurrentDictionary<int, List<int>> ByTarget { get; } = new();
+    public ConcurrentDictionary<int, List<int>> ByStateNpc { get; } = new();
 
     public QuestDefinitionCollection(ILogger logger)
     {
@@ -126,6 +127,9 @@ public class QuestDefinitionCollection
                     ByTarget.GetOrAdd(entry.TargetNpcId, _ => []).Add(entry.QuestId);
 
                 IndexGoals(entry, filePath);
+
+                foreach (var stateNpcId in entry.StateNpcIds())
+                    ByStateNpc.GetOrAdd(stateNpcId, _ => []).Add(entry.QuestId);
             }
 
             EnforceSymmetricExclusions(filePath);

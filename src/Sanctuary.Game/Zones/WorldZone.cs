@@ -113,6 +113,10 @@ public sealed class WorldZone : BaseZone
     public override NotificationInfo? GetQuestBadge(Player player, Npc npc)
         => _questManager.IsQuestNpc(npc.DefinitionId) ? _questManager.GetQuestBadge(player, npc) : null;
 
+    public override bool IsHiddenByQuest(Player player, Npc npc) => _questManager.IsHiddenByQuest(player, npc);
+
+    public override int GetQuestEffectId(Player player, Npc npc) => _questManager.GetQuestEffectId(player, npc);
+
     public override void OnClientFinishedLoading(Player player)
     {
         base.OnClientFinishedLoading(player);
