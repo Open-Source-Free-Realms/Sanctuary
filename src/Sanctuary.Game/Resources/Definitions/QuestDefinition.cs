@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 
+using Sanctuary.Game.Entities;
 using Sanctuary.Game.Quests;
 using Sanctuary.Game.Resources.Definitions.QuestGoals;
 
@@ -54,6 +55,20 @@ public sealed class QuestDefinition
         Goals.Count > 0 && Goals[^1].ConversationFor(TargetNpcId) is { Count: > 0 } lines ? lines[^1].TextId : 0;
 
     // Shared by the offer flow and the giver's badge so the two can't drift.
+    public int GoalTargetNpcId(int goalIndex)
+        => goalIndex >= 0 && goalIndex < Goals.Count && Goals[goalIndex] is TalkToNpcGoal talkGoal
+            ? talkGoal.TargetNpcId(this)
+            : TargetNpcId;
+
+    public bool IsWaitingOn(QuestProgress progress, Npc npc)
+    {
+        if (progress.GoalIndex >= Goals.Count)
+            return GoalTargetNpcId(Goals.Count - 1) == npc.DefinitionId;
+
+        return Goals[progress.GoalIndex].Matches(this, new NpcTalkedEvent(npc))
+            && !(progress.Goal is TalkProgress talkProgress && talkProgress.HasTalkedTo(npc.DefinitionId));
+    }
+
     public bool IsOfferableFor(QuestLog playerQuests)
     {
         if (playerQuests.Contains(QuestId))

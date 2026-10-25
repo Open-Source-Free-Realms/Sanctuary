@@ -136,7 +136,41 @@ public sealed class QuestGoalTests
         Assert.AreEqual(2, loadedCollect.Count);
     }
 
-    private static NpcTalkedEvent Talk(int npcId) => new(new Npc(null!) { DefinitionId = npcId });
+    [TestMethod]
+    public void IsWaitingOn_OnlyTheCurrentGoalsUntalkedNpcsThenTheTurnInNpc()
+    {
+        var quest = new QuestDefinition
+        {
+            QuestId = 2,
+            TargetNpcId = 500,
+            Goals =
+            [
+                new TalkToNpcGoal { Targets = [new TalkTarget { NpcId = 600 }] },
+                new TalkToNpcGoal { RequiredCount = 2, Targets = [new TalkTarget { NpcId = 700 }, new TalkTarget { NpcId = 701 }, new TalkTarget { NpcId = 702 }] }
+            ]
+        };
+        var progress = new QuestProgress(2);
+        progress.StartGoal(quest, 0);
+
+        Assert.IsTrue(quest.IsWaitingOn(progress, Npc(600)));
+        Assert.IsFalse(quest.IsWaitingOn(progress, Npc(700)));
+
+        progress.StartGoal(quest, 1);
+        quest.Goals[1].Progress(quest, Talk(700), progress.Goal);
+
+        Assert.IsFalse(quest.IsWaitingOn(progress, Npc(600)));
+        Assert.IsFalse(quest.IsWaitingOn(progress, Npc(700)));
+        Assert.IsTrue(quest.IsWaitingOn(progress, Npc(701)));
+
+        progress.StartGoal(quest, 2);
+
+        Assert.IsFalse(quest.IsWaitingOn(progress, Npc(701)));
+        Assert.IsTrue(quest.IsWaitingOn(progress, Npc(700)));
+    }
+
+    private static Npc Npc(int npcId) => new(null!) { DefinitionId = npcId };
+
+    private static NpcTalkedEvent Talk(int npcId) => new(Npc(npcId));
 
     private static PlayerMovedEvent Move(float x, float z, int zoneDefinitionId = ReachLocationGoal.FabledRealmsZoneDefinitionId)
         => new(new Vector4(x, 0f, z, 1f), zoneDefinitionId);
