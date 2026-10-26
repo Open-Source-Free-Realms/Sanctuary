@@ -43,6 +43,8 @@ public sealed class QuestDefinition
     public int? PrerequisiteQuestId { get; set; }
     public int? NextQuestId { get; set; }
 
+    public bool HideObjectiveTarget { get; set; }
+
     // Quests that block this one while active or completed, for mutually exclusive quests such as the
     // two race-specific introductions. Each lists the other so the check is symmetric.
     public List<int> ExcludesQuestIds { get; set; } = [];
@@ -64,21 +66,39 @@ public sealed class QuestDefinition
     public IEnumerable<int> StateNpcIds()
         => Goals.SelectMany(goal => goal.HideNpcIdsWhenDone.Concat(goal.NpcEffectsUntilDone.Select(effect => effect.NpcId))).Distinct();
 
-    private int GoalsDoneFor(QuestLog playerQuests)
+    public int StepEnd(int stepStart)
+    {
+        if (stepStart >= Goals.Count)
+            return stepStart;
+
+        var end = stepStart + 1;
+        while (end < Goals.Count && Goals[end].WithPrevious)
+            end++;
+
+        return end;
+    }
+
+    public int StepStartOf(int goalIndex)
+    {
+        while (goalIndex > 0 && goalIndex < Goals.Count && Goals[goalIndex].WithPrevious)
+            goalIndex--;
+
+        return goalIndex;
+    }
+
+    private bool IsGoalDoneFor(QuestLog playerQuests, int goalIndex)
     {
         if (!playerQuests.Contains(QuestId))
-            return 0;
+            return false;
 
-        return playerQuests.TryGetInProgress(QuestId, out var progress) ? progress.GoalIndex : Goals.Count;
+        return !playerQuests.TryGetInProgress(QuestId, out var progress) || progress.IsGoalDone(goalIndex);
     }
 
     public bool HidesNpcFor(QuestLog playerQuests, int npcId)
     {
-        var goalsDone = GoalsDoneFor(playerQuests);
-
-        for (var i = 0; i < goalsDone; i++)
+        for (var i = 0; i < Goals.Count; i++)
         {
-            if (Goals[i].HideNpcIdsWhenDone.Contains(npcId))
+            if (Goals[i].HideNpcIdsWhenDone.Contains(npcId) && IsGoalDoneFor(playerQuests, i))
                 return true;
         }
 
@@ -87,8 +107,11 @@ public sealed class QuestDefinition
 
     public int NpcEffectIdFor(QuestLog playerQuests, int npcId)
     {
-        for (var i = GoalsDoneFor(playerQuests); i < Goals.Count; i++)
+        for (var i = 0; i < Goals.Count; i++)
         {
+            if (IsGoalDoneFor(playerQuests, i))
+                continue;
+
             foreach (var effect in Goals[i].NpcEffectsUntilDone)
             {
                 if (effect.NpcId == npcId)
@@ -104,8 +127,14 @@ public sealed class QuestDefinition
         if (progress.GoalIndex >= Goals.Count)
             return GoalTargetNpcId(Goals.Count - 1) == npc.DefinitionId;
 
-        return Goals[progress.GoalIndex].Matches(this, new NpcTalkedEvent(npc))
-            && !(progress.Goal is TalkProgress talkProgress && talkProgress.HasTalkedTo(npc.DefinitionId));
+        foreach (var (goalIndex, goalProgress) in progress.OpenGoals)
+        {
+            if (Goals[goalIndex].Matches(this, new NpcTalkedEvent(npc))
+                && !(goalProgress is TalkProgress talkProgress && talkProgress.HasTalkedTo(npc.DefinitionId)))
+                return true;
+        }
+
+        return false;
     }
 
     public bool IsOfferableFor(QuestLog playerQuests)

@@ -150,19 +150,19 @@ public sealed class QuestGoalTests
             ]
         };
         var progress = new QuestProgress(2);
-        progress.StartGoal(quest, 0);
+        progress.StartStep(quest, 0);
 
         Assert.IsTrue(quest.IsWaitingOn(progress, Npc(600)));
         Assert.IsFalse(quest.IsWaitingOn(progress, Npc(700)));
 
-        progress.StartGoal(quest, 1);
-        quest.Goals[1].Progress(quest, Talk(700), progress.Goal);
+        progress.StartStep(quest, 1);
+        quest.Goals[1].Progress(quest, Talk(700), progress.ProgressFor(1));
 
         Assert.IsFalse(quest.IsWaitingOn(progress, Npc(600)));
         Assert.IsFalse(quest.IsWaitingOn(progress, Npc(700)));
         Assert.IsTrue(quest.IsWaitingOn(progress, Npc(701)));
 
-        progress.StartGoal(quest, 2);
+        progress.StartStep(quest, 2);
 
         Assert.IsFalse(quest.IsWaitingOn(progress, Npc(701)));
         Assert.IsTrue(quest.IsWaitingOn(progress, Npc(700)));

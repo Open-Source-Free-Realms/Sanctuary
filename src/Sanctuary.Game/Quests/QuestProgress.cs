@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 using Sanctuary.Game.Resources.Definitions;
 
@@ -6,6 +8,8 @@ namespace Sanctuary.Game.Quests;
 
 public sealed class QuestProgress
 {
+    private readonly Dictionary<int, GoalProgress> _openGoals = [];
+
     public QuestProgress(int questId)
     {
         QuestId = questId;
@@ -19,19 +23,42 @@ public sealed class QuestProgress
 
     public int GoalIndex { get; private set; }
 
-    public GoalProgress Goal { get; private set; } = new();
+    public int StepEnd { get; private set; }
 
-    public void StartGoal(QuestDefinition quest, int goalIndex)
+    public IReadOnlyDictionary<int, GoalProgress> OpenGoals => _openGoals;
+
+    public int FirstOpenGoalIndex => _openGoals.Count > 0 ? _openGoals.Keys.Min() : GoalIndex;
+
+    public int GoalsDone => StepEnd - _openGoals.Count;
+
+    public bool IsGoalDone(int goalIndex) => Completed || goalIndex < StepEnd && !_openGoals.ContainsKey(goalIndex);
+
+    public GoalProgress ProgressFor(int goalIndex) => _openGoals.TryGetValue(goalIndex, out var progress) ? progress : new GoalProgress();
+
+    public void StartStep(QuestDefinition quest, int stepStart)
     {
-        GoalIndex = goalIndex;
-        Goal = goalIndex < quest.Goals.Count ? quest.Goals[goalIndex].CreateProgress() : new GoalProgress();
+        GoalIndex = stepStart;
+        StepEnd = quest.StepEnd(stepStart);
+        _openGoals.Clear();
+
+        for (var i = stepStart; i < StepEnd; i++)
+            _openGoals[i] = quest.Goals[i].CreateProgress();
     }
 
-    public void Advance(QuestDefinition quest) => StartGoal(quest, GoalIndex + 1);
+    public bool FinishGoal(QuestDefinition quest, int goalIndex)
+    {
+        _openGoals.Remove(goalIndex);
+
+        if (_openGoals.Count > 0)
+            return false;
+
+        StartStep(quest, StepEnd);
+        return true;
+    }
 
     internal void Complete()
     {
         Completed = true;
-        Goal = new GoalProgress();
+        _openGoals.Clear();
     }
 }
