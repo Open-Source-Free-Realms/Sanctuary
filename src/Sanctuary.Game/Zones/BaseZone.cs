@@ -186,6 +186,8 @@ public abstract class BaseZone : IZone, IDisposable
 
     public virtual IReadOnlyList<NpcInteractionOption> GetInteractionOptions(Player player, Npc npc) => [];
 
+    public virtual NotificationInfo? GetQuestBadge(Player player, Npc npc) => null;
+
     public bool TryFindRoute(Vector3 start, Vector3 goal, Queue<Vector3> waypoints)
     {
         if (Pathfinder is null || start.DistanceSquaredXZ(goal) < RoadRouteMinDistance * RoadRouteMinDistance)

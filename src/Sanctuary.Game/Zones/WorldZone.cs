@@ -78,6 +78,9 @@ public sealed class WorldZone : BaseZone
     public override IReadOnlyList<NpcInteractionOption> GetInteractionOptions(Player player, Npc npc)
         => _questManager.IsQuestNpc(npc.DefinitionId) ? _questManager.GetInteractionOptions(player, npc) : [];
 
+    public override NotificationInfo? GetQuestBadge(Player player, Npc npc)
+        => _questManager.IsQuestNpc(npc.DefinitionId) ? _questManager.GetQuestBadge(player, npc) : null;
+
     public override void OnClientFinishedLoading(Player player)
     {
         base.OnClientFinishedLoading(player);

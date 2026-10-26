@@ -5,6 +5,7 @@ using System.Numerics;
 
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Interactions;
+using Sanctuary.Packet.Common;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Scripting;
 using Sanctuary.UdpLibrary;
@@ -100,6 +101,8 @@ public interface IZone : IScriptableZone, IDisposable
     bool TryFindRoute(Vector3 start, Vector3 goal, Queue<Vector3> waypoints);
 
     IReadOnlyList<NpcInteractionOption> GetInteractionOptions(Player player, Npc npc);
+
+    NotificationInfo? GetQuestBadge(Player player, Npc npc);
 
     bool TryFindReachableRoute(Vector3 start, Vector3 goal, Queue<Vector3> waypoints, bool followRoads);
 }

@@ -94,9 +94,6 @@ public sealed class Player : ClientPcData, IEntity
 
     public ulong CharacterId { get; set; }
 
-    public ulong LastInteractNpcGuid { get; set; }
-    public DateTime LastInteractAt { get; set; }
-
     public QuestLog Quests { get; } = new();
 
     public QuestConversation QuestConversation { get; } = new();
@@ -687,6 +684,8 @@ public sealed class Player : ClientPcData, IEntity
 
         SendTunneled(packetClientBeginZoning);
 
+        ClearObjectives();
+
         return true;
     }
 
@@ -796,79 +795,9 @@ public sealed class Player : ClientPcData, IEntity
         foreach (var notification in npc.Notifications)
             yield return notification;
 
-        if (GetBadgeNotification(npc) is { } badge)
+        if ((Zone.GetQuestBadge(this, npc) ?? npc.Notification) is { } badge)
             yield return badge;
     }
-
-    public NotificationInfo? GetBadgeNotification(Npc npc)
-    {
-        var questImageId = GetNotificationImageId(npc);
-        return questImageId != 0 ? GetQuestNotification(npc, questImageId) : npc.Notification;
-    }
-
-    public HashSet<int> GetBadgeIconStates(Npc npc)
-    {
-        var quests = _resourceManager.Quests;
-        var states = new HashSet<int>();
-
-        if (quests.ByGiver.TryGetValue(npc.DefinitionId, out var giverQuestIds))
-        {
-            foreach (var questId in giverQuestIds)
-            {
-                if (quests.TryGet(questId, out var quest) && quest.NotificationAvailable != 0)
-                    states.Add(quest.NotificationAvailable);
-            }
-        }
-
-        if (quests.ByTarget.TryGetValue(npc.DefinitionId, out var targetQuestIds))
-        {
-            foreach (var questId in targetQuestIds)
-            {
-                if (quests.TryGet(questId, out var quest) && quest.NotificationActive != 0)
-                    states.Add(quest.NotificationActive);
-            }
-        }
-
-        if (npc.Notification is not null)
-            states.Add(npc.Notification.IconState);
-
-        return states;
-    }
-
-    public int GetNotificationImageId(Npc npc)
-    {
-        var quests = _resourceManager.Quests;
-
-        if (quests.ByGiver.TryGetValue(npc.DefinitionId, out var giverQuestIds))
-        {
-            foreach (var questId in giverQuestIds)
-            {
-                if (quests.TryGet(questId, out var quest) && quest.IsOfferableFor(Quests))
-                    return quest.NotificationAvailable;
-            }
-        }
-
-        if (quests.ByTarget.TryGetValue(npc.DefinitionId, out var targetQuestIds))
-        {
-            foreach (var questId in targetQuestIds)
-            {
-                if (Quests.TryGetInProgress(questId, out _) && quests.TryGet(questId, out var quest))
-                    return quest.NotificationActive;
-            }
-        }
-
-        return npc.Notification?.IconState ?? 0;
-    }
-
-    public static NotificationInfo GetQuestNotification(Npc npc, int imageId) => new()
-    {
-        Guid = npc.Guid,
-        IsCompact = false,
-        IconState = imageId,
-        NameId = npc.NameId,
-        ReferenceId = npc.SubTextNameId,
-        Enabled = false
-    };
 
     public void OnAddVisiblePlayers(params IEnumerable<Player> players)
     {
@@ -1568,11 +1497,14 @@ public sealed class Player : ClientPcData, IEntity
         }
     }
 
-    public void OnZoneChanged(IZone zone, Vector4 position, Quaternion rotation)
+    public void ClearObjectives()
     {
         SendTunneled(new ObjectiveTargetUpdatePacket { Active = false });
         SendTunneled(new ObjectiveClientClearPacket { Unknown = Random.Shared.Next() });
+    }
 
+    public void OnZoneChanged(IZone zone, Vector4 position, Quaternion rotation)
+    {
         PlayerPet.RecallPet(remember: zone is not CombatZone);
 
         RemoveFromVisibleEntities(true);
@@ -1610,13 +1542,19 @@ public sealed class Player : ClientPcData, IEntity
 
     public void SendInteractionMenu(Npc npc, IReadOnlyList<NpcInteractionOption> options, IEnumerable<InteractionData>? npcInteractions = null)
     {
+        var npcInteractionList = npcInteractions?.ToList() ?? [];
+        var usedIds = npcInteractionList.Select(interaction => interaction.Id).ToHashSet();
+
         var interactions = new List<InteractionData>(options.Count);
         var actions = new Dictionary<int, Action<Player>>(options.Count);
+        var nextId = NpcInteractionIdBase;
 
-        for (var i = 0; i < options.Count; i++)
+        foreach (var option in options)
         {
-            var option = options[i];
-            var id = NpcInteractionIdBase + i;
+            while (!usedIds.Add(nextId))
+                nextId++;
+
+            var id = nextId++;
 
             interactions.Add(new InteractionData
             {
@@ -1629,8 +1567,7 @@ public sealed class Player : ClientPcData, IEntity
             actions[id] = option.Invoke;
         }
 
-        if (npcInteractions is not null)
-            interactions.AddRange(npcInteractions);
+        interactions.AddRange(npcInteractionList);
 
         OpenInteractionMenu = new InteractionMenu(npc.Guid, actions);
 

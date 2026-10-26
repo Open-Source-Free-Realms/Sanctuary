@@ -454,16 +454,88 @@ public sealed class QuestManager : IQuestManager
         if (!player.VisibleNpcs.TryGetValue(npcGuid, out var npc))
             return;
 
+        var iconStates = QuestBadgeIconStates(npc);
+        if (npc.Notification is not null)
+            iconStates.Add(npc.Notification.IconState);
+
         var removeNotifications = new PlayerUpdatePacketRemoveNotifications();
 
-        foreach (var iconState in player.GetBadgeIconStates(npc))
+        foreach (var iconState in iconStates)
             removeNotifications.Notifications.Add(new RemoveNotificationInfo { Guid = npc.Guid, ThoughtBubbleIconId = iconState });
 
         if (removeNotifications.Notifications.Count > 0)
             player.SendTunneled(removeNotifications);
 
-        if (player.GetBadgeNotification(npc) is { } badge)
+        if ((GetQuestBadge(player, npc) ?? npc.Notification) is { } badge)
             player.SendTunneled(new PlayerUpdatePacketAddNotifications { Notifications = { badge } });
+    }
+
+    public NotificationInfo? GetQuestBadge(Player player, Npc npc)
+    {
+        var imageId = QuestBadgeImageId(player, npc);
+        if (imageId == 0)
+            return null;
+
+        return new NotificationInfo
+        {
+            Guid = npc.Guid,
+            IsCompact = false,
+            IconState = imageId,
+            NameId = npc.NameId,
+            ReferenceId = npc.SubTextNameId,
+            Enabled = false
+        };
+    }
+
+    private int QuestBadgeImageId(Player player, Npc npc)
+    {
+        var quests = _resourceManager.Quests;
+
+        if (quests.ByGiver.TryGetValue(npc.DefinitionId, out var giverQuestIds))
+        {
+            foreach (var questId in giverQuestIds)
+            {
+                if (quests.TryGet(questId, out var quest) && quest.IsOfferableFor(player.Quests))
+                    return quest.NotificationAvailable;
+            }
+        }
+
+        if (quests.ByTarget.TryGetValue(npc.DefinitionId, out var targetQuestIds))
+        {
+            foreach (var questId in targetQuestIds)
+            {
+                if (player.Quests.TryGetInProgress(questId, out _) && quests.TryGet(questId, out var quest))
+                    return quest.NotificationActive;
+            }
+        }
+
+        return 0;
+    }
+
+    private HashSet<int> QuestBadgeIconStates(Npc npc)
+    {
+        var quests = _resourceManager.Quests;
+        var states = new HashSet<int>();
+
+        if (quests.ByGiver.TryGetValue(npc.DefinitionId, out var giverQuestIds))
+        {
+            foreach (var questId in giverQuestIds)
+            {
+                if (quests.TryGet(questId, out var quest) && quest.NotificationAvailable != 0)
+                    states.Add(quest.NotificationAvailable);
+            }
+        }
+
+        if (quests.ByTarget.TryGetValue(npc.DefinitionId, out var targetQuestIds))
+        {
+            foreach (var questId in targetQuestIds)
+            {
+                if (quests.TryGet(questId, out var quest) && quest.NotificationActive != 0)
+                    states.Add(quest.NotificationActive);
+            }
+        }
+
+        return states;
     }
 
     private const float DefaultOfferCameraDistance = 6f;
@@ -576,6 +648,7 @@ public sealed class QuestManager : IQuestManager
             QuestId = quest.QuestId,
             Objective = ObjectiveFor(goals[progress.GoalIndex], ObjectiveActive)
         });
+        SendObjectiveActivated(player, quest.QuestId, goals[progress.GoalIndex], restored: false);
         SendObjectiveForGoal(player, quest, progress.GoalIndex);
 
         if (completedGoal is TalkToNpcGoal)
@@ -669,6 +742,9 @@ public sealed class QuestManager : IQuestManager
             });
         }
 
+        if (goalsDone < goals.Count)
+            SendObjectiveActivated(player, quest.QuestId, goals[goalsDone], restored: false);
+
         SendObjectiveForGoal(player, quest, goalsDone);
     }
 
@@ -686,14 +762,14 @@ public sealed class QuestManager : IQuestManager
         RequiredCount = goal.RequiredCount
     };
 
-    private static void SendObjectiveActivated(Player player, int questId, QuestGoal goal)
+    private static void SendObjectiveActivated(Player player, int questId, QuestGoal goal, bool restored = true)
     {
         player.SendTunneled(new QuestObjectiveActivatedPacket
         {
             QuestId = questId,
             ObjectiveId = goal.NameId,
-            RequiredCount = goal.RequiredCount,
-            Unknown2 = true
+            RequiredCount = restored ? goal.RequiredCount : 0,
+            Unknown2 = restored
         });
     }
 
@@ -772,6 +848,12 @@ public sealed class QuestManager : IQuestManager
         if (goalIndex >= 0 && goalIndex < goals.Count
             && goals[goalIndex] is ReachLocationGoal reachGoal && reachGoal.ReachPosition != Vector3.Zero)
         {
+            if (reachGoal.ZoneDefinitionId != player.Zone.DefinitionId)
+            {
+                player.SendTunneled(new ObjectiveTargetUpdatePacket { Active = false });
+                return;
+            }
+
             var reachPos = new Vector4(reachGoal.ReachPosition, 1f);
 
             player.SendTunneled(new ObjectiveTargetUpdatePacket
@@ -844,6 +926,9 @@ public sealed class QuestManager : IQuestManager
         if (currentGoalIndex >= 0 && currentGoalIndex < goals.Count
             && goals[currentGoalIndex] is ReachLocationGoal reachGoal && reachGoal.ReachPosition != Vector3.Zero)
         {
+            if (reachGoal.ZoneDefinitionId != player.Zone.DefinitionId)
+                return false;
+
             quest = q;
             goalIndex = currentGoalIndex;
             return true;

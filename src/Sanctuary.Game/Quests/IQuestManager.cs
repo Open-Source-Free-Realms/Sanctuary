@@ -28,6 +28,8 @@ public interface IQuestManager
 
     void RestoreJournal(Player player);
 
+    NotificationInfo? GetQuestBadge(Player player, Npc npc);
+
     void RefreshQuestNotification(Player player, ulong npcGuid);
 
     void RefreshObjectiveTarget(Player player);
