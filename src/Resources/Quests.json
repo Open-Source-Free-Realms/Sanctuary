@@ -2243,5 +2243,62 @@
         "Targets": [{ "NpcId": 33691 }]
       }
     ]
+  },
+  {
+    "Name": "One Man's Trash",
+    "QuestId": 624,
+    "TitleId": 47534,
+    "DescriptionId": 47535,
+    "GiverDialogueId": 47533,
+    "ObjectiveDescriptionId": 47535,
+    "IconId": 43278,
+    "GiverNpcId": 2222,
+    "TargetNpcId": 2222,
+    "RewardCoins": 10,
+    "RewardExperience": 0,
+    "RewardItems": [3850, 3023],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "HideObjectiveTarget": true,
+    "Goals": [
+      {
+        "Type": 2,
+        "NameId": 47543,
+        "DescriptionId": 47544,
+        "RequiredCount": 1,
+        "CollectNodeType": "one-mans-trash-camp"
+      },
+      {
+        "Type": 2,
+        "NameId": 47545,
+        "DescriptionId": 47546,
+        "RequiredCount": 1,
+        "CollectNodeType": "one-mans-trash-chugawug",
+        "WithPrevious": true
+      },
+      {
+        "Type": 2,
+        "NameId": 47547,
+        "DescriptionId": 47548,
+        "RequiredCount": 1,
+        "CollectNodeType": "one-mans-trash-vendors",
+        "WithPrevious": true
+      },
+      {
+        "Type": 2,
+        "NameId": 47549,
+        "DescriptionId": 47550,
+        "RequiredCount": 1,
+        "CollectNodeType": "one-mans-trash-stage",
+        "WithPrevious": true
+      },
+      {
+        "Type": 0,
+        "NameId": 47551,
+        "DescriptionId": 47552,
+        "DialogueId": 47536,
+        "Targets": [{ "NpcId": 2222 }]
+      }
+    ]
   }
 ]

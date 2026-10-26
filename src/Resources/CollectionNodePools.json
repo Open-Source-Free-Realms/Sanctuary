@@ -8140,5 +8140,33 @@
     "NodeType": "woe-is-willie-flowers",
     "MaxActiveNodes": 1,
     "RespawnSeconds": 10
+  },
+  {
+    "Key": "merryvale-one-mans-trash-camp",
+    "ZoneDefinitionId": 1,
+    "NodeType": "one-mans-trash-camp",
+    "MaxActiveNodes": 1,
+    "RespawnSeconds": 10
+  },
+  {
+    "Key": "merryvale-one-mans-trash-chugawug",
+    "ZoneDefinitionId": 1,
+    "NodeType": "one-mans-trash-chugawug",
+    "MaxActiveNodes": 1,
+    "RespawnSeconds": 10
+  },
+  {
+    "Key": "merryvale-one-mans-trash-vendors",
+    "ZoneDefinitionId": 1,
+    "NodeType": "one-mans-trash-vendors",
+    "MaxActiveNodes": 1,
+    "RespawnSeconds": 10
+  },
+  {
+    "Key": "merryvale-one-mans-trash-stage",
+    "ZoneDefinitionId": 1,
+    "NodeType": "one-mans-trash-stage",
+    "MaxActiveNodes": 1,
+    "RespawnSeconds": 10
   }
 ]
