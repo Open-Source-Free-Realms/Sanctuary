@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Interactions;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Scripting;
 using Sanctuary.UdpLibrary;
@@ -97,6 +98,8 @@ public interface IZone : IScriptableZone, IDisposable
     bool TryFindClientNavMeshPath(Vector3 start, Vector3 goal, Queue<Vector3> waypoints);
 
     bool TryFindRoute(Vector3 start, Vector3 goal, Queue<Vector3> waypoints);
+
+    IReadOnlyList<NpcInteractionOption> GetInteractionOptions(Player player, Npc npc);
 
     bool TryFindReachableRoute(Vector3 start, Vector3 goal, Queue<Vector3> waypoints, bool followRoads);
 }

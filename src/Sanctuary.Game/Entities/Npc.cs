@@ -142,6 +142,13 @@ public class Npc : IScriptableNpc, IEntity
 
     public void OnInteract(Player player)
     {
+        if (InteractionMenuHelper.TryOpenMenu(player, this, Zone.GetInteractionOptions(player, this)))
+        {
+            player.LastInteractNpcGuid = Guid;
+            player.LastInteractAt = DateTime.UtcNow;
+            return;
+        }
+
         if (OpensAtlas)
         {
             var executeScriptPacket = OpenAtlasInteraction.GetAtlasPacket(this, player);

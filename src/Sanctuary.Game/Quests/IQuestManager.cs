@@ -11,8 +11,6 @@ public interface IQuestManager
 
     List<NpcInteractionOption> GetInteractionOptions(Player player, Npc npc);
 
-    bool OnNpcInteract(Player player, Npc npc);
-
     void OnEvent(Player player, QuestEvent questEvent);
 
     void AcceptQuest(Player player, int questId);

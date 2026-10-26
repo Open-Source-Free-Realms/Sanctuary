@@ -17,6 +17,7 @@ using Sanctuary.Core.Extensions;
 using Sanctuary.Core.IO;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
+using Sanctuary.Game.Interactions;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Zones;
 using Sanctuary.Packet;
@@ -182,6 +183,8 @@ public abstract class BaseZone : IZone, IDisposable
 
     public bool TryFindClientNavMeshPath(Vector3 start, Vector3 goal, Queue<Vector3> waypoints) =>
         _clientNavMeshPathfinder is not null && _clientNavMeshPathfinder.TryFindPath(start, goal, waypoints);
+
+    public virtual IReadOnlyList<NpcInteractionOption> GetInteractionOptions(Player player, Npc npc) => [];
 
     public bool TryFindRoute(Vector3 start, Vector3 goal, Queue<Vector3> waypoints)
     {

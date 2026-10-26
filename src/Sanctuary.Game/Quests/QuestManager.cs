@@ -125,9 +125,6 @@ public sealed class QuestManager : IQuestManager
             QuestDialogue.Begin(player, goal.ConversationFor(npc.DefinitionId), npc.Guid);
     }
 
-    public bool OnNpcInteract(Player player, Npc npc)
-        => InteractionMenuHelper.TryOpenMenu(player, npc, GetInteractionOptions(player, npc));
-
     public void OnEvent(Player player, QuestEvent questEvent)
     {
         foreach (var (quest, progress, goal) in ActiveGoals(player).ToList())

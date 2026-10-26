@@ -10,6 +10,7 @@ using Sanctuary.Core.Extensions;
 using Sanctuary.Core.IO;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
+using Sanctuary.Game.Interactions;
 using Sanctuary.Game.Quests;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Zones;
@@ -73,6 +74,9 @@ public sealed class WorldZone : BaseZone
             _questManager.RefreshQuestNotification(player, npc.Guid);
         }
     }
+
+    public override IReadOnlyList<NpcInteractionOption> GetInteractionOptions(Player player, Npc npc)
+        => _questManager.IsQuestNpc(npc.DefinitionId) ? _questManager.GetInteractionOptions(player, npc) : [];
 
     public override void OnClientFinishedLoading(Player player)
     {
