@@ -823,7 +823,6 @@
       {
         "Type": 0,
         "NameId": 440471,
-        "DescriptionId": 440472,
         "DialogueId": 440468,
         "Targets": [{ "NpcId": 3841 }]
       }
@@ -849,7 +848,6 @@
       {
         "Type": 0,
         "NameId": 438901,
-        "DescriptionId": 438902,
         "Targets": [{ "NpcId": 3842 }],
         "Dialogue": [
           { "TextId": 438967, "ResponseTextId": 423585 }
@@ -858,7 +856,6 @@
       {
         "Type": 0,
         "NameId": 438499,
-        "DescriptionId": 438500,
         "Targets": [{ "NpcId": 3841 }],
         "Dialogue": [
           { "TextId": 438969, "ResponseTextId": 428407 }
@@ -867,7 +864,6 @@
       {
         "Type": 0,
         "NameId": 438985,
-        "DescriptionId": 438986,
         "RequiredCount": 3,
         "Targets": [
           { "NpcId": 40032, "DialogueId": 438971, "ResponseId": 438972 },
@@ -878,7 +874,6 @@
       {
         "Type": 0,
         "NameId": 437816,
-        "DescriptionId": 437817,
         "DialogueId": 438842,
         "Targets": [{ "NpcId": 3840 }]
       }
