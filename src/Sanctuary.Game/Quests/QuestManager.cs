@@ -454,9 +454,16 @@ public sealed class QuestManager : IQuestManager
         if (!player.VisibleNpcs.TryGetValue(npcGuid, out var npc))
             return;
 
-        player.SendTunneled(new PlayerUpdatePacketRemoveNotifications { Notifications = { new RemoveNotificationInfo { Guid = npc.Guid } } });
-        player.OnRemoveVisibleNpcs(npc);
-        player.OnAddVisibleNpcs(npc);
+        var removeNotifications = new PlayerUpdatePacketRemoveNotifications();
+
+        foreach (var iconState in player.GetBadgeIconStates(npc))
+            removeNotifications.Notifications.Add(new RemoveNotificationInfo { Guid = npc.Guid, ThoughtBubbleIconId = iconState });
+
+        if (removeNotifications.Notifications.Count > 0)
+            player.SendTunneled(removeNotifications);
+
+        if (player.GetBadgeNotification(npc) is { } badge)
+            player.SendTunneled(new PlayerUpdatePacketAddNotifications { Notifications = { badge } });
     }
 
     private const float DefaultOfferCameraDistance = 6f;

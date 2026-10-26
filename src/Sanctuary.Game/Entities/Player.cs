@@ -770,10 +770,6 @@ public sealed class Player : ClientPcData, IEntity
             if (npc is PetTreasureChest petTreasureChest && !petTreasureChest.IsOwner(this))
                 playerUpdatePacketAddNpc.IsInteractable = false;
 
-            var questImageId = GetNotificationImageId(npc);
-            if (questImageId != 0)
-                playerUpdatePacketAddNpc.NotificationImageSetId = questImageId;
-
             SendTunneled(playerUpdatePacketAddNpc);
             SendTunneled(new PlayerUpdatePacketUpdateCharacterState { Guid = npc.Guid, State = IdleCharacterState });
         }
@@ -800,11 +796,43 @@ public sealed class Player : ClientPcData, IEntity
         foreach (var notification in npc.Notifications)
             yield return notification;
 
+        if (GetBadgeNotification(npc) is { } badge)
+            yield return badge;
+    }
+
+    public NotificationInfo? GetBadgeNotification(Npc npc)
+    {
         var questImageId = GetNotificationImageId(npc);
-        if (questImageId != 0)
-            yield return GetQuestNotification(npc, questImageId);
-        else if (npc.Notification is not null)
-            yield return npc.Notification;
+        return questImageId != 0 ? GetQuestNotification(npc, questImageId) : npc.Notification;
+    }
+
+    public HashSet<int> GetBadgeIconStates(Npc npc)
+    {
+        var quests = _resourceManager.Quests;
+        var states = new HashSet<int>();
+
+        if (quests.ByGiver.TryGetValue(npc.DefinitionId, out var giverQuestIds))
+        {
+            foreach (var questId in giverQuestIds)
+            {
+                if (quests.TryGet(questId, out var quest) && quest.NotificationAvailable != 0)
+                    states.Add(quest.NotificationAvailable);
+            }
+        }
+
+        if (quests.ByTarget.TryGetValue(npc.DefinitionId, out var targetQuestIds))
+        {
+            foreach (var questId in targetQuestIds)
+            {
+                if (quests.TryGet(questId, out var quest) && quest.NotificationActive != 0)
+                    states.Add(quest.NotificationActive);
+            }
+        }
+
+        if (npc.Notification is not null)
+            states.Add(npc.Notification.IconState);
+
+        return states;
     }
 
     public int GetNotificationImageId(Npc npc)
