@@ -24,6 +24,10 @@ public sealed class WorldZone : BaseZone
     private readonly HashSet<SeasonalClientAreaDefinition> _activeSeasonalClientAreas = [];
     private readonly HashSet<int> _scriptEnabledClientAreaIds = [];
 
+    private readonly Dictionary<(int Longitude, int Latitude), ZoneAreaDefinition> _tileZoneAreas = [];
+    private readonly List<ZoneAreaDefinition> _shapeZoneAreas = [];
+    private readonly Dictionary<int, List<ZoneAreaDefinition>> _environmentZoneAreas = [];
+
     private const int ClientAreaRefreshSeconds = 3;
     private int _secondsSinceClientAreaRefresh;
 
@@ -31,6 +35,34 @@ public sealed class WorldZone : BaseZone
         : base(zoneDefinition, serviceProvider)
     {
         _zoneDefinition = zoneDefinition;
+
+        foreach (var areaDefinition in _zoneDefinition.AreaDefinitions)
+        {
+            if (areaDefinition.Tiles.Count > 0)
+            {
+                foreach (var tile in areaDefinition.Tiles)
+                    _tileZoneAreas[(tile[0], tile[1])] = areaDefinition;
+
+                continue;
+            }
+
+            if (areaDefinition.EnvironmentIds.Count == 0)
+            {
+                _shapeZoneAreas.Add(areaDefinition);
+                continue;
+            }
+
+            foreach (var environmentId in areaDefinition.EnvironmentIds)
+            {
+                if (!_environmentZoneAreas.TryGetValue(environmentId, out var environmentZoneAreas))
+                {
+                    environmentZoneAreas = [];
+                    _environmentZoneAreas[environmentId] = environmentZoneAreas;
+                }
+
+                environmentZoneAreas.Add(areaDefinition);
+            }
+        }
 
         foreach (var seasonalClientArea in _zoneDefinition.SeasonalClientAreas)
         {
@@ -58,6 +90,8 @@ public sealed class WorldZone : BaseZone
         base.OnClientFinishedLoading(player);
 
         SendEnabledClientAreas(player);
+
+        player.UpdatePointOfInterest(GetNearestZoneArea(player.Position));
     }
 
     protected override void UpdateEverySecond()
@@ -139,12 +173,17 @@ public sealed class WorldZone : BaseZone
             player.SendTunneled(new PacketSetClientArea { AreaId = areaId, Enabled = enabled });
     }
 
-    public int GetZoneAreaId(Vector4 position)
+    public ZoneAreaDefinition? GetZoneArea(Vector4 position)
     {
-        if (_zoneDefinition.Name != "FabledRealms")
-            return 0;
+        return GetZoneArea(position, GetTileFromPosition(position));
+    }
 
-        foreach (var areaDefinition in _zoneDefinition.AreaDefinitions)
+    public ZoneAreaDefinition? GetZoneArea(Vector4 position, ZoneTile zoneTile)
+    {
+        if (_tileZoneAreas.TryGetValue((zoneTile.Longitude, zoneTile.Latitude), out var tileZoneArea))
+            return tileZoneArea;
+
+        foreach (var areaDefinition in _shapeZoneAreas)
         {
             var isInArea = areaDefinition.Shape switch
             {
@@ -156,10 +195,40 @@ public sealed class WorldZone : BaseZone
             };
 
             if (isInArea)
-                return areaDefinition.Id;
+                return areaDefinition;
         }
 
-        return 0;
+        if (!_environmentZoneAreas.TryGetValue(zoneTile.EnvironmentId, out var environmentZoneAreas))
+            return null;
+
+        return environmentZoneAreas.FirstOrDefault(x => x.IsInEnvironmentXRange(position.X));
+    }
+
+    public ZoneAreaDefinition? GetNearestZoneArea(Vector4 position)
+    {
+        var zoneArea = GetZoneArea(position);
+
+        if (zoneArea is not null)
+            return zoneArea;
+
+        ZoneAreaDefinition? nearestZoneArea = null;
+        var nearestDistance = float.MaxValue;
+
+        foreach (var areaDefinition in _zoneDefinition.AreaDefinitions)
+        {
+            if (!_resourceManager.PointOfInterests.TryGetValue(areaDefinition.PointOfInterestId, out var pointOfInterest))
+                continue;
+
+            var distance = pointOfInterest.Position.ToVector3().DistanceSquaredXZ(position.ToVector3());
+
+            if (distance >= nearestDistance)
+                continue;
+
+            nearestDistance = distance;
+            nearestZoneArea = areaDefinition;
+        }
+
+        return nearestZoneArea;
     }
 
     private void SendPointOfInterests(Player player)

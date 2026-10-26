@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -7,6 +7,8 @@ using System.IO;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
+
+using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Collections;
 using Sanctuary.Core.Extensions;
@@ -43,6 +45,7 @@ public sealed class Player : ClientPcData, IEntity
     private const int ActionBarSlotUnknown6 = 4;
     private const int ActionBarSlotUnknown7 = 15;
     private const float OnFootMovementSpeed = 8f;
+    private const long AreaSettleMilliseconds = 1500;
 
     private readonly UdpConnection _connection;
     private readonly IResourceManager _resourceManager;
@@ -59,7 +62,11 @@ public sealed class Player : ClientPcData, IEntity
     private uint? _pendingPortraitCrc;
     private DateTimeOffset _portraitUpdateExpiresAt;
 
-    private int ZoneAreaId { get; set; }
+    public int PointOfInterestId { get; private set; }
+    public int ChatAreaNameId { get; private set; }
+
+    private ZoneAreaDefinition? _pendingZoneArea;
+    private long _pendingZoneAreaSince;
 
     public int ChatBubbleForegroundColor { get; set; }
     public int ChatBubbleBackgroundColor { get; set; }
@@ -91,6 +98,8 @@ public sealed class Player : ClientPcData, IEntity
     public ConcurrentSet<ulong> IncomingGuildInvites { get; } = [];
 
     public ConcurrentDictionary<ChatChannel, bool> ChatChannelStatus { get; set; } = [];
+
+    private static readonly ChatChannel[] DefaultEnabledChatChannels = [ChatChannel.WorldArea, ChatChannel.WorldMembersOnly];
 
     public DateTimeOffset LoginStartedAt { get; set; }
 
@@ -392,6 +401,7 @@ public sealed class Player : ClientPcData, IEntity
     {
         SnowballInteraction.Update(this);
         UpdatePortrait();
+        UpdatePendingPointOfInterest();
     }
 
     public void RelayPosition(PlayerUpdatePacketUpdatePosition playerUpdatePacketUpdatePosition)
@@ -558,20 +568,22 @@ public sealed class Player : ClientPcData, IEntity
         return clientUpdatePacketUpdateActionBarSlot;
     }
 
-    public void UpdatePosition(Vector4 position, Quaternion rotation, bool updateZoneArea = true)
+    public void UpdatePosition(Vector4 position, Quaternion rotation)
     {
         Position = position;
         Rotation = rotation;
 
-        Mount?.UpdatePosition(position, rotation, updateZoneArea);
+        Mount?.UpdatePosition(position, rotation);
 
         if (Visible)
-        {
             UpdateZoneTile();
+    }
 
-            if (updateZoneArea)
-                UpdateZoneArea();
-        }
+    public bool IsChatChannelOn(ChatChannel chatChannel)
+    {
+        return ChatChannelStatus.TryGetValue(chatChannel, out var channelStatus)
+            ? channelStatus
+            : DefaultEnabledChatChannels.Contains(chatChannel);
     }
 
     // Nearest other player in the zone within range, excluding excludeGuid if given.
@@ -632,9 +644,14 @@ public sealed class Player : ClientPcData, IEntity
         if (newZoneTile == ZoneTile)
             return;
 
+        if (!Zone.IsOutOfBounds(ZoneTile) && Zone.IsOutOfBounds(newZoneTile))
+            Zone.Logger.LogWarning("{name} entered out of bounds tile {tile} at {position}.", Name.FullName, newZoneTile, Position);
+
         Zone.UpdateEntityZoneTile(this, ZoneTile, newZoneTile);
 
         ZoneTile = newZoneTile;
+
+        QueuePointOfInterest();
     }
 
     public bool TeleportToZone(IZone destinationZone, Vector4 position, Quaternion rotation)
@@ -650,6 +667,9 @@ public sealed class Player : ClientPcData, IEntity
 
         if (!_zoneManager.TryMovePlayerToZone(destinationZone.DefinitionId, destinationZone.OwnerId, this, position, rotation, out var zone))
             return false;
+
+        PointOfInterestId = 0;
+        ChatAreaNameId = 0;
 
         if (_appearanceEffectId != 0 && _effects.TryGetValue(_appearanceEffectId, out var appearanceEffect) && appearanceEffect.ExpiresAt is null)
             RemoveTemporaryAppearance();
@@ -673,24 +693,62 @@ public sealed class Player : ClientPcData, IEntity
         return true;
     }
 
-    private void UpdateZoneArea()
+    private void QueuePointOfInterest()
     {
-        if (Zone is not WorldZone worldZone || worldZone.Name != "FabledRealms")
+        var zoneAreaDefinition = Zone is WorldZone worldZone ? worldZone.GetZoneArea(Position, ZoneTile) : null;
+
+        if (zoneAreaDefinition is null || zoneAreaDefinition.Id == PointOfInterestId)
+        {
+            _pendingZoneArea = null;
+            return;
+        }
+
+        if (_pendingZoneArea?.Id == zoneAreaDefinition.Id)
             return;
 
-        var zoneAreaId = worldZone.GetZoneAreaId(Position);
+        _pendingZoneArea = zoneAreaDefinition;
+        _pendingZoneAreaSince = Environment.TickCount64;
+    }
 
-        if (ZoneAreaId == zoneAreaId)
+    private void UpdatePendingPointOfInterest()
+    {
+        if (_pendingZoneArea is null || Environment.TickCount64 - _pendingZoneAreaSince < AreaSettleMilliseconds)
             return;
 
-        ZoneAreaId = zoneAreaId;
+        UpdatePointOfInterest(_pendingZoneArea);
+    }
+
+    public void UpdatePointOfInterest()
+    {
+        if (Zone is WorldZone worldZone && worldZone.GetZoneArea(Position, ZoneTile) is { } zoneAreaDefinition && zoneAreaDefinition.Id != PointOfInterestId)
+            UpdatePointOfInterest(zoneAreaDefinition);
+    }
+
+    public void UpdatePointOfInterest(ZoneAreaDefinition? zoneAreaDefinition)
+    {
+        _pendingZoneArea = null;
+
+        if (zoneAreaDefinition is null || zoneAreaDefinition.Id == PointOfInterestId)
+            return;
+
+        PointOfInterestId = zoneAreaDefinition.Id;
+        ChatAreaNameId = zoneAreaDefinition.ChatAreaNameId;
 
         var packetPOIChangeMessage = new PacketPOIChangeMessage
         {
-            ZoneId = zoneAreaId
+            NameId = zoneAreaDefinition.NameId,
+            ZoneId = zoneAreaDefinition.Id,
+            AreaId = zoneAreaDefinition.AreaId
         };
 
         SendTunneled(packetPOIChangeMessage);
+
+        var chatPacketEnterArea = new ChatPacketEnterArea
+        {
+            AreaNameId = ChatAreaNameId
+        };
+
+        SendTunneled(chatPacketEnterArea);
     }
 
     public void SetMountMovementSpeed(float? mountMovementSpeed)
