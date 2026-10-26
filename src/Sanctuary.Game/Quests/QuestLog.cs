@@ -1,15 +1,16 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 
 namespace Sanctuary.Game.Quests;
 
 public sealed class QuestLog
 {
-    private readonly ConcurrentDictionary<int, QuestProgress> _quests = new();
-    private readonly ConcurrentDictionary<int, QuestProgress> _inProgress = new();
+    private readonly Lock _lock = new();
+    private readonly Dictionary<int, QuestProgress> _quests = [];
+    private readonly Dictionary<int, QuestProgress> _inProgress = [];
 
     public int ActiveQuestId { get; set; }
 
@@ -17,27 +18,62 @@ public sealed class QuestLog
 
     public DateTime LastAcceptedAt { get; set; }
 
-    public IEnumerable<QuestProgress> All => _quests.Values;
+    public IReadOnlyList<QuestProgress> All
+    {
+        get
+        {
+            lock (_lock)
+                return _quests.Values.ToList();
+        }
+    }
 
-    public IEnumerable<QuestProgress> InProgress => _inProgress.Values;
+    public IReadOnlyList<QuestProgress> InProgress
+    {
+        get
+        {
+            lock (_lock)
+                return _inProgress.Values.ToList();
+        }
+    }
 
-    public int CompletedCount => _quests.Count - _inProgress.Count;
+    public int CompletedCount
+    {
+        get
+        {
+            lock (_lock)
+                return _quests.Count - _inProgress.Count;
+        }
+    }
 
-    public bool Contains(int questId) => _quests.ContainsKey(questId);
+    public bool Contains(int questId)
+    {
+        lock (_lock)
+            return _quests.ContainsKey(questId);
+    }
 
-    public bool IsCompleted(int questId) => _quests.ContainsKey(questId) && !_inProgress.ContainsKey(questId);
+    public bool IsCompleted(int questId)
+    {
+        lock (_lock)
+            return _quests.ContainsKey(questId) && !_inProgress.ContainsKey(questId);
+    }
 
     public bool TryGetInProgress(int questId, [MaybeNullWhen(false)] out QuestProgress quest)
-        => _inProgress.TryGetValue(questId, out quest);
+    {
+        lock (_lock)
+            return _inProgress.TryGetValue(questId, out quest);
+    }
 
     public void Add(QuestProgress quest)
     {
-        _quests[quest.QuestId] = quest;
+        lock (_lock)
+        {
+            _quests[quest.QuestId] = quest;
 
-        if (quest.Completed)
-            _inProgress.TryRemove(quest.QuestId, out _);
-        else
-            _inProgress[quest.QuestId] = quest;
+            if (quest.Completed)
+                _inProgress.Remove(quest.QuestId);
+            else
+                _inProgress[quest.QuestId] = quest;
+        }
     }
 
     public void AddCompleted(int questId)
@@ -49,13 +85,19 @@ public sealed class QuestLog
 
     public void Complete(int questId)
     {
-        if (_inProgress.TryRemove(questId, out var quest))
-            quest.Complete();
+        lock (_lock)
+        {
+            if (_inProgress.Remove(questId, out var quest))
+                quest.Complete();
+        }
     }
 
     public bool Remove(int questId)
     {
-        _inProgress.TryRemove(questId, out _);
-        return _quests.TryRemove(questId, out _);
+        lock (_lock)
+        {
+            _inProgress.Remove(questId);
+            return _quests.Remove(questId);
+        }
     }
 }

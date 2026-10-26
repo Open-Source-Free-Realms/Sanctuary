@@ -116,11 +116,10 @@ public sealed class QuestManager : IQuestManager
         if (!AdvancesHere(quest, progress, npc))
             return;
 
-        var goalIndex = progress.GoalIndex;
-        var goal = quest.Goals[goalIndex];
+        var goal = quest.Goals[progress.GoalIndex];
         var result = goal.Progress(quest, new NpcTalkedEvent(npc), progress.Goal);
 
-        ApplyProgress(player, quest, progress, goalIndex, result, npc);
+        ApplyProgress(player, quest, progress, result, npc);
 
         if (result != QuestGoalResult.Completed && goal is TalkToNpcGoal { IsCounted: true })
             QuestDialogue.Begin(player, goal.ConversationFor(npc.DefinitionId), npc.Guid);
@@ -133,30 +132,29 @@ public sealed class QuestManager : IQuestManager
     {
         foreach (var (quest, progress, goal) in ActiveGoals(player).ToList())
         {
-            var goalIndex = progress.GoalIndex;
             var result = goal.Progress(quest, questEvent, progress.Goal);
 
             if (result == QuestGoalResult.None)
                 continue;
 
-            ApplyProgress(player, quest, progress, goalIndex, result);
+            ApplyProgress(player, quest, progress, result);
 
             if (questEvent.CreditsOneQuest)
                 return;
         }
     }
 
-    private void ApplyProgress(Player player, QuestDefinition quest, QuestProgress progress, int goalIndex, QuestGoalResult result, Npc? npc = null)
+    private void ApplyProgress(Player player, QuestDefinition quest, QuestProgress progress, QuestGoalResult result, Npc? npc = null)
     {
         if (result == QuestGoalResult.Completed)
         {
-            CompleteGoal(player, quest, goalIndex, npc);
+            CompleteGoal(player, quest, progress, npc);
             return;
         }
 
         if (result == QuestGoalResult.Progressed)
         {
-            var goal = quest.Goals[goalIndex];
+            var goal = quest.Goals[progress.GoalIndex];
 
             player.SendTunneled(new QuestObjectiveUpdatePacket
             {
@@ -533,29 +531,28 @@ public sealed class QuestManager : IQuestManager
         return NearestNpc(player, npc => untalkedNpcIds.Contains(npc.DefinitionId))?.Guid ?? 0;
     }
 
-    private void CompleteGoal(Player player, QuestDefinition quest, int goalIndex, Npc? spokenBy = null)
+    private void CompleteGoal(Player player, QuestDefinition quest, QuestProgress progress, Npc? spokenBy = null)
     {
         var goals = quest.Goals;
+        var completedGoalIndex = progress.GoalIndex;
+        var completedGoal = goals[completedGoalIndex];
 
-        bool isFinalGoal = goalIndex + 1 >= goals.Count;
+        progress.Advance(quest);
+
+        bool isFinalGoal = progress.GoalIndex >= goals.Count;
 
         player.SendTunneled(new QuestObjectiveCompletePacket
         {
             QuestId = quest.QuestId,
-            ObjectiveId = goals[goalIndex].NameId,
-            Percent = QuestCompletion(quest, goalIndex + 1),
+            ObjectiveId = completedGoal.NameId,
+            Percent = QuestCompletion(quest, progress.GoalIndex),
             Silent = isFinalGoal
         });
 
-        var nextGoalIndex = goalIndex + 1;
-
-        if (player.Quests.TryGetInProgress(quest.QuestId, out var progress))
-            progress.Advance(quest);
-
-        SaveQuestRow(player, quest.QuestId, q => q.CurrentGoalId = nextGoalIndex < goals.Count ? goals[nextGoalIndex].NameId : AllGoalsDoneGoalId);
+        SaveQuestRow(player, quest.QuestId, q => q.CurrentGoalId = isFinalGoal ? AllGoalsDoneGoalId : goals[progress.GoalIndex].NameId);
         DeleteSavedGoalProgress(player, quest.QuestId);
 
-        if (nextGoalIndex >= goals.Count)
+        if (isFinalGoal)
         {
             TurnIn(player, quest);
             return;
@@ -564,14 +561,13 @@ public sealed class QuestManager : IQuestManager
         player.SendTunneled(new QuestObjectiveAddedPacket
         {
             QuestId = quest.QuestId,
-            Objective = ObjectiveFor(goals[nextGoalIndex], ObjectiveActive)
+            Objective = ObjectiveFor(goals[progress.GoalIndex], ObjectiveActive)
         });
-        SendObjectiveForGoal(player, quest, nextGoalIndex);
+        SendObjectiveForGoal(player, quest, progress.GoalIndex);
 
-        var completedGoal = goals[goalIndex];
         if (completedGoal is TalkToNpcGoal)
         {
-            var speakerNpcId = spokenBy?.DefinitionId ?? GoalTargetNpcId(quest, goalIndex);
+            var speakerNpcId = spokenBy?.DefinitionId ?? GoalTargetNpcId(quest, completedGoalIndex);
             var speakerGuid = spokenBy?.Guid ?? NearestNpcGuid(player, speakerNpcId);
 
             QuestDialogue.Begin(player, completedGoal.ConversationFor(speakerNpcId), speakerGuid);
@@ -749,16 +745,11 @@ public sealed class QuestManager : IQuestManager
             && goals[goalIndex] is ReachLocationGoal reachGoal && reachGoal.ReachPosition != Vector3.Zero)
         {
             var reachPos = new Vector4(reachGoal.ReachPosition, 1f);
-            var reachZoneId = player.Zone is WorldZone reachZone
-                ? reachZone.GetZoneAreaId(reachPos)
-                : player.Zone.Id;
 
             player.SendTunneled(new ObjectiveTargetUpdatePacket
             {
                 Active = true,
-                LocationX = reachPos.X,
-                LocationZ = reachPos.Z,
-                ZoneId = reachZoneId,
+                TaskId = player.ObjectiveTaskId,
                 Guid = 0,
                 NameId = goals[goalIndex].NameId,
                 PositionX = reachPos.X,
@@ -778,16 +769,11 @@ public sealed class QuestManager : IQuestManager
             return;
 
         var pos = target.Position;
-        var zoneAreaId = player.Zone is WorldZone worldZone
-            ? worldZone.GetZoneAreaId(pos)
-            : player.Zone.Id;
 
         player.SendTunneled(new ObjectiveTargetUpdatePacket
         {
             Active = true,
-            LocationX = pos.X,
-            LocationZ = pos.Z,
-            ZoneId = zoneAreaId,
+            TaskId = player.ObjectiveTaskId,
             Guid = targetGuid,
             NameId = target.NameId,
             PositionX = pos.X,

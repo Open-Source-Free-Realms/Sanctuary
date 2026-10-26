@@ -39,4 +39,18 @@ public sealed class QuestLogTests
         Assert.AreEqual(0, log.InProgress.Count());
         Assert.AreEqual(0, log.CompletedCount);
     }
+
+    [TestMethod]
+    public void Add_ReplacingACompletedQuestPutsItBackInProgress()
+    {
+        var log = new QuestLog();
+        log.AddCompleted(1);
+
+        log.Add(new QuestProgress(1));
+
+        Assert.IsFalse(log.IsCompleted(1));
+        Assert.IsTrue(log.TryGetInProgress(1, out _));
+        Assert.AreEqual(1, log.All.Count);
+        Assert.AreEqual(0, log.CompletedCount);
+    }
 }

@@ -8,16 +8,15 @@ public class ObjectiveTargetUpdatePacket : BaseUiPacket, ISerializablePacket
 
     public bool Active = true;
 
-    public float LocationX;
-    public float LocationZ;
-    public int ZoneId;
+    public ulong TaskId;
+    public int Unknown = 2;
     public ulong Guid;
     public int NameId;
     public float PositionX;
     public float PositionY;
     public float PositionZ;
     public float PositionW = 1f;
-    public int ScreenAngle;
+    public int Unknown2 = 1;
 
     public ObjectiveTargetUpdatePacket() : base(OpCode)
     {
@@ -33,16 +32,15 @@ public class ObjectiveTargetUpdatePacket : BaseUiPacket, ISerializablePacket
 
         if (Active)
         {
-            writer.Write(LocationX);
-            writer.Write(LocationZ);
-            writer.Write(ZoneId);
+            writer.Write(TaskId);
+            writer.Write(Unknown);
             writer.Write(Guid);
             writer.Write(NameId);
             writer.Write(PositionX);
             writer.Write(PositionY);
             writer.Write(PositionZ);
             writer.Write(PositionW);
-            writer.Write(ScreenAngle);
+            writer.Write(Unknown2);
         }
 
         return writer.Buffer;

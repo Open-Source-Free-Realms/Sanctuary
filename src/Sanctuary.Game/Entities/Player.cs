@@ -101,6 +101,8 @@ public sealed class Player : ClientPcData, IEntity
 
     public QuestConversation QuestConversation { get; } = new();
 
+    public ulong ObjectiveTaskId { get; } = (ulong)Random.Shared.NextInt64();
+
     public ConcurrentDictionary<ChatChannel, bool> ChatChannelStatus { get; set; } = [];
 
     public DateTimeOffset LoginStartedAt { get; set; }
