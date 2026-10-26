@@ -163,7 +163,8 @@ public sealed class QuestManager : IQuestManager
                 QuestId = quest.QuestId,
                 ObjectiveId = goal.NameId,
                 CurrentCount = progress.Goal.Count,
-                CompletedPercentage = (float)progress.Goal.Count / goal.RequiredCount
+                CompletedPercentage = QuestCompletion(quest, progress.GoalIndex),
+                Unknown6 = RetailObjectiveUpdateUnknown6
             });
 
             SaveGoalProgress(player, quest.QuestId, goal.NameId, progress.Goal);
@@ -542,7 +543,7 @@ public sealed class QuestManager : IQuestManager
         {
             QuestId = quest.QuestId,
             ObjectiveId = goals[goalIndex].NameId,
-            Percent = 1f,
+            Percent = QuestCompletion(quest, goalIndex + 1),
             Silent = isFinalGoal
         });
 
@@ -625,7 +626,7 @@ public sealed class QuestManager : IQuestManager
             return;
 
         int goalsDone = progress.GoalIndex;
-        SendQuestAdd(player, quest, quest.ObjectiveDescriptionId, (float)goalsDone / quest.Goals.Count, suppressStartBanner,
+        SendQuestAdd(player, quest, quest.ObjectiveDescriptionId, QuestCompletion(quest, goalsDone), suppressStartBanner,
             showInTracker: quest.QuestId == player.Quests.ActiveQuestId);
 
         var goals = quest.Goals;
@@ -668,9 +669,13 @@ public sealed class QuestManager : IQuestManager
             QuestId = questId,
             ObjectiveId = goal.NameId,
             RequiredCount = goal.RequiredCount,
-            Unknown2 = false
+            Unknown2 = true
         });
     }
+
+    private const int RetailObjectiveUpdateUnknown6 = 82;
+
+    private static float QuestCompletion(QuestDefinition quest, int goalsDone) => (float)goalsDone / quest.Goals.Count;
 
     private static Npc? NearestNpc(Player player, int npcId) => NearestNpc(player, npc => npc.DefinitionId == npcId);
 

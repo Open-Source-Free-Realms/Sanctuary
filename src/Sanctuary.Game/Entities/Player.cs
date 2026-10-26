@@ -1540,6 +1540,9 @@ public sealed class Player : ClientPcData, IEntity
 
     public void OnZoneChanged(IZone zone, Vector4 position, Quaternion rotation)
     {
+        SendTunneled(new ObjectiveTargetUpdatePacket { Active = false });
+        SendTunneled(new ObjectiveClientClearPacket { Unknown = Random.Shared.Next() });
+
         PlayerPet.RecallPet(remember: zone is not CombatZone);
 
         RemoveFromVisibleEntities(true);
