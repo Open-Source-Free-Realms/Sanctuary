@@ -18,6 +18,7 @@ using Sanctuary.Game;
 using Sanctuary.Game.ChatCommands;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Interactions;
+using Sanctuary.Game.Quests;
 using Sanctuary.Game.Resources.Definitions.Combat;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Zones;
@@ -96,6 +97,15 @@ public sealed class Player : ClientPcData, IEntity
 
     public ConcurrentSet<ulong> IncomingFriendRequests { get; } = [];
     public ConcurrentSet<ulong> IncomingGuildInvites { get; } = [];
+
+
+    public ulong CharacterId { get; set; }
+
+    public QuestLog Quests { get; } = new();
+
+    public QuestConversation QuestConversation { get; } = new();
+
+    public ulong ObjectiveTaskId { get; } = (ulong)Random.Shared.NextInt64();
 
     public ConcurrentDictionary<ChatChannel, bool> ChatChannelStatus { get; set; } = [];
 
@@ -350,6 +360,10 @@ public sealed class Player : ClientPcData, IEntity
         var now = DateTimeOffset.UtcNow;
 
         TickEffects(now);
+
+        if (QuestConversation.TalkingNpcGuid != 0 && now >= QuestConversation.TalkAnimationEndsAt)
+            QuestDialogue.StopTalkAnimation(this);
+
         PlayerPet.UpdateEveryTick();
         SendVisiblePositions();
 
@@ -690,6 +704,8 @@ public sealed class Player : ClientPcData, IEntity
 
         SendTunneled(packetClientBeginZoning);
 
+        ClearObjectives();
+
         return true;
     }
 
@@ -823,17 +839,22 @@ public sealed class Player : ClientPcData, IEntity
         var playerUpdatePacketAddNotifications = new PlayerUpdatePacketAddNotifications();
 
         foreach (var npc in visibleNpcs)
-        {
-            playerUpdatePacketAddNotifications.Notifications.AddRange(npc.Notifications);
-            if (npc.Notification is not null)
-                playerUpdatePacketAddNotifications.Notifications.Add(npc.Notification);
-        }
+            playerUpdatePacketAddNotifications.Notifications.AddRange(GetNotificationsFor(npc));
 
         if (playerUpdatePacketAddNotifications.Notifications.Count > 0)
             SendTunneled(playerUpdatePacketAddNotifications);
 
         foreach (var npc in visibleNpcs)
             VisibleNpcs.TryAdd(npc.Guid, npc);
+    }
+
+    public IEnumerable<NotificationInfo> GetNotificationsFor(Npc npc)
+    {
+        foreach (var notification in npc.Notifications)
+            yield return notification;
+
+        if ((Zone.GetQuestBadge(this, npc) ?? npc.Notification) is { } badge)
+            yield return badge;
     }
 
     public void OnAddVisiblePlayers(params IEnumerable<Player> players)
@@ -1534,6 +1555,12 @@ public sealed class Player : ClientPcData, IEntity
         }
     }
 
+    public void ClearObjectives()
+    {
+        SendTunneled(new ObjectiveTargetUpdatePacket { Active = false });
+        SendTunneled(new ObjectiveClientClearPacket { Unknown = Random.Shared.Next() });
+    }
+
     public void OnZoneChanged(IZone zone, Vector4 position, Quaternion rotation)
     {
         PlayerPet.RecallPet(remember: zone is not CombatZone);
@@ -1563,5 +1590,45 @@ public sealed class Player : ClientPcData, IEntity
         ZoneTile.Entities.Remove(Guid, out _);
         Zone.TryRemovePlayer(Guid);
         _zoneManager.EvictIfEmpty(Zone);
+    }
+
+    public sealed record InteractionMenu(ulong Guid, IReadOnlyDictionary<int, Action<Player>> Options);
+
+    public InteractionMenu? OpenInteractionMenu { get; set; }
+
+    private const int NpcInteractionIdBase = 1_000_000;
+
+    public void SendInteractionMenu(Npc npc, IReadOnlyList<NpcInteractionOption> options, IEnumerable<InteractionData>? npcInteractions = null)
+    {
+        var npcInteractionList = npcInteractions?.ToList() ?? [];
+        var usedIds = npcInteractionList.Select(interaction => interaction.Id).ToHashSet();
+
+        var interactions = new List<InteractionData>(options.Count);
+        var actions = new Dictionary<int, Action<Player>>(options.Count);
+        var nextId = NpcInteractionIdBase;
+
+        foreach (var option in options)
+        {
+            while (!usedIds.Add(nextId))
+                nextId++;
+
+            var id = nextId++;
+
+            interactions.Add(new InteractionData
+            {
+                Id = id,
+                IconId = option.IconId,
+                ButtonText = option.ButtonTextId,
+                TooltipId = option.TooltipId
+            });
+
+            actions[id] = option.Invoke;
+        }
+
+        interactions.AddRange(npcInteractionList);
+
+        OpenInteractionMenu = new InteractionMenu(npc.Guid, actions);
+
+        SendTunneled(InteractionMenuHelper.GetInteractionListPacket(npc.Guid, npc.Name, interactions));
     }
 }

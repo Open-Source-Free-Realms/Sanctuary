@@ -43,6 +43,8 @@ public class Npc : IScriptableNpc, IEntity
     public ILogger Logger => Zone.Logger;
     public ScriptRuntime ScriptRuntime => Zone.ScriptRuntime;
 
+    public int DefinitionId { get; set; }
+
     public int NameId { get; set; }
     public string? Name { get; set; }
     public int SubTextNameId { get; set; }
@@ -140,6 +142,9 @@ public class Npc : IScriptableNpc, IEntity
 
     public void OnInteract(Player player)
     {
+        if (InteractionMenuHelper.TryOpenMenu(player, this, Zone.GetInteractionOptions(player, this)))
+            return;
+
         if (OpensAtlas)
         {
             var executeScriptPacket = OpenAtlasInteraction.GetAtlasPacket(this, player);
@@ -454,7 +459,7 @@ public class Npc : IScriptableNpc, IEntity
 
             ActiveProfile = default,
 
-            Unknown67 = default,
+            NotificationImageSetId = default,
             Unknown68 = default,
 
             NameScale = default,

@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Extensions;
 using Sanctuary.Core.IO;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
+using Sanctuary.Game.Interactions;
+using Sanctuary.Game.Quests;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Zones;
 using Sanctuary.Packet;
@@ -19,6 +22,7 @@ namespace Sanctuary.Game.Zones;
 public sealed class WorldZone : BaseZone
 {
     private readonly WorldZoneDefinition _zoneDefinition;
+    private readonly IQuestManager _questManager;
 
     private readonly object _clientAreasLock = new();
     private readonly HashSet<SeasonalClientAreaDefinition> _activeSeasonalClientAreas = [];
@@ -69,6 +73,8 @@ public sealed class WorldZone : BaseZone
             if (seasonalClientArea.IsActive(DateTime.Now))
                 _activeSeasonalClientAreas.Add(seasonalClientArea);
         }
+
+        _questManager = serviceProvider.GetRequiredService<IQuestManager>();
     }
 
     public override void OnClientIsReady(Player player)
@@ -83,7 +89,29 @@ public sealed class WorldZone : BaseZone
 
         if (player.SeenOneTimeNotifications.TryAdd(OneTimeNotification.WelcomeInfo))
             SendWelcomeInfo(player);
+
+        _questManager.RestoreJournal(player);
+
+        foreach (var npc in Npcs)
+        {
+            if (!_questManager.IsQuestNpc(npc.DefinitionId))
+                continue;
+
+            if (_resourceManager.Quests.TryGetNpcCursorId(npc.DefinitionId, out var cursorId))
+                npc.CursorId = cursorId;
+
+            if (_resourceManager.Quests.TryGetNpcInteractRange(npc.DefinitionId, out var interactRange))
+                npc.InteractRange = interactRange;
+
+            _questManager.RefreshQuestNotification(player, npc.Guid);
+        }
     }
+
+    public override IReadOnlyList<NpcInteractionOption> GetInteractionOptions(Player player, Npc npc)
+        => _questManager.IsQuestNpc(npc.DefinitionId) ? _questManager.GetInteractionOptions(player, npc) : [];
+
+    public override NotificationInfo? GetQuestBadge(Player player, Npc npc)
+        => _questManager.IsQuestNpc(npc.DefinitionId) ? _questManager.GetQuestBadge(player, npc) : null;
 
     public override void OnClientFinishedLoading(Player player)
     {
