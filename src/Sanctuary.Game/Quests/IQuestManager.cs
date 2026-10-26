@@ -2,6 +2,7 @@
 
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Interactions;
+using Sanctuary.Packet.Common;
 
 namespace Sanctuary.Game.Quests;
 
@@ -22,6 +23,8 @@ public interface IQuestManager
     bool ResetQuest(Player player, int questId);
 
     void SetActiveQuest(Player player, int questId);
+
+    ClientQuestData GetClientQuestData(Player player);
 
     void RestoreJournal(Player player);
 

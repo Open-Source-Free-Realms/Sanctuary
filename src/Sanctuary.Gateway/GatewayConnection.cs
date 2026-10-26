@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -694,6 +695,8 @@ public class GatewayConnection : UdpConnection
 
         Player.Collections = _resourceManager.Collections.CreateClientCollections(
             Player.Guid, ownedItemDefinitionIds, collectedEntryIds);
+
+        Player.QuestData = _serviceProvider.GetRequiredService<IQuestManager>().GetClientQuestData(Player);
 
         var packetSendSelfToClient = new PacketSendSelfToClient();
 

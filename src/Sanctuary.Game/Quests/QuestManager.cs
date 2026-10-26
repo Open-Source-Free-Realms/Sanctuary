@@ -387,20 +387,29 @@ public sealed class QuestManager : IQuestManager
         }
     }
 
-    public void RestoreJournal(Player player)
+    public ClientQuestData GetClientQuestData(Player player)
     {
+        var questData = new ClientQuestData
+        {
+            CompletedCount = player.Quests.CompletedCount,
+            ActiveQuestId = player.Quests.TryGetInProgress(player.Quests.ActiveQuestId, out _) ? player.Quests.ActiveQuestId : 0
+        };
+
         foreach (var progress in player.Quests.InProgress)
         {
             if (_resourceManager.Quests.TryGet(progress.QuestId, out var quest))
-                SendActiveState(player, quest, sendObjectiveTarget: false, suppressStartBanner: true);
+                questData.Quests.Add(ClientQuestFor(quest, progress));
         }
 
-        RefreshObjectiveTarget(player);
+        return questData;
+    }
 
-        player.SendTunneled(new CompletedQuestCountUpdatePacket
-        {
-            Count = player.Quests.CompletedCount
-        });
+    public void RestoreJournal(Player player)
+    {
+        foreach (var (quest, _, goal) in ActiveGoals(player))
+            SendObjectiveActivated(player, quest.QuestId, goal);
+
+        RefreshObjectiveTarget(player);
 
         SendJournalQuestStates(player);
     }
@@ -594,33 +603,48 @@ public sealed class QuestManager : IQuestManager
         player.Quests.PendingTurnInQuestId = quest.QuestId;
     }
 
-    private static void SendQuestAdd(Player player, QuestDefinition quest, int helperTextId, float completedPercentage = 0f, bool suppressStartBanner = false, bool showInTracker = false)
+    private static ClientQuest NewClientQuest(QuestDefinition quest, float completedPercentage, bool suppressStartBanner) => new()
     {
-        player.SendTunneled(new QuestAddPacket
+        QuestId = quest.QuestId,
+        TitleId = quest.TitleId,
+        DescriptionId = quest.ObjectiveDescriptionId,
+        HelperTextId = quest.ObjectiveDescriptionId,
+        MembersOnly = false,
+        TimeStarted = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+        ProfileId = 0,
+        CompletedPercentage = completedPercentage,
+        IconId = quest.IconId,
+        SystemQuest = false,
+        SuppressStartBanner = suppressStartBanner
+    };
+
+    private static ClientQuest ClientQuestFor(QuestDefinition quest, QuestProgress progress)
+    {
+        var clientQuest = NewClientQuest(quest, QuestCompletion(quest, progress.GoalIndex), suppressStartBanner: true);
+        var goals = quest.Goals;
+        int lastVisible = System.Math.Min(progress.GoalIndex, goals.Count - 1);
+
+        for (int i = 0; i <= lastVisible; i++)
         {
-            QuestId = quest.QuestId,
-            TitleId = quest.TitleId,
-            DescriptionId = quest.ObjectiveDescriptionId,
-            HelperTextId = helperTextId,
-            MembersOnly = false,
-            TimeStarted = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
-            ProfileId = 0,
-            CompletedPercentage = completedPercentage,
-            IconId = quest.IconId,
-            SystemQuest = false,
-            SuppressStartBanner = suppressStartBanner,
-            ShowInTracker = showInTracker
-        });
+            clientQuest.Objectives[i + 1] = i < progress.GoalIndex
+                ? ObjectiveFor(goals[i], ObjectiveComplete)
+                : ObjectiveFor(goals[i], ObjectiveInactive, progress.Goal.Count);
+        }
+
+        return clientQuest;
     }
 
-    private void SendActiveState(Player player, QuestDefinition quest, bool sendObjectiveTarget = true, bool suppressStartBanner = false)
+    private void SendActiveState(Player player, QuestDefinition quest)
     {
         if (!player.Quests.TryGetInProgress(quest.QuestId, out var progress))
             return;
 
         int goalsDone = progress.GoalIndex;
-        SendQuestAdd(player, quest, quest.ObjectiveDescriptionId, QuestCompletion(quest, goalsDone), suppressStartBanner,
-            showInTracker: quest.QuestId == player.Quests.ActiveQuestId);
+        player.SendTunneled(new QuestAddPacket
+        {
+            Quest = NewClientQuest(quest, QuestCompletion(quest, goalsDone), suppressStartBanner: false),
+            ShowInTracker = quest.QuestId == player.Quests.ActiveQuestId
+        });
 
         var goals = quest.Goals;
         int lastVisible = System.Math.Min(goalsDone, goals.Count - 1);
@@ -638,10 +662,10 @@ public sealed class QuestManager : IQuestManager
             });
         }
 
-        if (sendObjectiveTarget)
-            SendObjectiveForGoal(player, quest, goalsDone);
+        SendObjectiveForGoal(player, quest, goalsDone);
     }
 
+    private const int ObjectiveInactive = 0;
     private const int ObjectiveActive = 1;
     private const int ObjectiveComplete = 2;
 
