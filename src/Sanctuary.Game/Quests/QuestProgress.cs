@@ -1,3 +1,5 @@
+using System;
+
 using Sanctuary.Game.Resources.Definitions;
 
 namespace Sanctuary.Game.Quests;
@@ -10,6 +12,8 @@ public sealed class QuestProgress
     }
 
     public int QuestId { get; }
+
+    public DateTimeOffset Started { get; init; } = DateTimeOffset.UtcNow;
 
     public bool Completed { get; private set; }
 

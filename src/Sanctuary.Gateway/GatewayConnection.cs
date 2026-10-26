@@ -306,7 +306,7 @@ public class GatewayConnection : UdpConnection
                 continue;
             }
 
-            var questProgress = new QuestProgress(dbQuest.QuestId);
+            var questProgress = new QuestProgress(dbQuest.QuestId) { Started = dbQuest.Started };
             Player.Quests.Add(questProgress);
 
             var goalIndex = dbQuest.CurrentGoalId == QuestManager.AllGoalsDoneGoalId

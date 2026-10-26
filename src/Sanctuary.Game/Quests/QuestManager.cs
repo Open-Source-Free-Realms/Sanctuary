@@ -257,7 +257,8 @@ public sealed class QuestManager : IQuestManager
                 QuestId = questId,
                 CharacterId = player.CharacterId,
                 Completed = false,
-                CurrentGoalId = quest.Goals[0].NameId
+                CurrentGoalId = quest.Goals[0].NameId,
+                Started = progress.Started
             });
 
             var dbCharacter = db.Characters.FirstOrDefault(c => c.Id == player.CharacterId);
@@ -776,16 +777,16 @@ public sealed class QuestManager : IQuestManager
         player.Quests.PendingTurnInQuestId = quest.QuestId;
     }
 
-    private static ClientQuest NewClientQuest(QuestDefinition quest, float completedPercentage, bool suppressStartBanner) => new()
+    private static ClientQuest NewClientQuest(QuestDefinition quest, QuestProgress progress, bool suppressStartBanner) => new()
     {
         QuestId = quest.QuestId,
         TitleId = quest.TitleId,
         DescriptionId = quest.ObjectiveDescriptionId,
         HelperTextId = quest.ObjectiveDescriptionId,
         MembersOnly = false,
-        TimeStarted = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+        TimeStarted = progress.Started.ToUnixTimeSeconds(),
         ProfileId = 0,
-        CompletedPercentage = completedPercentage,
+        CompletedPercentage = QuestCompletion(quest, progress.GoalIndex),
         IconId = quest.IconId,
         SystemQuest = false,
         SuppressStartBanner = suppressStartBanner
@@ -793,7 +794,7 @@ public sealed class QuestManager : IQuestManager
 
     private static ClientQuest ClientQuestFor(QuestDefinition quest, QuestProgress progress)
     {
-        var clientQuest = NewClientQuest(quest, QuestCompletion(quest, progress.GoalIndex), suppressStartBanner: true);
+        var clientQuest = NewClientQuest(quest, progress, suppressStartBanner: true);
         var goals = quest.Goals;
         int lastVisible = System.Math.Min(progress.GoalIndex, goals.Count - 1);
 
@@ -815,7 +816,7 @@ public sealed class QuestManager : IQuestManager
         int goalsDone = progress.GoalIndex;
         player.SendTunneled(new QuestAddPacket
         {
-            Quest = NewClientQuest(quest, QuestCompletion(quest, goalsDone), suppressStartBanner: false),
+            Quest = NewClientQuest(quest, progress, suppressStartBanner: false),
             ShowInTracker = quest.QuestId == player.Quests.ActiveQuestId
         });
 
