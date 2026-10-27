@@ -113,6 +113,7 @@ public static class QuestDialogue
         {
             DialogueTextId = line.TextId,
             NpcGuid = conversation.NpcGuid,
+            Closable = line.Closable,
             CameraFocusParam = 1f,
         };
 
