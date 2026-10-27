@@ -147,7 +147,7 @@ public class Npc : IScriptableNpc, IEntity
     {
         Zone = zone;
 
-        Routines = new RoutineManager(Logger);
+        Routines = new RoutineManager(Logger, zone.TickDelta);
 
         // TODO: these need to be rebuilt/reset on zone change in the future.
         if (zone.NavMeshQuery is not null)
@@ -232,8 +232,6 @@ public class Npc : IScriptableNpc, IEntity
 
     public void UpdateEverySecond()
     {
-        Routines.OnSecond();
-
         UpdateEverySecondAction?.Invoke();
 
         if (!_scripts.IsEmpty)
@@ -588,8 +586,7 @@ public class Npc : IScriptableNpc, IEntity
                 onStart: () => _pathFollower.SetPath(path, 0f), // TODO: Magic number!
                 onStep: () => StepPathFollower(),
                 onEnd: () => _pathFollower.Stop()
-            ),
-            Cadence.Tick
+            )
         );
 
         return true;
@@ -656,8 +653,7 @@ public class Npc : IScriptableNpc, IEntity
                         onEnd: () => _pathFollower.Stop()
                     ),
                 ]
-            ),
-            Cadence.Tick
+            )
         );
     }
 

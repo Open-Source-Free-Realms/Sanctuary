@@ -1,29 +1,38 @@
-using System.Diagnostics;
+using System;
 
 namespace Sanctuary.Game.Routines;
 
-public sealed class TimeoutRoutine : IRoutine
+public sealed class TimeoutRoutine : Routine
 {
-    private readonly IRoutine _routine;
-    private readonly double _timeoutSeconds;
-    private readonly Stopwatch _stopwatch = new();
+    private readonly Routine _routine;
+    private readonly TimeSpan _timeout;
+    private TimeSpan _elapsed;
 
-    public TimeoutRoutine(IRoutine routine, double timeoutSeconds)
+    public TimeoutRoutine(Routine routine, double timeoutSeconds)
     {
         _routine = routine;
-        _timeoutSeconds = timeoutSeconds;
+        _timeout = TimeSpan.FromSeconds(timeoutSeconds);
     }
 
-    public void OnStart()
+    protected override void OnStart()
     {
-        _stopwatch.Restart();
-        _routine.OnStart();
+        _elapsed = TimeSpan.Zero;
+        _routine.Start();
     }
 
-    public bool OnStep()
+    protected override bool OnStep(TimeSpan delta)
     {
-        return _stopwatch.Elapsed.TotalSeconds >= _timeoutSeconds || _routine.OnStep();
+        if (_routine.Step(delta))
+            return true;
+
+        _elapsed += delta;
+
+        if (_elapsed < _timeout)
+            return false;
+
+        _routine.Interrupt();
+        return true;
     }
 
-    public void OnEnd() => _routine.OnEnd();
+    protected override void OnInterrupted() => _routine.Interrupt();
 }

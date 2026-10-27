@@ -1,51 +1,49 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Sanctuary.Game.Routines;
 
-public sealed class SequentialRoutine : IRoutine
+public sealed class SequentialRoutine : Routine
 {
-    private readonly IRoutine[] _routines;
-    private readonly Queue<IRoutine> _pending = new();
+    private readonly Routine[] _routines;
+    private int _index;
 
-    private IRoutine? _current;
+    public SequentialRoutine(params IEnumerable<Routine> routines) => _routines = routines.ToArray();
 
-    public SequentialRoutine(IEnumerable<IRoutine> routines) => _routines = routines.ToArray();
-
-    public void OnStart()
+    protected override void OnStart()
     {
-        _pending.Clear();
-
-        foreach (var routine in _routines)
-            _pending.Enqueue(routine);
-
-        _current = null;
-
-        Advance();
+        _index = 0;
+        StartCurrent();
     }
 
-    public bool OnStep()
+    protected override bool OnStep(TimeSpan delta)
     {
-        if (_current is null) return true;
-        if (!_current.OnStep()) return false;
-        return Advance();
+        while (_index < _routines.Length)
+        {
+            if (!_routines[_index].Step(delta))
+                return false;
+
+            if (!IsRunning)
+                return true;
+
+            _index++;
+            StartCurrent();
+            delta = TimeSpan.Zero;
+        }
+
+        return true;
     }
 
-    public void OnEnd()
+    protected override void OnInterrupted()
     {
-        _current?.OnEnd();
-        _current = null;
-
-        _pending.Clear();
+        if (_index < _routines.Length)
+            _routines[_index].Interrupt();
     }
 
-    private bool Advance()
+    private void StartCurrent()
     {
-        _current?.OnEnd();
-
-        if (!_pending.TryDequeue(out _current)) return true;
-
-        _current.OnStart();
-        return false;
+        if (_index < _routines.Length)
+            _routines[_index].Start();
     }
 }

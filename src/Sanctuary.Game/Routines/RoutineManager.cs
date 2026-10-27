@@ -7,112 +7,93 @@ namespace Sanctuary.Game.Routines;
 
 public sealed class RoutineManager
 {
-    private sealed class RoutineEntry
-    {
-        public readonly IRoutine Routine;
-        public readonly Cadence Cadence;
-
-        public RoutineEntry(IRoutine routine, Cadence cadence)
-        {
-            Routine = routine;
-            Cadence = cadence;
-        }
-    }
-
     private readonly ILogger _logger;
-    private readonly ConcurrentDictionary<string, RoutineEntry> _routines = new();
+    private readonly ConcurrentDictionary<string, Routine> _routines = new();
 
-    public RoutineManager(ILogger logger)
+    private readonly TimeSpan _tickDelta;
+
+    public RoutineManager(ILogger logger, TimeSpan tickDelta)
     {
         _logger = logger;
+        _tickDelta = tickDelta;
     }
 
-    public void SetRoutine(string name, IRoutine routine, Cadence cadence)
+    public void SetRoutine(string name, Routine routine)
     {
-        Cancel(name);
-
-        try
+        lock (routine)
         {
-            routine.OnStart();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Routine '{name}' threw during OnStart and will not be scheduled.", name);
-            End(name, routine);
-            return;
-        }
+            Routine? previous = null;
 
-        var entry = new RoutineEntry(routine, cadence);
-
-        while (true)
-        {
-            if (_routines.TryGetValue(name, out var previous))
+            _routines.AddOrUpdate(name, routine, (_, existing) =>
             {
-                if (!_routines.TryUpdate(name, entry, previous))
-                    continue;
+                previous = existing;
+                return routine;
+            });
 
+            if (previous is not null)
                 lock (previous)
-                    End(name, previous.Routine);
+                    Interrupt(name, previous);
 
-                return;
+            try
+            {
+                routine.Start();
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Routine '{name}' threw during Start and will not be scheduled.", name);
 
-            if (_routines.TryAdd(name, entry))
-                return;
+                if (_routines.TryRemove(new(name, routine)))
+                    Interrupt(name, routine);
+            }
         }
     }
 
-    public void SetRoutine(string name, Func<bool> onStep, Cadence cadence, Action? onStart = null, Action? onEnd = null)
+    public void SetRoutine(string name, Func<bool> onStep, Action? onStart = null, Action? onEnd = null, Action? onInterrupted = null)
     {
-        SetRoutine(name, new DelegateRoutine(onStart, onStep, onEnd), cadence);
+        SetRoutine(name, new DelegateRoutine(onStart, onStep, onEnd, onInterrupted));
     }
 
     public void Cancel(string name)
     {
-        if (_routines.TryRemove(name, out var entry))
-            lock (entry)
-                End(name, entry.Routine);
+        if (_routines.TryRemove(name, out var routine))
+            lock (routine)
+                Interrupt(name, routine);
     }
 
-    public void OnTick() => Step(Cadence.Tick);
-    public void OnSecond() => Step(Cadence.Second);
-
-    private void Step(Cadence cadence)
+    public void OnTick()
     {
-        foreach (var (name, entry) in _routines)
+        foreach (var (name, routine) in _routines)
         {
-            if (entry.Cadence != cadence)
-                continue;
-
-            lock (entry)
+            lock (routine)
             {
                 bool done;
 
                 try
                 {
-                    done = entry.Routine.OnStep();
+                    done = routine.Step(_tickDelta);
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Routine '{name}' threw and will be removed.", name);
+                    Interrupt(name, routine);
                     done = true;
                 }
 
-                if (done && _routines.TryRemove(new(name, entry)))
-                    End(name, entry.Routine);
+                if (done)
+                    _routines.TryRemove(new(name, routine));
             }
         }
     }
 
-    private void End(string name, IRoutine routine)
+    private void Interrupt(string name, Routine routine)
     {
         try
         {
-            routine.OnEnd();
+            routine.Interrupt();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Routine '{name}' threw during OnEnd.", name);
+            _logger.LogError(ex, "Routine '{name}' threw while being interrupted.", name);
         }
     }
 }

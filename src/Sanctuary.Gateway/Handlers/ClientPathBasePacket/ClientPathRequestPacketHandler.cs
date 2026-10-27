@@ -48,7 +48,7 @@ public static class ClientPathRequestPacketHandler
         {
             connection.SendTunneled(CreateReply(player.Zone, clientPathRequestPacket));
             return true;
-        }, Cadence.Tick);
+        });
 
         return true;
     }

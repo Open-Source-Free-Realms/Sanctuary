@@ -1,48 +1,48 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Sanctuary.Game.Routines;
 
-public sealed class ParallelRoutine : IRoutine
+public sealed class ParallelRoutine : Routine
 {
-    private readonly IRoutine[] _routines;
-    private readonly List<IRoutine> _active = new();
+    private readonly Routine[] _routines;
 
-    public ParallelRoutine(params IRoutine[] routines)
+    public ParallelRoutine(params IEnumerable<Routine> routines) => _routines = routines.ToArray();
+
+    protected override void OnStart()
     {
-        _routines = routines.ToArray();
-    }
-
-    public void OnStart()
-    {
-        _active.Clear();
-        _active.AddRange(_routines);
-
-        foreach (var routine in _active)
+        foreach (var routine in _routines)
         {
-            routine.OnStart();
+            routine.Start();
+
+            if (!IsRunning)
+                return;
         }
     }
 
-    public bool OnStep()
+    protected override bool OnStep(TimeSpan delta)
     {
-        for (int i = _active.Count - 1; i >= 0; i--)
+        var allDone = true;
+
+        foreach (var routine in _routines)
         {
-            if (!_active[i].OnStep())
+            if (!routine.IsRunning)
                 continue;
 
-            _active[i].OnEnd();
-            _active.RemoveAt(i);
+            if (!routine.Step(delta))
+                allDone = false;
+
+            if (!IsRunning)
+                return true;
         }
 
-        return _active.Count == 0;
+        return allDone;
     }
 
-    public void OnEnd()
+    protected override void OnInterrupted()
     {
-        foreach (var routine in _active)
-            routine.OnEnd();
-
-        _active.Clear();
+        foreach (var routine in _routines)
+            routine.Interrupt();
     }
 }

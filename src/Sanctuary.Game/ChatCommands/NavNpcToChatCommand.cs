@@ -145,7 +145,7 @@ public class NavNpcToChatCommand : IChatCommand
 
                 npc.TryMoveTo(goal);
                 return true;
-            }, Cadence.Tick);
+            });
         }
 
         return true;
