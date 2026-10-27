@@ -229,6 +229,11 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.Property<int>("CurrentGoalId")
                         .HasColumnType("int");
 
+                    b.Property<DateTimeOffset>("Started")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("NOW()");
+
                     b.HasKey("QuestId", "CharacterId");
 
                     b.HasIndex("CharacterId");

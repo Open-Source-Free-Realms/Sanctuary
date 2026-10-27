@@ -48,7 +48,9 @@ public static class QuestEndReplyPacketHandler
             return true;
         }
 
-        player.SendTunneled(new CommandPacketQuestDialogComplete());
+        if (!_questManager.OfferNextQuest(player, packet.QuestId))
+            player.SendTunneled(new CommandPacketQuestDialogComplete());
+
         return true;
     }
 }

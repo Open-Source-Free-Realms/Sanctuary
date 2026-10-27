@@ -19,6 +19,7 @@ using Sanctuary.Core.IO;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Interactions;
+using Sanctuary.Game.Quests;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Zones;
 using Sanctuary.Packet;
@@ -37,6 +38,7 @@ public abstract class BaseZone : IZone, IDisposable
     protected readonly IResourceManager _resourceManager;
     private readonly IZoneManager _zoneManager;
     private readonly IScriptManager _scriptManager;
+    private readonly IQuestManager _questManager;
     private readonly ScriptRuntime _scriptRuntime;
     private readonly BaseZoneDefinition _zoneDefinition;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
@@ -112,6 +114,7 @@ public abstract class BaseZone : IZone, IDisposable
         _logger = loggerFactory.CreateLogger($"Zone {Name} ({Id})");
 
         _scriptManager = serviceProvider.GetRequiredService<IScriptManager>();
+        _questManager = serviceProvider.GetRequiredService<IQuestManager>();
         _scriptRuntime = new ScriptRuntime(_logger);
 
         foreach (var script in _zoneDefinition.Scripts ?? [])
@@ -191,6 +194,10 @@ public abstract class BaseZone : IZone, IDisposable
     public virtual IReadOnlyList<NpcInteractionOption> GetInteractionOptions(Player player, Npc npc) => [];
 
     public virtual NotificationInfo? GetQuestBadge(Player player, Npc npc) => null;
+
+    public virtual bool IsHiddenByQuest(Player player, Npc npc) => false;
+
+    public virtual int GetQuestEffectId(Player player, Npc npc) => 0;
 
     public bool TryFindRoute(Vector3 start, Vector3 goal, Queue<Vector3> waypoints)
     {
@@ -329,6 +336,8 @@ public abstract class BaseZone : IZone, IDisposable
         };
 
         player.SendTunneled(playerUpdatePacketEffectTagCompositeEffectsEnable);
+
+        _questManager.SendActiveObjectives(player);
 
         var packetZoneDoneSendingInitialData = new PacketZoneDoneSendingInitialData();
 

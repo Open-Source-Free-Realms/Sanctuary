@@ -15,7 +15,8 @@ public class QuestObjectiveInfo : ISerializableType
     {
         Success = false,
         Unknown3 = 0,
-        Multiplier = 0f
+        IconId = -1,
+        NameId = -1
     };
 
     // 0 = inactive, 1 = active, 2 = complete, 3 = failed.

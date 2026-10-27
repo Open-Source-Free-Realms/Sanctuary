@@ -25,6 +25,8 @@ public sealed class QuestManager : IQuestManager
 {
     public const int AllGoalsDoneGoalId = 0;
 
+    public const int GoalDoneCount = -1;
+
     private readonly IResourceManager _resourceManager;
     private readonly IRewardManager _rewardManager;
     private readonly IDbContextFactory<DatabaseContext> _dbContextFactory;
@@ -41,14 +43,15 @@ public sealed class QuestManager : IQuestManager
     public bool IsQuestNpc(int npcId)
         => _resourceManager.Quests.ByGiver.ContainsKey(npcId) || _resourceManager.Quests.ByTarget.ContainsKey(npcId);
 
-    private IEnumerable<(QuestDefinition Quest, QuestProgress Progress, QuestGoal Goal)> ActiveGoals(Player player)
+    private IEnumerable<(QuestDefinition Quest, QuestProgress Progress, int GoalIndex, QuestGoal Goal)> ActiveGoals(Player player)
     {
         foreach (var progress in player.Quests.InProgress)
         {
-            if (!_resourceManager.Quests.TryGet(progress.QuestId, out var quest) || progress.GoalIndex >= quest.Goals.Count)
+            if (!_resourceManager.Quests.TryGet(progress.QuestId, out var quest))
                 continue;
 
-            yield return (quest, progress, quest.Goals[progress.GoalIndex]);
+            foreach (var goalIndex in progress.OpenGoals.Keys.Order())
+                yield return (quest, progress, goalIndex, quest.Goals[goalIndex]);
         }
     }
 
@@ -97,10 +100,21 @@ public sealed class QuestManager : IQuestManager
     }
 
     private static bool AdvancesHere(QuestDefinition quest, QuestProgress progress, Npc npc)
-        => progress.GoalIndex < quest.Goals.Count && quest.Goals[progress.GoalIndex].Matches(quest, new NpcTalkedEvent(npc));
+        => TalkGoalHere(quest, progress, npc) >= 0;
+
+    private static int TalkGoalHere(QuestDefinition quest, QuestProgress progress, Npc npc)
+    {
+        foreach (var goalIndex in progress.OpenGoals.Keys.Order())
+        {
+            if (quest.Goals[goalIndex].Matches(quest, new NpcTalkedEvent(npc)))
+                return goalIndex;
+        }
+
+        return -1;
+    }
 
     private static bool TurnsInHere(QuestDefinition quest, QuestProgress progress, Npc npc)
-        => progress.GoalIndex >= quest.Goals.Count && GoalTargetNpcId(quest, quest.Goals.Count - 1) == npc.DefinitionId;
+        => progress.GoalIndex >= quest.Goals.Count && quest.GoalTargetNpcId(quest.Goals.Count - 1) == npc.DefinitionId;
 
     private void AdvanceAtNpc(Player player, QuestDefinition quest, Npc npc)
     {
@@ -113,13 +127,25 @@ public sealed class QuestManager : IQuestManager
             return;
         }
 
-        if (!AdvancesHere(quest, progress, npc))
+        var goalIndex = TalkGoalHere(quest, progress, npc);
+        if (goalIndex < 0)
             return;
 
-        var goal = quest.Goals[progress.GoalIndex];
-        var result = goal.Progress(quest, new NpcTalkedEvent(npc), progress.Goal);
+        var goal = quest.Goals[goalIndex];
 
-        ApplyProgress(player, quest, progress, result, npc);
+        if (goal is TalkToNpcGoal { CompleteAfterDialogue: true })
+        {
+            QuestDialogue.Begin(player, goal.ConversationFor(npc.DefinitionId), npc.Guid, () =>
+            {
+                if (player.Quests.TryGetInProgress(quest.QuestId, out var current) && current.OpenGoals.ContainsKey(goalIndex))
+                    CompleteGoal(player, quest, current, goalIndex, npc, playDialogue: false);
+            });
+            return;
+        }
+
+        var result = goal.Progress(quest, new NpcTalkedEvent(npc), progress.ProgressFor(goalIndex));
+
+        ApplyProgress(player, quest, progress, goalIndex, result, npc);
 
         if (result != QuestGoalResult.Completed && goal is TalkToNpcGoal { IsCounted: true })
             QuestDialogue.Begin(player, goal.ConversationFor(npc.DefinitionId), npc.Guid);
@@ -127,42 +153,46 @@ public sealed class QuestManager : IQuestManager
 
     public void OnEvent(Player player, QuestEvent questEvent)
     {
-        foreach (var (quest, progress, goal) in ActiveGoals(player).ToList())
+        foreach (var (quest, progress, goalIndex, goal) in ActiveGoals(player).ToList())
         {
-            var result = goal.Progress(quest, questEvent, progress.Goal);
+            if (!progress.OpenGoals.TryGetValue(goalIndex, out var goalProgress))
+                continue;
+
+            var result = goal.Progress(quest, questEvent, goalProgress);
 
             if (result == QuestGoalResult.None)
                 continue;
 
-            ApplyProgress(player, quest, progress, result);
+            ApplyProgress(player, quest, progress, goalIndex, result);
 
             if (questEvent.CreditsOneQuest)
                 return;
         }
     }
 
-    private void ApplyProgress(Player player, QuestDefinition quest, QuestProgress progress, QuestGoalResult result, Npc? npc = null)
+    private void ApplyProgress(Player player, QuestDefinition quest, QuestProgress progress, int goalIndex, QuestGoalResult result, Npc? npc = null)
     {
         if (result == QuestGoalResult.Completed)
         {
-            CompleteGoal(player, quest, progress, npc);
+            CompleteGoal(player, quest, progress, goalIndex, npc);
             return;
         }
 
         if (result == QuestGoalResult.Progressed)
         {
-            var goal = quest.Goals[progress.GoalIndex];
+            var goal = quest.Goals[goalIndex];
+            var goalProgress = progress.ProgressFor(goalIndex);
 
             player.SendTunneled(new QuestObjectiveUpdatePacket
             {
                 QuestId = quest.QuestId,
                 ObjectiveId = goal.NameId,
-                CurrentCount = progress.Goal.Count,
-                CompletedPercentage = QuestCompletion(quest, progress.GoalIndex),
+                CurrentCount = goalProgress.Count,
+                CompletedPercentage = QuestCompletion(quest, progress.GoalsDone),
                 Unknown6 = RetailObjectiveUpdateUnknown6
             });
 
-            SaveGoalProgress(player, quest.QuestId, goal.NameId, progress.Goal);
+            SaveGoalProgress(player, quest.QuestId, goal.NameId, goalProgress);
 
             if (npc is not null)
                 RefreshQuestNotification(player, npc.Guid);
@@ -205,6 +235,26 @@ public sealed class QuestManager : IQuestManager
         db.SaveChanges();
     }
 
+    private void SaveGoalDone(Player player, int questId, int goalId)
+    {
+        using var db = _dbContextFactory.CreateDbContext();
+
+        db.CharacterQuestProgress
+            .Where(p => p.CharacterId == player.CharacterId && p.QuestId == questId && p.GoalId == goalId)
+            .ExecuteDelete();
+
+        db.CharacterQuestProgress.Add(new DbCharacterQuestProgress
+        {
+            CharacterId = player.CharacterId,
+            QuestId = questId,
+            GoalId = goalId,
+            TargetId = 0,
+            Count = GoalDoneCount
+        });
+
+        db.SaveChanges();
+    }
+
     private void DeleteSavedGoalProgress(Player player, int questId)
     {
         using var db = _dbContextFactory.CreateDbContext();
@@ -232,7 +282,7 @@ public sealed class QuestManager : IQuestManager
             return;
 
         var progress = new QuestProgress(questId);
-        progress.StartGoal(quest, 0);
+        progress.StartStep(quest, 0);
 
         player.Quests.Add(progress);
         player.Quests.ActiveQuestId = questId;
@@ -245,7 +295,8 @@ public sealed class QuestManager : IQuestManager
                 QuestId = questId,
                 CharacterId = player.CharacterId,
                 Completed = false,
-                CurrentGoalId = quest.Goals[0].NameId
+                CurrentGoalId = quest.Goals[0].NameId,
+                Started = progress.Started
             });
 
             var dbCharacter = db.Characters.FirstOrDefault(c => c.Id == player.CharacterId);
@@ -298,6 +349,21 @@ public sealed class QuestManager : IQuestManager
         RefreshObjectiveTarget(player);
         return true;
     }
+
+    public bool OfferNextQuest(Player player, int questId)
+    {
+        if (!_resourceManager.Quests.TryGet(questId, out var quest)
+            || quest.NextQuestId is not { } nextQuestId
+            || !_resourceManager.Quests.TryGet(nextQuestId, out var next)
+            || next.GiverNpcId != quest.GoalTargetNpcId(quest.Goals.Count - 1)
+            || !next.IsOfferableFor(player.Quests))
+            return false;
+
+        Offer(player, next, NextOfferDelayMs);
+        return true;
+    }
+
+    private const int NextOfferDelayMs = 750;
 
     private static readonly TimeSpan AbandonBlockedAfterAccept = TimeSpan.FromSeconds(3);
 
@@ -377,13 +443,10 @@ public sealed class QuestManager : IQuestManager
             player.Quests.ActiveQuestId = questId;
             SaveActiveQuestId(player, questId);
 
-            int currentGoalIndex = progress.GoalIndex;
-            var goals = quest.Goals;
+            foreach (var goalIndex in progress.OpenGoals.Keys.Order())
+                SendObjectiveActivated(player, questId, quest.Goals[goalIndex]);
 
-            if (currentGoalIndex < goals.Count)
-                SendObjectiveActivated(player, questId, goals[currentGoalIndex]);
-
-            SendObjectiveForGoal(player, quest, currentGoalIndex);
+            SendObjectiveForGoal(player, quest, progress.FirstOpenGoalIndex);
         }
     }
 
@@ -398,17 +461,20 @@ public sealed class QuestManager : IQuestManager
         foreach (var progress in player.Quests.InProgress)
         {
             if (_resourceManager.Quests.TryGet(progress.QuestId, out var quest))
-                questData.Quests.Add(ClientQuestFor(quest, progress));
+                questData.Quests.Add(ClientQuestFor(player, quest, progress));
         }
 
         return questData;
     }
 
+    public void SendActiveObjectives(Player player)
+    {
+        foreach (var (quest, _, _, goal) in ActiveGoals(player))
+            SendObjectiveActivated(player, quest.QuestId, goal);
+    }
+
     public void RestoreJournal(Player player)
     {
-        foreach (var (quest, _, goal) in ActiveGoals(player))
-            SendObjectiveActivated(player, quest.QuestId, goal);
-
         RefreshObjectiveTarget(player);
 
         SendJournalQuestStates(player);
@@ -427,16 +493,36 @@ public sealed class QuestManager : IQuestManager
 
     private void RefreshQuestNotifications(Player player, QuestDefinition quest)
     {
-        RefreshQuestNotifications(player, quest.GiverNpcId);
-        RefreshQuestNotifications(player, quest.TargetNpcId);
+        var npcIds = new HashSet<int> { quest.GiverNpcId, quest.TargetNpcId };
+
+        foreach (var goal in quest.Goals.OfType<TalkToNpcGoal>())
+            npcIds.UnionWith(goal.AllTalkTargetNpcIds());
+
+        npcIds.UnionWith(quest.StateNpcIds());
 
         foreach (var excludedId in quest.ExcludesQuestIds)
         {
             if (!_resourceManager.Quests.TryGet(excludedId, out var excludedQuest))
                 continue;
 
-            RefreshQuestNotifications(player, excludedQuest.GiverNpcId);
-            RefreshQuestNotifications(player, excludedQuest.TargetNpcId);
+            npcIds.Add(excludedQuest.GiverNpcId);
+            npcIds.Add(excludedQuest.TargetNpcId);
+        }
+
+        foreach (var npcId in npcIds)
+            RefreshQuestNotifications(player, npcId);
+    }
+
+    private static void RemoveHiddenNpcs(Player player, QuestGoal goal)
+    {
+        foreach (var npcId in goal.HideNpcIdsWhenDone)
+        {
+            foreach (var npc in player.VisibleNpcs.Values.Where(npc => npc.DefinitionId == npcId).ToList())
+            {
+                player.SendTunneled(EntityHelper.GetRemovePlayerGracefullyPacket(npc.Guid, animate: goal.HideEffectId != 0,
+                    delay: goal.HideDelayMs, effectDelay: goal.HideDelayMs, compositeEffectId: goal.HideEffectId));
+                player.VisibleNpcs.TryRemove(npc.Guid, out _);
+            }
         }
     }
 
@@ -454,40 +540,61 @@ public sealed class QuestManager : IQuestManager
         if (!player.VisibleNpcs.TryGetValue(npcGuid, out var npc))
             return;
 
-        var iconStates = QuestBadgeIconStates(npc);
-        if (npc.Notification is not null)
-            iconStates.Add(npc.Notification.IconState);
-
         var removeNotifications = new PlayerUpdatePacketRemoveNotifications();
 
-        foreach (var iconState in iconStates)
-            removeNotifications.Notifications.Add(new RemoveNotificationInfo { Guid = npc.Guid, ThoughtBubbleIconId = iconState });
+        foreach (var (iconState, effectId) in QuestBadgeIconStates(npc))
+            removeNotifications.Notifications.Add(new RemoveNotificationInfo { Guid = npc.Guid, ThoughtBubbleIconId = iconState, CompositeEffectId = effectId });
+
+        if (npc.Notification is { } notification)
+        {
+            removeNotifications.Notifications.Add(new RemoveNotificationInfo
+            {
+                Guid = npc.Guid,
+                ThoughtBubbleIconId = notification.IconState,
+                CompositeEffectId = notification.Unknown2
+            });
+        }
 
         if (removeNotifications.Notifications.Count > 0)
             player.SendTunneled(removeNotifications);
 
-        if ((GetQuestBadge(player, npc) ?? npc.Notification) is { } badge)
+        var questBadge = GetQuestBadge(player, npc);
+
+        var cursorEntry = questBadge is not null && !ReferenceEquals(questBadge, npc.Notification)
+            ? InteractionMenuHelper.GetQuestCursorEntry(npc.Guid)
+            : InteractionMenuHelper.GetOwnCursorEntry(npc);
+        player.SendTunneled(new PlayerUpdatePacketNpcRelevance { Entries = { cursorEntry } });
+
+        if ((questBadge ?? npc.Notification) is { } badge)
             player.SendTunneled(new PlayerUpdatePacketAddNotifications { Notifications = { badge } });
     }
 
+    private const int QuestBadgeNotificationType = 2;
+    private const int AvailableBadgeIconId = 2;
+
     public NotificationInfo? GetQuestBadge(Player player, Npc npc)
     {
-        var imageId = QuestBadgeImageId(player, npc);
+        var (imageId, waiting) = QuestBadgeImageId(player, npc);
         if (imageId == 0)
             return null;
+
+        if (waiting && npc.Notification is not null)
+            return npc.Notification;
 
         return new NotificationInfo
         {
             Guid = npc.Guid,
             IsCompact = false,
+            NotificationType = QuestBadgeNotificationType,
+            IconId = waiting ? 0 : AvailableBadgeIconId,
             IconState = imageId,
             NameId = npc.NameId,
             ReferenceId = npc.SubTextNameId,
-            Enabled = false
+            Enabled = true
         };
     }
 
-    private int QuestBadgeImageId(Player player, Npc npc)
+    private (int ImageId, bool Waiting) QuestBadgeImageId(Player player, Npc npc)
     {
         var quests = _resourceManager.Quests;
 
@@ -496,7 +603,7 @@ public sealed class QuestManager : IQuestManager
             foreach (var questId in giverQuestIds)
             {
                 if (quests.TryGet(questId, out var quest) && quest.IsOfferableFor(player.Quests))
-                    return quest.NotificationAvailable;
+                    return (quest.NotificationAvailable, false);
             }
         }
 
@@ -504,25 +611,70 @@ public sealed class QuestManager : IQuestManager
         {
             foreach (var questId in targetQuestIds)
             {
-                if (player.Quests.TryGetInProgress(questId, out _) && quests.TryGet(questId, out var quest))
-                    return quest.NotificationActive;
+                if (player.Quests.TryGetInProgress(questId, out var progress) && quests.TryGet(questId, out var quest)
+                    && quest.IsWaitingOn(progress, npc))
+                    return (quest.NotificationActive, true);
             }
+        }
+
+        return (0, false);
+    }
+
+    public bool IsHiddenByQuest(Player player, Npc npc)
+    {
+        var quests = _resourceManager.Quests;
+
+        if (!quests.ByStateNpc.TryGetValue(npc.DefinitionId, out var questIds))
+            return false;
+
+        foreach (var questId in questIds)
+        {
+            if (quests.TryGet(questId, out var quest) && quest.HidesNpcFor(player.Quests, npc.DefinitionId))
+                return true;
+        }
+
+        return false;
+    }
+
+    public int GetQuestEffectId(Player player, Npc npc)
+    {
+        var quests = _resourceManager.Quests;
+
+        if (!quests.ByStateNpc.TryGetValue(npc.DefinitionId, out var questIds))
+            return 0;
+
+        foreach (var questId in questIds)
+        {
+            if (quests.TryGet(questId, out var quest) && quest.NpcEffectIdFor(player.Quests, npc.DefinitionId) is var effectId and not 0)
+                return effectId;
         }
 
         return 0;
     }
 
-    private HashSet<int> QuestBadgeIconStates(Npc npc)
+    private static void RefreshNpcEffects(Player player, QuestGoal goal)
+    {
+        foreach (var effect in goal.NpcEffectsUntilDone)
+        {
+            foreach (var npc in player.VisibleNpcs.Values.Where(npc => npc.DefinitionId == effect.NpcId).ToList())
+            {
+                player.OnRemoveVisibleNpcs(npc);
+                player.OnAddVisibleNpcs(npc);
+            }
+        }
+    }
+
+    private HashSet<(int IconState, int EffectId)> QuestBadgeIconStates(Npc npc)
     {
         var quests = _resourceManager.Quests;
-        var states = new HashSet<int>();
+        var states = new HashSet<(int IconState, int EffectId)>();
 
         if (quests.ByGiver.TryGetValue(npc.DefinitionId, out var giverQuestIds))
         {
             foreach (var questId in giverQuestIds)
             {
                 if (quests.TryGet(questId, out var quest) && quest.NotificationAvailable != 0)
-                    states.Add(quest.NotificationAvailable);
+                    states.Add((quest.NotificationAvailable, 0));
             }
         }
 
@@ -531,25 +683,24 @@ public sealed class QuestManager : IQuestManager
             foreach (var questId in targetQuestIds)
             {
                 if (quests.TryGet(questId, out var quest) && quest.NotificationActive != 0)
-                    states.Add(quest.NotificationActive);
+                    states.Add((quest.NotificationActive, 0));
             }
         }
 
         return states;
     }
 
-    private const float DefaultOfferCameraDistance = 6f;
+    private const float DefaultOfferCameraDistance = 0f;
 
-    private void Offer(Player player, QuestDefinition quest)
+    private void Offer(Player player, QuestDefinition quest, int delayMs = 0)
     {
         var offer = new QuestInfoPacket
         {
             QuestId = quest.QuestId,
-            TitleId = quest.GiverDialogueId,
+            NpcDialogId = quest.GiverDialogueId,
+            NpcAnimationId = QuestDialogue.TalkAnimationId,
+            NameId = quest.TitleId,
             DescriptionId = quest.DescriptionId,
-            HelperTextId = quest.TitleId,
-            IconId = quest.IconId,
-            GoalsTextId = quest.ObjectiveDescriptionId,
             MembersOnly = false,
             NpcGuid = NearestNpcGuid(player, quest.GiverNpcId),
             CameraDistance = quest.CameraDistance ?? DefaultOfferCameraDistance,
@@ -559,7 +710,10 @@ public sealed class QuestManager : IQuestManager
 
         FillRewardBundle(offer.RewardBundle, quest);
 
-        player.SendTunneled(offer);
+        if (delayMs > 0)
+            player.SendTunneledDelayed(offer, delayMs);
+        else
+            player.SendTunneled(offer);
     }
 
     private void FillRewardBundle(RewardBundleBase bundle, QuestDefinition quest)
@@ -586,7 +740,9 @@ public sealed class QuestManager : IQuestManager
                 entries.Add(new RewardBundleEntryItem
                 {
                     IconId = itemDef.Icon.Id,
+                    TintId = itemDef.Icon.TintId,
                     NameId = itemDef.NameId,
+                    DefinitionId = definitionId,
                     Quantity = 1
                 });
             }
@@ -607,35 +763,44 @@ public sealed class QuestManager : IQuestManager
         return entries;
     }
 
-    private static ulong NearestUntalkedTarget(Player player, TalkToNpcGoal goal, QuestProgress progress)
+    private static ulong NearestUntalkedTarget(Player player, TalkToNpcGoal goal, GoalProgress goalProgress)
     {
         var untalkedNpcIds = goal.AllTalkTargetNpcIds()
-            .Where(npcId => progress.Goal is not TalkProgress talkProgress || !talkProgress.HasTalkedTo(npcId))
+            .Where(npcId => goalProgress is not TalkProgress talkProgress || !talkProgress.HasTalkedTo(npcId))
             .ToHashSet();
 
         return NearestNpc(player, npc => untalkedNpcIds.Contains(npc.DefinitionId))?.Guid ?? 0;
     }
 
-    private void CompleteGoal(Player player, QuestDefinition quest, QuestProgress progress, Npc? spokenBy = null)
+    private void CompleteGoal(Player player, QuestDefinition quest, QuestProgress progress, int goalIndex, Npc? spokenBy = null, bool playDialogue = true)
     {
         var goals = quest.Goals;
-        var completedGoalIndex = progress.GoalIndex;
-        var completedGoal = goals[completedGoalIndex];
+        var completedGoal = goals[goalIndex];
 
-        progress.Advance(quest);
-
+        var stepDone = progress.FinishGoal(quest, goalIndex);
         bool isFinalGoal = progress.GoalIndex >= goals.Count;
 
         player.SendTunneled(new QuestObjectiveCompletePacket
         {
             QuestId = quest.QuestId,
             ObjectiveId = completedGoal.NameId,
-            Percent = QuestCompletion(quest, progress.GoalIndex),
+            Percent = QuestCompletion(quest, progress.GoalsDone),
             Silent = isFinalGoal
         });
 
-        SaveQuestRow(player, quest.QuestId, q => q.CurrentGoalId = isFinalGoal ? AllGoalsDoneGoalId : goals[progress.GoalIndex].NameId);
-        DeleteSavedGoalProgress(player, quest.QuestId);
+        if (stepDone)
+        {
+            SaveQuestRow(player, quest.QuestId, q => q.CurrentGoalId = isFinalGoal ? AllGoalsDoneGoalId : goals[progress.GoalIndex].NameId);
+            DeleteSavedGoalProgress(player, quest.QuestId);
+        }
+        else
+        {
+            SaveGoalDone(player, quest.QuestId, completedGoal.NameId);
+        }
+
+        RemoveHiddenNpcs(player, completedGoal);
+        RefreshNpcEffects(player, completedGoal);
+        RefreshQuestNotifications(player, quest);
 
         if (isFinalGoal)
         {
@@ -643,17 +808,24 @@ public sealed class QuestManager : IQuestManager
             return;
         }
 
-        player.SendTunneled(new QuestObjectiveAddedPacket
+        if (stepDone)
         {
-            QuestId = quest.QuestId,
-            Objective = ObjectiveFor(goals[progress.GoalIndex], ObjectiveActive)
-        });
-        SendObjectiveActivated(player, quest.QuestId, goals[progress.GoalIndex], restored: false);
-        SendObjectiveForGoal(player, quest, progress.GoalIndex);
+            foreach (var openGoalIndex in progress.OpenGoals.Keys.Order())
+            {
+                player.SendTunneled(new QuestObjectiveAddedPacket
+                {
+                    QuestId = quest.QuestId,
+                    Objective = ObjectiveFor(goals[openGoalIndex], ObjectiveActive)
+                });
+                SendObjectiveActivated(player, quest.QuestId, goals[openGoalIndex], restored: false);
+            }
+        }
 
-        if (completedGoal is TalkToNpcGoal)
+        SendObjectiveForGoal(player, quest, progress.FirstOpenGoalIndex);
+
+        if (playDialogue && completedGoal is TalkToNpcGoal)
         {
-            var speakerNpcId = spokenBy?.DefinitionId ?? GoalTargetNpcId(quest, completedGoalIndex);
+            var speakerNpcId = spokenBy?.DefinitionId ?? quest.GoalTargetNpcId(goalIndex);
             var speakerGuid = spokenBy?.Guid ?? NearestNpcGuid(player, speakerNpcId);
 
             QuestDialogue.Begin(player, completedGoal.ConversationFor(speakerNpcId), speakerGuid);
@@ -670,10 +842,11 @@ public sealed class QuestManager : IQuestManager
     {
         var end = new QuestEndPacket
         {
-            NpcGuid = NearestNpcGuid(player, GoalTargetNpcId(quest, quest.Goals.Count - 1)),
+            NpcGuid = NearestNpcGuid(player, quest.GoalTargetNpcId(quest.Goals.Count - 1)),
             QuestId = quest.QuestId,
-            TitleId = quest.TurnInDialogueId,
-            DescriptionId = quest.TitleId
+            EndDialogTextId = quest.TurnInDialogueId,
+            NpcAnimationId = QuestDialogue.TalkAnimationId,
+            CameraDistance = quest.CameraDistance ?? DefaultOfferCameraDistance
         };
 
         FillRewardBundle(end.RewardBundle, quest);
@@ -683,32 +856,66 @@ public sealed class QuestManager : IQuestManager
         player.Quests.PendingTurnInQuestId = quest.QuestId;
     }
 
-    private static ClientQuest NewClientQuest(QuestDefinition quest, float completedPercentage, bool suppressStartBanner) => new()
+    private const int QuestListRewardUnknown3 = 15;
+    private const int CoinsIconId = 102;
+    private const int CoinsTextId = 6513;
+    private const int ExperienceIconId = 101;
+
+    private RewardBundleBase QuestListRewardBundle(Player player, QuestDefinition quest)
+    {
+        var bundle = new RewardBundleBase
+        {
+            Coins = quest.RewardCoins,
+            Experience = quest.RewardExperience,
+            Unknown3 = QuestListRewardUnknown3,
+            PlayerGuid = player.Guid
+        };
+
+        bundle.Entries.AddRange(BuildRewardEntries(quest));
+
+        if (bundle.Entries.Count > 0)
+        {
+            bundle.IconId = bundle.Entries[0].IconId;
+            bundle.NameId = bundle.Entries[0].NameId;
+        }
+        else if (quest.RewardCoins > 0)
+        {
+            bundle.IconId = CoinsIconId;
+            bundle.NameId = CoinsTextId;
+        }
+        else if (quest.RewardExperience > 0)
+        {
+            bundle.IconId = ExperienceIconId;
+        }
+
+        return bundle;
+    }
+
+    private ClientQuest NewClientQuest(Player player, QuestDefinition quest, QuestProgress progress, bool suppressStartBanner) => new()
     {
         QuestId = quest.QuestId,
         TitleId = quest.TitleId,
-        DescriptionId = quest.ObjectiveDescriptionId,
+        DescriptionId = quest.DescriptionId,
         HelperTextId = quest.ObjectiveDescriptionId,
         MembersOnly = false,
-        TimeStarted = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+        TimeStarted = progress.Started.ToUnixTimeSeconds(),
         ProfileId = 0,
-        CompletedPercentage = completedPercentage,
-        IconId = quest.IconId,
+        CompletedPercentage = QuestCompletion(quest, progress.GoalsDone),
         SystemQuest = false,
-        SuppressStartBanner = suppressStartBanner
+        SuppressStartBanner = suppressStartBanner,
+        RewardBundle = QuestListRewardBundle(player, quest)
     };
 
-    private static ClientQuest ClientQuestFor(QuestDefinition quest, QuestProgress progress)
+    private ClientQuest ClientQuestFor(Player player, QuestDefinition quest, QuestProgress progress)
     {
-        var clientQuest = NewClientQuest(quest, QuestCompletion(quest, progress.GoalIndex), suppressStartBanner: true);
+        var clientQuest = NewClientQuest(player, quest, progress, suppressStartBanner: true);
         var goals = quest.Goals;
-        int lastVisible = System.Math.Min(progress.GoalIndex, goals.Count - 1);
 
-        for (int i = 0; i <= lastVisible; i++)
+        for (int i = 0; i < progress.StepEnd; i++)
         {
-            clientQuest.Objectives[i + 1] = i < progress.GoalIndex
+            clientQuest.Objectives[i + 1] = progress.IsGoalDone(i)
                 ? ObjectiveFor(goals[i], ObjectiveComplete)
-                : ObjectiveFor(goals[i], ObjectiveInactive, progress.Goal.Count);
+                : ObjectiveFor(goals[i], ObjectiveInactive, progress.ProgressFor(i).Count);
         }
 
         return clientQuest;
@@ -719,33 +926,29 @@ public sealed class QuestManager : IQuestManager
         if (!player.Quests.TryGetInProgress(quest.QuestId, out var progress))
             return;
 
-        int goalsDone = progress.GoalIndex;
         player.SendTunneled(new QuestAddPacket
         {
-            Quest = NewClientQuest(quest, QuestCompletion(quest, goalsDone), suppressStartBanner: false),
+            Quest = NewClientQuest(player, quest, progress, suppressStartBanner: false),
             ShowInTracker = quest.QuestId == player.Quests.ActiveQuestId
         });
 
         var goals = quest.Goals;
-        int lastVisible = System.Math.Min(goalsDone, goals.Count - 1);
 
-        int collected = progress.Goal.Count;
-
-        for (int i = 0; i <= lastVisible; i++)
+        for (int i = 0; i < progress.StepEnd; i++)
         {
             player.SendTunneled(new QuestObjectiveAddedPacket
             {
                 QuestId = quest.QuestId,
-                Objective = i < goalsDone
+                Objective = progress.IsGoalDone(i)
                     ? ObjectiveFor(goals[i], ObjectiveComplete)
-                    : ObjectiveFor(goals[i], ObjectiveActive, collected)
+                    : ObjectiveFor(goals[i], ObjectiveActive, progress.ProgressFor(i).Count)
             });
         }
 
-        if (goalsDone < goals.Count)
-            SendObjectiveActivated(player, quest.QuestId, goals[goalsDone], restored: false);
+        foreach (var goalIndex in progress.OpenGoals.Keys.Order())
+            SendObjectiveActivated(player, quest.QuestId, goals[goalIndex], restored: false);
 
-        SendObjectiveForGoal(player, quest, goalsDone);
+        SendObjectiveForGoal(player, quest, progress.FirstOpenGoalIndex);
     }
 
     private const int ObjectiveInactive = 0;
@@ -758,7 +961,7 @@ public sealed class QuestManager : IQuestManager
         NameId = goal.NameId,
         DescriptionId = goal.DescriptionId != 0 ? goal.DescriptionId : goal.NameId,
         State = state,
-        CurrentCount = currentCount,
+        CurrentCount = state == ObjectiveComplete ? goal.RequiredCount : currentCount,
         RequiredCount = goal.RequiredCount
     };
 
@@ -806,14 +1009,6 @@ public sealed class QuestManager : IQuestManager
     private static ulong NearestNpcGuid(Player player, int npcId)
         => npcId != 0 && NearestNpc(player, npcId) is { } npc ? npc.Guid : 0;
 
-    private static int GoalTargetNpcId(QuestDefinition quest, int goalIndex)
-    {
-        var goals = quest.Goals;
-        return goalIndex >= 0 && goalIndex < goals.Count && goals[goalIndex] is TalkToNpcGoal talkGoal
-            ? talkGoal.TargetNpcId(quest)
-            : quest.TargetNpcId;
-    }
-
     private ulong ResolveGoalTargetGuid(Player player, QuestDefinition quest, int goalIndex)
     {
         var goals = quest.Goals;
@@ -829,12 +1024,12 @@ public sealed class QuestManager : IQuestManager
         if (goalIndex >= 0 && goalIndex < goals.Count && goals[goalIndex] is TalkToNpcGoal { IsCounted: true } countedGoal
             && player.Quests.TryGetInProgress(quest.QuestId, out var progress))
         {
-            var untalked = NearestUntalkedTarget(player, countedGoal, progress);
+            var untalked = NearestUntalkedTarget(player, countedGoal, progress.ProgressFor(goalIndex));
             if (untalked != 0)
                 return untalked;
         }
 
-        return NearestNpcGuid(player, GoalTargetNpcId(quest, goalIndex));
+        return NearestNpcGuid(player, quest.GoalTargetNpcId(goalIndex));
     }
 
     private static Npc? NearestCollectionNode(Player player, string nodeType)
@@ -844,6 +1039,12 @@ public sealed class QuestManager : IQuestManager
     private void SendObjectiveForGoal(Player player, QuestDefinition quest, int goalIndex)
     {
         var goals = quest.Goals;
+
+        if (quest.HideObjectiveTarget)
+        {
+            player.SendTunneled(new ObjectiveTargetUpdatePacket { Active = false });
+            return;
+        }
 
         if (goalIndex >= 0 && goalIndex < goals.Count
             && goals[goalIndex] is ReachLocationGoal reachGoal && reachGoal.ReachPosition != Vector3.Zero)
@@ -920,8 +1121,11 @@ public sealed class QuestManager : IQuestManager
         if (!_resourceManager.Quests.TryGet(questId, out var q) || !player.Quests.TryGetInProgress(questId, out var progress))
             return false;
 
-        int currentGoalIndex = progress.GoalIndex;
+        int currentGoalIndex = progress.FirstOpenGoalIndex;
         var goals = q.Goals;
+
+        if (q.HideObjectiveTarget)
+            return false;
 
         if (currentGoalIndex >= 0 && currentGoalIndex < goals.Count
             && goals[currentGoalIndex] is ReachLocationGoal reachGoal && reachGoal.ReachPosition != Vector3.Zero)

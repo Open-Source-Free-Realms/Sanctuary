@@ -33,6 +33,7 @@ public static class BaseCommandPacketHandler
             FreeInteractionNpc.OpCode => FreeInteractionNpcHandler.HandlePacket(connection, reader.Span),
             CommandPacketInteractRequest.OpCode => CommandPacketInteractRequestHandler.HandlePacket(connection, reader.Span),
             PacketDialogResponse.OpCode => PacketDialogResponseHandler.HandlePacket(connection, reader.Span),
+            CommandPacketEndDialog.OpCode => CommandPacketEndDialogHandler.HandlePacket(connection, reader.Span),
             CommandPacketInteractionSelect.OpCode => CommandPacketInteractionSelectHandler.HandlePacket(connection, reader.Span),
             CommandPacketSetProfile.OpCode => CommandPacketSetProfileHandler.HandlePacket(connection, reader.Span),
             CommandPacketAddFriendRequest.OpCode => CommandPacketAddFriendRequestHandler.HandlePacket(connection, reader.Span),
