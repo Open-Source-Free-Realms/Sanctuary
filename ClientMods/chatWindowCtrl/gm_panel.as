@@ -74,7 +74,8 @@ var gmTabs = [
    ["conv", "Dialogue"],
    ["quests", "Quests"],
    ["itemgen", "Item Gen"],
-   ["codes", "Codes"]
+   ["codes", "Codes"],
+   ["tiles", "Tiles"]
 ];
 // Entity selected for editing (god mode click), as sent by the server: ["npc"|"prop"|"none", fields...].
 var gmEdit = ["none"];
@@ -252,10 +253,12 @@ function gmBuild()
       _root.gm_mc._visible = false;
    }, 0xC0392B);
 
+   // Tabs shrink a little once there are too many for the panel's height.
+   var tabStep = Math.min(38, Math.floor((GM_H - GM_CONTENT_Y - 12) / gmTabs.length));
    var i;
    for(i = 0; i < gmTabs.length; i++)
    {
-      var tab = gmButton(root_mc, "tab" + i + "_mc", gmTabs[i][1], 12, GM_CONTENT_Y - 8 + i * 38, GM_SIDEBAR_W - 4, 32, function()
+      var tab = gmButton(root_mc, "tab" + i + "_mc", gmTabs[i][1], 12, GM_CONTENT_Y - 8 + i * tabStep, GM_SIDEBAR_W - 4, tabStep - 6, function()
       {
          gmShowTab(this.tabId);
       });
@@ -410,6 +413,11 @@ function gmShowTab(tabId)
    if(tabId == "codes")
    {
       gmRenderCodes(content);
+      return;
+   }
+   if(tabId == "tiles")
+   {
+      gmRenderTiles(content);
       return;
    }
    gmToolbar(content, tabId);
@@ -2739,6 +2747,263 @@ function gmRedeemSubmit(text)
    _root.gmredeem_mc.removeMovieClip();
 }
 
+// --- tile editor (Mod+) ---------------------------------------------------------------
+// Edits a selection of placed props and saved world NPCs (!tile). After every !tile command the server
+// sends tilesel|begin|count|cx|cy|cz, tilesel|entry|guid|prop/npc|definitionId|label|x|y|z|heading per item,
+// tilesel|end and tileundo|depth|label; kit lists come as tilekits|begin, tilekits|entry|name|count|note,
+// tilekits|end.
+
+var gmTileSel = { count: 0, cx: 0, cy: 0, cz: 0, items: [] };
+var gmTileSelLoading = undefined;
+var gmTileUndo = { depth: 0, label: "" };
+var gmTileKits = [];
+var gmTileKitsLoading = [];
+var gmTileAsked = false;
+var gmTileScroll = 0;
+var gmTileKitScroll = 0;
+var GM_TILE_ROWS = 11;
+var GM_TILE_KIT_ROWS = 5;
+
+function gmTileRound(n)
+{
+   return Math.round(Number(n) * 10) / 10;
+}
+
+function gmRenderTiles(content)
+{
+   if(!gmTileAsked)
+   {
+      gmTileAsked = true;
+      gmSend("!tile list");
+      gmSend("!tile kit list");
+   }
+
+   // Select row.
+   gmText(content, "tile_label", "Tile editor", 0, 2, 80, 18, 12, GM_TEXT_GOLD, true);
+   gmInput(content, "tileradius_txt", 84, 0, 40, 22, "10", "r", function(text)
+   {
+      gmSend("!tile select radius " + (text == "" ? "10" : text));
+   });
+   gmButton(content, "tilesel_mc", "Select radius", 128, 0, 92, 22, function()
+   {
+      var r = gmFieldText(_root.gm_mc.content_mc.tileradius_txt);
+      gmSend("!tile select radius " + (r == "" ? "10" : r));
+   });
+   gmButton(content, "tileadd_mc", "+ Clicked", 224, 0, 74, 22, function()
+   {
+      gmSend("!tile select add");
+   }, 0x2E7D5B);
+   gmButton(content, "tilerem_mc", "- Clicked", 302, 0, 74, 22, function()
+   {
+      gmSend("!tile select remove");
+   });
+   gmButton(content, "tileclear_mc", "Clear", 380, 0, 52, 22, function()
+   {
+      gmSend("!tile select clear");
+   });
+   gmButton(content, "tilelist_mc", "Refresh", 436, 0, 60, 22, function()
+   {
+      gmSend("!tile list");
+      gmSend("!tile kit list");
+   });
+
+   gmRenderTileSelection(content, 0, 30);
+   gmRenderTileTools(content, 318, 30);
+   gmStatus(gmTileSel.count > 0 ? gmTileSel.count + " selected. Moves, turns and copies are saved as you go; Undo keeps 20 steps." : "Select props and NPCs by radius, or click one in god mode and press + Clicked.");
+}
+
+// Left: the selection, nearest first, each with a remove button.
+function gmRenderTileSelection(content, x, y)
+{
+   var s = gmTileSel;
+   gmText(content, "tilecount_txt", s.count + " selected" + (s.count > 0 ? "   centre " + gmTileRound(s.cx) + ", " + gmTileRound(s.cy) + ", " + gmTileRound(s.cz) : ""), x, y, 310, 18, 10, GM_TEXT_DIM, true).wordWrap = false;
+   gmTileScroll = Math.max(0, Math.min(gmTileScroll, s.items.length - GM_TILE_ROWS));
+   var i;
+   for(i = 0; i < GM_TILE_ROWS && gmTileScroll + i < s.items.length; i++)
+   {
+      var it = s.items[gmTileScroll + i];
+      var row = content.createEmptyMovieClip("tile" + i + "_mc", content.getNextHighestDepth());
+      row._x = x;
+      row._y = y + 20 + i * 24;
+      gmPanelShape(row, 288, 22, 6, it.kind == "npc" ? 0x5B3A8C : GM_BLUE_CELL, GM_BLUE_BOTTOM, GM_GOLD_DARK, 1);
+      var name = it.label == "" ? it.kind + " " + it.def : it.label;
+      gmText(row, "label_txt", gmOneLine(name, 22), 6, 3, 150, 18, 10, GM_TEXT, true).wordWrap = false;
+      gmText(row, "pos_txt", gmTileRound(it.x) + ", " + gmTileRound(it.y) + ", " + gmTileRound(it.z) + "  " + Math.round(Number(it.heading)) + " deg", 152, 4, 132, 18, 9, GM_TEXT_DIM, false, "right").wordWrap = false;
+      var rem = gmButton(content, "tilerm" + i + "_mc", "x", x + 292, y + 20 + i * 24, 18, 22, function()
+      {
+         gmSend("!tile select remove " + this.guid);
+      }, 0xC0392B);
+      rem.guid = it.guid;
+   }
+   if(s.items.length > GM_TILE_ROWS)
+   {
+      gmButton(content, "tilemore_mc", "more... (" + (gmTileScroll + 1) + "-" + Math.min(s.items.length, gmTileScroll + GM_TILE_ROWS) + " of " + s.items.length + ")", x, y + 20 + GM_TILE_ROWS * 24, 310, 18, function()
+      {
+         gmTileScroll = gmTileScroll + GM_TILE_ROWS >= gmTileSel.items.length ? 0 : gmTileScroll + GM_TILE_ROWS;
+         gmShowTab("tiles");
+      });
+   }
+}
+
+// Right: nudge, turn, actions, undo and kits.
+function gmRenderTileTools(content, x, y)
+{
+   gmText(content, "tilemove_label", "Move", x, y, 60, 18, 10, GM_TEXT_DIM, true);
+   var axes = ["X", "Y", "Z"];
+   var steps = [-5, -1, 1, 5];
+   var a;
+   var k;
+   for(a = 0; a < 3; a++)
+   {
+      gmText(content, "tileaxis" + a + "_txt", axes[a], x, y + 22 + a * 24, 16, 18, 11, GM_TEXT_GOLD, true);
+      for(k = 0; k < steps.length; k++)
+      {
+         var b = gmButton(content, "tilemv" + a + "_" + k + "_mc", (steps[k] > 0 ? "+" : "") + steps[k], x + 18 + k * 46, y + 20 + a * 24, 42, 22, function()
+         {
+            var d = [0, 0, 0];
+            d[this.axis] = this.step;
+            gmSend("!tile move " + d[0] + " " + d[1] + " " + d[2]);
+         });
+         b.axis = a;
+         b.step = steps[k];
+      }
+   }
+
+   var ry = y + 96;
+   gmText(content, "tilerot_label", "Turn", x, ry + 3, 40, 18, 10, GM_TEXT_DIM, true);
+   var turns = [-90, -15, 15, 90];
+   for(k = 0; k < turns.length; k++)
+   {
+      var t = gmButton(content, "tilerot" + k + "_mc", (turns[k] > 0 ? "+" : "") + turns[k], x + 40 + k * 56, ry, 52, 22, function()
+      {
+         gmSend("!tile rotate " + this.degrees);
+      });
+      t.degrees = turns[k];
+   }
+
+   var ay = ry + 28;
+   gmButton(content, "tilehere_mc", "Move here", x, ay, 72, 22, function()
+   {
+      gmSend("!tile here");
+   });
+   gmButton(content, "tilecopy_mc", "Copy", x + 76, ay, 52, 22, function()
+   {
+      gmSend("!tile copy");
+   }, 0x2E7D5B);
+   gmButton(content, "tiledel_mc", "Delete", x + 132, ay, 60, 22, function()
+   {
+      gmSend("!tile delete");
+   }, 0xC0392B);
+   var undo = gmButton(content, "tileundo_mc", gmTileUndo.depth > 0 ? "Undo " + gmOneLine(gmTileUndo.label, 14) : "Undo", x + 196, ay, 104, 22, function()
+   {
+      gmSend("!tile undo");
+   }, gmTileUndo.depth > 0 ? 0x9C6B12 : undefined);
+
+   // Kits.
+   var ky = ay + 32;
+   gmText(content, "tilekits_label", "Kits", x, ky, 60, 18, 10, GM_TEXT_DIM, true);
+   gmTileKitScroll = Math.max(0, Math.min(gmTileKitScroll, gmTileKits.length - GM_TILE_KIT_ROWS));
+   var i;
+   for(i = 0; i < GM_TILE_KIT_ROWS && gmTileKitScroll + i < gmTileKits.length; i++)
+   {
+      var kit = gmTileKits[gmTileKitScroll + i];
+      var row = content.createEmptyMovieClip("tilekit" + i + "_mc", content.getNextHighestDepth());
+      row._x = x;
+      row._y = ky + 18 + i * 24;
+      gmPanelShape(row, 194, 22, 6, GM_BLUE_CELL, GM_BLUE_BOTTOM, GM_GOLD_DARK, 1);
+      gmText(row, "label_txt", gmOneLine(kit.name, 16) + "  (" + kit.count + ")" + (kit.note == "" ? "" : "  " + gmOneLine(kit.note, 12)), 6, 3, 184, 18, 10, GM_TEXT, false).wordWrap = false;
+      var place = gmButton(content, "tilekitp" + i + "_mc", "Place", x + 198, ky + 18 + i * 24, 50, 22, function()
+      {
+         gmSend("!tile kit place " + this.kit);
+      }, 0x2E7D5B);
+      place.kit = kit.name;
+      var kdel = gmButton(content, "tilekitd" + i + "_mc", "x", x + 252, ky + 18 + i * 24, 20, 22, function()
+      {
+         gmSend("!tile kit delete " + this.kit);
+      }, 0xC0392B);
+      kdel.kit = kit.name;
+   }
+   if(gmTileKits.length > GM_TILE_KIT_ROWS)
+   {
+      gmButton(content, "tilekitmore_mc", "more...", x + 276, ky + 18, 24, 22, function()
+      {
+         gmTileKitScroll = gmTileKitScroll + GM_TILE_KIT_ROWS >= gmTileKits.length ? 0 : gmTileKitScroll + GM_TILE_KIT_ROWS;
+         gmShowTab("tiles");
+      });
+   }
+   if(gmTileKits.length == 0)
+   {
+      gmText(content, "tilenokits_txt", "No kits yet. Save the selection as one below; kits place at your position and facing.", x, ky + 18, 300, 36, 10, GM_TEXT_DIM, false);
+   }
+
+   var sy = ky + 18 + GM_TILE_KIT_ROWS * 24 + 4;
+   gmInput(content, "tilekitname_txt", x, sy, 96, 22, "", "kit name");
+   gmInput(content, "tilekitnote_txt", x + 100, sy, 140, 22, "", "note");
+   gmButton(content, "tilekitsave_mc", "Save kit", x + 244, sy, 56, 22, function()
+   {
+      var c = _root.gm_mc.content_mc;
+      var name = gmFieldText(c.tilekitname_txt);
+      if(name == "")
+      {
+         gmStatus("Name the kit first (letters, digits, _ and -).");
+         return;
+      }
+      var note = String(c.tilekitnote_txt.text);
+      gmSend("!tile kit save " + name + (note == "" ? "" : " " + gmEscapeText(note)));
+   }, 0x2E7D5B);
+}
+
+function gmHandleTileData(kind, parts)
+{
+   if(kind == "tilesel")
+   {
+      if(parts[2] == "begin")
+      {
+         gmTileSelLoading = { count: Number(parts[3]), cx: parts[4], cy: parts[5], cz: parts[6], items: [] };
+      }
+      else if(parts[2] == "entry" && gmTileSelLoading != undefined)
+      {
+         gmTileSelLoading.items.push({ guid: parts[3], kind: parts[4], def: parts[5], label: gmUnescapeText(parts[6]),
+            x: parts[7], y: parts[8], z: parts[9], heading: parts[10] });
+      }
+      else if(parts[2] == "end" && gmTileSelLoading != undefined)
+      {
+         gmTileSel = gmTileSelLoading;
+         gmTileSelLoading = undefined;
+      }
+      return;
+   }
+   if(kind == "tileundo")
+   {
+      // The last line after every !tile command, so the tab redraws once per command.
+      gmTileUndo = { depth: Number(parts[2]), label: gmUnescapeText(parts[3]) };
+      if(_root.gm_mc._visible && gmTab == "tiles")
+      {
+         gmShowTab("tiles");
+      }
+      return;
+   }
+   if(kind == "tilekits")
+   {
+      if(parts[2] == "begin")
+      {
+         gmTileKitsLoading = [];
+      }
+      else if(parts[2] == "entry")
+      {
+         gmTileKitsLoading.push({ name: parts[3], count: parts[4], note: gmUnescapeText(parts[5]) });
+      }
+      else if(parts[2] == "end")
+      {
+         gmTileKits = gmTileKitsLoading;
+         if(_root.gm_mc._visible && gmTab == "tiles")
+         {
+            gmShowTab("tiles");
+         }
+      }
+   }
+}
+
 // --- decorate bar (every player) -----------------------------------------------
 // While a player decorates their house, the server sends decorate|on and, for the piece last placed,
 // moved or turned with the client's own wheel, decorate|sel|name|yaw|pitch|roll. The client's wheel only
@@ -3020,6 +3285,11 @@ function gmHandleData(text)
    if(kind == "codes" || kind == "codeedit" || kind == "codeitem")
    {
       gmHandleCodeData(kind, parts);
+      return;
+   }
+   if(kind == "tilesel" || kind == "tileundo" || kind == "tilekits")
+   {
+      gmHandleTileData(kind, parts);
       return;
    }
    if(kind == "redeem")
