@@ -13,7 +13,7 @@ public class RedeemChatCommand : IChatCommand
     private readonly IRedeemCodeManager _redeemCodeManager;
 
     public string KeyWord => "redeem";
-    public string Usage => "<code>";
+    public string Usage => "[code]";
     public string Description => "Redeems a code for items or coins.";
     public ChatCommandRole RequiredRole => ChatCommandRole.Player;
 
@@ -24,6 +24,13 @@ public class RedeemChatCommand : IChatCommand
 
     public bool Handle(Player invoker, string[] args)
     {
+        // A bare !redeem (the dock's Redeem Code button) opens the chat window mod's code popup.
+        if (args.Length == 0)
+        {
+            ChatHelper.SendGmPanelData(invoker, "redeem", "open");
+            return true;
+        }
+
         if (args.Length != 1)
             return false;
 
