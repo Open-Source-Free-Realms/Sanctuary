@@ -1,17 +1,12 @@
 using System;
 using System.IO;
 
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Resources;
 using Sanctuary.Game.Resources.Definitions;
-using Sanctuary.Game.Resources.Definitions.Zones;
-using Sanctuary.Game.Zones;
-using Sanctuary.Scripting;
 
 namespace Sanctuary.Game.Tests;
 
@@ -48,7 +43,7 @@ public sealed class CollectionCoinDefinitionTests
             CollectionId = 10,
             EntryId = 20
         };
-        using var zone = CreateZone();
+        using var zone = TestZone.Create();
 
         var coin = new CollectionCoin(zone, definition);
         var collectedPlayer = new Player(zone, null!, null!, null!);
@@ -57,19 +52,5 @@ public sealed class CollectionCoinDefinitionTests
 
         Assert.IsFalse(coin.IsVisibleTo(collectedPlayer));
         Assert.IsTrue(coin.IsVisibleTo(otherPlayer));
-    }
-
-    private static WorldZone CreateZone()
-    {
-        Directory.CreateDirectory(ResourceManager.BaseDirectory);
-
-        var services = new ServiceCollection();
-
-        services.AddSingleton<ILoggerFactory>(NullLoggerFactory.Instance);
-        services.AddSingleton<IResourceManager>(new ResourceManager(NullLogger<ResourceManager>.Instance));
-        services.AddSingleton<IScriptManager>(new ScriptManager(NullLoggerFactory.Instance));
-        services.AddSingleton<IZoneManager, ZoneManager>();
-
-        return new WorldZone(new WorldZoneDefinition { Name = "Test" }, services.BuildServiceProvider());
     }
 }
