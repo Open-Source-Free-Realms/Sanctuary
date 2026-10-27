@@ -92,6 +92,9 @@ public class GatewayService : BackgroundService
             return Task.CompletedTask;
         }
 
+        // GM-made items first, since custom quests and codes can reward them.
+        _serviceProvider.GetRequiredService<ICustomItemManager>().Load();
+
         // GM-authored quests join the loaded quest collection before zones spawn their givers.
         _serviceProvider.GetRequiredService<ICustomQuestManager>().Load();
 

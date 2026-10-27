@@ -25,6 +25,9 @@ public abstract class DatabaseContext : DbContext
     public DbSet<DbWorldEvent> WorldEvents => Set<DbWorldEvent>();
     public DbSet<DbScriptLibraryEntry> ScriptLibrary => Set<DbScriptLibraryEntry>();
     public DbSet<DbCustomQuest> CustomQuests => Set<DbCustomQuest>();
+    public DbSet<DbCustomItem> CustomItems => Set<DbCustomItem>();
+    public DbSet<DbRedeemCode> RedeemCodes => Set<DbRedeemCode>();
+    public DbSet<DbRedeemCodeUse> RedeemCodeUses => Set<DbRedeemCodeUse>();
     public DbSet<DbCharacterQuest> CharacterQuests => Set<DbCharacterQuest>();
     public DbSet<DbCharacterQuestProgress> CharacterQuestProgress => Set<DbCharacterQuestProgress>();
 

@@ -112,6 +112,8 @@ builder.ConfigureServices((hostBuilderContext, serviceCollection) =>
     serviceCollection.AddSingleton<INpcContentManager, NpcContentManager>();
     serviceCollection.AddSingleton<IScriptLibrary, ScriptLibrary>();
     serviceCollection.AddSingleton<ICustomQuestManager, CustomQuestManager>();
+    serviceCollection.AddSingleton<ICustomItemManager, CustomItemManager>();
+    serviceCollection.AddSingleton<IRedeemCodeManager, RedeemCodeManager>();
 });
 
 builder.ConfigureLogging((hostBuilderContext, loggingBuilder) =>
