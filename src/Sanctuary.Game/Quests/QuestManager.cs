@@ -359,9 +359,11 @@ public sealed class QuestManager : IQuestManager
             || !next.IsOfferableFor(player.Quests))
             return false;
 
-        Offer(player, next);
+        Offer(player, next, NextOfferDelayMs);
         return true;
     }
+
+    private const int NextOfferDelayMs = 750;
 
     private static readonly TimeSpan AbandonBlockedAfterAccept = TimeSpan.FromSeconds(3);
 
@@ -683,7 +685,7 @@ public sealed class QuestManager : IQuestManager
 
     private const float DefaultOfferCameraDistance = 0f;
 
-    private void Offer(Player player, QuestDefinition quest)
+    private void Offer(Player player, QuestDefinition quest, int delayMs = 0)
     {
         var offer = new QuestInfoPacket
         {
@@ -701,7 +703,10 @@ public sealed class QuestManager : IQuestManager
 
         FillRewardBundle(offer.RewardBundle, quest);
 
-        player.SendTunneled(offer);
+        if (delayMs > 0)
+            player.SendTunneledDelayed(offer, delayMs);
+        else
+            player.SendTunneled(offer);
     }
 
     private void FillRewardBundle(RewardBundleBase bundle, QuestDefinition quest)
