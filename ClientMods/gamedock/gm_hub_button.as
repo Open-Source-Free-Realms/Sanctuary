@@ -29,13 +29,40 @@ function gmCreateHubButton()
    };
 }
 
+// Gold tree "Redeem Code" icon for every player, right of the Referee Tools icon. "!redeem" with no code
+// opens the redeem box in the chat window.
+Object.registerClass("gmRedeemIcon", GameDockIcon);
+
+function gmCreateRedeemButton()
+{
+   var b = _root.attachMovie("gmRedeemIcon", "gmRedeemButton", 9001);
+   b.setTooltipStr("Redeem Code");
+
+   var hub = _root.gmHubButton.getBounds(_root);
+   var own = b.getBounds(_root);
+   b._x += hub.xMax + 8 - own.xMin;
+   b._y += (hub.yMin + hub.yMax) / 2 - (own.yMin + own.yMax) / 2;
+
+   b.onPress = function()
+   {
+      this.onRollOut();
+      fscommand("FR_event", "PlaySound(DockSelect)");
+      fscommand("FR_event", "sendChatMessage(  \"!redeem\")");
+   };
+   b.onRelease = b.onReleaseOutside = function()
+   {
+   };
+}
+
 // Lua shows and hides the hub icons through showDockIcons_lua; keep ours in step.
 var gmOriginalShowDockIcons = showDockIcons_lua;
 showDockIcons_lua = function(n)
 {
    gmOriginalShowDockIcons.apply(_root, arguments);
    _root.gmHubButton._visible = n == 1;
+   _root.gmRedeemButton._visible = n == 1;
 };
 
 gmCreateHubButton();
+gmCreateRedeemButton();
 // ===== End Sanctuary GM hub button =====

@@ -44,11 +44,12 @@ COMPRESSED_MAGIC = 0xA1B2C3D4
 
 # (exported symbol to copy, export name of the copy, hue shift in degrees)
 GM_TREE_ICON = ("treeIcon", "gmTreeIcon", 155)
+REDEEM_TREE_ICON = ("treeIcon", "gmRedeemIcon", 35)
 
 # (stock movie, published name, script inside the movie to append to, patch source, recolored symbols to add)
 MODS = [
     ("chatWindowCtrl", "sanctuaryChatWindowCtrl", "\\frame_2\\DoAction", script_dir / "chatWindowCtrl" / "gm_panel.as", []),
-    ("gamedock", "sanctuaryGameDock", "\\frame_1\\DoAction", script_dir / "gamedock" / "gm_hub_button.as", [GM_TREE_ICON]),
+    ("gamedock", "sanctuaryGameDock", "\\frame_1\\DoAction", script_dir / "gamedock" / "gm_hub_button.as", [GM_TREE_ICON, REDEEM_TREE_ICON]),
     ("dialog", "sanctuaryDialog", "\\frame_1\\DoAction", script_dir / "dialog" / "dialog_hide.as", []),
     ("housingEditPanel", "sanctuaryHousingEditPanel", "\\frame_1\\DoAction", script_dir / "housing" / "tray.as", []),
 ]

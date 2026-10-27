@@ -72,7 +72,9 @@ var gmTabs = [
    ["edit", "Edit"],
    ["script", "Script"],
    ["conv", "Dialogue"],
-   ["quests", "Quests"]
+   ["quests", "Quests"],
+   ["itemgen", "Item Gen"],
+   ["codes", "Codes"]
 ];
 // Entity selected for editing (god mode click), as sent by the server: ["npc"|"prop"|"none", fields...].
 var gmEdit = ["none"];
@@ -400,6 +402,16 @@ function gmShowTab(tabId)
       gmRenderQuests(content);
       return;
    }
+   if(tabId == "itemgen")
+   {
+      gmRenderItemGen(content);
+      return;
+   }
+   if(tabId == "codes")
+   {
+      gmRenderCodes(content);
+      return;
+   }
    gmToolbar(content, tabId);
    if(gmList.kind == tabId)
    {
@@ -522,7 +534,7 @@ function gmFieldText(t)
 var gmKeyListener = new Object();
 gmKeyListener.onKeyDown = function()
 {
-   if(!_root.gm_mc._visible || Key.getCode() != Key.ENTER)
+   if((!_root.gm_mc._visible && _root.gmredeem_mc == undefined) || Key.getCode() != Key.ENTER)
    {
       return;
    }
@@ -2264,6 +2276,469 @@ function gmHandleQuestData(kind, parts)
    }
 }
 
+// --- item generation (Admin) ----------------------------------------------------
+// Custom items are copies of a regular item with fields overridden (!itemgen). The server sends the list as
+// itemgen|begin, itemgen|entry|customId|itemId|label|baseItemId|iconImageSetId, itemgen|end, and the editor as
+// itemedit|begin|customId|itemId|label|baseItemId, one itemfield|field|value|overridden per field, itemedit|end.
+
+var gmGenList = [];
+var gmGenListLoading = [];
+var gmGenListAsked = false;
+var gmGen = undefined;
+var gmGenLoading = undefined;
+var gmGenSel = 0;
+var gmGenScroll = 0;
+var GM_GEN_ROWS = 12;
+// Fields that are on/off toggles rather than typed values.
+var GM_GEN_FLAGS = { members: true, notrade: true, nosale: true };
+// Field labels, in the server's field order.
+var GM_GEN_LABELS = { name: "Name id", desc: "Desc id", model: "Model", texture: "Texture", tint: "Tint",
+   icon: "Icon set", icontint: "Icon tint", rarity: "Rarity", cost: "Cost", stack: "Stack", effect: "Effect",
+   members: "Members", notrade: "No trade", nosale: "No sale", label: "Label" };
+
+function gmRenderItemGen(content)
+{
+   if(!gmGenListAsked)
+   {
+      gmGenListAsked = true;
+      gmSend("!itemgen list");
+   }
+
+   // Left: search, the list and "new from base item".
+   gmText(content, "gen_label", "Custom items", 0, 0, 100, 18, 12, GM_TEXT_GOLD, true);
+   gmButton(content, "genreload_mc", "Refresh", 120, 0, 54, 20, function()
+   {
+      var search = gmFieldText(_root.gm_mc.content_mc.gensearch_txt);
+      gmSend("!itemgen list" + (search == "" ? "" : " " + search));
+   });
+   gmInput(content, "gensearch_txt", 0, 22, 174, 20, "", "Search label or id", function(text)
+   {
+      gmSend("!itemgen list" + (text == "" ? "" : " " + text));
+   });
+   gmGenScroll = Math.max(0, Math.min(gmGenScroll, gmGenList.length - GM_GEN_ROWS));
+   var i;
+   for(i = 0; i < GM_GEN_ROWS && gmGenScroll + i < gmGenList.length; i++)
+   {
+      var g = gmGenList[gmGenScroll + i];
+      var selected = String(g.id) == String(gmGenSel);
+      var row = content.createEmptyMovieClip("gen" + i + "_mc", content.getNextHighestDepth());
+      row._y = 46 + i * 22;
+      gmPanelShape(row, 174, 20, 6, selected ? GM_BLUE_ACTIVE : GM_BLUE_CELL, GM_BLUE_BOTTOM, selected ? GM_GOLD : GM_GOLD_DARK, 1);
+      gmText(row, "label_txt", g.itemId + "  " + gmOneLine(g.label == "" ? "(base " + g.base + ")" : g.label, 20), 6, 2, 164, 18, 10, GM_TEXT, selected).wordWrap = false;
+      row.genId = g.id;
+      row.onRelease = function()
+      {
+         gmGenSel = this.genId;
+         gmSend("!itemgen show " + this.genId);
+      };
+   }
+   if(gmGenList.length > GM_GEN_ROWS)
+   {
+      gmButton(content, "gendown_mc", "more...", 0, 46 + GM_GEN_ROWS * 22, 174, 18, function()
+      {
+         gmGenScroll = gmGenScroll + GM_GEN_ROWS >= gmGenList.length ? 0 : gmGenScroll + GM_GEN_ROWS;
+         gmShowTab("itemgen");
+      });
+   }
+   gmInput(content, "genbase_txt", 0, 344, 56, 20, "", "base id");
+   gmInput(content, "genlabel_txt", 60, 344, 62, 20, "", "label");
+   gmButton(content, "gennew_mc", "+ New", 126, 344, 48, 20, function()
+   {
+      var c = _root.gm_mc.content_mc;
+      var base = gmFieldText(c.genbase_txt);
+      if(base == "")
+      {
+         gmStatus("Enter the id of the item to copy.");
+         return;
+      }
+      var label = String(c.genlabel_txt.text);
+      gmSend("!itemgen new " + base + (label == "" ? "" : " " + gmEscapeText(label)));
+   }, 0x2E7D5B);
+
+   if(gmGen == undefined || String(gmGen.id) != String(gmGenSel))
+   {
+      gmText(content, "genhint_txt", "Pick a custom item on the left, or copy an existing item: enter its id (and a label for yourself) and press + New.\r\rCustom items get item id 9000000 + their number and go live for everyone online. Names and descriptions are client string ids.", 184, 26, 420, 120, 11, GM_TEXT_DIM, false);
+      gmStatus("Item generation");
+      return;
+   }
+   gmRenderItemGenEditor(content, 184);
+}
+
+function gmGenSet(field, text)
+{
+   gmSend("!itemgen set " + gmGen.id + " " + field + " " + (text == "" ? "clear" : gmEscapeText(text)));
+}
+
+function gmRenderItemGenEditor(content, x)
+{
+   var g = gmGen;
+   gmIcon(content, "genicon_mc", g.iconSet, x, 0, 44);
+   gmText(content, "gentitle_txt", "Item " + g.itemId + "  (copy of " + g.base + ")", x + 50, 0, 250, 18, 12, GM_TEXT_GOLD, true).wordWrap = false;
+   gmText(content, "gensub_txt", "Gold labels are overridden; Clear reverts to the base item.", x + 50, 20, 250, 18, 10, GM_TEXT_DIM, false).wordWrap = false;
+   gmInput(content, "genqty_txt", x + 306, 0, 30, 20, "1", "");
+   gmButton(content, "gengive_mc", "Give me", x + 340, 0, 58, 20, function()
+   {
+      var qty = gmFieldText(_root.gm_mc.content_mc.genqty_txt);
+      gmSend("!itemgen give " + gmGen.id + " " + (qty == "" ? "1" : qty));
+   }, 0x2E7D5B);
+   gmButton(content, "gendel_mc", "Delete", x + 340, 24, 58, 20, function()
+   {
+      gmSend("!itemgen delete " + gmGen.id);
+   }, 0xC0392B);
+
+   // Two columns of fields.
+   var colW = 214;
+   var i;
+   for(i = 0; i < g.fields.length; i++)
+   {
+      var f = g.fields[i];
+      var col = i < 8 ? 0 : 1;
+      var fx = x + col * colW;
+      var fy = 52 + (col == 0 ? i : i - 8) * 24;
+      gmText(content, "gf" + i + "_label", GM_GEN_LABELS[f.name] == undefined ? f.name : GM_GEN_LABELS[f.name], fx, fy + 3, 62, 18, 10, f.over ? GM_TEXT_GOLD : GM_TEXT_DIM, true).wordWrap = false;
+      if(GM_GEN_FLAGS[f.name])
+      {
+         var isOn = f.value == "1" || f.value == "on" || f.value == "True" || f.value == "true";
+         var flag = gmButton(content, "gf" + i + "_mc", isOn ? "On" : "Off", fx + 62, fy, 50, 20, function()
+         {
+            gmGenSet(this.field, this.isOn ? "off" : "on");
+         }, isOn ? 0x2E7D5B : undefined);
+         flag.field = f.name;
+         flag.isOn = isOn;
+      }
+      else
+      {
+         var t = gmInput(content, "gf" + i + "_txt", fx + 62, fy, 100, 20, f.value, "", function(text)
+         {
+            gmGenSet(this.field, text);
+         });
+         t.field = f.name;
+         var setBtn = gmButton(content, "gf" + i + "_set", "Set", fx + 164, fy, 28, 20, function()
+         {
+            gmGenSet(this.input.field, String(this.input.text));
+         });
+         setBtn.input = t;
+      }
+      if(f.over)
+      {
+         var clear = gmButton(content, "gf" + i + "_clr", "x", fx + (GM_GEN_FLAGS[f.name] ? 114 : 194), fy, 18, 20, function()
+         {
+            gmSend("!itemgen set " + gmGen.id + " " + this.field + " clear");
+         }, 0xC0392B);
+         clear.field = f.name;
+      }
+   }
+   gmStatus("Editing custom item " + g.id + (g.label == "" ? "" : ": " + gmOneLine(g.label, 40)));
+}
+
+function gmHandleItemGenData(kind, parts)
+{
+   if(kind == "itemgen")
+   {
+      if(parts[2] == "begin")
+      {
+         gmGenListLoading = [];
+      }
+      else if(parts[2] == "entry")
+      {
+         gmGenListLoading.push({ id: parts[3], itemId: parts[4], label: gmUnescapeText(parts[5]), base: parts[6], iconSet: parts[7] });
+      }
+      else if(parts[2] == "end")
+      {
+         gmGenList = gmGenListLoading;
+         if(_root.gm_mc._visible && gmTab == "itemgen")
+         {
+            gmShowTab("itemgen");
+         }
+      }
+      return;
+   }
+   if(kind == "itemedit")
+   {
+      if(parts[2] == "begin")
+      {
+         gmGenLoading = { id: parts[3], itemId: parts[4], label: gmUnescapeText(parts[5]), base: parts[6], iconSet: 0, fields: [] };
+      }
+      else if(parts[2] == "end" && gmGenLoading != undefined)
+      {
+         gmGen = gmGenLoading;
+         gmGenSel = gmGen.id;
+         gmGenLoading = undefined;
+         if(_root.gm_mc._visible && gmTab == "itemgen")
+         {
+            gmShowTab("itemgen");
+         }
+         // Labels and icons show in the list too.
+         gmSend("!itemgen list");
+      }
+      return;
+   }
+   if(kind == "itemfield" && gmGenLoading != undefined)
+   {
+      var value = gmUnescapeText(parts[3]);
+      gmGenLoading.fields.push({ name: parts[2], value: value, over: parts[4] == "1" });
+      if(parts[2] == "icon")
+      {
+         gmGenLoading.iconSet = value;
+      }
+   }
+}
+
+// --- redeem codes (Admin) -----------------------------------------------------------
+// !code: codes|begin, codes|entry|code|enabled|uses|maxUses|expires|note, codes|end, and the editor as
+// codeedit|begin|code|coins|maxUses|uses|perCharacter|starts|expires|members|enabled|note, codeitem|itemId|qty,
+// codeedit|end.
+
+var gmCodeList = [];
+var gmCodeListLoading = [];
+var gmCodeListAsked = false;
+var gmCode = undefined;
+var gmCodeLoading = undefined;
+var gmCodeSel = "";
+var gmCodeScroll = 0;
+var GM_CODE_ROWS = 12;
+
+function gmRenderCodes(content)
+{
+   if(!gmCodeListAsked)
+   {
+      gmCodeListAsked = true;
+      gmSend("!code list");
+   }
+
+   gmText(content, "codes_label", "Redeem codes", 0, 0, 100, 18, 12, GM_TEXT_GOLD, true);
+   gmButton(content, "codereload_mc", "Refresh", 120, 0, 54, 20, function()
+   {
+      gmSend("!code list");
+   });
+   gmCodeScroll = Math.max(0, Math.min(gmCodeScroll, gmCodeList.length - GM_CODE_ROWS));
+   var i;
+   for(i = 0; i < GM_CODE_ROWS && gmCodeScroll + i < gmCodeList.length; i++)
+   {
+      var c = gmCodeList[gmCodeScroll + i];
+      var selected = c.code == gmCodeSel;
+      var row = content.createEmptyMovieClip("code" + i + "_mc", content.getNextHighestDepth());
+      row._y = 24 + i * 22;
+      gmPanelShape(row, 174, 20, 6, selected ? GM_BLUE_ACTIVE : GM_BLUE_CELL, GM_BLUE_BOTTOM, selected ? GM_GOLD : GM_GOLD_DARK, 1);
+      var uses = c.uses + "/" + (c.maxUses == "0" ? "inf" : c.maxUses);
+      gmText(row, "label_txt", (c.enabled ? "" : "(off) ") + gmOneLine(c.code, 16) + "  " + uses, 6, 2, 164, 18, 10, c.enabled ? GM_TEXT : GM_TEXT_DIM, selected).wordWrap = false;
+      row.code = c.code;
+      row.onRelease = function()
+      {
+         gmCodeSel = this.code;
+         gmSend("!code show " + this.code);
+      };
+   }
+   if(gmCodeList.length > GM_CODE_ROWS)
+   {
+      gmButton(content, "codedown_mc", "more...", 0, 24 + GM_CODE_ROWS * 22, 174, 18, function()
+      {
+         gmCodeScroll = gmCodeScroll + GM_CODE_ROWS >= gmCodeList.length ? 0 : gmCodeScroll + GM_CODE_ROWS;
+         gmShowTab("codes");
+      });
+   }
+   gmInput(content, "codenew_txt", 0, 344, 92, 20, "", "CODE (or blank)");
+   gmButton(content, "codenew_mc", "+ New", 96, 344, 40, 20, function()
+   {
+      var code = gmFieldText(_root.gm_mc.content_mc.codenew_txt);
+      gmSend("!code new" + (code == "" ? "" : " " + code));
+   }, 0x2E7D5B);
+   gmButton(content, "coderandom_mc", "Rnd", 140, 344, 34, 20, function()
+   {
+      gmSend("!code new random");
+   }, 0x2E7D5B);
+
+   if(gmCode == undefined || gmCode.code != gmCodeSel)
+   {
+      gmText(content, "codehint_txt", "Pick a code on the left, or create one (blank or Rnd makes a random FR-XXXX-XXXX code).\r\rPlayers redeem codes with !redeem <code>, or the Redeem Code button on the dock.", 184, 26, 420, 120, 11, GM_TEXT_DIM, false);
+      gmStatus("Redeem codes");
+      return;
+   }
+   gmRenderCodeEditor(content, 184);
+}
+
+function gmCodeSetValue(field, text)
+{
+   gmSend("!code set " + gmCode.code + " " + field + " " + (field == "note" ? gmEscapeText(text) : (text == "" ? "0" : text)));
+}
+
+// Field with a Set button that sends "!code set <code> <field> <value>".
+function gmCodeField(content, name, label, x, y, labelW, inputW, value, field, hint)
+{
+   gmText(content, name + "_label", label, x, y + 3, labelW, 18, 10, GM_TEXT_DIM, true).wordWrap = false;
+   var t = gmInput(content, name, x + labelW, y, inputW, 20, value, hint, function(text)
+   {
+      gmCodeSetValue(this.field, text);
+   });
+   t.field = field;
+   var b = gmButton(content, name + "_set", "Set", x + labelW + inputW + 2, y, 28, 20, function()
+   {
+      gmCodeSetValue(this.input.field, String(this.input.text));
+   });
+   b.input = t;
+}
+
+function gmCodeToggle(content, name, label, x, y, isOn, field)
+{
+   var b = gmButton(content, name, label + (isOn ? ": on" : ": off"), x, y, 104, 20, function()
+   {
+      gmSend("!code set " + gmCode.code + " " + this.field + " " + (this.isOn ? "off" : "on"));
+   }, isOn ? 0x2E7D5B : undefined);
+   b.field = field;
+   b.isOn = isOn;
+}
+
+function gmRenderCodeEditor(content, x)
+{
+   var c = gmCode;
+   gmText(content, "codetitle_txt", c.code, x, 0, 220, 20, 14, GM_TEXT_GOLD, true).wordWrap = false;
+   gmText(content, "codeuses_txt", "Redeemed " + c.uses + (c.maxUses == "0" ? " times (no limit)" : " of " + c.maxUses), x, 20, 220, 18, 10, GM_TEXT_DIM, false).wordWrap = false;
+   gmButton(content, "codedel_mc", "Delete", x + 370, 0, 58, 20, function()
+   {
+      gmSend("!code delete " + gmCode.code);
+   }, 0xC0392B);
+
+   gmCodeField(content, "cc", "Coins", x, 44, 74, 70, c.coins, "coins", "0");
+   gmCodeField(content, "cu", "Max uses", x, 68, 74, 70, c.maxUses, "uses", "0 = no limit");
+   gmCodeField(content, "cp", "Per player", x, 92, 74, 70, c.perCharacter, "percharacter", "0 = no limit");
+   gmCodeField(content, "cs", "Starts", x + 218, 44, 50, 92, c.starts, "starts", "never");
+   gmCodeField(content, "ce", "Expires", x + 218, 68, 50, 92, c.expires, "expires", "never");
+   gmText(content, "cdates_txt", "yyyy-MM-dd (UTC), +days or never", x + 218, 94, 210, 18, 10, GM_TEXT_DIM, false).wordWrap = false;
+   gmCodeToggle(content, "cen_mc", "Enabled", x, 118, c.enabled, "enabled");
+   gmCodeToggle(content, "cmem_mc", "Members", x + 108, 118, c.members, "members");
+   gmCodeField(content, "cn", "Note", x, 144, 74, 324, c.note, "note", "");
+
+   // Items, up to 8.
+   gmText(content, "citems_label", "Items (" + c.items.length + "/8)", x, 172, 120, 18, 10, GM_TEXT_DIM, true);
+   var i;
+   for(i = 0; i < c.items.length; i++)
+   {
+      var it = c.items[i];
+      var iy = 190 + (i % 4) * 22;
+      var ix = x + Math.floor(i / 4) * 214;
+      gmText(content, "ci" + i + "_txt", "Item " + it.itemId + "  x" + it.qty, ix, iy + 2, 160, 18, 10, GM_TEXT, false).wordWrap = false;
+      var del = gmButton(content, "ci" + i + "_del", "x", ix + 164, iy, 18, 18, function()
+      {
+         gmSend("!code item del " + gmCode.code + " " + this.itemId);
+      }, 0xC0392B);
+      del.itemId = it.itemId;
+   }
+   gmInput(content, "ciitem_txt", x, 284, 80, 20, "", "item id");
+   gmInput(content, "ciqty_txt", x + 84, 284, 36, 20, "", "qty");
+   gmButton(content, "ciadd_mc", "+ Add item", x + 124, 284, 76, 20, function()
+   {
+      var cm = _root.gm_mc.content_mc;
+      var item = gmFieldText(cm.ciitem_txt);
+      var qty = gmFieldText(cm.ciqty_txt);
+      if(item == "")
+      {
+         gmStatus("Enter an item id (custom items are 9000000 and up).");
+         return;
+      }
+      gmSend("!code item add " + gmCode.code + " " + item + " " + (qty == "" ? "1" : qty));
+   }, 0x2E7D5B);
+   gmStatus("Editing code " + c.code);
+}
+
+function gmHandleCodeData(kind, parts)
+{
+   if(kind == "codes")
+   {
+      if(parts[2] == "begin")
+      {
+         gmCodeListLoading = [];
+      }
+      else if(parts[2] == "entry")
+      {
+         gmCodeListLoading.push({ code: parts[3], enabled: parts[4] == "1", uses: parts[5], maxUses: parts[6], expires: parts[7], note: gmUnescapeText(parts[8]) });
+      }
+      else if(parts[2] == "end")
+      {
+         gmCodeList = gmCodeListLoading;
+         // A deleted code drops out of the editor.
+         var found = false;
+         var i;
+         for(i = 0; i < gmCodeList.length; i++)
+         {
+            found = found || gmCodeList[i].code == gmCodeSel;
+         }
+         if(!found)
+         {
+            gmCodeSel = "";
+         }
+         if(_root.gm_mc._visible && gmTab == "codes")
+         {
+            gmShowTab("codes");
+         }
+      }
+      return;
+   }
+   if(kind == "codeedit")
+   {
+      if(parts[2] == "begin")
+      {
+         gmCodeLoading = { code: parts[3], coins: parts[4], maxUses: parts[5], uses: parts[6], perCharacter: parts[7], starts: parts[8], expires: parts[9],
+            members: parts[10] == "1", enabled: parts[11] == "1", note: gmUnescapeText(parts[12]), items: [] };
+      }
+      else if(parts[2] == "end" && gmCodeLoading != undefined)
+      {
+         gmCode = gmCodeLoading;
+         gmCodeSel = gmCode.code;
+         gmCodeLoading = undefined;
+         if(_root.gm_mc._visible && gmTab == "codes")
+         {
+            gmShowTab("codes");
+         }
+         gmSend("!code list");
+      }
+      return;
+   }
+   if(kind == "codeitem" && gmCodeLoading != undefined)
+   {
+      gmCodeLoading.items.push({ itemId: parts[2], qty: parts[3] });
+   }
+}
+
+// --- redeem box (every player) ------------------------------------------------------
+// "!redeem" with no code answers redeem|open; this small box then sends "!redeem <code>". The result comes
+// back as a system chat line.
+
+function gmShowRedeem()
+{
+   _root.gmredeem_mc.removeMovieClip();
+   var box = _root.createEmptyMovieClip("gmredeem_mc", 16002);
+   box._x = 8;
+   box._y = GM_CHAT_STAGE_H - 130;
+   gmPanelShape(box, 300, 96, 12, GM_BLUE_TOP, GM_BLUE_BOTTOM, GM_GOLD, 3);
+   gmText(box, "title_txt", "Redeem a code", 12, 8, 220, 20, 13, GM_TEXT_GOLD, true);
+   gmButton(box, "close_mc", "X", 270, 8, 22, 20, function()
+   {
+      _root.gmredeem_mc.removeMovieClip();
+   }, 0xC0392B);
+   var t = gmInput(box, "code_txt", 12, 36, 196, 24, "", "Enter your code", function(text)
+   {
+      gmRedeemSubmit(text);
+   });
+   t.maxChars = 32;
+   gmButton(box, "go_mc", "Redeem", 214, 36, 74, 24, function()
+   {
+      gmRedeemSubmit(gmFieldText(_root.gmredeem_mc.code_txt));
+   }, 0x2E7D5B);
+   gmText(box, "hint_txt", "Codes from events and the referees. The result shows in chat.", 12, 66, 280, 20, 10, GM_TEXT_DIM, false).wordWrap = false;
+   gmFocusInput(t);
+}
+
+function gmRedeemSubmit(text)
+{
+   var code = frHelperClass.stringReplace(String(text), " ", "");
+   if(code == "")
+   {
+      return;
+   }
+   gmSend("!redeem " + code);
+   _root.gmredeem_mc.removeMovieClip();
+}
+
 // --- decorate bar (every player) -----------------------------------------------
 // While a player decorates their house, the server sends decorate|on and, for the piece last placed,
 // moved or turned with the client's own wheel, decorate|sel|name|yaw|pitch|roll. The client's wheel only
@@ -2537,6 +3012,24 @@ function gmHandleData(text)
       gmHandleQuestData(kind, parts);
       return;
    }
+   if(kind == "itemgen" || kind == "itemedit" || kind == "itemfield")
+   {
+      gmHandleItemGenData(kind, parts);
+      return;
+   }
+   if(kind == "codes" || kind == "codeedit" || kind == "codeitem")
+   {
+      gmHandleCodeData(kind, parts);
+      return;
+   }
+   if(kind == "redeem")
+   {
+      if(parts[2] == "open")
+      {
+         gmShowRedeem();
+      }
+      return;
+   }
    if(kind == "scriptlib")
    {
       gmHandleScriptLib(parts);
@@ -2624,6 +3117,12 @@ addSystemMessage = function(guid, charName, bubText, txtColor, bubColor, message
    {
       gmHandleData(String(bubText));
       return undefined;
+   }
+   // Item gen and code failures also show in the panel's status bar.
+   var failure = String(bubText);
+   if(failure.indexOf("Item gen failed: ") == 0 || failure.indexOf("Code failed: ") == 0)
+   {
+      gmStatus(failure);
    }
    return gmOriginalAddSystemMessage.apply(_root, arguments);
 };
