@@ -15,6 +15,8 @@ public class DbItem
 
     public ICollection<DbProfile> Profiles { get; set; } = new HashSet<DbProfile>();
 
+    public ICollection<DbPet> Pets { get; set; } = new HashSet<DbPet>();
+
     public ulong CharacterId { get; set; }
     public DbCharacter Character { get; set; } = null!;
 }

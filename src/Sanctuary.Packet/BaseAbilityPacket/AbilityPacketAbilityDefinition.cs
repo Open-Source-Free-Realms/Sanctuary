@@ -1,10 +1,13 @@
-﻿using Sanctuary.Core.IO;
+using Sanctuary.Core.IO;
+using Sanctuary.Packet.Common;
 
 namespace Sanctuary.Packet;
 
 public class AbilityPacketAbilityDefinition : BaseAbilityPacket, ISerializablePacket
 {
     public new const short OpCode = 13;
+
+    public ClientAbilityDefinition? Definition;
 
     public int AbilityId;
     public int NameId;
@@ -25,6 +28,12 @@ public class AbilityPacketAbilityDefinition : BaseAbilityPacket, ISerializablePa
         using var writer = new PacketWriter();
 
         Write(writer);
+
+        if (Definition is not null)
+        {
+            Definition.Serialize(writer);
+            return writer.Buffer;
+        }
 
         writer.Write(AbilityId);
         writer.Write(false);

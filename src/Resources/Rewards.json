@@ -25,5 +25,149 @@
                 "Weight": 1
             }
         ]
+    },
+    {
+        "Key": "pet-treasure-common",
+        "DropTable": [
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 1835,
+                "Weight": 3,
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 1836,
+                "Weight": 3,
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 3146,
+                "Weight": 1,
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 3147,
+                "Weight": 1,
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 3148,
+                "Weight": 1,
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 3149,
+                "Weight": 1,
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 3150,
+                "Weight": 1,
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 3151,
+                "Weight": 1,
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 3152,
+                "Weight": 1,
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 3153,
+                "Weight": 1,
+                "Quantity": 1
+            }
+        ]
+    },
+    {
+        "Key": "pet-treasure-common-coins",
+        "DropTable": [
+            {
+                "RewardType": "Currency",
+                "CurrencyType": "Coins",
+                "Amount": 15,
+                "Weight": 1
+            }
+        ]
+    },
+    {
+        "Key": "pet-treasure-rare",
+        "DropTable": [
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 17107,
+                "Weight": 1,
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 15482,
+                "Weight": 1,
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 14954,
+                "Weight": 2,
+                "Quantity": 1
+            }
+        ]
+    },
+    {
+        "Key": "pet-treasure-rare-coins",
+        "DropTable": [
+            {
+                "RewardType": "Currency",
+                "CurrencyType": "Coins",
+                "Amount": 250,
+                "Weight": 1
+            }
+        ]
+    },
+    {
+        "Key": "pet-treasure-elite",
+        "DropTable": [
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 17107,
+                "Weight": 1,
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 15482,
+                "Weight": 1,
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 14954,
+                "Weight": 1,
+                "Quantity": 1
+            }
+        ]
+    },
+    {
+        "Key": "pet-treasure-elite-coins",
+        "DropTable": [
+            {
+                "RewardType": "Currency",
+                "CurrencyType": "Coins",
+                "Amount": 500,
+                "Weight": 1
+            }
+        ]
     }
 ]

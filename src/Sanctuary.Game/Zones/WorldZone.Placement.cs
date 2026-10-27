@@ -109,7 +109,6 @@ public sealed partial class WorldZone
         npc.Scale = fixture.Scale;
         npc.HideNamePlate = true;
         npc.IsInteractable = false;
-        npc.HasCollision = true;
         npc.Visible = true;
 
         var position = new Vector4(fixture.PositionX, fixture.PositionY, fixture.PositionZ, 1.0f);

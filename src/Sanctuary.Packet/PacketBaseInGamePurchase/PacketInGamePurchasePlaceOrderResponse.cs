@@ -1,4 +1,5 @@
 ﻿using Sanctuary.Core.IO;
+using Sanctuary.Packet.Common;
 
 namespace Sanctuary.Packet;
 
@@ -12,7 +13,7 @@ public class PacketInGamePurchasePlaceOrderResponse : PacketBaseInGamePurchase, 
     // 5 - marketplace_error_balance_not_enough
     // 8 - marketplace_error_invalid_coupon
     // X - marketplace_error_request_unavailable
-    public int Result;
+    public InGamePurchaseOrderResult Result;
 
     public string? OrderId;
 
@@ -32,7 +33,7 @@ public class PacketInGamePurchasePlaceOrderResponse : PacketBaseInGamePurchase, 
 
         writer.Write(OrderTrackingId);
 
-        writer.Write(Result);
+        writer.Write((int)Result);
 
         writer.Write(OrderId);
 

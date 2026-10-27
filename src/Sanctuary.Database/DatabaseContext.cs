@@ -8,8 +8,10 @@ public abstract class DatabaseContext : DbContext
 {
     public DbSet<DbUser> Users => Set<DbUser>();
     public DbSet<DbItem> Items => Set<DbItem>();
+    public DbSet<DbCollectionEntry> CollectionEntries => Set<DbCollectionEntry>();
     public DbSet<DbTitle> Titles => Set<DbTitle>();
     public DbSet<DbMount> Mounts => Set<DbMount>();
+    public DbSet<DbPet> Pets => Set<DbPet>();
     public DbSet<DbGuild> Guilds => Set<DbGuild>();
     public DbSet<DbHouse> Houses => Set<DbHouse>();
     public DbSet<DbFriend> Friends => Set<DbFriend>();
@@ -21,6 +23,8 @@ public abstract class DatabaseContext : DbContext
     public DbSet<DbWorldFixture> WorldFixtures => Set<DbWorldFixture>();
     public DbSet<DbWorldNpc> WorldNpcs => Set<DbWorldNpc>();
     public DbSet<DbWorldEvent> WorldEvents => Set<DbWorldEvent>();
+    public DbSet<DbCharacterQuest> CharacterQuests => Set<DbCharacterQuest>();
+    public DbSet<DbCharacterQuestProgress> CharacterQuestProgress => Set<DbCharacterQuestProgress>();
 
     public DatabaseContext()
     {

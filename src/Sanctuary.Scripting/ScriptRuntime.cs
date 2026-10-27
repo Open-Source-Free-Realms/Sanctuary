@@ -22,6 +22,8 @@ public sealed class ScriptRuntime
 
         _state.OpenStandardLibraries();
 
+        _state.ModuleLoader = new ScriptModuleLoader();
+
         logger.LogInformation("Scripting initialized");
     }
 

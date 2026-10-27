@@ -1,4 +1,5 @@
-﻿using System.Threading;
+using System.Collections.Generic;
+using System.Threading;
 
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Zones;
@@ -8,6 +9,7 @@ namespace Sanctuary.Game.Entities;
 public sealed class CollectionNode : Npc
 {
     private int _reserved;
+    private readonly List<Npc> _effectAnchors = [];
 
     public CollectionNodeTypeDefinition TypeDefinition { get; }
     public CollectionNodePoolDefinition PoolDefinition { get; }
@@ -42,13 +44,22 @@ public sealed class CollectionNode : Npc
         Zone.CompleteCollectionNode(this);
     }
 
-    internal void DisposeAfterCollection()
+    internal void AddEffectAnchor(Npc anchor)
     {
-        DisposeGracefully(
-            animate: true,
-            delay: 0,
-            effectDelay: 0,
-            compositeEffectId: 0,
-            duration: 1000);
+        _effectAnchors.Add(anchor);
+    }
+
+    public override void Dispose()
+    {
+        DisposeEffectAnchors();
+        base.Dispose();
+    }
+
+    private void DisposeEffectAnchors()
+    {
+        foreach (var anchor in _effectAnchors)
+            anchor.Dispose();
+
+        _effectAnchors.Clear();
     }
 }

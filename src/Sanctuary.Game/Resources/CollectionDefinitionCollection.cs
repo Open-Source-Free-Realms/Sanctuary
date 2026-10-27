@@ -60,13 +60,15 @@ public sealed class CollectionDefinitionCollection : ObservableConcurrentDiction
         }
     }
 
-    public List<ClientCollection> CreateClientCollections(ulong playerGuid, IReadOnlySet<int> ownedItemDefinitionIds)
+    public List<ClientCollection> CreateClientCollections(ulong playerGuid, IReadOnlySet<int> ownedItemDefinitionIds,
+        IReadOnlySet<int>? collectedEntryIds = null)
     {
+        // The client derives its collection data-source width from every definition,
+        // then hides unstarted collections whose entries are all uncollected.
         return Values
-            .Where(definition => definition.IsStarted(ownedItemDefinitionIds))
             .OrderBy(definition => definition.CategoryId)
             .ThenBy(definition => definition.Id)
-            .Select(definition => definition.CreateClientCollection(playerGuid, ownedItemDefinitionIds))
+            .Select(definition => definition.CreateClientCollection(playerGuid, ownedItemDefinitionIds, collectedEntryIds))
             .ToList();
     }
 
@@ -78,20 +80,27 @@ public sealed class CollectionDefinitionCollection : ObservableConcurrentDiction
             return false;
         }
 
+        var entries = definitions.SelectMany(definition => definition.Entries).ToArray();
+        var itemDefinitionIds = entries
+            .Where(entry => entry.ItemDefinitionId > 0)
+            .Select(entry => entry.ItemDefinitionId)
+            .ToArray();
+
+        // Entry ids back direct progress, and item ids are resolved to a collection globally.
+        if (entries.Any(entry => entry.Id <= 0 || entry.ItemDefinitionId < 0) ||
+            entries.Select(entry => entry.Id).Distinct().Count() != entries.Length ||
+            itemDefinitionIds.Distinct().Count() != itemDefinitionIds.Length)
+        {
+            _logger.LogError("Invalid or duplicate collection entry or item definition ids found in \"{file}\".", filePath);
+            return false;
+        }
+
         foreach (var definition in definitions)
         {
             if (definition.Id <= 0 || definition.NameId <= 0 || definition.CategoryId <= 0 ||
                 definition.Entries.Count == 0)
             {
                 _logger.LogError("Collection {id} has invalid required data in \"{file}\".", definition.Id, filePath);
-                return false;
-            }
-
-            if (definition.Entries.Select(entry => entry.Id).Distinct().Count() != definition.Entries.Count ||
-                definition.Entries.Any(entry => entry.ItemDefinitionId <= 0) ||
-                definition.Entries.Select(entry => entry.ItemDefinitionId).Distinct().Count() != definition.Entries.Count)
-            {
-                _logger.LogError("Collection {id} has duplicate entry or item definition ids in \"{file}\".", definition.Id, filePath);
                 return false;
             }
         }

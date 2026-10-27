@@ -17,7 +17,7 @@ public class PacketClientMetrics : IDeserializable<PacketClientMetrics>
 
         var reader = new PacketReader(data);
 
-        if (!reader.TryRead(out short opCode) && opCode != OpCode)
+        if (!reader.TryRead(out short opCode) || opCode != OpCode)
             return false;
 
         if (!value.Metrics.TryRead(ref reader))

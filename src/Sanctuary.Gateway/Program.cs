@@ -13,6 +13,7 @@ using Sanctuary.Core.Extensions;
 using Sanctuary.Database;
 using Sanctuary.Game;
 using Sanctuary.Game.Conversations;
+using Sanctuary.Game.Quests;
 using Sanctuary.Gateway;
 using Sanctuary.Scripting;
 using Sanctuary.UdpLibrary.Configuration;
@@ -81,7 +82,8 @@ builder.ConfigureServices((hostBuilderContext, serviceCollection) =>
             MaxConnections = 2000,
             KeepAliveDelay = 29000,
             Port = serverOptions.Port,
-            ProtocolName = "CGAPI_527"
+            ProtocolName = "CGAPI_527",
+            ParallelConnectionGiveTime = true
         };
 
         if (serverOptions.UseCompression)
@@ -101,6 +103,7 @@ builder.ConfigureServices((hostBuilderContext, serviceCollection) =>
     serviceCollection.AddSingleton<IScriptManager, ScriptManager>();
     serviceCollection.AddSingleton<IInteractionManager, InteractionManager>();
     serviceCollection.AddSingleton<IChatCommandManager, ChatCommandManager>();
+    serviceCollection.AddSingleton<IQuestManager, QuestManager>();
     serviceCollection.AddSingleton<IRewardManager, RewardManager>();
     serviceCollection.AddSingleton<IHousingManager, HousingManager>();
     serviceCollection.AddSingleton<IServerSettings, ServerSettings>();

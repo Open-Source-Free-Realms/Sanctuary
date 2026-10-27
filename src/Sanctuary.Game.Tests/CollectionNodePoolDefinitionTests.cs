@@ -37,7 +37,8 @@ public sealed class CollectionNodePoolDefinitionTests
         var path = Path.Combine(Path.GetTempPath(), $"collection-node-pools-{Guid.NewGuid():N}.json");
         File.WriteAllText(path,
             "[{\"Key\":\"test\",\"ZoneDefinitionId\":1,\"NodeType\":\"mushrooms\"," +
-            "\"MaxActiveNodes\":-1,\"RespawnSeconds\":30}]");
+            "\"MaxActiveNodes\":-1,\"RespawnSeconds\":30," +
+            "\"DropTable\":[{\"ItemDefinitionId\":1001,\"Weight\":1}]}]");
 
         try
         {
@@ -58,7 +59,8 @@ public sealed class CollectionNodePoolDefinitionTests
         var path = Path.Combine(Path.GetTempPath(), $"collection-node-pools-{Guid.NewGuid():N}.json");
         File.WriteAllText(path,
             "[{\"Key\":\"test\",\"ZoneDefinitionId\":1,\"NodeType\":\"mushrooms\"," +
-            "\"MaxActiveNodes\":0,\"RespawnSeconds\":30}]");
+            "\"MaxActiveNodes\":0,\"RespawnSeconds\":30," +
+            "\"DropTable\":[{\"ItemDefinitionId\":1001,\"Weight\":1}]}]");
 
         try
         {
@@ -86,9 +88,11 @@ public sealed class CollectionNodePoolDefinitionTests
         var path = Path.Combine(Path.GetTempPath(), $"collection-node-pools-{Guid.NewGuid():N}.json");
         File.WriteAllText(path,
             "[{\"Key\":\"briarwood-mushrooms\",\"ZoneDefinitionId\":1," +
-            "\"NodeType\":\"mushrooms\",\"MaxActiveNodes\":12,\"RespawnSeconds\":60}," +
+            "\"NodeType\":\"mushrooms\",\"MaxActiveNodes\":12,\"RespawnSeconds\":60," +
+            "\"DropTable\":[{\"ItemDefinitionId\":1001,\"Weight\":1}]}," +
             "{\"Key\":\"briarwood-mushrooms-rare\",\"ZoneDefinitionId\":1," +
-            "\"NodeType\":\"rare-mushrooms\",\"MaxActiveNodes\":2,\"RespawnSeconds\":300}]");
+            "\"NodeType\":\"rare-mushrooms\",\"MaxActiveNodes\":2,\"RespawnSeconds\":300," +
+            "\"DropTable\":[{\"ItemDefinitionId\":1002,\"Weight\":1}]}]");
 
         try
         {
@@ -190,7 +194,11 @@ public sealed class CollectionNodePoolDefinitionTests
         {
             Key = "briarwood-mushrooms",
             NodeType = "mushrooms",
-            MaxActiveNodes = maxActiveNodes
+            MaxActiveNodes = maxActiveNodes,
+            DropTable =
+            [
+                new CollectionNodeDropDefinition { ItemDefinitionId = 1001 }
+            ]
         };
     }
 }

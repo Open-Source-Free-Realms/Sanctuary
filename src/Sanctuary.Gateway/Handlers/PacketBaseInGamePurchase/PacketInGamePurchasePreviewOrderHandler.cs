@@ -80,6 +80,8 @@ public static class PacketInGamePurchasePreviewOrderHandler
         if (order.Details.Count == 0)
             return false;
 
+        long totalCostValue = 0;
+
         foreach (var orderDetail in order.Details)
         {
             if (orderDetail.Quantity <= 0
@@ -92,10 +94,15 @@ public static class PacketInGamePurchasePreviewOrderHandler
                 ? appStoreBundleDefinition.Price
                 : appStoreBundleDefinition.MemberDiscount;
 
-            totalCost += cost * orderDetail.Quantity;
+            totalCostValue += (long)cost * orderDetail.Quantity;
+
+            if (totalCostValue < 0 || totalCostValue > int.MaxValue)
+                return false;
 
             orderLines.Add((orderDetail, appStoreBundleDefinition, orderDetailTint));
         }
+
+        totalCost = (int)totalCostValue;
 
         return true;
     }

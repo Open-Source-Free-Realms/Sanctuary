@@ -353,7 +353,6 @@ public sealed class HousingZone : BaseZone
         npc.HideNamePlate = true;
         npc.IsInteractable = false;
         npc.IsHouseFixture = true;
-        npc.HasCollision = true;
         npc.Visible = true;
 
         var position = new Vector4(fixture.PositionX, fixture.PositionY, fixture.PositionZ, 1.0f);

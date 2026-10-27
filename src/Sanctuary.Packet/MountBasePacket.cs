@@ -21,10 +21,10 @@ public class MountBasePacket
 
     public bool TryRead(ref PacketReader reader)
     {
-        if (!reader.TryRead(out short opCode) && opCode != OpCode)
+        if (!reader.TryRead(out short opCode) || opCode != OpCode)
             return false;
 
-        if (!reader.TryRead(out byte subOpCode) && subOpCode != SubOpCode)
+        if (!reader.TryRead(out byte subOpCode) || subOpCode != SubOpCode)
             return false;
 
         return true;

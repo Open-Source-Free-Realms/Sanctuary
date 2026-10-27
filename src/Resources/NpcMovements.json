@@ -1,0 +1,2068 @@
+[
+  {
+    "ModelFileName": "rabbit.adr",
+    "Type": "Wander",
+    "Speed": 4.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 20,
+    "MinLegDistance": 4.4,
+    "MaxLegDistance": 19.7,
+    "MinPauseMs": 6600,
+    "MaxPauseMs": 9400,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0
+  },
+  {
+    "ModelFileName": "squirrel.adr",
+    "Type": "Wander",
+    "Speed": 4.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 10,
+    "MinLegDistance": 2.6,
+    "MaxLegDistance": 13.0,
+    "MinPauseMs": 6700,
+    "MaxPauseMs": 9400,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0
+  },
+  {
+    "ModelFileName": "crab_m_basic.adr",
+    "Type": "Wander",
+    "Speed": 4.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 14,
+    "MinLegDistance": 3.6,
+    "MaxLegDistance": 14.0,
+    "MinPauseMs": 6700,
+    "MaxPauseMs": 9300,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0
+  },
+  {
+    "ModelFileName": "forest_doe.adr",
+    "Type": "Wander",
+    "Speed": 3.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 20,
+    "MinLegDistance": 4.9,
+    "MaxLegDistance": 17.0,
+    "MinPauseMs": 2200,
+    "MaxPauseMs": 15800,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0
+  },
+  {
+    "ModelFileName": "antelope.adr",
+    "Type": "Wander",
+    "Speed": 3.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 17,
+    "MinLegDistance": 8.3,
+    "MaxLegDistance": 13.0,
+    "MinPauseMs": 12300,
+    "MaxPauseMs": 15800,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0
+  },
+  {
+    "ModelFileName": "antelope_female.adr",
+    "Type": "Wander",
+    "Speed": 3.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 12,
+    "MinLegDistance": 2.9,
+    "MaxLegDistance": 12.8,
+    "MinPauseMs": 6200,
+    "MaxPauseMs": 15900,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0
+  },
+  {
+    "ModelFileName": "wolf.adr",
+    "Type": "Wander",
+    "Speed": 3.0,
+    "UpdateIntervalMs": 500,
+    "Radius": 8,
+    "MinLegDistance": 2.4,
+    "MaxLegDistance": 6.1,
+    "MinPauseMs": 7000,
+    "MaxPauseMs": 9800
+  },
+  {
+    "Guid": 100000004769,
+    "Type": "Patrol",
+    "Speed": 2.71,
+    "UpdateIntervalMs": 1500,
+    "PauseMs": 1000,
+    "Points": [
+      [
+        -1222.79,
+        5.06,
+        380.68
+      ],
+      [
+        -1227.75,
+        5.13,
+        378.01
+      ],
+      [
+        -1232.71,
+        5.17,
+        376.46
+      ],
+      [
+        -1226.06,
+        5.17,
+        378.71
+      ],
+      [
+        -1223.4,
+        5.17,
+        379.77
+      ],
+      [
+        -1221.51,
+        4.38,
+        385.43
+      ],
+      [
+        -1222.35,
+        4.83,
+        382.25
+      ],
+      [
+        -1231.67,
+        5.16,
+        376.09
+      ],
+      [
+        -1233.94,
+        5.16,
+        377.58
+      ],
+      [
+        -1232.82,
+        5.17,
+        376.55
+      ],
+      [
+        -1224.79,
+        5.17,
+        379.21
+      ],
+      [
+        -1221.12,
+        4.21,
+        386.58
+      ]
+    ]
+  },
+  {
+    "Guid": 100000002372,
+    "Type": "Patrol",
+    "Speed": 4.42,
+    "UpdateIntervalMs": 1500,
+    "PauseMs": 1000,
+    "Points": [
+      [
+        -1026.13,
+        5.61,
+        191.09
+      ],
+      [
+        -1031.42,
+        6.29,
+        194.47
+      ],
+      [
+        -1025.03,
+        5.42,
+        193.68
+      ],
+      [
+        -1027.82,
+        5.45,
+        201.4
+      ],
+      [
+        -1020.84,
+        4.79,
+        193.94
+      ],
+      [
+        -1032.29,
+        6.4,
+        195.07
+      ],
+      [
+        -1032.22,
+        6.17,
+        199.82
+      ],
+      [
+        -1024.92,
+        5.36,
+        192.19
+      ],
+      [
+        -1029.91,
+        5.64,
+        203.69
+      ],
+      [
+        -1022.75,
+        4.97,
+        196.0
+      ],
+      [
+        -1020.34,
+        4.78,
+        192.72
+      ],
+      [
+        -1025.79,
+        5.52,
+        194.3
+      ],
+      [
+        -1020.09,
+        4.75,
+        192.47
+      ],
+      [
+        -1030.22,
+        6.11,
+        195.09
+      ],
+      [
+        -1023.28,
+        5.18,
+        193.26
+      ],
+      [
+        -1029.59,
+        5.64,
+        202.4
+      ],
+      [
+        -1019.84,
+        4.69,
+        192.86
+      ],
+      [
+        -1024.59,
+        5.36,
+        193.91
+      ],
+      [
+        -1021.64,
+        4.99,
+        190.67
+      ],
+      [
+        -1027.14,
+        5.39,
+        200.52
+      ],
+      [
+        -1025.21,
+        5.46,
+        192.58
+      ],
+      [
+        -1033.42,
+        6.51,
+        196.55
+      ],
+      [
+        -1030.95,
+        5.8,
+        203.63
+      ],
+      [
+        -1033.57,
+        6.52,
+        196.93
+      ],
+      [
+        -1031.06,
+        5.83,
+        203.36
+      ],
+      [
+        -1032.92,
+        6.46,
+        196.16
+      ],
+      [
+        -1027.35,
+        5.64,
+        196.46
+      ],
+      [
+        -1020.89,
+        4.87,
+        191.38
+      ],
+      [
+        -1028.2,
+        5.87,
+        192.59
+      ],
+      [
+        -1022.58,
+        5.09,
+        193.05
+      ],
+      [
+        -1027.71,
+        5.52,
+        198.58
+      ],
+      [
+        -1025.65,
+        5.4,
+        193.89
+      ],
+      [
+        -1029.36,
+        5.63,
+        201.79
+      ],
+      [
+        -1024.3,
+        5.36,
+        190.86
+      ],
+      [
+        -1028.32,
+        5.87,
+        194.63
+      ],
+      [
+        -1021.95,
+        5.01,
+        193.05
+      ],
+      [
+        -1033.36,
+        6.51,
+        196.53
+      ],
+      [
+        -1026.52,
+        5.47,
+        195.51
+      ],
+      [
+        -1021.63,
+        4.98,
+        190.93
+      ],
+      [
+        -1025.42,
+        5.47,
+        194.14
+      ],
+      [
+        -1029.36,
+        5.67,
+        201.74
+      ],
+      [
+        -1024.1,
+        5.31,
+        190.57
+      ],
+      [
+        -1029.72,
+        5.65,
+        202.57
+      ],
+      [
+        -1019.59,
+        4.67,
+        192.59
+      ],
+      [
+        -1024.83,
+        5.39,
+        193.98
+      ],
+      [
+        -1019.42,
+        4.66,
+        192.25
+      ],
+      [
+        -1027.54,
+        5.42,
+        201.13
+      ],
+      [
+        -1032.05,
+        6.12,
+        200.37
+      ],
+      [
+        -1029.77,
+        6.05,
+        195.27
+      ],
+      [
+        -1028.61,
+        5.67,
+        199.53
+      ],
+      [
+        -1031.02,
+        6.22,
+        194.63
+      ],
+      [
+        -1023.87,
+        5.31,
+        189.67
+      ],
+      [
+        -1027.53,
+        5.52,
+        197.89
+      ],
+      [
+        -1029.74,
+        5.68,
+        202.52
+      ],
+      [
+        -1026.65,
+        5.62,
+        194.84
+      ],
+      [
+        -1032.87,
+        6.38,
+        197.68
+      ],
+      [
+        -1026.12,
+        5.44,
+        194.74
+      ],
+      [
+        -1033.73,
+        6.59,
+        195.94
+      ]
+    ]
+  },
+  {
+    "Guid": 100000004498,
+    "Type": "Patrol",
+    "Speed": 2.98,
+    "UpdateIntervalMs": 1500,
+    "PauseMs": 700,
+    "Points": [
+      [
+        -1590.13,
+        -38.73,
+        595.37
+      ],
+      [
+        -1583.71,
+        -39.12,
+        581.74
+      ],
+      [
+        -1581.27,
+        -39.47,
+        582.84
+      ],
+      [
+        -1582.69,
+        -39.25,
+        581.73
+      ],
+      [
+        -1584.37,
+        -39.04,
+        583.51
+      ],
+      [
+        -1585.83,
+        -38.87,
+        585.78
+      ],
+      [
+        -1580.07,
+        -39.65,
+        584.22
+      ],
+      [
+        -1584.61,
+        -39.04,
+        585.71
+      ],
+      [
+        -1588.88,
+        -38.77,
+        592.76
+      ]
+    ]
+  },
+  {
+    "Guid": 100000004389,
+    "Type": "Patrol",
+    "Speed": 3.0,
+    "UpdateIntervalMs": 1250,
+    "PauseMs": 3700,
+    "Points": [
+      [
+        87.33,
+        41.53,
+        1030.05
+      ],
+      [
+        89.15,
+        41.61,
+        1027.6
+      ],
+      [
+        90.52,
+        41.67,
+        1025.76
+      ],
+      [
+        90.2,
+        41.64,
+        1028.19
+      ],
+      [
+        88.73,
+        41.58,
+        1029.28
+      ],
+      [
+        86.89,
+        41.51,
+        1030.64
+      ]
+    ]
+  },
+  {
+    "Guid": 100000002973,
+    "Type": "Patrol",
+    "Speed": 2.7,
+    "UpdateIntervalMs": 1000,
+    "PauseMs": 1000,
+    "Points": [
+      [
+        -1303.36,
+        -56.12,
+        821.68
+      ],
+      [
+        -1292.31,
+        -56.16,
+        819.15
+      ],
+      [
+        -1290.04,
+        -56.14,
+        820.62
+      ],
+      [
+        -1288.61,
+        -56.11,
+        822.75
+      ],
+      [
+        -1290.93,
+        -56.11,
+        825.41
+      ],
+      [
+        -1297.16,
+        -56.17,
+        817.0
+      ],
+      [
+        -1300.23,
+        -56.17,
+        814.7
+      ],
+      [
+        -1304.34,
+        -56.15,
+        815.42
+      ],
+      [
+        -1304.97,
+        -56.13,
+        819.12
+      ],
+      [
+        -1293.62,
+        -56.16,
+        819.52
+      ],
+      [
+        -1291.17,
+        -56.15,
+        819.88
+      ],
+      [
+        -1288.07,
+        -56.1,
+        824.32
+      ],
+      [
+        -1292.59,
+        -56.13,
+        825.52
+      ],
+      [
+        -1297.89,
+        -56.17,
+        815.83
+      ],
+      [
+        -1300.15,
+        -56.17,
+        814.76
+      ],
+      [
+        -1302.79,
+        -56.16,
+        815.0
+      ],
+      [
+        -1304.7,
+        -56.14,
+        816.37
+      ]
+    ]
+  },
+  {
+    "Guid": 100000001643,
+    "Type": "Patrol",
+    "Speed": 1.97,
+    "UpdateIntervalMs": 1000,
+    "PauseMs": 500,
+    "Points": [
+      [
+        33.44,
+        28.03,
+        -362.37
+      ],
+      [
+        33.89,
+        28.05,
+        -358.32
+      ],
+      [
+        45.54,
+        28.05,
+        -342.3
+      ],
+      [
+        47.0,
+        28.05,
+        -341.29
+      ],
+      [
+        51.54,
+        28.05,
+        -341.74
+      ],
+      [
+        35.09,
+        28.01,
+        -364.13
+      ],
+      [
+        37.28,
+        28.01,
+        -369.09
+      ],
+      [
+        43.99,
+        28.05,
+        -371.61
+      ],
+      [
+        45.26,
+        28.06,
+        -372.81
+      ],
+      [
+        45.5,
+        28.07,
+        -374.53
+      ],
+      [
+        44.83,
+        28.07,
+        -376.11
+      ],
+      [
+        41.06,
+        28.05,
+        -376.42
+      ],
+      [
+        33.77,
+        27.96,
+        -367.51
+      ]
+    ]
+  },
+  {
+    "Guid": 100000003355,
+    "Type": "Patrol",
+    "Speed": 3.0,
+    "UpdateIntervalMs": 1000,
+    "PauseMs": 7800,
+    "Points": [
+      [
+        -376.73,
+        0.97,
+        -614.61
+      ],
+      [
+        -373.69,
+        0.97,
+        -614.35
+      ],
+      [
+        -381.72,
+        0.94,
+        -615.34
+      ],
+      [
+        -383.69,
+        0.93,
+        -615.58
+      ]
+    ]
+  },
+  {
+    "Guid": 100000001758,
+    "Type": "Patrol",
+    "Speed": 4.99,
+    "UpdateIntervalMs": 1000,
+    "PauseMs": 1000,
+    "Points": [
+      [
+        -416.47,
+        -3.11,
+        -1201.17
+      ],
+      [
+        -416.81,
+        -3.2,
+        -1203.65
+      ],
+      [
+        -415.83,
+        -2.51,
+        -1189.91
+      ],
+      [
+        -415.3,
+        -2.14,
+        -1182.42
+      ],
+      [
+        -378.57,
+        -5.46,
+        -1183.36
+      ],
+      [
+        -374.06,
+        -5.86,
+        -1183.48
+      ],
+      [
+        -339.32,
+        -6.68,
+        -1211.16
+      ],
+      [
+        -337.75,
+        -6.71,
+        -1212.41
+      ],
+      [
+        -342.76,
+        -6.34,
+        -1209.58
+      ],
+      [
+        -370.15,
+        -5.81,
+        -1186.86
+      ],
+      [
+        -374.53,
+        -5.74,
+        -1183.11
+      ],
+      [
+        -411.81,
+        -2.71,
+        -1183.97
+      ],
+      [
+        -414.31,
+        -2.51,
+        -1184.03
+      ]
+    ]
+  },
+  {
+    "Type": "Wander",
+    "Speed": 3.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 14.0,
+    "MinLegDistance": 4.5,
+    "MaxLegDistance": 13.3,
+    "MinPauseMs": 4600,
+    "MaxPauseMs": 17100,
+    "Guid": 100000033308,
+    "Area": [
+      [
+        -1412.16,
+        -29.46,
+        273.37
+      ],
+      [
+        -1410.33,
+        -29.46,
+        272.08
+      ],
+      [
+        -1406.15,
+        -29.46,
+        271.85
+      ],
+      [
+        -1404.07,
+        -29.46,
+        274.03
+      ],
+      [
+        -1400.95,
+        -29.46,
+        277.3
+      ],
+      [
+        -1399.4,
+        -29.46,
+        278.93
+      ],
+      [
+        -1400.17,
+        -29.46,
+        286.75
+      ],
+      [
+        -1402.12,
+        -29.46,
+        286.03
+      ],
+      [
+        -1404.84,
+        -29.46,
+        284.43
+      ],
+      [
+        -1410.43,
+        -29.46,
+        281.05
+      ],
+      [
+        -1412.11,
+        -29.46,
+        278.61
+      ]
+    ]
+  },
+  {
+    "Type": "Wander",
+    "Speed": 3.0,
+    "UpdateIntervalMs": 1500,
+    "Radius": 51,
+    "MinLegDistance": 6.6,
+    "MaxLegDistance": 16.1,
+    "MinPauseMs": 2000,
+    "MaxPauseMs": 4400,
+    "Guid": 100000033199
+  },
+  {
+    "Type": "Patrol",
+    "Speed": 2.7,
+    "UpdateIntervalMs": 1000,
+    "PauseMs": 1000,
+    "Points": [
+      [
+        -1389.08,
+        -30.4,
+        248.81
+      ],
+      [
+        -1378.04,
+        -30.44,
+        246.28
+      ],
+      [
+        -1375.76,
+        -30.41,
+        247.74
+      ],
+      [
+        -1374.33,
+        -30.39,
+        249.88
+      ],
+      [
+        -1376.66,
+        -30.39,
+        252.54
+      ],
+      [
+        -1382.89,
+        -30.44,
+        244.13
+      ],
+      [
+        -1385.96,
+        -30.44,
+        241.83
+      ],
+      [
+        -1390.06,
+        -30.42,
+        242.55
+      ],
+      [
+        -1390.69,
+        -30.4,
+        246.25
+      ],
+      [
+        -1379.34,
+        -30.43,
+        246.65
+      ],
+      [
+        -1378.04,
+        -30.44,
+        246.28
+      ],
+      [
+        -1376.9,
+        -30.43,
+        247.01
+      ],
+      [
+        -1373.79,
+        -30.37,
+        251.45
+      ],
+      [
+        -1378.31,
+        -30.4,
+        252.65
+      ],
+      [
+        -1383.62,
+        -30.45,
+        242.96
+      ],
+      [
+        -1385.88,
+        -30.44,
+        241.88
+      ],
+      [
+        -1388.52,
+        -30.43,
+        242.13
+      ],
+      [
+        -1390.42,
+        -30.42,
+        243.5
+      ]
+    ],
+    "Guid": 100000033118
+  },
+  {
+    "Type": "Wander",
+    "Speed": 4.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 20.0,
+    "MinLegDistance": 4.4,
+    "MaxLegDistance": 19.7,
+    "MinPauseMs": 6600,
+    "MaxPauseMs": 9400,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0,
+    "Guid": 100000033166
+  },
+  {
+    "Type": "Wander",
+    "Speed": 4.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 10.0,
+    "MinLegDistance": 2.6,
+    "MaxLegDistance": 13.0,
+    "MinPauseMs": 6700,
+    "MaxPauseMs": 9400,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0,
+    "Guid": 100000033361
+  },
+  {
+    "Type": "Wander",
+    "Speed": 4.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 20.0,
+    "MinLegDistance": 4.4,
+    "MaxLegDistance": 19.7,
+    "MinPauseMs": 6600,
+    "MaxPauseMs": 9400,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0,
+    "Guid": 100000033100
+  },
+  {
+    "Type": "Wander",
+    "Speed": 3.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 12.0,
+    "MinLegDistance": 4.1,
+    "MaxLegDistance": 11.3,
+    "MinPauseMs": 8300,
+    "MaxPauseMs": 16900,
+    "Guid": 100000033164,
+    "Area": [
+      [
+        -1410.6,
+        -29.69,
+        272.4
+      ],
+      [
+        -1409.51,
+        -29.69,
+        271.49
+      ],
+      [
+        -1404.56,
+        -29.69,
+        273.36
+      ],
+      [
+        -1399.54,
+        -29.69,
+        279.78
+      ],
+      [
+        -1399.62,
+        -29.69,
+        282.97
+      ],
+      [
+        -1405.9,
+        -29.69,
+        284.41
+      ],
+      [
+        -1408.31,
+        -29.69,
+        284.29
+      ],
+      [
+        -1410.52,
+        -29.69,
+        277.39
+      ]
+    ]
+  },
+  {
+    "Type": "Wander",
+    "Speed": 4.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 20.0,
+    "MinLegDistance": 4.4,
+    "MaxLegDistance": 19.7,
+    "MinPauseMs": 6600,
+    "MaxPauseMs": 9400,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0,
+    "Guid": 100000033360
+  },
+  {
+    "Type": "Patrol",
+    "Speed": 2.98,
+    "UpdateIntervalMs": 1500,
+    "PauseMs": 700,
+    "Points": [
+      [
+        -1352.77,
+        -29.47,
+        189.68
+      ],
+      [
+        -1346.36,
+        -29.87,
+        176.04
+      ],
+      [
+        -1343.91,
+        -30.22,
+        177.14
+      ],
+      [
+        -1345.33,
+        -30.0,
+        176.03
+      ],
+      [
+        -1347.01,
+        -29.79,
+        177.81
+      ],
+      [
+        -1348.48,
+        -29.61,
+        180.09
+      ],
+      [
+        -1342.71,
+        -30.4,
+        178.52
+      ],
+      [
+        -1347.25,
+        -29.78,
+        180.01
+      ],
+      [
+        -1348.39,
+        -29.63,
+        180.38
+      ],
+      [
+        -1351.52,
+        -29.51,
+        187.06
+      ]
+    ],
+    "Guid": 100000033372
+  },
+  {
+    "Type": "Patrol",
+    "Speed": 4.42,
+    "UpdateIntervalMs": 1500,
+    "PauseMs": 1000,
+    "Points": [
+      [
+        -1348.67,
+        -29.55,
+        177.16
+      ],
+      [
+        -1353.96,
+        -28.87,
+        180.54
+      ],
+      [
+        -1347.56,
+        -29.74,
+        179.75
+      ],
+      [
+        -1350.36,
+        -29.71,
+        187.47
+      ],
+      [
+        -1343.38,
+        -30.37,
+        180.02
+      ],
+      [
+        -1354.83,
+        -28.76,
+        181.14
+      ],
+      [
+        -1354.75,
+        -28.99,
+        185.89
+      ],
+      [
+        -1347.46,
+        -29.8,
+        178.26
+      ],
+      [
+        -1352.44,
+        -29.52,
+        189.76
+      ],
+      [
+        -1345.28,
+        -30.19,
+        182.07
+      ],
+      [
+        -1342.88,
+        -30.38,
+        178.79
+      ],
+      [
+        -1348.33,
+        -29.64,
+        180.37
+      ],
+      [
+        -1342.63,
+        -30.41,
+        178.54
+      ],
+      [
+        -1352.76,
+        -29.05,
+        181.16
+      ],
+      [
+        -1345.82,
+        -29.98,
+        179.33
+      ],
+      [
+        -1352.13,
+        -29.52,
+        188.47
+      ],
+      [
+        -1342.38,
+        -30.47,
+        178.93
+      ],
+      [
+        -1347.13,
+        -29.8,
+        179.98
+      ],
+      [
+        -1344.18,
+        -30.17,
+        176.74
+      ],
+      [
+        -1349.68,
+        -29.77,
+        186.59
+      ],
+      [
+        -1347.75,
+        -29.7,
+        178.65
+      ],
+      [
+        -1355.96,
+        -28.65,
+        182.62
+      ],
+      [
+        -1353.49,
+        -29.36,
+        189.7
+      ],
+      [
+        -1356.11,
+        -28.64,
+        183.0
+      ],
+      [
+        -1353.6,
+        -29.33,
+        189.43
+      ],
+      [
+        -1355.46,
+        -28.7,
+        182.23
+      ],
+      [
+        -1349.89,
+        -29.52,
+        182.53
+      ],
+      [
+        -1343.43,
+        -30.29,
+        177.45
+      ],
+      [
+        -1350.74,
+        -29.29,
+        178.66
+      ],
+      [
+        -1345.12,
+        -30.07,
+        179.12
+      ],
+      [
+        -1350.25,
+        -29.64,
+        184.65
+      ],
+      [
+        -1348.19,
+        -29.76,
+        179.96
+      ],
+      [
+        -1351.9,
+        -29.53,
+        187.86
+      ],
+      [
+        -1346.84,
+        -29.8,
+        176.93
+      ],
+      [
+        -1350.85,
+        -29.3,
+        180.7
+      ],
+      [
+        -1344.49,
+        -30.16,
+        179.12
+      ],
+      [
+        -1355.89,
+        -28.66,
+        182.6
+      ],
+      [
+        -1349.05,
+        -29.69,
+        181.58
+      ],
+      [
+        -1344.17,
+        -30.18,
+        177.0
+      ],
+      [
+        -1347.95,
+        -29.69,
+        180.21
+      ],
+      [
+        -1351.9,
+        -29.5,
+        187.81
+      ],
+      [
+        -1346.63,
+        -29.85,
+        176.64
+      ],
+      [
+        -1352.26,
+        -29.51,
+        188.64
+      ],
+      [
+        -1342.12,
+        -30.49,
+        178.66
+      ],
+      [
+        -1347.37,
+        -29.77,
+        180.05
+      ],
+      [
+        -1341.96,
+        -30.5,
+        178.32
+      ],
+      [
+        -1350.08,
+        -29.74,
+        187.2
+      ],
+      [
+        -1354.59,
+        -29.04,
+        186.44
+      ],
+      [
+        -1352.31,
+        -29.11,
+        181.34
+      ],
+      [
+        -1351.15,
+        -29.49,
+        185.6
+      ],
+      [
+        -1353.56,
+        -28.94,
+        180.7
+      ],
+      [
+        -1346.41,
+        -29.85,
+        175.74
+      ],
+      [
+        -1350.07,
+        -29.64,
+        183.96
+      ],
+      [
+        -1352.28,
+        -29.48,
+        188.59
+      ],
+      [
+        -1349.19,
+        -29.54,
+        180.91
+      ],
+      [
+        -1355.41,
+        -28.78,
+        183.75
+      ],
+      [
+        -1348.66,
+        -29.72,
+        180.81
+      ],
+      [
+        -1356.27,
+        -28.57,
+        182.01
+      ]
+    ],
+    "Guid": 100000033405
+  },
+  {
+    "Type": "Patrol",
+    "Speed": 2.71,
+    "UpdateIntervalMs": 1500,
+    "PauseMs": 1000,
+    "Points": [
+      [
+        -1351.79,
+        -29.11,
+        161.75
+      ],
+      [
+        -1356.74,
+        -29.03,
+        159.08
+      ],
+      [
+        -1361.7,
+        -29.0,
+        157.53
+      ],
+      [
+        -1355.05,
+        -29.0,
+        159.78
+      ],
+      [
+        -1352.39,
+        -29.0,
+        160.84
+      ],
+      [
+        -1350.5,
+        -29.79,
+        166.5
+      ],
+      [
+        -1350.12,
+        -29.95,
+        167.63
+      ],
+      [
+        -1351.34,
+        -29.33,
+        163.32
+      ],
+      [
+        -1360.66,
+        -29.0,
+        157.16
+      ],
+      [
+        -1362.93,
+        -29.0,
+        158.65
+      ],
+      [
+        -1361.82,
+        -29.0,
+        157.62
+      ],
+      [
+        -1353.79,
+        -29.0,
+        160.28
+      ],
+      [
+        -1350.12,
+        -29.95,
+        167.65
+      ]
+    ],
+    "Guid": 100000033412
+  },
+  {
+    "Type": "Wander",
+    "Speed": 3.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 7.0,
+    "MinLegDistance": 0.0,
+    "MaxLegDistance": 0.0,
+    "MinPauseMs": 11500,
+    "MaxPauseMs": 11500,
+    "Guid": 100000033452
+  },
+  {
+    "Type": "Wander",
+    "Speed": 1.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 19.0,
+    "MinLegDistance": 2,
+    "MaxLegDistance": 9.3,
+    "MinPauseMs": 5000,
+    "MaxPauseMs": 10000,
+    "Guid": 100000033456
+  },
+  {
+    "Type": "Wander",
+    "Speed": 3.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 17.0,
+    "MinLegDistance": 8.3,
+    "MaxLegDistance": 13.0,
+    "MinPauseMs": 12300,
+    "MaxPauseMs": 15800,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0,
+    "Guid": 100000033576
+  },
+  {
+    "Type": "Wander",
+    "Speed": 3.0,
+    "UpdateIntervalMs": 1500,
+    "Radius": 8.0,
+    "MinLegDistance": 2,
+    "MaxLegDistance": 4,
+    "MinPauseMs": 5000,
+    "MaxPauseMs": 10000,
+    "Guid": 100000033578
+  },
+  {
+    "Type": "Wander",
+    "Speed": 3.0,
+    "UpdateIntervalMs": 1500,
+    "Radius": 24,
+    "MinLegDistance": 2,
+    "MaxLegDistance": 11.8,
+    "MinPauseMs": 5000,
+    "MaxPauseMs": 10000,
+    "Guid": 100000033571
+  },
+  {
+    "Type": "Wander",
+    "Speed": 1.0,
+    "UpdateIntervalMs": 500,
+    "Radius": 15.0,
+    "MinLegDistance": 2,
+    "MaxLegDistance": 7.5,
+    "MinPauseMs": 5000,
+    "MaxPauseMs": 10000,
+    "Guid": 100000033549
+  },
+  {
+    "Type": "Wander",
+    "Speed": 3.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 7.0,
+    "MinLegDistance": 2.7,
+    "MaxLegDistance": 7.4,
+    "MinPauseMs": 900,
+    "MaxPauseMs": 1600,
+    "Guid": 100000033504
+  },
+  {
+    "Type": "Wander",
+    "Speed": 3.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 12.0,
+    "MinLegDistance": 2.9,
+    "MaxLegDistance": 12.8,
+    "MinPauseMs": 6200,
+    "MaxPauseMs": 15900,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0,
+    "Guid": 100000033573
+  },
+  {
+    "Type": "Wander",
+    "Speed": 4.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 20.0,
+    "MinLegDistance": 4.4,
+    "MaxLegDistance": 19.7,
+    "MinPauseMs": 6600,
+    "MaxPauseMs": 9400,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0,
+    "Guid": 100000033547
+  },
+  {
+    "Type": "Wander",
+    "Speed": 4.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 20.0,
+    "MinLegDistance": 4.4,
+    "MaxLegDistance": 19.7,
+    "MinPauseMs": 6600,
+    "MaxPauseMs": 9400,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0,
+    "Guid": 100000033555
+  },
+  {
+    "Type": "Wander",
+    "Speed": 3.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 12.0,
+    "MinLegDistance": 2.9,
+    "MaxLegDistance": 12.8,
+    "MinPauseMs": 6200,
+    "MaxPauseMs": 15900,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0,
+    "Guid": 100000033459
+  },
+  {
+    "Type": "Wander",
+    "Speed": 3.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 17.0,
+    "MinLegDistance": 8.3,
+    "MaxLegDistance": 13.0,
+    "MinPauseMs": 12300,
+    "MaxPauseMs": 15800,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0,
+    "Guid": 100000033584
+  },
+  {
+    "Type": "Wander",
+    "Speed": 3.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 20.0,
+    "MinLegDistance": 4.9,
+    "MaxLegDistance": 17.0,
+    "MinPauseMs": 2200,
+    "MaxPauseMs": 15800,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0,
+    "Guid": 100000033596
+  },
+  {
+    "Type": "Wander",
+    "Speed": 4.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 10.0,
+    "MinLegDistance": 2.6,
+    "MaxLegDistance": 13.0,
+    "MinPauseMs": 6700,
+    "MaxPauseMs": 9400,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0,
+    "Guid": 100000033598
+  },
+  {
+    "Type": "Wander",
+    "Speed": 3.0,
+    "UpdateIntervalMs": 1500,
+    "Radius": 10.0,
+    "MinLegDistance": 1.8,
+    "MaxLegDistance": 10.0,
+    "MinPauseMs": 900,
+    "MaxPauseMs": 12900,
+    "Guid": 100000033597
+  },
+  {
+    "Type": "Patrol",
+    "Speed": 3.0,
+    "UpdateIntervalMs": 1250,
+    "PauseMs": 3700,
+    "Points": [
+      [
+        241.51,
+        24.8,
+        490.67
+      ],
+      [
+        243.33,
+        24.88,
+        488.22
+      ],
+      [
+        244.7,
+        24.94,
+        486.38
+      ],
+      [
+        244.56,
+        24.93,
+        487.44
+      ],
+      [
+        244.39,
+        24.91,
+        488.8
+      ],
+      [
+        242.91,
+        24.85,
+        489.9
+      ],
+      [
+        241.08,
+        24.78,
+        491.26
+      ]
+    ],
+    "Guid": 100000033769
+  },
+  {
+    "Type": "Wander",
+    "Speed": 3.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 12.0,
+    "MinLegDistance": 2.9,
+    "MaxLegDistance": 12.8,
+    "MinPauseMs": 6200,
+    "MaxPauseMs": 15900,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0,
+    "Guid": 100000033829
+  },
+  {
+    "Type": "Wander",
+    "Speed": 2.9,
+    "UpdateIntervalMs": 1000,
+    "Radius": 6.0,
+    "MinLegDistance": 3.6,
+    "MaxLegDistance": 10.5,
+    "MinPauseMs": 11300,
+    "MaxPauseMs": 16100,
+    "Guid": 100000033828
+  },
+  {
+    "Type": "Wander",
+    "Speed": 3.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 20.0,
+    "MinLegDistance": 4.9,
+    "MaxLegDistance": 17.0,
+    "MinPauseMs": 2200,
+    "MaxPauseMs": 15800,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0,
+    "Guid": 100000033835
+  },
+  {
+    "Type": "Wander",
+    "Speed": 4.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 10.0,
+    "MinLegDistance": 2.6,
+    "MaxLegDistance": 13.0,
+    "MinPauseMs": 6700,
+    "MaxPauseMs": 9400,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0,
+    "Guid": 100000033832
+  },
+  {
+    "Type": "Wander",
+    "Speed": 4.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 10.0,
+    "MinLegDistance": 2.6,
+    "MaxLegDistance": 13.0,
+    "MinPauseMs": 6700,
+    "MaxPauseMs": 9400,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0,
+    "Guid": 100000033833
+  },
+  {
+    "Type": "Wander",
+    "Speed": 4.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 10.0,
+    "MinLegDistance": 2.6,
+    "MaxLegDistance": 13.0,
+    "MinPauseMs": 6700,
+    "MaxPauseMs": 9400,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0,
+    "Guid": 100000033845
+  },
+  {
+    "Type": "Wander",
+    "Speed": 3.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 20.0,
+    "MinLegDistance": 4.9,
+    "MaxLegDistance": 17.0,
+    "MinPauseMs": 2200,
+    "MaxPauseMs": 15800,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0,
+    "Guid": 100000033935
+  },
+  {
+    "Type": "Wander",
+    "Speed": 3.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 17.0,
+    "MinLegDistance": 8.3,
+    "MaxLegDistance": 13.0,
+    "MinPauseMs": 12300,
+    "MaxPauseMs": 15800,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0,
+    "Guid": 100000033950
+  },
+  {
+    "Type": "Wander",
+    "Speed": 4.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 10.0,
+    "MinLegDistance": 2.6,
+    "MaxLegDistance": 13.0,
+    "MinPauseMs": 6700,
+    "MaxPauseMs": 9400,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0,
+    "Guid": 100000033937
+  },
+  {
+    "Type": "Wander",
+    "Speed": 3.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 12.0,
+    "MinLegDistance": 2.9,
+    "MaxLegDistance": 12.8,
+    "MinPauseMs": 6200,
+    "MaxPauseMs": 15900,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0,
+    "Guid": 100000033938
+  },
+  {
+    "Type": "Patrol",
+    "Speed": 1.97,
+    "UpdateIntervalMs": 1000,
+    "PauseMs": 500,
+    "Points": [
+      [
+        -166.73,
+        -12.53,
+        334.0
+      ],
+      [
+        -166.28,
+        -12.5,
+        338.05
+      ],
+      [
+        -154.63,
+        -12.51,
+        354.07
+      ],
+      [
+        -154.12,
+        -12.51,
+        354.7
+      ],
+      [
+        -153.17,
+        -12.51,
+        355.07
+      ],
+      [
+        -152.32,
+        -12.51,
+        355.41
+      ],
+      [
+        -148.64,
+        -12.51,
+        354.63
+      ],
+      [
+        -165.08,
+        -12.55,
+        332.24
+      ],
+      [
+        -165.3,
+        -12.55,
+        331.35
+      ],
+      [
+        -162.9,
+        -12.54,
+        327.28
+      ],
+      [
+        -156.18,
+        -12.5,
+        324.76
+      ],
+      [
+        -155.44,
+        -12.5,
+        324.43
+      ],
+      [
+        -154.91,
+        -12.49,
+        323.56
+      ],
+      [
+        -154.68,
+        -12.48,
+        321.84
+      ],
+      [
+        -155.35,
+        -12.48,
+        320.26
+      ],
+      [
+        -159.11,
+        -12.5,
+        319.95
+      ],
+      [
+        -166.41,
+        -12.59,
+        328.86
+      ]
+    ],
+    "Guid": 100000033987
+  },
+  {
+    "Type": "Wander",
+    "Speed": 4.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 10.0,
+    "MinLegDistance": 2.6,
+    "MaxLegDistance": 13.0,
+    "MinPauseMs": 6700,
+    "MaxPauseMs": 9400,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0,
+    "Guid": 100000033988
+  },
+  {
+    "Type": "Wander",
+    "Speed": 3.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 20.0,
+    "MinLegDistance": 4.9,
+    "MaxLegDistance": 17.0,
+    "MinPauseMs": 2200,
+    "MaxPauseMs": 15800,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0,
+    "Guid": 100000034009
+  },
+  {
+    "Type": "Wander",
+    "Speed": 4.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 10.0,
+    "MinLegDistance": 2.6,
+    "MaxLegDistance": 13.0,
+    "MinPauseMs": 6700,
+    "MaxPauseMs": 9400,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0,
+    "Guid": 100000033998
+  },
+  {
+    "Type": "Wander",
+    "Speed": 3.0,
+    "UpdateIntervalMs": 1000,
+    "Radius": 20.0,
+    "MinLegDistance": 4.9,
+    "MaxLegDistance": 17.0,
+    "MinPauseMs": 2200,
+    "MaxPauseMs": 15800,
+    "FleeDistance": 5.0,
+    "FleeLegDistance": 12.0,
+    "FleeSpeed": 8.0,
+    "Guid": 100000034005
+  }
+]

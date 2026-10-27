@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Game;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
@@ -36,6 +37,21 @@ public static class CommandPacketInteractionSelectHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(CommandPacketInteractionSelect), packet);
 
+        if (connection.Player.OpenInteractionMenu is { } menu
+            && menu.Guid == packet.Guid
+            && menu.Options.TryGetValue(packet.Id, out var action))
+        {
+            connection.Player.OpenInteractionMenu = null;
+
+            if (!connection.Player.VisibleNpcs.TryGetValue(packet.Guid, out var menuNpc))
+                return true;
+
+            if (!InteractionMenuHelper.CanInteract(menuNpc, connection.Player))
+                return true;
+
+            action(connection.Player);
+            return true;
+        }
         if (!_interactionManager.TryGet(packet.Id, out var interaction))
         {
             _logger.LogError("Invalid interaction. {interaction}", packet.Id);

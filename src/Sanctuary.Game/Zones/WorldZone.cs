@@ -1,14 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Extensions;
 using Sanctuary.Core.IO;
 using Sanctuary.Database;
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Helpers;
+using Sanctuary.Game.Interactions;
+using Sanctuary.Game.Quests;
+using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -18,12 +24,59 @@ namespace Sanctuary.Game.Zones;
 public sealed partial class WorldZone : BaseZone
 {
     private readonly WorldZoneDefinition _zoneDefinition;
+    private readonly IQuestManager _questManager;
+
+    private readonly object _clientAreasLock = new();
+    private readonly HashSet<SeasonalClientAreaDefinition> _activeSeasonalClientAreas = [];
+    private readonly HashSet<int> _scriptEnabledClientAreaIds = [];
+
+    private readonly Dictionary<(int Longitude, int Latitude), ZoneAreaDefinition> _tileZoneAreas = [];
+    private readonly List<ZoneAreaDefinition> _shapeZoneAreas = [];
+    private readonly Dictionary<int, List<ZoneAreaDefinition>> _environmentZoneAreas = [];
+
+    private const int ClientAreaRefreshSeconds = 3;
+    private int _secondsSinceClientAreaRefresh;
 
     public WorldZone(WorldZoneDefinition zoneDefinition, IServiceProvider serviceProvider)
         : base(zoneDefinition, serviceProvider)
     {
         _zoneDefinition = zoneDefinition;
 
+        foreach (var areaDefinition in _zoneDefinition.AreaDefinitions)
+        {
+            if (areaDefinition.Tiles.Count > 0)
+            {
+                foreach (var tile in areaDefinition.Tiles)
+                    _tileZoneAreas[(tile[0], tile[1])] = areaDefinition;
+
+                continue;
+            }
+
+            if (areaDefinition.EnvironmentIds.Count == 0)
+            {
+                _shapeZoneAreas.Add(areaDefinition);
+                continue;
+            }
+
+            foreach (var environmentId in areaDefinition.EnvironmentIds)
+            {
+                if (!_environmentZoneAreas.TryGetValue(environmentId, out var environmentZoneAreas))
+                {
+                    environmentZoneAreas = [];
+                    _environmentZoneAreas[environmentId] = environmentZoneAreas;
+                }
+
+                environmentZoneAreas.Add(areaDefinition);
+            }
+        }
+
+        foreach (var seasonalClientArea in _zoneDefinition.SeasonalClientAreas)
+        {
+            if (seasonalClientArea.IsActive(DateTime.Now))
+                _activeSeasonalClientAreas.Add(seasonalClientArea);
+        }
+
+        _questManager = serviceProvider.GetRequiredService<IQuestManager>();
         _housingManager = serviceProvider.GetRequiredService<IHousingManager>();
         _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
         _worldEventManager = serviceProvider.GetRequiredService<IWorldEventManager>();
@@ -63,40 +116,182 @@ public sealed partial class WorldZone : BaseZone
         SendPointOfInterests(player);
         SendAdventurersJournalInfo(player);
 
+        SendShopData(player);
+        player.SendTunneled(WelcomeScreenHelper.GetAnnouncementsPacket());
+
         if (player.SeenOneTimeNotifications.TryAdd(OneTimeNotification.WelcomeInfo))
             SendWelcomeInfo(player);
 
         SendShopData(player);
 
         _housingManager.SendPlayerHouses(player, player.Guid, null);
+        _questManager.RestoreJournal(player);
+
+        foreach (var npc in Npcs)
+        {
+            if (!_questManager.IsQuestNpc(npc.DefinitionId))
+                continue;
+
+            if (_resourceManager.Quests.TryGetNpcCursorId(npc.DefinitionId, out var cursorId))
+                npc.CursorId = cursorId;
+
+            if (_resourceManager.Quests.TryGetNpcInteractRange(npc.DefinitionId, out var interactRange))
+                npc.InteractRange = interactRange;
+
+            _questManager.RefreshQuestNotification(player, npc.Guid);
+        }
     }
 
-    public int GetZoneAreaId(Vector4 position)
+    public override IReadOnlyList<NpcInteractionOption> GetInteractionOptions(Player player, Npc npc)
+        => _questManager.IsQuestNpc(npc.DefinitionId) ? _questManager.GetInteractionOptions(player, npc) : [];
+
+    public override NotificationInfo? GetQuestBadge(Player player, Npc npc)
+        => _questManager.IsQuestNpc(npc.DefinitionId) ? _questManager.GetQuestBadge(player, npc) : null;
+
+    public override void OnClientFinishedLoading(Player player)
     {
-        foreach (var areaDefinition in _zoneDefinition.AreaDefinitions)
+        base.OnClientFinishedLoading(player);
+
+        SendEnabledClientAreas(player);
+
+        player.UpdatePointOfInterest(GetNearestZoneArea(player.Position));
+    }
+
+    protected override void UpdateEverySecond()
+    {
+        base.UpdateEverySecond();
+
+        var now = DateTime.Now;
+
+        lock (_clientAreasLock)
         {
-            if (areaDefinition.Shape == "Circle")
+            foreach (var seasonalClientArea in _zoneDefinition.SeasonalClientAreas)
             {
-                var circle = new Vector3(areaDefinition.X1, 0, areaDefinition.Z1);
+                var isActive = seasonalClientArea.IsActive(now);
 
-                if (position.IsInCircle(circle, areaDefinition.Radius))
-                    return areaDefinition.Id;
-            }
-            else if (areaDefinition.Shape == "Rectangle")
-            {
-                var p1 = new Vector3(areaDefinition.X1, 0, areaDefinition.Z1);
-                var p2 = new Vector3(areaDefinition.X2, 0, areaDefinition.Z2);
+                if (isActive == _activeSeasonalClientAreas.Contains(seasonalClientArea))
+                    continue;
 
-                if (position.IsInRectangle(p1, p2))
-                    return areaDefinition.Id;
-            }
-            else
-            {
-                throw new NotImplementedException(nameof(areaDefinition.Shape));
+                if (isActive)
+                    _activeSeasonalClientAreas.Add(seasonalClientArea);
+                else
+                    _activeSeasonalClientAreas.Remove(seasonalClientArea);
+
+                Logger.LogInformation("Seasonal client areas {name} {state}", seasonalClientArea.Name, isActive ? "enabled" : "disabled");
+
+                if (!isActive)
+                {
+                    foreach (var player in Players)
+                        SendClientAreas(player, seasonalClientArea.AreaIds, false);
+                }
             }
         }
 
-        return 0;
+        if (++_secondsSinceClientAreaRefresh < ClientAreaRefreshSeconds)
+            return;
+
+        _secondsSinceClientAreaRefresh = 0;
+
+        foreach (var player in Players)
+            SendEnabledClientAreas(player);
+    }
+
+    public override bool IsSeasonActive(string seasonName)
+    {
+        var now = DateTime.Now;
+
+        return _zoneDefinition.SeasonalClientAreas.Any(x => x.Name == seasonName && x.IsActive(now));
+    }
+
+    public override void SetClientAreaEnabled(int areaId, bool enabled)
+    {
+        lock (_clientAreasLock)
+        {
+            var changed = enabled ? _scriptEnabledClientAreaIds.Add(areaId) : _scriptEnabledClientAreaIds.Remove(areaId);
+
+            if (!changed)
+                return;
+        }
+
+        foreach (var player in Players)
+            SendClientAreas(player, [areaId], enabled);
+    }
+
+    private void SendEnabledClientAreas(Player player)
+    {
+        SendClientAreas(player, _zoneDefinition.EnabledClientAreaIds, true);
+
+        lock (_clientAreasLock)
+        {
+            foreach (var seasonalClientArea in _activeSeasonalClientAreas)
+                SendClientAreas(player, seasonalClientArea.AreaIds, true);
+
+            SendClientAreas(player, [.. _scriptEnabledClientAreaIds], true);
+        }
+    }
+
+    private static void SendClientAreas(Player player, List<int> areaIds, bool enabled)
+    {
+        foreach (var areaId in areaIds)
+            player.SendTunneled(new PacketSetClientArea { AreaId = areaId, Enabled = enabled });
+    }
+
+    public ZoneAreaDefinition? GetZoneArea(Vector4 position)
+    {
+        return GetZoneArea(position, GetTileFromPosition(position));
+    }
+
+    public ZoneAreaDefinition? GetZoneArea(Vector4 position, ZoneTile zoneTile)
+    {
+        if (_tileZoneAreas.TryGetValue((zoneTile.Longitude, zoneTile.Latitude), out var tileZoneArea))
+            return tileZoneArea;
+
+        foreach (var areaDefinition in _shapeZoneAreas)
+        {
+            var isInArea = areaDefinition.Shape switch
+            {
+                ZoneAreaShape.Circle => position.IsInCircle(new Vector3(areaDefinition.X1, 0, areaDefinition.Z1), areaDefinition.Radius),
+                ZoneAreaShape.Rectangle => position.IsInRectangle(new Vector3(areaDefinition.X1, 0, areaDefinition.Z1),
+                    new Vector3(areaDefinition.X2, 0, areaDefinition.Z2)),
+                ZoneAreaShape.Polygon => position.IsInPolygon(areaDefinition.Points),
+                _ => throw new NotImplementedException(nameof(areaDefinition.Shape))
+            };
+
+            if (isInArea)
+                return areaDefinition;
+        }
+
+        if (!_environmentZoneAreas.TryGetValue(zoneTile.EnvironmentId, out var environmentZoneAreas))
+            return null;
+
+        return environmentZoneAreas.FirstOrDefault(x => x.IsInEnvironmentXRange(position.X));
+    }
+
+    public ZoneAreaDefinition? GetNearestZoneArea(Vector4 position)
+    {
+        var zoneArea = GetZoneArea(position);
+
+        if (zoneArea is not null)
+            return zoneArea;
+
+        ZoneAreaDefinition? nearestZoneArea = null;
+        var nearestDistance = float.MaxValue;
+
+        foreach (var areaDefinition in _zoneDefinition.AreaDefinitions)
+        {
+            if (!_resourceManager.PointOfInterests.TryGetValue(areaDefinition.PointOfInterestId, out var pointOfInterest))
+                continue;
+
+            var distance = pointOfInterest.Position.ToVector3().DistanceSquaredXZ(position.ToVector3());
+
+            if (distance >= nearestDistance)
+                continue;
+
+            nearestDistance = distance;
+            nearestZoneArea = areaDefinition;
+        }
+
+        return nearestZoneArea;
     }
 
     private void SendPointOfInterests(Player player)
@@ -123,7 +318,7 @@ public sealed partial class WorldZone : BaseZone
         // DO NOT REMOVE even if it's not fully implemented. This packet is needed
         // due to an Area Definition called "Newbiezone" in FabledRealmsAreas.xml.
 
-        var adventurersJournal = new AdventurersJournalInfoPacket();
+        var adventurersJournalInfoPacket = new AdventurersJournalInfoPacket();
 
         AdventurersJournalRegionDefinition[] regions =
         [
@@ -169,7 +364,7 @@ public sealed partial class WorldZone : BaseZone
             }
         ];
 
-        adventurersJournal.Regions = regions.ToDictionary(x => x.Id);
+        adventurersJournalInfoPacket.Regions = regions.ToDictionary(x => x.Id);
 
         AdventurersJournalHubDefinition[] hubs =
         [
@@ -305,7 +500,7 @@ public sealed partial class WorldZone : BaseZone
             }
         ];
 
-        adventurersJournal.Hubs = hubs.ToDictionary(x => x.Id);
+        adventurersJournalInfoPacket.Hubs = hubs.ToDictionary(x => x.Id);
 
         AdventurersJournalHubQuestDefinition[] hubQuests =
         [
@@ -659,7 +854,7 @@ public sealed partial class WorldZone : BaseZone
             }
         ];
 
-        adventurersJournal.HubQuests = hubQuests.ToDictionary(x => x.Id);
+        adventurersJournalInfoPacket.HubQuests = hubQuests.ToDictionary(x => x.Id);
 
         AdventurersJournalStickerDefinition[] stickers =
         [
@@ -857,80 +1052,11 @@ public sealed partial class WorldZone : BaseZone
             }
         ];
 
-        adventurersJournal.Stickers = stickers.ToDictionary(x => x.Id);
+        adventurersJournalInfoPacket.Stickers = stickers.ToDictionary(x => x.Id);
 
-        player.SendTunneled(adventurersJournal);
+        player.SendTunneled(adventurersJournalInfoPacket);
     }
 
-    private void SendWelcomeInfo(Player player)
-    {
-        var packetLoadWelcomeScreen = new PacketLoadWelcomeScreen();
-
-        packetLoadWelcomeScreen.Contents.AddRange(
-        [
-            new ContentInfo
-            {
-                NameId = 6185,
-                DescriptionId = 6186,
-            },
-            new ContentInfo
-            {
-                NameId = 6187,
-                DescriptionId = 6188,
-            },
-            new ContentInfo
-            {
-                NameId = 6189,
-                DescriptionId = 6190,
-            }
-        ]);
-
-        packetLoadWelcomeScreen.ClaimCodes.AddRange(
-        [
-            new ClaimCodeInfo
-            {
-                Code = "MMMDONUT",
-                NameId = 401519,
-                DescriptionId = 401534,
-                IconId = 929
-            },
-            new ClaimCodeInfo
-            {
-                Code = "BERRYCUPCAKE",
-                NameId = 401517,
-                DescriptionId = 401532,
-                IconId = 939
-            },
-            new ClaimCodeInfo
-            {
-                Code = "SKELETAL",
-                NameId = 409157,
-                DescriptionId = 109132,
-                IconId = 3459
-            },
-            new ClaimCodeInfo
-            {
-                Code = "STRAWBERRIES",
-                NameId = 409158,
-                DescriptionId = 108948,
-                IconId = 3441
-            },
-            new ClaimCodeInfo
-            {
-                Code = "FROGGY",
-                NameId = 409159,
-                DescriptionId = 3141,
-                IconId = 1258
-            },
-            new ClaimCodeInfo
-            {
-                Code = "SANDWICH",
-                NameId = 409160,
-                DescriptionId = 2430,
-                IconId = 949
-            }
-        ]);
-
-        player.SendTunneled(packetLoadWelcomeScreen);
-    }
+    private void SendWelcomeInfo(Player player) =>
+        player.SendTunneled(WelcomeScreenHelper.GetWelcomeScreenPacket(player.SecondsSinceLastLogin, player.StationCash));
 }

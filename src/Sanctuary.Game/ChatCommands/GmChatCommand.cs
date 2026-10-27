@@ -288,7 +288,7 @@ public class GmChatCommand : IChatCommand
             return;
         }
 
-        player.UpdatePosition(position, rotation, false);
+        player.UpdatePosition(position, rotation);
 
         player.SendTunneled(new ClientUpdatePacketUpdateLocation
         {

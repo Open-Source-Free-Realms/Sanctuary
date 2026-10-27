@@ -43,7 +43,7 @@ public class MovePlayerChatCommand : IChatCommand
 
         var position = new Vector4(x, y, z, target.Position.W);
 
-        target.UpdatePosition(position, target.Rotation, false);
+        target.UpdatePosition(position, target.Rotation);
 
         target.SendTunneled(new ClientUpdatePacketUpdateLocation
         {

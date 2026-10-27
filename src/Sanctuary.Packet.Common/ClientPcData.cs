@@ -334,13 +334,15 @@ public class ClientPcData
 
     public int Gender;
 
-    // public ClientQuestData Quests = new();
+    public ClientQuestData QuestData = new();
     // public ClientAchievementData Achievements = new();
+    public int NonMemberQuestLimit = 30;
+    public int MemberQuestLimit = 30;
 
     // public List<Acquaintance> Acquaintances = new();
     // public List<RecipeData> Recipes = new();
 
-    // public List<UnknownPetStruct> Pets = new();
+    public List<PetClientInfo> Pets = new();
 
     public int ActivePetId;
     public ulong ActivePetGuid;
@@ -519,13 +521,9 @@ public class ClientPcData
 
         writer.Write(Gender);
 
-        // TODO Quests
-        writer.Write(0);
-        writer.Write(0);
-        writer.Write(0);
-        writer.Write(false);
-        writer.Write(0);
-        writer.Write(0);
+        QuestData.Serialize(writer);
+        writer.Write(NonMemberQuestLimit);
+        writer.Write(MemberQuestLimit);
 
         // TODO Achievements
         writer.Write(0);
@@ -535,7 +533,10 @@ public class ClientPcData
 
         writer.Write(0); // TODO Recipes
 
-        writer.Write(0); // TODO Pets
+        writer.Write(Pets.Count);
+
+        foreach (var petClientInfo in Pets)
+            petClientInfo.Serialize(writer);
 
         writer.Write(ActivePetId);
         writer.Write(ActivePetGuid);

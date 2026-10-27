@@ -49,7 +49,7 @@ public class PlayerUpdatePacketAddNpc : BasePlayerUpdatePacket, ISerializablePac
 
     public int Animation;
 
-    public bool Unknown16;
+    public bool HideHealthBar;
 
     public float VerticalOffset;
 
@@ -94,7 +94,7 @@ public class PlayerUpdatePacketAddNpc : BasePlayerUpdatePacket, ISerializablePac
 
     public bool Unknown40;
     public bool Unknown41; // Health bar
-    public bool Unknown42; // Collision?
+    public bool DisableCollision;
 
     public bool HasTilt;
 
@@ -157,7 +157,7 @@ public class PlayerUpdatePacketAddNpc : BasePlayerUpdatePacket, ISerializablePac
 
     public int ActiveProfile;
 
-    public int Unknown67;
+    public int NotificationImageSetId;
     public int Unknown68;
 
     public float NameScale;
@@ -202,7 +202,7 @@ public class PlayerUpdatePacketAddNpc : BasePlayerUpdatePacket, ISerializablePac
 
         writer.Write(TintId);
 
-        writer.Write(Unknown16);
+        writer.Write(HideHealthBar);
 
         writer.Write(VerticalOffset);
 
@@ -251,7 +251,7 @@ public class PlayerUpdatePacketAddNpc : BasePlayerUpdatePacket, ISerializablePac
 
         writer.Write(Unknown40);
         writer.Write(Unknown41);
-        writer.Write(Unknown42);
+        writer.Write(DisableCollision);
 
         writer.Write(HasTilt);
 
@@ -300,7 +300,7 @@ public class PlayerUpdatePacketAddNpc : BasePlayerUpdatePacket, ISerializablePac
 
         writer.Write(ActiveProfile);
 
-        writer.Write(Unknown67);
+        writer.Write(NotificationImageSetId);
         writer.Write(Unknown68);
 
         writer.Write(NameScale);

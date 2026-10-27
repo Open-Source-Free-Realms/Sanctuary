@@ -6,9 +6,7 @@ namespace Sanctuary.Packet.Common;
 
 public class CoinStoreTransactionRecord : ISerializableType
 {
-    // 1 - Buy
-    // 2 - Sell
-    public int Type;
+    public CoinStoreTransactionType Type;
 
     public ulong MerchantGuid;
 
@@ -24,7 +22,7 @@ public class CoinStoreTransactionRecord : ISerializableType
 
     public void Serialize(PacketWriter writer)
     {
-        writer.Write(Type);
+        writer.Write((int)Type);
 
         writer.Write(MerchantGuid);
 

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Game;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -54,6 +55,20 @@ public static class InventoryPacketEquipByGuidHandler
             return true;
         }
 
+        if (clientItemDefinition.Type != 1)
+        {
+            _logger.LogWarning("User tried to equip non-equipment item. {guid} {definition} {type}",
+                inventoryPacketEquipByGuid.Guid, clientItem.Definition, clientItemDefinition.Type);
+            return true;
+        }
+
+        if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out var itemClass))
+        {
+            _logger.LogWarning("User tried to equip item with unknown class. {guid} {definition} {class}",
+                inventoryPacketEquipByGuid.Guid, clientItem.Definition, clientItemDefinition.Class);
+            return true;
+        }
+
         var profile = connection.Player.Profiles.SingleOrDefault(x => x.Id == inventoryPacketEquipByGuid.ProfileId);
 
         if (profile is null)
@@ -62,26 +77,7 @@ public static class InventoryPacketEquipByGuidHandler
             return true;
         }
 
-        using var dbContext = _dbContextFactory.CreateDbContext();
-
-        var dbProfile = dbContext.Profiles
-            .Include(x => x.Items)
-            .SingleOrDefault(x => x.CharacterId == GuidHelper.GetPlayerId(connection.Player.Guid) && x.Id == inventoryPacketEquipByGuid.ProfileId);
-
-        if (dbProfile is null)
-        {
-            _logger.LogWarning("Invalid database profile.");
-            return true;
-        }
-
-        var dbItem = dbContext.Items
-            .SingleOrDefault(x => x.CharacterId == GuidHelper.GetPlayerId(connection.Player.Guid) && x.Id == inventoryPacketEquipByGuid.Guid);
-
-        if (dbItem is null)
-        {
-            _logger.LogWarning("Invalid database item.");
-            return true;
-        }
+        int? oldItemId = null;
 
         if (!profile.Items.TryGetValue(clientItemDefinition.Slot, out var profileItem))
         {
@@ -91,32 +87,58 @@ public static class InventoryPacketEquipByGuidHandler
             profileItem.Slot = clientItemDefinition.Slot;
 
             profile.Items.Add(profileItem.Slot, profileItem);
-
-            dbProfile.Items.Add(dbItem);
         }
         else
         {
-            var dbItemOld = dbContext.Items
-                .SingleOrDefault(x => x.CharacterId == GuidHelper.GetPlayerId(connection.Player.Guid) && x.Id == profileItem.Id);
-
-            if (dbItemOld is null)
-            {
-                _logger.LogWarning("Invalid database item.");
-                return true;
-            }
+            oldItemId = profileItem.Id;
 
             profileItem.Id = clientItem.Id;
             profileItem.Slot = clientItemDefinition.Slot;
+        }
+
+        var characterId = GuidHelper.GetPlayerId(connection.Player.Guid);
+        var profileId = inventoryPacketEquipByGuid.ProfileId;
+        var itemId = clientItem.Id;
+
+        connection.QueueWork(() =>
+        {
+            using var dbContext = _dbContextFactory.CreateDbContext();
+
+            var dbProfile = dbContext.Profiles
+                .Include(x => x.Items)
+                .SingleOrDefault(x => x.CharacterId == characterId && x.Id == profileId);
+
+            if (dbProfile is null)
+            {
+                _logger.LogWarning("Invalid database profile.");
+                return;
+            }
+
+            var dbItem = dbContext.Items
+                .SingleOrDefault(x => x.CharacterId == characterId && x.Id == itemId);
+
+            if (dbItem is null)
+            {
+                _logger.LogWarning("Invalid database item.");
+                return;
+            }
+
+            if (oldItemId is not null)
+            {
+                var dbItemOld = dbProfile.Items.SingleOrDefault(x => x.Id == oldItemId);
+
+                if (dbItemOld is not null)
+                    dbProfile.Items.Remove(dbItemOld);
+            }
 
             dbProfile.Items.Add(dbItem);
-            dbProfile.Items.Remove(dbItemOld);
-        }
 
-        if (dbContext.SaveChanges() <= 0)
-        {
-            _logger.LogWarning("Failed to save to database.");
-            return true;
-        }
+            if (dbContext.SaveChanges() <= 0)
+            {
+                _logger.LogWarning("Failed to save to database.");
+                return;
+            }
+        });
 
         var clientUpdatePacketEquipItem = new ClientUpdatePacketEquipItem();
 
@@ -145,13 +167,8 @@ public static class InventoryPacketEquipByGuidHandler
 
         playerUpdatePacketEquipItemChange.ProfileId = connection.Player.ActiveProfileId;
 
-        if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out var itemClass))
-        {
-            _logger.LogWarning("User tried to equip unknown item class. {guid} {definition}", inventoryPacketEquipByGuid.Guid, clientItemDefinition.Class);
-            return true;
-        }
-
-        playerUpdatePacketEquipItemChange.WieldType = itemClass.WieldType;
+        playerUpdatePacketEquipItemChange.ItemClassId = clientItemDefinition.Class;
+        playerUpdatePacketEquipItemChange.WieldType = connection.Player.GetWieldType();
 
         if (inventoryPacketEquipByGuid.ProfileId == connection.Player.ActiveProfileId)
             connection.Player.SendTunneledToVisible(playerUpdatePacketEquipItemChange);

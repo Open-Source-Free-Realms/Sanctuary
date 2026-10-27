@@ -168,10 +168,8 @@ public class RewardManager : IRewardManager
         // TODO: Is there a coin/station cash toast? How about for other types of rewards..?
         var notificationId = Environment.TickCount & int.MaxValue;
 
-        var packet = new RewardBundlePacket
-        {
-            Unknown8 = itemDefinition.DescriptionId
-        };
+        var packet = new RewardBundlePacket();
+        packet.RewardBundle.DescriptionId = itemDefinition.DescriptionId;
         packet.RewardBundle.SourceGuid = sourceGuid ^ (uint)notificationId;
         packet.RewardBundle.PlayerGuid = player.Guid;
         packet.RewardBundle.IconId = itemDefinition.Icon.Id;
