@@ -1,4 +1,4 @@
-using Sanctuary.Game.Entities;
+﻿using Sanctuary.Game.Entities;
 
 namespace Sanctuary.Game.ChatCommands;
 
@@ -26,4 +26,14 @@ public interface IChatCommand : IChatCommandView
     /// <param name="args">The arguments passed to the command.</param>
     /// <returns>True if the command was well-formed; otherwise, false.</returns>
     bool Handle(Player invoker, string[] args);
+}
+
+/// <summary>
+/// A command that also needs the text after its keyword exactly as typed, e.g. to keep runs of spaces
+/// in script source (see <see cref="ChatCommandText.Remainder"/>).
+/// </summary>
+public interface IRawChatCommand : IChatCommand
+{
+    /// <param name="rawArgs">Everything after the keyword and the single space that follows it.</param>
+    bool Handle(Player invoker, string[] args, string rawArgs);
 }

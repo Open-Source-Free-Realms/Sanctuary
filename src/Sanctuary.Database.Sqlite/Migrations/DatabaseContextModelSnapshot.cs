@@ -15,7 +15,7 @@ namespace Sanctuary.Database.Sqlite.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.9");
+            modelBuilder.HasAnnotation("ProductVersion", "9.0.17");
 
             modelBuilder.Entity("DbItemDbProfile", b =>
                 {
@@ -87,9 +87,12 @@ namespace Sanctuary.Database.Sqlite.Migrations
                         .HasMaxLength(16)
                         .HasColumnType("TEXT");
 
+                    b.PrimitiveCollection<string>("FirstTimeEvents")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("FullName")
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasMaxLength(32)
+                        .HasMaxLength(33)
                         .HasColumnType("TEXT")
                         .HasComputedColumnSql("CONCAT_WS(' ', FirstName, NULLIF(LastName, ''))", true);
 
@@ -125,6 +128,9 @@ namespace Sanctuary.Database.Sqlite.Migrations
 
                     b.Property<int>("MembershipStatus")
                         .HasColumnType("INTEGER");
+
+                    b.PrimitiveCollection<string>("MiniGameTutorials")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("Model")
                         .HasColumnType("INTEGER");
@@ -254,6 +260,107 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     b.HasIndex("GuildId");
 
                     b.ToTable("GuildMembers");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbHouse", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<ulong>("CharacterId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("DATE()");
+
+                    b.Property<int>("Definition")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsFloraAllowed")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset?>("LastVisited")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("NameId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("PetAutospawn")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId");
+
+                    b.HasIndex("Definition", "CharacterId")
+                        .IsUnique();
+
+                    b.ToTable("Houses");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbHouseFixture", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("DATE()");
+
+                    b.Property<int>("Definition")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<ulong>("HouseId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<float>("PositionX")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("PositionY")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("PositionZ")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("RotationW")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("RotationX")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("RotationY")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("RotationZ")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("Scale")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("REAL")
+                        .HasDefaultValue(1f);
+
+                    b.Property<int>("Tint")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HouseId");
+
+                    b.ToTable("HouseFixtures");
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbIgnore", b =>
@@ -441,6 +548,170 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbWorldEvent", b =>
+                {
+                    b.Property<string>("Key")
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Key");
+
+                    b.ToTable("WorldEvents");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbWorldFixture", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("DATE()");
+
+                    b.Property<ulong?>("CreatedBy")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Definition")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<float>("PositionX")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("PositionY")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("PositionZ")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("RotationW")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("RotationX")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("RotationY")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("RotationZ")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("Scale")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("REAL")
+                        .HasDefaultValue(1f);
+
+                    b.Property<string>("Script")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Tint")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Zone")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Zone");
+
+                    b.ToTable("WorldFixtures");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbWorldNpc", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Animation")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Behavior")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Conversation")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("DATE()");
+
+                    b.Property<ulong?>("CreatedBy")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Definition")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Disposition")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("EventKey")
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("HideNamePlate")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ModelId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("NameId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<float>("PositionX")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("PositionY")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("PositionZ")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("RotationW")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("RotationX")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("RotationY")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("RotationZ")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("Scale")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("REAL")
+                        .HasDefaultValue(1f);
+
+                    b.Property<string>("Script")
+                        .HasColumnType("TEXT");
+
+                    b.Property<float>("Speed")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("WanderRadius")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("Zone")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Zone");
+
+                    b.ToTable("WorldNpcs");
+                });
+
             modelBuilder.Entity("DbItemDbProfile", b =>
                 {
                     b.HasOne("Sanctuary.Database.Entities.DbItem", null)
@@ -502,6 +773,28 @@ namespace Sanctuary.Database.Sqlite.Migrations
                         .IsRequired();
 
                     b.Navigation("Guild");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbHouse", b =>
+                {
+                    b.HasOne("Sanctuary.Database.Entities.DbCharacter", "Character")
+                        .WithMany("Houses")
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Character");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbHouseFixture", b =>
+                {
+                    b.HasOne("Sanctuary.Database.Entities.DbHouse", "House")
+                        .WithMany("Fixtures")
+                        .HasForeignKey("HouseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("House");
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbIgnore", b =>
@@ -571,6 +864,8 @@ namespace Sanctuary.Database.Sqlite.Migrations
                 {
                     b.Navigation("Friends");
 
+                    b.Navigation("Houses");
+
                     b.Navigation("Ignores");
 
                     b.Navigation("Items");
@@ -591,6 +886,11 @@ namespace Sanctuary.Database.Sqlite.Migrations
                 {
                     b.Navigation("Character")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbHouse", b =>
+                {
+                    b.Navigation("Fixtures");
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbUser", b =>

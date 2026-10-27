@@ -1,0 +1,22 @@
+{
+  "$type": "Housing",
+  "Id": 1005,
+  "Name": "hsg_emptylot_briarwood_01",
+  "Type": "Housing",
+  "TileSize": 64,
+  "StartLatitude": -4,
+  "StartLongitude": -4,
+  "EndLatitude": 32,
+  "EndLongitude": 32,
+  "SpawnPosition": [
+    442.2,
+    0,
+    431.7
+  ],
+  "SpawnRotation": [
+    -1,
+    0,
+    0,
+    0
+  ]
+}

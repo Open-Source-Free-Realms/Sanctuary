@@ -2,8 +2,11 @@
   {
     "Id": 1,
     "NameId": 6514,
-    "ZoneId": 1,
+    "ZoneId": 1001,
     "Icon": 33439,
+    "ItemDefinitionIds": [17567],
+    "ExitObjectId": 1278541040,
+    "ExitPosition": [451.86, 5.24, 429.65, 0],
     "SpawnPosition": [444.3, 5.2, 429.3, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -16,8 +19,9 @@
   {
     "Id": 2,
     "NameId": 5103265,
-    "ZoneId": 2,
+    "ZoneId": 1002,
     "Icon": 47733,
+    "ItemDefinitionIds": [79149],
     "SpawnPosition": [391, 32.45, 424.8, 0],
     "SpawnRotation": [0, 1, 0, 0 ],
     "BuildAreas": [
@@ -30,8 +34,11 @@
   {
     "Id": 3,
     "NameId": 69974,
-    "ZoneId": 3,
+    "ZoneId": 1003,
     "Icon": 33593,
+    "ItemDefinitionIds": [17192],
+    "ExitObjectId": 1282070851,
+    "ExitPosition": [520.65, -0.0, 507.03, 0],
     "SpawnPosition": [520.5, 0, 513.1, 0],
     "SpawnRotation": [0, 1, 0, 0],
     "BuildAreas": [
@@ -44,8 +51,11 @@
   {
     "Id": 4,
     "NameId": 69975,
-    "ZoneId": 4,
+    "ZoneId": 1004,
     "Icon": 33596,
+    "ItemDefinitionIds": [17193],
+    "ExitObjectId": 1282759300,
+    "ExitPosition": [588.78, 0.08, 545.3, 0],
     "SpawnPosition": [585.7, 0, 545.5, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -58,8 +68,11 @@
   {
     "Id": 5,
     "NameId": 5184,
-    "ZoneId": 5,
+    "ZoneId": 1005,
     "Icon": 31260,
+    "ItemDefinitionIds": [7485],
+    "ExitObjectId": 1273543179,
+    "ExitPosition": [447.22, -0.11, 431.54, 0],
     "SpawnPosition": [442.2, 0, 431.7, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -72,8 +85,11 @@
   {
     "Id": 6,
     "NameId": 69971,
-    "ZoneId": 6,
+    "ZoneId": 1006,
     "Icon": 37055,
+    "ItemDefinitionIds": [17189],
+    "ExitObjectId": 1280442109,
+    "ExitPosition": [571.8, 0.0, 557.49, 0],
     "SpawnPosition": [566.9, 0, 557.1, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -86,8 +102,9 @@
   {
     "Id": 7,
     "NameId": 510215,
-    "ZoneId": 7,
+    "ZoneId": 1007,
     "Icon": 31263,
+    "ItemDefinitionIds": [],
     "SpawnPosition": [675.4, 0, 410.4, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -100,8 +117,11 @@
   {
     "Id": 8,
     "NameId": 69965,
-    "ZoneId": 8,
+    "ZoneId": 1008,
     "Icon": 33638,
+    "ItemDefinitionIds": [10338],
+    "ExitObjectId": 1278630108,
+    "ExitPosition": [448.46, -1.0, 432.27, 0],
     "SpawnPosition": [445.6, -1.02, 431.4, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -114,8 +134,11 @@
   {
     "Id": 9,
     "NameId": 69964,
-    "ZoneId": 9,
+    "ZoneId": 1009,
     "Icon": 33445,
+    "ItemDefinitionIds": [17182],
+    "ExitObjectId": 1278724131,
+    "ExitPosition": [448.32, -1.0, 432.29, 0],
     "SpawnPosition": [445.6, -1.02, 431.4, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -128,8 +151,9 @@
   {
     "Id": 10,
     "NameId": 8322,
-    "ZoneId": 10,
+    "ZoneId": 1010,
     "Icon": 33121,
+    "ItemDefinitionIds": [10386],
     "SpawnPosition": [368.1, 25.2, 426.2, 0],
     "SpawnRotation": [-0.63, -1, 0, 0],
     "BuildAreas": [
@@ -142,8 +166,11 @@
   {
     "Id": 14,
     "NameId": 8320,
-    "ZoneId": 14,
+    "ZoneId": 1014,
     "Icon": 32638,
+    "ItemDefinitionIds": [10384],
+    "ExitObjectId": 1280250893,
+    "ExitPosition": [577.05, 50.53, 519.1, 0],
     "SpawnPosition": [568.8, 50.8, 517.9, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -156,8 +183,9 @@
   {
     "Id": 15,
     "NameId": 69977,
-    "ZoneId": 15,
+    "ZoneId": 1015,
     "Icon": 33969,
+    "ItemDefinitionIds": [17195],
     "SpawnPosition": [398.07, 3.1, 537.6, 0],
     "SpawnRotation": [-1, 0.57, 0, 0],
     "BuildAreas": [
@@ -170,8 +198,9 @@
   {
     "Id": 16,
     "NameId": 69973,
-    "ZoneId": 16,
+    "ZoneId": 1016,
     "Icon": 33599,
+    "ItemDefinitionIds": [17191],
     "SpawnPosition": [378.6, 8.8, 427.8, 0],
     "SpawnRotation": [1, 0, 0, 0],
     "BuildAreas": [
@@ -184,8 +213,11 @@
   {
     "Id": 17,
     "NameId": 17432,
-    "ZoneId": 17,
+    "ZoneId": 1017,
     "Icon": 39401,
+    "ItemDefinitionIds": [17183],
+    "ExitObjectId": 1343751235,
+    "ExitPosition": [512.32, -1.0, 496.29, 0],
     "SpawnPosition": [509.5, -0.82, 495.5, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -198,8 +230,11 @@
   {
     "Id": 18,
     "NameId": 441205,
-    "ZoneId": 18,
+    "ZoneId": 1018,
     "Icon": 41068,
+    "ItemDefinitionIds": [],
+    "ExitObjectId": 1352918072,
+    "ExitPosition": [689.53, -0.98, 676.16, 0],
     "SpawnPosition": [684.34, -0.82, 675.6, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -212,8 +247,11 @@
   {
     "Id": 19,
     "NameId": 5185,
-    "ZoneId": 19,
+    "ZoneId": 1019,
     "Icon": 31266,
+    "ItemDefinitionIds": [7486],
+    "ExitObjectId": 1273005753,
+    "ExitPosition": [433.53, -0.99, 420.16, 0],
     "SpawnPosition": [428.4, -0.82, 419.8, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -226,8 +264,11 @@
   {
     "Id": 20,
     "NameId": 69976,
-    "ZoneId": 20,
+    "ZoneId": 1020,
     "Icon": 33617,
+    "ItemDefinitionIds": [17194],
+    "ExitObjectId": 1282841649,
+    "ExitPosition": [576.33, 0.07, 562.88, 0],
     "SpawnPosition": [573.1, 0, 561.6, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -240,8 +281,11 @@
   {
     "Id": 21,
     "NameId": 69967,
-    "ZoneId": 21,
+    "ZoneId": 1021,
     "Icon": 33454,
+    "ItemDefinitionIds": [10999, 17185],
+    "ExitObjectId": 1279237734,
+    "ExitPosition": [576.82, 0.0, 558.16, 0],
     "SpawnPosition": [573.1, 0, 559.8, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -254,8 +298,11 @@
   {
     "Id": 22,
     "NameId": 69966,
-    "ZoneId": 22,
+    "ZoneId": 1022,
     "Icon": 33439,
+    "ItemDefinitionIds": [11110],
+    "ExitObjectId": 1284400714,
+    "ExitPosition": [643.86, 5.16, 557.65, 0],
     "SpawnPosition": [639.77, 5, 557, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -268,8 +315,9 @@
   {
     "Id": 23,
     "NameId": 426811,
-    "ZoneId": 23,
+    "ZoneId": 1023,
     "Icon": 31263,
+    "ItemDefinitionIds": [],
     "SpawnPosition": [255, 8, 230, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -282,8 +330,11 @@
   {
     "Id": 24,
     "NameId": 420151,
-    "ZoneId": 24,
+    "ZoneId": 1024,
     "Icon": 27226,
+    "ItemDefinitionIds": [10337],
+    "ExitObjectId": 1254855129,
+    "ExitPosition": [63.22, 4.68, 53.54, 0],
     "SpawnPosition": [63.2, 4.79, 54.81, 0],
     "SpawnRotation": [0, 1, 0, 0],
     "BuildAreas": [
@@ -296,8 +347,11 @@
   {
     "Id": 25,
     "NameId": 296,
-    "ZoneId": 25,
+    "ZoneId": 1025,
     "Icon": 38460,
+    "ItemDefinitionIds": [17184],
+    "ExitObjectId": 1325788602,
+    "ExitPosition": [82.52, -0.98, -31.07, 0],
     "SpawnPosition": [86, -0.87, -30.9, 0],
     "SpawnRotation": [1, 0, 0, 0],
     "BuildAreas": [
@@ -310,8 +364,11 @@
   {
     "Id": 26,
     "NameId": 6290,
-    "ZoneId": 26,
+    "ZoneId": 1026,
     "Icon": 27229,
+    "ItemDefinitionIds": [2214],
+    "ExitObjectId": 1256837999,
+    "ExitPosition": [447.25, -0.29, 406.3, 0],
     "SpawnPosition": [444.9, -0.4, 405.5, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -324,8 +381,11 @@
   {
     "Id": 27,
     "NameId": 6289,
-    "ZoneId": 27,
+    "ZoneId": 1027,
     "Icon": 27232,
+    "ItemDefinitionIds": [2213],
+    "ExitObjectId": 1256158073,
+    "ExitPosition": [790.77, 0.0, 758.23, 0],
     "SpawnPosition": [792.74, 0, 762.4, 0],
     "SpawnRotation": [0, 1, 0, 0],
     "BuildAreas": [
@@ -338,8 +398,11 @@
   {
     "Id": 28,
     "NameId": 6775,
-    "ZoneId": 28,
+    "ZoneId": 1028,
     "Icon": 34759,
+    "ItemDefinitionIds": [11140],
+    "ExitObjectId": 1291231576,
+    "ExitPosition": [567.09, 100.0, 551.57, 0],
     "SpawnPosition": [560.9, 100, 552.2, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -352,8 +415,11 @@
   {
     "Id": 29,
     "NameId": 404,
-    "ZoneId": 29,
+    "ZoneId": 1029,
     "Icon": 38416,
+    "ItemDefinitionIds": [],
+    "ExitObjectId": 1323724577,
+    "ExitPosition": [440.35, -0.93, 421.66, 0],
     "SpawnPosition": [434.6, -0.8, 421.4, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -366,8 +432,9 @@
   {
     "Id": 30,
     "NameId": 442333,
-    "ZoneId": 30,
+    "ZoneId": 1030,
     "Icon": 44468,
+    "ItemDefinitionIds": [15955],
     "SpawnPosition": [511, 61.6, 416.2, 0],
     "SpawnRotation": [-0.65, 1, 0, 0],
     "BuildAreas": [
@@ -380,8 +447,11 @@
   {
     "Id": 31,
     "NameId": 394,
-    "ZoneId": 31,
+    "ZoneId": 1031,
     "Icon": 38153,
+    "ItemDefinitionIds": [],
+    "ExitObjectId": 1318352063,
+    "ExitPosition": [479.47, 61.66, 451.67, 0],
     "SpawnPosition": [479.9, 61.6, 456, 0],
     "SpawnRotation": [0, 1, 0, 0],
     "BuildAreas": [
@@ -394,8 +464,11 @@
   {
     "Id": 32,
     "NameId": 33944,
-    "ZoneId": 32,
+    "ZoneId": 1032,
     "Icon": 39773,
+    "ItemDefinitionIds": [],
+    "ExitObjectId": 1346888051,
+    "ExitPosition": [624.47, 6.89, 497.9, 0],
     "SpawnPosition": [623.9, 4.8, 503.4, 0],
     "SpawnRotation": [0, 1, 0, 0],
     "BuildAreas": [
@@ -408,8 +481,11 @@
   {
     "Id": 33,
     "NameId": 435461,
-    "ZoneId": 33,
+    "ZoneId": 1033,
     "Icon": 36591,
+    "ItemDefinitionIds": [2215],
+    "ExitObjectId": 1300143577,
+    "ExitPosition": [1412.64, 0.07, 752.29, 0],
     "SpawnPosition": [1409, 0, 750.8, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [
@@ -422,8 +498,9 @@
   {
     "Id": 34,
     "NameId": 5409,
-    "ZoneId": 34,
+    "ZoneId": 1034,
     "Icon": 35450,
+    "ItemDefinitionIds": [11435],
     "SpawnPosition": [1409, 0, 750.8, 0],
     "SpawnRotation": [-1, 0, 0, 0],
     "BuildAreas": [

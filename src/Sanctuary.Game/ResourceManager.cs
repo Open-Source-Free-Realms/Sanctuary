@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 using Microsoft.Extensions.Logging;
+
+using Sanctuary.Core.Collections;
 
 using Sanctuary.Game.Resources;
 using Sanctuary.Game.Resources.Definitions.Rewards;
@@ -13,6 +16,7 @@ public class ResourceManager : IResourceManager
 {
     private ILogger _logger;
     private FileSystemWatcher _fileSystemWatcher;
+    private readonly Dictionary<string, Func<bool>> _reloaders;
 
     public static readonly string BaseDirectory = "Resources";
 
@@ -23,6 +27,9 @@ public class ResourceManager : IResourceManager
     public static readonly string ModelCustomizationMappingsFile = Path.Combine(BaseDirectory, "CharacterCreate", "ModelCustomizationMappings.txt");
 
     public static readonly string ModelsFile = Path.Combine(BaseDirectory, "Models.txt");
+
+    public static readonly string FirstTimeEventsFile = Path.Combine(BaseDirectory, "FirstTimeEvents.txt");
+    public static readonly string MiniGameTutorialsFile = Path.Combine(BaseDirectory, "GameTutorialData.txt");
 
     public static readonly string ClientItemDefinitionsFile = Path.Combine(BaseDirectory, "ClientItemDefinitions.json");
     public static readonly string CollectionsFile = Path.Combine(BaseDirectory, "Collections.json");
@@ -63,6 +70,9 @@ public class ResourceManager : IResourceManager
     public IdToStringLookup SkinToneMappings { get; }
     public IdToStringLookup FacePaintMappings { get; }
     public IdToStringLookup ModelCustomizationMappings { get; }
+
+    public IdToStringLookup FirstTimeEvents { get; }
+    public IdToStringLookup MiniGameTutorials { get; }
 
     public ModelDefinitionCollection Models { get; }
 
@@ -117,6 +127,9 @@ public class ResourceManager : IResourceManager
         FacePaintMappings = new(_logger);
         ModelCustomizationMappings = new(_logger);
 
+        FirstTimeEvents = new(_logger);
+        MiniGameTutorials = new(_logger);
+
         Models = new(_logger);
 
         ClientItemDefinitions = new(_logger);
@@ -150,6 +163,78 @@ public class ResourceManager : IResourceManager
         RewardTables = new(_logger);
         CombatAbilities = new(_logger);
         CombatJobs = new(_logger);
+
+        _reloaders = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["models"] = () => Reload(Models, () => Models.Load(ModelsFile)),
+            ["items"] = () => Reload(ClientItemDefinitions, () => ClientItemDefinitions.Load(ClientItemDefinitionsFile)),
+            ["collections"] = () => Reload(Collections, () => Collections.Load(CollectionsFile)),
+            ["nodepools"] = () => Reload(CollectionNodePools, () => CollectionNodePools.Load(CollectionNodePoolsFile)),
+            ["nodetypes"] = () => Reload(CollectionNodeTypes, () => CollectionNodeTypes.Load(CollectionNodeTypesFile)),
+            ["nodespawns"] = () => Reload(CollectionNodeSpawns, () => CollectionNodeSpawns.Load(CollectionNodeSpawnsDirectory)),
+            ["coinstore"] = () => Reload(CoinStoreItems, () => CoinStoreItems.Load(CoinStoreItemsFile)),
+            ["itemclasses"] = () => Reload(ItemClasses, () => ItemClasses.Load(ItemClassesFile)),
+            ["itemcategories"] = () => Reload(ItemCategories, () => ItemCategories.Load(ItemCategoriesFile)),
+            ["itemcategorygroups"] = () => Reload(ItemCategoryGroups, () => ItemCategoryGroups.Load(ItemCategoryGroupsFile)),
+            ["stores"] = () => Reload(Stores, () => Stores.Load(StoresFile) && Stores.LoadBundles(StoreBundlesFile)),
+            ["bundlegroups"] = () => Reload(StoreBundleGroups, () => StoreBundleGroups.Load(StoreBundleGroupsFile)),
+            ["bundlecategories"] = () => Reload(StoreBundleCategories, () => StoreBundleCategories.Load(StoreBundleCategoriesFile)),
+            ["bundlecategorygroups"] = () => Reload(StoreBundleCategoryGroups, () => StoreBundleCategoryGroups.Load(StoreBundleCategoryGroupsFile)),
+            ["houses"] = () => Reload(Houses, () => Houses.Load(HousesFile)),
+            ["mounts"] = () => Reload(Mounts, () => Mounts.Load(MountsFile)),
+            ["profiles"] = () => Reload(Profiles, () => Profiles.Load(ProfilesFile)),
+            ["quickchats"] = () => Reload(QuickChats, () => QuickChats.Load(QuickChatsFile)),
+            ["titles"] = () => Reload(PlayerTitles, () => PlayerTitles.Load(PlayerTitlesFile)),
+            ["pois"] = () => Reload(PointOfInterests, () => PointOfInterests.Load(PointOfInterestsFile)),
+            ["npcs"] = () => Reload(Npcs, () => Npcs.Load(NpcsFile)),
+            ["rewards"] = () => Reload(RewardTables, () => RewardTables.Load(RewardTablesFile)),
+            ["abilities"] = () => Reload(CombatAbilities, () => CombatAbilities.Load(CombatAbilitiesFile)),
+            ["jobs"] = () => Reload(CombatJobs, () => CombatJobs.Load(CombatJobsFile)),
+            ["namefilter"] = () => NameFilter.Load(NameFilterFile),
+            ["firsttimeevents"] = () => Reload(FirstTimeEvents, () => FirstTimeEvents.Load(FirstTimeEventsFile)),
+            ["minigametutorials"] = () => Reload(MiniGameTutorials, () => MiniGameTutorials.Load(MiniGameTutorialsFile))
+        };
+    }
+
+    public IEnumerable<string> ReloadableResources => _reloaders.Keys;
+
+    public bool TryReload(string name)
+    {
+        if (!_reloaders.TryGetValue(name, out var reload))
+            return false;
+
+        _fileSystemWatcher.EnableRaisingEvents = false;
+
+        try
+        {
+            return reload();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error reloading resource {name}.", name);
+            return false;
+        }
+        finally
+        {
+            _fileSystemWatcher.EnableRaisingEvents = true;
+        }
+    }
+
+    private static bool Reload<TKey, TValue>(ObservableConcurrentDictionary<TKey, TValue> collection, Func<bool> load) where TKey : notnull
+    {
+        var previous = collection.ToList();
+
+        collection.Clear();
+
+        if (load())
+            return true;
+
+        collection.Clear();
+
+        foreach (var entry in previous)
+            collection.TryAdd(entry.Key, entry.Value);
+
+        return false;
     }
 
     public bool Load()
@@ -170,6 +255,12 @@ public class ResourceManager : IResourceManager
             return false;
 
         if (!ModelCustomizationMappings.Load(ModelCustomizationMappingsFile))
+            return false;
+
+        if (!FirstTimeEvents.Load(FirstTimeEventsFile))
+            return false;
+
+        if (!MiniGameTutorials.Load(MiniGameTutorialsFile))
             return false;
 
         if (!Models.Load(ModelsFile))
@@ -361,6 +452,10 @@ public class ResourceManager : IResourceManager
                 loaded = ModelCustomizationMappings.Load(ModelCustomizationMappingsFile);
             else if (e.FullPath == ModelsFile)
                 loaded = Models.Load(ModelsFile);
+            else if (e.FullPath == FirstTimeEventsFile)
+                loaded = FirstTimeEvents.Load(FirstTimeEventsFile);
+            else if (e.FullPath == MiniGameTutorialsFile)
+                loaded = MiniGameTutorials.Load(MiniGameTutorialsFile);
             else if (e.FullPath == ClientItemDefinitionsFile)
                 loaded = ClientItemDefinitions.Load(ClientItemDefinitionsFile);
             else if (e.FullPath == CollectionsFile)

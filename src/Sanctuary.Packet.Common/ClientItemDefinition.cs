@@ -6,6 +6,11 @@ namespace Sanctuary.Packet.Common;
 
 public class ClientItemDefinition : BaseItemDefinition
 {
+    /// <summary>
+    /// English name from the data file. Server-side only, used for GM lookups.
+    /// </summary>
+    public string? Comment { get; set; }
+
     public int ResellValue { get; set; }
 
     // ModelId

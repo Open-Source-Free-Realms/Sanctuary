@@ -57,6 +57,16 @@ public class DbCharacter
     public int Coins { get; set; }
     public int StationCash { get; set; }
 
+    /// <summary>
+    /// Ids from the client's FirstTimeEvents.txt that this character has already seen.
+    /// </summary>
+    public List<int>? FirstTimeEvents { get; set; }
+
+    /// <summary>
+    /// Ids from the client's GameTutorialData.txt (minigame tutorials) this character has already seen.
+    /// </summary>
+    public List<int>? MiniGameTutorials { get; set; }
+
     public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset? LastLogin { get; set; }
 
@@ -66,6 +76,7 @@ public class DbCharacter
     public ICollection<DbItem> Items { get; set; } = new HashSet<DbItem>();
     public ICollection<DbTitle> Titles { get; set; } = new HashSet<DbTitle>();
     public ICollection<DbMount> Mounts { get; set; } = new HashSet<DbMount>();
+    public ICollection<DbHouse> Houses { get; set; } = new HashSet<DbHouse>();
     public ICollection<DbFriend> Friends { get; set; } = new HashSet<DbFriend>();
     public ICollection<DbIgnore> Ignores { get; set; } = new HashSet<DbIgnore>();
     public ICollection<DbProfile> Profiles { get; set; } = new HashSet<DbProfile>();

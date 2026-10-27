@@ -1,0 +1,22 @@
+{
+  "$type": "Housing",
+  "Id": 1001,
+  "Name": "hsg_emptylot_blackspore_01",
+  "Type": "Housing",
+  "TileSize": 64,
+  "StartLatitude": -4,
+  "StartLongitude": -4,
+  "EndLatitude": 32,
+  "EndLongitude": 32,
+  "SpawnPosition": [
+    444.3,
+    5.2,
+    429.3
+  ],
+  "SpawnRotation": [
+    -1,
+    0,
+    0,
+    0
+  ]
+}

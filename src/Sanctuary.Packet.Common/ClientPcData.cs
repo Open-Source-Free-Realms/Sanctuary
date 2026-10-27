@@ -349,8 +349,17 @@ public class ClientPcData
 
     public Dictionary<int, ClientActionBar> ActionBars = new();
 
-    // public List<int> FirstTimeEvent = new();
-    // public List<int> MiniGameTutorials = new();
+    public bool FirstTimeEventsEnabled = true;
+
+    /// <summary>
+    /// FirstTimeEvents.txt ids already seen; the client won't show these again.
+    /// </summary>
+    public List<int> FirstTimeEvents = new();
+
+    /// <summary>
+    /// GameTutorialData.txt ids already seen.
+    /// </summary>
+    public List<int> MiniGameTutorials = new();
 
     // public Dictionary<int, ClientEffectTag> EffectTags = new();
 
@@ -535,11 +544,10 @@ public class ClientPcData
 
         writer.Write(ActionBars);
 
-        // TODO FirstTimeEvent
-        writer.Write(true); // Enable
-        writer.Write(0);
+        writer.Write(FirstTimeEventsEnabled);
+        writer.Write(FirstTimeEvents);
 
-        writer.Write(0); // TODO MiniGameTutorials
+        writer.Write(MiniGameTutorials);
         writer.Write(0); // TODO EffectTags
 
         writer.Write(PendingNameChanges);

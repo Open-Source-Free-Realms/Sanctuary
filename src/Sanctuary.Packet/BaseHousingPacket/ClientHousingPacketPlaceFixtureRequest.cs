@@ -1,0 +1,43 @@
+﻿using System;
+
+using Sanctuary.Core.IO;
+
+namespace Sanctuary.Packet;
+
+public class ClientHousingPacketPlaceFixtureRequest : BaseHousingPacket, IDeserializable<ClientHousingPacketPlaceFixtureRequest>
+{
+    public new const short OpCode = 1;
+
+    public int ItemGuid;
+    public int ItemDefinitionId;
+    public int TintId;
+    public bool PlaceImmediately;
+
+    public ClientHousingPacketPlaceFixtureRequest() : base(OpCode)
+    {
+    }
+
+    public static bool TryDeserialize(ReadOnlySpan<byte> data, out ClientHousingPacketPlaceFixtureRequest value)
+    {
+        value = new ClientHousingPacketPlaceFixtureRequest();
+
+        var reader = new PacketReader(data);
+
+        if (!value.TryRead(ref reader))
+            return false;
+
+        if (!reader.TryRead(out value.ItemGuid))
+            return false;
+
+        if (!reader.TryRead(out value.ItemDefinitionId))
+            return false;
+
+        if (!reader.TryRead(out value.TintId))
+            return false;
+
+        if (!reader.TryRead(out value.PlaceImmediately))
+            return false;
+
+        return reader.RemainingLength == 0;
+    }
+}

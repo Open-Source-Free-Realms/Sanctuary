@@ -8,8 +8,10 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game.Entities;
@@ -226,7 +228,7 @@ public class ZoneManager : IZoneManager
     }
 
 
-    private static bool PlayerCanAccessZone(BaseZoneDefinition definition, ulong? ownerId) => definition switch
+    private bool PlayerCanAccessZone(BaseZoneDefinition definition, ulong? ownerId) => definition switch
     {
         // NOTE: One day, we may need to worry about code that tries to allow a player into a zone
         // they're not aloud to be inside of (e.g., a private(?) house. Not sure if that existed).
@@ -236,26 +238,36 @@ public class ZoneManager : IZoneManager
         // This is why we don't pass a player instance here directly.
         WorldZoneDefinition => true,
         CombatZoneDefinition => ownerId is not null,
-        HousingZoneDefinition housing => ownerId is not null && PlayerOwnsHouse(ownerId.Value, housing.Id),
+        HousingZoneDefinition housing => ownerId is not null && HouseExists(ownerId.Value, housing.Id),
         _ => false
     };
 
-    private static bool PlayerOwnsHouse(ulong ownerId, int zoneDefinitionId)
+    /// <summary>
+    /// Housing instances are keyed by the house guid rather than the owning player,
+    /// so visitors join the same instance as the owner.
+    /// </summary>
+    private bool HouseExists(ulong houseGuid, int zoneDefinitionId)
     {
-        // NOTE: I'm not sure I like this function living here...
-        // maybe just throw this DB logic into the 'PlayerCanAccessZone' funciton in
-        // the first place..? Idk
+        if (!GuidHelper.IsHouseGuid(houseGuid))
+            return false;
 
-        // TODO: fetch from DB
+        var houseId = GuidHelper.GetHouseId(houseGuid);
 
-        // using var dbContext = _dbContextFactory.CreateDbContext();
+        var dbContextFactory = _serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
 
-        // var dbHouse = dbContext.Houses.SingleOrDefault(house =>
-        //     house.CharacterId == ownerId && house.ZoneDefinitionId == zoneDefinitionId);
+        using var dbContext = dbContextFactory.CreateDbContext();
 
-        // if (dbHouse is null)
-        //     return false;
+        var definitionId = dbContext.Houses
+            .Where(house => house.Id == houseId)
+            .Select(house => (int?)house.Definition)
+            .SingleOrDefault();
 
-        throw new NotImplementedException();
+        if (definitionId is null)
+            return false;
+
+        if (!_resourceManager.Houses.TryGetValue(definitionId.Value, out var houseDefinition))
+            return false;
+
+        return houseDefinition.ZoneId == zoneDefinitionId;
     }
 }

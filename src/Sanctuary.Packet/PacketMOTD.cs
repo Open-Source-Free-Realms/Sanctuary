@@ -6,8 +6,8 @@ public class PacketMOTD : ISerializablePacket
 {
     public const short OpCode = 87;
 
-    public string Unknown = null!;
-    public string Unknown2 = null!;
+    public string Title = null!;
+    public string Message = null!;
 
     public byte[] Serialize()
     {
@@ -15,8 +15,8 @@ public class PacketMOTD : ISerializablePacket
 
         writer.Write(OpCode);
 
-        writer.Write(Unknown);
-        writer.Write(Unknown2);
+        writer.Write(Title);
+        writer.Write(Message);
 
         return writer.Buffer;
     }

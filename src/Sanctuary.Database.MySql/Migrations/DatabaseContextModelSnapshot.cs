@@ -17,7 +17,7 @@ namespace Sanctuary.Database.MySql.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.9")
+                .HasAnnotation("ProductVersion", "9.0.17")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
@@ -94,6 +94,9 @@ namespace Sanctuary.Database.MySql.Migrations
                         .HasMaxLength(16)
                         .HasColumnType("varchar(16)");
 
+                    b.PrimitiveCollection<string>("FirstTimeEvents")
+                        .HasColumnType("longtext");
+
                     b.Property<string>("FullName")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasMaxLength(33)
@@ -132,6 +135,9 @@ namespace Sanctuary.Database.MySql.Migrations
 
                     b.Property<int>("MembershipStatus")
                         .HasColumnType("int");
+
+                    b.PrimitiveCollection<string>("MiniGameTutorials")
+                        .HasColumnType("longtext");
 
                     b.Property<int>("Model")
                         .HasColumnType("int");
@@ -263,6 +269,111 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.HasIndex("GuildId");
 
                     b.ToTable("GuildMembers");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbHouse", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint unsigned");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<ulong>("Id"));
+
+                    b.Property<ulong>("CharacterId")
+                        .HasColumnType("bigint unsigned");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<int>("Definition")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsFloraAllowed")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTimeOffset?>("LastVisited")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)");
+
+                    b.Property<int>("NameId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("PetAutospawn")
+                        .HasColumnType("tinyint(1)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId");
+
+                    b.HasIndex("Definition", "CharacterId")
+                        .IsUnique();
+
+                    b.ToTable("Houses");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbHouseFixture", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint unsigned");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<ulong>("Id"));
+
+                    b.Property<DateTimeOffset>("Created")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<int>("Definition")
+                        .HasColumnType("int");
+
+                    b.Property<ulong>("HouseId")
+                        .HasColumnType("bigint unsigned");
+
+                    b.Property<float>("PositionX")
+                        .HasColumnType("float");
+
+                    b.Property<float>("PositionY")
+                        .HasColumnType("float");
+
+                    b.Property<float>("PositionZ")
+                        .HasColumnType("float");
+
+                    b.Property<float>("RotationW")
+                        .HasColumnType("float");
+
+                    b.Property<float>("RotationX")
+                        .HasColumnType("float");
+
+                    b.Property<float>("RotationY")
+                        .HasColumnType("float");
+
+                    b.Property<float>("RotationZ")
+                        .HasColumnType("float");
+
+                    b.Property<float>("Scale")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasDefaultValue(1f);
+
+                    b.Property<int>("Tint")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HouseId");
+
+                    b.ToTable("HouseFixtures");
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbIgnore", b =>
@@ -452,6 +563,174 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbWorldEvent", b =>
+                {
+                    b.Property<string>("Key")
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.HasKey("Key");
+
+                    b.ToTable("WorldEvents");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbWorldFixture", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint unsigned");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<ulong>("Id"));
+
+                    b.Property<DateTimeOffset>("Created")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<ulong?>("CreatedBy")
+                        .HasColumnType("bigint unsigned");
+
+                    b.Property<int>("Definition")
+                        .HasColumnType("int");
+
+                    b.Property<float>("PositionX")
+                        .HasColumnType("float");
+
+                    b.Property<float>("PositionY")
+                        .HasColumnType("float");
+
+                    b.Property<float>("PositionZ")
+                        .HasColumnType("float");
+
+                    b.Property<float>("RotationW")
+                        .HasColumnType("float");
+
+                    b.Property<float>("RotationX")
+                        .HasColumnType("float");
+
+                    b.Property<float>("RotationY")
+                        .HasColumnType("float");
+
+                    b.Property<float>("RotationZ")
+                        .HasColumnType("float");
+
+                    b.Property<float>("Scale")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasDefaultValue(1f);
+
+                    b.Property<string>("Script")
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("Tint")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Zone")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Zone");
+
+                    b.ToTable("WorldFixtures");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbWorldNpc", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint unsigned");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<ulong>("Id"));
+
+                    b.Property<int>("Animation")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Behavior")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Conversation")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<ulong?>("CreatedBy")
+                        .HasColumnType("bigint unsigned");
+
+                    b.Property<int>("Definition")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Disposition")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EventKey")
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)");
+
+                    b.Property<bool>("HideNamePlate")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("ModelId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar(64)");
+
+                    b.Property<int>("NameId")
+                        .HasColumnType("int");
+
+                    b.Property<float>("PositionX")
+                        .HasColumnType("float");
+
+                    b.Property<float>("PositionY")
+                        .HasColumnType("float");
+
+                    b.Property<float>("PositionZ")
+                        .HasColumnType("float");
+
+                    b.Property<float>("RotationW")
+                        .HasColumnType("float");
+
+                    b.Property<float>("RotationX")
+                        .HasColumnType("float");
+
+                    b.Property<float>("RotationY")
+                        .HasColumnType("float");
+
+                    b.Property<float>("RotationZ")
+                        .HasColumnType("float");
+
+                    b.Property<float>("Scale")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("float")
+                        .HasDefaultValue(1f);
+
+                    b.Property<string>("Script")
+                        .HasColumnType("longtext");
+
+                    b.Property<float>("Speed")
+                        .HasColumnType("float");
+
+                    b.Property<float>("WanderRadius")
+                        .HasColumnType("float");
+
+                    b.Property<int>("Zone")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Zone");
+
+                    b.ToTable("WorldNpcs");
+                });
+
             modelBuilder.Entity("DbItemDbProfile", b =>
                 {
                     b.HasOne("Sanctuary.Database.Entities.DbItem", null)
@@ -513,6 +792,28 @@ namespace Sanctuary.Database.MySql.Migrations
                         .IsRequired();
 
                     b.Navigation("Guild");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbHouse", b =>
+                {
+                    b.HasOne("Sanctuary.Database.Entities.DbCharacter", "Character")
+                        .WithMany("Houses")
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Character");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbHouseFixture", b =>
+                {
+                    b.HasOne("Sanctuary.Database.Entities.DbHouse", "House")
+                        .WithMany("Fixtures")
+                        .HasForeignKey("HouseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("House");
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbIgnore", b =>
@@ -582,6 +883,8 @@ namespace Sanctuary.Database.MySql.Migrations
                 {
                     b.Navigation("Friends");
 
+                    b.Navigation("Houses");
+
                     b.Navigation("Ignores");
 
                     b.Navigation("Items");
@@ -602,6 +905,11 @@ namespace Sanctuary.Database.MySql.Migrations
                 {
                     b.Navigation("Character")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbHouse", b =>
+                {
+                    b.Navigation("Fixtures");
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbUser", b =>

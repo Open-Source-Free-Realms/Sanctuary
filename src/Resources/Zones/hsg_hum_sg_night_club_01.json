@@ -1,0 +1,22 @@
+{
+  "$type": "Housing",
+  "Id": 1028,
+  "Name": "hsg_hum_sg_night_club_01",
+  "Type": "Housing",
+  "TileSize": 64,
+  "StartLatitude": -4,
+  "StartLongitude": -4,
+  "EndLatitude": 32,
+  "EndLongitude": 32,
+  "SpawnPosition": [
+    560.9,
+    100,
+    552.2
+  ],
+  "SpawnRotation": [
+    -1,
+    0,
+    0,
+    0
+  ]
+}

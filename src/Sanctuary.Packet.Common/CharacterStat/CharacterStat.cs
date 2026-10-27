@@ -13,6 +13,8 @@ public class CharacterStat : ISerializableType
 
     public CharacterStatId Id => _id;
 
+    public bool IsFloat => _value is float;
+
     public int Int
     {
         get { return (int)_value; }

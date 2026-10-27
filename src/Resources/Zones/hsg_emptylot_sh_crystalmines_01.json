@@ -1,0 +1,22 @@
+{
+  "$type": "Housing",
+  "Id": 1016,
+  "Name": "hsg_emptylot_sh_crystalmines_01",
+  "Type": "Housing",
+  "TileSize": 64,
+  "StartLatitude": -4,
+  "StartLongitude": -4,
+  "EndLatitude": 32,
+  "EndLongitude": 32,
+  "SpawnPosition": [
+    378.6,
+    8.8,
+    427.8
+  ],
+  "SpawnRotation": [
+    1,
+    0,
+    0,
+    0
+  ]
+}

@@ -15,6 +15,7 @@ using Microsoft.Extensions.Logging;
 using Sanctuary.Core.Collections;
 using Sanctuary.Core.Extensions;
 using Sanctuary.Core.IO;
+using Sanctuary.Game.Conversations;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Zones;
@@ -82,6 +83,7 @@ public abstract class BaseZone : IZone, IDisposable
 
     public IScriptManager ScriptManager => _scriptManager;
     public ScriptRuntime ScriptRuntime => _scriptRuntime;
+    public INpcContentManager NpcContent { get; }
 
     public Pathfinder<MapNode>? Pathfinder { get; }
 
@@ -100,6 +102,7 @@ public abstract class BaseZone : IZone, IDisposable
         _logger = loggerFactory.CreateLogger($"Zone {Name} ({Id})");
 
         _scriptManager = serviceProvider.GetRequiredService<IScriptManager>();
+        NpcContent = serviceProvider.GetRequiredService<INpcContentManager>();
         _scriptRuntime = new ScriptRuntime(_logger);
 
         foreach (var script in _zoneDefinition.Scripts ?? [])

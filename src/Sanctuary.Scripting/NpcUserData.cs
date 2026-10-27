@@ -56,6 +56,38 @@ internal sealed class NpcUserData(IScriptableNpc npc) : ILuaUserData
         return new ValueTask<int>(context.Return());
     });
 
+    private static readonly LuaFunction EmoteFunction = new("emote", static (context, cancellationToken) =>
+    {
+        var self = context.GetArgument<NpcUserData>(0);
+        var animationId = context.GetArgument<int>(1);
+        var loop = context.ArgumentCount > 2 && context.GetArgument<bool>(2);
+
+        self._npc.Emote(animationId, loop);
+
+        return new ValueTask<int>(context.Return());
+    });
+
+    private static readonly LuaFunction FaceFunction = new("face", static (context, cancellationToken) =>
+    {
+        var self = context.GetArgument<NpcUserData>(0);
+        var player = context.GetArgument<PlayerUserData>(1);
+
+        self._npc.Face(player.Player);
+
+        return new ValueTask<int>(context.Return());
+    });
+
+    private static readonly LuaFunction StartConversationFunction = new("startConversation", static (context, cancellationToken) =>
+    {
+        var self = context.GetArgument<NpcUserData>(0);
+        var player = context.GetArgument<PlayerUserData>(1);
+        int? nodeId = context.ArgumentCount > 2 ? context.GetArgument<int>(2) : null;
+
+        self._npc.StartConversation(player.Player, nodeId);
+
+        return new ValueTask<int>(context.Return());
+    });
+
     #endregion
 
     private static readonly LuaTable SharedMetatable = BuildMetatable();
@@ -85,6 +117,9 @@ internal sealed class NpcUserData(IScriptableNpc npc) : ILuaUserData
                 "say" => SayFunction,
                 "sayLocalized" => SayLocalizedFunction,
                 "moveTo" => MoveToFunction,
+                "emote" => EmoteFunction,
+                "face" => FaceFunction,
+                "startConversation" => StartConversationFunction,
                 _ => LuaValue.Nil
             };
 

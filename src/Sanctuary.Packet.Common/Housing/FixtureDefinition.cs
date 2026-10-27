@@ -9,7 +9,11 @@ public class FixtureDefinition : ISerializableType
     public int Id;
     public int ItemDefinitionId;
 
-    public int Unknown3;
+    /// <summary>
+    /// How the fixture is placed. The client only moves the placement preview with the
+    /// mouse for 1 (regular furniture), 14 and 15.
+    /// </summary>
+    public int PlacementType;
 
     public int ModelId;
 
@@ -52,7 +56,10 @@ public class FixtureDefinition : ISerializableType
     public float Unknown14;
     public float Unknown15;
 
-    public bool Unknown16;
+    /// <summary>
+    /// Lets the client move the placement preview with the mouse and place it.
+    /// </summary>
+    public bool IsPlaceable;
     public bool Unknown17;
     public bool Unknown18;
     public bool Unknown19;
@@ -62,7 +69,7 @@ public class FixtureDefinition : ISerializableType
         writer.Write(Id);
         writer.Write(ItemDefinitionId);
 
-        writer.Write(Unknown3);
+        writer.Write(PlacementType);
 
         writer.Write(ModelId);
 
@@ -83,7 +90,7 @@ public class FixtureDefinition : ISerializableType
         writer.Write(Unknown14);
         writer.Write(Unknown15);
 
-        writer.Write(Unknown16);
+        writer.Write(IsPlaceable);
         writer.Write(Unknown17);
         writer.Write(Unknown18);
         writer.Write(Unknown19);

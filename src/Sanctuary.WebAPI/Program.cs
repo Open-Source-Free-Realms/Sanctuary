@@ -39,6 +39,9 @@ builder.Services.AddOptionsWithValidateOnStart<WebAPIOptions>()
 // Database
 builder.Services.AddDatabase(builder.Configuration);
 
+// Client asset delivery
+builder.Services.AddAssetEndpointServices();
+
 // Logging
 builder.Logging.ClearProviders();
 
@@ -71,5 +74,6 @@ app.UseHttpLogging();
 
 app.MapAuthEndpoints();
 app.MapPortraitEndpoints();
+app.MapAssetEndpoints();
 
 app.Run();

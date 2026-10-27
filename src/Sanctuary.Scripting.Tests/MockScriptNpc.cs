@@ -1,4 +1,5 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 
 using Microsoft.Extensions.Logging;
 
@@ -29,6 +30,20 @@ internal class MockScriptNpc(IScriptableZone _zone) : IScriptableNpc
     }
 
     public void MoveTo(float x, float y, float z, bool direct)
+    {
+        throw new NotImplementedException();
+    }
+
+    public List<(int AnimationId, bool Loop)> Emotes { get; } = [];
+
+    public void Emote(int animationId, bool loop) => Emotes.Add((animationId, loop));
+
+    public void Face(IScriptablePlayer player)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void StartConversation(IScriptablePlayer player, int? nodeId)
     {
         throw new NotImplementedException();
     }

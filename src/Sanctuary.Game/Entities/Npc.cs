@@ -8,6 +8,8 @@ using System.Numerics;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Collections;
+using Sanctuary.Game.Conversations;
+using Sanctuary.Game.Interactions;
 using Sanctuary.Game.Pathfinding;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Zones;
@@ -49,6 +51,36 @@ public class Npc : IScriptableNpc, IEntity
     public int TerrainObjectId { get; set; }
     public bool ReplaceTerrainObject { get; set; }
 
+    /// <summary>
+    /// Asks the client to collide with the model (used for placed furniture).
+    /// </summary>
+    public bool HasCollision { get; set; }
+
+    /// <summary>
+    /// Furniture in a house, which is edited with the house's own tools.
+    /// </summary>
+    public bool IsHouseFixture { get; set; }
+
+    /// <summary>
+    /// A prop placed into a world zone by a GM (a world fixture).
+    /// </summary>
+    public bool IsWorldProp { get; set; }
+
+    /// <summary>
+    /// GM-authored script (see INpcContentManager).
+    /// </summary>
+    public ScriptSandbox? GmScript { get; set; }
+
+    /// <summary>
+    /// GM-authored conversation (see INpcContentManager).
+    /// </summary>
+    public Conversation? Conversation { get; set; }
+
+    /// <summary>
+    /// Players currently inside the script's onProximity range. Lock it to use it.
+    /// </summary>
+    public HashSet<ulong> NearbyPlayers { get; } = [];
+
     public string? TextureAlias { get; set; }
     public string? TintAlias { get; set; }
     public int TintId { get; set; }
@@ -74,6 +106,19 @@ public class Npc : IScriptableNpc, IEntity
     public bool OpensAtlas { get; set; }
     public bool AutoSelectSingleInteraction { get; set; }
     public List<InteractionData> Interactions { get; } = [];
+
+    /// <summary>
+    /// Clicking does something for a regular player.
+    /// </summary>
+    public virtual bool HasInteraction => Interactions.Count > 0 || InteractAction is not null || OpensAtlas;
+
+    public bool HasNameplate => !HideNamePlate && (!string.IsNullOrEmpty(Name) || NameId != 0);
+
+    /// <summary>
+    /// Whether the client shows its glow and "Press X or click" prompt: only for NPCs that do something
+    /// when clicked and are either named or a deliberate clickable object with their own cursor (e.g. a house exit).
+    /// </summary>
+    public bool ShowsInteractPrompt => IsInteractable && HasInteraction && (HasNameplate || CursorId != 0);
 
     public int MovementType => 2;
 
@@ -108,6 +153,13 @@ public class Npc : IScriptableNpc, IEntity
 
     public void OnInteract(Player player)
     {
+        if (player.IsInGodMode && RefereeNpcInteractions.CanEdit(this))
+        {
+            RefereeEditorHelper.Select(player, this);
+            player.SendTunneled(InteractionMenuHelper.GetInteractionListPacket(Guid, Name, RefereeNpcInteractions.GetMenu(this)));
+            return;
+        }
+
         if (Interactions.Count > 0)
         {
             if (InteractionMenuHelper.CanInteract(this, player))
@@ -163,6 +215,11 @@ public class Npc : IScriptableNpc, IEntity
     public void UpdateEverySecond()
     {
         UpdateEverySecondAction?.Invoke();
+
+        UpdateBehavior();
+
+        if (GmScript is not null || Conversation is not null)
+            Zone.NpcContent.OnSecond(this);
 
         if (!_scripts.IsEmpty)
             GetOrCreateScriptContext().FireEvent("second");
@@ -287,7 +344,7 @@ public class Npc : IScriptableNpc, IEntity
             Unknown39 = default,
             Unknown40 = default,
             Unknown41 = default,
-            Unknown42 = default,
+            Unknown42 = HasCollision,
 
             HasTilt = default,
 
@@ -301,7 +358,7 @@ public class Npc : IScriptableNpc, IEntity
 
             ImageSetId = ImageSetId,
 
-            IsInteractable = IsInteractable,
+            IsInteractable = ShowsInteractPrompt,
 
             RiderGuid = default,
 
@@ -456,6 +513,16 @@ public class Npc : IScriptableNpc, IEntity
     {
         MoveTo(new Vector3(x, y, z), direct);
     }
+
+    public void Emote(int animationId, bool loop) => PlayAnimation(animationId, loop);
+
+    public void Face(IScriptablePlayer player) => FaceTowards(new Vector4(player.Position.x, player.Position.y, player.Position.z, 1f));
+
+    public void StartConversation(IScriptablePlayer player, int? nodeId)
+    {
+        if (player is ScriptPlayer scriptPlayer)
+            Zone.NpcContent.StartConversation(scriptPlayer.Player, this, nodeId);
+    }
     
     #endregion
 
@@ -486,6 +553,112 @@ public class Npc : IScriptableNpc, IEntity
 
         Zone.TryRemoveNpc(Guid);
     }
+
+    #region Referee editing
+
+    private const float FollowDistance = 3f;
+
+    private NpcBehavior _behavior;
+    private ulong _followGuid;
+    private float _wanderRadius;
+    private int _wanderCooldown;
+
+    public NpcBehavior Behavior => _behavior;
+
+    public float WanderRadius => _wanderRadius;
+
+    public bool IsMoving => _path.TryGetCurrentTarget(out _);
+
+    /// <summary>
+    /// Turns in place to face the position. Returns false if it is (almost) on top of us.
+    /// </summary>
+    public bool FaceTowards(Vector4 position)
+    {
+        var direction = new Vector3(position.X - Position.X, 0f, position.Z - Position.Z);
+
+        if (direction.LengthSquared() < 0.0001f)
+            return false;
+
+        UpdatePosition(Position, Quaternion.CreateFromYawPitchRoll(MathF.Atan2(direction.X, direction.Z), 0f, 0f));
+        return true;
+    }
+
+    public void StopMoving() => _path.Set(new Queue<Vector3>());
+
+    public void SetBehavior(NpcBehavior behavior, ulong followGuid = 0, float wanderRadius = 10f)
+    {
+        _behavior = behavior;
+        _followGuid = followGuid;
+        _wanderRadius = wanderRadius;
+        _wanderCooldown = 0;
+
+        if (behavior == NpcBehavior.Stay)
+            StopMoving();
+    }
+
+    private void UpdateBehavior()
+    {
+        switch (_behavior)
+        {
+            case NpcBehavior.Follow:
+                if (!VisiblePlayers.TryGetValue(_followGuid, out var target))
+                {
+                    SetBehavior(NpcBehavior.Stay);
+                    return;
+                }
+
+                if (Vector4.Distance(Position, target.Position) > FollowDistance)
+                    MoveTo(new Vector3(target.Position.X, target.Position.Y, target.Position.Z));
+                break;
+
+            case NpcBehavior.Wander:
+                if (IsMoving || --_wanderCooldown > 0)
+                    return;
+
+                var angle = Random.Shared.NextSingle() * MathF.Tau;
+                var distance = Random.Shared.NextSingle() * _wanderRadius;
+                var home = SpawnPosition == default ? Position : SpawnPosition;
+
+                MoveTo(new Vector3(home.X + MathF.Cos(angle) * distance, home.Y, home.Z + MathF.Sin(angle) * distance));
+
+                _wanderCooldown = Random.Shared.Next(3, 8);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Plays an animation for everyone in view. A looping one also becomes the animation new viewers see.
+    /// </summary>
+    public void PlayAnimation(int animationId, bool loop)
+    {
+        if (loop)
+            Animation = animationId;
+
+        var packet = new PlayerUpdatePacketSetAnimation
+        {
+            Guid = Guid,
+            AnimationId = animationId,
+            Flags = (byte)(loop ? 1 : 0)
+        };
+
+        foreach (var visiblePlayer in VisiblePlayers)
+            visiblePlayer.Value.SendTunneled(packet);
+    }
+
+    /// <summary>
+    /// Re-sends this NPC to everyone in view, so changes that have no update packet of their own
+    /// (name, scale, model, disposition, nameplate) show without a relog.
+    /// </summary>
+    public void RefreshForVisiblePlayers()
+    {
+        foreach (var visiblePlayer in VisiblePlayers)
+        {
+            visiblePlayer.Value.OnRemoveVisibleNpcs([this]);
+            visiblePlayer.Value.OnAddVisibleNpcs([this]);
+        }
+    }
+
+    #endregion
 
     public void MoveTo(Vector3 goalPosition, bool direct = false)
     {

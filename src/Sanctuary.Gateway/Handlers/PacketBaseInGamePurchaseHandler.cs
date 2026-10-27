@@ -40,7 +40,15 @@ public static class PacketBaseInGamePurchaseHandler
             PacketInGamePurchaseAccountInfoRequest.OpCode => PacketInGamePurchaseAccountInfoRequestHandler.HandlePacket(connection, reader.Span),
             PacketInGamePurchaseStoreBundleContentRequest.OpCode => PacketInGamePurchaseStoreBundleContentRequestHandler.HandlePacket(connection, reader.Span),
             InGamePurchaseUpdateItemRequirementsRequest.OpCode => InGamePurchaseUpdateItemRequirementsRequestHandler.HandlePacket(connection),
-            _ => false
+            _ => LogUnhandled(opCode, reader)
         };
+    }
+
+    private static bool LogUnhandled(short opCode, PacketReader reader)
+    {
+        // Client statistics, server status, merchant and Station Cash product requests are informational or unused here.
+        _logger.LogDebug("Unhandled in-game purchase packet {opCode}. ( Data: {data} )", opCode, Convert.ToHexString(reader.Span));
+
+        return true;
     }
 }

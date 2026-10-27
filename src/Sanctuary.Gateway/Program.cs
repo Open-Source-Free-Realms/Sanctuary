@@ -12,6 +12,7 @@ using Sanctuary.Core.Configuration;
 using Sanctuary.Core.Extensions;
 using Sanctuary.Database;
 using Sanctuary.Game;
+using Sanctuary.Game.Conversations;
 using Sanctuary.Gateway;
 using Sanctuary.Scripting;
 using Sanctuary.UdpLibrary.Configuration;
@@ -101,6 +102,10 @@ builder.ConfigureServices((hostBuilderContext, serviceCollection) =>
     serviceCollection.AddSingleton<IInteractionManager, InteractionManager>();
     serviceCollection.AddSingleton<IChatCommandManager, ChatCommandManager>();
     serviceCollection.AddSingleton<IRewardManager, RewardManager>();
+    serviceCollection.AddSingleton<IHousingManager, HousingManager>();
+    serviceCollection.AddSingleton<IServerSettings, ServerSettings>();
+    serviceCollection.AddSingleton<IWorldEventManager, WorldEventManager>();
+    serviceCollection.AddSingleton<INpcContentManager, NpcContentManager>();
 });
 
 builder.ConfigureLogging((hostBuilderContext, loggingBuilder) =>

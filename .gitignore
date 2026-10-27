@@ -438,3 +438,7 @@ FodyWeavers.xsd
 # Ignore JetBrains Rider/ReSharper temporary files
 .idea/
 *.sln.iml
+
+# Built client mods: modified Free Realms UI movies, built locally from your own client assets.
+# See ClientMods/README.md.
+src/Resources/ClientMods/

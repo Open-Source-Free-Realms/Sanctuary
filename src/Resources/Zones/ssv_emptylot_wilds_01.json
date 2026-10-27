@@ -1,0 +1,22 @@
+{
+  "$type": "Housing",
+  "Id": 1031,
+  "Name": "ssv_emptylot_wilds_01",
+  "Type": "Housing",
+  "TileSize": 64,
+  "StartLatitude": -4,
+  "StartLongitude": -4,
+  "EndLatitude": 32,
+  "EndLongitude": 32,
+  "SpawnPosition": [
+    479.9,
+    61.6,
+    456
+  ],
+  "SpawnRotation": [
+    0,
+    1,
+    0,
+    0
+  ]
+}

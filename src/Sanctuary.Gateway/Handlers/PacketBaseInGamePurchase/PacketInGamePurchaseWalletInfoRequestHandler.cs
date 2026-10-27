@@ -23,6 +23,16 @@ public static class PacketInGamePurchaseWalletInfoRequestHandler
     {
         _logger.LogTrace("Received {name} packet.", nameof(PacketInGamePurchaseWalletInfoRequest));
 
+        SendWalletInfo(connection);
+
+        return true;
+    }
+
+    /// <summary>
+    /// Also used to refresh the marketplace's Station Cash balance after a purchase.
+    /// </summary>
+    public static void SendWalletInfo(GatewayConnection connection)
+    {
         var packetInGamePurchaseWalletInfoResponse = new PacketInGamePurchaseWalletInfoResponse
         {
             ErrorCode = 1,
@@ -37,7 +47,5 @@ public static class PacketInGamePurchaseWalletInfoRequestHandler
         };
 
         connection.SendTunneled(packetInGamePurchaseWalletInfoResponse);
-
-        return true;
     }
 }

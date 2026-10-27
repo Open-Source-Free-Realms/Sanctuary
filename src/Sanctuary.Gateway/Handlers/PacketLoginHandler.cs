@@ -23,6 +23,7 @@ public static class PacketLoginHandler
     private static LoginClient _loginClient = null!;
     private static GatewayServerOptions _options = null!;
     private static IResourceManager _resourceManager = null!;
+    private static IServerSettings _serverSettings = null!;
     private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
@@ -33,6 +34,7 @@ public static class PacketLoginHandler
         _loginClient = serviceProvider.GetRequiredService<LoginClient>();
 
         _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
+        _serverSettings = serviceProvider.GetRequiredService<IServerSettings>();
         _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
 
         var options = serviceProvider.GetRequiredService<IOptionsMonitor<GatewayServerOptions>>();
@@ -135,7 +137,18 @@ public static class PacketLoginHandler
                 return true;
             }
         }
-      
+
+        if (_serverSettings.IsLocked && !character.User.IsMod && !character.User.IsAdmin)
+        {
+            _logger.LogInformation("{connection} was refused while the server is locked. ( Guid: {guid} )", connection, packet.Guid);
+
+            connection.Send(packetLoginReply);
+
+            connection.Disconnect();
+
+            return true;
+        }
+
         var orphanedIgnores = character.Ignores
             .Where(x => x.IgnoreCharacter is null)
             .ToList();
@@ -205,6 +218,7 @@ public static class PacketLoginHandler
         connection.SendInitializationParameters();
         connection.SendZoneDetails();
         connection.ClientGameSettings();
+        connection.SendMotd();
         connection.SendItemDefinitions();
 
         // TODO

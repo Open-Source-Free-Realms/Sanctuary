@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Numerics;
 
 using Sanctuary.Game.Entities;
@@ -43,18 +43,40 @@ public static class InteractionMenuHelper
         return commandPacketInteractionList;
     }
 
-    public static PlayerUpdatePacketNpcRelevance GetNpcRelevancePacket(IEnumerable<Npc> npcs)
+    /// <summary>
+    /// Cursor shown on NPCs that have none of their own, so referees can click them (see RefereeNpcInteractions).
+    /// </summary>
+    public const byte RefereeCursorId = 17;
+
+    public static PlayerUpdatePacketNpcRelevance GetNpcRelevancePacket(IEnumerable<Npc> npcs, bool isReferee = false)
     {
         var playerUpdatePacketNpcRelevance = new PlayerUpdatePacketNpcRelevance();
         foreach (var npc in npcs)
         {
-            if (npc is Mount || (npc.HasCursor is null && npc.CursorId == 0))
+            if (npc is Mount)
+                continue;
+
+            var hasCursor = npc.HasCursor ?? npc.CursorId != 0;
+
+            if (!hasCursor && isReferee && Interactions.RefereeNpcInteractions.CanEdit(npc))
+            {
+                playerUpdatePacketNpcRelevance.Entries.Add(new PlayerUpdatePacketNpcRelevance.Entry
+                {
+                    Guid = npc.Guid,
+                    HasCursor = true,
+                    CursorId = RefereeCursorId,
+                    Unknown2 = npc.RelevanceUnknown2
+                });
+                continue;
+            }
+
+            if (npc.HasCursor is null && npc.CursorId == 0)
                 continue;
 
             playerUpdatePacketNpcRelevance.Entries.Add(new PlayerUpdatePacketNpcRelevance.Entry
             {
                 Guid = npc.Guid,
-                HasCursor = npc.HasCursor ?? npc.CursorId != 0,
+                HasCursor = hasCursor,
                 CursorId = npc.CursorId,
                 Unknown2 = npc.RelevanceUnknown2
             });

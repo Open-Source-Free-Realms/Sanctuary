@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -51,8 +51,16 @@ public static class ProfileHelper
     public static bool AddSpecialProfile(DbCharacter character, DatabaseContext dbContext,
         IResourceManager resourceManager, ILogger logger, SpecialProfileIds profileId)
     {
-        int id = (int)profileId;
+        return AddProfile(character, dbContext, resourceManager, logger, (int)profileId, 20);
+    }
 
+    /// <summary>
+    /// Adds a profile with its default items. <paramref name="character"/> must be loaded
+    /// with its Profiles and Items.
+    /// </summary>
+    public static bool AddProfile(DbCharacter character, DatabaseContext dbContext,
+        IResourceManager resourceManager, ILogger logger, int id, int level)
+    {
         if (!resourceManager.Profiles.TryGetValue(id, out var profileData))
         {
             logger.LogWarning("Profile with ID {profileId} does not exist in the resource manager.", id);
@@ -70,7 +78,7 @@ public static class ProfileHelper
         {
             CharacterId = character.Id,
             Id = id,
-            Level = 20
+            Level = level
         };
 
         var existingItemIds = character.Items.Select(x => x.Id).ToHashSet();

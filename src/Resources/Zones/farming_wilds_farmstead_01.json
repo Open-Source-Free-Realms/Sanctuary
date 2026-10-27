@@ -1,0 +1,22 @@
+{
+  "$type": "Housing",
+  "Id": 1034,
+  "Name": "farming_wilds_farmstead_01",
+  "Type": "Housing",
+  "TileSize": 64,
+  "StartLatitude": -4,
+  "StartLongitude": -4,
+  "EndLatitude": 32,
+  "EndLongitude": 32,
+  "SpawnPosition": [
+    1409,
+    0,
+    750.8
+  ],
+  "SpawnRotation": [
+    -1,
+    0,
+    0,
+    0
+  ]
+}

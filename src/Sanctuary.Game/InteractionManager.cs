@@ -30,6 +30,21 @@ public class InteractionManager : IInteractionManager
 
         foreach (var interactionType in executingAssembly.GetTypes())
         {
+            if (interactionType.IsAbstract || interactionType.IsInterface)
+                continue;
+
+            if (typeof(IInteractionProvider).IsAssignableFrom(interactionType))
+            {
+                if (!TryAddProvider(interactionType))
+                    return false;
+
+                continue;
+            }
+
+            // Provided by an IInteractionProvider instead.
+            if (interactionType == typeof(DelegateInteraction))
+                continue;
+
             if (!interactionType.GetInterfaces().Any(i => i.IsAssignableFrom(typeof(IInteraction))))
                 continue;
 
@@ -45,6 +60,24 @@ public class InteractionManager : IInteractionManager
         }
 
         _logger.LogInformation("Loaded {count} interactions.", _interactions.Count);
+
+        return true;
+    }
+
+    private bool TryAddProvider(Type providerType)
+    {
+        var provider = ActivatorUtilities.CreateInstance(_serviceProvider, providerType) as IInteractionProvider;
+
+        ArgumentNullException.ThrowIfNull(provider);
+
+        foreach (var interaction in provider.Interactions)
+        {
+            if (!_interactions.TryAdd(interaction.Id, interaction))
+            {
+                _logger.LogWarning("Failed to add interaction. {interaction}", interaction.Id);
+                return false;
+            }
+        }
 
         return true;
     }

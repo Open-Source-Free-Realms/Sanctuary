@@ -1,0 +1,22 @@
+{
+  "$type": "Housing",
+  "Id": 1015,
+  "Name": "hsg_emptylot_sh_batcave_01",
+  "Type": "Housing",
+  "TileSize": 64,
+  "StartLatitude": -4,
+  "StartLongitude": -4,
+  "EndLatitude": 32,
+  "EndLongitude": 32,
+  "SpawnPosition": [
+    398.07,
+    3.1,
+    537.6
+  ],
+  "SpawnRotation": [
+    -1,
+    0.57,
+    0,
+    0
+  ]
+}

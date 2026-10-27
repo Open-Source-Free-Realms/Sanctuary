@@ -1,0 +1,22 @@
+{
+  "$type": "Housing",
+  "Id": 1021,
+  "Name": "hsg_emptylot_wugachug_01",
+  "Type": "Housing",
+  "TileSize": 64,
+  "StartLatitude": -4,
+  "StartLongitude": -4,
+  "EndLatitude": 32,
+  "EndLongitude": 32,
+  "SpawnPosition": [
+    573.1,
+    0,
+    559.8
+  ],
+  "SpawnRotation": [
+    -1,
+    0,
+    0,
+    0
+  ]
+}

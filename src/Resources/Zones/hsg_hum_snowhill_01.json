@@ -1,0 +1,22 @@
+{
+  "$type": "Housing",
+  "Id": 1029,
+  "Name": "hsg_hum_snowhill_01",
+  "Type": "Housing",
+  "TileSize": 64,
+  "StartLatitude": -4,
+  "StartLongitude": -4,
+  "EndLatitude": 32,
+  "EndLongitude": 32,
+  "SpawnPosition": [
+    434.6,
+    -0.8,
+    421.4
+  ],
+  "SpawnRotation": [
+    -1,
+    0,
+    0,
+    0
+  ]
+}

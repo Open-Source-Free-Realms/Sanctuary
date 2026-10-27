@@ -7,9 +7,13 @@ public class HousingPacketZoneData : BaseHousingPacket, ISerializablePacket
 {
     public new const short OpCode = 45;
 
-    public bool IsPreview;
+    /// <summary>
+    /// Turns on the client's housing UI (Housing:SetIsInInstance). Zoning resets it,
+    /// so this packet has to be sent again once the housing zone has loaded.
+    /// </summary>
+    public bool IsInInstance;
 
-    private bool Unused = default;
+    public bool Unknown;
 
     public int HeadSize;
 
@@ -25,8 +29,8 @@ public class HousingPacketZoneData : BaseHousingPacket, ISerializablePacket
 
         Write(writer);
 
-        writer.Write(IsPreview);
-        writer.Write(Unused);
+        writer.Write(IsInInstance);
+        writer.Write(Unknown);
         writer.Write(HeadSize);
 
         InstanceInfo.Serialize(writer);

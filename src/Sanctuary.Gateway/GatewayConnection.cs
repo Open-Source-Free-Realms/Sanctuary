@@ -17,6 +17,7 @@ using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game;
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Gateway.Handlers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -34,6 +35,7 @@ public class GatewayConnection : UdpConnection
     private readonly GatewayServerOptions _options;
     private readonly IServiceProvider _serviceProvider;
     private readonly IResourceManager _resourceManager;
+    private readonly IServerSettings _serverSettings;
     private readonly IDbContextFactory<DatabaseContext> _dbContextFactory;
 
     private ICipher _cipher;
@@ -46,7 +48,7 @@ public class GatewayConnection : UdpConnection
 
     public string Locale { get; set; } = "en_US";
 
-    public GatewayConnection(ILogger<GatewayConnection> logger, IOptions<GatewayServerOptions> options, IZoneManager zoneManager, LoginClient loginClient, GatewayServer gatewayServer, IResourceManager resourceManager, IServiceProvider serviceProvider, IDbContextFactory<DatabaseContext> dbContextFactory, SocketAddress socketAddress, int connectCode) : base(gatewayServer, socketAddress, connectCode)
+    public GatewayConnection(ILogger<GatewayConnection> logger, IOptions<GatewayServerOptions> options, IZoneManager zoneManager, LoginClient loginClient, GatewayServer gatewayServer, IResourceManager resourceManager, IServerSettings serverSettings, IServiceProvider serviceProvider, IDbContextFactory<DatabaseContext> dbContextFactory, SocketAddress socketAddress, int connectCode) : base(gatewayServer, socketAddress, connectCode)
     {
         _logger = logger;
         _options = options.Value;
@@ -54,6 +56,7 @@ public class GatewayConnection : UdpConnection
         _zoneManager = zoneManager;
         _gatewayServer = gatewayServer;
         _resourceManager = resourceManager;
+        _serverSettings = serverSettings;
         _serviceProvider = serviceProvider;
         _dbContextFactory = dbContextFactory;
 
@@ -106,6 +109,9 @@ public class GatewayConnection : UdpConnection
 
         if (!reader.TryRead(out short opCode))
             return;
+
+        if (Player?.PacketLogger is not null)
+            PacketLogHelper.Log(Player.PacketLogger, Player, false, data);
 
         bool handled;
 
@@ -251,6 +257,9 @@ public class GatewayConnection : UdpConnection
         Player.Name.LastName = dbCharacter.LastName ?? string.Empty;
 
         Player.Coins = dbCharacter.Coins;
+
+        Player.FirstTimeEvents = dbCharacter.FirstTimeEvents?.ToList() ?? [];
+        Player.MiniGameTutorials = dbCharacter.MiniGameTutorials?.ToList() ?? [];
 
         Player.Birthday = dbCharacter.Created;
         Player.PlayTime = dbCharacter.PlayTime;
@@ -566,16 +575,15 @@ public class GatewayConnection : UdpConnection
 
     public void ClientGameSettings()
     {
-        var packetClientGameSettings = new PacketClientGameSettings
-        {
-            Unknown = 4,
-            Unknown2 = 7,
-            PowerHourEffectTag = 268,
-            Unknown4 = true,
-            GameTimeScalar = 1.0f
-        };
+        SendTunneled(_serverSettings.CreateClientGameSettings());
+    }
 
-        SendTunneled(packetClientGameSettings);
+    public void SendMotd()
+    {
+        var packetMotd = _serverSettings.CreateMotd();
+
+        if (packetMotd is not null)
+            SendTunneled(packetMotd);
     }
 
     public void SendItemDefinitions()

@@ -6,6 +6,8 @@ using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
 
+using Microsoft.Extensions.Logging;
+
 using Sanctuary.Core.Collections;
 using Sanctuary.Core.IO;
 using Sanctuary.Game;
@@ -47,7 +49,42 @@ public sealed class Player : ClientPcData, IEntity
     public bool IsAdmin { get; set; }
     public bool IsMod { get; set; }
     public ChatCommandRole ChatCommandRole => ChatHelper.GetRoleFromFlags(IsAdmin, IsMod);
+
+    /// <summary>
+    /// Toggled with !godmode. Off by default, so referees see the world as players do until they turn it on.
+    /// </summary>
+    public bool GodMode { get; set; }
+
+    /// <summary>
+    /// Referee editing is live: cursors, glow and GM menus on everything editable.
+    /// </summary>
+    public bool IsInGodMode => GodMode && ChatCommandRole >= ChatCommandRole.Mod;
     public DateTimeOffset? MutedUntil { get; set; }
+
+    /// <summary>
+    /// While set, every packet to and from this player is traced (see !packetlog).
+    /// </summary>
+    public ILogger? PacketLogger { get; set; }
+
+    /// <summary>
+    /// Movement speed to restore on unfreeze; null while not frozen (see !freeze).
+    /// </summary>
+    public float? FrozenMovementSpeed { get; set; }
+
+    /// <summary>
+    /// NPC a referee last clicked; the target of !npc edits.
+    /// </summary>
+    public ulong? SelectedNpcGuid { get; set; }
+
+    /// <summary>
+    /// The NPC conversation (and node) this player has open, if any.
+    /// </summary>
+    public (ulong NpcGuid, int NodeId)? ActiveConversation { get; set; }
+
+    /// <summary>
+    /// Script source a referee is uploading in chunks (!npc script append), until they commit it.
+    /// </summary>
+    public System.Text.StringBuilder? PendingScript { get; set; }
 
     public ClientPcProfile ActiveProfile =>
         Profiles.FirstOrDefault(x => x.Id == ActiveProfileId) ?? Profiles.First();
@@ -122,11 +159,14 @@ public sealed class Player : ClientPcData, IEntity
     {
         var data = serializablePacket.Serialize();
 
-        _connection.Send(UdpChannel.Reliable1, data);
+        SendSerialized(data);
     }
 
     internal void SendSerialized(byte[] data)
     {
+        if (PacketLogger is not null)
+            PacketLogHelper.Log(PacketLogger, this, true, data);
+
         _connection.Send(UdpChannel.Reliable1, data);
     }
 
@@ -367,14 +407,26 @@ public sealed class Player : ClientPcData, IEntity
         if (Zone == destinationZone)
             return true;
 
-        if (Zone is WorldZone)
-        {
-            StartingZonePosition = Position;
-            StartingZoneRotation = Rotation;
-        }
+        return TeleportToZone(destinationZone.DefinitionId, destinationZone.OwnerId, position, rotation);
+    }
 
-        if (!_zoneManager.TryMovePlayerToZone(destinationZone.DefinitionId, destinationZone.OwnerId, this, position, rotation, out var zone))
+    public bool TeleportToZone(int zoneDefinitionId, ulong? ownerId, Vector4 position, Quaternion rotation)
+    {
+        if (Zone.DefinitionId == zoneDefinitionId && Zone.OwnerId == ownerId)
+            return true;
+
+        var previousPosition = Position;
+        var previousRotation = Rotation;
+        var wasInWorldZone = Zone is WorldZone;
+
+        if (!_zoneManager.TryMovePlayerToZone(zoneDefinitionId, ownerId, this, position, rotation, out var zone))
             return false;
+
+        if (wasInWorldZone)
+        {
+            StartingZonePosition = previousPosition;
+            StartingZoneRotation = previousRotation;
+        }
 
         if (_appearanceEffectId != 0 && _effects.TryGetValue(_appearanceEffectId, out var appearanceEffect) && appearanceEffect.ExpiresAt is null)
             RemoveTemporaryAppearance();
@@ -457,10 +509,16 @@ public sealed class Player : ClientPcData, IEntity
             if (npc is Mount)
                 continue;
 
-            SendTunneled(npc.GetAddNpcPacket());
+            var playerUpdatePacketAddNpc = npc.GetAddNpcPacket();
+
+            // Gives referees in god mode the mouseover glow on everything they can edit, props included.
+            if (IsInGodMode && RefereeNpcInteractions.CanEdit(npc))
+                playerUpdatePacketAddNpc.IsInteractable = true;
+
+            SendTunneled(playerUpdatePacketAddNpc);
         }
 
-        var playerUpdatePacketNpcRelevance = InteractionMenuHelper.GetNpcRelevancePacket(npcs);
+        var playerUpdatePacketNpcRelevance = InteractionMenuHelper.GetNpcRelevancePacket(npcs, IsInGodMode);
         if (playerUpdatePacketNpcRelevance.Entries.Count > 0)
             SendTunneled(playerUpdatePacketNpcRelevance);
 
@@ -938,6 +996,12 @@ public sealed class Player : ClientPcData, IEntity
 
     private int MaxEnergy { get; set; } = 100;
 
+    /// <summary>
+    /// Combat ability ids that replace the job kit's basic/special abilities on the toolbar (see !ability).
+    /// </summary>
+    public int? BasicAbilityOverride { get; set; }
+    public int? SpecialAbilityOverride { get; set; }
+
     public int GetEquippedWeaponDefinitionId()
     {
         if (!ActiveProfile.Items.TryGetValue(PrimaryWeaponSlot, out var profileItem))
@@ -1015,8 +1079,8 @@ public sealed class Player : ClientPcData, IEntity
     {
         var mapping = kit.Weapons.FirstOrDefault(w => w.WeaponDefIds.Contains(weaponDefinitionId));
 
-        var basicId = mapping?.BasicAbilityId ?? kit.FallbackBasicAbilityId;
-        var specialId = mapping?.SpecialAbilityId ?? 0;
+        var basicId = BasicAbilityOverride ?? mapping?.BasicAbilityId ?? kit.FallbackBasicAbilityId;
+        var specialId = SpecialAbilityOverride ?? mapping?.SpecialAbilityId ?? 0;
 
         return (
             _resourceManager.CombatAbilities.TryGetValue(basicId, out var basic) ? basic : null,

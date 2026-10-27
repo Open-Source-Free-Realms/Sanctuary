@@ -1,9 +1,13 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Numerics;
 
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+
 using Sanctuary.Core.Extensions;
 using Sanctuary.Core.IO;
+using Sanctuary.Database;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Resources.Definitions.Zones;
 using Sanctuary.Packet;
@@ -11,7 +15,7 @@ using Sanctuary.Packet.Common;
 
 namespace Sanctuary.Game.Zones;
 
-public sealed class WorldZone : BaseZone
+public sealed partial class WorldZone : BaseZone
 {
     private readonly WorldZoneDefinition _zoneDefinition;
 
@@ -19,10 +23,41 @@ public sealed class WorldZone : BaseZone
         : base(zoneDefinition, serviceProvider)
     {
         _zoneDefinition = zoneDefinition;
+
+        _housingManager = serviceProvider.GetRequiredService<IHousingManager>();
+        _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
+        _worldEventManager = serviceProvider.GetRequiredService<IWorldEventManager>();
+    }
+
+    public override void OnStart()
+    {
+        lock (_worldFixtureLock)
+        {
+            if (!_worldFixturesLoaded)
+            {
+                _worldFixturesLoaded = true;
+
+                LoadWorldFixtures();
+            }
+        }
+
+        lock (_worldNpcLock)
+        {
+            if (!_worldNpcsLoaded)
+            {
+                _worldNpcsLoaded = true;
+
+                LoadWorldNpcs();
+            }
+        }
+
+        base.OnStart();
     }
 
     public override void OnClientIsReady(Player player)
     {
+        _placementSessions.TryRemove(player.Guid, out _);
+
         base.OnClientIsReady(player);
 
         SendPointOfInterests(player);
@@ -32,6 +67,8 @@ public sealed class WorldZone : BaseZone
             SendWelcomeInfo(player);
 
         SendShopData(player);
+
+        _housingManager.SendPlayerHouses(player, player.Guid, null);
     }
 
     public int GetZoneAreaId(Vector4 position)

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -81,7 +81,11 @@ public class ChatCommandManager : IChatCommandManager
 
         var args = tokens[1..];
 
-        if (!cmd.Handle(invoker, args))
+        var handled = cmd is IRawChatCommand rawCommand
+            ? rawCommand.Handle(invoker, args, ChatCommandText.Remainder(command, 1))
+            : cmd.Handle(invoker, args);
+
+        if (!handled)
             ChatHelper.SendSystemMessage(invoker, $"Usage: {Prefix}{cmd.KeyWord} {cmd.Usage}");
 
         return true;

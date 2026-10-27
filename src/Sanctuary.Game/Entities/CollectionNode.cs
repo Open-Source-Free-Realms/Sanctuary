@@ -1,4 +1,4 @@
-using System.Threading;
+﻿using System.Threading;
 
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Zones;
@@ -21,6 +21,11 @@ public sealed class CollectionNode : Npc
         PoolDefinition = poolDefinition;
         SpawnDefinition = spawnDefinition;
     }
+
+    /// <summary>
+    /// Collected through the interact request handler rather than an interaction or action.
+    /// </summary>
+    public override bool HasInteraction => true;
 
     public bool TryReserve()
     {

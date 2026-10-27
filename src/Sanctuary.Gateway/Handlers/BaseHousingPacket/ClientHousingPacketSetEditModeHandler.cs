@@ -3,6 +3,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
@@ -29,11 +30,20 @@ public static class ClientHousingPacketSetEditModeHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(ClientHousingPacketSetEditMode), packet);
 
-        var housingPacketUpdateHouseInfo = new HousingPacketUpdateHouseInfo();
+        // Leaving edit mode from the client UI also ends GM world placement.
+        if (connection.Player.Zone is WorldZone worldZone && worldZone.IsPlacing(connection.Player))
+        {
+            if (!packet.InEditMode)
+                worldZone.EndPlacement(connection.Player);
 
-        housingPacketUpdateHouseInfo.InEditMode = packet.InEditMode;
+            return true;
+        }
 
-        connection.SendTunneled(housingPacketUpdateHouseInfo);
+        // No reply outside a house: the client's house info handler assumes a housing instance exists.
+        if (connection.Player.Zone is not HousingZone housingZone)
+            return true;
+
+        housingZone.SetEditMode(connection.Player, packet.InEditMode);
 
         return true;
     }

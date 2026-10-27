@@ -30,9 +30,31 @@ public static class BaseHousingPacketHandler
 
         return opCode switch
         {
+            ClientHousingPacketPlaceFixtureRequest.OpCode => ClientHousingPacketPlaceFixtureRequestHandler.HandlePacket(connection, reader.Span),
+            ClientHousingPacketPlaceFixture.OpCode => ClientHousingPacketPlaceFixtureHandler.HandlePacket(connection, reader.Span),
+            ClientHousingPacketPickupFixture.OpCode => ClientHousingPacketPickupFixtureHandler.HandlePacket(connection, reader.Span),
+            ClientHousingPacketPickupAllFixtures.OpCode => ClientHousingPacketPickupAllFixturesHandler.HandlePacket(connection, reader.Span),
+            ClientHousingPacketSaveFixture.OpCode => ClientHousingPacketSaveFixtureHandler.HandlePacket(connection, reader.Span),
             ClientHousingPacketSetEditMode.OpCode => ClientHousingPacketSetEditModeHandler.HandlePacket(connection, reader.Span),
+            ClientHousingPacketChangeHouseName.OpCode => ClientHousingPacketChangeHouseNameHandler.HandlePacket(connection, reader.Span),
+            ClientHousingPacketLeaveHouse.OpCode => ClientHousingPacketLeaveHouseHandler.HandlePacket(connection, reader.Span),
+            ClientHousingPacketToggleLocked.OpCode => ClientHousingPacketToggleLockedHandler.HandlePacket(connection, reader.Span),
+            ClientHousingPacketToggleFloraAllowed.OpCode => ClientHousingPacketToggleFloraAllowedHandler.HandlePacket(connection, reader.Span),
+            ClientHousingPacketTogglePetAutospawn.OpCode => ClientHousingPacketTogglePetAutospawnHandler.HandlePacket(connection, reader.Span),
+            ClientHousingPacketRequestPlayerHouses.OpCode => ClientHousingPacketRequestPlayerHousesHandler.HandlePacket(connection, reader.Span),
+            ClientHousingPacketRequestName.OpCode => ClientHousingPacketRequestNameHandler.HandlePacket(connection, reader.Span),
             ClientHousingPacketEnterRequest.OpCode => ClientHousingPacketEnterRequestHandler.HandlePacket(connection, reader.Span),
-            _ => true // housing not implemented
+            ClientHousingPacketRequestVisitToNeighbor.OpCode => ClientHousingPacketRequestVisitToNeighborHandler.HandlePacket(connection, reader.Span),
+            ClientHousingPacketLockHouse.OpCode => ClientHousingPacketLockHouseHandler.HandlePacket(connection, reader.Span),
+            _ => LogUnhandled(opCode, reader)
         };
+    }
+
+    private static bool LogUnhandled(short opCode, PacketReader reader)
+    {
+        // Upkeep, invites, previews, grants, explosions and fixture customization aren't implemented yet.
+        _logger.LogDebug("Unhandled housing packet {opCode}. ( Data: {data} )", opCode, Convert.ToHexString(reader.Span));
+
+        return true;
     }
 }

@@ -20,6 +20,11 @@
     <ProjectReference Include="..\Sanctuary.Core\Sanctuary.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Modified client assets served by the asset endpoint. -->
+    <Content Include="..\Resources\ClientMods\**\*" LinkBase="ClientMods" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(Configuration)'=='Release'">
     <None Remove="NLog.Development.config" />
     <Content Remove="NLog.Development.config" />

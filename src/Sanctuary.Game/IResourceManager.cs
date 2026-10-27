@@ -1,4 +1,6 @@
-﻿using Sanctuary.Game.Resources;
+﻿using System.Collections.Generic;
+
+using Sanctuary.Game.Resources;
 
 namespace Sanctuary.Game;
 
@@ -9,6 +11,9 @@ public interface IResourceManager
     IdToStringLookup SkinToneMappings { get; }
     IdToStringLookup FacePaintMappings { get; }
     IdToStringLookup ModelCustomizationMappings { get; }
+
+    IdToStringLookup FirstTimeEvents { get; }
+    IdToStringLookup MiniGameTutorials { get; }
 
     ModelDefinitionCollection Models { get; }
 
@@ -30,6 +35,7 @@ public interface IResourceManager
     StoreBundleCategoryGroupDefinitionCollection StoreBundleCategoryGroups { get; }
 
     ZoneDefinitionCollection Zones { get; }
+    HouseDefinitionCollection Houses { get; }
     MountDefinitionCollection Mounts { get; }
     PlayerTitleCollection PlayerTitles { get; }
     ProfileDefinitionCollection Profiles { get; }
@@ -46,4 +52,15 @@ public interface IResourceManager
     JobKitDefinitionCollection CombatJobs { get; }
 
     bool Load();
+
+    /// <summary>
+    /// Names accepted by <see cref="TryReload"/>.
+    /// </summary>
+    IEnumerable<string> ReloadableResources { get; }
+
+    /// <summary>
+    /// Clears and reloads a single resource from disk, so edits to existing entries take effect.
+    /// On failure the previous entries are restored.
+    /// </summary>
+    bool TryReload(string name);
 }

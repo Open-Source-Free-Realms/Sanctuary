@@ -1,0 +1,22 @@
+{
+  "$type": "Housing",
+  "Id": 1030,
+  "Name": "ssv_rumbledome_lot_01",
+  "Type": "Housing",
+  "TileSize": 64,
+  "StartLatitude": -4,
+  "StartLongitude": -4,
+  "EndLatitude": 32,
+  "EndLongitude": 32,
+  "SpawnPosition": [
+    511,
+    61.6,
+    416.2
+  ],
+  "SpawnRotation": [
+    -0.65,
+    1,
+    0,
+    0
+  ]
+}
