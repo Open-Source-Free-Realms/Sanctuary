@@ -64,7 +64,8 @@ var gmTabs = [
    ["world", "World"],
    ["edit", "Edit"],
    ["script", "Script"],
-   ["conv", "Talk"]
+   ["conv", "Talk"],
+   ["quests", "Quests"]
 ];
 // Entity selected for editing (god mode click), as sent by the server: ["npc"|"prop"|"none", fields...].
 var gmEdit = ["none"];
@@ -245,7 +246,7 @@ function gmBuild()
    var i;
    for(i = 0; i < gmTabs.length; i++)
    {
-      var tab = gmButton(root_mc, "tab" + i + "_mc", gmTabs[i][1], 12 + i * 65, 32, 62, 24, function()
+      var tab = gmButton(root_mc, "tab" + i + "_mc", gmTabs[i][1], 12 + i * 57, 32, 54, 24, function()
       {
          gmShowTab(this.tabId);
       });
@@ -387,6 +388,11 @@ function gmShowTab(tabId)
       gmRenderConv(content);
       return;
    }
+   if(tabId == "quests")
+   {
+      gmRenderQuests(content);
+      return;
+   }
    gmToolbar(content, tabId);
    if(gmList.kind == tabId)
    {
@@ -429,8 +435,7 @@ function gmToolbar(content, kind)
          ["Enter", "!house enter"],
          ["Leave", "!house leave"],
          ["Furniture", "!furniture"],
-         ["Anywhere", "!house unbound"],
-         ["Actors", "!house actors"]
+         ["Anywhere", "!house unbound"]
       ]);
    }
 }
@@ -1004,6 +1009,8 @@ function gmQueueSend(cmd)
 }
 
 // --- script tab ------------------------------------------------------------------
+// Left: the shared script library (templates first). Right: the editor for the selected
+// NPC/prop's script, or a library entry. Templates take parameters through a small form.
 
 // Selected entity kind for "!npc script" / "!prop script": the editor's selection.
 function gmScriptKind()
@@ -1011,32 +1018,143 @@ function gmScriptKind()
    return gmEdit[0] == "prop" ? "prop" : "npc";
 }
 
+// guid is the entity guid, or "lib:<name>" when the editor holds a library entry.
 var gmScript = { kind: "", guid: "", source: "", loading: "", status: "" };
+
+// Library entries: { name, template, description, params: [[key, type, default], ...] }.
+var gmScriptLib = [];
+var gmScriptLibLoading = [];
+var gmScriptLibSel = "";
+var gmScriptLibAsked = false;
+var gmScriptForm = false;
+var GM_LIB_ROWS = 8;
 
 var GM_SCRIPT_HELP = "Hooks: onSpawn()  onSecond()  onInteract(player)  onProximity(player)  onChoice(player, hook)\r" +
    "npc: guid name position  say(text)  sayLocalized(id)  moveTo(x,y,z[,direct])  emote(animId[,loop])  face(player)  startConversation(player[,nodeId])\r" +
-   "player: name guid position  message(text)  giveItem(itemId[,qty])\r" +
-   "Lua: math string table pairs ipairs next select type tostring tonumber pcall error assert unpack print.  16 KB, 100 ms per hook.";
+   "player: name guid position  message(text)  giveItem(itemId[,qty])  acceptQuest(id)  hasCompletedQuest(id)\r" +
+   "Lua: math string table pairs ipairs next select type tostring tonumber pcall error assert unpack print.  16 KB, 100 ms per hook.\r" +
+   "Example:\r  function onInteract(player)\r      npc:say(\"Hello, \" .. player.name)\r  end";
+
+// Every space escaped, for values passed as key=value arguments.
+function gmEscapeArg(s)
+{
+   return frHelperClass.stringReplace(gmEscapeText(String(s)), " ", "\\s");
+}
+
+function gmScriptLibEntry(name)
+{
+   var i;
+   for(i = 0; i < gmScriptLib.length; i++)
+   {
+      if(gmScriptLib[i].name == name)
+      {
+         return gmScriptLib[i];
+      }
+   }
+   return undefined;
+}
 
 function gmRenderScript(content)
 {
-   if(gmEdit[0] != "npc" && gmEdit[0] != "prop")
+   if(!gmScriptLibAsked)
    {
-      gmText(content, "none_txt", "Select an NPC or world prop first (god mode, then click it), then come back here to edit its script.", 0, 0, 500, 40, 12, GM_TEXT_DIM, false);
-      gmStatus("Script");
+      gmScriptLibAsked = true;
+      gmSend("!scriptlib list");
+   }
+
+   gmRenderScriptLibrary(content);
+
+   var x = 182;
+   var hasEntity = gmEdit[0] == "npc" || gmEdit[0] == "prop";
+   var kind = gmScriptKind();
+   var isLib = gmScript.guid.substr(0, 4) == "lib:";
+   var title = isLib ? "Library: " + gmScript.guid.substr(4)
+      : hasEntity ? "Script for " + kind + " " + gmEdit[1] + (gmScript.guid == gmEdit[1] ? "" : " (press Load)")
+      : "No NPC or prop selected (god mode, then click one)";
+   gmText(content, "title_txt", title, x, 0, 322, 20, 12, GM_TEXT_GOLD, true).wordWrap = false;
+
+   if(gmScriptForm)
+   {
+      gmRenderScriptForm(content, x);
+   }
+   else
+   {
+      gmRenderScriptEditor(content, x, hasEntity, kind, isLib);
+   }
+
+   gmText(content, "result_txt", gmScript.status, x, 226, 322, 20, 10, GM_TEXT_GOLD, false);
+   gmStatus("Script editor");
+}
+
+function gmRenderScriptLibrary(content)
+{
+   gmText(content, "lib_label", "Library", 0, 0, 100, 18, 12, GM_TEXT_GOLD, true);
+   gmButton(content, "libreload_mc", "Refresh", 112, 0, 62, 20, function()
+   {
+      gmSend("!scriptlib list");
+   });
+   var i;
+   for(i = 0; i < GM_LIB_ROWS && i < gmScriptLib.length; i++)
+   {
+      var entry = gmScriptLib[i];
+      var selected = entry.name == gmScriptLibSel;
+      var row = content.createEmptyMovieClip("lib" + i + "_mc", content.getNextHighestDepth());
+      row._y = 24 + i * 25;
+      gmPanelShape(row, 174, 22, 6, selected ? GM_BLUE_ACTIVE : GM_BLUE_CELL, GM_BLUE_BOTTOM, selected ? GM_GOLD : GM_GOLD_DARK, 1);
+      gmText(row, "label_txt", (entry.template ? "[T] " : "") + entry.name, 6, 2, 164, 18, 11, GM_TEXT, selected).wordWrap = false;
+      row.entryName = entry.name;
+      row.onRelease = function()
+      {
+         gmScriptLibSel = this.entryName;
+         gmScriptForm = false;
+         gmShowTab("script");
+      };
+   }
+   if(gmScriptLib.length == 0)
+   {
+      gmText(content, "libempty_txt", "No library entries yet.", 0, 26, 174, 40, 11, GM_TEXT_DIM, false);
+   }
+
+   var sel = gmScriptLibEntry(gmScriptLibSel);
+   if(sel == undefined)
+   {
       return;
    }
-   var kind = gmScriptKind();
-   var loaded = gmScript.guid == gmEdit[1];
-   gmText(content, "title_txt", "Script for " + kind + " " + gmEdit[1] + (loaded ? "" : "  (not loaded)"), 0, 0, 330, 20, 13, GM_TEXT_GOLD, true);
+   gmText(content, "libdesc_txt", sel.description, 0, 226, 174, 20, 10, GM_TEXT_DIM, false).wordWrap = false;
+   gmButton(content, "libuse_mc", "Use on NPC", 0, 230 - 26, 84, 20, function()
+   {
+      var e = gmScriptLibEntry(gmScriptLibSel);
+      if(e.params.length > 0)
+      {
+         gmScriptForm = true;
+         gmShowTab("script");
+         return;
+      }
+      gmSend("!" + gmScriptKind() + " script use " + e.name);
+   }, 0x2E7D5B);
+   gmButton(content, "libopen_mc", "Open", 88, 230 - 26, 42, 20, function()
+   {
+      gmSend("!scriptlib show " + gmScriptLibSel);
+   });
+   if(!sel.template)
+   {
+      gmButton(content, "libdel_mc", "Del", 134, 230 - 26, 40, 20, function()
+      {
+         gmSend("!scriptlib delete " + gmScriptLibSel);
+      }, 0xC0392B);
+   }
+}
 
+function gmRenderScriptEditor(content, x, hasEntity, kind, isLib)
+{
    var area = content.createEmptyMovieClip("area_mc", content.getNextHighestDepth());
-   area._y = 24;
+   area._x = x;
+   area._y = 22;
    area.lineStyle(2, GM_GOLD, 100);
    area.beginFill(0x0B1E3A, 100);
-   gmRoundRect(area, 0, 0, 504, 150, 8);
+   gmRoundRect(area, 0, 0, 322, 154, 8);
    area.endFill();
-   content.createTextField("source_txt", content.getNextHighestDepth(), 6, 28, 492, 142);
+   content.createTextField("source_txt", content.getNextHighestDepth(), x + 6, 26, 310, 146);
    var t = content.source_txt;
    t.embedFonts = true;
    t.type = "input";
@@ -1045,243 +1163,634 @@ function gmRenderScript(content)
    t.wordWrap = true;
    t.maxChars = 16000;
    t.setNewTextFormat(gmFormat(11, GM_TEXT, false));
-   t.text = loaded ? gmScript.source : "";
+   t.text = (isLib || gmScript.guid == gmEdit[1]) ? gmScript.source : "";
    area.field = t;
    area.onPress = function()
    {
       gmFocusInput(this.field);
    };
 
-   gmEditButtons(content, 180, [
-      ["Load", "!" + kind + " script show"],
-      ["Test", "!" + kind + " script test"],
-      ["Clear", "!" + kind + " script clear", 0xC0392B]
-   ]);
-   gmButton(content, "save_mc", "Save", 252, 180, 80, 22, function()
+   if(hasEntity)
    {
-      gmSaveScript();
-   }, 0x2E7D5B);
-   gmButton(content, "help_mc", "API help", 336, 180, 80, 22, function()
+      gmButton(content, "load_mc", "Load", x, 180, 50, 20, function()
+      {
+         gmSend("!" + gmScriptKind() + " script show");
+      });
+      gmButton(content, "save_mc", "Save to " + kind, x + 54, 180, 84, 20, function()
+      {
+         gmSaveScript("!" + gmScriptKind() + " script", "commit", gmEdit[1]);
+      }, 0x2E7D5B);
+      gmButton(content, "test_mc", "Test", x + 142, 180, 44, 20, function()
+      {
+         gmSend("!" + gmScriptKind() + " script test");
+      });
+      gmButton(content, "clear_mc", "Remove", x + 190, 180, 58, 20, function()
+      {
+         gmSend("!" + gmScriptKind() + " script clear");
+      }, 0xC0392B);
+   }
+   gmButton(content, "help_mc", "API help", x + 252, 180, 70, 20, function()
    {
       var h = _root.gm_mc.content_mc.help_txt;
       h._visible = !h._visible;
    });
 
-   gmText(content, "help_txt", GM_SCRIPT_HELP, 0, 24, 504, 150, 10, GM_TEXT, false);
+   // Save the editor text to the library under a name.
+   gmInput(content, "libname_txt", x, 204, 160, 20, isLib ? gmScript.guid.substr(4) : "", "library name");
+   gmButton(content, "libsave_mc", "Save to library", x + 164, 204, 110, 20, function()
+   {
+      var name = gmFieldText(_root.gm_mc.content_mc.libname_txt);
+      if(name == "")
+      {
+         gmStatus("Type a library name first.");
+         return;
+      }
+      gmSaveScript("!scriptlib", "commit " + name, "lib:" + name);
+   });
+
+   gmText(content, "help_txt", GM_SCRIPT_HELP, x, 22, 322, 154, 10, GM_TEXT, false);
    var help = content.help_txt;
    help.background = true;
    help.backgroundColor = 0x0B1E3A;
    help._visible = false;
-
-   gmText(content, "result_txt", gmScript.status, 0, 206, 504, 36, 11, GM_TEXT_GOLD, false);
-   gmStatus("Script editor");
 }
 
-function gmSaveScript()
+// Parameter form for a template: one input per parameter, then apply to the selected NPC/prop.
+function gmRenderScriptForm(content, x)
+{
+   var e = gmScriptLibEntry(gmScriptLibSel);
+   gmText(content, "form_label", "Use \"" + e.name + "\" on the selected " + gmScriptKind(), x, 24, 322, 18, 11, GM_TEXT, true);
+   var i;
+   for(i = 0; i < e.params.length && i < 6; i++)
+   {
+      var p = e.params[i];
+      gmText(content, "param" + i + "_label", p[0] + " (" + p[1] + ")", x, 48 + i * 26 + 3, 110, 18, 10, GM_TEXT_DIM, true).wordWrap = false;
+      gmInput(content, "param" + i + "_txt", x + 112, 48 + i * 26, 210, 20, p[2], "");
+   }
+   gmButton(content, "apply_mc", "Apply", x, 206, 70, 20, function()
+   {
+      var e2 = gmScriptLibEntry(gmScriptLibSel);
+      var cmd = "!" + gmScriptKind() + " script use " + e2.name;
+      var j;
+      for(j = 0; j < e2.params.length && j < 6; j++)
+      {
+         cmd += " " + e2.params[j][0] + "=" + gmEscapeArg(_root.gm_mc.content_mc["param" + j + "_txt"].text);
+      }
+      gmSend(cmd);
+      gmScriptForm = false;
+   }, 0x2E7D5B);
+   gmButton(content, "cancel_mc", "Back", x + 74, 206, 60, 20, function()
+   {
+      gmScriptForm = false;
+      gmShowTab("script");
+   });
+}
+
+// Sends the editor text in escaped chunks: "<prefix> append <chunk>" ..., then "<prefix> <commit>".
+function gmSaveScript(prefix, commit, target)
 {
    var t = _root.gm_mc.content_mc.source_txt;
    if(t == undefined)
    {
       return;
    }
-   var kind = gmScriptKind();
    var source = String(t.text);
    gmScript.source = source;
-   gmScript.guid = gmEdit[1];
+   gmScript.guid = target;
    // Escape per chunk so no escape sequence is split; each stays well under the chat line limit.
    var i;
    for(i = 0; i < source.length; i += 80)
    {
-      gmQueueSend("!" + kind + " script append " + gmEscapeText(source.substr(i, 80)));
+      gmQueueSend(prefix + " append " + gmEscapeText(source.substr(i, 80)));
    }
-   gmQueueSend("!" + kind + " script commit");
+   gmQueueSend(prefix + " " + commit);
    gmScript.status = "Saving...";
    _root.gm_mc.content_mc.result_txt.text = gmScript.status;
    fscommand("FR_event", "killFocus()");
 }
 
-// --- conversation tab ------------------------------------------------------------
-
-var gmConv = { guid: "", start: 1, nodes: [], choices: [], building: false };
-var gmConvScroll = 0;
-
-function gmConvLines()
+// scriptlib|begin, scriptlib|entry|<name>|<template>|<description>|<key:type:default;...>, scriptlib|end
+function gmHandleScriptLib(parts)
 {
-   // Flattened tree: nodes, each followed by its choices.
-   var lines = [];
-   var i;
-   var j;
-   for(i = 0; i < gmConv.nodes.length; i++)
+   var step = parts[2];
+   if(step == "begin")
    {
-      var node = gmConv.nodes[i];
-      lines.push({ kind: "node", id: node.id, text: node.text });
-      for(j = 0; j < gmConv.choices.length; j++)
+      gmScriptLibLoading = [];
+      return;
+   }
+   if(step == "entry")
+   {
+      // One field per parameter: <key>:<type>:<escaped default> (the default may contain ':').
+      var params = [];
+      var i;
+      for(i = 6; i < parts.length; i++)
       {
-         var c = gmConv.choices[j];
-         if(c.node == node.id)
+         if(String(parts[i]) == "")
          {
-            lines.push({ kind: "choice", node: c.node, index: c.index, next: c.next, give: c.give, qty: c.qty, hook: c.hook, text: c.text });
+            continue;
          }
+         var bits = String(parts[i]).split(":");
+         params.push([bits[0], bits[1], gmUnescapeText(bits.slice(2).join(":"))]);
+      }
+      gmScriptLibLoading.push({ name: parts[3], template: parts[4] == "1", description: gmUnescapeText(parts[5]), params: params });
+      return;
+   }
+   if(step == "end")
+   {
+      gmScriptLib = gmScriptLibLoading;
+      if(_root.gm_mc._visible && gmTab == "script")
+      {
+         gmShowTab("script");
       }
    }
-   return lines;
 }
 
-function gmOneLine(s)
+// --- conversation tab ------------------------------------------------------------
+// Click-built: NPC lines are cards; answers lead to a new line, the end, or an existing line.
+// Node ids are picked here (highest + 1), so nothing has to be typed but the text.
+
+var gmConv = { guid: "", start: 1, nodes: [], choices: [] };
+var gmConvSel = 0;
+var gmConvScroll = 0;
+var gmConvLinkFrom = undefined;
+var GM_CONV_CARDS = 8;
+
+function gmOneLine(s, max)
 {
    var r = frHelperClass.stringReplace(String(s), "\r", " / ");
-   return r.length > 70 ? r.substr(0, 68) + "..." : r;
+   return r.length > max ? r.substr(0, max - 2) + "..." : r;
+}
+
+function gmConvNode(id)
+{
+   var i;
+   for(i = 0; i < gmConv.nodes.length; i++)
+   {
+      if(String(gmConv.nodes[i].id) == String(id))
+      {
+         return gmConv.nodes[i];
+      }
+   }
+   return undefined;
+}
+
+function gmConvAnswers(id)
+{
+   var answers = [];
+   var i;
+   for(i = 0; i < gmConv.choices.length; i++)
+   {
+      if(String(gmConv.choices[i].node) == String(id))
+      {
+         answers.push(gmConv.choices[i]);
+      }
+   }
+   return answers;
+}
+
+function gmConvNextId()
+{
+   var next = 1;
+   var i;
+   for(i = 0; i < gmConv.nodes.length; i++)
+   {
+      next = Math.max(next, Number(gmConv.nodes[i].id) + 1);
+   }
+   return next;
+}
+
+function gmConvTarget(next)
+{
+   if(String(next) == "0")
+   {
+      return "ends";
+   }
+   var node = gmConvNode(next);
+   return node == undefined ? "line " + next : "\"" + gmOneLine(node.text, 22) + "\"";
 }
 
 function gmRenderConv(content)
 {
    if(gmEdit[0] != "npc")
    {
-      gmText(content, "none_txt", "Select an NPC first (god mode, then click it), then come back here to author its conversation.", 0, 0, 500, 40, 12, GM_TEXT_DIM, false);
+      gmText(content, "none_txt", "Select an NPC first (god mode, then click it). Its conversation is authored here.", 0, 0, 500, 40, 12, GM_TEXT_DIM, false);
       gmStatus("Conversation");
       return;
    }
+
    var loaded = gmConv.guid == gmEdit[1];
-   gmText(content, "title_txt", "Conversation  (start #" + (loaded ? gmConv.start : "?") + ")" + (loaded ? "" : "  not loaded"), 0, 2, 220, 20, 12, GM_TEXT_GOLD, true);
-   gmEditField(content, "start_txt", "Start", 222, 0, 34, 34, loaded ? gmConv.start : "", "!conv start");
-   gmButton(content, "load_mc", "Load", 334, 0, 52, 22, function()
+   if(!loaded)
    {
+      gmText(content, "load_txt", "Loading conversation...", 0, 0, 300, 20, 12, GM_TEXT_DIM, false);
       gmSend("!conv show");
-   });
-   gmButton(content, "test_mc", "Test", 390, 0, 52, 22, function()
+      return;
+   }
+
+   if(gmConvNode(gmConvSel) == undefined)
+   {
+      gmConvSel = gmConv.nodes.length > 0 ? gmConv.nodes[0].id : 0;
+   }
+
+   gmText(content, "title_txt", (gmEdit[2] == "" ? "NPC" : gmEdit[2]) + " - conversation", 0, 2, 250, 20, 12, GM_TEXT_GOLD, true);
+   gmButton(content, "newline_mc", "+ New line", 256, 0, 80, 22, function()
+   {
+      var id = gmConvNextId();
+      gmConvSel = id;
+      gmSend("!conv node " + id + " " + gmEscapeText("(new line)"));
+   }, 0x2E7D5B);
+   gmButton(content, "test_mc", "Test", 340, 0, 50, 22, function()
    {
       gmSend("!conv test");
    });
-   gmButton(content, "clear_mc", "Clear", 446, 0, 58, 22, function()
+   gmButton(content, "clear_mc", "Clear all", 394, 0, 66, 22, function()
    {
       gmSend("!conv clear");
    }, 0xC0392B);
-
-   // Tree view, 7 lines with paging. Click a line to load it into the fields below.
-   var list = content.createEmptyMovieClip("list_mc", content.getNextHighestDepth());
-   list._y = 26;
-   list.lineStyle(1, GM_GOLD_DARK, 100);
-   list.beginFill(0x0B1E3A, 100);
-   gmRoundRect(list, 0, 0, 474, 122, 6);
-   list.endFill();
-   var lines = loaded ? gmConvLines() : [];
-   gmConvScroll = Math.max(0, Math.min(gmConvScroll, lines.length - 7));
-   var i;
-   for(i = 0; i < 7 && gmConvScroll + i < lines.length; i++)
+   gmButton(content, "reload_mc", "Reload", 464, 0, 40, 22, function()
    {
-      var line = lines[gmConvScroll + i];
-      var row = list.createEmptyMovieClip("row" + i, 10 + i);
-      row._x = 4;
-      row._y = 3 + i * 17;
-      row.beginFill(0xFFFFFF, 0);
-      gmRoundRect(row, 0, 0, 466, 16, 0);
-      row.endFill();
-      var label;
-      if(line.kind == "node")
-      {
-         label = "#" + line.id + "  " + gmOneLine(line.text);
-      }
-      else
-      {
-         label = "     [" + line.index + "] -> " + (line.next == "0" ? "end" : "#" + line.next) + "  " + gmOneLine(line.text) +
-            (Number(line.give) > 0 ? "  (give " + line.give + " x" + line.qty + ")" : "") + (line.hook != "" ? "  (hook " + line.hook + ")" : "");
-      }
-      gmText(row, "label_txt", label, 0, 0, 466, 17, 11, line.kind == "node" ? GM_TEXT : GM_TEXT_DIM, line.kind == "node");
-      row.line = line;
-      row.onRelease = function()
-      {
-         gmConvPick(this.line);
-      };
-   }
-   gmButton(content, "up_mc", "^", 478, 26, 26, 58, function()
-   {
-      gmConvScroll -= 6;
-      gmShowTab("conv");
-   });
-   gmButton(content, "down_mc", "v", 478, 90, 26, 58, function()
-   {
-      gmConvScroll += 6;
-      gmShowTab("conv");
+      gmSend("!conv show");
    });
 
-   // Node: id + text.
-   gmText(content, "node_label", "Node", 0, 158, 36, 18, 11, GM_TEXT_DIM, true);
-   gmInput(content, "nodeid_txt", 36, 154, 36, 22, "", "id");
-   gmInput(content, "nodetext_txt", 76, 154, 300, 22, "", "What the NPC says");
-   gmButton(content, "setnode_mc", "Set node", 380, 154, 66, 22, function()
-   {
-      var c = _root.gm_mc.content_mc;
-      gmSend("!conv node " + gmFieldText(c.nodeid_txt) + " " + gmEscapeText(String(c.nodetext_txt.text)));
-   });
-   gmButton(content, "delnode_mc", "Delete", 450, 154, 54, 22, function()
-   {
-      gmSend("!conv node del " + gmFieldText(_root.gm_mc.content_mc.nodeid_txt));
-   }, 0xC0392B);
-
-   // New choice on that node.
-   gmText(content, "choice_label", "Choice", 0, 186, 40, 18, 11, GM_TEXT_DIM, true);
-   gmText(content, "next_label", "next", 40, 186, 28, 18, 11, GM_TEXT_DIM, false);
-   gmInput(content, "next_txt", 68, 182, 34, 22, "", "0");
-   gmInput(content, "choicetext_txt", 106, 182, 270, 22, "", "What the player answers");
-   gmButton(content, "addchoice_mc", "Add choice", 380, 182, 124, 22, function()
-   {
-      var c = _root.gm_mc.content_mc;
-      var next = gmFieldText(c.next_txt);
-      gmSend("!conv choice add " + gmFieldText(c.nodeid_txt) + " " + (next == "" ? "0" : next) + " " + gmEscapeText(String(c.choicetext_txt.text)));
-   });
-
-   // Existing choice (node id + index): delete, give item, script hook.
-   gmText(content, "idx_label", "Choice #", 0, 214, 52, 18, 11, GM_TEXT_DIM, true);
-   gmInput(content, "index_txt", 52, 210, 30, 22, "", "0");
-   gmButton(content, "delchoice_mc", "Del", 86, 210, 36, 22, function()
-   {
-      var c = _root.gm_mc.content_mc;
-      gmSend("!conv choice del " + gmFieldText(c.nodeid_txt) + " " + gmFieldText(c.index_txt));
-   }, 0xC0392B);
-   gmInput(content, "give_txt", 128, 210, 60, 22, "", "item id");
-   gmInput(content, "qty_txt", 192, 210, 34, 22, "", "qty");
-   gmButton(content, "give_mc", "Give", 230, 210, 44, 22, function()
-   {
-      var c = _root.gm_mc.content_mc;
-      var item = gmFieldText(c.give_txt);
-      gmSend("!conv choice give " + gmFieldText(c.nodeid_txt) + " " + gmFieldText(c.index_txt) + " " + (item == "" ? "0" : item) + " " + gmFieldText(c.qty_txt));
-   });
-   gmInput(content, "hook_txt", 280, 210, 130, 22, "", "script hook name");
-   gmButton(content, "hook_mc", "Hook", 414, 210, 90, 22, function()
-   {
-      var c = _root.gm_mc.content_mc;
-      var hook = gmFieldText(c.hook_txt);
-      gmSend("!conv choice hook " + gmFieldText(c.nodeid_txt) + " " + gmFieldText(c.index_txt) + " " + (hook == "" ? "none" : hook));
-   });
-
-   gmStatus(loaded ? gmConv.nodes.length + " node(s), " + gmConv.choices.length + " choice(s)" : "Press Load to fetch this NPC's conversation.");
+   gmRenderConvCards(content);
+   gmRenderConvEditor(content);
+   gmStatus(gmConvLinkFrom != undefined ? "Click the line this answer should lead to." : gmConv.nodes.length + " line(s). The player sees the starred one first.");
 }
 
-// Fills the authoring fields from a clicked tree line.
-function gmConvPick(line)
+// Left column: one card per NPC line.
+function gmRenderConvCards(content)
 {
-   var c = _root.gm_mc.content_mc;
-   if(line.kind == "node")
-   {
-      c.nodeid_txt.text = line.id;
-      c.nodetext_txt.text = line.text;
-      c.index_txt.text = "";
-   }
-   else
-   {
-      c.nodeid_txt.text = line.node;
-      c.index_txt.text = line.index;
-      c.next_txt.text = line.next;
-      c.choicetext_txt.text = line.text;
-      c.give_txt.text = Number(line.give) > 0 ? line.give : "";
-      c.qty_txt.text = Number(line.give) > 0 ? line.qty : "";
-      c.hook_txt.text = line.hook;
-   }
-   var names = ["nodeid_txt", "nodetext_txt", "index_txt", "next_txt", "choicetext_txt", "give_txt", "qty_txt", "hook_txt"];
+   var list = content.createEmptyMovieClip("cards_mc", content.getNextHighestDepth());
+   list._y = 28;
+   gmConvScroll = Math.max(0, Math.min(gmConvScroll, gmConv.nodes.length - GM_CONV_CARDS));
    var i;
-   for(i = 0; i < names.length; i++)
+   for(i = 0; i < GM_CONV_CARDS && gmConvScroll + i < gmConv.nodes.length; i++)
    {
-      c[names[i]].onChanged();
+      var node = gmConv.nodes[gmConvScroll + i];
+      var selected = String(node.id) == String(gmConvSel);
+      var card = list.createEmptyMovieClip("card" + i, 10 + i);
+      card._y = i * 27;
+      gmPanelShape(card, 180, 24, 6, selected ? GM_BLUE_ACTIVE : GM_BLUE_CELL, GM_BLUE_BOTTOM, selected ? GM_GOLD : GM_GOLD_DARK, 1);
+      var star = String(node.id) == String(gmConv.start) ? "* " : "";
+      gmText(card, "label_txt", star + gmOneLine(node.text, 26), 6, 3, 170, 18, 11, GM_TEXT, selected).wordWrap = false;
+      card.nodeId = node.id;
+      card.onRelease = function()
+      {
+         if(gmConvLinkFrom != undefined)
+         {
+            gmQueueSend("!conv choice add " + gmConvLinkFrom.node + " " + this.nodeId + " " + gmEscapeText(gmConvLinkFrom.text));
+            gmConvLinkFrom = undefined;
+            return;
+         }
+         gmConvSel = this.nodeId;
+         gmShowTab("conv");
+      };
+   }
+   if(gmConv.nodes.length > GM_CONV_CARDS)
+   {
+      gmButton(content, "up_mc", "^", 184, 28, 20, 104, function()
+      {
+         gmConvScroll -= GM_CONV_CARDS - 1;
+         gmShowTab("conv");
+      });
+      gmButton(content, "down_mc", "v", 184, 136, 20, 104, function()
+      {
+         gmConvScroll += GM_CONV_CARDS - 1;
+         gmShowTab("conv");
+      });
+   }
+   if(gmConv.nodes.length == 0)
+   {
+      gmText(content, "empty_txt", "No lines yet. Press + New line.", 0, 32, 200, 40, 11, GM_TEXT_DIM, false);
+   }
+}
+
+// Right column: the selected line's text and its answers.
+function gmRenderConvEditor(content)
+{
+   var node = gmConvNode(gmConvSel);
+   if(node == undefined)
+   {
+      return;
+   }
+   var x = 210;
+
+   gmText(content, "says_label", "NPC says", x, 30, 80, 18, 11, GM_TEXT_DIM, true);
+   var box = content.createEmptyMovieClip("says_box", content.getNextHighestDepth());
+   box._x = x;
+   box._y = 48;
+   box.lineStyle(2, GM_GOLD, 100);
+   box.beginFill(0x0B1E3A, 100);
+   gmRoundRect(box, 0, 0, 294, 46, 8);
+   box.endFill();
+   content.createTextField("says_txt", content.getNextHighestDepth(), x + 6, 51, 282, 42);
+   var says = content.says_txt;
+   says.embedFonts = true;
+   says.type = "input";
+   says.multiline = true;
+   says.wordWrap = true;
+   says.maxChars = 400;
+   says.setNewTextFormat(gmFormat(11, GM_TEXT, false));
+   says.text = node.text;
+   box.field = says;
+   box.onPress = function()
+   {
+      gmFocusInput(this.field);
+   };
+
+   gmButton(content, "savetext_mc", "Save text", x, 98, 70, 20, function()
+   {
+      gmSend("!conv node " + gmConvSel + " " + gmEscapeText(String(_root.gm_mc.content_mc.says_txt.text)));
+   });
+   gmButton(content, "start_mc", "Make first", x + 74, 98, 72, 20, function()
+   {
+      gmSend("!conv start " + gmConvSel);
+   });
+   gmButton(content, "delline_mc", "Delete line", x + 150, 98, 76, 20, function()
+   {
+      gmSend("!conv node del " + gmConvSel);
+   }, 0xC0392B);
+
+   gmText(content, "answers_label", "Player answers", x, 122, 120, 18, 11, GM_TEXT_DIM, true);
+   var answers = gmConvAnswers(gmConvSel);
+   var i;
+   for(i = 0; i < answers.length && i < 3; i++)
+   {
+      var a = answers[i];
+      var y = 140 + i * 22;
+      var extra = (Number(a.give) > 0 ? " +item " + a.give : "") + (a.hook != "" ? " +script " + a.hook : "");
+      gmText(content, "answer" + i + "_txt", "\"" + gmOneLine(a.text, 20) + "\" " + gmConvTarget(a.next) + extra, x, y + 2, 250, 18, 10, GM_TEXT, false).wordWrap = false;
+      var del = gmButton(content, "answerdel" + i + "_mc", "x", x + 274, y, 20, 19, function()
+      {
+         gmSend("!conv choice del " + gmConvSel + " " + this.index);
+      }, 0xC0392B);
+      del.index = a.index;
+   }
+   if(answers.length > 3)
+   {
+      gmText(content, "more_txt", "+" + (answers.length - 3) + " more", x + 200, 122, 94, 18, 10, GM_TEXT_DIM, false, "right");
+   }
+
+   // New answer: type it, then pick where it leads.
+   gmInput(content, "answer_txt", x, 208, 294, 20, "", "New answer the player can pick...");
+   gmButton(content, "tonew_mc", "-> new line", x, 230, 80, 18, function()
+   {
+      var text = String(_root.gm_mc.content_mc.answer_txt.text);
+      var id = gmConvNextId();
+      gmQueueSend("!conv node " + id + " " + gmEscapeText("(new line)"));
+      gmQueueSend("!conv choice add " + gmConvSel + " " + id + " " + gmEscapeText(text == "" ? "..." : text));
+      gmConvSel = id;
+   }, 0x2E7D5B);
+   gmButton(content, "toend_mc", "-> ends", x + 84, 230, 60, 18, function()
+   {
+      var text = String(_root.gm_mc.content_mc.answer_txt.text);
+      gmSend("!conv choice add " + gmConvSel + " 0 " + gmEscapeText(text == "" ? "Goodbye" : text));
+   });
+   gmButton(content, "tolink_mc", "-> link...", x + 148, 230, 70, 18, function()
+   {
+      var text = String(_root.gm_mc.content_mc.answer_txt.text);
+      gmConvLinkFrom = { node: gmConvSel, text: text == "" ? "..." : text };
+      gmStatus("Click the line this answer should lead to.");
+   });
+}
+
+// --- quests tab ------------------------------------------------------------------
+// Custom quests (ids 900000+) built on the quest system. The quest window shows generic
+// locale text; the custom title, description and goal text reach the player as chat.
+
+var gmQuestList = [];
+var gmQuestListLoading = [];
+var gmQuestListAsked = false;
+var gmQuest = undefined;
+var gmQuestLoading = undefined;
+var gmQuestSel = 0;
+var gmQuestNodes = [];
+var gmQuestScroll = 0;
+var GM_QUEST_ROWS = 7;
+
+function gmRenderQuests(content)
+{
+   if(!gmQuestListAsked)
+   {
+      gmQuestListAsked = true;
+      gmSend("!questedit list");
+      gmSend("!questedit nodes");
+   }
+
+   // Left: quest list and "new".
+   gmText(content, "quests_label", "Custom quests", 0, 0, 120, 18, 12, GM_TEXT_GOLD, true);
+   gmButton(content, "qreload_mc", "Refresh", 120, 0, 54, 20, function()
+   {
+      gmSend("!questedit list");
+   });
+   gmQuestScroll = Math.max(0, Math.min(gmQuestScroll, gmQuestList.length - GM_QUEST_ROWS));
+   var i;
+   for(i = 0; i < GM_QUEST_ROWS && gmQuestScroll + i < gmQuestList.length; i++)
+   {
+      var q = gmQuestList[gmQuestScroll + i];
+      var selected = String(q.id) == String(gmQuestSel);
+      var row = content.createEmptyMovieClip("q" + i + "_mc", content.getNextHighestDepth());
+      row._y = 24 + i * 24;
+      gmPanelShape(row, 174, 21, 6, selected ? GM_BLUE_ACTIVE : GM_BLUE_CELL, GM_BLUE_BOTTOM, selected ? GM_GOLD : GM_GOLD_DARK, 1);
+      gmText(row, "label_txt", (q.published ? "" : "(draft) ") + gmOneLine(q.title, 24), 6, 2, 164, 18, 10, GM_TEXT, selected).wordWrap = false;
+      row.questId = q.id;
+      row.onRelease = function()
+      {
+         gmQuestSel = this.questId;
+         gmSend("!questedit show " + this.questId);
+      };
+   }
+   if(gmQuestList.length > GM_QUEST_ROWS)
+   {
+      gmButton(content, "qdown_mc", "more...", 0, 24 + GM_QUEST_ROWS * 24, 174, 18, function()
+      {
+         gmQuestScroll = gmQuestScroll + GM_QUEST_ROWS >= gmQuestList.length ? 0 : gmQuestScroll + GM_QUEST_ROWS;
+         gmShowTab("quests");
+      });
+   }
+   gmInput(content, "qnew_txt", 0, 210, 120, 20, "", "New quest title");
+   gmButton(content, "qnew_mc", "+ New", 124, 210, 50, 20, function()
+   {
+      var title = String(_root.gm_mc.content_mc.qnew_txt.text);
+      gmSend("!questedit new " + gmEscapeText(title == "" ? "New quest" : title));
+   }, 0x2E7D5B);
+
+   if(gmQuest == undefined || String(gmQuest.id) != String(gmQuestSel))
+   {
+      gmText(content, "qhint_txt", "Pick a quest on the left, or create one. Its title, description and goal text are sent to the player in chat; the quest window itself shows generic text.", 184, 26, 320, 80, 11, GM_TEXT_DIM, false);
+      gmStatus("Quest authoring");
+      return;
+   }
+   gmRenderQuestEditor(content, 184);
+}
+
+// Field with a Set button that sends "!questedit set <id> <what> <value>".
+function gmQuestField(content, name, label, x, y, labelW, inputW, value, what, isText)
+{
+   gmText(content, name + "_label", label, x, y + 3, labelW, 18, 10, GM_TEXT_DIM, true);
+   var t = gmInput(content, name, x + labelW, y, inputW, 20, value, "", function(text)
+   {
+      gmQuestSet(this.what, this.isText, text);
+   });
+   t.what = what;
+   t.isText = isText;
+   var b = gmButton(content, name + "_set", "Set", x + labelW + inputW + 2, y, 30, 20, function()
+   {
+      gmQuestSet(this.field.what, this.field.isText, String(this.field.text));
+   });
+   b.field = t;
+}
+
+function gmQuestSet(what, isText, text)
+{
+   gmSend("!questedit set " + gmQuest.id + " " + what + " " + (isText ? gmEscapeText(text) : (text == "" ? "0" : text)));
+}
+
+function gmRenderQuestEditor(content, x)
+{
+   var q = gmQuest;
+   gmText(content, "qtitle_txt", "#" + q.id + (q.published ? "  published" : "  draft"), x, 0, 150, 18, 11, q.published ? 0x7CFC9A : GM_TEXT_GOLD, true);
+   gmButton(content, "qpub_mc", q.published ? "Unpublish" : "Publish", x + 150, 0, 70, 20, function()
+   {
+      gmSend("!questedit " + (gmQuest.published ? "unpublish " : "publish ") + gmQuest.id);
+   }, q.published ? undefined : 0x2E7D5B);
+   gmButton(content, "qdel_mc", "Delete", x + 224, 0, 54, 20, function()
+   {
+      gmSend("!questedit delete " + gmQuest.id);
+   }, 0xC0392B);
+
+   gmQuestField(content, "qt", "Title", x, 22, 34, 248, q.title, "title", true);
+   gmQuestField(content, "qd", "Text", x, 44, 34, 248, q.desc, "desc", true);
+   gmQuestField(content, "qg", "Giver", x, 66, 34, 52, q.giver, "giver", false);
+   gmQuestField(content, "qi", "Turn-in", x + 122, 66, 46, 52, q.turnin, "turnin", false);
+   gmQuestField(content, "qc", "Coins", x, 88, 34, 52, q.coins, "coins", false);
+   gmQuestField(content, "qp", "After", x + 122, 88, 46, 52, q.prereq == "0" ? "" : q.prereq, "prereq", false);
+
+   // Goals, in order.
+   gmText(content, "goals_label", "Goals (in order)", x, 112, 120, 18, 10, GM_TEXT_DIM, true);
+   var i;
+   for(i = 0; i < q.goals.length && i < 4; i++)
+   {
+      var g = q.goals[i];
+      var y = 128 + i * 19;
+      var what = g.type == "talk" ? "talk to NPC " + g.a
+         : g.type == "collect" ? "collect " + g.b + " x " + g.a
+         : g.type == "reach" ? "reach " + Math.round(Number(g.b)) + ", " + Math.round(Number(g.d)) : g.type;
+      gmText(content, "goal" + i + "_txt", (Number(g.index) + 1) + ". " + what + (g.text != "" ? " - " + gmOneLine(g.text, 18) : ""), x, y + 1, 226, 18, 10, GM_TEXT, false).wordWrap = false;
+      var up = gmButton(content, "gup" + i + "_mc", "^", x + 228, y, 16, 17, function()
+      {
+         gmSend("!questedit goal up " + gmQuest.id + " " + this.index);
+      });
+      up.index = g.index;
+      var down = gmButton(content, "gdn" + i + "_mc", "v", x + 246, y, 16, 17, function()
+      {
+         gmSend("!questedit goal down " + gmQuest.id + " " + this.index);
+      });
+      down.index = g.index;
+      var del = gmButton(content, "gdel" + i + "_mc", "x", x + 264, y, 16, 17, function()
+      {
+         gmSend("!questedit goal del " + gmQuest.id + " " + this.index);
+      }, 0xC0392B);
+      del.index = g.index;
+   }
+   if(q.goals.length > 4)
+   {
+      gmText(content, "gmore_txt", "+" + (q.goals.length - 4) + " more", x + 200, 112, 80, 18, 10, GM_TEXT_DIM, false, "right");
+   }
+
+   // Add a goal: one input, three kinds.
+   gmInput(content, "gval_txt", x, 206, 92, 20, "", "NPC id / node key");
+   gmInput(content, "gcount_txt", x + 96, 206, 30, 20, "", "n");
+   gmButton(content, "gtalk_mc", "+ Talk", x + 130, 206, 48, 20, function()
+   {
+      gmSend("!questedit goal add " + gmQuest.id + " talk " + gmFieldText(_root.gm_mc.content_mc.gval_txt));
+   });
+   gmButton(content, "gcollect_mc", "+ Collect", x + 182, 206, 60, 20, function()
+   {
+      var c = _root.gm_mc.content_mc;
+      var count = gmFieldText(c.gcount_txt);
+      gmSend("!questedit goal add " + gmQuest.id + " collect " + gmFieldText(c.gval_txt) + " " + (count == "" ? "1" : count));
+   });
+   gmButton(content, "greach_mc", "+ Reach here", x + 246, 206, 74, 20, function()
+   {
+      gmSend("!questedit goal add " + gmQuest.id + " reach");
+   });
+
+   // Rewards.
+   var rewards = "";
+   for(i = 0; i < q.rewards.length; i++)
+   {
+      rewards += (i > 0 ? ", " : "") + q.rewards[i][0] + " x" + q.rewards[i][1];
+   }
+   gmText(content, "rewards_txt", "Rewards: " + (rewards == "" ? "none" : gmOneLine(rewards, 40)), x, 230, 190, 18, 10, GM_TEXT_DIM, false).wordWrap = false;
+   gmInput(content, "ritem_txt", x + 192, 228, 56, 18, "", "item id");
+   gmButton(content, "radd_mc", "+", x + 250, 228, 22, 18, function()
+   {
+      gmSend("!questedit reward add " + gmQuest.id + " " + gmFieldText(_root.gm_mc.content_mc.ritem_txt) + " 1");
+   });
+   gmButton(content, "rdel_mc", "-", x + 274, 228, 22, 18, function()
+   {
+      gmSend("!questedit reward del " + gmQuest.id + " " + gmFieldText(_root.gm_mc.content_mc.ritem_txt));
+   }, 0xC0392B);
+
+   gmStatus(gmQuestNodes.length > 0 ? "Collect node keys: " + gmOneLine(gmQuestNodes.join(", "), 70) : "Quest editor");
+}
+
+function gmHandleQuestData(kind, parts)
+{
+   if(kind == "questlist")
+   {
+      if(parts[2] == "begin")
+      {
+         gmQuestListLoading = [];
+      }
+      else if(parts[2] == "entry")
+      {
+         gmQuestListLoading.push({ id: parts[3], title: gmUnescapeText(parts[4]), published: parts[5] == "1", goals: Number(parts[6]) });
+      }
+      else if(parts[2] == "end")
+      {
+         gmQuestList = gmQuestListLoading;
+         if(_root.gm_mc._visible && gmTab == "quests")
+         {
+            gmShowTab("quests");
+         }
+      }
+      return;
+   }
+   if(kind == "questedit")
+   {
+      if(parts[2] == "begin")
+      {
+         gmQuestLoading = { id: parts[3], title: gmUnescapeText(parts[4]), desc: gmUnescapeText(parts[5]), giver: parts[6], turnin: parts[7],
+            coins: parts[8], prereq: parts[9], next: parts[10], published: parts[11] == "1", titleId: parts[12], descId: parts[13], goals: [], rewards: [] };
+      }
+      else if(parts[2] == "end" && gmQuestLoading != undefined)
+      {
+         gmQuest = gmQuestLoading;
+         gmQuestSel = gmQuest.id;
+         gmQuestLoading = undefined;
+         if(_root.gm_mc._visible && gmTab == "quests")
+         {
+            gmShowTab("quests");
+         }
+         // Titles and published state show in the list too.
+         gmSend("!questedit list");
+      }
+      return;
+   }
+   if(kind == "questgoal" && gmQuestLoading != undefined)
+   {
+      gmQuestLoading.goals.push({ index: parts[2], type: parts[3], a: parts[4], b: parts[5], c: parts[6], d: parts[7], e: parts[8], text: gmUnescapeText(parts[9]) });
+      return;
+   }
+   if(kind == "questreward" && gmQuestLoading != undefined)
+   {
+      gmQuestLoading.rewards.push([parts[2], parts[3]]);
+      return;
+   }
+   if(kind == "questnodes")
+   {
+      gmQuestNodes = parts.slice(2);
    }
 }
 
@@ -1347,7 +1856,7 @@ function gmHandleScript(parts)
    if(step == "begin")
    {
       gmScript.kind = parts[3];
-      gmScript.pending = parts[4];
+      gmScript.pending = parts[3] == "lib" ? "lib:" + parts[4] : parts[4];
       gmScript.loading = "";
       return;
    }
@@ -1378,26 +1887,10 @@ function gmHandleScript(parts)
    }
 }
 
-// Re-renders the Talk tab after a tree update, keeping what the GM typed in the fields.
+// Re-renders the Talk tab after a tree update, keeping the selected line.
 function gmConvRefresh()
 {
-   var names = ["nodeid_txt", "nodetext_txt", "index_txt", "next_txt", "choicetext_txt", "give_txt", "qty_txt", "hook_txt"];
-   var saved = [];
-   var i;
-   for(i = 0; i < names.length; i++)
-   {
-      saved.push(_root.gm_mc.content_mc[names[i]].text);
-   }
    gmShowTab("conv");
-   var c = _root.gm_mc.content_mc;
-   for(i = 0; i < names.length; i++)
-   {
-      if(saved[i] != undefined && c[names[i]] != undefined)
-      {
-         c[names[i]].text = saved[i];
-         c[names[i]].onChanged();
-      }
-   }
 }
 
 // --- server data ---------------------------------------------------------------
@@ -1457,9 +1950,20 @@ function gmHandleData(text)
       gmHandleScript(parts);
       return;
    }
+   if(kind == "questlist" || kind == "questedit" || kind == "questgoal" || kind == "questreward" || kind == "questnodes")
+   {
+      gmHandleQuestData(kind, parts);
+      return;
+   }
+   if(kind == "scriptlib")
+   {
+      gmHandleScriptLib(parts);
+      return;
+   }
    if(kind == "conv")
    {
       gmConv = { guid: parts[2], start: parts[3], nodes: [], choices: [] };
+      gmConvLinkFrom = undefined;
       return;
    }
    if(kind == "convnode")

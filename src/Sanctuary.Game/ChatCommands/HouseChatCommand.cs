@@ -14,7 +14,7 @@ public class HouseChatCommand : IChatCommand
     private readonly IResourceManager _resourceManager;
 
     public string KeyWord => "house";
-    public string Usage => "list | enter [index] | leave | visit <player name> | grant <house_id> | unbound | actors | rotate yaw|pitch|roll <degrees>";
+    public string Usage => "list | enter [index] | leave | visit <player name> | grant <house_id> | unbound | rotate yaw|pitch|roll <degrees>";
     public string Description => "Lists, enters, and leaves your houses. 'grant' and 'unbound' (place anywhere in the current house) require admin.";
     public ChatCommandRole RequiredRole => ChatCommandRole.Player;
 
@@ -51,9 +51,6 @@ public class HouseChatCommand : IChatCommand
 
             case "unbound":
                 return HandleUnbound(invoker);
-
-            case "actors":
-                return HandleActors(invoker);
 
             case "rotate":
                 return HandleRotate(invoker, args);
@@ -176,29 +173,6 @@ public class HouseChatCommand : IChatCommand
 
         housingZone.RotateLastFixture(invoker, axis, degrees, out var message);
         ChatHelper.SendSystemMessage(invoker, message);
-        return true;
-    }
-
-    private bool HandleActors(Player invoker)
-    {
-        if (invoker.ChatCommandRole < ChatCommandRole.Admin)
-        {
-            ChatHelper.SendSystemMessage(invoker, "You do not have permission to use this command.");
-            return true;
-        }
-
-        if (invoker.Zone is not HousingZone housingZone)
-        {
-            ChatHelper.SendSystemMessage(invoker, "You're not in a house.");
-            return true;
-        }
-
-        housingZone.SetClientFixtureActors(!housingZone.UsesClientFixtureActors);
-
-        ChatHelper.SendSystemMessage(invoker, housingZone.UsesClientFixtureActors
-            ? "Fixtures now use client-built actors."
-            : "Fixtures now use server NPCs.");
-
         return true;
     }
 

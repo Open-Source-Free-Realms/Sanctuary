@@ -821,7 +821,8 @@ public class Npc : IScriptableNpc, IEntity
         if (direction.LengthSquared() < 0.0001f)
             return false;
 
-        UpdatePosition(Position, Quaternion.CreateFromYawPitchRoll(MathF.Atan2(direction.X, direction.Z), 0f, 0f));
+        // NPC rotations are flat facing directions (see ToFlatRotation); a real yaw quaternion tips the model over.
+        UpdatePosition(Position, direction.ToFlatRotation());
         return true;
     }
 

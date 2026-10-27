@@ -13,6 +13,7 @@ using Sanctuary.Core.IO;
 using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Interactions;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Zones;
@@ -312,9 +313,6 @@ public sealed class HousingZone : BaseZone
             // with either empty, editing (move, turn, ...) silently does nothing.
             fixtureInstance.Unknown12 = modelItem.ModelName;
 
-            // Experimental: let the client build the actor itself, as it does for the placement ghost.
-            if (UsesClientFixtureActors)
-                fixtureInstance.NpcGuid = fixtureInstance.Guid;
         }
 
         if (_resourceManager.ClientItemDefinitions.TryGetValue(fixture.Definition, out var itemDefinition)
@@ -331,9 +329,6 @@ public sealed class HousingZone : BaseZone
 
     private void SpawnFixtureNpc(ulong fixtureGuid, DbHouseFixture fixture)
     {
-        if (UsesClientFixtureActors)
-            return;
-
         if (!_resourceManager.ClientItemDefinitions.TryGetValue(fixture.Definition, out var itemDefinition)
             || !_housingManager.TryGetFixtureDefinition(fixture.Definition, out var fixtureDefinition))
         {
@@ -360,6 +355,9 @@ public sealed class HousingZone : BaseZone
 
         npc.SpawnPosition = position;
         npc.SpawnRotation = rotation;
+
+        // Sent as a placed object (tilted, MovementType 0), which the client collides with.
+        npc.Tilt = FixtureHelper.GetTilt(rotation);
 
         npc.UpdatePosition(position, rotation);
 
@@ -640,8 +638,9 @@ public sealed class HousingZone : BaseZone
             }
             else
             {
-                if (_fixtureNpcs.TryGetValue(packet.FixtureGuid, out var npc))
-                    npc.UpdatePosition(packet.Position with { W = 1.0f }, packet.Rotation);
+                // Respawn, so a new rotation also updates the placed object's tilt.
+                DespawnFixtureNpc(packet.FixtureGuid);
+                SpawnFixtureNpc(packet.FixtureGuid, fixture);
 
                 Broadcast(GetUpdateFixturePosition(fixture));
             }
@@ -852,31 +851,6 @@ public sealed class HousingZone : BaseZone
             return false;
 
         return _housingManager.TryGetFixtureDefinition(clientItem.Definition, out fixtureDefinition!);
-    }
-
-    /// <summary>
-    /// Experimental: fixtures rendered by client-built actors instead of server NPCs.
-    /// </summary>
-    public bool UsesClientFixtureActors { get; private set; }
-
-    public void SetClientFixtureActors(bool usesClientFixtureActors)
-    {
-        lock (_houseLock)
-        {
-            foreach (var fixtureGuid in _fixtures.Keys)
-            {
-                Broadcast(new HousingPacketFixtureRemove { FixtureGuid = fixtureGuid });
-                DespawnFixtureNpc(fixtureGuid);
-            }
-
-            UsesClientFixtureActors = usesClientFixtureActors;
-
-            foreach (var (fixtureGuid, fixture) in _fixtures)
-            {
-                SpawnFixtureNpc(fixtureGuid, fixture);
-                Broadcast(GetFixtureUpdate(fixture));
-            }
-        }
     }
 
     /// <summary>
