@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -11,6 +12,8 @@ namespace Sanctuary.Game.Helpers;
 
 public static class InteractionMenuHelper
 {
+    public const byte QuestCursorId = 5;
+
     public static CommandPacketInteractionList GetInteractionListPacket(ulong guid, string? name,
         IEnumerable<InteractionData> interactions, bool autoSelectSingle = false)
     {
@@ -51,24 +54,38 @@ public static class InteractionMenuHelper
         return commandPacketInteractionList;
     }
 
-    public static PlayerUpdatePacketNpcRelevance GetNpcRelevancePacket(IEnumerable<Npc> npcs)
+    public static PlayerUpdatePacketNpcRelevance GetNpcRelevancePacket(IEnumerable<Npc> npcs, Func<Npc, bool>? hasQuestCursor = null)
     {
         var playerUpdatePacketNpcRelevance = new PlayerUpdatePacketNpcRelevance();
         foreach (var npc in npcs)
         {
-            if (npc is Mount || (npc.HasCursor is null && npc.CursorId == 0))
+            if (npc is Mount)
                 continue;
 
-            playerUpdatePacketNpcRelevance.Entries.Add(new PlayerUpdatePacketNpcRelevance.Entry
-            {
-                Guid = npc.Guid,
-                HasCursor = npc.HasCursor ?? npc.CursorId != 0,
-                CursorId = npc.CursorId,
-                Unknown2 = npc.RelevanceUnknown2
-            });
+            if (hasQuestCursor?.Invoke(npc) == true)
+                playerUpdatePacketNpcRelevance.Entries.Add(GetQuestCursorEntry(npc.Guid));
+            else if (HasOwnCursor(npc))
+                playerUpdatePacketNpcRelevance.Entries.Add(GetOwnCursorEntry(npc));
         }
         return playerUpdatePacketNpcRelevance;
     }
+
+    public static bool HasOwnCursor(Npc npc) => npc.HasCursor is not null || npc.CursorId != 0;
+
+    public static PlayerUpdatePacketNpcRelevance.Entry GetQuestCursorEntry(ulong guid) => new()
+    {
+        Guid = guid,
+        HasCursor = true,
+        CursorId = QuestCursorId
+    };
+
+    public static PlayerUpdatePacketNpcRelevance.Entry GetOwnCursorEntry(Npc npc) => new()
+    {
+        Guid = npc.Guid,
+        HasCursor = npc.HasCursor ?? npc.CursorId != 0,
+        CursorId = npc.CursorId,
+        Unknown2 = npc.RelevanceUnknown2
+    };
 
     public static NotificationInfo GetNotification(ulong guid, NotificationInfo definition) => new()
     {

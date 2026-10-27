@@ -558,7 +558,14 @@ public sealed class QuestManager : IQuestManager
         if (removeNotifications.Notifications.Count > 0)
             player.SendTunneled(removeNotifications);
 
-        if ((GetQuestBadge(player, npc) ?? npc.Notification) is { } badge)
+        var questBadge = GetQuestBadge(player, npc);
+
+        var cursorEntry = questBadge is not null && !ReferenceEquals(questBadge, npc.Notification)
+            ? InteractionMenuHelper.GetQuestCursorEntry(npc.Guid)
+            : InteractionMenuHelper.GetOwnCursorEntry(npc);
+        player.SendTunneled(new PlayerUpdatePacketNpcRelevance { Entries = { cursorEntry } });
+
+        if ((questBadge ?? npc.Notification) is { } badge)
             player.SendTunneled(new PlayerUpdatePacketAddNotifications { Notifications = { badge } });
     }
 

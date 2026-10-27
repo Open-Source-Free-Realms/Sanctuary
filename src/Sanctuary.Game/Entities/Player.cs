@@ -844,7 +844,8 @@ public sealed class Player : ClientPcData, IEntity
         }
 
         var playerUpdatePacketNpcRelevance = InteractionMenuHelper.GetNpcRelevancePacket(
-            visibleNpcs.Where(npc => npc is not PetTreasureChest petTreasureChest || petTreasureChest.IsOwner(this)));
+            visibleNpcs.Where(npc => npc is not PetTreasureChest petTreasureChest || petTreasureChest.IsOwner(this)),
+            npc => Zone.GetQuestBadge(this, npc) is { } badge && !ReferenceEquals(badge, npc.Notification));
         if (playerUpdatePacketNpcRelevance.Entries.Count > 0)
             SendTunneled(playerUpdatePacketNpcRelevance);
 
