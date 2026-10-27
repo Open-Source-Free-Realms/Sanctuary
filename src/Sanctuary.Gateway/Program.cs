@@ -12,6 +12,7 @@ using Sanctuary.Core.Configuration;
 using Sanctuary.Core.Extensions;
 using Sanctuary.Database;
 using Sanctuary.Game;
+using Sanctuary.Game.Authoring;
 using Sanctuary.Game.Conversations;
 using Sanctuary.Game.Quests;
 using Sanctuary.Gateway;
@@ -109,6 +110,8 @@ builder.ConfigureServices((hostBuilderContext, serviceCollection) =>
     serviceCollection.AddSingleton<IServerSettings, ServerSettings>();
     serviceCollection.AddSingleton<IWorldEventManager, WorldEventManager>();
     serviceCollection.AddSingleton<INpcContentManager, NpcContentManager>();
+    serviceCollection.AddSingleton<IScriptLibrary, ScriptLibrary>();
+    serviceCollection.AddSingleton<ICustomQuestManager, CustomQuestManager>();
 });
 
 builder.ConfigureLogging((hostBuilderContext, loggingBuilder) =>

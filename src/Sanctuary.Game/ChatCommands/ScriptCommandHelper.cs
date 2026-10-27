@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
+using Sanctuary.Game.Authoring;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Zones;
@@ -16,7 +18,7 @@ namespace Sanctuary.Game.ChatCommands;
 /// </summary>
 public static class ScriptCommandHelper
 {
-    public const string Usage = "script show | append <escaped chunk> | commit | cancel | clear | test";
+    public const string Usage = "script show | append <escaped chunk> | commit | cancel | clear | test | use <library name> [key=value ...]";
 
     /// <summary>
     /// Panel lines carry at most this much escaped source each.
@@ -24,7 +26,7 @@ public static class ScriptCommandHelper
     private const int ChunkLength = 200;
 
     /// <param name="rawArgs">The text after "script", exactly as typed.</param>
-    public static bool Handle(IChatCommand command, IChatCommandManager chatCommandManager, Player invoker, Npc target, string kind, string[] args, string rawArgs)
+    public static bool Handle(IChatCommand command, IChatCommandManager chatCommandManager, IScriptLibrary scriptLibrary, Player invoker, Npc target, string kind, string[] args, string rawArgs)
     {
         if (invoker.ChatCommandRole < ChatCommandRole.Admin)
         {
@@ -91,6 +93,19 @@ public static class ScriptCommandHelper
                 _ = TestAsync(invoker, target);
                 return true;
 
+            case "use":
+                if (args.Length < 2)
+                    return false;
+
+                if (!TryRenderLibraryScript(scriptLibrary, args[1], args[2..], out var rendered, out var renderError))
+                {
+                    SendResult(invoker, false, renderError!);
+                    return true;
+                }
+
+                _ = CommitAsync(command, chatCommandManager, invoker, worldZone, target, rendered);
+                return true;
+
             default:
                 return false;
         }
@@ -123,11 +138,48 @@ public static class ScriptCommandHelper
         SendResult(invoker, error is null, error ?? "Ran onSpawn and onInteract without errors.");
     }
 
+    /// <summary>
+    /// Renders a library script with "key=value" arguments, whose values are escaped (see <see cref="PanelTextHelper"/>).
+    /// </summary>
+    private static bool TryRenderLibraryScript(IScriptLibrary scriptLibrary, string name, string[] arguments, out string source, out string? error)
+    {
+        source = string.Empty;
+
+        if (!scriptLibrary.TryGet(name, out var entry))
+        {
+            error = $"No library script named {name}. Use !scriptlib list.";
+            return false;
+        }
+
+        var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var argument in arguments)
+        {
+            var separator = argument.IndexOf('=');
+
+            if (separator <= 0)
+            {
+                error = $"Expected key=value, got '{argument}'.";
+                return false;
+            }
+
+            values[argument[..separator]] = PanelTextHelper.Unescape(argument[(separator + 1)..]);
+        }
+
+        return entry.TryRender(values, out source, out error);
+    }
+
     private static void SendSource(Player invoker, Npc target, string kind, string source)
+        => SendSource(invoker, kind, target.Guid, source);
+
+    /// <summary>
+    /// Sends source to the panel's script editor as script|begin, script|chunk... and script|end.
+    /// </summary>
+    public static void SendSource(Player invoker, string kind, object id, string source)
     {
         var escaped = PanelTextHelper.Escape(source);
 
-        ChatHelper.SendGmPanelData(invoker, "script", "begin", kind, target.Guid);
+        ChatHelper.SendGmPanelData(invoker, "script", "begin", kind, id);
 
         for (var i = 0; i < escaped.Length; i += ChunkLength)
             ChatHelper.SendGmPanelData(invoker, "script", "chunk", escaped.Substring(i, Math.Min(ChunkLength, escaped.Length - i)));
@@ -135,7 +187,7 @@ public static class ScriptCommandHelper
         ChatHelper.SendGmPanelData(invoker, "script", "end");
     }
 
-    private static void SendResult(Player invoker, bool ok, string message)
+    public static void SendResult(Player invoker, bool ok, string message)
     {
         ChatHelper.SendGmPanelData(invoker, "script", ok ? "ok" : "error", PanelTextHelper.Escape(message));
         ChatHelper.SendSystemMessage(invoker, ok ? message : $"Script error: {message}");

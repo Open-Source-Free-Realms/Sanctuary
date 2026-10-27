@@ -1,4 +1,4 @@
-namespace Sanctuary.Scripting;
+﻿namespace Sanctuary.Scripting;
 
 /// <summary>
 /// What GM-authored scripts can see and do with a player (see <see cref="ScriptSandbox"/>).
@@ -15,4 +15,11 @@ public interface IScriptablePlayer
     void Message(string message);
 
     void GiveItem(int itemDefinitionId, int quantity);
+
+    /// <summary>
+    /// Starts a quest for the player if it's offerable to them (prerequisites met, not already taken).
+    /// </summary>
+    void AcceptQuest(int questId);
+
+    bool HasCompletedQuest(int questId);
 }

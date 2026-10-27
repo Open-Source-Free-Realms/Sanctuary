@@ -141,6 +141,39 @@ public class QuestDefinitionCollection
         return true;
     }
 
+    /// <summary>
+    /// Adds a quest defined at runtime (GM-authored), replacing any quest with the same id, and indexes
+    /// its NPCs the way <see cref="Load"/> does.
+    /// </summary>
+    public void AddOrReplace(QuestDefinition quest, string source)
+    {
+        Remove(quest.QuestId);
+
+        Quests[quest.QuestId] = quest;
+
+        if (quest.GiverNpcId != 0)
+            ByGiver.GetOrAdd(quest.GiverNpcId, _ => []).Add(quest.QuestId);
+
+        if (quest.TargetNpcId != 0)
+            ByTarget.GetOrAdd(quest.TargetNpcId, _ => []).Add(quest.QuestId);
+
+        IndexGoals(quest, source);
+    }
+
+    public bool Remove(int questId)
+    {
+        if (!Quests.TryRemove(questId, out _))
+            return false;
+
+        foreach (var index in new[] { ByGiver, ByTarget })
+        {
+            foreach (var questIds in index.Values)
+                questIds.Remove(questId);
+        }
+
+        return true;
+    }
+
     private void IndexGoals(QuestDefinition quest, string filePath)
     {
         var goalNameIds = new HashSet<int>();

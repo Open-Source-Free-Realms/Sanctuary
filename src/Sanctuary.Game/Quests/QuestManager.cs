@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Sanctuary.Core.Extensions;
 using Sanctuary.Database;
 using Sanctuary.Database.Entities;
+using Sanctuary.Game.Authoring;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Interactions;
@@ -29,13 +30,15 @@ public sealed class QuestManager : IQuestManager
     private readonly IRewardManager _rewardManager;
     private readonly IDbContextFactory<DatabaseContext> _dbContextFactory;
     private readonly ILogger<QuestManager> _logger;
+    private readonly ICustomQuestManager _customQuestManager;
 
-    public QuestManager(IResourceManager resourceManager, IRewardManager rewardManager, IDbContextFactory<DatabaseContext> dbContextFactory, ILogger<QuestManager> logger)
+    public QuestManager(IResourceManager resourceManager, IRewardManager rewardManager, IDbContextFactory<DatabaseContext> dbContextFactory, ILogger<QuestManager> logger, ICustomQuestManager customQuestManager)
     {
         _resourceManager = resourceManager;
         _rewardManager = rewardManager;
         _dbContextFactory = dbContextFactory;
         _logger = logger;
+        _customQuestManager = customQuestManager;
     }
 
     public bool IsQuestNpc(int npcId)
@@ -260,6 +263,9 @@ public sealed class QuestManager : IQuestManager
         RefreshQuestNotifications(player, quest);
 
         player.SendTunneled(new CommandPacketQuestDialogComplete());
+
+        // GM-authored quests carry free text the quest window can't show.
+        _customQuestManager.AnnounceGoal(player, questId, 0);
     }
 
     public bool CompleteQuest(Player player, int questId)
@@ -662,6 +668,8 @@ public sealed class QuestManager : IQuestManager
         SendObjectiveActivated(player, quest.QuestId, goals[progress.GoalIndex], restored: false);
         SendObjectiveForGoal(player, quest, progress.GoalIndex);
 
+        _customQuestManager.AnnounceGoal(player, quest.QuestId, progress.GoalIndex);
+
         if (completedGoal is TalkToNpcGoal)
         {
             var speakerNpcId = spokenBy?.DefinitionId ?? GoalTargetNpcId(quest, completedGoalIndex);
@@ -690,6 +698,8 @@ public sealed class QuestManager : IQuestManager
         FillRewardBundle(end.RewardBundle, quest);
 
         player.SendTunneled(end);
+
+        _customQuestManager.AnnounceComplete(player, quest.QuestId);
 
         player.Quests.PendingTurnInQuestId = quest.QuestId;
     }

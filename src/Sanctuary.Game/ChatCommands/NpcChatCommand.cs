@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Linq;
 using System.Numerics;
 
+using Sanctuary.Game.Authoring;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Zones;
@@ -14,6 +15,7 @@ public class NpcChatCommand : IRawChatCommand
     private readonly IChatCommandManager _chatCommandManager;
     private readonly IResourceManager _resourceManager;
     private readonly IWorldEventManager _worldEventManager;
+    private readonly IScriptLibrary _scriptLibrary;
 
     public string KeyWord => "npc";
 
@@ -24,11 +26,12 @@ public class NpcChatCommand : IRawChatCommand
 
     public ChatCommandRole RequiredRole => ChatCommandRole.Mod;
 
-    public NpcChatCommand(IChatCommandManager chatCommandManager, IResourceManager resourceManager, IWorldEventManager worldEventManager)
+    public NpcChatCommand(IChatCommandManager chatCommandManager, IResourceManager resourceManager, IWorldEventManager worldEventManager, IScriptLibrary scriptLibrary)
     {
         _chatCommandManager = chatCommandManager;
         _resourceManager = resourceManager;
         _worldEventManager = worldEventManager;
+        _scriptLibrary = scriptLibrary;
     }
 
     private void LogAction(Player invoker, string action, string? targetName = null, string? detail = null)
@@ -58,7 +61,7 @@ public class NpcChatCommand : IRawChatCommand
                     return true;
                 }
 
-                return ScriptCommandHelper.Handle(this, _chatCommandManager, invoker, scriptNpc, "npc", args[1..], ChatCommandText.Remainder(rawArgs, 1));
+                return ScriptCommandHelper.Handle(this, _chatCommandManager, _scriptLibrary, invoker, scriptNpc, "npc", args[1..], ChatCommandText.Remainder(rawArgs, 1));
             case "info":
             case "name":
             case "anim":

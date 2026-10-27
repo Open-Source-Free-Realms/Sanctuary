@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 using Lua;
 
@@ -43,6 +43,24 @@ internal sealed class PlayerUserData(IScriptablePlayer player) : ILuaUserData
         return new ValueTask<int>(context.Return());
     });
 
+    private static readonly LuaFunction AcceptQuestFunction = new("acceptQuest", static (context, cancellationToken) =>
+    {
+        var self = context.GetArgument<PlayerUserData>(0);
+        var questId = context.GetArgument<int>(1);
+
+        self._player.AcceptQuest(questId);
+
+        return new ValueTask<int>(context.Return());
+    });
+
+    private static readonly LuaFunction HasCompletedQuestFunction = new("hasCompletedQuest", static (context, cancellationToken) =>
+    {
+        var self = context.GetArgument<PlayerUserData>(0);
+        var questId = context.GetArgument<int>(1);
+
+        return new ValueTask<int>(context.Return(self._player.HasCompletedQuest(questId)));
+    });
+
     #endregion
 
     private static readonly LuaTable SharedMetatable = BuildMetatable();
@@ -69,6 +87,8 @@ internal sealed class PlayerUserData(IScriptablePlayer player) : ILuaUserData
                 //
                 "message" => MessageFunction,
                 "giveItem" => GiveItemFunction,
+                "acceptQuest" => AcceptQuestFunction,
+                "hasCompletedQuest" => HasCompletedQuestFunction,
                 _ => LuaValue.Nil
             };
 

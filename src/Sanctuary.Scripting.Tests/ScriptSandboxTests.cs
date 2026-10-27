@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.Logging.Abstractions;
@@ -20,6 +20,12 @@ public class ScriptSandboxTests
 
         public void Message(string message) => Messages.Add(message);
         public void GiveItem(int itemDefinitionId, int quantity) => Given.Add((itemDefinitionId, quantity));
+
+        public List<int> AcceptedQuests { get; } = [];
+
+        public void AcceptQuest(int questId) => AcceptedQuests.Add(questId);
+
+        public bool HasCompletedQuest(int questId) => questId == 7;
     }
 
     private static MockScriptNpc CreateNpc() => new(new MockScriptZone(NullLogger.Instance));

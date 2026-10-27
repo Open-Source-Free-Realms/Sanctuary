@@ -287,6 +287,68 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.ToTable("CollectionEntries");
                 });
 
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbCustomQuest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(400)
+                        .HasColumnType("varchar(400)");
+
+                    b.Property<int>("DescriptionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GiverNpcId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Goals")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("IsPublished")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int?>("NextQuestId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PrerequisiteQuestId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RewardCoins")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Rewards")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar(64)");
+
+                    b.Property<int>("TitleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TurnInNpcId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("Updated")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<ulong?>("UpdatedBy")
+                        .HasColumnType("bigint unsigned");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CustomQuests");
+                });
+
             modelBuilder.Entity("Sanctuary.Database.Entities.DbFriend", b =>
                 {
                     b.Property<ulong>("FriendCharacterId")
@@ -651,6 +713,33 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.HasIndex("CharacterId");
 
                     b.ToTable("Profiles");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbScriptLibraryEntry", b =>
+                {
+                    b.Property<string>("Name")
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTimeOffset>("Updated")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<ulong?>("UpdatedBy")
+                        .HasColumnType("bigint unsigned");
+
+                    b.HasKey("Name");
+
+                    b.ToTable("ScriptLibrary", (string)null);
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbTitle", b =>

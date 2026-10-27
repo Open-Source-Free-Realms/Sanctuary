@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -10,6 +11,7 @@ using Microsoft.Extensions.Options;
 using Sanctuary.Core.Configuration;
 using Sanctuary.Database;
 using Sanctuary.Game;
+using Sanctuary.Game.Authoring;
 using Sanctuary.Packet.Common.Extensions;
 using Sanctuary.Scripting;
 using Sanctuary.UdpLibrary.Enumerations;
@@ -89,6 +91,9 @@ public class GatewayService : BackgroundService
 
             return Task.CompletedTask;
         }
+
+        // GM-authored quests join the loaded quest collection before zones spawn their givers.
+        _serviceProvider.GetRequiredService<ICustomQuestManager>().Load();
 
         // Load scripts.
         if (!_scriptManager.Load())

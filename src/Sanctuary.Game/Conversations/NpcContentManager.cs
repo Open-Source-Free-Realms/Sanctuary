@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
 
@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
+using Sanctuary.Game.Quests;
 using Sanctuary.Scripting;
 
 namespace Sanctuary.Game.Conversations;
@@ -23,11 +24,13 @@ public class NpcContentManager : INpcContentManager
 
     private readonly ILogger _logger;
     private readonly IRewardManager _rewardManager;
+    private readonly IQuestManager _questManager;
 
-    public NpcContentManager(ILogger<NpcContentManager> logger, IRewardManager rewardManager)
+    public NpcContentManager(ILogger<NpcContentManager> logger, IRewardManager rewardManager, IQuestManager questManager)
     {
         _logger = logger;
         _rewardManager = rewardManager;
+        _questManager = questManager;
     }
 
     #region Scripts
@@ -64,7 +67,7 @@ public class NpcContentManager : INpcContentManager
             return "This has no script.";
 
         return await sandbox.CallAsync("onSpawn")
-            ?? await sandbox.CallAsync("onInteract", new ScriptPlayer(player, _rewardManager));
+            ?? await sandbox.CallAsync("onInteract", new ScriptPlayer(player, _rewardManager, _questManager));
     }
 
     private void FireHook(Npc npc, string hook, Player? player = null, string? argument = null)
@@ -77,7 +80,7 @@ public class NpcContentManager : INpcContentManager
 
     private async Task RunHookAsync(Npc npc, ScriptSandbox sandbox, string hook, Player? player, string? argument)
     {
-        var scriptPlayer = player is null ? null : new ScriptPlayer(player, _rewardManager);
+        var scriptPlayer = player is null ? null : new ScriptPlayer(player, _rewardManager, _questManager);
 
         var error = await sandbox.CallAsync(hook, scriptPlayer, argument);
 
