@@ -21,6 +21,7 @@ public static class BaseActivityServicePacket
     public const byte ActivitySubOpCode = 1;
 
     public const byte ListOfActivities = 1;
+    public const byte JoinActivityRequest = 2;
     public const byte ActivityListRefreshRequest = 4;
 
     public static bool TryReadSubOps(ReadOnlySpan<byte> data, out byte serviceSubOpCode, out byte activitySubOpCode)

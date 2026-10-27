@@ -34,6 +34,18 @@ public static class BaseActivityServicePacketHandler
             return true;
         }
 
+        if (serviceSubOpCode == BaseActivityServicePacket.ActivitySubOpCode
+            && activitySubOpCode == BaseActivityServicePacket.JoinActivityRequest
+            && data.Length >= 8)
+        {
+            var activityId = BitConverter.ToInt32(data[4..]);
+            _logger.LogInformation("{player} joined activity {activity}.", connection.Player.Name.FullName, activityId);
+
+            // Activities are minigames so far (the daily wheel); start it on the client.
+            BaseZone.StartMinigameActivity(connection.Player, activityId);
+            return true;
+        }
+
         _logger.LogInformation("{player} sent an activity packet. ( Data: {data} )", connection.Player.Name.FullName, Convert.ToHexString(data));
         return true;
     }

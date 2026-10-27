@@ -348,6 +348,24 @@ public abstract class BaseZone : IZone, IDisposable
 
     private const int DailyWheelMinigameId = 8;
 
+    /// <summary>
+    /// Answers a join request from the Games window by starting the activity's minigame on the client.
+    /// </summary>
+    public static void StartMinigameActivity(Player player, int activityId)
+    {
+        if (activityId != DailyWheelMinigameId)
+            return;
+
+        player.SendTunneled(new MiniGameInfoPacket
+        {
+            MinigameId = DailyWheelMinigameId,
+            NameId = 409962,
+            IconId = 20985,
+            DescriptionId = 409969,
+            StageId = DailyWheelMinigameId
+        });
+    }
+
     public virtual void OnClientIsReady(Player player)
     {
         SendQuickChatData(player);
