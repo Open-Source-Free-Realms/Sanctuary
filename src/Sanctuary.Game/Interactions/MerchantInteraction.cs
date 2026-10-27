@@ -52,7 +52,8 @@ public class MerchantInteraction : IInteraction
                 DescriptionId = definition.DescriptionId,
                 PurchasableQty = entry.PurchasableQty,
                 MembersOnly = entry.MembersOnly,
-                Unknown8 = player.MembershipStatus == 0 ? definition.Cost : definition.GetMemberPurchasePrice(),
+                // Everyone is a member now that membership no longer exists.
+                Unknown8 = definition.GetMemberPurchasePrice(),
                 Unknown9 = entry.Unknown9,
                 AvailableTintGroupId = entry.AvailableTintGroupId,
                 CanBuy = entry.CanBuy

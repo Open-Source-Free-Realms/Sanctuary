@@ -21,7 +21,6 @@ public sealed class LoginServerOptions : ServerOptions
     public required int DefaultProfileId { get; set; }
 
     public int StartingCoins { get; set; }
-    public int StartingStationCash { get; set; }
 
     public bool UnlockAllTitles { get; set; }
     public bool UnlockAllProfiles { get; set; }

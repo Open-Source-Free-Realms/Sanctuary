@@ -152,7 +152,6 @@ public sealed class Player : ClientPcData, IEntity
     public int SecondsSinceLastLogin { get; set; } = -1;
     public ConcurrentSet<int> CollectedCollectionEntryIds { get; } = [];
 
-    public int StationCash { get; set; }
     public List<CoinStoreTransactionRecord> CoinStoreTransactions { get; set; } = [];
 
     public GuildData? GuildData { get; set; }
@@ -1208,7 +1207,6 @@ public sealed class Player : ClientPcData, IEntity
             MaxMovementSpeed = Stats[CharacterStatId.MaxMovementSpeed],
 
             IsUnderage = Age < 18,
-            IsMember = MembershipStatus != 0,
             IsReferee = isReferee,
 
             TemporaryAppearance = TemporaryAppearance,

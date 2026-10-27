@@ -49,6 +49,20 @@ WINDOW_PATCHES = [
         # Room for 10 items a page instead of 6 (4 more slots, 74 wide); the window and its movie both.
         ('Width="800" Height="200"', 'Width="1096" Height="200"'),
     ]),
+    # Station Cash and membership no longer exist: the Marketplace window is the coin store, and Station
+    # Cash wallets and Add Station Cash buttons are gone.
+    (Path("UI/UiModules/Main/wndMarketplace.xml"), [("UI\\marketplace.swf", "UI\\sanctuaryMarketplace.swf")]),
+    (Path("UI/UiModules/Main/wndNavigationBar.xml"), [("UI\\navigation.swf", "UI\\sanctuaryNavigation.swf")]),
+    (Path("UI/UiModules/Main/wndMysteryRewardBrowser.xml"), [("UI\\MysteryRewardBrowser.swf", "UI\\sanctuaryMysteryRewardBrowser.swf")]),
+    (Path("UI/UiModules/Main/wndMysteryRewardBrowserSmall.xml"),
+     [("UI\\MysteryRewardBrowserSmall.swf", "UI\\sanctuaryMysteryRewardBrowserSmall.swf")]),
+    (Path("UI/UiModules/Main/wndPaidNameChange.xml"), [("UI\\PaidNameChange.swf", "UI\\sanctuaryPaidNameChange.swf")]),
+    (Path("UI/UiModules/Main/wndUnifiedMessageWindow.xml"), [("UI\\UnifiedMessageWindow.swf", "UI\\sanctuaryUnifiedMessageWindow.swf")]),
+    (Path("UI/UiModules/Main/wndAboutMe.xml"), [("UI\\aboutme.swf", "UI\\sanctuaryAboutMe.swf")]),
+    (Path("UI/UiModules/Main/wndWelcomeHandler.xml"), [("UI\\welcome.swf", "UI\\sanctuaryWelcome.swf")]),
+    (Path("UI/UiModules/Main/wndActivityPortal.xml"), [("UI\\ActivityPortal.swf", "UI\\sanctuaryActivityPortal.swf")]),
+    (Path("UI/UiModules/Main/wndHousingPreview.xml"), [("UI\\HousingPreview.swf", "UI\\sanctuaryHousingPreview.swf")]),
+    (Path("UI/UiModules/Main/wndStorage.xml"), [("UI\\storage.swf", "UI\\sanctuaryStorage.swf")]),
     # The client picks a loading screen at random from this block, so the OSFR one is the only live entry
     # and the stock ones are commented out.
     (Path("LoadingScreen.xml"), [

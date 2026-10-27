@@ -6,8 +6,6 @@ public class WebAPIOptions
 
     public string? LaunchArguments { get; set; }
 
-    public bool? MemberByDefault { get; set; }
-
     /// <summary>
     /// Local mirror of the asset server (<c>manifest.txt.z</c> plus <c>000</c>-<c>999</c> bucket folders).
     /// </summary>

@@ -668,7 +668,6 @@ public abstract class BaseZone : IZone, IDisposable
         bool isReferee = player.IsAdmin || player.IsMod;
         var packetMembershipSubscriptionInfo = new PacketMembershipSubscriptionInfo
         {
-            IsMember = player.MembershipStatus != 0,
             IsReferee = isReferee
         };
 
@@ -677,65 +676,14 @@ public abstract class BaseZone : IZone, IDisposable
 
     private void SendInGamePurchase(Player player)
     {
-        var packetInGamePurchaseStoreBundleGroups = new PacketInGamePurchaseStoreBundleGroups
-        {
-            BundleGroups = _resourceManager.StoreBundleGroups.ToDictionary()
-        };
-
+        // The coin store is a page of the client's Marketplace window, so the Marketplace stays enabled.
+        // Its Station Cash store is gone; ClientMods/marketplace keeps the window on the coin store.
         var packetInGamePurchaseEnableMarketplace = new PacketInGamePurchaseEnableMarketplace
         {
             Enabled = true
         };
 
         player.SendTunneled(packetInGamePurchaseEnableMarketplace);
-
-        var packetInGamePurchaseStoreEnablePaymentSources = new PacketInGamePurchaseStoreEnablePaymentSources
-        {
-            Sms = true,
-            Paypal = true
-        };
-
-        player.SendTunneled(packetInGamePurchaseStoreEnablePaymentSources);
-
-        var packetInGamePurchaseStoreBundleCategoryGroups = new PacketInGamePurchaseStoreBundleCategoryGroups();
-
-        packetInGamePurchaseStoreBundleCategoryGroups.CategoryGroups = _resourceManager.StoreBundleCategoryGroups.ToDictionary();
-
-        player.SendTunneled(packetInGamePurchaseStoreBundleCategoryGroups);
-
-        var packetInGamePurchaseStoreBundleCategories = new PacketInGamePurchaseStoreBundleCategories();
-
-        packetInGamePurchaseStoreBundleCategories.CategoryTree.Categories = _resourceManager.StoreBundleCategories.ToDictionary();
-
-        player.SendTunneled(packetInGamePurchaseStoreBundleCategories);
-
-        if (_resourceManager.Stores.TryGetValue(1, out var mainStore))
-        {
-            var packetInGamePurchaseStoreBundles = new PacketInGamePurchaseStoreBundles();
-
-            packetInGamePurchaseStoreBundles.StoreId = mainStore.Id;
-
-            packetInGamePurchaseStoreBundles.Store.Id = mainStore.Id;
-            packetInGamePurchaseStoreBundles.Store.NameId = mainStore.NameId;
-            packetInGamePurchaseStoreBundles.Store.DescriptionId = mainStore.DescriptionId;
-            packetInGamePurchaseStoreBundles.Store.Image = mainStore.Image;
-
-            foreach (var storeBundle in mainStore.Bundles.Values)
-            {
-                var valid = storeBundle.Entries.All(x => _resourceManager.ClientItemDefinitions.ContainsKey(x.MarketingItemId));
-
-                if (valid)
-                    packetInGamePurchaseStoreBundles.Store.Bundles.Add(storeBundle.Id, storeBundle);
-            }
-
-            player.SendTunneled(packetInGamePurchaseStoreBundles);
-
-            if (packetInGamePurchaseStoreBundleGroups.BundleGroups.TryGetValue(WelcomeScreenHelper.PopularItemsGroupId, out var popularItems))
-                packetInGamePurchaseStoreBundleGroups.BundleGroups[WelcomeScreenHelper.PopularItemsGroupId] = WelcomeScreenHelper.GetPopularItems(
-                    popularItems, packetInGamePurchaseStoreBundles.Store.Bundles.Values);
-        }
-
-        player.SendTunneled(packetInGamePurchaseStoreBundleGroups);
     }
 
     private void SendFriendList(Player player)

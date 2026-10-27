@@ -27,6 +27,4 @@ public sealed class GatewayServerOptions : ServerOptions
 
     [Required]
     public required string LoginGatewayChallenge { get; set; }
-
-    public bool ShowMemberNagScreen { get; set; }
 }

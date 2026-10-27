@@ -10,7 +10,8 @@ public class LoginReply : ISerializablePacket
 
     public bool LoggedIn;
     public int Status;
-    public bool IsMember;
+    // Membership no longer exists. The client still locks member content behind this flag, so everyone is a member.
+    public bool IsMember = true;
 
     public byte[] Payload = Array.Empty<byte>();
 

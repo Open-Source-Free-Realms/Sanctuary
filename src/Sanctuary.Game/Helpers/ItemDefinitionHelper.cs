@@ -47,6 +47,5 @@ public static class ItemDefinitionHelper
     }
 
     private static bool HasTintChoice(IResourceManager resourceManager, ClientItemDefinition clientItemDefinition) =>
-        resourceManager.Stores.Values.Any(storeDefinition => storeDefinition.Bundles.Values.Any(appStoreBundleDefinition =>
-            appStoreBundleDefinition.IsTintable && appStoreBundleDefinition.Entries.Any(entry => entry.MarketingItemId == clientItemDefinition.Id)));
+        resourceManager.CoinStoreItems.TryGetValue(clientItemDefinition.Id, out var coinStoreItem) && coinStoreItem.TintGroupId != 0;
 }

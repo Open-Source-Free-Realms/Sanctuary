@@ -54,14 +54,12 @@ public sealed class DbCharacterConfiguration : IEntityTypeConfiguration<DbCharac
         builder.Property(c => c.ActiveTitleId).IsRequired(false);
 
         builder.Property(c => c.VipRank).IsRequired();
-        builder.Property(c => c.MembershipStatus).IsRequired();
 
         builder.Property(c => c.ChatBubbleForegroundColor).IsRequired().HasDefaultValue(0x063C67);
         builder.Property(c => c.ChatBubbleBackgroundColor).IsRequired().HasDefaultValue(0xD4E2F0);
         builder.Property(c => c.ChatBubbleSize).IsRequired().HasDefaultValue(1);
 
         builder.Property(c => c.Coins).IsRequired();
-        builder.Property(c => c.StationCash).IsRequired();
 
         builder.PrimitiveCollection(c => c.FirstTimeEvents).IsRequired(false);
         builder.PrimitiveCollection(c => c.MiniGameTutorials).IsRequired(false);

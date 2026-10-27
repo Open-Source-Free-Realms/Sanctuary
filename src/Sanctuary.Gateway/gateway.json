@@ -9,8 +9,6 @@
     "ServerAddress": "127.0.0.1:20260",
 
     "LoginGatewayAddress": "localhost:20041",
-    "LoginGatewayChallenge": "OSFR-EDITz@2024",
-
-    "ShowMemberNagScreen": false
+    "LoginGatewayChallenge": "OSFR-EDITz@2024"
   }
 }

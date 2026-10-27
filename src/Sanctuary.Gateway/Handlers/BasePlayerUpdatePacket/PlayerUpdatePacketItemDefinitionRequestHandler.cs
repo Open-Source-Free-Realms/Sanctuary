@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -58,24 +57,43 @@ public static class PlayerUpdatePacketItemDefinitionRequestHandler
         return true;
     }
 
+    /// <summary>
+    /// Sends the requested item, then every coin store definition the player doesn't have yet, in batches.
+    /// The coin store asks for one item and shows the rest of the page from what arrives, in its own sort
+    /// order; batches that only covered the requested item's neighbours left the other cards blank.
+    /// </summary>
     private static void SendCoinStoreItemDefinitions(Player player, ItemDefinitionMetaData requestedItemDefinitionMetaData)
     {
-        var clientItemDefinitions = new List<ClientItemDefinition>();
+        player.SentCoinStoreItemDefinitionIds.TryAdd(requestedItemDefinitionMetaData.Id);
 
-        foreach (var coinStoreItem in _resourceManager.CoinStoreItems.Values
-            .Where(x => x.CategoryId == requestedItemDefinitionMetaData.CategoryId)
-            .SkipWhile(x => x.Id != requestedItemDefinitionMetaData.Id))
+        var batch = new List<ClientItemDefinition>();
+
+        if (_resourceManager.ClientItemDefinitions.TryGetValue(requestedItemDefinitionMetaData.Id, out var requestedItemDefinition))
+            batch.Add(requestedItemDefinition);
+
+        foreach (var coinStoreItem in _resourceManager.CoinStoreItems.Values)
         {
-            if (clientItemDefinitions.Count >= CoinStoreItemDefinitionBatchSize)
-                break;
-
-            if (!player.SentCoinStoreItemDefinitionIds.TryAdd(coinStoreItem.Id) && coinStoreItem.Id != requestedItemDefinitionMetaData.Id)
+            if (!player.SentCoinStoreItemDefinitionIds.TryAdd(coinStoreItem.Id))
                 continue;
 
-            if (_resourceManager.ClientItemDefinitions.TryGetValue(coinStoreItem.Id, out var clientItemDefinition))
-                clientItemDefinitions.Add(clientItemDefinition);
+            if (!_resourceManager.ClientItemDefinitions.TryGetValue(coinStoreItem.Id, out var clientItemDefinition))
+                continue;
+
+            batch.Add(clientItemDefinition);
+
+            if (batch.Count >= CoinStoreItemDefinitionBatchSize)
+            {
+                SendItemDefinitions(player, batch);
+                batch.Clear();
+            }
         }
 
+        if (batch.Count > 0)
+            SendItemDefinitions(player, batch);
+    }
+
+    private static void SendItemDefinitions(Player player, List<ClientItemDefinition> clientItemDefinitions)
+    {
         using var writer = new PacketWriter();
 
         writer.Write(clientItemDefinitions);

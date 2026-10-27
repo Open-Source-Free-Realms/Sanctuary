@@ -31,11 +31,6 @@ public interface IResourceManager
     ItemCategoryDefinitionCollection ItemCategories { get; }
     ItemCategoryGroupDefinitionCollection ItemCategoryGroups { get; }
 
-    StoreDefinitionCollection Stores { get; }
-    StoreBundleGroupDefinitionCollection StoreBundleGroups { get; }
-    StoreBundleCategoryNodeCollection StoreBundleCategories { get; }
-    StoreBundleCategoryGroupDefinitionCollection StoreBundleCategoryGroups { get; }
-
     ZoneDefinitionCollection Zones { get; }
     HouseDefinitionCollection Houses { get; }
     ZoneEnvironmentCollection ZoneEnvironments { get; }

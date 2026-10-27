@@ -4,7 +4,8 @@ namespace Sanctuary.Packet.Common;
 
 public class AccountInfo
 {
-    public bool IsMember;
+    // Membership no longer exists. The client still locks member content behind this flag, so everyone is a member.
+    public bool IsMember = true;
 
     public int MaxCharacters;
 

@@ -5,6 +5,5 @@ namespace Sanctuary.Game.Resources.Definitions.Rewards;
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum CurrencyType
 {
-    Coins,
-    StationCash
+    Coins
 }

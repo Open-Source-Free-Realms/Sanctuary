@@ -81,7 +81,6 @@ public static class AuthEndpoints
     private static async Task<IResult> RegisterHandlerAsync(
         RegisterRequestModel request,
         CancellationToken cancellationToken,
-        IOptions<WebAPIOptions> webAPIOptions,
         IDbContextFactory<DatabaseContext> dbContextFactory)
     {
         if (!MiniValidator.TryValidate(request, out var errors))
@@ -105,7 +104,6 @@ public static class AuthEndpoints
         {
             Username = request.Username,
             Password = hashedPassword,
-            IsMember = webAPIOptions.Value.MemberByDefault ?? true,
         };
 
         await dbContext.Users.AddAsync(dbUser, cancellationToken);

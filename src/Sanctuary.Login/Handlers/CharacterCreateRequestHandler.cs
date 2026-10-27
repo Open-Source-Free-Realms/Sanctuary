@@ -238,13 +238,10 @@ public static class CharacterCreateRequestHandler
 
             Gender = model.Gender,
 
-            MembershipStatus = dbUser.IsMember ? 2 : 0,
-
             UserId = connection.UserId
         };
 
         dbCharacter.Coins = _options.StartingCoins;
-        dbCharacter.StationCash = _options.StartingStationCash;
 
         if (_options.DefaultTitleId > 0)
         {

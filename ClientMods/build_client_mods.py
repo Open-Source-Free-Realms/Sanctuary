@@ -17,6 +17,17 @@ Mods:
   sanctuaryLoadingScreen.gfx (+ .lst.z)  - loading screen with "Open Source Free Realms" curved around the
                                            OSFR tree (loadingscreen/background.py), keeping the tip and bar.
 
+  Station Cash and membership no longer exist:
+  sanctuaryGameDock.gfx                  - the Marketplace icon is labelled Coin Shop (gamedock/coin_shop_button.as).
+  sanctuaryMarketplace.gfx               - the Marketplace window only shows its coin store page
+                                           (marketplace/coin_store_only.as).
+  sanctuaryNavigation.gfx                - the Marketplace tab bar only has the Coin Shop tab
+                                           (navigation/coin_store_tabs.as).
+  sanctuaryMysteryRewardBrowser(Small).gfx, sanctuaryPaidNameChange.gfx, sanctuaryUnifiedMessageWindow.gfx,
+  sanctuaryAboutMe.gfx, sanctuaryWelcome.gfx, sanctuaryActivityPortal.gfx, sanctuaryHousingPreview.gfx,
+  sanctuaryStorage.gfx                   - no Station Cash wallets or Add Station Cash buttons
+                                           (<movie>/no_station_cash.as).
+
 The stock movies are read from your Free Realms client's local asset packs (--client), or from a
 local copy of the asset server (--assets). Nothing from the game is stored in this repository.
 
@@ -50,13 +61,39 @@ COMPRESSED_MAGIC = 0xA1B2C3D4
 GM_TREE_ICON = ("treeIcon", "gmTreeIcon", 155)
 REDEEM_TREE_ICON = ("treeIcon", "gmRedeemIcon", 35)
 
-# (stock movie, published name, script inside the movie to append to, patch source, recolored symbols to add)
+NO_STATION_CASH = "no_station_cash.as"
+
+# (stock movie, published name, script inside the movie to append to, patch sources, recolored symbols to add)
 MODS = [
-    ("chatWindowCtrl", "sanctuaryChatWindowCtrl", "\\frame_2\\DoAction", script_dir / "chatWindowCtrl" / "gm_panel.as", []),
-    ("gamedock", "sanctuaryGameDock", "\\frame_1\\DoAction", script_dir / "gamedock" / "gm_hub_button.as", [GM_TREE_ICON, REDEEM_TREE_ICON]),
-    ("dialog", "sanctuaryDialog", "\\frame_1\\DoAction", script_dir / "dialog" / "dialog_hide.as", []),
-    ("housingEditPanel", "sanctuaryHousingEditPanel", "\\frame_1\\DoAction", script_dir / "housing" / "tray.as", []),
+    ("chatWindowCtrl", "sanctuaryChatWindowCtrl", "\\frame_2\\DoAction", [script_dir / "chatWindowCtrl" / "gm_panel.as"], []),
+    ("gamedock", "sanctuaryGameDock", "\\frame_1\\DoAction",
+     [script_dir / "gamedock" / "gm_hub_button.as", script_dir / "gamedock" / "coin_shop_button.as"], [GM_TREE_ICON, REDEEM_TREE_ICON]),
+    ("dialog", "sanctuaryDialog", "\\frame_1\\DoAction", [script_dir / "dialog" / "dialog_hide.as"], []),
+    ("housingEditPanel", "sanctuaryHousingEditPanel", "\\frame_1\\DoAction", [script_dir / "housing" / "tray.as"], []),
+    ("marketplace", "sanctuaryMarketplace", "\\frame_1\\DoAction", [script_dir / "marketplace" / "coin_store_only.as"], []),
+    ("navigation", "sanctuaryNavigation", "\\frame_1\\DoAction", [script_dir / "navigation" / "coin_store_tabs.as"], []),
+    ("MysteryRewardBrowser", "sanctuaryMysteryRewardBrowser", "\\frame_1\\DoAction",
+     [script_dir / "MysteryRewardBrowser" / NO_STATION_CASH], []),
+    # Same side panel as MysteryRewardBrowser.
+    ("MysteryRewardBrowserSmall", "sanctuaryMysteryRewardBrowserSmall", "\\frame_1\\DoAction",
+     [script_dir / "MysteryRewardBrowser" / NO_STATION_CASH], []),
+    ("PaidNameChange", "sanctuaryPaidNameChange", "\\frame_1\\DoAction", [script_dir / "PaidNameChange" / NO_STATION_CASH], []),
+    ("UnifiedMessageWindow", "sanctuaryUnifiedMessageWindow", "\\frame_1\\DoAction",
+     [script_dir / "UnifiedMessageWindow" / NO_STATION_CASH], []),
+    ("aboutme", "sanctuaryAboutMe", "\\frame_1\\DoAction", [script_dir / "aboutme" / NO_STATION_CASH], []),
+    ("welcome", "sanctuaryWelcome", "\\frame_1\\DoAction", [script_dir / "welcome" / NO_STATION_CASH], []),
+    ("ActivityPortal", "sanctuaryActivityPortal", "\\frame_1\\DoAction", [script_dir / "ActivityPortal" / NO_STATION_CASH], []),
+    ("HousingPreview", "sanctuaryHousingPreview", "\\frame_1\\DoAction", [script_dir / "HousingPreview" / NO_STATION_CASH], []),
+    ("storage", "sanctuaryStorage", "\\frame_1\\DoAction", [script_dir / "storage" / NO_STATION_CASH], []),
 ]
+
+# Stock movie -> [(external texture, texture to use instead)]. Station Cash no longer exists, so the
+# hub's Marketplace (now Coin Shop) icon shows the coin from the coin store's wallet instead of the SC logo.
+TEXTURE_SWAPS = {
+    "gamedock": [("img9752574847671325523.dds", "img11900526720825140648.dds")],
+    # The welcome screen's header wallet, which now shows coins.
+    "welcome": [("img9752574847671325523.dds", "img11900526720825140648.dds")],
+}
 
 LOADING_SCREEN = ("loadingscreen", "sanctuaryLoadingScreen")
 # Root timeline depths of loadingscreen.gfx that stay: the backdrop, its twinkle, the tip text and the
@@ -203,18 +240,24 @@ def ffdec(java, jar, *args):
         raise RuntimeError(f"ffdec failed: {' '.join(map(str, args))}")
 
 
-def build_movie(java, jar, stock, stock_name, script_name, patch_path, symbols, output_path):
+def build_movie(java, jar, stock, stock_name, script_name, patch_paths, symbols, output_path):
     with tempfile.TemporaryDirectory() as temp:
         temp = Path(temp)
 
         stock_path = temp / f"{stock_name}.gfx"
         stock_path.write_bytes(stock.read(f"{stock_name}.gfx"))
 
-        if symbols:
+        swaps = TEXTURE_SWAPS.get(stock_name, [])
+
+        if symbols or swaps:
             ffdec(java, jar, "-swf2xml", stock_path, temp / "stock.xml")
             xml = (temp / "stock.xml").read_text(encoding="utf-8")
             for symbol in symbols:
                 xml = add_recolored_symbol(xml, stock, *symbol)
+            for old, new in swaps:
+                if f'fileName="{old}"' not in xml:
+                    raise ValueError(f"{old} not found in {stock_name}.gfx")
+                xml = xml.replace(f'fileName="{old}"', f'fileName="{new}"')
             (temp / "stock.xml").write_text(xml, encoding="utf-8")
             ffdec(java, jar, "-xml2swf", temp / "stock.xml", temp / "stock.gfx")
             stock_path = temp / "stock.gfx"
@@ -227,7 +270,7 @@ def build_movie(java, jar, stock, stock_name, script_name, patch_path, symbols, 
 
         patched = temp / "patched.as"
         patched.write_text(
-            script_path.read_text(encoding="utf-8") + "\n" + patch_path.read_text(encoding="utf-8"),
+            "\n".join([script_path.read_text(encoding="utf-8")] + [p.read_text(encoding="utf-8") for p in patch_paths]),
             encoding="utf-8")
 
         ffdec(java, jar, "-replace", stock_path, output_path, script_name, patched)
@@ -237,6 +280,8 @@ def build_list(stock, stock_name, published_name, output_path):
     # The .lst preloads the movie's images and ends with the movie itself.
     text = stock.read(f"{stock_name}.lst").decode("latin-1")
     text = text.replace(f"{stock_name}.gfx", f"{published_name}.gfx")
+    for old, new in TEXTURE_SWAPS.get(stock_name, []):
+        text = text.replace(old, new)
     output_path.write_bytes(compress(text.encode("latin-1")))
 
 
@@ -330,11 +375,11 @@ def main():
 
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    for stock_name, published_name, script_name, patch_path, symbols in MODS:
+    for stock_name, published_name, script_name, patch_paths, symbols in MODS:
         movie_path = output_dir / f"{published_name}.gfx"
         list_path = output_dir / f"{published_name}.lst.z"
 
-        build_movie(args.java, args.ffdec, stock, stock_name, script_name, patch_path, symbols, movie_path)
+        build_movie(args.java, args.ffdec, stock, stock_name, script_name, patch_paths, symbols, movie_path)
         build_list(stock, stock_name, published_name, list_path)
 
         print(f"Built {movie_path.name} ({movie_path.stat().st_size} bytes) and {list_path.name}")

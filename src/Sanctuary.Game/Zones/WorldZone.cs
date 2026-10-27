@@ -1058,5 +1058,5 @@ public sealed partial class WorldZone : BaseZone
     }
 
     private void SendWelcomeInfo(Player player) =>
-        player.SendTunneled(WelcomeScreenHelper.GetWelcomeScreenPacket(player.SecondsSinceLastLogin, player.StationCash));
+        player.SendTunneled(WelcomeScreenHelper.GetWelcomeScreenPacket(player.SecondsSinceLastLogin));
 }

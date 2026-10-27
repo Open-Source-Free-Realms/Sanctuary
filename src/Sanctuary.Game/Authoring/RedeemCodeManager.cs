@@ -183,9 +183,6 @@ public sealed partial class RedeemCodeManager : IRedeemCodeManager
             if (redeemCode.ExpiresAt is { } expiresAt && now >= expiresAt)
                 return Fail(player, now, "That code has expired.");
 
-            if (redeemCode.MembersOnly && player.MembershipStatus == 0)
-                return "That code is for members only.";
-
             if (redeemCode.MaxUses > 0 && redeemCode.Uses >= redeemCode.MaxUses)
                 return "That code has been fully redeemed.";
 

@@ -48,14 +48,12 @@ public class DbCharacter
     public int? ActiveTitleId { get; set; }
 
     public float VipRank { get; set; }
-    public int MembershipStatus { get; set; }
 
     public int ChatBubbleForegroundColor { get; set; } = 0x063C67;
     public int ChatBubbleBackgroundColor { get; set; } = 0xD4E2F0;
     public int ChatBubbleSize { get; set; } = 1;
 
     public int Coins { get; set; }
-    public int StationCash { get; set; }
 
     /// <summary>
     /// Ids from the client's FirstTimeEvents.txt that this character has already seen.

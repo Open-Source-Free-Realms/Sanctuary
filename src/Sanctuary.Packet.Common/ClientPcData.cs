@@ -50,7 +50,8 @@ public class ClientPcData
     // 0 - Inactive
     // 1 - Trial
     // 2 - Active
-    public int MembershipStatus;
+    // Membership no longer exists. The client still locks member content behind this, so everyone is active.
+    public int MembershipStatus = 2;
 
     // Only shows when membership isn't active.
     public bool ShowMemberNagScreen;

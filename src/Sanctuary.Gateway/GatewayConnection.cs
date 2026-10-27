@@ -337,8 +337,6 @@ public class GatewayConnection : UdpConnection
         Player.Birthday = dbCharacter.Created;
         Player.PlayTime = dbCharacter.PlayTime;
 
-        Player.MembershipStatus = dbCharacter.MembershipStatus;
-        Player.ShowMemberNagScreen = _options.ShowMemberNagScreen;
 
         foreach (var dbProfile in dbCharacter.Profiles)
         {
@@ -537,8 +535,6 @@ public class GatewayConnection : UdpConnection
 
             Player.Ignores.Add(ignoreData);
         }
-
-        Player.StationCash = dbCharacter.StationCash;
 
         if (dbCharacter.GuildMember?.Guild is { } dbGuild)
         {

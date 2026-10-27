@@ -1569,7 +1569,8 @@
     "PowerRating": 5,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 50
   },
   {
     "Comment": "Small Sandwich",
@@ -42237,7 +42238,8 @@
     "Param1": 3,
     "Param2": 7,
     "MembersOnly": true,
-    "Rarity": 2
+    "Rarity": 2,
+    "Cost": 25000
   },
   {
     "Comment": "Large Wilds House",
@@ -42253,7 +42255,8 @@
     "TintAlias": "dyetint",
     "MemberDiscount": 10,
     "Param1": 4,
-    "Param2": 8
+    "Param2": 8,
+    "Cost": 25000
   },
   {
     "Comment": "Briarwood Farm",
@@ -42269,7 +42272,8 @@
     "TintAlias": "dyetint",
     "MemberDiscount": 10,
     "Param1": 73,
-    "Param2": 74
+    "Param2": 74,
+    "Cost": 25000
   },
   {
     "Comment": "Large Snowhill House",
@@ -151186,7 +151190,8 @@
     "ActivatableAbilityId": 278,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 50
   },
   {
     "Comment": "Seaside Birthday Cake",
@@ -151207,7 +151212,8 @@
     "ActivatableAbilityId": 279,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 50
   },
   {
     "Comment": "Snowhill Birthday Cake",
@@ -151228,7 +151234,8 @@
     "ActivatableAbilityId": 280,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 50
   },
   {
     "Comment": "Merry Vale Birthday Cake",
@@ -151249,7 +151256,8 @@
     "ActivatableAbilityId": 281,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 50
   },
   {
     "Comment": "Sanctuary Birthday Cake",
@@ -151270,7 +151278,8 @@
     "ActivatableAbilityId": 282,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 50
   },
   {
     "Comment": "Wugachug Birthday Cake",
@@ -151291,7 +151300,8 @@
     "ActivatableAbilityId": 283,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 50
   },
   {
     "Comment": "Blackspore Swamp Birthday Cake",
@@ -151312,7 +151322,8 @@
     "ActivatableAbilityId": 284,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 50
   },
   {
     "Comment": "Briarwood Birthday Cake",
@@ -151333,7 +151344,8 @@
     "ActivatableAbilityId": 285,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 50
   },
   {
     "Comment": "Boss Birthday Cake",
@@ -151354,7 +151366,8 @@
     "ActivatableAbilityId": 286,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 50
   },
   {
     "Comment": "Precursor Hoverboard",
@@ -151376,7 +151389,8 @@
     "MembersOnly": true,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "Molten Precursor Hoverboard",
@@ -151398,7 +151412,8 @@
     "MembersOnly": true,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "Anvil Hammer",
@@ -194570,7 +194585,8 @@
     "Param1": 4227,
     "ModelName": "groundhog_m_sharkfin.adr",
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 10000
   },
   {
     "Comment": "Landshark",
@@ -194875,7 +194891,8 @@
     "MembersOnly": true,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "Fiery Hoverboard",
@@ -194897,7 +194914,8 @@
     "MembersOnly": true,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "Icy Hoverboard",
@@ -194921,7 +194939,8 @@
     "MembersOnly": true,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "Seaside Lot",
@@ -195086,7 +195105,8 @@
     "Param1": 958,
     "ModelName": "dog_large_husky.adr",
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 10000
   },
   {
     "Comment": "Fairweather Hoverboard",
@@ -195107,7 +195127,8 @@
     "MembersOnly": true,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "Faded Sun Necklace",
@@ -195604,7 +195625,8 @@
     "Rarity": 3,
     "Icon": {
       "Id": 6891
-    }
+    },
+    "Cost": 10000
   },
   {
     "Comment": "Polished Air Necklace",
@@ -195684,7 +195706,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "ResellValue": 50
+    "ResellValue": 50,
+    "Cost": 15000
   },
   {
     "Comment": "T-Bone Steak Outfit",
@@ -195750,7 +195773,8 @@
     "CategoryId": 3,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "Pulsing Ocean Triangle Shard",
@@ -196967,7 +196991,8 @@
     "CategoryId": 3,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "Plain Kibbles",
@@ -197493,7 +197518,8 @@
     "MembersOnly": true,
     "NoSale": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "Basic Pet Shampoo",
@@ -210544,7 +210570,8 @@
     "Param1": 757,
     "ModelName": "trex_air_mount.adr",
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "Fast Blast Boots",
@@ -216250,7 +216277,8 @@
     "ModelName": "kangaroo_m_basic.adr",
     "CategoryId": 3,
     "NoSale": true,
-    "NonMiniGame": true
+    "NonMiniGame": true,
+    "Cost": 15000
   },
   {
     "Comment": "Focus Fire Cap",
@@ -220076,7 +220104,8 @@
     "ModelName": "tractor_m_zamboni.adr",
     "CategoryId": 3,
     "NoSale": true,
-    "NonMiniGame": true
+    "NonMiniGame": true,
+    "Cost": 15000
   },
   {
     "Comment": "Savage Sting Leggings",
@@ -224621,7 +224650,8 @@
     "Param1": 55,
     "Param2": 56,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 25000
   },
   {
     "Comment": "Tempest Woven Fez",
@@ -262413,7 +262443,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "Wolf",
@@ -262435,7 +262466,8 @@
     "CategoryId": 3,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "High Speed Gloves",
@@ -262997,7 +263029,8 @@
     "MembersOnly": true,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "Beach Ball",
@@ -286548,7 +286581,8 @@
     "CategoryId": 3,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "Surfboard",
@@ -286709,7 +286743,8 @@
     "CategoryId": 3,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "Wooden Surfboard",
@@ -308870,7 +308905,8 @@
     "CategoryId": 3,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "Basalt Surfboard",
@@ -309271,7 +309307,8 @@
     "MemberDiscount": 10,
     "Param1": 50,
     "Param2": 51,
-    "Rarity": 2
+    "Rarity": 2,
+    "Cost": 25000
   },
   {
     "Comment": "Wugachug Lot",
@@ -309501,7 +309538,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "Lava Tiger",
@@ -315956,7 +315994,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "Seeker's Gloves",
@@ -318485,7 +318524,8 @@
     "MemberDiscount": 10,
     "CategoryId": 148,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 1000
   },
   {
     "Comment": "Baron von Darkcheat Chaos Starter Deck",
@@ -318503,7 +318543,8 @@
     "MemberDiscount": 10,
     "CategoryId": 148,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 1000
   },
   {
     "Comment": "Baron von Darkcheat Machine Starter Deck",
@@ -318521,7 +318562,8 @@
     "MemberDiscount": 10,
     "CategoryId": 148,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 1000
   },
   {
     "Comment": "Baron von Darkcheat Nature Starter Deck",
@@ -318539,7 +318581,8 @@
     "MemberDiscount": 10,
     "CategoryId": 148,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 1000
   },
   {
     "Comment": "Baron von Darkcheat Order Starter Deck",
@@ -318557,7 +318600,8 @@
     "MemberDiscount": 10,
     "CategoryId": 148,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 1000
   },
   {
     "Comment": "Traveler's Cap",
@@ -655051,7 +655095,8 @@
     "MemberDiscount": 10,
     "CategoryId": 148,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 1000
   },
   {
     "Comment": "Postman M2 Shirt",
@@ -869192,7 +869237,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "Coyote Juice Bottle",
@@ -1155120,7 +1155166,8 @@
     "ActivatableAbilityId": 4168,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 270
   },
   {
     "Comment": "Striker's Triangle Power Shard",
@@ -1173567,7 +1173614,8 @@
     "TintAlias": "dyetint",
     "MemberDiscount": 10,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 1000
   },
   {
     "Comment": "Shattered Past Chaos Starter Deck",
@@ -1173584,7 +1173632,8 @@
     "TintAlias": "dyetint",
     "MemberDiscount": 10,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 1000
   },
   {
     "Comment": "Shattered Past Machine Starter Deck",
@@ -1173601,7 +1173650,8 @@
     "TintAlias": "dyetint",
     "MemberDiscount": 10,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 1000
   },
   {
     "Comment": "Shattered Past Nature Starter Deck",
@@ -1173618,7 +1173668,8 @@
     "TintAlias": "dyetint",
     "MemberDiscount": 10,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 1000
   },
   {
     "Comment": "Shattered Past Order Starter Deck",
@@ -1173635,7 +1173686,8 @@
     "TintAlias": "dyetint",
     "MemberDiscount": 10,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 1000
   },
   {
     "Comment": "The Adventurer Enthusiast",
@@ -1239792,7 +1239844,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "Big Bang Coveralls",
@@ -1239993,7 +1240046,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "Lightning Quick Shoes",
@@ -1240227,7 +1240281,8 @@
     "CategoryId": 51,
     "NoSale": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 1000
   },
   {
     "Comment": "Diagonal Wood Flooring",
@@ -1240269,7 +1240324,8 @@
     "CategoryId": 51,
     "NoSale": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 1000
   },
   {
     "Comment": "Regal Wood Flooring",
@@ -1240291,7 +1240347,8 @@
     "CategoryId": 51,
     "NoSale": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 1000
   },
   {
     "Comment": "Heart-shaped Roofing Shingles",
@@ -1240333,7 +1240390,8 @@
     "CategoryId": 55,
     "NoSale": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 1000
   },
   {
     "Comment": "Standard Roofing Tiles",
@@ -1240375,7 +1240433,8 @@
     "CategoryId": 55,
     "NoSale": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 1000
   },
   {
     "Comment": "Butterfly Print Wallpaper",
@@ -1240397,7 +1240456,8 @@
     "CategoryId": 59,
     "NoSale": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 1000
   },
   {
     "Comment": "Fiery Might Wallpaper",
@@ -1240439,7 +1240499,8 @@
     "CategoryId": 59,
     "NoSale": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 1000
   },
   {
     "Comment": "Standard Wall Paint",
@@ -1240461,7 +1240522,8 @@
     "CategoryId": 59,
     "NoSale": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 1000
   },
   {
     "Comment": "Dragonscale Wallpaper",
@@ -1240483,7 +1240545,8 @@
     "CategoryId": 59,
     "NoSale": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 1000
   },
   {
     "Comment": "Shanty Town Wallpaper",
@@ -1240505,7 +1240568,8 @@
     "CategoryId": 59,
     "NoSale": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 1000
   },
   {
     "Comment": "Outer Space Wallpaper",
@@ -1240527,7 +1240591,8 @@
     "CategoryId": 59,
     "NoSale": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 1000
   },
   {
     "Comment": "Paint Splatter Wallpaper",
@@ -1240549,7 +1240614,8 @@
     "CategoryId": 59,
     "NoSale": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 1000
   },
   {
     "Comment": "Starry Night Wallpaper",
@@ -1240571,7 +1240637,8 @@
     "CategoryId": 59,
     "NoSale": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 1000
   },
   {
     "Comment": "Stucco Wall Texture",
@@ -1240593,7 +1240660,8 @@
     "CategoryId": 59,
     "NoSale": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 1000
   },
   {
     "Comment": "Refined Vertical Stripe Wallpaper",
@@ -1240615,7 +1240683,8 @@
     "CategoryId": 59,
     "NoSale": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 1000
   },
   {
     "Comment": "Colorful Vertical Stripe Wallpaper",
@@ -1240637,7 +1240706,8 @@
     "CategoryId": 59,
     "NoSale": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 1000
   },
   {
     "Comment": "Victorian Wallpaper",
@@ -1241530,7 +1241600,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "Spotted T-Rex",
@@ -1241556,7 +1241627,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "Gold-Tipped Dragon",
@@ -1241582,7 +1241654,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "Scaled Dragon",
@@ -1241608,7 +1241681,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "Dwarftech Hoverboard",
@@ -1241634,7 +1241708,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "Clockwork Hoverboard",
@@ -1241660,7 +1241735,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "Armored T-Rex",
@@ -1241686,7 +1241762,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "Beach Ball",
@@ -1241790,7 +1241867,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "Saber-Tooth Tiger",
@@ -1241816,7 +1241894,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "White-Nosed Mare",
@@ -1241842,7 +1241921,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "Black-Nosed Stallion",
@@ -1241868,7 +1241948,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "Stallion",
@@ -1241894,7 +1241975,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "White-Nosed Stallion",
@@ -1241920,7 +1242002,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "Nightmare",
@@ -1241946,7 +1242029,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "Hearts Pegasus",
@@ -1241972,7 +1242056,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "Pegasus Unicorn",
@@ -1241998,7 +1242083,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "Unicorn",
@@ -1242024,7 +1242110,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "Stone Saber-Tooth Tiger",
@@ -1242050,7 +1242137,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "Basalt Surfboard",
@@ -1242102,7 +1242190,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "Treasure War Booster Pack",
@@ -1242120,7 +1242209,8 @@
     "MemberDiscount": 10,
     "CategoryId": 149,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 1000
   },
   {
     "Comment": "Silver Bauble",
@@ -1242138,7 +1242228,8 @@
     "MemberDiscount": 10,
     "CategoryId": 149,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 1000
   },
   {
     "Comment": "Silver Trinket",
@@ -1242156,7 +1242247,8 @@
     "MemberDiscount": 10,
     "CategoryId": 149,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 1000
   },
   {
     "Comment": "Silver Jewel",
@@ -1242191,7 +1242283,8 @@
     "MemberDiscount": 10,
     "Param1": 2586,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 2204
   },
   {
     "Comment": "Campaign 4: Lakeshore Shenanigans",
@@ -1242209,7 +1242302,8 @@
     "MemberDiscount": 10,
     "Param1": 2587,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 2204
   },
   {
     "Comment": "Campaign 5: Hot Springs Haven",
@@ -1242227,7 +1242321,8 @@
     "MemberDiscount": 10,
     "Param1": 2588,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 2204
   },
   {
     "Comment": "Campaign 6: Tanglewood Fort",
@@ -1242245,7 +1242340,8 @@
     "MemberDiscount": 10,
     "Param1": 2589,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 2204
   },
   {
     "Comment": "Campaign 7: Queen's Last Hope",
@@ -1242263,7 +1242359,8 @@
     "MemberDiscount": 10,
     "Param1": 2590,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 2204
   },
   {
     "Comment": "Bicycle",
@@ -1242287,7 +1242384,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "Poison Dragon",
@@ -1242426,7 +1242524,8 @@
     "ActivatableAbilityId": 5936,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 500
   },
   {
     "Comment": "Ballet Boombox - cannot find the correct store entry (never released/sold, staff events only)",
@@ -1242449,7 +1242548,8 @@
     "ActivatableAbilityId": 5932,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 500
   },
   {
     "Comment": "Chiptune Boombox",
@@ -1242472,7 +1242572,8 @@
     "ActivatableAbilityId": 5933,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 500
   },
   {
     "Comment": "Chicken Boombox",
@@ -1242495,7 +1242596,8 @@
     "ActivatableAbilityId": 5934,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 500
   },
   {
     "Comment": "Plants Dance Boombox (reuses the Rainbow Leaf model; standard dance only, no plant-dancing mechanic)",
@@ -1242518,7 +1242620,8 @@
     "ActivatableAbilityId": 5935,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 500
   },
   {
     "Comment": "Hootenanny Boombox",
@@ -1242561,7 +1242664,8 @@
     "ActivatableAbilityId": 1057,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 500
   },
   {
     "Comment": "Realmshake Boombox",
@@ -1251328,7 +1251432,8 @@
     "CategoryId": 3,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 2
+    "Rarity": 2,
+    "Cost": 15000
   },
   {
     "Comment": "Seafarer",
@@ -1256533,7 +1256638,8 @@
     "CategoryId": 3,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "Fire Pegasus",
@@ -1256556,7 +1256662,8 @@
     "CategoryId": 3,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "Fire Pegasus",
@@ -1256577,7 +1256684,8 @@
     "Param1": 4031,
     "ModelName": "pony_pegasus_m_fire.adr",
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 10000
   },
   {
     "Comment": "Fan Faire 2011 T-Shirt",
@@ -1256683,7 +1256791,8 @@
     "MemberDiscount": 10,
     "CategoryId": 408,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 500
   },
   {
     "Comment": "Striped Beanie Cap",
@@ -1257067,7 +1257176,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 1000
   },
   {
     "Comment": "The Hover Ring",
@@ -1257089,7 +1257199,8 @@
     "CategoryId": 3,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "Pockets Dress",
@@ -1257587,7 +1257698,8 @@
     "CategoryId": 3,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "The Cyber Cycle",
@@ -1257609,7 +1257721,8 @@
     "CategoryId": 3,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "The Blast Rover",
@@ -1257631,7 +1257744,8 @@
     "CategoryId": 3,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "The Fire Hawk",
@@ -1257669,7 +1257783,8 @@
     "Stats.67.Id": 67,
     "Stats.67.Value": 1082130432,
     "Stats.68.Id": 68,
-    "Stats.68.Value": 1084227584
+    "Stats.68.Value": 1084227584,
+    "Cost": 15000
   },
   {
     "Comment": "Rhinestone Halter Top Dress",
@@ -1259129,7 +1259244,8 @@
     "CategoryId": 207,
     "PowerRating": 5,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 1431
   },
   {
     "Comment": "Precursor Energy Blade",
@@ -1259927,7 +1260043,8 @@
     "CategoryId": 3,
     "ActivatableAbilityId": 5931,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 1000
   },
   {
     "Comment": "Adept Wizard Hat",
@@ -1265945,7 +1266062,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "Lawn Chair",
@@ -1266016,7 +1266134,8 @@
     "CategoryId": 3,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "Boat Shoes ",
@@ -1266108,7 +1266227,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 2,
-    "ResellValue": 0
+    "ResellValue": 0,
+    "Cost": 15000
   },
   {
     "Comment": "Sci-Fighter Outfit",
@@ -1266504,7 +1266624,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "Dragonfire Broomstick",
@@ -1266525,7 +1266646,8 @@
     "MembersOnly": true,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "Sparky",
@@ -1266546,7 +1266668,8 @@
     "MembersOnly": true,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "Wonderous Tiger",
@@ -1266568,7 +1266691,8 @@
     "MembersOnly": true,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "Giant Turkey",
@@ -1266590,7 +1266714,8 @@
     "MembersOnly": true,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "Pogo Stick",
@@ -1266613,7 +1266738,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "IsTintable": true
+    "IsTintable": true,
+    "Cost": 15000
   },
   {
     "Comment": "Eyeball",
@@ -1266703,7 +1266829,8 @@
     "MembersOnly": true,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "Clockwork Horse",
@@ -1266869,7 +1266996,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "ResellValue": 50
+    "ResellValue": 50,
+    "Cost": 15000
   },
   {
     "Comment": "Flying Saucer",
@@ -1266892,7 +1267020,8 @@
     "NoSale": true,
     "NonMiniGame": true,
     "Rarity": 3,
-    "ResellValue": 50
+    "ResellValue": 50,
+    "Cost": 15000
   },
   {
     "Comment": "Reindeer",
@@ -1269939,7 +1270068,8 @@
     "MemberDiscount": 10,
     "ModelName": "pony_m_nightmare.adr",
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 10000
   },
   {
     "Comment": "Piñata Pony",
@@ -1269991,7 +1270121,8 @@
     "ModelName": "basketball_m.adr",
     "CategoryId": 200,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 10000
   },
   {
     "Comment": "Dukey the Dog",
@@ -1270009,7 +1270140,8 @@
     "ModelName": "dog_large_dukey.adr",
     "CategoryId": 200,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 10000
   },
   {
     "Comment": "Fruit Cake Critter",
@@ -1270027,7 +1270159,8 @@
     "ModelName": "fruitcake_m_basic.adr",
     "CategoryId": 200,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 10000
   },
   {
     "Comment": "Little Fang",
@@ -1270045,7 +1270178,8 @@
     "ModelName": "babytiger_m_fangs.adr",
     "CategoryId": 200,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 10000
   },
   {
     "Comment": "S.M.A.C.M.",
@@ -1270066,7 +1270200,8 @@
     "CategoryId": 3,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "Chicken",
@@ -1270087,7 +1270222,8 @@
     "CategoryId": 3,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "Wilds Tractor",
@@ -1270107,7 +1270243,8 @@
     "CategoryId": 3,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "Drake",
@@ -1270128,7 +1270265,8 @@
     "CategoryId": 3,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "Undead Nightmare",
@@ -1270149,7 +1270287,8 @@
     "CategoryId": 3,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "Arctic Cat",
@@ -1270170,7 +1270309,8 @@
     "CategoryId": 3,
     "NoSale": true,
     "NonMiniGame": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 15000
   },
   {
     "Comment": "Bambi",
@@ -1270188,7 +1270328,8 @@
     "ModelName": "deer_bambi.adr",
     "CategoryId": 200,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 10000
   },
   {
     "Comment": "Flower",
@@ -1270206,7 +1270347,8 @@
     "ModelName": "skunk_flower.adr",
     "CategoryId": 200,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 10000
   },
   {
     "Comment": "Cupid",
@@ -1270224,7 +1270366,8 @@
     "ModelName": "fairy_m_cupid.adr",
     "CategoryId": 200,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 10000
   },
   {
     "Comment": "Heart Critter",
@@ -1270242,7 +1270385,8 @@
     "ModelName": "heart_critter.adr",
     "CategoryId": 200,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 10000
   },
   {
     "Comment": "Embers",
@@ -1270260,7 +1270404,8 @@
     "ModelName": "babydragon_m_basic.adr",
     "CategoryId": 200,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 10000
   },
   {
     "Comment": "Teeny Wrex",
@@ -1270278,7 +1270423,8 @@
     "ModelName": "babytrex_m_basic.adr",
     "CategoryId": 200,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 10000
   },
   {
     "Comment": "Feathered Drakeling",
@@ -1270296,7 +1270442,8 @@
     "ModelName": "feathereddrake_m_drakelingpet.adr",
     "CategoryId": 200,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 10000
   },
   {
     "Comment": "Mini-Manguana",
@@ -1270314,7 +1270461,8 @@
     "ModelName": "manguana_m_base.adr",
     "CategoryId": 200,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 10000
   },
   {
     "Comment": "Sandscale Gatherer",
@@ -1270332,7 +1270480,8 @@
     "ModelName": "manguana_m_scavengerpet.adr",
     "CategoryId": 200,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 10000
   },
   {
     "Comment": "Friendly Leafling",
@@ -1270350,7 +1270499,8 @@
     "ModelName": "floren_m_baby.adr",
     "CategoryId": 200,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 10000
   },
   {
     "Comment": "Spring Chick",
@@ -1270368,7 +1270518,8 @@
     "ModelName": "tintchick.adr",
     "CategoryId": 200,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 10000
   },
   {
     "Comment": "Toeny",
@@ -1270386,7 +1270537,8 @@
     "ModelName": "toeny_m_basic.adr",
     "CategoryId": 200,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 10000
   },
   {
     "Comment": "Wally",
@@ -1270404,7 +1270556,8 @@
     "ModelName": "toad_walgreens.adr",
     "CategoryId": 200,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 10000
   },
   {
     "Comment": "Wild Eagle",
@@ -1270422,7 +1270575,8 @@
     "ModelName": "birds_eagle.adr",
     "CategoryId": 200,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 10000
   },
   {
     "Comment": "Wild Hawk",
@@ -1270440,7 +1270594,8 @@
     "ModelName": "birds_hawk.adr",
     "CategoryId": 200,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 10000
   },
   {
     "Comment": "Minicopter",
@@ -1270458,7 +1270613,8 @@
     "ModelName": "minicopter.adr",
     "CategoryId": 200,
     "NoSale": true,
-    "Rarity": 3
+    "Rarity": 3,
+    "Cost": 10000
   },
   {
     "Comment": "Figgy Pudding Critter",
@@ -1270477,6 +1270633,7 @@
     "NoSale": true,
     "Rarity": 3,
     "TextureAlias": "figgypuddingman",
-    "ModelName": "fruitcake_m_basic.adr"
+    "ModelName": "fruitcake_m_basic.adr",
+    "Cost": 10000
   }
 ]

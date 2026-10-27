@@ -10,9 +10,6 @@ namespace Sanctuary.Game.Helpers;
 
 public static class WelcomeScreenHelper
 {
-    public const int PopularItemsGroupId = 6;
-    private const int StationCashCurrencyType = 1;
-    private const int PopularItemCount = 8;
     private const int MarketplaceAnnouncementId = 1;
     private const int MarketplaceAnnouncementPriority = 1;
     private const int MarketplaceAnnouncementIconId = 38443;
@@ -46,32 +43,6 @@ public static class WelcomeScreenHelper
     private const int SandwichClaimCodeIconId = 949;
     private const int FirstLoginSecondsSinceLastLogin = -1;
 
-    public static StoreBundleGroupDefinition GetPopularItems(
-        StoreBundleGroupDefinition template, IEnumerable<AppStoreBundleDefinition> catalog,
-        int count = PopularItemCount, int currencyType = StationCashCurrencyType)
-    {
-        var candidates = catalog.Where(x => x.CurrencyType == currencyType && x.NameId > 0
-            && x.DescriptionId > 0 && int.TryParse(x.Image.Image, out var imageId) && imageId > 0)
-            .DistinctBy(x => x.Id).ToArray();
-        Random.Shared.Shuffle(candidates);
-
-        return new StoreBundleGroupDefinition
-        {
-            Id = template.Id,
-            NameId = template.NameId,
-            DescriptionId = template.DescriptionId,
-            Status = template.Status,
-            Image = template.Image,
-            IsExclusive = template.IsExclusive,
-            Entries = candidates.Take(Math.Max(0, count)).Select((bundle, index) =>
-                new StoreBundleGroupDefinition.Entry
-                {
-                    StoreBundleId = bundle.Id,
-                    DisplayOrder = index + 1
-                }).ToDictionary(x => x.StoreBundleId)
-        };
-    }
-
     public static AnnouncementDataSendPacket GetAnnouncementsPacket(IEnumerable<AnnouncementInfo>? announcements = null) => new()
     {
         Announcements = announcements?.ToList() ??
@@ -95,13 +66,12 @@ public static class WelcomeScreenHelper
             ? (int)Math.Clamp((loginTime - previousLogin.Value).TotalSeconds, 0, int.MaxValue)
             : FirstLoginSecondsSinceLastLogin;
 
-    public static PacketLoadWelcomeScreen GetWelcomeScreenPacket(int secondsSinceLastLogin, int stationCash,
+    public static PacketLoadWelcomeScreen GetWelcomeScreenPacket(int secondsSinceLastLogin,
         IEnumerable<ContentInfo>? contents = null, IEnumerable<ClaimCodeInfo>? claimCodes = null)
     {
         var packetLoadWelcomeScreen = new PacketLoadWelcomeScreen
         {
-            SecondsSinceLastLogin = secondsSinceLastLogin,
-            StartingScWalletBalance = stationCash
+            SecondsSinceLastLogin = secondsSinceLastLogin
         };
 
         packetLoadWelcomeScreen.Contents.AddRange(contents ??

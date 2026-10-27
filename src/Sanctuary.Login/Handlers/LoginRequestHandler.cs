@@ -108,11 +108,9 @@ public static class LoginRequestHandler
 
         loginReply.LoggedIn = true;
         loginReply.Status = 1;
-        loginReply.IsMember = user.IsMember;
 
         var accountInfo = new AccountInfo
         {
-            IsMember = user.IsMember,
             MaxCharacters = user.MaxCharacters,
             IsAdminAccount = user.IsAdmin
         };

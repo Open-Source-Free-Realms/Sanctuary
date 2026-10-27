@@ -30,15 +30,6 @@ public static class PacketBaseInGamePurchaseHandler
 
         return opCode switch
         {
-            PacketInGamePurchasePreviewOrder.OpCode => PacketInGamePurchasePreviewOrderHandler.HandlePacket(connection, reader.Span),
-            PacketInGamePurchasePlaceOrderPacket.OpCode => PacketInGamePurchasePlaceOrderPacketHandler.HandlePacket(connection, reader.Span),
-            PacketInGamePurchaseWalletInfoRequest.OpCode => PacketInGamePurchaseWalletInfoRequestHandler.HandlePacket(connection),
-            PacketInGamePurchaseCurrencyCodesRequest.OpCode => PacketInGamePurchaseCurrencyCodesRequestHandler.HandlePacket(connection, reader.Span),
-            PacketInGamePurchaseStateCodesRequest.OpCode => PacketInGamePurchaseStateCodesRequestHandler.HandlePacket(connection),
-            PacketInGamePurchaseCountryCodesRequest.OpCode => PacketInGamePurchaseCountryCodesRequestHandler.HandlePacket(connection, reader.Span),
-            PacketInGamePurchaseSubscriptionProductsRequest.OpCode => PacketInGamePurchaseSubscriptionProductsRequestHandler.HandlePacket(connection, reader.Span),
-            PacketInGamePurchaseAccountInfoRequest.OpCode => PacketInGamePurchaseAccountInfoRequestHandler.HandlePacket(connection, reader.Span),
-            PacketInGamePurchaseStoreBundleContentRequest.OpCode => PacketInGamePurchaseStoreBundleContentRequestHandler.HandlePacket(connection, reader.Span),
             InGamePurchaseUpdateItemRequirementsRequest.OpCode => InGamePurchaseUpdateItemRequirementsRequestHandler.HandlePacket(connection),
             _ => LogUnhandled(opCode, reader)
         };

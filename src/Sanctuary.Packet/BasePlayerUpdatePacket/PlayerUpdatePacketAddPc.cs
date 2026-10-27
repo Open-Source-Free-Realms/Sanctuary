@@ -41,7 +41,8 @@ public class PlayerUpdatePacketAddPc : BasePlayerUpdatePacket, ISerializablePack
     public float MaxMovementSpeed;
 
     public bool IsUnderage;
-    public bool IsMember;
+    // Membership no longer exists. The client still locks member content behind this flag, so everyone is a member.
+    public bool IsMember = true;
     public bool IsReferee;
 
     // Custom Model Id
