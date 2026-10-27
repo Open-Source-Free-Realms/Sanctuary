@@ -82,7 +82,14 @@ public static class ScriptCommandHelper
                 var source = PanelTextHelper.Unescape(invoker.PendingScript.ToString());
                 invoker.PendingScript = null;
 
-                _ = CommitAsync(command, chatCommandManager, invoker, worldZone, target, source);
+                // A library template loaded into the editor still has its {{placeholders}}; fill them with the header defaults.
+                if (!ScriptTemplate.Parse(source, null, null, false).TryRender(new Dictionary<string, string>(), out var filled, out var fillError))
+                {
+                    SendResult(invoker, false, fillError!);
+                    return true;
+                }
+
+                _ = CommitAsync(command, chatCommandManager, invoker, worldZone, target, filled);
                 return true;
 
             case "clear":

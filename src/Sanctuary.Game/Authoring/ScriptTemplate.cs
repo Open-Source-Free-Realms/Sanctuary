@@ -90,7 +90,9 @@ public sealed partial record ScriptTemplate
 
     /// <summary>
     /// Fills the placeholders. Missing values take the header default; string values are escaped
-    /// for a Lua string literal and the other types must be numbers.
+    /// for a Lua string literal and the other types must be numbers. A placeholder without a
+    /// matching @param fails: Lua would otherwise compile "{{hits}}" as a nested table and the
+    /// script would only break when it runs.
     /// </summary>
     public bool TryRender(IReadOnlyDictionary<string, string> values, out string source, out string? error)
     {
@@ -120,8 +122,25 @@ public sealed partial record ScriptTemplate
             rendered[param.Key] = formatted;
         }
 
-        source = PlaceholderRegex().Replace(Source, match =>
-            rendered.TryGetValue(match.Groups[1].Value, out var value) ? value : match.Value);
+        string? undeclared = null;
+
+        var filled = PlaceholderRegex().Replace(Source, match =>
+        {
+            if (rendered.TryGetValue(match.Groups[1].Value, out var value))
+                return value;
+
+            undeclared ??= match.Groups[1].Value;
+            return match.Value;
+        });
+
+        if (undeclared is not null)
+        {
+            error = $"{{{{{undeclared}}}}} has no \"-- @param {undeclared} <type> <default>\" line to fill it. " +
+                $"For a nested Lua table, write {{ {{{undeclared}}} }} instead.";
+            return false;
+        }
+
+        source = filled;
 
         return true;
     }

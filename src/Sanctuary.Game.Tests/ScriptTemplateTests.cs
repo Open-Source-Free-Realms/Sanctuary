@@ -133,6 +133,26 @@ public sealed class ScriptTemplateTests
     }
 
     [TestMethod]
+    public void Render_RejectsPlaceholdersWithoutParam()
+    {
+        // Lua compiles "{{hits}}" as a nested table, so it has to fail here rather than at the first click.
+        var template = ScriptTemplate.Parse("local health = {{hits}}\nfunction onInteract(player) health = health - 1 end", null, null, false);
+
+        Assert.IsFalse(template.TryRender(new Dictionary<string, string>(), out _, out var error));
+        StringAssert.Contains(error, "{{hits}}");
+    }
+
+    [TestMethod]
+    public void Render_FillsLoadedTemplateWithDefaults()
+    {
+        var template = ScriptTemplate.Parse(File.ReadAllText(Path.Combine(FindTemplatesDirectory(), "pinata.lua")), null, null, false);
+
+        Assert.IsTrue(template.TryRender(new Dictionary<string, string>(), out var source, out var error), error);
+        StringAssert.Contains(source, "local health = 10");
+        Assert.IsFalse(source.Contains("{{"), "No placeholder should reach Lua.");
+    }
+
+    [TestMethod]
     public async Task ShippedTemplates_CompileWithDefaults()
     {
         var directory = FindTemplatesDirectory();
