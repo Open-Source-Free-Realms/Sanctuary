@@ -32,6 +32,7 @@ public abstract class QuestGoal
 
     public List<int> HideNpcIdsWhenDone { get; set; } = [];
     public int HideEffectId { get; set; }
+    public int HideDelayMs { get; set; }
     public List<QuestNpcEffect> NpcEffectsUntilDone { get; set; } = [];
 
     public virtual GoalProgress CreateProgress() => new();

@@ -517,7 +517,8 @@ public sealed class QuestManager : IQuestManager
         {
             foreach (var npc in player.VisibleNpcs.Values.Where(npc => npc.DefinitionId == npcId).ToList())
             {
-                player.SendTunneled(EntityHelper.GetRemovePlayerGracefullyPacket(npc.Guid, animate: true, compositeEffectId: goal.HideEffectId));
+                player.SendTunneled(EntityHelper.GetRemovePlayerGracefullyPacket(npc.Guid, animate: goal.HideEffectId != 0,
+                    delay: goal.HideDelayMs, effectDelay: goal.HideDelayMs, compositeEffectId: goal.HideEffectId));
                 player.VisibleNpcs.TryRemove(npc.Guid, out _);
             }
         }
@@ -868,13 +869,12 @@ public sealed class QuestManager : IQuestManager
     {
         QuestId = quest.QuestId,
         TitleId = quest.TitleId,
-        DescriptionId = quest.ObjectiveDescriptionId,
+        DescriptionId = quest.DescriptionId,
         HelperTextId = quest.ObjectiveDescriptionId,
         MembersOnly = false,
         TimeStarted = progress.Started.ToUnixTimeSeconds(),
         ProfileId = 0,
         CompletedPercentage = QuestCompletion(quest, progress.GoalsDone),
-        IconId = quest.IconId,
         SystemQuest = false,
         SuppressStartBanner = suppressStartBanner,
         RewardBundle = QuestListRewardBundle(player, quest)

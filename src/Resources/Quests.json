@@ -892,7 +892,7 @@
     "RewardCoins": 9,
     "RewardExperience": 60,
     "RewardItems": [],
-    "NextQuestId": 3091,
+    "NextQuestId": 435,
     "NotificationAvailable": 2,
     "NotificationActive": 6,
     "Goals": [
@@ -907,7 +907,7 @@
   },
   {
     "Name": "Noise Permit",
-    "QuestId": 3091,
+    "QuestId": 435,
     "TitleId": 36830,
     "DescriptionId": 36831,
     "GiverDialogueId": 36829,
@@ -915,8 +915,8 @@
     "IconId": 43278,
     "GiverNpcId": 3568,
     "TargetNpcId": 3568,
-    "RewardCoins": 26,
-    "RewardExperience": 80,
+    "RewardCoins": 9,
+    "RewardExperience": 0,
     "RewardItems": [],
     "PrerequisiteQuestId": 3090,
     "NotificationAvailable": 2,
@@ -926,7 +926,9 @@
         "Type": 0,
         "NameId": 36834,
         "DescriptionId": 103958,
-        "Targets": [{ "NpcId": 33678 }]
+        "Targets": [{ "NpcId": 33678 }],
+        "HideNpcIdsWhenDone": [33678],
+        "HideDelayMs": 5000
       },
       {
         "Type": 0,
@@ -2245,7 +2247,7 @@
     "TitleId": 47534,
     "DescriptionId": 47535,
     "GiverDialogueId": 47533,
-    "ObjectiveDescriptionId": 47535,
+    "ObjectiveDescriptionId": 47542,
     "IconId": 43278,
     "GiverNpcId": 2222,
     "TargetNpcId": 2222,
