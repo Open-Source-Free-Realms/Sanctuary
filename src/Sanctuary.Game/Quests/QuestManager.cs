@@ -459,17 +459,20 @@ public sealed class QuestManager : IQuestManager
         foreach (var progress in player.Quests.InProgress)
         {
             if (_resourceManager.Quests.TryGet(progress.QuestId, out var quest))
-                questData.Quests.Add(ClientQuestFor(quest, progress));
+                questData.Quests.Add(ClientQuestFor(player, quest, progress));
         }
 
         return questData;
     }
 
-    public void RestoreJournal(Player player)
+    public void SendActiveObjectives(Player player)
     {
         foreach (var (quest, _, _, goal) in ActiveGoals(player))
             SendObjectiveActivated(player, quest.QuestId, goal);
+    }
 
+    public void RestoreJournal(Player player)
+    {
         RefreshObjectiveTarget(player);
 
         SendJournalQuestStates(player);
@@ -711,7 +714,9 @@ public sealed class QuestManager : IQuestManager
                 entries.Add(new RewardBundleEntryItem
                 {
                     IconId = itemDef.Icon.Id,
+                    TintId = itemDef.Icon.TintId,
                     NameId = itemDef.NameId,
+                    DefinitionId = definitionId,
                     Quantity = 1
                 });
             }
@@ -824,7 +829,42 @@ public sealed class QuestManager : IQuestManager
         player.Quests.PendingTurnInQuestId = quest.QuestId;
     }
 
-    private static ClientQuest NewClientQuest(QuestDefinition quest, QuestProgress progress, bool suppressStartBanner) => new()
+    private const int QuestListRewardUnknown3 = 15;
+    private const int CoinsIconId = 102;
+    private const int CoinsTextId = 6513;
+    private const int ExperienceIconId = 101;
+
+    private RewardBundleBase QuestListRewardBundle(Player player, QuestDefinition quest)
+    {
+        var bundle = new RewardBundleBase
+        {
+            Coins = quest.RewardCoins,
+            Experience = quest.RewardExperience,
+            Unknown3 = QuestListRewardUnknown3,
+            PlayerGuid = player.Guid
+        };
+
+        bundle.Entries.AddRange(BuildRewardEntries(quest));
+
+        if (bundle.Entries.Count > 0)
+        {
+            bundle.IconId = bundle.Entries[0].IconId;
+            bundle.NameId = bundle.Entries[0].NameId;
+        }
+        else if (quest.RewardCoins > 0)
+        {
+            bundle.IconId = CoinsIconId;
+            bundle.NameId = CoinsTextId;
+        }
+        else if (quest.RewardExperience > 0)
+        {
+            bundle.IconId = ExperienceIconId;
+        }
+
+        return bundle;
+    }
+
+    private ClientQuest NewClientQuest(Player player, QuestDefinition quest, QuestProgress progress, bool suppressStartBanner) => new()
     {
         QuestId = quest.QuestId,
         TitleId = quest.TitleId,
@@ -836,12 +876,13 @@ public sealed class QuestManager : IQuestManager
         CompletedPercentage = QuestCompletion(quest, progress.GoalsDone),
         IconId = quest.IconId,
         SystemQuest = false,
-        SuppressStartBanner = suppressStartBanner
+        SuppressStartBanner = suppressStartBanner,
+        RewardBundle = QuestListRewardBundle(player, quest)
     };
 
-    private static ClientQuest ClientQuestFor(QuestDefinition quest, QuestProgress progress)
+    private ClientQuest ClientQuestFor(Player player, QuestDefinition quest, QuestProgress progress)
     {
-        var clientQuest = NewClientQuest(quest, progress, suppressStartBanner: true);
+        var clientQuest = NewClientQuest(player, quest, progress, suppressStartBanner: true);
         var goals = quest.Goals;
 
         for (int i = 0; i < progress.StepEnd; i++)
@@ -861,7 +902,7 @@ public sealed class QuestManager : IQuestManager
 
         player.SendTunneled(new QuestAddPacket
         {
-            Quest = NewClientQuest(quest, progress, suppressStartBanner: false),
+            Quest = NewClientQuest(player, quest, progress, suppressStartBanner: false),
             ShowInTracker = quest.QuestId == player.Quests.ActiveQuestId
         });
 
@@ -894,7 +935,7 @@ public sealed class QuestManager : IQuestManager
         NameId = goal.NameId,
         DescriptionId = goal.DescriptionId != 0 ? goal.DescriptionId : goal.NameId,
         State = state,
-        CurrentCount = currentCount,
+        CurrentCount = state == ObjectiveComplete ? goal.RequiredCount : currentCount,
         RequiredCount = goal.RequiredCount
     };
 

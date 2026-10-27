@@ -28,6 +28,8 @@ public interface IQuestManager
 
     ClientQuestData GetClientQuestData(Player player);
 
+    void SendActiveObjectives(Player player);
+
     void RestoreJournal(Player player);
 
     NotificationInfo? GetQuestBadge(Player player, Npc npc);
