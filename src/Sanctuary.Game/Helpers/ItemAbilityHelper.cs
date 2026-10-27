@@ -52,21 +52,26 @@ public static class ItemAbilityHelper
     public static int GetAmount(ItemAbilityRestoreDefinition restore, int maximum) =>
         restore.Amount + (int)MathF.Round(maximum * restore.Percent / 100f);
 
-    private static PlayerEffect? CreateEffect(Player player, ItemAbilityDefinition ability, int nameId, int iconId)
+    /// <summary>
+    /// The lasting part of an ability (stats, speed, scale, aura, restore over time), or null if it's instant.
+    /// </summary>
+    public static PlayerEffect? CreateEffect(Player player, ItemAbilityDefinition ability, int nameId, int iconId)
     {
         var health = ItemAbilityDefinitionCollection.IsOverTime(ability.Health) ? ability.Health : null;
         var energy = ItemAbilityDefinitionCollection.IsOverTime(ability.Energy) ? ability.Energy : null;
 
+        // Validation makes health and energy over time share one tick, so either one sets it.
+        var overTime = health ?? energy;
+
         var timed = ability.AuraEffectId != 0 || ability.MovementSpeedBonus != 0 || ability.Scale != 0 || ability.Stats.Count > 0;
 
-        if (!timed && health is null && energy is null)
+        if (!timed && overTime is null)
             return null;
 
-        var intervalMs = health?.IntervalMs ?? energy!.IntervalMs;
-        var overTimeMs = Math.Max(health?.OverMs ?? 0, energy?.OverMs ?? 0);
-        var tickCount = overTimeMs / intervalMs;
+        var intervalMs = overTime?.IntervalMs ?? 0;
+        var tickCount = overTime is null ? 0 : overTime.OverMs / intervalMs;
 
-        var durationMs = ability.DurationMs > 0 ? ability.DurationMs : overTimeMs + OverTimeGraceMs;
+        var durationMs = ability.DurationMs > 0 ? ability.DurationMs : overTime!.OverMs + OverTimeGraceMs;
 
         return new PlayerEffect
         {
@@ -81,10 +86,10 @@ public static class ItemAbilityHelper
             StatBonuses = ability.Stats.Count > 0
                 ? ability.Stats.GroupBy(stat => stat.Stat).ToDictionary(group => group.Key, group => group.Sum(stat => stat.Value))
                 : null,
-            TickIntervalMs = health is not null || energy is not null ? intervalMs : 0,
+            TickIntervalMs = intervalMs,
             TickCount = tickCount,
-            HealthPerTick = health is not null ? GetAmount(health, player.MaxHitpoints) / Math.Max(1, health.OverMs / intervalMs) : 0,
-            EnergyPerTick = energy is not null ? GetAmount(energy, player.EffectiveMaxEnergy) / Math.Max(1, energy.OverMs / intervalMs) : 0
+            HealthPerTick = health is not null ? GetAmount(health, player.MaxHitpoints) / tickCount : 0,
+            EnergyPerTick = energy is not null ? GetAmount(energy, player.EffectiveMaxEnergy) / tickCount : 0
         };
     }
 }

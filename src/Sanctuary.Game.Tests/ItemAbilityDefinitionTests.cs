@@ -42,6 +42,67 @@ public sealed class ItemAbilityDefinitionTests
     }
 
     [TestMethod]
+    public void CreateEffect_BuildsEveryShippedAbility()
+    {
+        var abilities = new ItemAbilityDefinitionCollection(NullLogger.Instance);
+        Assert.IsTrue(abilities.Load(Path.Combine(Resources, "ItemAbilities.json")));
+
+        var player = new Player(null!, null!, null!, null!);
+
+        foreach (var ability in abilities.Values)
+        {
+            var effect = ItemAbilityHelper.CreateEffect(player, ability, nameId: 1, iconId: 1);
+            var overTime = ItemAbilityDefinitionCollection.IsOverTime(ability.Health) || ItemAbilityDefinitionCollection.IsOverTime(ability.Energy);
+            var timed = ability.AuraEffectId != 0 || ability.MovementSpeedBonus != 0 || ability.Scale != 0 || ability.Stats.Count > 0;
+
+            Assert.AreEqual(timed || overTime, effect is not null, $"Ability {ability.AbilityId}");
+
+            if (effect is null)
+                continue;
+
+            Assert.IsTrue(effect.ExpiresAt > DateTimeOffset.UtcNow, $"Ability {ability.AbilityId}");
+            Assert.AreEqual(overTime, effect.TickCount > 0, $"Ability {ability.AbilityId}");
+        }
+    }
+
+    [TestMethod]
+    public void CreateEffect_SplitsRestoreOverTimeIntoTicks()
+    {
+        var player = new Player(null!, null!, null!, null!);
+        var ability = new ItemAbilityDefinition
+        {
+            AbilityId = 1,
+            AuraEffectId = 10,
+            Health = new ItemAbilityRestoreDefinition { Percent = 25, OverMs = 5000 }
+        };
+
+        var effect = ItemAbilityHelper.CreateEffect(player, ability, 1, 1)!;
+
+        Assert.AreEqual(5, effect.TickCount);
+        Assert.AreEqual(1000, effect.TickIntervalMs);
+        Assert.AreEqual(player.MaxHitpoints / 4 / 5, effect.HealthPerTick);
+        Assert.AreEqual(0, effect.EnergyPerTick);
+    }
+
+    [TestMethod]
+    public void CreateEffect_TimedBuffWithoutRestoreHasNoTicks()
+    {
+        var player = new Player(null!, null!, null!, null!);
+        var ability = new ItemAbilityDefinition
+        {
+            AbilityId = 244,
+            Group = "CoinBoost",
+            DurationMs = 60000,
+            Stats = [new ItemAbilityStatDefinition { Stat = CharacterStatId.GoldBoostPercent, Value = 25 }]
+        };
+
+        var effect = ItemAbilityHelper.CreateEffect(player, ability, 1, 1)!;
+
+        Assert.AreEqual(0, effect.TickCount);
+        Assert.AreEqual(25f, effect.StatBonuses![CharacterStatId.GoldBoostPercent]);
+    }
+
+    [TestMethod]
     public void ItemAbilitiesJson_ModelsExist()
     {
         var models = new ModelDefinitionCollection(NullLogger.Instance);
