@@ -63,6 +63,11 @@ public class DbWorldNpc
     /// </summary>
     public string? Conversation { get; set; }
 
+    /// <summary>
+    /// Extra appearance set by GMs (texture, tint, effect, overhead icon, ...), as JSON.
+    /// </summary>
+    public string? Properties { get; set; }
+
     public ulong? CreatedBy { get; set; }
 
     public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;

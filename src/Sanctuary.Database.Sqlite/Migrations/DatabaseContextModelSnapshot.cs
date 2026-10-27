@@ -852,6 +852,9 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     b.Property<float>("PositionZ")
                         .HasColumnType("REAL");
 
+                    b.Property<string>("Properties")
+                        .HasColumnType("TEXT");
+
                     b.Property<float>("RotationW")
                         .HasColumnType("REAL");
 
@@ -944,6 +947,9 @@ namespace Sanctuary.Database.Sqlite.Migrations
 
                     b.Property<float>("PositionZ")
                         .HasColumnType("REAL");
+
+                    b.Property<string>("Properties")
+                        .HasColumnType("TEXT");
 
                     b.Property<float>("RotationW")
                         .HasColumnType("REAL");

@@ -10,6 +10,10 @@ Mods:
                                            (chatWindowCtrl/gm_panel.as appended).
   sanctuaryGameDock.gfx (+ .lst.z)       - main hub with a purple Referee Tools tree that opens the panel
                                            (gamedock/gm_hub_button.as appended, gmTreeIcon added).
+  sanctuaryDialog.gfx (+ .lst.z)         - NPC dialog that stays hidden when sent empty, so GM conversations
+                                           get its camera zoom with the panel's text (dialog/dialog_hide.as).
+  sanctuaryHousingEditPanel.gfx (+ .lst.z) - decorate-mode furniture tray with 10 items per page and a
+                                           search box (housing/tray.as).
 
 The stock movies are read from your Free Realms client's local asset packs (--client), or from a
 local copy of the asset server (--assets). Nothing from the game is stored in this repository.
@@ -45,6 +49,8 @@ GM_TREE_ICON = ("treeIcon", "gmTreeIcon", 155)
 MODS = [
     ("chatWindowCtrl", "sanctuaryChatWindowCtrl", "\\frame_2\\DoAction", script_dir / "chatWindowCtrl" / "gm_panel.as", []),
     ("gamedock", "sanctuaryGameDock", "\\frame_1\\DoAction", script_dir / "gamedock" / "gm_hub_button.as", [GM_TREE_ICON]),
+    ("dialog", "sanctuaryDialog", "\\frame_1\\DoAction", script_dir / "dialog" / "dialog_hide.as", []),
+    ("housingEditPanel", "sanctuaryHousingEditPanel", "\\frame_1\\DoAction", script_dir / "housing" / "tray.as", []),
 ]
 
 # ffdec's XML export puts each top-level tag on its own line at this indentation.

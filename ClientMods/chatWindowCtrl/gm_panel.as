@@ -33,11 +33,18 @@ function gmRight()
    return Stage.width;
 }
 
-var GM_W = 540;
-var GM_H = 340;
+// Base layout; the panel scales from here (resize grip, maximize). Tabs run down a sidebar on the left
+// and every tab draws into the content area beside it.
+var GM_W = 780;
+var GM_H = 500;
+var GM_SIDEBAR_W = 112;
+var GM_CONTENT_X = GM_SIDEBAR_W + 24;
+var GM_CONTENT_Y = 52;
+var GM_CONTENT_W = GM_W - GM_CONTENT_X - 20;
+var GM_CONTENT_H = GM_H - GM_CONTENT_Y - 40;
 var GM_COLUMNS = 3;
-var GM_CELL_W = 166;
-var GM_CELL_H = 50;
+var GM_CELL_W = 204;
+var GM_CELL_H = 52;
 
 // Hub palette.
 var GM_GOLD = 0xF2C94C;
@@ -64,7 +71,7 @@ var gmTabs = [
    ["world", "World"],
    ["edit", "Edit"],
    ["script", "Script"],
-   ["conv", "Talk"],
+   ["conv", "Dialogue"],
    ["quests", "Quests"]
 ];
 // Entity selected for editing (god mode click), as sent by the server: ["npc"|"prop"|"none", fields...].
@@ -246,7 +253,7 @@ function gmBuild()
    var i;
    for(i = 0; i < gmTabs.length; i++)
    {
-      var tab = gmButton(root_mc, "tab" + i + "_mc", gmTabs[i][1], 12 + i * 57, 32, 54, 24, function()
+      var tab = gmButton(root_mc, "tab" + i + "_mc", gmTabs[i][1], 12, GM_CONTENT_Y - 8 + i * 38, GM_SIDEBAR_W - 4, 32, function()
       {
          gmShowTab(this.tabId);
       });
@@ -254,14 +261,14 @@ function gmBuild()
    }
 
    var inner = root_mc.createEmptyMovieClip("inner_mc", 50);
-   inner._x = 10;
-   inner._y = 62;
+   inner._x = GM_CONTENT_X - 10;
+   inner._y = GM_CONTENT_Y - 10;
    inner.lineStyle(2, GM_GOLD_DARK, 100);
    inner.beginFill(GM_BLUE_INNER, 92);
-   gmRoundRect(inner, 0, 0, GM_W - 20, GM_H - 92, 10);
+   gmRoundRect(inner, 0, 0, GM_CONTENT_W + 20, GM_CONTENT_H + 16, 10);
    inner.endFill();
 
-   gmText(root_mc, "status_txt", "", 14, GM_H - 26, GM_W - 28, 18, 11, GM_TEXT_DIM, false);
+   gmText(root_mc, "status_txt", "", GM_CONTENT_X, GM_H - 28, GM_CONTENT_W - 20, 18, 11, GM_TEXT_DIM, false);
 
    root_mc.createEmptyMovieClip("content_mc", 60);
    gmAddResizeGrip(root_mc);
@@ -352,8 +359,8 @@ function gmClearContent()
    var root_mc = _root.gm_mc;
    root_mc.content_mc.removeMovieClip();
    var content = root_mc.createEmptyMovieClip("content_mc", 60);
-   content._x = 18;
-   content._y = 68;
+   content._x = GM_CONTENT_X;
+   content._y = GM_CONTENT_Y;
    return content;
 }
 
@@ -707,14 +714,14 @@ function gmRenderWorld(content)
    var i;
    for(i = 0; i < prompts.length; i++)
    {
-      var b = gmButton(content, "prompt" + i + "_mc", prompts[i][0], (i % 6) * 84, 122 + Math.floor(i / 6) * 24, 81, 21, function()
+      var b = gmButton(content, "prompt" + i + "_mc", prompts[i][0], (i % 6) * 106, 124 + Math.floor(i / 6) * 28, 100, 24, function()
       {
          gmPrompt(this.prefix);
       });
       b.prefix = prompts[i][1];
    }
-   gmText(content, "game_txt", "Game systems", 0, 198, 300, 18, 12, GM_TEXT_GOLD, true);
-   gmButtonRow(content, 216, [
+   gmText(content, "game_txt", "Game systems", 0, 214, 300, 18, 12, GM_TEXT_GOLD, true);
+   gmButtonRow(content, 234, [
       ["My quests", "!quest list"],
       ["My pets", "!pet list"],
       ["Collections", "!collection status"],
@@ -775,7 +782,11 @@ function gmEditButtons(content, y, buttons)
 function gmRenderEdit(content)
 {
    var kind = gmEdit[0];
-   if(kind == "npc")
+   if((kind == "npc" || kind == "prop") && gmFields != undefined && gmFields.guid == gmEdit[1])
+   {
+      gmRenderFields(content);
+   }
+   else if(kind == "npc")
    {
       gmRenderEditNpc(content, gmEdit);
    }
@@ -900,6 +911,465 @@ function gmRenderEditProp(content, e)
       ["Remove", "!prop remove", 0xC0392B]
    ]);
    gmStatus("Editing prop " + e[1]);
+}
+
+// --- editor form ---------------------------------------------------------------------
+// The server describes every editable field of the selected NPC or prop ("fields" lines, see
+// RefereeFieldsHelper); this draws them as grouped cards in two columns, scrollable, with actions,
+// emotes and the overhead icon picker below.
+
+// { kind, guid, title, subtitle, list: [{ group, label, type, value, command, options }] }
+var gmFields = undefined;
+var gmFieldsLoading = undefined;
+var gmFieldsScroll = 0;
+// Overhead icon catalog: [{ type, icon, state, count, names }], filled by "!npc icon list".
+var gmIcons = [];
+var gmIconsLoading = [];
+var gmIconPicker = false;
+var gmIconPage = 0;
+var gmIconReplace = false;
+
+var GM_FIELD_ROW = 28;
+var GM_FIELD_COL_W = (GM_CONTENT_W - 12) / 2;
+var GM_FIELD_LABEL_W = 108;
+var GM_ICON_COLUMNS = 3;
+var GM_ICON_ROWS = 6;
+
+function gmHandleFields(parts)
+{
+   if(parts[2] == "begin")
+   {
+      gmFieldsLoading = { kind: parts[3], guid: parts[4], title: parts[5], subtitle: parts[6], list: [] };
+      return;
+   }
+   if(parts[2] == "f" && gmFieldsLoading != undefined)
+   {
+      gmFieldsLoading.list.push({ group: parts[3], label: parts[4], type: parts[5], value: parts[6], command: parts[7], options: parts[8] });
+      return;
+   }
+   if(parts[2] == "end" && gmFieldsLoading != undefined)
+   {
+      if(gmFields == undefined || gmFields.guid != gmFieldsLoading.guid)
+      {
+         gmFieldsScroll = 0;
+         gmIconPicker = false;
+      }
+      gmFields = gmFieldsLoading;
+      gmFieldsLoading = undefined;
+      if(_root.gm_mc._visible && gmTab == "edit")
+      {
+         gmShowTab("edit");
+      }
+   }
+}
+
+function gmHandleIcons(parts)
+{
+   if(parts[2] == "begin")
+   {
+      gmIconsLoading = [];
+      return;
+   }
+   if(parts[2] == "add")
+   {
+      var i;
+      for(i = 3; i < parts.length; i++)
+      {
+         // type:icon:state:count:example names
+         var e = parts[i].split(":");
+         gmIconsLoading.push({ type: e[0], icon: e[1], state: e[2], count: e[3], names: e.slice(4).join(":") });
+      }
+      return;
+   }
+   if(parts[2] == "end")
+   {
+      gmIcons = gmIconsLoading;
+      if(_root.gm_mc._visible && gmTab == "edit")
+      {
+         gmShowTab("edit");
+      }
+   }
+}
+
+// Runs a field's command with the typed text; empty text sends the field's "cleared" value, if any.
+function gmFieldSend(f, text)
+{
+   if(text == "")
+   {
+      if(f.options == undefined || f.options == "")
+      {
+         return;
+      }
+      text = f.options;
+   }
+   gmSend(frHelperClass.stringReplace(f.command, "{v}", text));
+   fscommand("FR_event", "killFocus()");
+}
+
+function gmFieldRow(card, f, x, y, w)
+{
+   gmText(card, "l" + y + "_txt", f.label, x, y + 4, GM_FIELD_LABEL_W, 18, 11, GM_TEXT_DIM, true).wordWrap = false;
+   var cx = x + GM_FIELD_LABEL_W;
+   var cw = w - GM_FIELD_LABEL_W;
+   if(f.type == "text" || f.type == "num")
+   {
+      var inputW = cw - 46;
+      var t = gmInput(card, "v" + y + "_txt", cx, y, inputW, 22, f.value, f.options != "" && f.options != undefined ? "empty = " + f.options : "", function(text)
+      {
+         gmFieldSend(this.field, text);
+      });
+      t.field = f;
+      var setButton = gmButton(card, "s" + y + "_mc", "Set", cx + inputW + 4, y, 40, 22, function()
+      {
+         gmFieldSend(this.input.field, gmFieldText(this.input));
+      });
+      setButton.input = t;
+      return;
+   }
+   if(f.type == "toggle")
+   {
+      var choices = [["On", "on", "1"], ["Off", "off", "0"]];
+      var i;
+      for(i = 0; i < choices.length; i++)
+      {
+         var b = gmButton(card, "t" + y + "_" + i + "_mc", choices[i][0], cx + i * 58, y, 54, 22, function()
+         {
+            gmSend(frHelperClass.stringReplace(this.field.command, "{v}", this.arg));
+         }, String(f.value) == choices[i][2] ? GM_BLUE_ACTIVE : undefined);
+         b.field = f;
+         b.arg = choices[i][1];
+      }
+      return;
+   }
+   if(f.type == "choice")
+   {
+      // Label=current value=argument;...
+      var options = String(f.options).split(";");
+      var bw = Math.min(70, Math.floor((cw - 4 * (options.length - 1)) / options.length));
+      var j;
+      for(j = 0; j < options.length; j++)
+      {
+         var o = options[j].split("=");
+         var c = gmButton(card, "c" + y + "_" + j + "_mc", o[0], cx + j * (bw + 4), y, bw, 22, function()
+         {
+            gmSend(frHelperClass.stringReplace(this.field.command, "{v}", this.arg));
+         }, String(f.value) == o[1] ? GM_BLUE_ACTIVE : undefined);
+         c.field = f;
+         c.arg = o[2];
+      }
+      return;
+   }
+   if(f.type == "steps")
+   {
+      // One button per option, each sending the command with that option.
+      var steps = String(f.options).split(";");
+      var sw = Math.min(56, Math.floor((cw - 4 * (steps.length - 1)) / steps.length));
+      var k;
+      for(k = 0; k < steps.length; k++)
+      {
+         var stepLabel = steps[k] == "reset" ? "Level" : (Number(steps[k]) > 0 ? "+" + steps[k] : steps[k]);
+         var st = gmButton(card, "st" + y + "_" + k + "_mc", stepLabel, cx + k * (sw + 4), y, steps[k] == "reset" ? 80 : sw, 22, function()
+         {
+            gmSend(frHelperClass.stringReplace(this.field.command, "{v}", this.arg));
+         });
+         st.field = f;
+         st.arg = steps[k];
+      }
+      return;
+   }
+   if(f.type == "icons")
+   {
+      var current = f.value == "" ? "none (definition default)" : frHelperClass.stringReplace(String(f.value), ";", ",  ");
+      gmText(card, "i" + y + "_txt", current, cx, y + 4, cw, 18, 11, GM_TEXT, false).wordWrap = false;
+      gmButton(card, "ipick" + y + "_mc", "Pick icon...", cx, y + GM_FIELD_ROW, 96, 22, function()
+      {
+         gmIconPicker = true;
+         if(gmIcons.length == 0)
+         {
+            gmSend("!npc icon list");
+         }
+         gmShowTab("edit");
+      }, 0x2E7D5B);
+      gmButton(card, "iclear" + y + "_mc", "Clear icons", cx + 100, y + GM_FIELD_ROW, 90, 22, function()
+      {
+         gmSend("!npc icon clear");
+      }, 0xC0392B);
+      return;
+   }
+   gmText(card, "v" + y + "_txt", String(f.value), cx, y + 4, cw, 18, 11, GM_TEXT, false);
+}
+
+function gmFieldRows(f)
+{
+   return f.type == "icons" ? 2 : 1;
+}
+
+function gmRenderFields(content)
+{
+   if(gmIconPicker)
+   {
+      gmRenderIconPicker(content);
+      return;
+   }
+   gmText(content, "title_txt", (gmFields.kind == "prop" ? "Prop: " : "NPC: ") + gmFields.title, 0, 0, GM_CONTENT_W - 120, 20, 14, GM_TEXT_GOLD, true).wordWrap = false;
+   gmText(content, "sub_txt", gmFields.subtitle, 0, 20, GM_CONTENT_W - 120, 18, 11, GM_TEXT_DIM, false).wordWrap = false;
+
+   var top = 44;
+   var height = GM_CONTENT_H - top;
+   var form = content.createEmptyMovieClip("form_mc", content.getNextHighestDepth());
+   form._y = top;
+   var mask = content.createEmptyMovieClip("mask_mc", content.getNextHighestDepth());
+   mask.beginFill(0x000000, 100);
+   gmRoundRect(mask, 0, top, GM_CONTENT_W, height, 0);
+   mask.endFill();
+   form.setMask(mask);
+
+   // Group the fields, keeping their order.
+   var groups = [];
+   var byName = {};
+   var i;
+   for(i = 0; i < gmFields.list.length; i++)
+   {
+      var f = gmFields.list[i];
+      if(byName[f.group] == undefined)
+      {
+         byName[f.group] = { name: f.group, fields: [] };
+         groups.push(byName[f.group]);
+      }
+      byName[f.group].fields.push(f);
+   }
+
+   // Field cards fill the shorter of two columns; actions and emotes run full width below.
+   var colY = [0, 0];
+   var actions = [];
+   var g;
+   for(g = 0; g < groups.length; g++)
+   {
+      var group = groups[g];
+      if(group.name == "Actions")
+      {
+         actions = group.fields;
+         continue;
+      }
+      var rows = 0;
+      for(i = 0; i < group.fields.length; i++)
+      {
+         rows += gmFieldRows(group.fields[i]);
+      }
+      var col = colY[0] <= colY[1] ? 0 : 1;
+      var card = form.createEmptyMovieClip("card" + g + "_mc", form.getNextHighestDepth());
+      card._x = col * (GM_FIELD_COL_W + 12);
+      card._y = colY[col];
+      var cardH = 30 + rows * GM_FIELD_ROW;
+      gmPanelShape(card, GM_FIELD_COL_W, cardH, 8, GM_BLUE_CELL, GM_BLUE_BOTTOM, GM_GOLD_DARK, 1);
+      gmText(card, "h_txt", group.name, 10, 5, GM_FIELD_COL_W - 20, 18, 12, GM_TEXT_GOLD, true);
+      var y = 28;
+      for(i = 0; i < group.fields.length; i++)
+      {
+         gmFieldRow(card, group.fields[i], 10, y, GM_FIELD_COL_W - 20);
+         y += gmFieldRows(group.fields[i]) * GM_FIELD_ROW;
+      }
+      colY[col] += cardH + 10;
+   }
+
+   var bottom = Math.max(colY[0], colY[1]);
+   bottom = gmRenderFieldActions(form, actions, bottom);
+   bottom = gmRenderFieldEmotes(form, bottom);
+
+   // Scrolling: arrows, and the mouse wheel over the panel.
+   var maxScroll = Math.max(0, bottom - height);
+   gmFieldsScroll = Math.max(0, Math.min(gmFieldsScroll, maxScroll));
+   form._y = top - gmFieldsScroll;
+   if(maxScroll > 0)
+   {
+      gmButton(content, "up_mc", "Up", GM_CONTENT_W - 110, 6, 52, 24, function()
+      {
+         gmScrollFields(-140);
+      });
+      gmButton(content, "down_mc", "Down", GM_CONTENT_W - 54, 6, 52, 24, function()
+      {
+         gmScrollFields(140);
+      });
+   }
+   content.maxScroll = maxScroll;
+   gmStatus("Editing " + gmFields.kind + " " + gmFields.guid + (maxScroll > 0 ? "   (scroll for more)" : ""));
+}
+
+function gmScrollFields(delta)
+{
+   var content = _root.gm_mc.content_mc;
+   if(content.form_mc == undefined)
+   {
+      return;
+   }
+   gmFieldsScroll = Math.max(0, Math.min(gmFieldsScroll + delta, content.maxScroll));
+   content.form_mc._y = 44 - gmFieldsScroll;
+}
+
+var gmWheelListener = new Object();
+gmWheelListener.onMouseWheel = function(delta)
+{
+   if(_root.gm_mc._visible && gmTab == "edit" && _root.gm_mc.hitTest(_root._xmouse, _root._ymouse, false))
+   {
+      gmScrollFields(-delta * 30);
+   }
+};
+Mouse.addListener(gmWheelListener);
+
+function gmRenderFieldActions(form, actions, y)
+{
+   if(actions.length == 0)
+   {
+      return y;
+   }
+   var card = form.createEmptyMovieClip("actions_mc", form.getNextHighestDepth());
+   card._y = y;
+   var buttons = [];
+   var texts = [];
+   var i;
+   for(i = 0; i < actions.length; i++)
+   {
+      if(actions[i].type == "action")
+      {
+         buttons.push(actions[i]);
+      }
+      else
+      {
+         texts.push(actions[i]);
+      }
+   }
+   var cardH = 64 + texts.length * GM_FIELD_ROW;
+   gmPanelShape(card, GM_CONTENT_W, cardH, 8, GM_BLUE_CELL, GM_BLUE_BOTTOM, GM_GOLD_DARK, 1);
+   gmText(card, "h_txt", "Actions", 10, 5, 200, 18, 12, GM_TEXT_GOLD, true);
+   var bw = 100;
+   for(i = 0; i < buttons.length; i++)
+   {
+      var danger = buttons[i].label == "Despawn" || buttons[i].label == "Remove";
+      var b = gmButton(card, "a" + i + "_mc", buttons[i].label, 10 + i * (bw + 6), 28, bw, 24, function()
+      {
+         gmSend(this.command);
+      }, danger ? 0xC0392B : undefined);
+      b.command = buttons[i].command;
+   }
+   for(i = 0; i < texts.length; i++)
+   {
+      gmFieldRow(card, texts[i], 10, 60 + i * GM_FIELD_ROW, GM_CONTENT_W - 20);
+   }
+   return y + cardH + 10;
+}
+
+// Emote buttons from the server's "anims" list; looping ones (green) become the saved idle.
+function gmRenderFieldEmotes(form, y)
+{
+   if(gmAnims.length == 0)
+   {
+      return y;
+   }
+   var perRow = 6;
+   var rows = Math.ceil(gmAnims.length / perRow);
+   var card = form.createEmptyMovieClip("emotes_mc", form.getNextHighestDepth());
+   card._y = y;
+   var cardH = 32 + rows * 26;
+   gmPanelShape(card, GM_CONTENT_W, cardH, 8, GM_BLUE_CELL, GM_BLUE_BOTTOM, GM_GOLD_DARK, 1);
+   gmText(card, "h_txt", "Emotes (green loop as the idle)", 10, 5, 300, 18, 12, GM_TEXT_GOLD, true);
+   var bw = Math.floor((GM_CONTENT_W - 20 - (perRow - 1) * 6) / perRow);
+   var i;
+   for(i = 0; i < gmAnims.length; i++)
+   {
+      var b = gmButton(card, "e" + i + "_mc", gmAnims[i][1], 10 + (i % perRow) * (bw + 6), 28 + Math.floor(i / perRow) * 26, bw, 22, function()
+      {
+         gmSend("!npc anim " + this.animId + (this.loop ? " loop" : ""));
+      }, gmAnims[i][2] ? 0x2E7D5B : undefined);
+      b.animId = gmAnims[i][0];
+      b.loop = gmAnims[i][2];
+   }
+   return y + cardH + 10;
+}
+
+// Overhead icons the game's NPCs use, labelled with NPCs that show them; or type one in.
+function gmRenderIconPicker(content)
+{
+   gmText(content, "title_txt", "Overhead icon for " + gmFields.title, 0, 0, 360, 20, 14, GM_TEXT_GOLD, true).wordWrap = false;
+   gmButton(content, "back_mc", "Back", GM_CONTENT_W - 60, 0, 60, 24, function()
+   {
+      gmIconPicker = false;
+      gmShowTab("edit");
+   });
+   gmButton(content, "mode_mc", gmIconReplace ? "Mode: replace" : "Mode: add", GM_CONTENT_W - 180, 0, 116, 24, function()
+   {
+      gmIconReplace = !gmIconReplace;
+      gmShowTab("edit");
+   });
+
+   // Manual entry.
+   gmText(content, "manual_txt", "Type / icon / state", 0, 32, 130, 18, 11, GM_TEXT_DIM, true);
+   gmInput(content, "itype_txt", 130, 28, 50, 22, "", "type");
+   gmInput(content, "iicon_txt", 184, 28, 60, 22, "", "icon");
+   gmInput(content, "istate_txt", 248, 28, 50, 22, "", "state");
+   gmButton(content, "iadd_mc", "Apply", 302, 28, 60, 22, function()
+   {
+      var c = _root.gm_mc.content_mc;
+      var state = gmFieldText(c.istate_txt);
+      gmIconApply(gmFieldText(c.itype_txt), gmFieldText(c.iicon_txt), state == "" ? "0" : state);
+   }, 0x2E7D5B);
+
+   if(gmIcons.length == 0)
+   {
+      gmText(content, "loading_txt", "Loading the icon list...", 0, 64, 400, 18, 12, GM_TEXT_DIM, false);
+      return;
+   }
+   var perPage = GM_ICON_COLUMNS * GM_ICON_ROWS;
+   var pages = Math.ceil(gmIcons.length / perPage);
+   gmIconPage = Math.max(0, Math.min(gmIconPage, pages - 1));
+   gmButton(content, "iprev_mc", "<", 380, 28, 28, 22, function()
+   {
+      gmIconPage--;
+      gmShowTab("edit");
+   });
+   gmText(content, "ipage_txt", "Page " + (gmIconPage + 1) + " / " + pages, 410, 31, 96, 18, 11, GM_TEXT, true, "center");
+   gmButton(content, "inext_mc", ">", 508, 28, 28, 22, function()
+   {
+      gmIconPage++;
+      gmShowTab("edit");
+   });
+
+   var cellW = Math.floor((GM_CONTENT_W - (GM_ICON_COLUMNS - 1) * 6) / GM_ICON_COLUMNS);
+   var i;
+   for(i = 0; i < perPage && gmIconPage * perPage + i < gmIcons.length; i++)
+   {
+      var e = gmIcons[gmIconPage * perPage + i];
+      var cell = content.createEmptyMovieClip("icon" + i + "_mc", content.getNextHighestDepth());
+      cell._x = (i % GM_ICON_COLUMNS) * (cellW + 6);
+      cell._y = 60 + Math.floor(i / GM_ICON_COLUMNS) * 56;
+      gmPanelShape(cell, cellW, 52, 8, GM_BLUE_CELL, GM_BLUE_BOTTOM, GM_GOLD_DARK, 1);
+      gmText(cell, "a_txt", "Type " + e.type + "  icon " + e.icon + "  state " + e.state + "   (" + e.count + ")", 6, 2, cellW - 12, 16, 11, GM_TEXT, true).wordWrap = false;
+      gmText(cell, "b_txt", e.names == "" ? "(unnamed NPCs)" : e.names, 6, 18, cellW - 12, 32, 10, GM_TEXT_DIM, false);
+      cell.entry = e;
+      cell.w = cellW;
+      cell.onRelease = function()
+      {
+         gmIconApply(this.entry.type, this.entry.icon, this.entry.state);
+      };
+      cell.onRollOver = function()
+      {
+         gmPanelShape(this, this.w, 52, 8, GM_BLUE_ACTIVE, GM_BLUE_BOTTOM, GM_GOLD, 1);
+      };
+      cell.onRollOut = function()
+      {
+         gmPanelShape(this, this.w, 52, 8, GM_BLUE_CELL, GM_BLUE_BOTTOM, GM_GOLD_DARK, 1);
+      };
+   }
+   gmStatus(gmIcons.length + " icons used by the game's NPCs; the count is how many NPCs show it");
+}
+
+function gmIconApply(type, icon, state)
+{
+   if(type == "" || icon == "")
+   {
+      return;
+   }
+   gmSend("!npc icon " + (gmIconReplace ? "set " : "add ") + type + " " + icon + " " + state);
+   gmIconPicker = false;
 }
 
 // --- text escaping (scripts, conversations, dialog) -----------------------------
@@ -1794,45 +2264,48 @@ function gmHandleQuestData(kind, parts)
    }
 }
 
-// --- player dialog (every player) ------------------------------------------------
+// --- decorate bar (every player) -----------------------------------------------
+// While a player decorates their house, the server sends decorate|on and, for the piece last placed,
+// moved or turned with the client's own wheel, decorate|sel|name|yaw|pitch|roll. The client's wheel only
+// turns in fixed yaw steps; these buttons add yaw, pitch and roll in any step.
 
-function gmShowDialog(parts)
+var gmDecorate = { on: false, name: "", yaw: 0, pitch: 0, roll: 0, x: undefined, y: undefined };
+var GM_DECORATE_W = 300;
+
+function gmHandleDecorate(parts)
 {
-   // dialog|npcGuid|name|nodeId|text|idx:choice|...
-   _root.gmdialog_mc.removeMovieClip();
-   var d = _root.createEmptyMovieClip("gmdialog_mc", 16001);
-   var w = 360;
-   var guid = parts[2];
-   var node = parts[4];
-
-   var title = gmText(d, "name_txt", gmUnescapeText(parts[3]), 14, 10, w - 60, 20, 14, GM_TEXT_GOLD, true);
-   var body = gmText(d, "body_txt", gmUnescapeText(parts[5]), 14, 34, w - 28, 20, 12, GM_TEXT, false);
-   body.autoSize = "left";
-   var y = 34 + Math.max(20, body.textHeight + 6) + 8;
-
-   var choices = parts.slice(6);
-   if(choices.length == 0 || (choices.length == 1 && choices[0] == ""))
+   if(parts[2] == "on" || parts[2] == "off")
    {
-      choices = ["end:Goodbye"];
+      gmDecorate.on = parts[2] == "on";
    }
-   var i;
-   for(i = 0; i < choices.length; i++)
+   else if(parts[2] == "sel")
    {
-      var colon = choices[i].indexOf(":");
-      var index = choices[i].substr(0, colon);
-      var b = gmButton(d, "choice" + i + "_mc", gmUnescapeText(choices[i].substr(colon + 1)), 14, y, w - 28, 24, function()
-      {
-         gmSend(this.index == "end" ? "!talk end" : "!talk " + this.guid + " " + this.node + " " + this.index);
-      });
-      b.index = index;
-      b.guid = guid;
-      b.node = node;
-      y += 28;
+      gmDecorate.name = parts[3];
+      gmDecorate.yaw = parts[4];
+      gmDecorate.pitch = parts[5];
+      gmDecorate.roll = parts[6];
    }
-   var h = y + 8;
+   gmShowDecorate();
+}
 
-   var frame = d.createEmptyMovieClip("frame_mc", -1);
-   gmPanelShape(frame, w, h, 14, GM_BLUE_TOP, GM_BLUE_BOTTOM, GM_GOLD, 3);
+function gmShowDecorate()
+{
+   var old = _root.gmdecorate_mc;
+   if(old != undefined)
+   {
+      gmDecorate.x = old._x;
+      gmDecorate.y = old._y;
+      old.removeMovieClip();
+   }
+   if(!gmDecorate.on)
+   {
+      return;
+   }
+   var d = _root.createEmptyMovieClip("gmdecorate_mc", 16002);
+   var w = GM_DECORATE_W;
+   var h = 176;
+   var frame = d.createEmptyMovieClip("frame_mc", 1);
+   gmPanelShape(frame, w, h, 12, GM_BLUE_TOP, GM_BLUE_BOTTOM, GM_GOLD, 3);
    frame.onPress = function()
    {
       this._parent.startDrag(false, 0, gmTop(), Math.max(0, gmRight() - w), Math.max(gmTop(), gmBottom() - h));
@@ -1841,13 +2314,122 @@ function gmShowDialog(parts)
    {
       this._parent.stopDrag();
    };
-   gmButton(d, "close_mc", "X", w - 34, 8, 24, 22, function()
+
+   var title = gmDecorate.name == "" ? "Place, move or turn a piece to rotate it" : "Rotate: " + gmDecorate.name;
+   gmText(d, "title_txt", title, 12, 8, w - 24, 18, 12, GM_TEXT_GOLD, true).wordWrap = false;
+   if(gmDecorate.name != "")
+   {
+      gmText(d, "angles_txt", "Yaw " + gmDecorate.yaw + "   Pitch " + gmDecorate.pitch + "   Roll " + gmDecorate.roll, 12, 26, w - 24, 18, 11, GM_TEXT_DIM, false);
+   }
+
+   var axes = [["Yaw", "yaw"], ["Pitch", "pitch"], ["Roll", "roll"]];
+   var steps = ["-45", "-15", "+15", "+45"];
+   var i;
+   var j;
+   for(i = 0; i < axes.length; i++)
+   {
+      var y = 48 + i * 28;
+      gmText(d, "axis" + i + "_txt", axes[i][0], 12, y + 4, 50, 18, 11, GM_TEXT, true);
+      for(j = 0; j < steps.length; j++)
+      {
+         var b = gmButton(d, "step" + i + "_" + j + "_mc", steps[j], 62 + j * 58, y, 54, 24, function()
+         {
+            gmSend("!house rotate " + this.axis + " " + this.degrees);
+         });
+         b.axis = axes[i][1];
+         b.degrees = Number(steps[j]);
+      }
+   }
+   gmButton(d, "flip_mc", "Flip", 62, 136, 112, 26, function()
+   {
+      gmSend("!house rotate roll 180");
+   });
+   gmButton(d, "level_mc", "Level", 178, 136, 110, 26, function()
+   {
+      gmSend("!house rotate level");
+   }, 0x2E7D5B);
+
+   d._x = gmDecorate.x != undefined ? gmDecorate.x : Math.max(0, gmScreenRight() - w - 40);
+   d._y = gmDecorate.y != undefined ? gmDecorate.y : Math.max(gmTop(), gmBottom() - h - 240);
+}
+
+// --- player dialog (every player) ------------------------------------------------
+// GM conversations open the client's own NPC dialog for its camera zoom (its pane stays hidden, see
+// ClientMods/dialog); this draws the text where that pane sits: a speech bubble on the right of the
+// screen with the answers as large buttons below it.
+
+var GM_DIALOG_W = 420;
+var GM_DIALOG_BUBBLE = 0xFFF8E7;
+var GM_DIALOG_TEXT = 0x3A2400;
+
+function gmShowDialog(parts)
+{
+   // dialog|npcGuid|name|nodeId|text|idx:choice|...
+   _root.gmdialog_mc.removeMovieClip();
+   var d = _root.createEmptyMovieClip("gmdialog_mc", 16001);
+   var w = GM_DIALOG_W;
+   var guid = parts[2];
+   var node = parts[4];
+
+   var bubble = d.createEmptyMovieClip("bubble_mc", 1);
+   var name = gmUnescapeText(parts[3]);
+   gmText(bubble, "name_txt", name == "" ? "..." : name, 20, 14, w - 70, 22, 16, GM_DIALOG_TEXT, true);
+   var body = gmText(bubble, "body_txt", gmUnescapeText(parts[5]), 20, 42, w - 40, 20, 14, GM_DIALOG_TEXT, false);
+   body.autoSize = "left";
+   var bubbleH = 42 + Math.max(24, body.textHeight + 8) + 18;
+
+   // Rounded cream bubble with a tail pointing left, toward the NPC.
+   bubble.lineStyle(3, GM_GOLD_DARK, 100);
+   bubble.beginFill(GM_DIALOG_BUBBLE, 100);
+   gmRoundRect(bubble, 0, 0, w, bubbleH, 18);
+   bubble.endFill();
+   bubble.lineStyle(3, GM_GOLD_DARK, 100);
+   bubble.beginFill(GM_DIALOG_BUBBLE, 100);
+   bubble.moveTo(2, bubbleH - 46);
+   bubble.lineTo(-22, bubbleH - 22);
+   bubble.lineTo(2, bubbleH - 26);
+   bubble.endFill();
+   // Text fields sit above the drawing.
+   bubble.name_txt.swapDepths(bubble.getNextHighestDepth());
+   bubble.body_txt.swapDepths(bubble.getNextHighestDepth());
+
+   gmButton(d, "close_mc", "X", w - 38, 10, 26, 24, function()
    {
       gmSend("!talk end");
    }, 0xC0392B);
 
-   d._x = Math.max(0, (gmRight() - w) / 2);
-   d._y = Math.max(gmTop(), gmBottom() - h - 60);
+   var choices = parts.slice(6);
+   if(choices.length == 0 || (choices.length == 1 && choices[0] == ""))
+   {
+      choices = ["end:Goodbye"];
+   }
+   var y = bubbleH + 12;
+   var i;
+   for(i = 0; i < choices.length; i++)
+   {
+      var colon = choices[i].indexOf(":");
+      var index = choices[i].substr(0, colon);
+      var b = gmButton(d, "choice" + i + "_mc", gmUnescapeText(choices[i].substr(colon + 1)), 30, y, w - 30, 36, function()
+      {
+         gmSend(this.index == "end" ? "!talk end" : "!talk " + this.guid + " " + this.node + " " + this.index);
+      }, index == "end" ? 0x2E7D5B : undefined);
+      b.index = index;
+      b.guid = guid;
+      b.node = node;
+      y += 42;
+   }
+   var h = y;
+
+   d._x = Math.max(0, gmScreenRight() - w - 120);
+   d._y = gmTop() + Math.max(20, (gmBottom() - gmTop() - h) / 2);
+}
+
+// Right edge of what is actually on screen. The chat window is a fixed 2000 wide, so it usually runs past
+// the edge of the game; the screen width, when the player reports one, is the better bound.
+function gmScreenRight()
+{
+   var screen = Number(System.capabilities.screenResolutionX);
+   return screen > 0 && screen < gmRight() ? screen : gmRight() * 0.9;
 }
 
 function gmHandleScript(parts)
@@ -1994,6 +2576,21 @@ function gmHandleData(text)
       {
          gmShowDialog(parts);
       }
+      return;
+   }
+   if(kind == "decorate")
+   {
+      gmHandleDecorate(parts);
+      return;
+   }
+   if(kind == "fields")
+   {
+      gmHandleFields(parts);
+      return;
+   }
+   if(kind == "icons")
+   {
+      gmHandleIcons(parts);
       return;
    }
    if(kind == "anims")

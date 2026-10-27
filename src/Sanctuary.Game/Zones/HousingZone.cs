@@ -357,11 +357,17 @@ public sealed class HousingZone : BaseZone
         npc.IsHouseFixture = true;
         npc.Visible = true;
 
+        // No idle loop: some furniture's animation is its effect (a music block's note), which would repeat forever.
+        npc.Animation = 0;
+
         var position = new Vector4(fixture.PositionX, fixture.PositionY, fixture.PositionZ, 1.0f);
 
-        // Fixtures store their yaw (radians) in RotationX; NPCs take a flat facing direction. Passing the
-        // fixture value through gives unrotated items a zero direction, which warps the actor.
-        var rotation = QuaternionExtensions.FromHeading(fixture.RotationX);
+        var (yaw, pitch, roll) = GetFixtureAngles(fixture);
+
+        // NPCs take a flat facing direction; passing the fixture's angles through gives unrotated items
+        // a zero direction, which warps the actor. Pitch and roll are sent as a tilt.
+        var rotation = QuaternionExtensions.FromHeading(yaw);
+        npc.Tilt = GetFixtureTilt(yaw, pitch, roll);
 
         npc.SpawnPosition = position;
         npc.SpawnRotation = rotation;
@@ -378,12 +384,40 @@ public sealed class HousingZone : BaseZone
             return;
 
         var position = new Vector4(fixture.PositionX, fixture.PositionY, fixture.PositionZ, 1.0f);
-        var rotation = QuaternionExtensions.FromHeading(fixture.RotationX);
+        var (yaw, pitch, roll) = GetFixtureAngles(fixture);
+        var rotation = QuaternionExtensions.FromHeading(yaw);
+        var tilt = GetFixtureTilt(yaw, pitch, roll);
 
         npc.SpawnPosition = position;
         npc.SpawnRotation = rotation;
+
+        // Pitch and roll changes have to re-send the actor; a move or a turn only updates its position.
+        if (npc.Tilt is not { } current || current.Y != tilt.Y || current.Z != tilt.Z)
+            NpcProperties.Change(npc, () => npc.Tilt = tilt);
+        else
+            npc.Tilt = tilt;
+
         npc.UpdatePosition(position, rotation);
     }
+
+    /// <summary>
+    /// The client stores a fixture's rotation as angles in radians: yaw in X, pitch in Y and roll in Z
+    /// (the layout of an NPC tilt). Rows saved as a quaternion (W set) by older builds count as yaw only.
+    /// </summary>
+    private static (float Yaw, float Pitch, float Roll) GetFixtureAngles(DbHouseFixture fixture)
+    {
+        if (fixture.RotationW != 0f)
+            return (NpcProperties.GetHeading(new Quaternion(fixture.RotationX, fixture.RotationY, fixture.RotationZ, fixture.RotationW)), 0f, 0f);
+
+        return (fixture.RotationX, fixture.RotationY, fixture.RotationZ);
+    }
+
+    /// <summary>
+    /// Furniture is always sent as a placed object (a tilt, MovementType 0), as the zone's own static objects
+    /// are. As a plain NPC the client simulates it: pieces push each other upward and looping animations
+    /// (and their sounds) never stop.
+    /// </summary>
+    private static Vector4 GetFixtureTilt(float yaw, float pitch, float roll) => new(yaw, pitch, roll, 0f);
 
     private void DespawnFixtureNpc(ulong fixtureGuid)
     {
@@ -428,6 +462,10 @@ public sealed class HousingZone : BaseZone
                 _editors.TryRemove(player.Guid, out _);
 
             player.SendTunneled(GetUpdateHouseInfo(player));
+
+            // The chat window's decorate bar (yaw, pitch, roll) shows while decorating.
+            ChatHelper.SendGmPanelData(player, "decorate", IsEditing(player) ? "on" : "off");
+            SendDecorateSelection(player);
 
             // Furniture shows the hover cursor only while decorating. Re-adding the NPCs instead would
             // break the client's fixture bindings.
@@ -591,6 +629,7 @@ public sealed class HousingZone : BaseZone
             _fixtures.Add(fixtureGuid, fixture);
             _lastFixtures[player.Guid] = fixtureGuid;
             SpawnFixtureNpc(fixtureGuid, fixture);
+            SendDecorateSelection(player);
 
             if (deleteItem)
             {
@@ -682,6 +721,8 @@ public sealed class HousingZone : BaseZone
 
                 Broadcast(GetUpdateFixturePosition(fixture));
             }
+
+            SendDecorateSelection(player);
         }
     }
 
@@ -699,34 +740,90 @@ public sealed class HousingZone : BaseZone
                 return false;
             }
 
-            if (!_lastFixtures.TryGetValue(player.Guid, out var fixtureGuid) || !_fixtures.TryGetValue(fixtureGuid, out var fixture))
+            if (!_lastFixtures.TryGetValue(player.Guid, out var fixtureGuid))
             {
                 message = "Place or move a piece of furniture first.";
                 return false;
             }
 
-            var radians = degrees * MathF.PI / 180.0f;
-            var delta = axis switch
-            {
-                'p' => Quaternion.CreateFromAxisAngle(Vector3.UnitX, radians),
-                'r' => Quaternion.CreateFromAxisAngle(Vector3.UnitZ, radians),
-                _ => Quaternion.CreateFromAxisAngle(Vector3.UnitY, radians)
-            };
+            return RotateFixture(player, fixtureGuid, axis, degrees, out message);
+        }
+    }
 
-            var rotation = new Quaternion(fixture.RotationX, fixture.RotationY, fixture.RotationZ, fixture.RotationW);
+    /// <summary>
+    /// Rotates a fixture about its yaw, pitch or roll axis ('y', 'p', 'r'), or levels it ('0').
+    /// </summary>
+    public bool RotateFixture(Player player, ulong fixtureGuid, char axis, float degrees, out string message)
+    {
+        lock (_houseLock)
+        {
+            if (!IsOwner(player) || !IsEditing(player))
+            {
+                message = "Turn on edit mode in your own house first.";
+                return false;
+            }
+
+            if (!_fixtures.TryGetValue(fixtureGuid, out var fixture))
+            {
+                message = "That furniture is gone.";
+                return false;
+            }
+
+            var radians = degrees * MathF.PI / 180.0f;
+            var (yaw, pitch, roll) = GetFixtureAngles(fixture);
+
+            switch (axis)
+            {
+                case 'y':
+                    yaw += radians;
+                    break;
+                case 'p':
+                    pitch = WrapAngle(pitch + radians);
+                    break;
+                case 'r':
+                    roll = WrapAngle(roll + radians);
+                    break;
+                default:
+                    pitch = roll = 0f;
+                    break;
+            }
+
+            _lastFixtures[player.Guid] = fixtureGuid;
 
             SaveFixture(player, new ClientHousingPacketSaveFixture
             {
                 FixtureGuid = fixtureGuid,
                 Position = new Vector4(fixture.PositionX, fixture.PositionY, fixture.PositionZ, 1.0f),
-                Rotation = Quaternion.Normalize(rotation * delta),
+                Rotation = new Quaternion(WrapAngle(yaw), pitch, roll, 0f),
                 TintId = fixture.Tint,
                 Scale = fixture.Scale
             });
 
-            message = $"Rotated {(axis == 'p' ? "pitch" : axis == 'r' ? "roll" : "yaw")} by {degrees:0.#} degrees.";
+            message = axis == '0' ? "Levelled." : $"Rotated {(axis == 'p' ? "pitch" : axis == 'r' ? "roll" : "yaw")} by {degrees:0.#} degrees.";
             return true;
         }
+    }
+
+    /// <summary>
+    /// Tells the decorate bar which piece its buttons turn (the last placed, moved or turned one) and its
+    /// angles in degrees: decorate|sel|name|yaw|pitch|roll.
+    /// </summary>
+    private void SendDecorateSelection(Player player)
+    {
+        if (!IsEditing(player) || !_lastFixtures.TryGetValue(player.Guid, out var fixtureGuid) || !_fixtures.TryGetValue(fixtureGuid, out var fixture))
+            return;
+
+        var name = _fixtureNpcs.TryGetValue(fixtureGuid, out var npc) ? GameNameHelper.Get(npc.NameId, "Furniture") : "Furniture";
+        var (yaw, pitch, roll) = GetFixtureAngles(fixture);
+
+        ChatHelper.SendGmPanelData(player, "decorate", "sel", name,
+            MathF.Round(yaw * 180f / MathF.PI), MathF.Round(pitch * 180f / MathF.PI), MathF.Round(roll * 180f / MathF.PI));
+    }
+
+    private static float WrapAngle(float radians)
+    {
+        radians %= 2f * MathF.PI;
+        return MathF.Abs(radians) < 1e-4f || MathF.Abs(MathF.Abs(radians) - 2f * MathF.PI) < 1e-4f ? 0f : radians;
     }
 
     public void PickupFixture(Player player, ulong fixtureGuid)

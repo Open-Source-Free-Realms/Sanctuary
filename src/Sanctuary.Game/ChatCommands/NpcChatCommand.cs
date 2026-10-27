@@ -20,7 +20,9 @@ public class NpcChatCommand : IRawChatCommand
     public string KeyWord => "npc";
 
     public string Usage => "spawn <definitionId> | despawn [guid] | select [guid] | info | name <text|clear> | anim <id> [loop] | scale <n> | model <id> " +
-        "| disposition hostile|neutral|ally | nameplate on|off | behavior stay|follow|wander [radius] | speed <n> | move | face | home | use | say <text> | event <key|none> | collide on|off | " + ScriptCommandHelper.Usage;
+        "| disposition hostile|neutral|ally | nameplate on|off | behavior stay|follow|wander [radius] | speed <n> | move | face | home | use | say <text> | event <key|none> | collide on|off " +
+        "| set texture|tintalias <alias|none> | set tint|effect|subtitle|nameid|plateimage|imageset <id> | set offset <n> " +
+        "| icon add|set <type> <iconId> [state] | icon clear | icon list | rotate yaw|pitch|roll <degrees> | rotate reset | " + ScriptCommandHelper.Usage;
 
     public string Description => "Spawns, despawns and edits NPCs. Edits apply to the NPC you last clicked (or 'select'ed) and show for everyone nearby.";
 
@@ -78,6 +80,9 @@ public class NpcChatCommand : IRawChatCommand
             case "home":
             case "use":
             case "collide":
+            case "set":
+            case "icon":
+            case "rotate":
                 return Edit(invoker, args[0].ToLowerInvariant(), args[1..]);
             default:
                 return false;
@@ -395,6 +400,36 @@ public class NpcChatCommand : IRawChatCommand
 
                 npc.Say(value);
                 break;
+
+            case "set":
+                if (!TrySetProperty(invoker, npc, args))
+                    return false;
+                break;
+
+            case "rotate":
+                if (args.Length == 1 && args[0].Equals("reset", StringComparison.OrdinalIgnoreCase))
+                {
+                    NpcProperties.Rotate(npc, '0', 0f);
+                    break;
+                }
+
+                if (args.Length != 2 || !float.TryParse(args[1], NumberStyles.Float, CultureInfo.InvariantCulture, out var degrees)
+                    || args[0].ToLowerInvariant() is not ("yaw" or "pitch" or "roll"))
+                    return false;
+
+                NpcProperties.Rotate(npc, args[0].ToLowerInvariant()[0] switch { 'y' => 'y', 'p' => 'p', _ => 'r' }, degrees);
+                break;
+
+            case "icon":
+                if (args.Length == 1 && args[0].Equals("list", StringComparison.OrdinalIgnoreCase))
+                {
+                    NpcIconCatalog.Send(invoker, _resourceManager);
+                    return true;
+                }
+
+                if (!TrySetIcon(npc, args))
+                    return false;
+                break;
         }
 
         if (field != "info")
@@ -407,6 +442,100 @@ public class NpcChatCommand : IRawChatCommand
             ChatHelper.SendSystemMessage(invoker, $"Updated {field} on {npc.Name ?? $"NameId {npc.NameId}"} (guid {npc.Guid}){(saved ? " and saved it" : string.Empty)}.");
         }
 
+        return true;
+    }
+
+    /// <summary>
+    /// Appearance fields beyond the dedicated subcommands; saved in the NPC's or prop's Properties.
+    /// </summary>
+    private bool TrySetProperty(Player invoker, Npc npc, string[] args)
+    {
+        if (args.Length < 2)
+            return false;
+
+        var key = args[0].ToLowerInvariant();
+        var text = string.Join(' ', args[1..]);
+        var none = text.Equals("none", StringComparison.OrdinalIgnoreCase);
+
+        if (key is "texture" or "tintalias")
+        {
+            NpcProperties.Change(npc, () =>
+            {
+                if (key == "texture")
+                    npc.TextureAlias = none ? null : text;
+                else
+                    npc.TintAlias = none ? null : text;
+            });
+            return true;
+        }
+
+        if (key == "offset")
+        {
+            if (!float.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var offset) || MathF.Abs(offset) > 50f)
+            {
+                ChatHelper.SendSystemMessage(invoker, "The offset must be between -50 and 50.");
+                return true;
+            }
+
+            NpcProperties.Change(npc, () => npc.VerticalOffset = offset);
+            return true;
+        }
+
+        if (!int.TryParse(text, out var id) || id < 0)
+            return false;
+
+        Action? change = key switch
+        {
+            "tint" => () => npc.TintId = id,
+            "effect" => () => npc.CompositeEffectId = id,
+            "subtitle" => () => npc.SubTextNameId = id,
+            "nameid" => () =>
+            {
+                npc.NameId = id;
+
+                // A localized name only shows without a custom one.
+                if (id != 0)
+                    npc.Name = null;
+            },
+            "plateimage" => () => npc.NameplateImageId = id,
+            "imageset" => () => npc.ImageSetId = id,
+            _ => null
+        };
+
+        if (change is null)
+            return false;
+
+        NpcProperties.Change(npc, change);
+        return true;
+    }
+
+    /// <summary>
+    /// Overhead icons: "add" stacks another, "set" replaces them all, "clear" removes them.
+    /// </summary>
+    private static bool TrySetIcon(Npc npc, string[] args)
+    {
+        if (args.Length == 1 && args[0].Equals("clear", StringComparison.OrdinalIgnoreCase))
+        {
+            NpcProperties.Change(npc, () => NpcProperties.SetIcons(npc, []));
+            return true;
+        }
+
+        if (args.Length is < 3 or > 4 || !int.TryParse(args[1], out var type) || !int.TryParse(args[2], out var iconId))
+            return false;
+
+        var state = 0;
+
+        if (args.Length == 4 && !int.TryParse(args[3], out state))
+            return false;
+
+        var replace = args[0].Equals("set", StringComparison.OrdinalIgnoreCase);
+
+        if (!replace && !args[0].Equals("add", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        var icon = new NpcProperties.NpcIcon(type, iconId, state);
+
+        NpcProperties.Change(npc, () => NpcProperties.SetIcons(npc, replace ? [icon] : [.. NpcProperties.GetIcons(npc), icon]));
         return true;
     }
 

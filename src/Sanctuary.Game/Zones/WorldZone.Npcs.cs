@@ -103,6 +103,8 @@ public sealed partial class WorldZone
         npc.SpawnPosition = position;
         npc.SpawnRotation = rotation;
 
+        NpcProperties.Apply(npc, worldNpc.Properties);
+
         npc.UpdatePosition(position, rotation);
 
         // Follow targets a player, so only Wander survives a respawn.
@@ -270,6 +272,7 @@ public sealed partial class WorldZone
             worldNpc.WanderRadius = npc.WanderRadius;
             worldNpc.Speed = npc.Speed;
             worldNpc.Collidable = npc.Collidable;
+            worldNpc.Properties = NpcProperties.Capture(npc, includeBasics: false);
 
             worldNpc.PositionX = npc.SpawnPosition.X;
             worldNpc.PositionY = npc.SpawnPosition.Y;

@@ -871,6 +871,9 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.Property<float>("PositionZ")
                         .HasColumnType("float");
 
+                    b.Property<string>("Properties")
+                        .HasColumnType("longtext");
+
                     b.Property<float>("RotationW")
                         .HasColumnType("float");
 
@@ -965,6 +968,9 @@ namespace Sanctuary.Database.MySql.Migrations
 
                     b.Property<float>("PositionZ")
                         .HasColumnType("float");
+
+                    b.Property<string>("Properties")
+                        .HasColumnType("longtext");
 
                     b.Property<float>("RotationW")
                         .HasColumnType("float");

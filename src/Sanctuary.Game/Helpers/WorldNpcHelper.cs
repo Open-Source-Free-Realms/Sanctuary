@@ -12,7 +12,8 @@ public static class WorldNpcHelper
     /// <summary>
     /// Saves the NPC's current state. Returns false if it is not persisted.
     /// </summary>
-    public static bool Save(Npc npc) => npc.Zone is WorldZone worldZone && worldZone.TrySaveWorldNpc(npc);
+    public static bool Save(Npc npc) => npc.Zone is WorldZone worldZone
+        && (worldZone.TrySaveWorldNpc(npc) || worldZone.TrySaveWorldFixtureProperties(npc));
 
     /// <summary>
     /// Makes the NPC's current position its home, so it is saved and respawns there.

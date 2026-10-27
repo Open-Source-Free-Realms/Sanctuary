@@ -20,7 +20,7 @@ namespace Sanctuary.Game.ChatCommands;
 /// </summary>
 public class GmChatCommand : IChatCommand
 {
-    private const int PageSize = 12;
+    private const int PageSize = 18;
 
     private readonly ILogger _logger;
     private readonly IChatCommandManager _chatCommandManager;

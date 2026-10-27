@@ -7,10 +7,12 @@ using System.Numerics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
+using Sanctuary.Core.Extensions;
 using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 
@@ -111,12 +113,19 @@ public sealed partial class WorldZone
         npc.IsInteractable = false;
         npc.Visible = true;
 
+        // No idle loop unless a GM sets one (see HousingZone.SpawnFixtureNpc).
+        npc.Animation = 0;
+
         var position = new Vector4(fixture.PositionX, fixture.PositionY, fixture.PositionZ, 1.0f);
-        var rotation = new Quaternion(fixture.RotationX, fixture.RotationY, fixture.RotationZ, fixture.RotationW);
+        var rotation = QuaternionExtensions.FromHeading(GetWorldFixtureHeading(fixture));
 
         npc.SpawnPosition = position;
         npc.SpawnRotation = rotation;
 
+        NpcProperties.Apply(npc, fixture.Properties);
+
+        // A placed object, so the client neither simulates nor animates it (see HousingZone.GetFixtureTilt).
+        npc.Tilt ??= new Vector4(GetWorldFixtureHeading(fixture), 0f, 0f, 0f);
 
         npc.UpdatePosition(position, rotation);
 
@@ -154,6 +163,45 @@ public sealed partial class WorldZone
 
             return true;
         }
+    }
+
+    /// <summary>
+    /// Saves a placed prop's name, animation and appearance (see <see cref="NpcProperties"/>).
+    /// </summary>
+    public bool TrySaveWorldFixtureProperties(Npc npc)
+    {
+        lock (_worldFixtureLock)
+        {
+            if (!_worldFixtures.TryGetValue(npc.Guid, out var fixture))
+                return false;
+
+            fixture.Properties = NpcProperties.Capture(npc, includeBasics: true);
+
+            // Stored like the client sends it: yaw in X (pitch and roll live in Properties).
+            fixture.RotationX = NpcProperties.GetHeading(npc.SpawnRotation);
+            fixture.RotationY = 0f;
+            fixture.RotationZ = 0f;
+            fixture.RotationW = 0f;
+
+            using var dbContext = _dbContextFactory.CreateDbContext();
+
+            dbContext.WorldFixtures.Update(fixture);
+            dbContext.SaveChanges();
+
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// A prop's heading in radians. The client places with its angles (yaw in X); rows saved as an NPC facing
+    /// direction (X/Z with W = 0) or a quaternion by earlier builds are read as such.
+    /// </summary>
+    private static float GetWorldFixtureHeading(DbWorldFixture fixture)
+    {
+        if (fixture.RotationW != 0f || fixture.RotationZ != 0f)
+            return NpcProperties.GetHeading(new Quaternion(fixture.RotationX, fixture.RotationY, fixture.RotationZ, fixture.RotationW));
+
+        return fixture.RotationX;
     }
 
     private bool TrySaveWorldFixtureScript(ulong npcGuid, string? source)
@@ -508,14 +556,18 @@ public sealed partial class WorldZone
 
             var position = packet.Position with { W = 1.0f };
 
+            // The packet carries the client's angles (yaw in X); the NPC takes a facing direction.
+            var facing = QuaternionExtensions.FromHeading(GetWorldFixtureHeading(fixture));
+
             npc.SpawnPosition = position;
-            npc.SpawnRotation = packet.Rotation;
+            npc.SpawnRotation = facing;
+            npc.Tilt = npc.Tilt is { } tilt ? tilt with { X = GetWorldFixtureHeading(fixture) } : null;
 
             if (appearanceChanged)
             {
                 npc.TintId = tint;
                 npc.Scale = scale;
-                npc.UpdatePosition(position, packet.Rotation);
+                npc.UpdatePosition(position, facing);
                 npc.RefreshForVisiblePlayers();
 
                 player.SendTunneled(GetWorldFixtureUpdate(npc, fixture));
@@ -523,7 +575,7 @@ public sealed partial class WorldZone
             else
             {
                 // Moves the prop for everyone in view.
-                npc.UpdatePosition(position, packet.Rotation);
+                npc.UpdatePosition(position, facing);
 
                 player.SendTunneled(new HousingPacketUpdateFixturePosition
                 {

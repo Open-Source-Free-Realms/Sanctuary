@@ -41,6 +41,19 @@ public sealed class RefereeNpcInteractions : IInteractionProvider
 
     private static readonly InteractionData Back = Entry(1861);          // "Back"
 
+    // Rotation (NPCs and props), in steps of RotateStep degrees
+    private static readonly InteractionData Rotate = Entry(429909);      // "Rotate"
+    private static readonly InteractionData YawLeft = Entry(426644);     // "Rotate Left"
+    private static readonly InteractionData YawRight = Entry(426645);    // "Rotate Right"
+    private static readonly InteractionData PitchUp = Entry(118037);     // "Up"
+    private static readonly InteractionData PitchDown = Entry(118039);   // "Down"
+    private static readonly InteractionData RollLeft = Entry(118036);    // "Left"
+    private static readonly InteractionData RollRight = Entry(118038);   // "Right"
+    private static readonly InteractionData Flip = Entry(411985);        // "Flip"
+    private static readonly InteractionData Level = Entry(103010);       // "Reset"
+
+    private const float RotateStep = 15f;
+
     // Props placed with !place (world fixtures)
     private static readonly InteractionData PropInfo = Entry(429840);    // "Info"
     private static readonly InteractionData PropMove = Entry(569);       // "Move"
@@ -78,8 +91,9 @@ public sealed class RefereeNpcInteractions : IInteractionProvider
         (Entry(21829), 1, true)       // "Idle" - back to the default idle
     ];
 
-    public static readonly InteractionData[] MainMenu = [Info, Rename, Emotes, Movement, Settings, MoveHere, FaceMe, Use, Remove];
-    public static readonly InteractionData[] PropMenu = [PropInfo, PropMove, PropRemove];
+    public static readonly InteractionData[] MainMenu = [Info, Rename, Emotes, Movement, Settings, Rotate, MoveHere, FaceMe, Use, Remove];
+    public static readonly InteractionData[] PropMenu = [PropInfo, PropMove, Rotate, PropRemove];
+    private static readonly InteractionData[] RotateMenu = [YawLeft, YawRight, PitchUp, PitchDown, RollLeft, RollRight, Flip, Level, Back];
     private static readonly InteractionData[] EmoteMenu = [.. EmoteEntries.Select(x => x.Data), Back];
     private static readonly InteractionData[] MovementMenu = [Follow, Stay, Wander, ReturnHome, Back];
     private static readonly InteractionData[] SettingsMenu = [Friendly, Neutral, Hostile, Small, DefaultSize, Large, ToggleName, Back];
@@ -99,7 +113,16 @@ public sealed class RefereeNpcInteractions : IInteractionProvider
             Create(Emotes, (player, npc) => ShowMenu(player, npc, EmoteMenu)),
             Create(Movement, (player, npc) => ShowMenu(player, npc, MovementMenu)),
             Create(Settings, (player, npc) => ShowMenu(player, npc, SettingsMenu)),
-            Create(Back, (player, npc) => ShowMenu(player, npc, MainMenu)),
+            Create(Back, (player, npc) => ShowMenu(player, npc, GetMenu(npc))),
+            Create(Rotate, (player, npc) => ShowMenu(player, npc, RotateMenu)),
+            Create(YawLeft, (player, npc) => RotateNpc(player, npc, 'y', -RotateStep)),
+            Create(YawRight, (player, npc) => RotateNpc(player, npc, 'y', RotateStep)),
+            Create(PitchUp, (player, npc) => RotateNpc(player, npc, 'p', -RotateStep)),
+            Create(PitchDown, (player, npc) => RotateNpc(player, npc, 'p', RotateStep)),
+            Create(RollLeft, (player, npc) => RotateNpc(player, npc, 'r', -RotateStep)),
+            Create(RollRight, (player, npc) => RotateNpc(player, npc, 'r', RotateStep)),
+            Create(Flip, (player, npc) => RotateNpc(player, npc, 'r', 180f)),
+            Create(Level, (player, npc) => RotateNpc(player, npc, '0', 0f)),
             Create(MoveHere, MoveToReferee),
             Create(FaceMe, FaceReferee),
             Create(Use, UseDefaultInteraction),
@@ -196,6 +219,18 @@ public sealed class RefereeNpcInteractions : IInteractionProvider
     {
         if (npc.FaceTowards(player.Position))
             WorldNpcHelper.SavePosition(npc);
+    }
+
+    /// <summary>
+    /// Rotates and saves, then reopens the rotate menu so it can be clicked again.
+    /// </summary>
+    private void RotateNpc(Player player, Npc npc, char axis, float degrees)
+    {
+        NpcProperties.Rotate(npc, axis, degrees);
+        WorldNpcHelper.Save(npc);
+
+        LogAction(player, npc, "Rotate", $"{axis} {degrees}");
+        ShowMenu(player, npc, RotateMenu);
     }
 
     private static void UseDefaultInteraction(Player player, Npc npc)

@@ -880,13 +880,17 @@ public sealed class Player : ClientPcData, IEntity
             if (npc is PetTreasureChest petTreasureChest && !petTreasureChest.IsOwner(this))
                 playerUpdatePacketAddNpc.IsInteractable = false;
 
-            // The owner's furniture must be interactable for the client's decorate menu; its cursor
-            // (see HousingZone.SetEditMode) only shows while decorating.
-            if (npc.IsHouseFixture && Zone is HousingZone housingZone && housingZone.IsOwner(this))
+            // Placed objects (house furniture, world props) must be interactable for everyone: otherwise the
+            // client neither collides with them nor keeps their placed height (it drops them to the ground).
+            // Furniture's cursor only shows while its owner decorates (see HousingZone.SetEditMode).
+            if (npc.IsHouseFixture || npc.IsWorldProp)
                 playerUpdatePacketAddNpc.IsInteractable = true;
 
             SendTunneled(playerUpdatePacketAddNpc);
-            SendTunneled(new PlayerUpdatePacketUpdateCharacterState { Guid = npc.Guid, State = IdleCharacterState });
+
+            // Placed objects get no idle state, which would loop their animation (and any sound in it).
+            if (!npc.IsHouseFixture && !npc.IsWorldProp)
+                SendTunneled(new PlayerUpdatePacketUpdateCharacterState { Guid = npc.Guid, State = IdleCharacterState });
         }
 
         var playerUpdatePacketNpcRelevance = InteractionMenuHelper.GetNpcRelevancePacket(

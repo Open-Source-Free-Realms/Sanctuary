@@ -89,6 +89,7 @@ public static class RefereeEditorHelper
                 Format(fixture.Scale), fixture.Tint,
                 Format(npc.Position.X), Format(npc.Position.Y), Format(npc.Position.Z),
                 npc.Collidable ? 1 : 0);
+            RefereeFieldsHelper.Send(player, npc, "prop", null);
             return;
         }
 
@@ -101,6 +102,7 @@ public static class RefereeEditorHelper
             npc.Behavior, Format(npc.Speed), eventKey ?? string.Empty,
             Format(npc.Position.X), Format(npc.Position.Y), Format(npc.Position.Z),
             npc.Collidable ? 1 : 0);
+        RefereeFieldsHelper.Send(player, npc, "npc", eventKey);
     }
 
     private static string Format(float value) => value.ToString("0.###", CultureInfo.InvariantCulture);

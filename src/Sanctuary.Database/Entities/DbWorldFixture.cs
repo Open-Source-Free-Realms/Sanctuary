@@ -35,6 +35,11 @@ public class DbWorldFixture
     /// </summary>
     public string? Script { get; set; }
 
+    /// <summary>
+    /// Extra appearance set by GMs (texture, tint, effect, overhead icon, ...), as JSON.
+    /// </summary>
+    public string? Properties { get; set; }
+
     public ulong? CreatedBy { get; set; }
 
     public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;

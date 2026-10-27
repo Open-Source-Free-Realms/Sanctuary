@@ -41,6 +41,14 @@ WINDOW_PATCHES = [
     (Path("UI/UiModules/Main/wndGameDock.xml"), [
         ("UI\\gamedock.swf", "UI\\sanctuaryGameDock.swf"),
     ]),
+    (Path("UI/UiModules/Main/wndDialogNew.xml"), [
+        ("UI\\dialog.swf", "UI\\sanctuaryDialog.swf"),
+    ]),
+    (Path("UI/UiModules/Main/wndHousingEditPanel.xml"), [
+        ("UI\\housingEditPanel.swf", "UI\\sanctuaryHousingEditPanel.swf"),
+        # Room for 10 items a page instead of 6 (4 more slots, 74 wide); the window and its movie both.
+        ('Width="800" Height="200"', 'Width="1096" Height="200"'),
+    ]),
 ]
 
 

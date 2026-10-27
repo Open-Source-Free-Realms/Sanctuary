@@ -23,7 +23,7 @@ client's data, as described here.
 
 ## Building the mods
 
-The stock movies (`chatWindowCtrl.gfx`, `gamedock.gfx`, their `.lst` preload lists and the hub's tree
+The stock movies (`chatWindowCtrl.gfx`, `gamedock.gfx`, `dialog.gfx`, their `.lst` preload lists and the hub's tree
 texture) are read straight from your client's `Assets_*.pack` files:
 
 ```
@@ -43,6 +43,7 @@ What gets built:
 | --- | --- | --- |
 | `sanctuaryChatWindowCtrl.gfx` | `chatWindowCtrl.gfx` | `chatWindowCtrl/gm_panel.as` appended: the Referee Tools panel (lookups, world tools, NPC/prop editor, script and conversation authoring, the player conversation window) |
 | `sanctuaryGameDock.gfx` | `gamedock.gfx` | `gamedock/gm_hub_button.as` appended, plus `gmTreeIcon`, a purple (hue-shifted) copy of the hub's tree icon |
+| `sanctuaryDialog.gfx` | `dialog.gfx` | `dialog/dialog_hide.as` appended: the NPC dialog stays hidden when sent without text. GM conversations open it for the camera zoom onto the NPC and the chat window draws their text where its pane sits, since the pane only shows locale strings |
 
 Mods are published under new names because the client only downloads assets that are missing
 from its local packs.
@@ -57,7 +58,7 @@ python install_client_mods.py --client "%LOCALAPPDATA%/OSFRLauncher/Servers/OSFR
 ```
 
 This writes the built mods into a new `Assets_NNN.pack` (recorded in `sanctuary_client_mods.txt`)
-and points `UI/UiModules/Main/wndChatLog.xml` and `wndGameDock.xml` at the renamed movies (the
+and points `UI/UiModules/Main/wndChatLog.xml`, `wndGameDock.xml` and `wndDialogNew.xml` at the renamed movies (the
 originals are kept as `*.sanctuary-backup`). Close the client first.
 
 It also enlarges the chat window to 2000x1045. The client clips every movie to its window, so this

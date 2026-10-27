@@ -14,7 +14,7 @@ public class HouseChatCommand : IChatCommand
     private readonly IResourceManager _resourceManager;
 
     public string KeyWord => "house";
-    public string Usage => "list | enter [index] | leave | visit <player name> | grant <house_id> | unbound | rotate yaw|pitch|roll <degrees>";
+    public string Usage => "list | enter [index] | leave | visit <player name> | grant <house_id> | unbound | rotate yaw|pitch|roll <degrees> | rotate level";
     public string Description => "Lists, enters, and leaves your houses. 'grant' and 'unbound' (place anywhere in the current house) require admin.";
     public ChatCommandRole RequiredRole => ChatCommandRole.Player;
 
@@ -151,10 +151,13 @@ public class HouseChatCommand : IChatCommand
 
     private bool HandleRotate(Player invoker, string[] args)
     {
-        if (args.Length < 3 || !float.TryParse(args[2], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var degrees))
+        var degrees = 0f;
+        var level = args.Length == 2 && args[1].Equals("level", System.StringComparison.OrdinalIgnoreCase);
+
+        if (!level && (args.Length < 3 || !float.TryParse(args[2], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out degrees)))
             return false;
 
-        var axis = args[1].ToLowerInvariant() switch
+        var axis = level ? '0' : args[1].ToLowerInvariant() switch
         {
             "yaw" or "y" => 'y',
             "pitch" or "p" => 'p',
@@ -171,8 +174,9 @@ public class HouseChatCommand : IChatCommand
             return true;
         }
 
-        housingZone.RotateLastFixture(invoker, axis, degrees, out var message);
-        ChatHelper.SendSystemMessage(invoker, message);
+        // Success shows on the decorate bar (see HousingZone.SendDecorateSelection).
+        if (!housingZone.RotateLastFixture(invoker, axis, degrees, out var message))
+            ChatHelper.SendSystemMessage(invoker, message);
         return true;
     }
 
