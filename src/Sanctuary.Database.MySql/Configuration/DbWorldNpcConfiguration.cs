@@ -41,6 +41,8 @@ public sealed class DbWorldNpcConfiguration : IEntityTypeConfiguration<DbWorldNp
 
         builder.Property(n => n.EventKey).IsRequired(false).HasMaxLength(32);
 
+        builder.Property(n => n.Collidable).IsRequired().HasDefaultValue(true);
+
         builder.Property(n => n.Script).IsRequired(false);
         builder.Property(n => n.Conversation).IsRequired(false);
 

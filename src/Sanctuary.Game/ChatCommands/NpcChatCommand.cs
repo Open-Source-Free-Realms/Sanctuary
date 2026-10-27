@@ -18,7 +18,7 @@ public class NpcChatCommand : IRawChatCommand
     public string KeyWord => "npc";
 
     public string Usage => "spawn <definitionId> | despawn [guid] | select [guid] | info | name <text|clear> | anim <id> [loop] | scale <n> | model <id> " +
-        "| disposition hostile|neutral|ally | nameplate on|off | behavior stay|follow|wander [radius] | speed <n> | move | face | home | use | say <text> | event <key|none> | " + ScriptCommandHelper.Usage;
+        "| disposition hostile|neutral|ally | nameplate on|off | behavior stay|follow|wander [radius] | speed <n> | move | face | home | use | say <text> | event <key|none> | collide on|off | " + ScriptCommandHelper.Usage;
 
     public string Description => "Spawns, despawns and edits NPCs. Edits apply to the NPC you last clicked (or 'select'ed) and show for everyone nearby.";
 
@@ -74,6 +74,7 @@ public class NpcChatCommand : IRawChatCommand
             case "face":
             case "home":
             case "use":
+            case "collide":
                 return Edit(invoker, args[0].ToLowerInvariant(), args[1..]);
             default:
                 return false;
@@ -327,6 +328,13 @@ public class NpcChatCommand : IRawChatCommand
                     return true;
 
                 npc.SpawnRotation = npc.Rotation;
+                break;
+
+            case "collide":
+                if (!value.Equals("on", StringComparison.OrdinalIgnoreCase) && !value.Equals("off", StringComparison.OrdinalIgnoreCase))
+                    return false;
+
+                npc.SetCollidable(value.Equals("on", StringComparison.OrdinalIgnoreCase));
                 break;
 
             case "home":

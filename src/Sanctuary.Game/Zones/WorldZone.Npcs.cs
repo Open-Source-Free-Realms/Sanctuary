@@ -90,6 +90,9 @@ public sealed partial class WorldZone
         npc.HideNamePlate = worldNpc.HideNamePlate;
         npc.Speed = worldNpc.Speed;
 
+        if (!worldNpc.Collidable)
+            npc.SetCollidable(false);
+
         // Clickable for everyone, so players can target it and referees get the edit menu.
         npc.HasCursor = true;
         npc.CursorId = InteractionMenuHelper.RefereeCursorId;
@@ -266,6 +269,7 @@ public sealed partial class WorldZone
             worldNpc.Behavior = (int)(npc.Behavior == NpcBehavior.Follow ? NpcBehavior.Stay : npc.Behavior);
             worldNpc.WanderRadius = npc.WanderRadius;
             worldNpc.Speed = npc.Speed;
+            worldNpc.Collidable = npc.Collidable;
 
             worldNpc.PositionX = npc.SpawnPosition.X;
             worldNpc.PositionY = npc.SpawnPosition.Y;

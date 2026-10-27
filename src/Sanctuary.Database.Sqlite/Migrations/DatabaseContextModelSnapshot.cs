@@ -740,6 +740,11 @@ namespace Sanctuary.Database.Sqlite.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("Collidable")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
+
                     b.Property<DateTimeOffset>("Created")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
@@ -804,6 +809,11 @@ namespace Sanctuary.Database.Sqlite.Migrations
 
                     b.Property<int>("Behavior")
                         .HasColumnType("INTEGER");
+
+                    b.Property<bool>("Collidable")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("Conversation")
                         .HasColumnType("TEXT");

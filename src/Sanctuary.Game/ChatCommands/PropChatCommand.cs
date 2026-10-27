@@ -14,7 +14,7 @@ public class PropChatCommand : IRawChatCommand
     private readonly IChatCommandManager _chatCommandManager;
 
     public string KeyWord => "prop";
-    public string Usage => "info | move | remove | scale <n> | tint <n> | " + ScriptCommandHelper.Usage;
+    public string Usage => "info | move | remove | scale <n> | tint <n> | collide on|off | " + ScriptCommandHelper.Usage;
     public string Description => "Edits the placed prop you last clicked: move opens the furniture tool, remove deletes it.";
     public ChatCommandRole RequiredRole => ChatCommandRole.Mod;
 
@@ -84,6 +84,22 @@ public class PropChatCommand : IRawChatCommand
                 }
 
                 return SetAppearance(invoker, worldZone, guid, fixture.Id, scale, fixture.Tint);
+
+            case "collide":
+                if (args.Length != 2
+                    || (!args[1].Equals("on", System.StringComparison.OrdinalIgnoreCase) && !args[1].Equals("off", System.StringComparison.OrdinalIgnoreCase)))
+                    return false;
+
+                var collidable = args[1].Equals("on", System.StringComparison.OrdinalIgnoreCase);
+
+                if (!worldZone.TrySetWorldFixtureCollidable(guid, collidable))
+                    return true;
+
+                RefereeEditorHelper.Refresh(invoker);
+
+                _chatCommandManager.LogAction(this, invoker, "Collide", null, $"Prop: {fixture.Id}, Collidable: {collidable}");
+                ChatHelper.SendSystemMessage(invoker, $"Prop #{fixture.Id} collision {(collidable ? "on" : "off")}.");
+                return true;
 
             case "tint":
                 if (args.Length != 2 || !int.TryParse(args[1], out var tint) || tint < 0)

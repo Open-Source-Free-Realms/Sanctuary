@@ -757,6 +757,11 @@ namespace Sanctuary.Database.MySql.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<ulong>("Id"));
 
+                    b.Property<bool>("Collidable")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(true);
+
                     b.Property<DateTimeOffset>("Created")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime(6)")
@@ -823,6 +828,11 @@ namespace Sanctuary.Database.MySql.Migrations
 
                     b.Property<int>("Behavior")
                         .HasColumnType("int");
+
+                    b.Property<bool>("Collidable")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(true);
 
                     b.Property<string>("Conversation")
                         .HasColumnType("longtext");

@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using System.Linq;
 
 using Sanctuary.Game.Entities;
@@ -83,22 +83,24 @@ public static class RefereeEditorHelper
 
         if (npc.Zone is WorldZone worldZone && worldZone.TryGetWorldFixture(npc.Guid, out var fixture))
         {
-            // prop: guid, fixture id, item id, name, scale, tint, x, y, z
+            // prop: guid, fixture id, item id, name, scale, tint, x, y, z, collidable
             ChatHelper.SendGmPanelData(player, "edit", "prop",
                 npc.Guid, fixture.Id, fixture.Definition, npc.Name ?? string.Empty,
                 Format(fixture.Scale), fixture.Tint,
-                Format(npc.Position.X), Format(npc.Position.Y), Format(npc.Position.Z));
+                Format(npc.Position.X), Format(npc.Position.Y), Format(npc.Position.Z),
+                npc.Collidable ? 1 : 0);
             return;
         }
 
         var eventKey = npc.Zone is WorldZone eventZone ? eventZone.GetWorldNpcEvent(npc.Guid) : null;
 
-        // npc: guid, name, name id, model, scale, animation, disposition, nameplate, behavior, speed, event, x, y, z
+        // npc: guid, name, name id, model, scale, animation, disposition, nameplate, behavior, speed, event, x, y, z, collidable
         ChatHelper.SendGmPanelData(player, "edit", "npc",
             npc.Guid, npc.Name ?? string.Empty, npc.NameId, npc.ModelId,
             Format(npc.Scale), npc.Animation, npc.Disposition, npc.HideNamePlate ? 0 : 1,
             npc.Behavior, Format(npc.Speed), eventKey ?? string.Empty,
-            Format(npc.Position.X), Format(npc.Position.Y), Format(npc.Position.Z));
+            Format(npc.Position.X), Format(npc.Position.Y), Format(npc.Position.Z),
+            npc.Collidable ? 1 : 0);
     }
 
     private static string Format(float value) => value.ToString("0.###", CultureInfo.InvariantCulture);

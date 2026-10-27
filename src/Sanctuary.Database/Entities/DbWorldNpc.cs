@@ -49,6 +49,11 @@ public class DbWorldNpc
     public string? EventKey { get; set; }
 
     /// <summary>
+    /// Whether players collide with it (off lets them walk through).
+    /// </summary>
+    public bool Collidable { get; set; } = true;
+
+    /// <summary>
     /// GM-authored Lua (see Sanctuary.Scripting.ScriptSandbox).
     /// </summary>
     public string? Script { get; set; }

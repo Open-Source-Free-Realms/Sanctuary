@@ -29,6 +29,8 @@ public sealed class DbWorldFixtureConfiguration : IEntityTypeConfiguration<DbWor
 
         builder.Property(f => f.Scale).IsRequired().HasDefaultValue(1.0f);
 
+        builder.Property(f => f.Collidable).IsRequired().HasDefaultValue(true);
+
         builder.Property(f => f.Script).IsRequired(false);
 
         builder.Property(f => f.CreatedBy).IsRequired(false);

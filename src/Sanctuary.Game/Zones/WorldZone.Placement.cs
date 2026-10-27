@@ -121,11 +121,38 @@ public sealed partial class WorldZone
 
         npc.IsWorldProp = true;
 
+        if (!fixture.Collidable)
+            npc.SetCollidable(false);
+
         _worldFixtures.Add(npc.Guid, fixture);
 
         AttachSavedScript(npc, fixture.Script);
 
         return true;
+    }
+
+    /// <summary>
+    /// Turns collision on a placed prop on or off for everyone and saves it.
+    /// </summary>
+    public bool TrySetWorldFixtureCollidable(ulong npcGuid, bool collidable)
+    {
+        lock (_worldFixtureLock)
+        {
+            if (!_worldFixtures.TryGetValue(npcGuid, out var fixture) || !TryGetNpc(npcGuid, out var npc))
+                return false;
+
+            fixture.Collidable = collidable;
+
+            using (var dbContext = _dbContextFactory.CreateDbContext())
+            {
+                dbContext.WorldFixtures.Update(fixture);
+                dbContext.SaveChanges();
+            }
+
+            npc.SetCollidable(collidable);
+
+            return true;
+        }
     }
 
     private bool TrySaveWorldFixtureScript(ulong npcGuid, string? source)
