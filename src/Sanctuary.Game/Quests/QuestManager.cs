@@ -688,11 +688,10 @@ public sealed class QuestManager : IQuestManager
         var offer = new QuestInfoPacket
         {
             QuestId = quest.QuestId,
-            TitleId = quest.GiverDialogueId,
+            NpcDialogId = quest.GiverDialogueId,
+            NpcAnimationId = QuestDialogue.TalkAnimationId,
+            NameId = quest.TitleId,
             DescriptionId = quest.DescriptionId,
-            HelperTextId = quest.TitleId,
-            IconId = quest.IconId,
-            GoalsTextId = quest.ObjectiveDescriptionId,
             MembersOnly = false,
             NpcGuid = NearestNpcGuid(player, quest.GiverNpcId),
             CameraDistance = quest.CameraDistance ?? DefaultOfferCameraDistance,
@@ -833,8 +832,9 @@ public sealed class QuestManager : IQuestManager
         {
             NpcGuid = NearestNpcGuid(player, quest.GoalTargetNpcId(quest.Goals.Count - 1)),
             QuestId = quest.QuestId,
-            TitleId = quest.TurnInDialogueId,
-            DescriptionId = quest.TitleId
+            EndDialogTextId = quest.TurnInDialogueId,
+            NpcAnimationId = QuestDialogue.TalkAnimationId,
+            CameraDistance = quest.CameraDistance ?? DefaultOfferCameraDistance
         };
 
         FillRewardBundle(end.RewardBundle, quest);

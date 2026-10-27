@@ -11,9 +11,9 @@ public class QuestEndPacket : BaseQuestPacket, ISerializablePacket
 
     public ulong NpcGuid;
     public int QuestId;
-    public int TitleId;
-    public int DescriptionId;
-    public float Percent = 1f;
+    public int EndDialogTextId;
+    public int NpcAnimationId;
+    public float CameraDistance;
 
     public RewardBundleBase RewardBundle { get; } = new();
 
@@ -29,12 +29,12 @@ public class QuestEndPacket : BaseQuestPacket, ISerializablePacket
 
         writer.Write(NpcGuid);
         writer.Write(QuestId);
-        writer.Write(TitleId);
-        writer.Write(DescriptionId);
+        writer.Write(EndDialogTextId);
+        writer.Write(NpcAnimationId);
 
         RewardBundle.Serialize(writer);
 
-        writer.Write(Percent);
+        writer.Write(CameraDistance);
 
         return writer.Buffer;
     }
