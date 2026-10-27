@@ -110,6 +110,16 @@ public static class InteractionMenuHelper
         if (!CanInteract(npc, player))
             return true;
 
+        if (npc.QuestInteractRange > 0 && !IsWithinRange(npc, player, npc.QuestInteractRange))
+        {
+            player.SendTunneled(new CommandPacketMoveAndInteract
+            {
+                Position = npc.Position,
+                Guid = npc.Guid
+            });
+            return true;
+        }
+
         var npcInteractions = npc.InteractionList?.Interactions ?? npc.Interactions;
 
         if (options.Count == 1 && npcInteractions.Count == 0)
@@ -127,10 +137,14 @@ public static class InteractionMenuHelper
         if (!npc.IsInteractable || !ReferenceEquals(npc.Zone, player.Zone))
             return false;
 
+        return npc.InteractRange >= 0 && IsWithinRange(npc, player, npc.InteractRange);
+    }
+
+    private static bool IsWithinRange(Npc npc, Player player, int range)
+    {
         var distanceSquared = Vector3.DistanceSquared(
             npc.Position.ToVector3(),
             player.Position.ToVector3());
-        return float.IsFinite(distanceSquared) && npc.InteractRange >= 0 &&
-            distanceSquared <= (float)npc.InteractRange * npc.InteractRange;
+        return float.IsFinite(distanceSquared) && distanceSquared <= (float)range * range;
     }
 }

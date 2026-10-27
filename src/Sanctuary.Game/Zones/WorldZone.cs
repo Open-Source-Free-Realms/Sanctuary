@@ -101,7 +101,7 @@ public sealed class WorldZone : BaseZone
                 npc.CursorId = cursorId;
 
             if (_resourceManager.Quests.TryGetNpcInteractRange(npc.DefinitionId, out var interactRange))
-                npc.InteractRange = interactRange;
+                npc.QuestInteractRange = interactRange;
 
             _questManager.RefreshQuestNotification(player, npc.Guid);
         }
