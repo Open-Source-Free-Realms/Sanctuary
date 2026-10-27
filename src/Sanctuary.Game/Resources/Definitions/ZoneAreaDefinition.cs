@@ -7,6 +7,20 @@ public class ZoneAreaDefinition
 {
     public int Id { get; set; }
 
+    public int NameId { get; set; }
+    public int AreaId { get; set; }
+    public int ChatAreaNameId { get; set; }
+    public int PointOfInterestId { get; set; }
+    public List<int> EnvironmentIds { get; set; } = [];
+    public float? EnvironmentMinX { get; set; }
+    public float? EnvironmentMaxX { get; set; }
+    public List<int[]> Tiles { get; set; } = [];
+
+    public bool IsInEnvironmentXRange(float x)
+    {
+        return (EnvironmentMinX is null || x >= EnvironmentMinX) && (EnvironmentMaxX is null || x < EnvironmentMaxX);
+    }
+
     /// <summary>
     /// Circle - XZ 1 and Radius
     /// Rectangle - XZ 1 and 2

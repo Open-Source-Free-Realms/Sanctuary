@@ -19,6 +19,7 @@ using Sanctuary.Core.Extensions;
 using Sanctuary.Core.IO;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
+using Sanctuary.Game.Interactions;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Zones;
 using Sanctuary.Game.Routines;
@@ -42,6 +43,7 @@ public abstract class BaseZone : IZone, IDisposable
 
     private const int VisibleTileRadius = 2;
     private readonly Dictionary<int, ZoneTile> _tiles;
+    protected readonly ZoneEnvironmentDefinition? _zoneEnvironment;
 
     private readonly object _npcGuidLock = new();
     private ulong _nextNpcGuid = NpcBaseGuid;
@@ -114,6 +116,8 @@ public abstract class BaseZone : IZone, IDisposable
         foreach (var script in _zoneDefinition.Scripts ?? [])
             _scripts.TryAdd(script);
 
+        _resourceManager.ZoneEnvironments.TryGetValue(Name, out _zoneEnvironment);
+
         _tiles = GenerateTiles();
 
         foreach (var tile in _tiles)
@@ -125,6 +129,10 @@ public abstract class BaseZone : IZone, IDisposable
         if (_resourceManager.NavMeshes.TryGetValue(Name, out var navMesh))
             NavMeshQuery = new DtNavMeshQuery(navMesh);
     }
+
+    public virtual IReadOnlyList<NpcInteractionOption> GetInteractionOptions(Player player, Npc npc) => [];
+
+    public virtual NotificationInfo? GetQuestBadge(Player player, Npc npc) => null;
 
     #region Events
 
@@ -782,6 +790,7 @@ public abstract class BaseZone : IZone, IDisposable
             ? new CollectionCoin(this, coinDefinition) { Guid = npcGuid }
             : new Npc(this) { Guid = npcGuid };
 
+        npc.DefinitionId = definition.Id;
         npc.NameId = definition.NameId;
         npc.Name = definition.Name;
         npc.ModelId = definition.ModelId;
@@ -1251,7 +1260,9 @@ public abstract class BaseZone : IZone, IDisposable
             {
                 var tileHash = ZoneTile.GetHash(longitude, latitude);
 
-                tiles.Add(tileHash, new ZoneTile(longitude, latitude));
+                var environmentId = _zoneEnvironment?.GetEnvironmentId(longitude, latitude) ?? default;
+
+                tiles.Add(tileHash, new ZoneTile(longitude, latitude, environmentId));
             }
         }
 
@@ -1278,6 +1289,18 @@ public abstract class BaseZone : IZone, IDisposable
         }
 
         return tiles;
+    }
+
+    public bool HasEnvironmentData => _zoneEnvironment is not null;
+
+    public bool IsOutOfBounds(ZoneTile zoneTile)
+    {
+        return _zoneEnvironment is not null && (zoneTile == ZoneTile.Empty || zoneTile.IsOutOfBounds);
+    }
+
+    public bool IsOutOfBounds(Vector4 position)
+    {
+        return IsOutOfBounds(GetTileFromPosition(position));
     }
 
     public ZoneTile GetTileFromPosition(Vector4 position)

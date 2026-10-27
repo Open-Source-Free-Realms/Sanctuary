@@ -6,6 +6,8 @@ using System.Numerics;
 using DotRecast.Detour;
 
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Interactions;
+using Sanctuary.Packet.Common;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Routines;
 using Sanctuary.Scripting;
@@ -78,6 +80,9 @@ public interface IZone : IScriptableZone, IDisposable
 
     #region Zone System
 
+    bool HasEnvironmentData { get; }
+    bool IsOutOfBounds(ZoneTile zoneTile);
+    bool IsOutOfBounds(Vector4 position);
     ZoneTile GetTileFromPosition(Vector4 position);
     void UpdateEntityZoneTile(IEntity entity, ZoneTile from, ZoneTile to);
 
@@ -86,4 +91,8 @@ public interface IZone : IScriptableZone, IDisposable
     DtNavMeshQuery? NavMeshQuery { get; }
 
     IDtQueryFilter NavMeshFilter { get; }
+
+    IReadOnlyList<NpcInteractionOption> GetInteractionOptions(Player player, Npc npc);
+
+    NotificationInfo? GetQuestBadge(Player player, Npc npc);
 }

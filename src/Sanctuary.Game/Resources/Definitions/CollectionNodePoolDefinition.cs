@@ -15,6 +15,8 @@ public sealed class CollectionNodePoolDefinition
     public int RespawnSeconds { get; set; } = 30;
     public List<CollectionNodeDropDefinition> DropTable { get; set; } = [];
 
+    public bool HasDrop => DropTable.Count > 0;
+
     private WeightedDropTable<CollectionNodeDropDefinition>? _table;
     public WeightedDropTable<CollectionNodeDropDefinition> Table =>
         _table ??= new WeightedDropTable<CollectionNodeDropDefinition>(DropTable);
