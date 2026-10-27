@@ -7,6 +7,32 @@
 
 var gmToken = "[[SANCTUARY_GM]]";
 
+// install_client_mods.py enlarges the chat window to about the size of the screen (the client clips
+// each movie to its window, and its Lua bottom-aligns the chat window). Drawing 1:1 anchored
+// bottom-left keeps chat where it always was, and the rest of the window is room for the panel.
+Stage.scaleMode = "noScale";
+Stage.align = "BL";
+
+// Height of the chat movie's own stage; with bottom-left alignment the visible area spans
+// y = GM_CHAT_STAGE_H - Stage.height (top) .. GM_CHAT_STAGE_H (bottom).
+var GM_CHAT_STAGE_H = 345;
+var GM_MIN_SCALE = 0.6;
+
+function gmTop()
+{
+   return Math.min(0, GM_CHAT_STAGE_H - Stage.height);
+}
+
+function gmBottom()
+{
+   return Math.max(GM_CHAT_STAGE_H, Stage.height + gmTop());
+}
+
+function gmRight()
+{
+   return Stage.width;
+}
+
 var GM_W = 540;
 var GM_H = 340;
 var GM_COLUMNS = 3;
@@ -27,6 +53,7 @@ var GM_TEXT_GOLD = 0xFFE68A;
 
 var gmTab = "items";
 var gmMaximized = false;
+var gmScale = 1;
 var gmResults = [];
 var gmList = { kind: "", search: "", page: 1, pages: 1, total: 0 };
 var gmTabs = [
@@ -180,7 +207,7 @@ function gmBuild()
 {
    var root_mc = _root.createEmptyMovieClip("gm_mc", 16000);
    root_mc._x = 8;
-   root_mc._y = 14;
+   root_mc._y = GM_CHAT_STAGE_H - GM_H - 8;
    root_mc._visible = false;
 
    var frame = root_mc.createEmptyMovieClip("frame_mc", 1);
@@ -191,7 +218,7 @@ function gmBuild()
       var p = _root.gm_mc;
       var w = GM_W * p._xscale / 100;
       var h = GM_H * p._yscale / 100;
-      p.startDrag(false, 0, 14, Math.max(0, Stage.width - w), Math.max(14, Stage.height - h));
+      p.startDrag(false, 0, gmTop(), Math.max(0, gmRight() - w), Math.max(gmTop(), gmBottom() - h));
    };
    frame.onRelease = frame.onReleaseOutside = function()
    {
@@ -236,6 +263,7 @@ function gmBuild()
    gmText(root_mc, "status_txt", "", 14, GM_H - 26, GM_W - 28, 18, 11, GM_TEXT_DIM, false);
 
    root_mc.createEmptyMovieClip("content_mc", 60);
+   gmAddResizeGrip(root_mc);
    gmClearContent();
 
    var stageListener = new Object();
@@ -247,22 +275,70 @@ function gmBuild()
 }
 
 // Keeps the whole panel on screen at any window size; maximized fills the space available.
+// Largest scale for the panel. The enlarged chat window can run a little past the screen edge,
+// so keep a margin and stay at 90% of the window.
+var GM_MAX_FILL = 0.9;
+
+function gmMaxScale()
+{
+   return GM_MAX_FILL * Math.min((gmRight() - 40) / GM_W, (gmBottom() - gmTop() - 80) / GM_H);
+}
+
+// Keeps the panel on screen at its current size; maximized fills the visible area.
 function gmFit()
 {
    var root_mc = _root.gm_mc;
-   var available = Math.min((Stage.width - 16) / GM_W, (Stage.height - 28) / GM_H);
-   // The client clips each movie to its window, so the chat window's Stage is as big as the panel can get.
-   var scale = gmMaximized ? available : Math.min(1, available);
+   var scale = gmMaximized ? gmMaxScale() : Math.max(GM_MIN_SCALE, Math.min(gmScale, gmMaxScale()));
    if(scale <= 0)
    {
       return;
    }
    root_mc._xscale = root_mc._yscale = scale * 100;
-   if(gmMaximized || root_mc._x < 0 || root_mc._x + GM_W * scale > Stage.width || root_mc._y + GM_H * scale > Stage.height)
+   var w = GM_W * scale;
+   var h = GM_H * scale;
+   if(gmMaximized)
    {
-      root_mc._x = Math.max(0, (Stage.width - GM_W * scale) / 2);
-      root_mc._y = Math.max(14, (Stage.height - GM_H * scale) / 2);
+      root_mc._x = (gmRight() - w) / 2;
+      root_mc._y = gmTop() + (gmBottom() - gmTop() - h) / 2;
+      return;
    }
+   root_mc._x = Math.max(0, Math.min(root_mc._x, gmRight() - w));
+   root_mc._y = Math.max(gmTop() + 14, Math.min(root_mc._y, gmBottom() - h));
+}
+
+// Bottom-right grip: drag to scale the whole panel (every tab keeps its layout).
+function gmAddResizeGrip(root_mc)
+{
+   var grip = root_mc.createEmptyMovieClip("grip_mc", 70);
+   grip._x = GM_W - 22;
+   grip._y = GM_H - 22;
+   grip.beginFill(0x000000, 0);
+   gmRoundRect(grip, 0, 0, 20, 20, 0);
+   grip.endFill();
+   grip.lineStyle(2, GM_GOLD, 100);
+   var i;
+   for(i = 0; i < 3; i++)
+   {
+      grip.moveTo(18, 6 + i * 5);
+      grip.lineTo(6 + i * 5, 18);
+   }
+   grip.onPress = function()
+   {
+      gmMaximized = false;
+      this.onMouseMove = function()
+      {
+         var p = _root.gm_mc;
+         var scale = Math.max((_root._xmouse - p._x) / GM_W, (_root._ymouse - p._y) / GM_H);
+         gmScale = Math.max(GM_MIN_SCALE, Math.min(scale, gmMaxScale()));
+         p._xscale = p._yscale = gmScale * 100;
+         updateAfterEvent();
+      };
+   };
+   grip.onRelease = grip.onReleaseOutside = function()
+   {
+      delete this.onMouseMove;
+      gmFit();
+   };
 }
 
 function gmStatus(s)
@@ -1250,7 +1326,7 @@ function gmShowDialog(parts)
    gmPanelShape(frame, w, h, 14, GM_BLUE_TOP, GM_BLUE_BOTTOM, GM_GOLD, 3);
    frame.onPress = function()
    {
-      this._parent.startDrag(false, 0, 0, Math.max(0, Stage.width - w), Math.max(0, Stage.height - h));
+      this._parent.startDrag(false, 0, gmTop(), Math.max(0, gmRight() - w), Math.max(gmTop(), gmBottom() - h));
    };
    frame.onRelease = frame.onReleaseOutside = function()
    {
@@ -1261,8 +1337,8 @@ function gmShowDialog(parts)
       gmSend("!talk end");
    }, 0xC0392B);
 
-   d._x = Math.max(0, (Stage.width - w) / 2);
-   d._y = Math.max(0, Stage.height - h - 60);
+   d._x = Math.max(0, (gmRight() - w) / 2);
+   d._y = Math.max(gmTop(), gmBottom() - h - 60);
 }
 
 function gmHandleScript(parts)

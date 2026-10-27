@@ -60,6 +60,11 @@ This writes the built mods into a new `Assets_NNN.pack` (recorded in `sanctuary_
 and points `UI/UiModules/Main/wndChatLog.xml` and `wndGameDock.xml` at the renamed movies (the
 originals are kept as `*.sanctuary-backup`). Close the client first.
 
+It also enlarges the chat window to 2000x1045. The client clips every movie to its window, so this
+is what lets the Referee Tools panel be dragged anywhere and resized (bottom-right grip, `[ ]` to
+maximize). The client's Lua bottom-aligns the chat window, and the mod draws the chat movie 1:1
+anchored bottom-left, so chat itself stays where it always was.
+
 Undo it with `--uninstall`.
 
 The client must be launched against a Sanctuary WebAPI that serves the same build

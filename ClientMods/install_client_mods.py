@@ -29,10 +29,18 @@ MARKER_FILE = "sanctuary_client_mods.txt"
 COMPRESSED_MAGIC = 0xA1B2C3D4
 PACK_DATA_ALIGNMENT = 8192
 
-# (window definition, original movie path, modded movie path)
+# (window definition, [(original text, modded text), ...]), applied to the original file.
 WINDOW_PATCHES = [
-    (Path("UI/UiModules/Main/wndChatLog.xml"), "UI\\chatWindowCtrl.swf", "UI\\sanctuaryChatWindowCtrl.swf"),
-    (Path("UI/UiModules/Main/wndGameDock.xml"), "UI\\gamedock.swf", "UI\\sanctuaryGameDock.swf"),
+    (Path("UI/UiModules/Main/wndChatLog.xml"), [
+        ("UI\\chatWindowCtrl.swf", "UI\\sanctuaryChatWindowCtrl.swf"),
+        # The client clips a movie to its window, so the chat window is enlarged to about the size of
+        # the screen to give the Referee Tools panel room. Its Lua bottom-aligns the window and the mod
+        # draws chat 1:1 at the bottom left, so chat itself stays where it was.
+        ('Width="550" Height="345"', 'Width="2000" Height="1045"'),
+    ]),
+    (Path("UI/UiModules/Main/wndGameDock.xml"), [
+        ("UI\\gamedock.swf", "UI\\sanctuaryGameDock.swf"),
+    ]),
 ]
 
 
@@ -92,29 +100,28 @@ def install(client_dir):
     marker.write_text(pack_path.name)
     print(f"{pack_path.name}: {', '.join(name for name, _ in mods)}")
 
-    for relative_path, original, modded in WINDOW_PATCHES:
+    for relative_path, replacements in WINDOW_PATCHES:
         path = client_dir / relative_path
         backup = path.with_name(path.name + BACKUP_SUFFIX)
-
-        text = path.read_text(encoding="utf-8-sig")
-
-        if modded in text:
-            print(f"{relative_path}: already installed")
-            continue
-
-        if original not in text:
-            raise ValueError(f"{relative_path}: {original} not found, refusing to patch")
 
         if not backup.exists():
             shutil.copy2(path, backup)
 
+        # Always patch the original, so reinstalling (or upgrading an older install) is idempotent.
+        text = backup.read_text(encoding="utf-8-sig")
+
+        for original, modded in replacements:
+            if original not in text:
+                raise ValueError(f"{relative_path}: {original} not found, refusing to patch")
+            text = text.replace(original, modded)
+
         # Keep the BOM the client's files are saved with.
-        path.write_text(text.replace(original, modded), encoding="utf-8-sig")
-        print(f"{relative_path}: {original} -> {modded}")
+        path.write_text(text, encoding="utf-8-sig")
+        print(f"{relative_path}: patched ({len(replacements)} change(s))")
 
 
 def uninstall(client_dir):
-    for relative_path, _, _ in WINDOW_PATCHES:
+    for relative_path, _ in WINDOW_PATCHES:
         path = client_dir / relative_path
         backup = path.with_name(path.name + BACKUP_SUFFIX)
 
