@@ -18,6 +18,8 @@ public interface IQuestManager
 
     bool CompleteQuest(Player player, int questId);
 
+    bool OfferNextQuest(Player player, int questId);
+
     void AbandonQuest(Player player, int questId);
 
     bool ResetQuest(Player player, int questId);
@@ -26,9 +28,15 @@ public interface IQuestManager
 
     ClientQuestData GetClientQuestData(Player player);
 
+    void SendActiveObjectives(Player player);
+
     void RestoreJournal(Player player);
 
     NotificationInfo? GetQuestBadge(Player player, Npc npc);
+
+    bool IsHiddenByQuest(Player player, Npc npc);
+
+    int GetQuestEffectId(Player player, Npc npc);
 
     void RefreshQuestNotification(Player player, ulong npcGuid);
 

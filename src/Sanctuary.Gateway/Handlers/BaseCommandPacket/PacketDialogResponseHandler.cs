@@ -28,7 +28,7 @@ public static class PacketDialogResponseHandler
             return false;
         }
 
-        if (QuestDialogue.TryAdvance(connection.Player))
+        if (QuestDialogue.TryAdvance(connection.Player, packet.ResponseId))
             return true;
 
         connection.Player.SendTunneled(new CommandPacketEndDialog());

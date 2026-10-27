@@ -7,8 +7,8 @@ public class QuestEndBlockedPacket : BaseQuestPacket, ISerializablePacket
     public new const int OpCode = 16;
 
     public ulong NpcGuid;
-    public int TextId;
     public int QuestId;
+    public int TextId;
 
     public QuestEndBlockedPacket() : base(OpCode)
     {
@@ -21,8 +21,8 @@ public class QuestEndBlockedPacket : BaseQuestPacket, ISerializablePacket
         Write(writer);
 
         writer.Write(NpcGuid);
-        writer.Write(TextId);
         writer.Write(QuestId);
+        writer.Write(TextId);
 
         return writer.Buffer;
     }

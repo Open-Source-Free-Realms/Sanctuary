@@ -107,5 +107,9 @@ public interface IZone : IScriptableZone, IDisposable
 
     NotificationInfo? GetQuestBadge(Player player, Npc npc);
 
+    bool IsHiddenByQuest(Player player, Npc npc);
+
+    int GetQuestEffectId(Player player, Npc npc);
+
     bool TryFindReachableRoute(Vector3 start, Vector3 goal, Queue<Vector3> waypoints, bool followRoads);
 }
