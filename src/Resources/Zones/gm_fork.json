@@ -1,0 +1,22 @@
+{
+  "$type": "World",
+  "Id": 1035,
+  "Name": "gm_fork",
+  "Type": "World",
+  "TileSize": 64,
+  "StartLatitude": -4,
+  "StartLongitude": -4,
+  "EndLatitude": 32,
+  "EndLongitude": 32,
+  "SpawnPosition": [
+    255,
+    8,
+    230
+  ],
+  "SpawnRotation": [
+    -1,
+    0,
+    0,
+    0
+  ]
+}

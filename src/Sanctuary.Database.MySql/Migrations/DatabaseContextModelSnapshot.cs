@@ -157,8 +157,6 @@ namespace Sanctuary.Database.MySql.Migrations
                         .HasMaxLength(16)
                         .HasColumnType("varchar(16)");
 
-                    b.Property<int>("MembershipStatus")
-                        .HasColumnType("int");
 
                     b.PrimitiveCollection<string>("MiniGameTutorials")
                         .HasColumnType("longtext");
@@ -197,8 +195,6 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.Property<int>("SkinToneId")
                         .HasColumnType("int");
 
-                    b.Property<int>("StationCash")
-                        .HasColumnType("int");
 
                     b.Property<Guid?>("Ticket")
                         .HasColumnType("char(36)");
@@ -885,10 +881,6 @@ namespace Sanctuary.Database.MySql.Migrations
                         .HasColumnType("tinyint(1)")
                         .HasDefaultValue(false);
 
-                    b.Property<bool>("IsMember")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("tinyint(1)")
-                        .HasDefaultValue(false);
 
                     b.Property<bool>("IsMod")
                         .ValueGeneratedOnAdd()
@@ -1015,6 +1007,33 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.HasIndex("Zone");
 
                     b.ToTable("WorldFixtures");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbWorldKit", b =>
+                {
+                    b.Property<string>("Name")
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)");
+
+                    b.Property<string>("Entries")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<DateTimeOffset>("Updated")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.Property<ulong?>("UpdatedBy")
+                        .HasColumnType("bigint unsigned");
+
+                    b.HasKey("Name");
+
+                    b.ToTable("WorldKits");
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbWorldNpc", b =>
