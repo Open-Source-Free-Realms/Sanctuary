@@ -822,7 +822,8 @@ function gmRenderEditProp(content, e)
 }
 
 // --- text escaping (scripts, conversations, dialog) -----------------------------
-// Free text travels as: '\' -> "\\", newline -> "\n", '|' -> "\p".
+// Free text travels as: '\' -> "\\", newline -> "\n", '|' -> "\p", tab -> "\t", and the spaces
+// chat would trim or collapse (leading, trailing, or next to another space) -> "\s".
 
 function gmEscapeText(s)
 {
@@ -847,6 +848,15 @@ function gmEscapeText(s)
       else if(c == "|")
       {
          out += "\\p";
+      }
+      else if(c == "\t")
+      {
+         out += "\\t";
+      }
+      else if(c == " " && (i == 0 || i == s.length - 1 || s.charAt(i - 1) == " " || s.charAt(i + 1) == " "))
+      {
+         // Chat trims leading/trailing spaces and collapses runs of them, so those travel as \s.
+         out += "\\s";
       }
       else
       {
@@ -874,6 +884,14 @@ function gmUnescapeText(s)
          else if(n == "p")
          {
             out += "|";
+         }
+         else if(n == "s")
+         {
+            out += " ";
+         }
+         else if(n == "t")
+         {
+            out += "\t";
          }
          else
          {
@@ -996,9 +1014,9 @@ function gmSaveScript()
    gmScript.guid = gmEdit[1];
    // Escape per chunk so no escape sequence is split; each stays well under the chat line limit.
    var i;
-   for(i = 0; i < source.length; i += 100)
+   for(i = 0; i < source.length; i += 80)
    {
-      gmQueueSend("!" + kind + " script append " + gmEscapeText(source.substr(i, 100)));
+      gmQueueSend("!" + kind + " script append " + gmEscapeText(source.substr(i, 80)));
    }
    gmQueueSend("!" + kind + " script commit");
    gmScript.status = "Saving...";

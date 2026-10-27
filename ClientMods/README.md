@@ -78,4 +78,5 @@ python extract_names.py --client "%LOCALAPPDATA%/OSFRLauncher/Servers/OSFR Publi
 - The server answers with hidden system chat lines, `[[SANCTUARY_GM]]|kind|field|...`
   (`ChatHelper.SendGmPanelData`). The chat window mod swallows these and renders them.
 - Free text in scripts, conversations and the player dialog is escaped as `\\` (backslash),
-  `\n` (newline) and `\p` (`|`).
+  `\n` (newline), `\p` (`|`), `\t` (tab) and `\s` for the spaces chat would otherwise trim or
+  collapse (leading, trailing, or next to another space).
