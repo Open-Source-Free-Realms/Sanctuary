@@ -20,7 +20,10 @@ public static class ItemAbilityHelper
 
     public static void Apply(Player player, ItemAbilityDefinition ability, int nameId, int iconId)
     {
-        if (ability.CastEffectId != 0)
+        // The appearance change plays the cast effect as its poof and brings its own change-form buff icon.
+        if (ability.ModelId != 0)
+            player.ApplyTemporaryAppearance(ability.ModelId, ability.DurationMs, ability.CastEffectId, nameId);
+        else if (ability.CastEffectId != 0)
         {
             player.SendTunneledToVisible(new PlayerUpdatePacketPlayCompositeEffect
             {
@@ -54,7 +57,9 @@ public static class ItemAbilityHelper
         var health = ItemAbilityDefinitionCollection.IsOverTime(ability.Health) ? ability.Health : null;
         var energy = ItemAbilityDefinitionCollection.IsOverTime(ability.Energy) ? ability.Energy : null;
 
-        if (ability.DurationMs == 0 && health is null && energy is null)
+        var timed = ability.AuraEffectId != 0 || ability.MovementSpeedBonus != 0 || ability.Scale != 0 || ability.Stats.Count > 0;
+
+        if (!timed && health is null && energy is null)
             return null;
 
         var intervalMs = health?.IntervalMs ?? energy!.IntervalMs;

@@ -45,6 +45,11 @@ public class ItemAbilityDefinition
     public float MovementSpeedBonus { get; set; }
     public float Scale { get; set; }
 
+    /// <summary>
+    /// Temporary appearance for <see cref="DurationMs"/> (illusion foods and masks), with <see cref="CastEffectId"/> as its poof.
+    /// </summary>
+    public int ModelId { get; set; }
+
     public List<ItemAbilityStatDefinition> Stats { get; set; } = [];
 }
 

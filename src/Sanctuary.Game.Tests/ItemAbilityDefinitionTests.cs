@@ -36,6 +36,22 @@ public sealed class ItemAbilityDefinitionTests
         Assert.IsTrue(abilities.TryGetValue(244, out var coinScroll), "Bonus Coin Scroll");
         Assert.IsTrue(coinScroll.DurationMs > 0);
         Assert.AreEqual(CharacterStatId.GoldBoostPercent, coinScroll.Stats.Single().Stat);
+
+        Assert.IsTrue(abilities.TryGetValue(1999, out var penguinFood), "Illusion Food - Penguin");
+        Assert.AreEqual(16, penguinFood.ModelId);
+    }
+
+    [TestMethod]
+    public void ItemAbilitiesJson_ModelsExist()
+    {
+        var models = new ModelDefinitionCollection(NullLogger.Instance);
+        Assert.IsTrue(models.Load(Path.Combine(Resources, "Models.txt")));
+
+        var abilities = new ItemAbilityDefinitionCollection(NullLogger.Instance);
+        Assert.IsTrue(abilities.Load(Path.Combine(Resources, "ItemAbilities.json")));
+
+        CollectionAssert.AreEqual(Array.Empty<int>(),
+            abilities.Values.Where(ability => ability.ModelId != 0 && !models.ContainsKey(ability.ModelId)).Select(ability => ability.AbilityId).ToArray());
     }
 
     [TestMethod]

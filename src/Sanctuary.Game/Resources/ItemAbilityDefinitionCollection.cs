@@ -71,6 +71,7 @@ public class ItemAbilityDefinitionCollection : ObservableConcurrentDictionary<in
             || entry.Health!.OverMs == entry.Energy!.OverMs && entry.Health.IntervalMs == entry.Energy.IntervalMs)
         && float.IsFinite(entry.MovementSpeedBonus)
         && float.IsFinite(entry.Scale) && entry.Scale >= 0
+        && entry.ModelId >= 0 && (entry.ModelId == 0 || entry.DurationMs > 0)
         && entry.Stats is not null && entry.Stats.All(stat => stat is not null
             && stat.Stat != CharacterStatId.InvalidStat && Enum.IsDefined(stat.Stat) && float.IsFinite(stat.Value))
         // Timed parts need a duration; an aura without one is only allowed to last as long as a restore over time.

@@ -11,6 +11,7 @@ script rebuilds it from what the client still ships:
   - Resources/ActorCompositeEffectDefinitions.xml
                                           every composite effect id used below is checked against it,
                                           and looping effects are played as timed auras, not one-shots
+  - src/Resources/Models.txt              illusion food models are checked against it
 
 Abilities already handled through Consumables.json (food auras, transformations) are skipped.
 
@@ -52,6 +53,7 @@ LIGHTNING_SPEED_AURA = 15049  # PFX_beam_red_feet_speed-run_loop
 SHIELD_EFFECT = 15855      # PFX_shield_green_head_defense-buff
 TRANSFIGURE_EFFECT = 5332  # PFX_swirl-flash_purple_root_transfiguration-land
 INVISIBILITY_AURA = 15570  # PFX_smoke_dark_root_invisibility-indicator_loop
+TRANSFORM_POOF = 21
 
 
 def restore(percent, over_ms=0):
@@ -103,6 +105,12 @@ def aura(effect_id, duration_ms=FOOD_DURATION_MS, group="Aura"):
 
 def cast(effect_id, cooldown=FIREWORK_COOLDOWN_MS):
     return {"CooldownMs": cooldown, "CastEffectId": effect_id}
+
+
+def transform(model_id, duration_ms=FOOD_DURATION_MS):
+    # Same poof (21) and 30 minute default as the Consumables.json transformations.
+    return {"Group": "Transform", "CooldownMs": BUFF_COOLDOWN_MS, "DurationMs": duration_ms, "CastEffectId": TRANSFORM_POOF,
+            "ModelId": model_id}
 
 
 # Tiers follow the item names (I/1, II, III, IV, V) and descriptions ("some", "a large portion").
@@ -183,6 +191,43 @@ ABILITIES = {
     1933: cast(15608, BUFF_COOLDOWN_MS),    # Laughter Latte
     3790: cast(5456),                       # Bottle of Butterflies
 
+    # Illusion foods and masks Consumables.json doesn't cover. Models are the race-assigned rows of
+    # Models.txt (the ones the existing transformations use), not the later duplicates.
+    1975: transform(212),                   # Illusion Food - Chick: chick.adr
+    1914: transform(212),                   # Chicken Feed: "It'll make you feel younger!"
+    1976: transform(3427),                  # Illusion Food - Deer: deer_bambi.adr
+    1977: transform(376), 358: transform(376),   # Illusion Food - Treeble, Treeble Treat: treeble.adr
+    1980: transform(434),                   # Animated Snacks: maneatingplant_greenpurple.adr
+    1991: transform(88), 1928: transform(88),    # Illusion Food - Man-Eating Plant, Man-Eating Plant Mask
+    1917: transform(88),                    # Audrey's Special Salad: "You are what you eat..."
+    3003: transform(433),                   # Illusion Food - Man-Eating Plant (Brown/Pink)
+    1981: transform(219),                   # Honey Soup: bixie_m_gatherer.adr
+    3411: transform(218),                   # Royal Bixie Trinket: bixie_m_elite_guard.adr
+    1984: transform(1924),                  # Illusion Food - Spider: spider_m.adr
+    1988: transform(28), 1913: transform(28),    # Illusion Food - Bat, Batwing Cookie: bat_01.adr
+    3006: transform(379),                   # Giant Bat Illusion Scroll: screecher_boss.adr (Greater Screecher)
+    1989: transform(129),                   # Illusion Food - Owl: birds_owl.adr
+    1993: transform(62),                    # Illusion Food - Bear Vine Golem: bear_vinegolem.adr
+    3069: transform(235),                   # Illusion Food - Fungal Vinegolem Bear: bear_vinegolem_fungus.adr
+    1996: transform(134),                   # Illusion Food - Floren: floren.adr
+    1999: transform(16), 1918: transform(16),    # Illusion Food - Penguin, Ice Cream Sandwich: penguin_01.adr
+    1930: transform(47),                    # Penguin Feather Mask: penguin_baby_01.adr
+    2028: transform(140),                   # Evil Snowman Illusion Scroll: snowman.adr
+    2029: transform(343),                   # Illusion Food - Vulture: vulture.adr
+    2030: transform(135),                   # Goat Cheese: billygoat.adr
+    3048: transform(136),                   # Illusion Food - Nanny Goat: nannygoat.adr
+    3000: transform(74),                    # Arboreal Giant Illusion Scroll: treesoldier.adr
+    3007: transform(126), 3008: transform(127), 3009: transform(128), 3010: transform(198),   # Dove, Eagle, Hawk, Raven
+    3039: transform(130), 3040: transform(132), 3041: transform(133),   # Antelope, Buck, Doe
+    3049: transform(138), 3050: transform(139),  # Snow Hog, Wart Hog
+    3054: transform(188),                   # Illusion Food - Robgoblin Female Mage: robgoblin_f_mage.adr
+    1927: transform(187),                   # Robgoblin Cooking Mask: robgoblin_f_cook.adr
+    359: transform(4), 1921: transform(4),  # Robgoblin Goody, Burnt Toast: robgoblin_m_basic.adr
+    1923: transform(199),                   # Bandit Burger: chugawug_m_bandit_01.adr
+    252: transform(1667, 15 * MINUTE),      # Crustay Ocean Cake: "into a crab for 15 minutes"
+    653: transform(1521), 654: transform(1516),  # Coyote / Road Runner Juice Bottle
+    3712: transform(4470),                  # Bug Me Potion: chugawug_m_bugawug_01.adr
+
     # Fireworks
     4066: cast(15656), 4067: cast(15657), 4068: cast(15658), 4069: cast(15659), 4070: cast(15660),   # Pinwheels
     4071: cast(15664),                      # Golden Fountain Firework
@@ -240,6 +285,8 @@ def main():
     locale = load_locale(args.client)
     text = lambda string_id: locale.get(lookup2(f"Global.Text.{string_id}".encode()), "") if string_id else ""
     effect_names = load_effect_names(args.client)
+    model_ids = {int(line.split("^", 1)[0]) for line in (resources_dir / "Models.txt").read_text("utf-8-sig").splitlines()
+                 if line[:1].isdigit()}
 
     consumables = json.loads((resources_dir / "Consumables.json").read_text("utf-8-sig"))
     claimed = {entry["AbilityId"] for key in ("FoodEffects", "Transformations") for entry in consumables[key]}
@@ -272,6 +319,9 @@ def main():
             effect_id = ability.get(key, 0)
             if effect_id and effect_id not in effect_names:
                 raise SystemExit(f"Ability {ability_id}: composite effect {effect_id} is not in ActorCompositeEffectDefinitions.xml")
+
+        if ability.get("ModelId", 0) not in model_ids | {0}:
+            raise SystemExit(f"Ability {ability_id}: model {ability['ModelId']} is not in Models.txt")
 
         # A looping effect sent as a one-shot never stops on its own, so time it as an aura instead.
         cast_effect = ability.get("CastEffectId", 0)

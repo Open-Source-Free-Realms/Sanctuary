@@ -546,6 +546,15 @@
     ]
   },
   {
+    "AbilityId": 252,
+    "Comment": "Crustay Ocean Cake",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 900000,
+    "CastEffectId": 21,
+    "ModelId": 1667
+  },
+  {
     "AbilityId": 264,
     "Comment": "Darkthorne's Embrace",
     "Group": "Defense",
@@ -588,6 +597,24 @@
     "Comment": "Free Realms Firework",
     "CooldownMs": 10000,
     "CastEffectId": 16518
+  },
+  {
+    "AbilityId": 358,
+    "Comment": "Treeble Treat",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 376
+  },
+  {
+    "AbilityId": 359,
+    "Comment": "Robgoblin Goody",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 4
   },
   {
     "AbilityId": 390,
@@ -1262,6 +1289,24 @@
     ]
   },
   {
+    "AbilityId": 653,
+    "Comment": "Coyote Juice Bottle",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 1521
+  },
+  {
+    "AbilityId": 654,
+    "Comment": "Road Runner Juice Bottle",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 1516
+  },
+  {
     "AbilityId": 1207,
     "Comment": "Average Conditioner (TEST), Health Potion",
     "Group": "Health",
@@ -1389,6 +1434,24 @@
     }
   },
   {
+    "AbilityId": 1913,
+    "Comment": "Batwing Cookie",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 28
+  },
+  {
+    "AbilityId": 1914,
+    "Comment": "Chicken Feed",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 212
+  },
+  {
     "AbilityId": 1915,
     "Comment": "Cupcake of Tim the Tiny",
     "Group": "Scale",
@@ -1407,12 +1470,48 @@
     "Scale": 2
   },
   {
+    "AbilityId": 1917,
+    "Comment": "Audrey's Special Salad",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 88
+  },
+  {
+    "AbilityId": 1918,
+    "Comment": "Ice Cream Sandwich",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 16
+  },
+  {
     "AbilityId": 1920,
     "Comment": "Rainbowopsicle",
     "Group": "Aura",
     "CooldownMs": 5000,
     "DurationMs": 1800000,
     "AuraEffectId": 15653
+  },
+  {
+    "AbilityId": 1921,
+    "Comment": "Burnt Toast",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 4
+  },
+  {
+    "AbilityId": 1923,
+    "Comment": "Bandit Burger",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 199
   },
   {
     "AbilityId": 1924,
@@ -1423,6 +1522,33 @@
     "Health": {
       "Percent": 75
     }
+  },
+  {
+    "AbilityId": 1927,
+    "Comment": "Robgoblin Cooking Mask",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 187
+  },
+  {
+    "AbilityId": 1928,
+    "Comment": "Man-Eating Plant Mask",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 88
+  },
+  {
+    "AbilityId": 1930,
+    "Comment": "Penguin Feather Mask",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 47
   },
   {
     "AbilityId": 1931,
@@ -1637,6 +1763,141 @@
     "MovementSpeedBonus": 1
   },
   {
+    "AbilityId": 1975,
+    "Comment": "Illusion Food - Chick",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 212
+  },
+  {
+    "AbilityId": 1976,
+    "Comment": "Illusion Food - Deer",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 3427
+  },
+  {
+    "AbilityId": 1977,
+    "Comment": "Illusion Food - Treeble",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 376
+  },
+  {
+    "AbilityId": 1980,
+    "Comment": "Animated Snacks",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 434
+  },
+  {
+    "AbilityId": 1981,
+    "Comment": "Honey Soup",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 219
+  },
+  {
+    "AbilityId": 1984,
+    "Comment": "Illusion Food - Spider",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 1924
+  },
+  {
+    "AbilityId": 1988,
+    "Comment": "Illusion Food - Bat",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 28
+  },
+  {
+    "AbilityId": 1989,
+    "Comment": "Illusion Food - Owl",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 129
+  },
+  {
+    "AbilityId": 1991,
+    "Comment": "Illusion Food - Man-Eating Plant",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 88
+  },
+  {
+    "AbilityId": 1993,
+    "Comment": "Illusion Food - Bear Vine Golem",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 62
+  },
+  {
+    "AbilityId": 1996,
+    "Comment": "Illusion Food - Floren",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 134
+  },
+  {
+    "AbilityId": 1999,
+    "Comment": "Illusion Food - Penguin",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 16
+  },
+  {
+    "AbilityId": 2028,
+    "Comment": "Evil Snowman Illusion Scroll",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 140
+  },
+  {
+    "AbilityId": 2029,
+    "Comment": "Illusion Food - Vulture",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 343
+  },
+  {
+    "AbilityId": 2030,
+    "Comment": "Goat Cheese",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 135
+  },
+  {
     "AbilityId": 2070,
     "Comment": "Health Potion IV (PH)",
     "Group": "Health",
@@ -1811,6 +2072,141 @@
     ]
   },
   {
+    "AbilityId": 3000,
+    "Comment": "Arboreal Giant Illusion Scroll",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 74
+  },
+  {
+    "AbilityId": 3003,
+    "Comment": "Illusion Food - Man-Eating Plant (Brown/Pink)",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 433
+  },
+  {
+    "AbilityId": 3006,
+    "Comment": "Giant Bat Illusion Scroll",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 379
+  },
+  {
+    "AbilityId": 3007,
+    "Comment": "Illusion Food - Dove",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 126
+  },
+  {
+    "AbilityId": 3008,
+    "Comment": "Illusion Food - Eagle",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 127
+  },
+  {
+    "AbilityId": 3009,
+    "Comment": "Illusion Food - Hawk",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 128
+  },
+  {
+    "AbilityId": 3010,
+    "Comment": "Illusion Food - Raven",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 198
+  },
+  {
+    "AbilityId": 3039,
+    "Comment": "Illusion Food - Antelope",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 130
+  },
+  {
+    "AbilityId": 3040,
+    "Comment": "Illusion Food - Buck",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 132
+  },
+  {
+    "AbilityId": 3041,
+    "Comment": "Illusion Food - Doe",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 133
+  },
+  {
+    "AbilityId": 3048,
+    "Comment": "Illusion Food - Nanny Goat",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 136
+  },
+  {
+    "AbilityId": 3049,
+    "Comment": "Illusion Food - Snow Hog",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 138
+  },
+  {
+    "AbilityId": 3050,
+    "Comment": "Illusion Food - Wart Hog",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 139
+  },
+  {
+    "AbilityId": 3054,
+    "Comment": "Illusion Food - Robgoblin Female Mage",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 188
+  },
+  {
+    "AbilityId": 3069,
+    "Comment": "Illusion Food - Fungal Vinegolem Bear",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 235
+  },
+  {
     "AbilityId": 3093,
     "Comment": "Heal Over Time Potion 1",
     "Group": "Health",
@@ -1875,6 +2271,24 @@
         "Value": 500
       }
     ]
+  },
+  {
+    "AbilityId": 3411,
+    "Comment": "Royal Bixie Trinket",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 218
+  },
+  {
+    "AbilityId": 3712,
+    "Comment": "Bug Me Potion",
+    "Group": "Transform",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 21,
+    "ModelId": 4470
   },
   {
     "AbilityId": 3786,
