@@ -287,6 +287,27 @@ public abstract class BaseZone : IZone, IDisposable
         }
     }
 
+    /// <summary>
+    /// The daily wheel (Activity of the Day) is a repeating activity named "wheel"; the client only lets the
+    /// player start it while its count is above zero. One spin a day, reset at midnight UTC.
+    /// </summary>
+    private static void SendDailyWheel(Player player)
+    {
+        var now = DateTimeOffset.UtcNow;
+        var secondsUntilReset = (int)(now.Date.AddDays(1) - now.UtcDateTime).TotalSeconds;
+
+        player.SendTunneled(new RepeatingActivityAddPacket
+        {
+            ActivityId = DailyWheelActivityId,
+            CountRemaining = 1,
+            SecondsUntil1 = secondsUntilReset,
+            SecondsUntil2 = secondsUntilReset,
+            Name = "wheel"
+        });
+    }
+
+    private const int DailyWheelActivityId = 1;
+
     public virtual void OnClientIsReady(Player player)
     {
         SendQuickChatData(player);
@@ -324,6 +345,8 @@ public abstract class BaseZone : IZone, IDisposable
         SendPlayerCustomizations(player);
 
         SendMembershipSubscriptionInfo(player);
+
+        SendDailyWheel(player);
 
         var playerUpdatePacketEffectTagCompositeEffectsEnable = new PlayerUpdatePacketEffectTagCompositeEffectsEnable
         {
