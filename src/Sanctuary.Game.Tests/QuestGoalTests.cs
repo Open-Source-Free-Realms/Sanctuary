@@ -15,6 +15,8 @@ public sealed class QuestGoalTests
 {
     private static readonly QuestDefinition Quest = new() { QuestId = 1, TargetNpcId = 500 };
 
+    private static readonly TestZone Zone = TestZone.Create();
+
     [TestMethod]
     public void TalkGoal_CompletesAtItsTargetAndIgnoresOtherNpcs()
     {
@@ -136,12 +138,12 @@ public sealed class QuestGoalTests
         Assert.AreEqual(2, loadedCollect.Count);
     }
 
-    private static NpcTalkedEvent Talk(int npcId) => new(new Npc(null!) { DefinitionId = npcId });
+    private static NpcTalkedEvent Talk(int npcId) => new(new Npc(Zone) { DefinitionId = npcId });
 
     private static PlayerMovedEvent Move(float x, float z, int zoneDefinitionId = ReachLocationGoal.FabledRealmsZoneDefinitionId)
         => new(new Vector4(x, 0f, z, 1f), zoneDefinitionId);
 
-    private static NodeGatheredEvent Gather(string nodeType) => new(new CollectionNode(null!,
+    private static NodeGatheredEvent Gather(string nodeType) => new(new CollectionNode(Zone,
         new CollectionNodeTypeDefinition { Key = nodeType, Name = nodeType },
         new CollectionNodePoolDefinition { Key = nodeType, NodeType = nodeType },
         new CollectionNodeSpawnDefinition()));
