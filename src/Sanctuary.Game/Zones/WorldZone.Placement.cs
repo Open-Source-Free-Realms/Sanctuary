@@ -11,7 +11,6 @@ using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game.Entities;
-using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 
@@ -118,8 +117,6 @@ public sealed partial class WorldZone
         npc.SpawnPosition = position;
         npc.SpawnRotation = rotation;
 
-        // Sent as a placed object (tilted, MovementType 0), which the client collides with.
-        npc.Tilt = FixtureHelper.GetTilt(rotation);
 
         npc.UpdatePosition(position, rotation);
 

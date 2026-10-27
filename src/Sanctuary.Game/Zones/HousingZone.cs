@@ -356,8 +356,6 @@ public sealed class HousingZone : BaseZone
         npc.SpawnPosition = position;
         npc.SpawnRotation = rotation;
 
-        // Sent as a placed object (tilted, MovementType 0), which the client collides with.
-        npc.Tilt = FixtureHelper.GetTilt(rotation);
 
         npc.UpdatePosition(position, rotation);
 
