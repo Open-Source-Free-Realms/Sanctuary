@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
+using Sanctuary.Packet;
 using Sanctuary.Game.Quests;
 using Sanctuary.Scripting;
 
@@ -179,6 +180,14 @@ public class NpcContentManager : INpcContentManager
 
         player.ActiveConversation = (npc.Guid, node.Id);
 
+        // The client's own NPC dialog gives the camera zoom onto the NPC. Its pane only shows locale strings,
+        // so it is sent empty, which the dialog mod (ClientMods/dialog) hides; the panel draws the text in its place.
+        player.SendTunneled(new CommandPacketShowDialog
+        {
+            NpcGuid = npc.Guid,
+            CameraFocusParam = 1f
+        });
+
         // dialog: npc guid, npc name, node id, text, then "<index>:<choice text>" per choice.
         ChatHelper.SendGmPanelData(player, "dialog",
         [
@@ -228,6 +237,7 @@ public class NpcContentManager : INpcContentManager
 
         player.ActiveConversation = null;
 
+        player.SendTunneled(new CommandPacketEndDialog());
         ChatHelper.SendGmPanelData(player, "dialog", "close");
     }
 
