@@ -4,7 +4,7 @@
 UI movies are loaded synchronously from the local asset packs, and only when their crc
 matches the asset manifest the client downloaded from the asset server. So installing:
   - writes the built mods (src/Resources/ClientMods) into a new Assets_NNN.pack, and
-  - switches the UI window definitions to the renamed mod movies.
+  - switches the UI window definitions (and LoadingScreen.xml) to the renamed mod movies.
 Sanctuary's WebAPI publishes the same files in the manifest it serves, which keeps them "current".
 
 Originals are backed up next to each file as <name>.sanctuary-backup.
@@ -29,7 +29,7 @@ MARKER_FILE = "sanctuary_client_mods.txt"
 COMPRESSED_MAGIC = 0xA1B2C3D4
 PACK_DATA_ALIGNMENT = 8192
 
-# (window definition, [(original text, modded text), ...]), applied to the original file.
+# (client file, [(original text, modded text), ...]), applied to the original file.
 WINDOW_PATCHES = [
     (Path("UI/UiModules/Main/wndChatLog.xml"), [
         ("UI\\chatWindowCtrl.swf", "UI\\sanctuaryChatWindowCtrl.swf"),
@@ -48,6 +48,13 @@ WINDOW_PATCHES = [
         ("UI\\housingEditPanel.swf", "UI\\sanctuaryHousingEditPanel.swf"),
         # Room for 10 items a page instead of 6 (4 more slots, 74 wide); the window and its movie both.
         ('Width="800" Height="200"', 'Width="1096" Height="200"'),
+    ]),
+    # The client picks a loading screen at random from this block, so the OSFR one is the only live entry
+    # and the stock ones are commented out.
+    (Path("LoadingScreen.xml"), [
+        ("<LoadingScreens>",
+         '<LoadingScreens>\n\t<LoadingScreen Id=1000 Filename="sanctuaryLoadingScreen.swf" ShowToMembers=1 ShowToNonMembers=1 Weight=100/>\n<!-- Stock loading screens'),
+        ("</LoadingScreens>", "-->\n</LoadingScreens>"),
     ]),
 ]
 

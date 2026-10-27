@@ -44,6 +44,7 @@ What gets built:
 | `sanctuaryChatWindowCtrl.gfx` | `chatWindowCtrl.gfx` | `chatWindowCtrl/gm_panel.as` appended: the Referee Tools panel (lookups, world tools, NPC/prop editor, script and conversation authoring, the player conversation window) |
 | `sanctuaryGameDock.gfx` | `gamedock.gfx` | `gamedock/gm_hub_button.as` appended, plus `gmTreeIcon`, a purple (hue-shifted) copy of the hub's tree icon |
 | `sanctuaryDialog.gfx` | `dialog.gfx` | `dialog/dialog_hide.as` appended: the NPC dialog stays hidden when sent without text. GM conversations open it for the camera zoom onto the NPC and the chat window draws their text where its pane sits, since the pane only shows locale strings |
+| `sanctuaryLoadingScreen.gfx` | `loadingscreen.gfx` | Characters, logo and vines removed, leaving the tip text and loading bar over new art: "Open Source Free Realms" curved around the OSFR tree (`loadingscreen/osfr_logo.png`). `loadingscreen/background.py` draws it at build time in the FreeRealmsDemiBold font exported from the client's `gfxfontlib.gfx` |
 
 Mods are published under new names because the client only downloads assets that are missing
 from its local packs.
@@ -59,7 +60,8 @@ python install_client_mods.py --client "%LOCALAPPDATA%/OSFRLauncher/Servers/OSFR
 
 This writes the built mods into a new `Assets_NNN.pack` (recorded in `sanctuary_client_mods.txt`)
 and points `UI/UiModules/Main/wndChatLog.xml`, `wndGameDock.xml` and `wndDialogNew.xml` at the renamed movies (the
-originals are kept as `*.sanctuary-backup`). Close the client first.
+originals are kept as `*.sanctuary-backup`). In `LoadingScreen.xml` it makes `sanctuaryLoadingScreen.swf`
+the only loading screen, commenting out the stock ones. Close the client first.
 
 It also enlarges the chat window to 2000x1045. The client clips every movie to its window, so this
 is what lets the Referee Tools panel be dragged anywhere and resized (bottom-right grip, `[ ]` to
