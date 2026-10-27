@@ -9,7 +9,7 @@ public sealed class QuestDialogueLine
     // 0 = the generic caption.
     public int ResponseTextId { get; set; }
 
-    public bool Closable { get; set; }
+    public bool Closable { get; set; } = true;
 
     public List<QuestDialogueChoice> Choices { get; set; } = [];
 }
