@@ -346,7 +346,7 @@ public abstract class BaseZone : IZone, IDisposable
     /// </summary>
     private const int WheelsActivityCategory = 17;
 
-    private const int DailyWheelMinigameId = 8;
+    public const int DailyWheelMinigameId = 8;
 
     /// <summary>
     /// Answers a join request from the Games window by starting the activity's minigame on the client.
@@ -358,11 +358,12 @@ public abstract class BaseZone : IZone, IDisposable
 
         player.SendTunneled(new MiniGameInfoPacket
         {
-            MinigameId = DailyWheelMinigameId,
+            StageId = DailyWheelMinigameId,
             NameId = 409962,
             IconId = 20985,
             DescriptionId = 409969,
-            StageId = DailyWheelMinigameId
+            Difficulty = 1,
+            StageDefinitionId = DailyWheelMinigameId
         });
     }
 
