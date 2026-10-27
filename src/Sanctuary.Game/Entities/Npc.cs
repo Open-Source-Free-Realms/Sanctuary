@@ -610,36 +610,20 @@ public class Npc : IScriptableNpc, IEntity
 
         var chaseOffset = TargetChaseSettings.GetOffset(Position.ToVector3(), target.Position.ToVector3());
 
-        // TODO: Make a periodic routine that just accepts an arbitrary routine...
         Routines.SetRoutine(
             MovementRoutineName,
             new ParallelRoutine(
                 [
-                    // NOTE: We can use a parallel routine to give us low-frequency behavior here. It'll have to wait for the
-                    // 'WaitRoutine' to finish. Combining this with a repeat routine (infinite until stopped), we get a rate-limited
-                    // motion planner. 
-                    // 
-                    // NOTE: Hard planning frequencies/periods are not enforced and we expect that these will diverge by about a tick
-                    // due to rounding.
-                    new RepeatRoutine( // Low-frequency planning
-                        new ParallelRoutine(
-                            [
-                                new DelegateRoutine(onStep: () =>
-                                    {
-                                        var position = Position.ToVector3();
-                                        var targetPosition = target.Position.ToVector3();
+                    new PeriodicRoutine( // Low-frequency planning
+                        new InstantRoutine(() =>
+                        {
+                            var position = Position.ToVector3();
+                            var targetPosition = target.Position.ToVector3();
 
-
-
-                                        if (_pathfinder.TryFindPath(position, targetPosition + chaseOffset, out var path))
-                                            _pathFollower.SetPath(path, TargetChaseSettings.StopTolerance);
-
-                                        return true;
-                                    }
-                                ),
-                                new WaitRoutine(1f / TargetChaseSettings.ReplanFrequency)
-                            ]
-                        )
+                            if (_pathfinder.TryFindPath(position, targetPosition + chaseOffset, out var path))
+                                _pathFollower.SetPath(path, TargetChaseSettings.StopTolerance);
+                        }),
+                        1d / TargetChaseSettings.ReplanFrequency
                     ),
                     new DelegateRoutine( // High-frequency following
                         // NOTE: We force return false here to keep the NPC always chasing. 
