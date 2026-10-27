@@ -549,7 +549,7 @@ public sealed class QuestManager : IQuestManager
             {
                 Guid = npc.Guid,
                 ThoughtBubbleIconId = notification.IconState,
-                CompositeEffectId = notification.Unknown3 ? notification.Unknown2 : 0
+                CompositeEffectId = notification.Unknown2
             });
         }
 

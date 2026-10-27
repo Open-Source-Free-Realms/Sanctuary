@@ -942,7 +942,7 @@ public sealed class Player : ClientPcData, IEntity
     private static RemoveNotificationInfo GetRemoveNotificationInfo(NotificationInfo notification) => new()
     {
         Guid = notification.Guid,
-        ThoughtBubbleIconId = notification.Unknown,
+        ThoughtBubbleIconId = notification.IconState,
         CompositeEffectId = notification.Unknown2
     };
 
