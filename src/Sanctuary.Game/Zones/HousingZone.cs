@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using Sanctuary.Core.Extensions;
 using Sanctuary.Core.Helpers;
 using Sanctuary.Core.IO;
 using Sanctuary.Database;
@@ -156,7 +157,7 @@ public sealed class HousingZone : BaseZone
             throw new InvalidOperationException($"House definition {house.Definition} does not exist.");
 
         foreach (var fixture in house.Fixtures)
-            _fixtures.Add(GuidHelper.GetFixtureGuid(fixture.Id), fixture);
+            _fixtures.Add(GetFixtureGuid(fixture.Id), fixture);
 
         _ownerName = house.Character.FullName ?? house.Character.FirstName;
         _houseDefinition = houseDefinition;
@@ -297,14 +298,14 @@ public sealed class HousingZone : BaseZone
     {
         var fixtureInstance = new FixtureInstance
         {
-            Guid = GuidHelper.GetFixtureGuid(fixture.Id),
+            Guid = GetFixtureGuid(fixture.Id),
             HouseGuid = HouseGuid,
             FixtureDefinitionId = fixture.Definition,
             Position = new Vector4(fixture.PositionX, fixture.PositionY, fixture.PositionZ, 1.0f),
             Rotation = new Quaternion(fixture.RotationX, fixture.RotationY, fixture.RotationZ, fixture.RotationW),
             Scale = fixture.Scale,
             TintId = fixture.Tint,
-            NpcGuid = _fixtureNpcs.TryGetValue(GuidHelper.GetFixtureGuid(fixture.Id), out var npc) ? npc.Guid : 0
+            NpcGuid = _fixtureNpcs.TryGetValue(GetFixtureGuid(fixture.Id), out var npc) ? npc.Guid : 0
         };
 
         if (_resourceManager.ClientItemDefinitions.TryGetValue(fixture.Definition, out var modelItem))
@@ -326,6 +327,12 @@ public sealed class HousingZone : BaseZone
 
         return fixtureInstance;
     }
+
+    /// <summary>
+    /// The client keys house fixtures by their 32-bit instance id and its decorate tools (move, turn) pass
+    /// that id back as the fixture guid, so a house fixture's guid is just its id.
+    /// </summary>
+    private static ulong GetFixtureGuid(ulong id) => id;
 
     private void SpawnFixtureNpc(ulong fixtureGuid, DbHouseFixture fixture)
     {
@@ -351,7 +358,10 @@ public sealed class HousingZone : BaseZone
         npc.Visible = true;
 
         var position = new Vector4(fixture.PositionX, fixture.PositionY, fixture.PositionZ, 1.0f);
-        var rotation = new Quaternion(fixture.RotationX, fixture.RotationY, fixture.RotationZ, fixture.RotationW);
+
+        // Fixtures store their yaw (radians) in RotationX; NPCs take a flat facing direction. Passing the
+        // fixture value through gives unrotated items a zero direction, which warps the actor.
+        var rotation = QuaternionExtensions.FromHeading(fixture.RotationX);
 
         npc.SpawnPosition = position;
         npc.SpawnRotation = rotation;
@@ -360,6 +370,19 @@ public sealed class HousingZone : BaseZone
         npc.UpdatePosition(position, rotation);
 
         _fixtureNpcs[fixtureGuid] = npc;
+    }
+
+    private void MoveFixtureNpc(ulong fixtureGuid, DbHouseFixture fixture)
+    {
+        if (!_fixtureNpcs.TryGetValue(fixtureGuid, out var npc))
+            return;
+
+        var position = new Vector4(fixture.PositionX, fixture.PositionY, fixture.PositionZ, 1.0f);
+        var rotation = QuaternionExtensions.FromHeading(fixture.RotationX);
+
+        npc.SpawnPosition = position;
+        npc.SpawnRotation = rotation;
+        npc.UpdatePosition(position, rotation);
     }
 
     private void DespawnFixtureNpc(ulong fixtureGuid)
@@ -405,6 +428,23 @@ public sealed class HousingZone : BaseZone
                 _editors.TryRemove(player.Guid, out _);
 
             player.SendTunneled(GetUpdateHouseInfo(player));
+
+            // Furniture shows the hover cursor only while decorating. Re-adding the NPCs instead would
+            // break the client's fixture bindings.
+            var editing = IsEditing(player);
+            var playerUpdatePacketNpcRelevance = new PlayerUpdatePacketNpcRelevance();
+            foreach (var npc in _fixtureNpcs.Values)
+            {
+                playerUpdatePacketNpcRelevance.Entries.Add(new PlayerUpdatePacketNpcRelevance.Entry
+                {
+                    Guid = npc.Guid,
+                    HasCursor = editing,
+                    CursorId = editing ? InteractionMenuHelper.RefereeCursorId : (byte)0
+                });
+            }
+
+            if (playerUpdatePacketNpcRelevance.Entries.Count > 0)
+                player.SendTunneled(playerUpdatePacketNpcRelevance);
         }
     }
 
@@ -546,7 +586,7 @@ public sealed class HousingZone : BaseZone
             }
 
             fixture.House = null!;
-            var fixtureGuid = GuidHelper.GetFixtureGuid(fixture.Id);
+            var fixtureGuid = GetFixtureGuid(fixture.Id);
 
             _fixtures.Add(fixtureGuid, fixture);
             _lastFixtures[player.Guid] = fixtureGuid;
@@ -636,9 +676,9 @@ public sealed class HousingZone : BaseZone
             }
             else
             {
-                // Respawn, so a new rotation also updates the placed object's tilt.
-                DespawnFixtureNpc(packet.FixtureGuid);
-                SpawnFixtureNpc(packet.FixtureGuid, fixture);
+                // Move the existing actor: respawning would give it a new guid, and the client's fixture
+                // would keep pointing at the old one, so the next move or turn finds no actor (and crashes).
+                MoveFixtureNpc(packet.FixtureGuid, fixture);
 
                 Broadcast(GetUpdateFixturePosition(fixture));
             }
@@ -786,7 +826,7 @@ public sealed class HousingZone : BaseZone
 
         foreach (var dbFixture in dbFixtures)
         {
-            var fixtureGuid = GuidHelper.GetFixtureGuid(dbFixture.Id);
+            var fixtureGuid = GetFixtureGuid(dbFixture.Id);
 
             _fixtures.Remove(fixtureGuid);
 
@@ -910,7 +950,7 @@ public sealed class HousingZone : BaseZone
 
     private HousingPacketFixtureUpdate GetFixtureUpdate(DbHouseFixture fixture)
     {
-        var fixtureGuid = GuidHelper.GetFixtureGuid(fixture.Id);
+        var fixtureGuid = GetFixtureGuid(fixture.Id);
 
         var housingPacketFixtureUpdate = new HousingPacketFixtureUpdate
         {
@@ -932,7 +972,7 @@ public sealed class HousingZone : BaseZone
     {
         return new HousingPacketUpdateFixturePosition
         {
-            FixtureGuid = GuidHelper.GetFixtureGuid(fixture.Id),
+            FixtureGuid = GetFixtureGuid(fixture.Id),
             Position = new Vector4(fixture.PositionX, fixture.PositionY, fixture.PositionZ, 1.0f),
             Rotation = new Quaternion(fixture.RotationX, fixture.RotationY, fixture.RotationZ, fixture.RotationW)
         };
