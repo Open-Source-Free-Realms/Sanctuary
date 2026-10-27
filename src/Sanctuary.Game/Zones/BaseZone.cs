@@ -373,21 +373,8 @@ public abstract class BaseZone : IZone, IDisposable
 
         SendUpdateStat(player);
 
-        var clientUpdatePacketHitpoints = new ClientUpdatePacketHitpoints
-        {
-            CurrentHitpoints = 2500,
-            MaxHitpoints = 2500
-        };
-
-        player.SendTunneled(clientUpdatePacketHitpoints);
-
-        var clientUpdatePacketMana = new ClientUpdatePacketMana
-        {
-            CurrentMana = 100,
-            MaxMana = 100
-        };
-
-        player.SendTunneled(clientUpdatePacketMana);
+        // Hitpoints, energy and buffed stats carry over between zones.
+        player.SendVitals();
 
         var playerUpdatePacketUpdateActiveWieldType = new PlayerUpdatePacketUpdateActiveWieldType
         {

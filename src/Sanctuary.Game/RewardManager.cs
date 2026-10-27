@@ -49,7 +49,8 @@ public class RewardManager : IRewardManager
         {
             ItemRewardDropDefinition item => TryGrantItem(player, item.ItemDefinitionId,
                 item.TintTable?.SelectRandom().TintId ?? 0, item.Quantity, sourceGuid),
-            CurrencyRewardDropDefinition currency => TryGrantCurrency(player, currency.CurrencyType, currency.Amount),
+            CurrencyRewardDropDefinition currency => TryGrantCurrency(player, currency.CurrencyType,
+                currency.CurrencyType == CurrencyType.Coins ? player.ApplyCoinBoost(currency.Amount) : currency.Amount),
             _ => false
         };
     }

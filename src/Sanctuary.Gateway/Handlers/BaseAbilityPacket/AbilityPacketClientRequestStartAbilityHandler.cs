@@ -44,6 +44,7 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             new SillyStringAbility(abilityServices),
             new TransformFoodAbility(abilityServices),
             new FoodEffectAbility(abilityServices),
+            new ItemAbility(abilityServices),
             new DefaultConsumableAbility(abilityServices),
         ];
     }

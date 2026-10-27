@@ -450,6 +450,7 @@ public sealed class Player : ClientPcData, IEntity
 
     public void UpdateEverySecond()
     {
+        RegenerateVitals();
         SnowballInteraction.Update(this);
         UpdatePortrait();
         UpdatePendingPointOfInterest();
@@ -1324,9 +1325,21 @@ public sealed class Player : ClientPcData, IEntity
         effect.OnRemoved?.Invoke();
     }
 
+    public IEnumerable<PlayerEffect> Effects => _effects.Values;
+
+    public void RemoveEffectGroup(string group)
+    {
+        foreach (var effect in _effects.Values)
+        {
+            if (string.Equals(effect.Group, group, StringComparison.OrdinalIgnoreCase))
+                RemoveEffect(effect.Id);
+        }
+    }
+
     private void TickEffects(DateTimeOffset now)
     {
         List<PlayerEffect> starting = [];
+        List<PlayerEffect> ticking = [];
         List<int> expired = [];
 
         foreach (var effect in _effects.Values)
@@ -1335,6 +1348,9 @@ public sealed class Player : ClientPcData, IEntity
                 (effect.WorldEffectStartsAt is null || effect.WorldEffectStartsAt <= now))
                 starting.Add(effect);
 
+            if (effect.TicksRemaining > 0 && effect.NextTickAt <= now)
+                ticking.Add(effect);
+
             if (effect.ExpiresAt is { } expiresAt && expiresAt <= now)
                 expired.Add(effect.Id);
         }
@@ -1342,8 +1358,75 @@ public sealed class Player : ClientPcData, IEntity
         foreach (var effect in starting)
             StartWorldEffect(effect);
 
+        // Before expiry, so the last tick of a restore over time still lands on the tick it expires.
+        foreach (var effect in ticking)
+            TickRestore(effect, now);
+
         foreach (var id in expired)
             RemoveEffect(id);
+    }
+
+    private void TickRestore(PlayerEffect effect, DateTimeOffset now)
+    {
+        var ticks = 0;
+
+        while (effect.TicksRemaining > 0 && effect.NextTickAt <= now)
+        {
+            effect.TicksRemaining--;
+            effect.NextTickAt = effect.NextTickAt.AddMilliseconds(effect.TickIntervalMs);
+            ticks++;
+        }
+
+        if (effect.HealthPerTick != 0)
+            Heal(effect.HealthPerTick * ticks);
+
+        if (effect.EnergyPerTick != 0)
+            RestoreEnergy(effect.EnergyPerTick * ticks);
+    }
+
+    // Stat values from before any effect touched them, so bonuses come off cleanly whatever order they expire in.
+    private readonly ConcurrentDictionary<CharacterStatId, float> _statBases = new();
+
+    public float GetStatBonus(CharacterStatId statId) =>
+        _effects.Values.Sum(effect => effect.StatBonuses?.GetValueOrDefault(statId) ?? 0f);
+
+    private float GetStatValue(CharacterStatId statId) =>
+        Stats.TryGetValue(statId, out var stat) ? stat.IsFloat ? stat.Float : stat.Int : 0f;
+
+    private void RefreshStatBonuses(IEnumerable<CharacterStatId> statIds)
+    {
+        List<CharacterStat> changed = [];
+
+        foreach (var statId in statIds)
+        {
+            Stats.TryGetValue(statId, out var current);
+
+            var isFloat = current?.IsFloat ?? false;
+            var bonus = GetStatBonus(statId);
+
+            float value;
+
+            if (bonus != 0)
+                value = _statBases.GetOrAdd(statId, _ => current is null ? 0f : isFloat ? current.Float : current.Int) + bonus;
+            else if (_statBases.TryRemove(statId, out var baseValue))
+                value = baseValue;
+            else
+                continue;
+
+            changed.Add(isFloat ? new CharacterStat(statId, value) : new CharacterStat(statId, (int)MathF.Round(value)));
+        }
+
+        if (changed.Count == 0)
+            return;
+
+        UpdateCharacterStats([.. changed]);
+
+        // Re-clamp against the new maximums.
+        if (changed.Any(stat => stat.Id == CharacterStatId.MaxHealth))
+            Hitpoints = _hitpoints;
+
+        if (changed.Any(stat => stat.Id == CharacterStatId.MaxMana))
+            Energy = _energy;
     }
 
     private void ApplyEffect(PlayerEffect effect)
@@ -1371,6 +1454,15 @@ public sealed class Player : ClientPcData, IEntity
 
         if (effect.MovementSpeedBonus != 0)
             RefreshMovementSpeed();
+
+        if (effect.StatBonuses is { Count: > 0 } statBonuses)
+            RefreshStatBonuses(statBonuses.Keys);
+
+        if (effect.TickCount > 0 && effect.TickIntervalMs > 0)
+        {
+            effect.TicksRemaining = effect.TickCount;
+            effect.NextTickAt = DateTimeOffset.UtcNow.AddMilliseconds(effect.TickIntervalMs);
+        }
     }
 
     public bool RefreshEffect(int id, DateTimeOffset expiresAt)
@@ -1431,6 +1523,9 @@ public sealed class Player : ClientPcData, IEntity
 
         if (effect.MovementSpeedBonus != 0)
             RefreshMovementSpeed();
+
+        if (effect.StatBonuses is { Count: > 0 } statBonuses)
+            RefreshStatBonuses(statBonuses.Keys);
     }
 
     private void StartWorldEffect(PlayerEffect effect)
@@ -1470,24 +1565,94 @@ public sealed class Player : ClientPcData, IEntity
     #region Combat
 
 
+    private const int DefaultMaxHitpoints = 2500;
+
+    private int _hitpoints = DefaultMaxHitpoints;
+
+    public int Hitpoints
+    {
+        get => _hitpoints;
+        set
+        {
+            _hitpoints = Math.Clamp(value, 0, MaxHitpoints);
+
+            SendTunneled(new ClientUpdatePacketHitpoints
+            {
+                CurrentHitpoints = _hitpoints,
+                MaxHitpoints = MaxHitpoints
+            });
+        }
+    }
+
+    public int MaxHitpoints => GetStatValue(CharacterStatId.MaxHealth) is var maxHealth and > 0 ? (int)maxHealth : DefaultMaxHitpoints;
+
     private int _energy = 100;
 
     public int Energy
     {
         get => _energy;
-        private set
+        set
         {
-            _energy = Math.Min(value, MaxEnergy);
+            _energy = Math.Clamp(value, 0, EffectiveMaxEnergy);
 
             SendTunneled(new ClientUpdatePacketMana
             {
                 CurrentMana = _energy,
-                MaxMana = MaxEnergy
+                MaxMana = EffectiveMaxEnergy
             });
         }
     }
 
     private int MaxEnergy { get; set; } = 100;
+
+    // MaxMana bonuses (energy scrolls and foods) on top of the job kit's energy.
+    public int EffectiveMaxEnergy => MaxEnergy + (int)MathF.Round(GetStatBonus(CharacterStatId.MaxMana));
+
+    public void Heal(int amount)
+    {
+        if (amount > 0 && _hitpoints < MaxHitpoints)
+            Hitpoints = _hitpoints + amount;
+    }
+
+    public void RestoreEnergy(int amount)
+    {
+        if (amount > 0 && _energy < EffectiveMaxEnergy)
+            Energy = _energy + amount;
+    }
+
+    /// <summary>
+    /// Resends hitpoints, energy and any buffed stats, e.g. after a zone load overwrote them with defaults.
+    /// </summary>
+    public void SendVitals()
+    {
+        RefreshStatBonuses(_statBases.Keys.ToList());
+
+        Hitpoints = _hitpoints;
+        Energy = _energy;
+    }
+
+    // Out of combat regen at the HitPointRegen/ManaRegen stat rates. A downed player (0 hp) stays down.
+    private void RegenerateVitals()
+    {
+        if (_hitpoints > 0 && _hitpoints < MaxHitpoints)
+            Heal((int)GetStatValue(CharacterStatId.HitPointRegen));
+
+        if (_energy < EffectiveMaxEnergy)
+            RestoreEnergy((int)GetStatValue(CharacterStatId.ManaRegen));
+    }
+
+    /// <summary>
+    /// Coins earned from rewards, with coin scrolls (GoldBoostPercent) applied.
+    /// </summary>
+    public int ApplyCoinBoost(int coins) => ApplyPercentBoost(coins, GetStatValue(CharacterStatId.GoldBoostPercent));
+
+    /// <summary>
+    /// Stars (experience) earned from rewards, with star scrolls (ExperienceBoostPercent) applied.
+    /// </summary>
+    public int ApplyExperienceBoost(int experience) => ApplyPercentBoost(experience, GetStatValue(CharacterStatId.ExperienceBoostPercent));
+
+    public static int ApplyPercentBoost(int amount, float percent) =>
+        amount <= 0 || percent <= 0 ? amount : (int)Math.Min(int.MaxValue, Math.Round(amount * (1 + percent / 100d), MidpointRounding.AwayFromZero));
 
     /// <summary>
     /// Combat ability ids that replace the job kit's basic/special abilities on the toolbar (see !ability).

@@ -8,7 +8,8 @@ using Sanctuary.Packet.Common;
 namespace Sanctuary.Game.ChatCommands;
 
 /// <summary>
-/// Players have no server-side health yet, so this only drives the client's hitpoint display.
+/// Sets the player's tracked hitpoints (see <see cref="Player.Hitpoints"/>), which potions heal and regen tops up.
+/// There's no damage or death handling server-side yet.
 /// </summary>
 public class KillChatCommand : IChatCommand
 {
@@ -17,7 +18,7 @@ public class KillChatCommand : IChatCommand
 
     public string KeyWord => "kill";
     public string Usage => "[player] | revive [player] | hp <current> [player]";
-    public string Description => "Sets a player's hitpoints to 0, back to full, or to a given value (client-side only; no server health yet).";
+    public string Description => "Sets a player's hitpoints to 0, back to full, or to a given value (for testing potions; no server damage yet).";
     public ChatCommandRole RequiredRole => ChatCommandRole.Admin;
 
     public KillChatCommand(IZoneManager zoneManager, IChatCommandManager chatCommandManager)
@@ -60,14 +61,10 @@ public class KillChatCommand : IChatCommand
             }
         }
 
-        var maxHitpoints = target.Stats.TryGetValue(CharacterStatId.MaxHealth, out var maxHealth) ? maxHealth.Int : 2500;
-        var current = Math.Min(hitpoints ?? maxHitpoints, maxHitpoints);
+        target.Hitpoints = hitpoints ?? target.MaxHitpoints;
 
-        target.SendTunneled(new ClientUpdatePacketHitpoints
-        {
-            CurrentHitpoints = current,
-            MaxHitpoints = maxHitpoints
-        });
+        var current = target.Hitpoints;
+        var maxHitpoints = target.MaxHitpoints;
 
         _chatCommandManager.LogAction(this, invoker, action, target.Name.FullName, $"Hitpoints: {current}/{maxHitpoints}");
         ChatHelper.SendSystemMessage(invoker, $"{target.Name.FullName} hitpoints set to {current}/{maxHitpoints}.");
