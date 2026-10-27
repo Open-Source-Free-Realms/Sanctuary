@@ -20,6 +20,12 @@ public interface IQuestManager
 
     void AbandonQuest(Player player, int questId);
 
+    /// <summary>
+    /// Completes the player's current goal of an in-progress quest as if it had been done (referee tool).
+    /// Skipping the last goal leads to the quest's normal turn-in.
+    /// </summary>
+    bool SkipGoal(Player player, int questId);
+
     bool ResetQuest(Player player, int questId);
 
     void SetActiveQuest(Player player, int questId);

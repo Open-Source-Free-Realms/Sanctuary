@@ -1,26 +1,45 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
+using Microsoft.EntityFrameworkCore;
+
+using Sanctuary.Core.Helpers;
+using Sanctuary.Core.IO;
+using Sanctuary.Database;
+using Sanctuary.Database.Entities;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
+using Sanctuary.Game.Resources.Definitions;
+using Sanctuary.Packet;
 
 namespace Sanctuary.Game.ChatCommands;
 
 public class CollectionChatCommand : IChatCommand
 {
     private readonly IChatCommandManager _chatCommandManager;
+    private readonly IZoneManager _zoneManager;
+    private readonly IResourceManager _resourceManager;
+    private readonly IRewardManager _rewardManager;
+    private readonly IDbContextFactory<DatabaseContext> _dbContextFactory;
 
     public string KeyWord => "collection";
 
-    public string Usage => "<pools|configure [pool] [maxActive] [respawnSeconds]|place [pool]|remove [radius|#id]|list [pool] [page]>";
+    public string Usage => "<pools|configure [pool] [maxActive] [respawnSeconds]|place [pool]|remove [radius|#id]|list [pool] [page]" +
+        "|status [player]|grant <collectionId> [player]|reset <collectionId> [player]>";
 
-    public string Description => "Manage collection nodes.";
+    public string Description => "Manage collection nodes, and players' collections (status, grant every entry, reset).";
 
     public ChatCommandRole RequiredRole => ChatCommandRole.Admin;
 
-    public CollectionChatCommand(IChatCommandManager chatCommandManager)
+    public CollectionChatCommand(IChatCommandManager chatCommandManager, IZoneManager zoneManager, IResourceManager resourceManager,
+        IRewardManager rewardManager, IDbContextFactory<DatabaseContext> dbContextFactory)
     {
         _chatCommandManager = chatCommandManager;
+        _zoneManager = zoneManager;
+        _resourceManager = resourceManager;
+        _rewardManager = rewardManager;
+        _dbContextFactory = dbContextFactory;
     }
 
     private void LogAction(Player invoker, string action, string? targetName = null, string? detail = null)
@@ -50,6 +69,13 @@ public class CollectionChatCommand : IChatCommand
             case "list":
                 ListCollectionNodes(invoker, args[1..]);
                 break;
+            case "status":
+                ShowPlayerCollections(invoker, args[1..]);
+                break;
+            case "grant":
+                return GrantPlayerCollection(invoker, args[1..]);
+            case "reset":
+                return ResetPlayerCollection(invoker, args[1..]);
             default:
                 return false;
         }
@@ -242,4 +268,166 @@ public class CollectionChatCommand : IChatCommand
             ? "No collection node pools are configured for this zone."
             : string.Join("\n", entries));
     }
+
+    #region Player collections
+
+    private bool TryGetTarget(Player invoker, string[] args, out Player target, out string? targetName)
+    {
+        targetName = args.Length > 0 ? string.Join(' ', args) : null;
+        target = invoker;
+
+        if (targetName is not null && !_zoneManager.TryGetPlayer(targetName, out target))
+        {
+            ChatHelper.SendSystemMessage(invoker, $"No online player named \"{targetName}\" was found.");
+            return false;
+        }
+
+        return true;
+    }
+
+    private static string GetCollectionName(CollectionDefinition collection) =>
+        GameNameHelper.Get(collection.NameId, $"Collection {collection.Id}");
+
+    private static (HashSet<int> OwnedItems, HashSet<int> CollectedEntries) GetProgress(Player player) =>
+        (player.Items.Select(item => item.Definition).ToHashSet(), player.CollectedCollectionEntryIds.ToHashSet());
+
+    private void ShowPlayerCollections(Player invoker, string[] args)
+    {
+        if (!TryGetTarget(invoker, args, out var target, out _))
+            return;
+
+        var (ownedItems, collectedEntries) = GetProgress(target);
+
+        var started = _resourceManager.Collections.Values
+            .Where(collection => collection.IsStarted(ownedItems, collectedEntries))
+            .OrderBy(collection => collection.Id)
+            .ToList();
+
+        ChatHelper.SendSystemMessage(invoker, $"{target.Name.FullName} has started {started.Count} collection(s).");
+
+        foreach (var collection in started)
+        {
+            var collected = collection.Entries.Count(entry => entry.ItemDefinitionId > 0
+                ? ownedItems.Contains(entry.ItemDefinitionId)
+                : collectedEntries.Contains(entry.Id));
+
+            ChatHelper.SendSystemMessage(invoker, $"  {collection.Id} {GetCollectionName(collection)}: {collected}/{collection.Entries.Count}");
+        }
+    }
+
+    private bool TryGetCollection(Player invoker, string[] args, out CollectionDefinition collection)
+    {
+        collection = null!;
+
+        if (!int.TryParse(args[0], out var collectionId))
+            return false;
+
+        if (!_resourceManager.Collections.TryGetValue(collectionId, out collection!))
+        {
+            ChatHelper.SendSystemMessage(invoker, $"Collection {collectionId} does not exist.");
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Fills in every missing entry: item entries are granted as items, the rest are saved as collected.
+    /// </summary>
+    private bool GrantPlayerCollection(Player invoker, string[] args)
+    {
+        if (args.Length == 0)
+            return false;
+
+        if (!TryGetCollection(invoker, args, out var collection) || !TryGetTarget(invoker, args[1..], out var target, out var targetName))
+            return true;
+
+        var (ownedItems, collectedEntries) = GetProgress(target);
+        var characterId = GuidHelper.GetPlayerId(target.Guid);
+        var granted = 0;
+
+        using (var dbContext = _dbContextFactory.CreateDbContext())
+        {
+            foreach (var entry in collection.Entries)
+            {
+                if (entry.ItemDefinitionId > 0)
+                {
+                    if (!ownedItems.Contains(entry.ItemDefinitionId) && _rewardManager.TryGrantItem(target, entry.ItemDefinitionId, 0))
+                        granted++;
+
+                    continue;
+                }
+
+                if (collectedEntries.Contains(entry.Id))
+                    continue;
+
+                dbContext.CollectionEntries.Add(new DbCollectionEntry
+                {
+                    CharacterId = characterId,
+                    CollectionId = collection.Id,
+                    EntryId = entry.Id
+                });
+
+                target.CollectedCollectionEntryIds.TryAdd(entry.Id);
+                granted++;
+            }
+
+            dbContext.SaveChanges();
+        }
+
+        SendCollection(target, collection);
+
+        LogAction(invoker, "Grant collection", targetName, collection.Id.ToString());
+        ChatHelper.SendSystemMessage(invoker, $"Granted {granted} missing entr{(granted == 1 ? "y" : "ies")} of {GetCollectionName(collection)}.");
+        return true;
+    }
+
+    /// <summary>
+    /// Clears the collected (non-item) entries of a collection. Items stay in the inventory.
+    /// </summary>
+    private bool ResetPlayerCollection(Player invoker, string[] args)
+    {
+        if (args.Length == 0)
+            return false;
+
+        if (!TryGetCollection(invoker, args, out var collection) || !TryGetTarget(invoker, args[1..], out var target, out var targetName))
+            return true;
+
+        var characterId = GuidHelper.GetPlayerId(target.Guid);
+
+        using (var dbContext = _dbContextFactory.CreateDbContext())
+        {
+            var entries = dbContext.CollectionEntries
+                .Where(entry => entry.CharacterId == characterId && entry.CollectionId == collection.Id)
+                .ToList();
+
+            dbContext.CollectionEntries.RemoveRange(entries);
+            dbContext.SaveChanges();
+        }
+
+        foreach (var entry in collection.Entries.Where(entry => entry.ItemDefinitionId <= 0))
+            target.CollectedCollectionEntryIds.TryRemove(entry.Id);
+
+        SendCollection(target, collection);
+
+        LogAction(invoker, "Reset collection", targetName, collection.Id.ToString());
+        ChatHelper.SendSystemMessage(invoker, $"Reset {GetCollectionName(collection)}. Item entries stay collected while the player still owns the items.");
+        return true;
+    }
+
+    /// <summary>
+    /// Replaces the client's copy of the collection with the player's current progress.
+    /// </summary>
+    private static void SendCollection(Player player, CollectionDefinition collection)
+    {
+        var (ownedItems, collectedEntries) = GetProgress(player);
+
+        using var writer = new PacketWriter();
+        collection.CreateClientCollection(player.Guid, ownedItems, collectedEntries).Serialize(writer);
+
+        player.SendTunneled(new ClientUpdatePacketCollectionRemove { CollectionId = collection.Id });
+        player.SendTunneled(new ClientUpdatePacketCollectionStart { Payload = writer.Buffer });
+    }
+
+    #endregion
 }

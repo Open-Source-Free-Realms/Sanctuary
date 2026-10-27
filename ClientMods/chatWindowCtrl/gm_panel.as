@@ -602,7 +602,7 @@ function gmRenderWorld(content)
       ["Zones", "!zone ls"],
       ["Help", "!help"]
    ]);
-   gmText(content, "admin_txt", "Prompts (type the rest in chat)", 0, 108, 400, 18, 12, GM_TEXT_GOLD, true);
+   gmText(content, "admin_txt", "Prompts (type the rest in chat)", 0, 104, 400, 18, 12, GM_TEXT_GOLD, true);
    var prompts = [
       ["Teleport x y z", "!teleport "],
       ["Mount model", "!mount "],
@@ -611,17 +611,35 @@ function gmRenderWorld(content)
       ["Ban", "!mod ban "],
       ["Unban", "!mod unban "],
       ["Mute", "!mod mute "],
-      ["Unmute", "!mod unmute "]
+      ["Unmute", "!mod unmute "],
+      ["Find quest", "!quest find "],
+      ["Start quest", "!quest start "],
+      ["Skip goal", "!quest skip "],
+      ["Finish quest", "!quest finish "],
+      ["Reset quest", "!quest reset "],
+      ["Find pet", "!pet find "],
+      ["Give pet", "!pet give "],
+      ["Grant collect.", "!collection grant "],
+      ["Reset collect.", "!collection reset "],
+      ["Go to area", "!area goto "]
    ];
    var i;
    for(i = 0; i < prompts.length; i++)
    {
-      var b = gmButton(content, "prompt" + i + "_mc", prompts[i][0], (i % 4) * 126, 128 + Math.floor(i / 4) * 28, 122, 24, function()
+      var b = gmButton(content, "prompt" + i + "_mc", prompts[i][0], (i % 6) * 84, 122 + Math.floor(i / 6) * 24, 81, 21, function()
       {
          gmPrompt(this.prefix);
       });
       b.prefix = prompts[i][1];
    }
+   gmText(content, "game_txt", "Game systems", 0, 198, 300, 18, 12, GM_TEXT_GOLD, true);
+   gmButtonRow(content, 216, [
+      ["My quests", "!quest list"],
+      ["My pets", "!pet list"],
+      ["Collections", "!collection status"],
+      ["Area here", "!area here"],
+      ["Zone areas", "!area list"]
+   ]);
    gmStatus("World tools");
 }
 

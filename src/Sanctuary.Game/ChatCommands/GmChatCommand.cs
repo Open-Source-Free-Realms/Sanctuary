@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Text.Json;
 
 using Microsoft.Extensions.Logging;
 
@@ -23,17 +22,10 @@ public class GmChatCommand : IChatCommand
 {
     private const int PageSize = 12;
 
-    /// <summary>
-    /// English names by NameId, extracted from the client locale (ClientMods/extract_names.py).
-    /// </summary>
-    private static readonly string NamesFile = Path.Combine(ResourceManager.BaseDirectory, "Names.json");
-
     private readonly ILogger _logger;
     private readonly IChatCommandManager _chatCommandManager;
     private readonly IZoneManager _zoneManager;
     private readonly IResourceManager _resourceManager;
-
-    private readonly Lazy<Dictionary<int, string>> _names;
 
     public string KeyWord => "gm";
     public string Usage => "[open] | items|npcs|houses|players <page> [search] | goto <player> | summon <player> | pos";
@@ -47,34 +39,9 @@ public class GmChatCommand : IChatCommand
         _chatCommandManager = chatCommandManager;
         _zoneManager = zoneManager;
         _resourceManager = resourceManager;
-
-        _names = new(LoadNames);
     }
 
-    private Dictionary<int, string> LoadNames()
-    {
-        try
-        {
-            if (File.Exists(NamesFile))
-            {
-                using var stream = File.OpenRead(NamesFile);
-
-                var names = JsonSerializer.Deserialize<Dictionary<int, string>>(stream);
-
-                if (names is not null)
-                    return names;
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Failed to load \"{file}\".", NamesFile);
-        }
-
-        _logger.LogWarning("No GM lookup names loaded, falling back to data file comments.");
-        return [];
-    }
-
-    private string? GetName(int nameId) => _names.Value.TryGetValue(nameId, out var name) ? name : null;
+    private static string? GetName(int nameId) => GameNameHelper.Get(nameId);
 
     public bool Handle(Player invoker, string[] args)
     {

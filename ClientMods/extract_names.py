@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Extracts English names for items, NPCs and houses from a Free Realms client's locale.
+"""Extracts English names for items, NPCs, houses, quests, collections and zone areas from a Free Realms client's locale.
 
 Writes src/Resources/Names.json ({"<NameId>": "<text>"}), which the server uses for
-GM lookups (item/NPC/house search in the referee panel).
+GM lookups (the referee panel searches, !quest, !pet, !collection and !area).
 
 Example:
   python extract_names.py --client "%LOCALAPPDATA%/OSFRLauncher/Servers/OSFR Public Server/Client"
@@ -80,6 +80,19 @@ def wanted_name_ids():
         ids.add(npc.get("NameId", 0))
     for house in json.loads((resources_dir / "Houses.json").read_text("utf-8-sig")):
         ids.add(house.get("NameId", 0))
+    for collection in json.loads((resources_dir / "Collections.json").read_text("utf-8-sig")):
+        ids.add(collection.get("NameId", 0))
+        for entry in collection.get("Entries", []):
+            ids.add(entry.get("NameId", 0))
+    for quest in json.loads((resources_dir / "Quests.json").read_text("utf-8-sig")):
+        ids.add(quest.get("TitleId", 0))
+    for point_of_interest in json.loads((resources_dir / "PointOfInterests.json").read_text("utf-8-sig")):
+        ids.add(point_of_interest.get("NameId", 0))
+    for zone_path in (resources_dir / "Zones").glob("*.json"):
+        zone = json.loads(zone_path.read_text("utf-8-sig"))
+        for area in zone.get("AreaDefinitions", []):
+            ids.add(area.get("NameId", 0))
+            ids.add(area.get("ChatAreaNameId", 0))
     ids.discard(0)
     return ids
 

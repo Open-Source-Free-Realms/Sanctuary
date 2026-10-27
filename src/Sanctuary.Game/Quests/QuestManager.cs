@@ -315,6 +315,17 @@ public sealed class QuestManager : IQuestManager
         RemoveQuest(player, quest);
     }
 
+    public bool SkipGoal(Player player, int questId)
+    {
+        if (!_resourceManager.Quests.TryGet(questId, out var quest)
+            || !player.Quests.TryGetInProgress(questId, out var progress)
+            || progress.GoalIndex >= quest.Goals.Count)
+            return false;
+
+        CompleteGoal(player, quest, progress);
+        return true;
+    }
+
     public bool ResetQuest(Player player, int questId)
     {
         if (!_resourceManager.Quests.TryGet(questId, out var quest) || !player.Quests.Contains(questId))
