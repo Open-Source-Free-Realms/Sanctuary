@@ -135,6 +135,7 @@
     "PrerequisiteQuestId": 3001,
     "NotificationAvailable": 2,
     "NotificationActive": 6,
+    "RewardCollectionId": 313,
     "Goals": [
       {
         "NameId": 74443,
@@ -590,6 +591,7 @@
     "NextQuestId": 3043,
     "NotificationAvailable": 2,
     "NotificationActive": 6,
+    "RewardCollectionId": 314,
     "Goals": [
       {
         "NameId": 70221,
@@ -630,6 +632,7 @@
     "PrerequisiteQuestId": 3042,
     "NotificationAvailable": 2,
     "NotificationActive": 6,
+    "RewardCollectionId": 315,
     "Goals": [
       {
         "NameId": 70289,
@@ -2185,6 +2188,7 @@
     "PrerequisiteQuestId": 3301,
     "NotificationAvailable": 2,
     "NotificationActive": 6,
+    "RewardCollectionId": 317,
     "Goals": [
       {
         "Type": 2,
@@ -2225,6 +2229,7 @@
     "NotificationAvailable": 2,
     "NotificationActive": 6,
     "HideObjectiveTarget": true,
+    "RewardCollectionId": 318,
     "Goals": [
       {
         "Type": 2,
