@@ -308,6 +308,46 @@ public abstract class BaseZone : IZone, IDisposable
 
     private const int DailyWheelActivityId = 1;
 
+    /// <summary>
+    /// The Games window (Main Menu > Games) lists the activities of the tile's category; the client has no
+    /// list of its own. Only the daily wheel is offered so far.
+    /// </summary>
+    public static void SendActivities(Player player)
+    {
+        player.SendTunneled(new ActivityPacketListOfActivities
+        {
+            Type = BaseActivityServicePacket.MinigameActivityType,
+            Activities =
+            [
+                new ActivityDefinition
+                {
+                    // A minigame activity: PLAY hands it to the client's minigame controller. The id is the
+                    // game's MiniGameData.txt id ("Spin For The Win!").
+                    Id = DailyWheelMinigameId,
+                    Type = BaseActivityServicePacket.MinigameActivityType,
+                    Category = WheelsActivityCategory,
+                    ImageSetId = 20985,
+                    // "Spin For The Win!" (the wheel's MiniGameData.txt entry).
+                    DisplayNameId = 409962,
+                    DisplayDescriptionId = 409969,
+                    NameId = 409962,
+                    DescriptionId = 409969,
+                    CanPlayerJoin = true,
+                    DetailImageFilename = "daily_wheel_detail.dds",
+                    ThumbnailImageFilename = "daily_wheel_thumb.dds",
+                    Difficulty = 1
+                }
+            ]
+        });
+    }
+
+    /// <summary>
+    /// ActivityCategories.txt: the Games window's Wheels tile.
+    /// </summary>
+    private const int WheelsActivityCategory = 17;
+
+    private const int DailyWheelMinigameId = 8;
+
     public virtual void OnClientIsReady(Player player)
     {
         SendQuickChatData(player);
@@ -347,6 +387,8 @@ public abstract class BaseZone : IZone, IDisposable
         SendMembershipSubscriptionInfo(player);
 
         SendDailyWheel(player);
+
+        SendActivities(player);
 
         var playerUpdatePacketEffectTagCompositeEffectsEnable = new PlayerUpdatePacketEffectTagCompositeEffectsEnable
         {
