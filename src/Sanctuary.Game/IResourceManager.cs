@@ -46,6 +46,7 @@ public interface IResourceManager
     QuickChatDefinitionCollection QuickChats { get; }
     PointOfInterestDefinitionCollection PointOfInterests { get; }
     ConsumableCollection Consumables { get; }
+    ItemAbilityDefinitionCollection ItemAbilities { get; }
     NpcDefinitionCollection Npcs { get; }
     NameFilterCollection NameFilter { get; }
     NpcMovementDefinitionCollection NpcMovements { get; }

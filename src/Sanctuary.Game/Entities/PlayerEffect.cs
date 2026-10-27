@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+
+using Sanctuary.Packet.Common;
 
 namespace Sanctuary.Game.Entities;
 
@@ -24,6 +27,24 @@ public sealed class PlayerEffect
     public int AppearancePoofEffectId { get; init; }
 
     public float Scale { get; init; }
+
+    /// <summary>
+    /// Effects in the same group replace each other (see <see cref="Player.RemoveEffectGroup"/>).
+    /// </summary>
+    public string? Group { get; init; }
+
+    /// <summary>
+    /// Added to the player's stats while the effect lasts.
+    /// </summary>
+    public IReadOnlyDictionary<CharacterStatId, float>? StatBonuses { get; init; }
+
+    // Restores spread over time (potions that heal "over 5 seconds"), one tick per interval.
+    public int HealthPerTick { get; init; }
+    public int EnergyPerTick { get; init; }
+    public int TickIntervalMs { get; init; }
+    public int TickCount { get; init; }
+    internal int TicksRemaining;
+    internal DateTimeOffset NextTickAt;
 
     public Action? OnRemoved { get; init; }
 }

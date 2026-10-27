@@ -1,0 +1,2330 @@
+[
+  {
+    "AbilityId": 203,
+    "Comment": "AAA Star Booster, Members Only Star Booster, Super Star Booster",
+    "Group": "StarBoost",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 15534,
+    "Stats": [
+      {
+        "Stat": "ExperienceBoostPercent",
+        "Value": 50
+      }
+    ]
+  },
+  {
+    "AbilityId": 206,
+    "Comment": "Members Only Coin Booster, Super Coin Booster",
+    "Group": "CoinBoost",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 5245,
+    "Stats": [
+      {
+        "Stat": "GoldBoostPercent",
+        "Value": 50
+      }
+    ]
+  },
+  {
+    "AbilityId": 207,
+    "Comment": "Ethereal Scroll DEPRECATED",
+    "Group": "CombatScroll",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "MeleeCriticalHitChance",
+        "Value": 5
+      },
+      {
+        "Stat": "AbilityCriticalHitChance",
+        "Value": 5
+      }
+    ]
+  },
+  {
+    "AbilityId": 208,
+    "Comment": "Dreadful Scroll DEPRECATED",
+    "Group": "CombatScroll",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "MeleeCriticalHitChance",
+        "Value": 5
+      },
+      {
+        "Stat": "AbilityCriticalHitChance",
+        "Value": 5
+      },
+      {
+        "Stat": "DamageAddition",
+        "Value": 20
+      }
+    ]
+  },
+  {
+    "AbilityId": 209,
+    "Comment": "Cosmic Scroll DEPRECATED",
+    "Group": "CombatScroll",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "MeleeCriticalHitChance",
+        "Value": 5
+      },
+      {
+        "Stat": "AbilityCriticalHitChance",
+        "Value": 5
+      },
+      {
+        "Stat": "MaxHealth",
+        "Value": 250
+      }
+    ]
+  },
+  {
+    "AbilityId": 210,
+    "Comment": "Mystical Scroll DEPRECATED",
+    "Group": "CombatScroll",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "MeleeCriticalHitChance",
+        "Value": 5
+      },
+      {
+        "Stat": "AbilityCriticalHitChance",
+        "Value": 5
+      },
+      {
+        "Stat": "MaxMana",
+        "Value": 25
+      }
+    ]
+  },
+  {
+    "AbilityId": 211,
+    "Comment": "Wicked Scroll DEPRECATED",
+    "Group": "CombatScroll",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "MeleeCriticalHitChance",
+        "Value": 5
+      },
+      {
+        "Stat": "AbilityCriticalHitChance",
+        "Value": 5
+      },
+      {
+        "Stat": "MeleeCriticalHitMultiplier",
+        "Value": 0.25
+      },
+      {
+        "Stat": "AbilityCriticalHitMultiplier",
+        "Value": 0.25
+      }
+    ]
+  },
+  {
+    "AbilityId": 212,
+    "Comment": "Spectral Scroll DEPRECATED",
+    "Group": "CombatScroll",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "DamageAddition",
+        "Value": 20
+      }
+    ]
+  },
+  {
+    "AbilityId": 213,
+    "Comment": "Corporeal Scroll DEPRECATED",
+    "Group": "CombatScroll",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "DamageAddition",
+        "Value": 20
+      },
+      {
+        "Stat": "MaxHealth",
+        "Value": 250
+      }
+    ]
+  },
+  {
+    "AbilityId": 214,
+    "Comment": "Phantasmal Scroll DEPRECATED",
+    "Group": "CombatScroll",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "DamageAddition",
+        "Value": 20
+      },
+      {
+        "Stat": "MaxMana",
+        "Value": 25
+      }
+    ]
+  },
+  {
+    "AbilityId": 215,
+    "Comment": "Fateful Scroll DEPRECATED",
+    "Group": "CombatScroll",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "MeleeCriticalHitMultiplier",
+        "Value": 0.25
+      },
+      {
+        "Stat": "AbilityCriticalHitMultiplier",
+        "Value": 0.25
+      },
+      {
+        "Stat": "DamageAddition",
+        "Value": 20
+      }
+    ]
+  },
+  {
+    "AbilityId": 216,
+    "Comment": "Eternal Scroll DEPRECATED",
+    "Group": "CombatScroll",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "MaxHealth",
+        "Value": 250
+      }
+    ]
+  },
+  {
+    "AbilityId": 217,
+    "Comment": "Celestial Scroll DEPRECATED",
+    "Group": "CombatScroll",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "MaxHealth",
+        "Value": 250
+      },
+      {
+        "Stat": "MaxMana",
+        "Value": 25
+      }
+    ]
+  },
+  {
+    "AbilityId": 218,
+    "Comment": "Fiendish Scroll DEPRECATED",
+    "Group": "CombatScroll",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "MeleeCriticalHitMultiplier",
+        "Value": 0.25
+      },
+      {
+        "Stat": "AbilityCriticalHitMultiplier",
+        "Value": 0.25
+      },
+      {
+        "Stat": "MaxHealth",
+        "Value": 250
+      }
+    ]
+  },
+  {
+    "AbilityId": 219,
+    "Comment": "Astral Scroll DEPRECATED",
+    "Group": "CombatScroll",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "MaxMana",
+        "Value": 25
+      }
+    ]
+  },
+  {
+    "AbilityId": 220,
+    "Comment": "Unearthly Scroll DEPRECATED",
+    "Group": "CombatScroll",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "MeleeCriticalHitMultiplier",
+        "Value": 0.25
+      },
+      {
+        "Stat": "AbilityCriticalHitMultiplier",
+        "Value": 0.25
+      },
+      {
+        "Stat": "MaxMana",
+        "Value": 25
+      }
+    ]
+  },
+  {
+    "AbilityId": 221,
+    "Comment": "Infernal Scroll DEPRECATED",
+    "Group": "CombatScroll",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "MeleeCriticalHitMultiplier",
+        "Value": 0.25
+      },
+      {
+        "Stat": "AbilityCriticalHitMultiplier",
+        "Value": 0.25
+      }
+    ]
+  },
+  {
+    "AbilityId": 222,
+    "Comment": "Super Star Scroll",
+    "Group": "StarBoost",
+    "CooldownMs": 5000,
+    "DurationMs": 900000,
+    "CastEffectId": 15534,
+    "Stats": [
+      {
+        "Stat": "ExperienceBoostPercent",
+        "Value": 100
+      }
+    ]
+  },
+  {
+    "AbilityId": 223,
+    "Comment": "Crazy Coin Scroll",
+    "Group": "CoinBoost",
+    "CooldownMs": 5000,
+    "DurationMs": 900000,
+    "CastEffectId": 5245,
+    "Stats": [
+      {
+        "Stat": "GoldBoostPercent",
+        "Value": 100
+      }
+    ]
+  },
+  {
+    "AbilityId": 224,
+    "Comment": "Crimson Rose",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15531
+  },
+  {
+    "AbilityId": 228,
+    "Comment": "Time Saver's Truffle, Wheeler Truffle",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 229,
+    "Comment": "Jumbo Energy Potion",
+    "Group": "Energy",
+    "CooldownMs": 30000,
+    "CastEffectId": 16325,
+    "Energy": {
+      "Percent": 75
+    }
+  },
+  {
+    "AbilityId": 230,
+    "Comment": "Jumbo Health Potion",
+    "Group": "Health",
+    "CooldownMs": 30000,
+    "CastEffectId": 16324,
+    "Health": {
+      "Percent": 75
+    }
+  },
+  {
+    "AbilityId": 231,
+    "Comment": "Jumbo Replenishing Potion",
+    "Group": "Health",
+    "CooldownMs": 30000,
+    "CastEffectId": 16326,
+    "Health": {
+      "Percent": 75
+    },
+    "Energy": {
+      "Percent": 75
+    }
+  },
+  {
+    "AbilityId": 233,
+    "Comment": "Sparkling Gingerbread Cookie",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 234,
+    "Comment": "Sparkling Grape",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 235,
+    "Comment": "Whole Milk Carton",
+    "Group": "Health",
+    "CooldownMs": 5000,
+    "CastEffectId": 16324,
+    "Health": {
+      "Percent": 20
+    }
+  },
+  {
+    "AbilityId": 236,
+    "Comment": "Low Fat Milk Carton",
+    "Group": "Timing",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3Timer",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 237,
+    "Comment": "Non Fat Milk Carton",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 239,
+    "Comment": "Wheeler Coin Booster Scroll",
+    "Group": "CoinBoost",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 5245,
+    "Stats": [
+      {
+        "Stat": "GoldBoostPercent",
+        "Value": 25
+      }
+    ]
+  },
+  {
+    "AbilityId": 240,
+    "Comment": "Wheeler Star Booster Scroll",
+    "Group": "StarBoost",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 15534,
+    "Stats": [
+      {
+        "Stat": "ExperienceBoostPercent",
+        "Value": 25
+      }
+    ]
+  },
+  {
+    "AbilityId": 243,
+    "Comment": "Bonus Star Scroll",
+    "Group": "StarBoost",
+    "CooldownMs": 5000,
+    "DurationMs": 900000,
+    "CastEffectId": 15534,
+    "Stats": [
+      {
+        "Stat": "ExperienceBoostPercent",
+        "Value": 25
+      }
+    ]
+  },
+  {
+    "AbilityId": 244,
+    "Comment": "Bonus Coin Scroll",
+    "Group": "CoinBoost",
+    "CooldownMs": 5000,
+    "DurationMs": 900000,
+    "CastEffectId": 5245,
+    "Stats": [
+      {
+        "Stat": "GoldBoostPercent",
+        "Value": 25
+      }
+    ]
+  },
+  {
+    "AbilityId": 250,
+    "Comment": "Lightning Elixir",
+    "Group": "Speed",
+    "CooldownMs": 120000,
+    "DurationMs": 60000,
+    "AuraEffectId": 15049,
+    "MovementSpeedBonus": 4
+  },
+  {
+    "AbilityId": 251,
+    "Comment": "Prospector's Scroll",
+    "Group": "CoinBoost",
+    "CooldownMs": 5000,
+    "DurationMs": 3600000,
+    "CastEffectId": 5245,
+    "Stats": [
+      {
+        "Stat": "GoldBoostPercent",
+        "Value": 50
+      }
+    ]
+  },
+  {
+    "AbilityId": 264,
+    "Comment": "Darkthorne's Embrace",
+    "Group": "Defense",
+    "CooldownMs": 120000,
+    "DurationMs": 30000,
+    "CastEffectId": 15855,
+    "Stats": [
+      {
+        "Stat": "DamageReductionPercent",
+        "Value": 25
+      }
+    ]
+  },
+  {
+    "AbilityId": 267,
+    "Comment": "Small Health Potion",
+    "Group": "Health",
+    "CooldownMs": 30000,
+    "CastEffectId": 16324,
+    "Health": {
+      "Percent": 25,
+      "OverMs": 5000
+    },
+    "AuraEffectId": 15858
+  },
+  {
+    "AbilityId": 345,
+    "Comment": "Birthday Firework",
+    "CooldownMs": 10000,
+    "CastEffectId": 16517
+  },
+  {
+    "AbilityId": 346,
+    "Comment": "Anniversary Firework",
+    "CooldownMs": 10000,
+    "CastEffectId": 16519
+  },
+  {
+    "AbilityId": 347,
+    "Comment": "Free Realms Firework",
+    "CooldownMs": 10000,
+    "CastEffectId": 16518
+  },
+  {
+    "AbilityId": 390,
+    "Comment": "Sparkling Cherry Pie",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 391,
+    "Comment": "Sparkling Pink Donut",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 392,
+    "Comment": "Chrono Carrot Cake",
+    "Group": "Timing",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3Timer",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 393,
+    "Comment": "Sparkling Crescent Roll",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 394,
+    "Comment": "Chrono Limecake",
+    "Group": "Timing",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3Timer",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 395,
+    "Comment": "Chrono Liberating Muffin, Members Only Chrono Muffin",
+    "Group": "Timing",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3Timer",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 400,
+    "Comment": "Sparkling Ham and Cheese",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 401,
+    "Comment": "Sparkling Star Soup",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 402,
+    "Comment": "Chrono Scallop Soup",
+    "Group": "Timing",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3Timer",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 403,
+    "Comment": "Sparkling Fish",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 404,
+    "Comment": "Chrono Sour Fruit",
+    "Group": "Timing",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3Timer",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 405,
+    "Comment": "Chrono Berries",
+    "Group": "Timing",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3Timer",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 410,
+    "Comment": "Sparkling Loaf",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 411,
+    "Comment": "Sparkling Tomato Soup",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 412,
+    "Comment": "Chrono Quarter Cake",
+    "Group": "Timing",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3Timer",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 413,
+    "Comment": "Sparkling Pineapple Burger",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 414,
+    "Comment": "Chrono Steak",
+    "Group": "Timing",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3Timer",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 415,
+    "Comment": "Chrono Gourmet Soup",
+    "Group": "Timing",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3Timer",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 420,
+    "Comment": "Cheese-stuffed Ham",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 421,
+    "Comment": "Ground Veal Quesadillas",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 422,
+    "Comment": "Cheesy Bread Pudding",
+    "Group": "Timing",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3Timer",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 423,
+    "Comment": "Hot Cheese Fondue",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 424,
+    "Comment": "Carrot Cheesecake",
+    "Group": "Timing",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3Timer",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 425,
+    "Comment": "Cheesy Ritzy Bits",
+    "Group": "Timing",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3Timer",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 426,
+    "Comment": "Sparkling Banana",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 429,
+    "Comment": "Slugmud Surprise",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 430,
+    "Comment": "Glerga's Gourmet Goulash, Maker's Cake - DEPRECATED",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 438,
+    "Comment": "Maker's Apple - DEPRECATED, Tangy Tumtumnip Mishmash",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 439,
+    "Comment": "Burnetta's Curious Creation, Maker's Burger - DEPRECATED",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 440,
+    "Comment": "Maker's Meatstick - DEPRECATED, Mystery Pot Roast",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 441,
+    "Comment": "Maker's Basket of Soup - DEPRECATED, Rainleaf Wrapped Dumpling",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 444,
+    "Comment": "Sparkling Croissant Sandwich",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 445,
+    "Comment": "Oddly Colored Omelette",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 453,
+    "Comment": "Stainberry Chocolate Gumdrop",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 454,
+    "Comment": "Maker's Bran Muffin - DEPRECATED, Seared Stainberry",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 455,
+    "Comment": "Maker's Raw Root - DEPRECATED, Spicy Vegetable Stirfry",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 456,
+    "Comment": "Briarmelon Surprise, Maker's Lettuce Head - DEPRECATED",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 459,
+    "Comment": "Maker's Strawberry Cupcake - DEPRECATED, Moonbean Mousse",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 460,
+    "Comment": "Sparkling Chocolate Cake",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 468,
+    "Comment": "Sparkling Assorted Cookies",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 469,
+    "Comment": "Sparkling Hot Dog",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 470,
+    "Comment": "Chrono Cupcake",
+    "Group": "Timing",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3Timer",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 471,
+    "Comment": "Kavod Rainbow Candy",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 474,
+    "Comment": "Western Charred Beef",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 475,
+    "Comment": "A Variety Gumdrop Pack",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 483,
+    "Comment": "Eight Layered Bittercake",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 484,
+    "Comment": "Rumbling Rodeo Grub",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 485,
+    "Comment": "Thumped Bear Meat",
+    "Group": "Timing",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3Timer",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 1207,
+    "Comment": "Average Conditioner (TEST), Health Potion",
+    "Group": "Health",
+    "CooldownMs": 30000,
+    "CastEffectId": 16324,
+    "Health": {
+      "Percent": 50
+    }
+  },
+  {
+    "AbilityId": 1208,
+    "Comment": "Mana Potion",
+    "Group": "Energy",
+    "CooldownMs": 30000,
+    "CastEffectId": 16325,
+    "Energy": {
+      "Percent": 50
+    }
+  },
+  {
+    "AbilityId": 1581,
+    "Comment": "(QA) You be stuck!",
+    "Group": "Speed",
+    "CooldownMs": 5000,
+    "DurationMs": 30000,
+    "AuraEffectId": 0,
+    "MovementSpeedBonus": -3.2
+  },
+  {
+    "AbilityId": 1598,
+    "Comment": "Heal Over Time Potion II (PH)",
+    "Group": "Health",
+    "CooldownMs": 30000,
+    "CastEffectId": 16324,
+    "Health": {
+      "Percent": 50,
+      "OverMs": 15000
+    },
+    "AuraEffectId": 15858
+  },
+  {
+    "AbilityId": 1599,
+    "Comment": "Heal Over Time Vial",
+    "Group": "Health",
+    "CooldownMs": 30000,
+    "CastEffectId": 16324,
+    "Health": {
+      "Percent": 55,
+      "OverMs": 15000
+    },
+    "AuraEffectId": 15858
+  },
+  {
+    "AbilityId": 1600,
+    "Comment": "Heal Over Time Potion IV (PH)",
+    "Group": "Health",
+    "CooldownMs": 30000,
+    "CastEffectId": 16324,
+    "Health": {
+      "Percent": 65,
+      "OverMs": 15000
+    },
+    "AuraEffectId": 15858
+  },
+  {
+    "AbilityId": 1601,
+    "Comment": "Heal Over Time Potion",
+    "Group": "Health",
+    "CooldownMs": 30000,
+    "CastEffectId": 16324,
+    "Health": {
+      "Percent": 60,
+      "OverMs": 15000
+    },
+    "AuraEffectId": 15858
+  },
+  {
+    "AbilityId": 1636,
+    "Comment": "Health Potion 1",
+    "Group": "Health",
+    "CooldownMs": 30000,
+    "CastEffectId": 16324,
+    "Health": {
+      "Percent": 25
+    }
+  },
+  {
+    "AbilityId": 1637,
+    "Comment": "Health Potion II (PH)",
+    "Group": "Health",
+    "CooldownMs": 30000,
+    "CastEffectId": 16324,
+    "Health": {
+      "Percent": 35
+    }
+  },
+  {
+    "AbilityId": 1638,
+    "Comment": "Mushroom Pizza Slice",
+    "Group": "Health",
+    "CooldownMs": 5000,
+    "CastEffectId": 16324,
+    "Health": {
+      "Percent": 30
+    }
+  },
+  {
+    "AbilityId": 1639,
+    "Comment": "Energy Potion 1",
+    "Group": "Energy",
+    "CooldownMs": 30000,
+    "CastEffectId": 16325,
+    "Energy": {
+      "Percent": 25
+    }
+  },
+  {
+    "AbilityId": 1640,
+    "Comment": "Mana Potion II (PH)",
+    "Group": "Energy",
+    "CooldownMs": 30000,
+    "CastEffectId": 16325,
+    "Energy": {
+      "Percent": 35
+    }
+  },
+  {
+    "AbilityId": 1915,
+    "Comment": "Cupcake of Tim the Tiny",
+    "Group": "Scale",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 5332,
+    "Scale": 0.5
+  },
+  {
+    "AbilityId": 1916,
+    "Comment": "Thousand Pound Cake",
+    "Group": "Scale",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 5332,
+    "Scale": 2
+  },
+  {
+    "AbilityId": 1920,
+    "Comment": "Rainbowopsicle",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15653
+  },
+  {
+    "AbilityId": 1924,
+    "Comment": "Deprecated Health Potion",
+    "Group": "Health",
+    "CooldownMs": 30000,
+    "CastEffectId": 16324,
+    "Health": {
+      "Percent": 75
+    }
+  },
+  {
+    "AbilityId": 1931,
+    "Comment": "Pixachino",
+    "Group": "Speed",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15216,
+    "MovementSpeedBonus": 2
+  },
+  {
+    "AbilityId": 1932,
+    "Comment": "Chugawug Brew, Sweetwater Sasparilla",
+    "CooldownMs": 5000,
+    "CastEffectId": 5376
+  },
+  {
+    "AbilityId": 1933,
+    "Comment": "Laughter Latte",
+    "CooldownMs": 5000,
+    "CastEffectId": 15608
+  },
+  {
+    "AbilityId": 1934,
+    "Comment": "Heart Candy",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15459
+  },
+  {
+    "AbilityId": 1935,
+    "Comment": "Glow Cookie",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15477
+  },
+  {
+    "AbilityId": 1936,
+    "Comment": "Invisibility Food V",
+    "Group": "Invisibility",
+    "CooldownMs": 5000,
+    "DurationMs": 300000,
+    "AuraEffectId": 15570
+  },
+  {
+    "AbilityId": 1937,
+    "Comment": "Invisibility Food IV",
+    "Group": "Invisibility",
+    "CooldownMs": 5000,
+    "DurationMs": 240000,
+    "AuraEffectId": 15570
+  },
+  {
+    "AbilityId": 1938,
+    "Comment": "Invisibility Food III",
+    "Group": "Invisibility",
+    "CooldownMs": 5000,
+    "DurationMs": 180000,
+    "AuraEffectId": 15570
+  },
+  {
+    "AbilityId": 1939,
+    "Comment": "Invisibility Food II",
+    "Group": "Invisibility",
+    "CooldownMs": 5000,
+    "DurationMs": 120000,
+    "AuraEffectId": 15570
+  },
+  {
+    "AbilityId": 1940,
+    "Comment": "Invisibility Food I",
+    "Group": "Invisibility",
+    "CooldownMs": 5000,
+    "DurationMs": 60000,
+    "AuraEffectId": 15570
+  },
+  {
+    "AbilityId": 1941,
+    "Comment": "Tiny Tincture",
+    "Group": "Scale",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 5332,
+    "Scale": 0.4
+  },
+  {
+    "AbilityId": 1942,
+    "Comment": "Shrink Food IV",
+    "Group": "Scale",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 5332,
+    "Scale": 0.55
+  },
+  {
+    "AbilityId": 1943,
+    "Comment": "Shrink Food III, Small Sandwich",
+    "Group": "Scale",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 5332,
+    "Scale": 0.65
+  },
+  {
+    "AbilityId": 1944,
+    "Comment": "Shrink Food II",
+    "Group": "Scale",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 5332,
+    "Scale": 0.75
+  },
+  {
+    "AbilityId": 1945,
+    "Comment": "Savory Spiralmint Soup, Shrink Food I",
+    "Group": "Scale",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 5332,
+    "Scale": 0.85
+  },
+  {
+    "AbilityId": 1946,
+    "Comment": "Grow Food V",
+    "Group": "Scale",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 5332,
+    "Scale": 2
+  },
+  {
+    "AbilityId": 1947,
+    "Comment": "Grow Food IV",
+    "Group": "Scale",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 5332,
+    "Scale": 1.75
+  },
+  {
+    "AbilityId": 1948,
+    "Comment": "Big Burger, Grow Food III",
+    "Group": "Scale",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 5332,
+    "Scale": 1.5
+  },
+  {
+    "AbilityId": 1949,
+    "Comment": "Grow Food II",
+    "Group": "Scale",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 5332,
+    "Scale": 1.3
+  },
+  {
+    "AbilityId": 1950,
+    "Comment": "De'Flor Family Fried Dumplings, Grow Food I",
+    "Group": "Scale",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 5332,
+    "Scale": 1.15
+  },
+  {
+    "AbilityId": 1951,
+    "Comment": "Speed Buff Food V",
+    "Group": "Speed",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15216,
+    "MovementSpeedBonus": 3
+  },
+  {
+    "AbilityId": 1952,
+    "Comment": "Speed Buff Food IV",
+    "Group": "Speed",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15216,
+    "MovementSpeedBonus": 2.5
+  },
+  {
+    "AbilityId": 1953,
+    "Comment": "Speed Buff Food III",
+    "Group": "Speed",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15216,
+    "MovementSpeedBonus": 2
+  },
+  {
+    "AbilityId": 1954,
+    "Comment": "Speed Buff Food II",
+    "Group": "Speed",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15216,
+    "MovementSpeedBonus": 1.5
+  },
+  {
+    "AbilityId": 1955,
+    "Comment": "Speed Buff Food I",
+    "Group": "Speed",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15216,
+    "MovementSpeedBonus": 1
+  },
+  {
+    "AbilityId": 2070,
+    "Comment": "Health Potion IV (PH)",
+    "Group": "Health",
+    "CooldownMs": 30000,
+    "CastEffectId": 16324,
+    "Health": {
+      "Percent": 65
+    }
+  },
+  {
+    "AbilityId": 2072,
+    "Comment": "Mana Potion IV (PH)",
+    "Group": "Energy",
+    "CooldownMs": 30000,
+    "CastEffectId": 16325,
+    "Energy": {
+      "Percent": 65
+    }
+  },
+  {
+    "AbilityId": 2622,
+    "Comment": "Three Leaf Omelette",
+    "Group": "Attack",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "EquippedMeleeWeaponDamage",
+        "Value": 20
+      }
+    ]
+  },
+  {
+    "AbilityId": 2626,
+    "Comment": "Spiralmint Steak",
+    "Group": "MaxHealth",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "MaxHealth",
+        "Value": 250
+      }
+    ]
+  },
+  {
+    "AbilityId": 2627,
+    "Comment": "Gummyfruit Gumbo",
+    "Group": "MaxEnergy",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "MaxMana",
+        "Value": 25
+      }
+    ]
+  },
+  {
+    "AbilityId": 2628,
+    "Comment": "Gummyfruit Topped Sundae",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 2631,
+    "Comment": "Starnut Sundae",
+    "Group": "Attack",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "EquippedMeleeWeaponDamage",
+        "Value": 20
+      }
+    ]
+  },
+  {
+    "AbilityId": 2635,
+    "Comment": "Sizzling Snowberry Saute",
+    "Group": "MaxHealth",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "MaxHealth",
+        "Value": 250
+      }
+    ]
+  },
+  {
+    "AbilityId": 2636,
+    "Comment": "Fried Starnut Stick",
+    "Group": "MaxEnergy",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "MaxMana",
+        "Value": 25
+      }
+    ]
+  },
+  {
+    "AbilityId": 2637,
+    "Comment": "Merri's Marinated Mystery Meat",
+    "Group": "Timing",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3Timer",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 2640,
+    "Comment": "Candied Briarmelon",
+    "Group": "Attack",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "EquippedMeleeWeaponDamage",
+        "Value": 20
+      }
+    ]
+  },
+  {
+    "AbilityId": 2644,
+    "Comment": "Honey Roasted Moonbean",
+    "Group": "MaxHealth",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "MaxHealth",
+        "Value": 250
+      }
+    ]
+  },
+  {
+    "AbilityId": 2645,
+    "Comment": "Moonbean Sundae Sweettreat",
+    "Group": "MaxEnergy",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "MaxMana",
+        "Value": 25
+      }
+    ]
+  },
+  {
+    "AbilityId": 3093,
+    "Comment": "Heal Over Time Potion 1",
+    "Group": "Health",
+    "CooldownMs": 30000,
+    "CastEffectId": 16324,
+    "Health": {
+      "Percent": 40,
+      "OverMs": 15000
+    },
+    "AuraEffectId": 15858
+  },
+  {
+    "AbilityId": 3109,
+    "Comment": "Replenishing Potion 1",
+    "Group": "Health",
+    "CooldownMs": 30000,
+    "CastEffectId": 16326,
+    "Health": {
+      "Percent": 25
+    },
+    "Energy": {
+      "Percent": 25
+    }
+  },
+  {
+    "AbilityId": 3110,
+    "Comment": "Replenishing Potion II (PH)",
+    "Group": "Health",
+    "CooldownMs": 30000,
+    "CastEffectId": 16326,
+    "Health": {
+      "Percent": 35
+    },
+    "Energy": {
+      "Percent": 35
+    }
+  },
+  {
+    "AbilityId": 3112,
+    "Comment": "Replenishing Potion IV (PH)",
+    "Group": "Health",
+    "CooldownMs": 30000,
+    "CastEffectId": 16326,
+    "Health": {
+      "Percent": 65
+    },
+    "Energy": {
+      "Percent": 65
+    }
+  },
+  {
+    "AbilityId": 3264,
+    "Comment": "Strong Arm Stew",
+    "Group": "Scale",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 5332,
+    "Scale": 1.3,
+    "Stats": [
+      {
+        "Stat": "MaxHealth",
+        "Value": 500
+      }
+    ]
+  },
+  {
+    "AbilityId": 3786,
+    "Comment": "Booming Blue Firecrackers",
+    "CooldownMs": 10000,
+    "CastEffectId": 15717
+  },
+  {
+    "AbilityId": 3788,
+    "Comment": "Red Dragon Firecrackers",
+    "CooldownMs": 10000,
+    "CastEffectId": 15731
+  },
+  {
+    "AbilityId": 3789,
+    "Comment": "Skylightning Firecrackers",
+    "CooldownMs": 10000,
+    "CastEffectId": 15727
+  },
+  {
+    "AbilityId": 3790,
+    "Comment": "Bottle of Butterflies",
+    "CooldownMs": 10000,
+    "CastEffectId": 5456
+  },
+  {
+    "AbilityId": 3791,
+    "Comment": "Flaming Jalepeno Pepper",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 10000,
+    "AuraEffectId": 16129
+  },
+  {
+    "AbilityId": 3792,
+    "Comment": "Icicle Ice Cream",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 10000,
+    "AuraEffectId": 630
+  },
+  {
+    "AbilityId": 3794,
+    "Comment": "Superstar Spotlight",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 30000,
+    "AuraEffectId": 5568
+  },
+  {
+    "AbilityId": 3796,
+    "Comment": "Seeing Stars Spyglass",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 10000,
+    "AuraEffectId": 2
+  },
+  {
+    "AbilityId": 3804,
+    "Comment": "Glowing Contacts",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15589
+  },
+  {
+    "AbilityId": 3855,
+    "Comment": "Red Button Eyes Potion",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15208
+  },
+  {
+    "AbilityId": 3856,
+    "Comment": "Red Button Eyes Potion",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15222
+  },
+  {
+    "AbilityId": 3857,
+    "Comment": "Orange Button Eyes Potion",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15291
+  },
+  {
+    "AbilityId": 3858,
+    "Comment": "Orange Button Eyes Potion",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15292
+  },
+  {
+    "AbilityId": 3859,
+    "Comment": "Yellow Button Eyes Potion",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15294
+  },
+  {
+    "AbilityId": 3860,
+    "Comment": "Yellow Button Eyes Potion",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15296
+  },
+  {
+    "AbilityId": 3861,
+    "Comment": "Green Button Eyes Potion",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15297
+  },
+  {
+    "AbilityId": 3862,
+    "Comment": "Green Button Eyes Potion",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15298
+  },
+  {
+    "AbilityId": 3863,
+    "Comment": "Cyan Button Eyes Potion",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15299
+  },
+  {
+    "AbilityId": 3864,
+    "Comment": "Cyan Button Eyes Potion",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15300
+  },
+  {
+    "AbilityId": 3866,
+    "Comment": "Blue Button Eyes Potion",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15303
+  },
+  {
+    "AbilityId": 3867,
+    "Comment": "Blue Button Eyes Potion",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15301
+  },
+  {
+    "AbilityId": 3868,
+    "Comment": "Purple Button Eyes Potion",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15304
+  },
+  {
+    "AbilityId": 3869,
+    "Comment": "Purple Button Eyes Potion",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15305
+  },
+  {
+    "AbilityId": 3870,
+    "Comment": "Magenta Button Eyes Potion",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15306
+  },
+  {
+    "AbilityId": 3871,
+    "Comment": "Magenta Button Eyes Potion",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15307
+  },
+  {
+    "AbilityId": 3873,
+    "Comment": "Firefly Swirls Potion",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15363
+  },
+  {
+    "AbilityId": 3874,
+    "Comment": "Butterfly Swirls Potion",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15362
+  },
+  {
+    "AbilityId": 3875,
+    "Comment": "Flower Trail Potion",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "AuraEffectId": 15369
+  },
+  {
+    "AbilityId": 3955,
+    "Comment": "{n}Queen's Firecrackers{pl=\"Queen's Firecrackers\"}",
+    "CooldownMs": 10000,
+    "CastEffectId": 15729
+  },
+  {
+    "AbilityId": 4066,
+    "Comment": "Gold Pinwheel Firework",
+    "CooldownMs": 10000,
+    "AuraEffectId": 15656,
+    "DurationMs": 10000
+  },
+  {
+    "AbilityId": 4067,
+    "Comment": "Blue Pinwheel Firework",
+    "CooldownMs": 10000,
+    "AuraEffectId": 15657,
+    "DurationMs": 10000
+  },
+  {
+    "AbilityId": 4068,
+    "Comment": "Red Pinwheel Firework",
+    "CooldownMs": 10000,
+    "AuraEffectId": 15658,
+    "DurationMs": 10000
+  },
+  {
+    "AbilityId": 4069,
+    "Comment": "Green Pinwheel Firework",
+    "CooldownMs": 10000,
+    "AuraEffectId": 15659,
+    "DurationMs": 10000
+  },
+  {
+    "AbilityId": 4070,
+    "Comment": "Purple Pinwheel Firework",
+    "CooldownMs": 10000,
+    "AuraEffectId": 15660,
+    "DurationMs": 10000
+  },
+  {
+    "AbilityId": 4071,
+    "Comment": "Golden Fountain Firework",
+    "CooldownMs": 10000,
+    "AuraEffectId": 15664,
+    "DurationMs": 10000
+  },
+  {
+    "AbilityId": 4072,
+    "Comment": "Stars and Stripes Firework",
+    "CooldownMs": 10000,
+    "CastEffectId": 15661
+  },
+  {
+    "AbilityId": 4085,
+    "Comment": "Very Cherry Pie",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 4086,
+    "Comment": "Two-Tone Cake",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 4087,
+    "Comment": "Berry Cupcake",
+    "Group": "Timing",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3Timer",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 4088,
+    "Comment": "Cherry Chocolate Cake",
+    "Group": "Talent",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3SpecialSpawnRate",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 4089,
+    "Comment": "Heavenly Donut",
+    "Group": "Timing",
+    "CooldownMs": 5000,
+    "DurationMs": 1800000,
+    "CastEffectId": 40,
+    "Stats": [
+      {
+        "Stat": "M3Timer",
+        "Value": 2
+      }
+    ]
+  },
+  {
+    "AbilityId": 4694,
+    "Comment": "Medium Energy Potion, Wheeler Energy Potion",
+    "Group": "Energy",
+    "CooldownMs": 30000,
+    "CastEffectId": 16325,
+    "Energy": {
+      "Percent": 50,
+      "OverMs": 5000
+    }
+  },
+  {
+    "AbilityId": 4695,
+    "Comment": "Large Energy Potion",
+    "Group": "Energy",
+    "CooldownMs": 30000,
+    "CastEffectId": 16325,
+    "Energy": {
+      "Percent": 75,
+      "OverMs": 5000
+    }
+  },
+  {
+    "AbilityId": 4696,
+    "Comment": "Mushroom Pizza Slice, Small Health Potion, Wheeler Health Potion",
+    "Group": "Health",
+    "CooldownMs": 5000,
+    "CastEffectId": 16324,
+    "Health": {
+      "Percent": 30
+    }
+  },
+  {
+    "AbilityId": 4697,
+    "Comment": "Gigantic Health Potion, Medium Health Potion, Members Only Health Potion",
+    "Group": "Health",
+    "CooldownMs": 30000,
+    "CastEffectId": 16324,
+    "Health": {
+      "Percent": 50,
+      "OverMs": 5000
+    },
+    "AuraEffectId": 15858
+  },
+  {
+    "AbilityId": 4698,
+    "Comment": "Ginormous Health Potion, Large Health Potion",
+    "Group": "Health",
+    "CooldownMs": 30000,
+    "CastEffectId": 16324,
+    "Health": {
+      "Percent": 75,
+      "OverMs": 5000
+    },
+    "AuraEffectId": 15858
+  },
+  {
+    "AbilityId": 4699,
+    "Comment": "Small Replenishment Potion",
+    "Group": "Health",
+    "CooldownMs": 30000,
+    "CastEffectId": 16326,
+    "Health": {
+      "Percent": 25
+    },
+    "Energy": {
+      "Percent": 25
+    }
+  },
+  {
+    "AbilityId": 4700,
+    "Comment": "Medium Replenishment Potion",
+    "Group": "Health",
+    "CooldownMs": 30000,
+    "CastEffectId": 16326,
+    "Health": {
+      "Percent": 50
+    },
+    "Energy": {
+      "Percent": 50
+    }
+  },
+  {
+    "AbilityId": 4701,
+    "Comment": "Large Replenishment Potion",
+    "Group": "Health",
+    "CooldownMs": 30000,
+    "CastEffectId": 16326,
+    "Health": {
+      "Percent": 75
+    },
+    "Energy": {
+      "Percent": 75
+    }
+  },
+  {
+    "AbilityId": 5157,
+    "Comment": "Red Petal",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 30000,
+    "AuraEffectId": 16460
+  },
+  {
+    "AbilityId": 5158,
+    "Comment": "Black Petal",
+    "Group": "Aura",
+    "CooldownMs": 5000,
+    "DurationMs": 30000,
+    "AuraEffectId": 16487
+  }
+]

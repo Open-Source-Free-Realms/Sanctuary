@@ -967,11 +967,11 @@ public sealed class QuestManager : IQuestManager
 
     private void GrantReward(Player player, QuestDefinition quest)
     {
-        var coins = quest.RewardCoins;
+        var coins = player.ApplyCoinBoost(quest.RewardCoins);
         if (coins > 0)
             _rewardManager.TryGrantCurrency(player, CurrencyType.Coins, coins);
 
-        var experience = quest.RewardExperience;
+        var experience = player.ApplyExperienceBoost(quest.RewardExperience);
 
         var grantedCollection = quest.RewardCollectionId != 0 &&
             _resourceManager.Collections.TryGetValue(quest.RewardCollectionId, out var rewardedCollection)

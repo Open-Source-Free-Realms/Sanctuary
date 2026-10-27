@@ -61,6 +61,7 @@ public class ResourceManager : IResourceManager, IDisposable
     public static readonly string PlayerTitlesFile = Path.Combine(BaseDirectory, "PlayerTitles.json");
     public static readonly string PointOfInterestsFile = Path.Combine(BaseDirectory, "PointOfInterests.json");
     public static readonly string ConsumablesFile = Path.Combine(BaseDirectory, "Consumables.json");
+    public static readonly string ItemAbilitiesFile = Path.Combine(BaseDirectory, "ItemAbilities.json");
     public static readonly string NpcsFile = Path.Combine(BaseDirectory, "Npcs.json");
     public static readonly string NpcMovementsFile = Path.Combine(BaseDirectory, "NpcMovements.json");
     public static readonly string NpcAmbientFile = Path.Combine(BaseDirectory, "NpcAmbient.json");
@@ -114,6 +115,7 @@ public class ResourceManager : IResourceManager, IDisposable
     public QuickChatDefinitionCollection QuickChats { get; }
     public PointOfInterestDefinitionCollection PointOfInterests { get; }
     public ConsumableCollection Consumables { get; }
+    public ItemAbilityDefinitionCollection ItemAbilities { get; }
     public NpcDefinitionCollection Npcs { get; }
     public NameFilterCollection NameFilter { get; }
     public NpcMovementDefinitionCollection NpcMovements { get; }
@@ -179,6 +181,7 @@ public class ResourceManager : IResourceManager, IDisposable
         PlayerTitles = new(_logger);
         PointOfInterests = new(_logger);
         Consumables = new(_logger);
+        ItemAbilities = new(_logger);
         Npcs = new(_logger);
         NameFilter = new(_logger);
         NpcMovements = new(_logger);
@@ -217,6 +220,7 @@ public class ResourceManager : IResourceManager, IDisposable
             ["rewards"] = () => Reload(RewardTables, () => RewardTables.Load(RewardTablesFile)),
             ["abilities"] = () => Reload(CombatAbilities, () => CombatAbilities.Load(CombatAbilitiesFile)),
             ["jobs"] = () => Reload(CombatJobs, () => CombatJobs.Load(CombatJobsFile)),
+            ["itemabilities"] = () => Reload(ItemAbilities, () => ItemAbilities.Load(ItemAbilitiesFile)),
             ["namefilter"] = () => NameFilter.Load(NameFilterFile),
             ["firsttimeevents"] = () => Reload(FirstTimeEvents, () => FirstTimeEvents.Load(FirstTimeEventsFile)),
             ["minigametutorials"] = () => Reload(MiniGameTutorials, () => MiniGameTutorials.Load(MiniGameTutorialsFile))
@@ -456,6 +460,9 @@ public class ResourceManager : IResourceManager, IDisposable
         if (!Consumables.Load(ConsumablesFile))
             return false;
 
+        if (!ItemAbilities.Load(ItemAbilitiesFile))
+            return false;
+
         if (!Npcs.Load(NpcsFile))
             return false;
 
@@ -599,6 +606,8 @@ public class ResourceManager : IResourceManager, IDisposable
                 loaded = CombatAbilities.Load(CombatAbilitiesFile);
             else if (e.FullPath == CombatJobsFile)
                 loaded = CombatJobs.Load(CombatJobsFile);
+            else if (e.FullPath == ItemAbilitiesFile)
+                loaded = Reload(ItemAbilities, () => ItemAbilities.Load(ItemAbilitiesFile));
             else if (e.FullPath == QuestsFile)
                 loaded = Quests.Load(QuestsFile);
             else
