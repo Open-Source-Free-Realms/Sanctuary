@@ -78,6 +78,49 @@ public sealed class QuestGoalTests
     }
 
     [TestMethod]
+    public void CollectGoal_IgnoresSharedNodes()
+    {
+        var goal = new CollectGoal { CollectNodeType = "tin-ore", RequiredCount = 1 };
+        var sharedNode = new CollectionNode(null!,
+            new CollectionNodeTypeDefinition { Key = "tin-ore", Name = "tin-ore" },
+            new CollectionNodePoolDefinition { Key = "tin-ore", NodeType = "tin-ore" },
+            new CollectionNodeSpawnDefinition { Id = 1 });
+
+        Assert.IsFalse(goal.CanGather(sharedNode, goal.CreateProgress()));
+        Assert.AreEqual(QuestGoalResult.None, goal.Progress(Quest, new NodeGatheredEvent(sharedNode), goal.CreateProgress()));
+    }
+
+    [TestMethod]
+    public void CollectGoal_CountsEachPlayerSpecificNodeOnce()
+    {
+        var goal = new CollectGoal { CollectNodeType = "tin-ore", RequiredCount = 2 };
+        var progress = goal.CreateProgress();
+
+        Assert.IsTrue(goal.CanGather(PlayerNode("tin-ore", 1), progress));
+        Assert.AreEqual(QuestGoalResult.Progressed, goal.Progress(Quest, GatherPlayerNode("tin-ore", 1), progress));
+        Assert.IsFalse(goal.CanGather(PlayerNode("tin-ore", 1), progress));
+        Assert.AreEqual(QuestGoalResult.None, goal.Progress(Quest, GatherPlayerNode("tin-ore", 1), progress));
+        Assert.AreEqual(QuestGoalResult.Completed, goal.Progress(Quest, GatherPlayerNode("tin-ore", 2), progress));
+    }
+
+    [TestMethod]
+    public void CollectGoal_SavesWhichPlayerSpecificNodesWereGathered()
+    {
+        var goal = new CollectGoal { CollectNodeType = "tin-ore", RequiredCount = 3 };
+        var progress = goal.CreateProgress();
+        goal.Progress(Quest, GatherPlayerNode("tin-ore", 7), progress);
+        goal.Progress(Quest, GatherPlayerNode("tin-ore", 9), progress);
+
+        var loaded = goal.CreateProgress();
+        foreach (var (targetId, count) in progress.Save())
+            loaded.Load(targetId, count);
+
+        Assert.AreEqual(2, loaded.Count);
+        Assert.IsFalse(goal.CanGather(PlayerNode("tin-ore", 7), loaded));
+        Assert.IsTrue(goal.CanGather(PlayerNode("tin-ore", 8), loaded));
+    }
+
+    [TestMethod]
     public void ReachGoal_CompletesOnlyInsideItsRadius()
     {
         var goal = new ReachLocationGoal { ReachPosition = new Vector3(100f, 0f, 100f), ReachRadius = 10f };
@@ -132,7 +175,7 @@ public sealed class QuestGoalTests
         foreach (var (targetId, count) in collect.Save())
             loadedCollect.Load(targetId, count);
 
-        Assert.AreEqual(1, collect.Save().Count());
+        Assert.AreEqual(2, collect.Save().Count());
         Assert.AreEqual(2, loadedCollect.Count);
     }
 
@@ -175,8 +218,14 @@ public sealed class QuestGoalTests
     private static PlayerMovedEvent Move(float x, float z, int zoneDefinitionId = ReachLocationGoal.FabledRealmsZoneDefinitionId)
         => new(new Vector4(x, 0f, z, 1f), zoneDefinitionId);
 
-    private static NodeGatheredEvent Gather(string nodeType) => new(new CollectionNode(null!,
+    private static CollectionNode PlayerNode(string nodeType, int spawnId) => new(null!,
         new CollectionNodeTypeDefinition { Key = nodeType, Name = nodeType },
-        new CollectionNodePoolDefinition { Key = nodeType, NodeType = nodeType },
-        new CollectionNodeSpawnDefinition()));
+        new CollectionNodePoolDefinition { Key = nodeType, NodeType = nodeType, PlayerSpecific = true },
+        new CollectionNodeSpawnDefinition { Id = spawnId });
+
+    private static NodeGatheredEvent GatherPlayerNode(string nodeType, int spawnId) => new(PlayerNode(nodeType, spawnId));
+
+    private static int _nextSpawnId;
+
+    private static NodeGatheredEvent Gather(string nodeType) => GatherPlayerNode(nodeType, ++_nextSpawnId);
 }

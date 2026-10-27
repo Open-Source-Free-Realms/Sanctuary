@@ -41,3 +41,30 @@ public sealed class TalkProgress : GoalProgress
             TryAdd((int)targetId);
     }
 }
+
+public sealed class CollectProgress : GoalProgress
+{
+    private readonly HashSet<int> _gatheredSpawnIds = [];
+
+    public bool HasGathered(int spawnId) => _gatheredSpawnIds.Contains(spawnId);
+
+    public bool TryAdd(int spawnId)
+    {
+        if (!_gatheredSpawnIds.Add(spawnId))
+            return false;
+
+        Count++;
+        return true;
+    }
+
+    public override IEnumerable<(ulong TargetId, int Count)> Save()
+        => _gatheredSpawnIds.Count > 0 ? _gatheredSpawnIds.Select(spawnId => ((ulong)spawnId, 1)) : base.Save();
+
+    public override void Load(ulong targetId, int count)
+    {
+        if (targetId != 0)
+            TryAdd((int)targetId);
+        else
+            base.Load(targetId, count);
+    }
+}

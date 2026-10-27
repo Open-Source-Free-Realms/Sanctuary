@@ -14,6 +14,8 @@ public interface IQuestManager
 
     void OnEvent(Player player, QuestEvent questEvent);
 
+    bool CanGatherQuestNode(Player player, CollectionNode node);
+
     void AcceptQuest(Player player, int questId);
 
     bool CompleteQuest(Player player, int questId);
