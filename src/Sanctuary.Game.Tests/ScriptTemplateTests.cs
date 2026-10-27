@@ -19,8 +19,9 @@ public sealed class ScriptTemplateTests
     {
         public ulong Guid => 1;
         public string? Name { get; set; } = "Stub";
-        public IScriptableZone Zone => null!;
+        public IScriptableZone Zone { get; } = new StubZone();
         public (float x, float y, float z) Position => (0, 0, 0);
+        public List<ulong> NearbyGuids { get; } = [];
         public ILogger Logger => NullLogger.Instance;
         public ScriptRuntime ScriptRuntime { get; } = new(NullLogger.Instance);
 
@@ -37,14 +38,49 @@ public sealed class ScriptTemplateTests
         public bool IsMoving => false;
         public void SetHeading(float heading) { }
         public void SetSpeed(float speed) { }
-        public IReadOnlyList<ulong> GetNearbyPlayerGuids(float radius) => [];
+        public IReadOnlyList<ulong> GetNearbyPlayerGuids(float radius) => NearbyGuids;
         public void PlayAnimation(int animationId) { }
         public void SetBaseAnimation(int animationId) { }
-        public IReadOnlyList<ulong> GetPlayerGuidsOnTop(float horizontalRadius, float minHeight, float maxHeight) => [];
-        public int AddEffectTag(int compositeEffectId) => 0;
+        public IReadOnlyList<ulong> GetPlayerGuidsOnTop(float horizontalRadius, float minHeight, float maxHeight) => NearbyGuids;
+        public int AddEffectTag(int compositeEffectId) => 1;
         public void RemoveEffectTag(int tagId) { }
         public void PlayEffect(int compositeEffectId) { }
         public void Remove(int compositeEffectId) { }
+    }
+
+    private sealed class StubZone : IScriptableZone
+    {
+        public IScriptManager ScriptManager => null!;
+        public int Id => 1;
+        public string Name => "stub";
+        public ILogger Logger => NullLogger.Instance;
+        public ScriptRuntime ScriptRuntime => throw new NotSupportedException();
+
+        public ScriptContext GetOrCreateScriptContext() => throw new NotSupportedException();
+        public bool TryAddScript(string scriptName) => false;
+        public bool TryRemoveScript(string scriptName) => false;
+        public void SetClientAreaEnabled(int areaId, bool enabled) { }
+        public void Broadcast(string message) { }
+        public void BroadcastNear(string message, float x, float z, float radius) { }
+        public bool IsSeasonActive(string seasonName) => false;
+
+        public bool TrySpawnNpc(int npcId, ulong? npcGuid, float x, float y, float z, float heading, float pitch, float roll, out IScriptableNpc npc)
+        {
+            npc = null!;
+            return false;
+        }
+    }
+
+    private sealed class StubPlayer : IScriptablePlayer
+    {
+        public ulong Guid => 7;
+        public string Name => "Tester";
+        public (float x, float y, float z) Position { get; set; }
+
+        public void Message(string message) { }
+        public void GiveItem(int itemDefinitionId, int quantity) { }
+        public void AcceptQuest(int questId) { }
+        public bool HasCompletedQuest(int questId) => false;
     }
 
     private const string Sample = """
@@ -114,6 +150,52 @@ public sealed class ScriptTemplateTests
             var (sandbox, compileError) = await ScriptSandbox.CompileAsync(new StubNpc(), source, template.Name);
 
             Assert.IsNotNull(sandbox, $"{file}: {compileError}");
+        }
+    }
+
+    [TestMethod]
+    public async Task ShippedTemplates_RunEveryHook()
+    {
+        foreach (var file in Directory.GetFiles(FindTemplatesDirectory(), "*.lua"))
+        {
+            var template = ScriptTemplate.Parse(File.ReadAllText(file), null, null, true);
+            Assert.IsTrue(template.TryRender(new Dictionary<string, string>(), out var source, out _));
+
+            var npc = new StubNpc();
+            var player = new StubPlayer();
+            var (sandbox, compileError) = await ScriptSandbox.CompileAsync(npc, source, template.Name);
+            Assert.IsNotNull(sandbox, $"{file}: {compileError}");
+
+            async Task Run(string hook, IScriptablePlayer? who = null, string? argument = null)
+            {
+                var error = await sandbox.CallAsync(hook, who, argument);
+                Assert.IsNull(error, $"{template.Name} {hook}: {error}");
+            }
+
+            await Run("onSpawn");
+
+            // A player clicks, walks off and is away a while, then comes back step by step and stays.
+            await Run("onInteract", player);
+            await Run("onChoice", player, "right");
+            await Run("onChoice", player, "wrong");
+
+            for (var second = 0; second < 200; second++)
+            {
+                var away = second < 40 ? 40f : Math.Max(0f, 40f - (second - 40));
+                player.Position = (away, 0, 0);
+
+                npc.NearbyGuids.Clear();
+                if (away < 12)
+                    npc.NearbyGuids.Add(player.Guid);
+
+                if (away == 5)
+                    await Run("onProximity", player);
+
+                if (second % 25 == 0)
+                    await Run("onInteract", player);
+
+                await Run("onSecond");
+            }
         }
     }
 
