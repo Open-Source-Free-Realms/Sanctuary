@@ -537,7 +537,7 @@ public class GatewayConnection : UdpConnection
         {
             var guildData = new GuildData
             {
-                Guid = dbGuild.Id,
+                Guid = GuidHelper.GetGuildGuid(dbGuild.Id),
 
                 Name = dbGuild.Name,
 
