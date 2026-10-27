@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -45,6 +45,8 @@ public class Npc : IScriptableNpc, IEntity
 
     public RoutineManager Routines { get; }
     public ScriptRuntime ScriptRuntime => Zone.ScriptRuntime;
+
+    public int DefinitionId { get; set; }
 
     public int NameId { get; set; }
     public string? Name { get; set; }
@@ -145,6 +147,9 @@ public class Npc : IScriptableNpc, IEntity
 
     public void OnInteract(Player player)
     {
+        if (InteractionMenuHelper.TryOpenMenu(player, this, Zone.GetInteractionOptions(player, this)))
+            return;
+
         if (OpensAtlas)
         {
             var executeScriptPacket = OpenAtlasInteraction.GetAtlasPacket(this, player);
@@ -277,7 +282,7 @@ public class Npc : IScriptableNpc, IEntity
             visiblePlayer.Value.SendSerialized(data);
     }
 
-    public void UpdatePosition(Vector4 position, Quaternion rotation, bool updateZoneArea = true) =>
+    public void UpdatePosition(Vector4 position, Quaternion rotation) =>
         UpdatePosition(position, rotation, StoppedPositionState);
 
     private void UpdatePosition(Vector4 position, Quaternion rotation, byte state)
@@ -461,7 +466,7 @@ public class Npc : IScriptableNpc, IEntity
 
             ActiveProfile = default,
 
-            Unknown67 = default,
+            NotificationImageSetId = default,
             Unknown68 = default,
 
             NameScale = default,

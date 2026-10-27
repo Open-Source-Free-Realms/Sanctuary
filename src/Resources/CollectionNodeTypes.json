@@ -151,5 +151,55 @@
     "CursorId": 18,
     "PlacementYOffset": -0.05,
     "SubTextNameId": -2118222202
+  },
+  {
+    "Key": "hastis-homework",
+    "Name": "Hasti's Homework",
+    "ModelId": 584,
+    "Scale": 1,
+    "CompositeEffectId": 5742,
+    "InteractRange": 12,
+    "CursorId": 17,
+    "PlacementYOffset": 0
+  },
+  {
+    "Key": "smashing-hammers",
+    "Name": "Hammer",
+    "ModelId": 197,
+    "Scale": 1,
+    "CompositeEffectId": 5742,
+    "InteractRange": 12,
+    "CursorId": 17,
+    "PlacementYOffset": 0
+  },
+  {
+    "Key": "smashing-chisels",
+    "Name": "Chisel",
+    "ModelId": 196,
+    "Scale": 1,
+    "CompositeEffectId": 5742,
+    "InteractRange": 12,
+    "CursorId": 17,
+    "PlacementYOffset": 0
+  },
+  {
+    "Key": "box-o-rocks",
+    "Name": "Rock",
+    "ModelId": 84,
+    "Scale": 1,
+    "CompositeEffectId": 5742,
+    "InteractRange": 12,
+    "CursorId": 17,
+    "PlacementYOffset": 0
+  },
+  {
+    "Key": "tin-ore",
+    "Name": "Tin Ore",
+    "ModelId": 611,
+    "Scale": 1,
+    "CompositeEffectId": 5742,
+    "InteractRange": 12,
+    "CursorId": 17,
+    "PlacementYOffset": 0
   }
 ]

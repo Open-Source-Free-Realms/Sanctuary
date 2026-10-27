@@ -7,6 +7,7 @@ using System.Numerics;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+using Sanctuary.Game.Quests;
 using Sanctuary.Game.Resources;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.QuestGoals;
@@ -77,7 +78,7 @@ public sealed class QuestDefinitionTests
 
         Assert.IsTrue(quests.TryGet(2, out var second));
         CollectionAssert.Contains(second.ExcludesQuestIds, 1);
-        Assert.IsFalse(second.IsOfferableFor(new Dictionary<int, bool> { [1] = false }));
+        Assert.IsFalse(second.IsOfferableFor(Log((1, false))));
     }
 
     [TestMethod]
@@ -105,13 +106,13 @@ public sealed class QuestDefinitionTests
     {
         var quest = new QuestDefinition { QuestId = 2 };
 
-        Assert.IsTrue(quest.IsOfferableFor(new Dictionary<int, bool>()));
+        Assert.IsTrue(quest.IsOfferableFor(Log()));
 
         quest.PrerequisiteQuestId = 1;
 
-        Assert.IsFalse(quest.IsOfferableFor(new Dictionary<int, bool>()));
-        Assert.IsFalse(quest.IsOfferableFor(new Dictionary<int, bool> { [1] = false }));
-        Assert.IsTrue(quest.IsOfferableFor(new Dictionary<int, bool> { [1] = true }));
+        Assert.IsFalse(quest.IsOfferableFor(Log()));
+        Assert.IsFalse(quest.IsOfferableFor(Log((1, false))));
+        Assert.IsTrue(quest.IsOfferableFor(Log((1, true))));
     }
 
     [TestMethod]
@@ -119,7 +120,7 @@ public sealed class QuestDefinitionTests
     {
         var quest = new QuestDefinition { QuestId = 3, PrerequisiteQuestId = 1, ExcludesQuestIds = [2] };
 
-        Assert.IsFalse(quest.IsOfferableFor(new Dictionary<int, bool> { [1] = true, [2] = true }));
+        Assert.IsFalse(quest.IsOfferableFor(Log((1, true), (2, true))));
     }
 
     [TestMethod]
@@ -150,5 +151,20 @@ public sealed class QuestDefinitionTests
         var path = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.json");
         File.WriteAllText(path, json);
         return path;
+    }
+
+    private static QuestLog Log(params (int QuestId, bool Completed)[] quests)
+    {
+        var log = new QuestLog();
+
+        foreach (var (questId, completed) in quests)
+        {
+            if (completed)
+                log.AddCompleted(questId);
+            else
+                log.Add(new QuestProgress(questId));
+        }
+
+        return log;
     }
 }
