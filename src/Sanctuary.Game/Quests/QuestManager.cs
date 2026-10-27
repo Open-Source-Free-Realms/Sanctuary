@@ -538,14 +538,20 @@ public sealed class QuestManager : IQuestManager
         if (!player.VisibleNpcs.TryGetValue(npcGuid, out var npc))
             return;
 
-        var iconStates = QuestBadgeIconStates(npc);
-        if (npc.Notification is not null)
-            iconStates.Add(npc.Notification.IconState);
-
         var removeNotifications = new PlayerUpdatePacketRemoveNotifications();
 
-        foreach (var iconState in iconStates)
-            removeNotifications.Notifications.Add(new RemoveNotificationInfo { Guid = npc.Guid, ThoughtBubbleIconId = iconState });
+        foreach (var (iconState, effectId) in QuestBadgeIconStates(npc))
+            removeNotifications.Notifications.Add(new RemoveNotificationInfo { Guid = npc.Guid, ThoughtBubbleIconId = iconState, CompositeEffectId = effectId });
+
+        if (npc.Notification is { } notification)
+        {
+            removeNotifications.Notifications.Add(new RemoveNotificationInfo
+            {
+                Guid = npc.Guid,
+                ThoughtBubbleIconId = notification.IconState,
+                CompositeEffectId = notification.Unknown3 ? notification.Unknown2 : 0
+            });
+        }
 
         if (removeNotifications.Notifications.Count > 0)
             player.SendTunneled(removeNotifications);
@@ -554,24 +560,32 @@ public sealed class QuestManager : IQuestManager
             player.SendTunneled(new PlayerUpdatePacketAddNotifications { Notifications = { badge } });
     }
 
+    private const int QuestBadgeNotificationType = 2;
+    private const int AvailableBadgeIconId = 2;
+
     public NotificationInfo? GetQuestBadge(Player player, Npc npc)
     {
-        var imageId = QuestBadgeImageId(player, npc);
+        var (imageId, waiting) = QuestBadgeImageId(player, npc);
         if (imageId == 0)
             return null;
+
+        if (waiting && npc.Notification is not null)
+            return npc.Notification;
 
         return new NotificationInfo
         {
             Guid = npc.Guid,
             IsCompact = false,
+            NotificationType = QuestBadgeNotificationType,
+            IconId = waiting ? 0 : AvailableBadgeIconId,
             IconState = imageId,
             NameId = npc.NameId,
             ReferenceId = npc.SubTextNameId,
-            Enabled = false
+            Enabled = true
         };
     }
 
-    private int QuestBadgeImageId(Player player, Npc npc)
+    private (int ImageId, bool Waiting) QuestBadgeImageId(Player player, Npc npc)
     {
         var quests = _resourceManager.Quests;
 
@@ -580,7 +594,7 @@ public sealed class QuestManager : IQuestManager
             foreach (var questId in giverQuestIds)
             {
                 if (quests.TryGet(questId, out var quest) && quest.IsOfferableFor(player.Quests))
-                    return quest.NotificationAvailable;
+                    return (quest.NotificationAvailable, false);
             }
         }
 
@@ -590,11 +604,11 @@ public sealed class QuestManager : IQuestManager
             {
                 if (player.Quests.TryGetInProgress(questId, out var progress) && quests.TryGet(questId, out var quest)
                     && quest.IsWaitingOn(progress, npc))
-                    return quest.NotificationActive;
+                    return (quest.NotificationActive, true);
             }
         }
 
-        return 0;
+        return (0, false);
     }
 
     public bool IsHiddenByQuest(Player player, Npc npc)
@@ -641,17 +655,17 @@ public sealed class QuestManager : IQuestManager
         }
     }
 
-    private HashSet<int> QuestBadgeIconStates(Npc npc)
+    private HashSet<(int IconState, int EffectId)> QuestBadgeIconStates(Npc npc)
     {
         var quests = _resourceManager.Quests;
-        var states = new HashSet<int>();
+        var states = new HashSet<(int IconState, int EffectId)>();
 
         if (quests.ByGiver.TryGetValue(npc.DefinitionId, out var giverQuestIds))
         {
             foreach (var questId in giverQuestIds)
             {
                 if (quests.TryGet(questId, out var quest) && quest.NotificationAvailable != 0)
-                    states.Add(quest.NotificationAvailable);
+                    states.Add((quest.NotificationAvailable, 0));
             }
         }
 
@@ -660,7 +674,7 @@ public sealed class QuestManager : IQuestManager
             foreach (var questId in targetQuestIds)
             {
                 if (quests.TryGet(questId, out var quest) && quest.NotificationActive != 0)
-                    states.Add(quest.NotificationActive);
+                    states.Add((quest.NotificationActive, 0));
             }
         }
 
