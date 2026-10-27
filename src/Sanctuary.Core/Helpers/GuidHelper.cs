@@ -32,7 +32,7 @@ public static class GuidHelper
     private const int NpcInstanceIdBits = 24;
     private const int NpcCounterShift = 36;
     private const int NpcCounterBits = 28;
-    private const int FixedNpcCounterBits = 17;
+    private const int FixedNpcCounterBits = 20;
 
     public const byte ServerId = 1;
     public const ulong OpenWorldInstanceId = 0;
