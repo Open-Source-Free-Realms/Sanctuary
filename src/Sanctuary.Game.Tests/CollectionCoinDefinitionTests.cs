@@ -43,9 +43,11 @@ public sealed class CollectionCoinDefinitionTests
             CollectionId = 10,
             EntryId = 20
         };
-        var coin = new CollectionCoin(null!, definition);
-        var collectedPlayer = new Player(null!, null!, null!, null!);
-        var otherPlayer = new Player(null!, null!, null!, null!);
+        using var zone = TestZone.Create();
+
+        var coin = new CollectionCoin(zone, definition);
+        var collectedPlayer = new Player(zone, null!, null!, null!);
+        var otherPlayer = new Player(zone, null!, null!, null!);
         collectedPlayer.CollectedCollectionEntryIds.TryAdd(definition.EntryId);
 
         Assert.IsFalse(coin.IsVisibleTo(collectedPlayer));

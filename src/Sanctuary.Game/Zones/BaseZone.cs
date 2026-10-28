@@ -9,6 +9,8 @@ using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 
+using DotRecast.Detour;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -22,12 +24,11 @@ using Sanctuary.Game.Interactions;
 using Sanctuary.Game.Quests;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Zones;
+using Sanctuary.Game.Routines;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Scripting;
 using Sanctuary.UdpLibrary;
-using Sanctuary.Game.Pathfinding;
-using Sanctuary.Game.Terrain;
 
 namespace Sanctuary.Game.Zones;
 
@@ -61,6 +62,7 @@ public abstract class BaseZone : IZone, IDisposable
     private const float TickRate = 1000f / FrameRate;
 
     public float TickDeltaSeconds => 1f / FrameRate;
+    public TimeSpan TickDelta => TimeSpan.FromMilliseconds(TickRate);
 
     private const ulong FirstNpcCounter = GuidHelper.MaxFixedNpcCounter + 1;
 
@@ -77,6 +79,8 @@ public abstract class BaseZone : IZone, IDisposable
     public string Name => _zoneDefinition.Name;
     public ILogger Logger => _logger;
 
+    public RoutineManager Routines { get; }
+
     public Vector4 SpawnPosition => _zoneDefinition.SpawnPosition;
     public Quaternion SpawnRotation => _zoneDefinition.SpawnRotation;
 
@@ -90,14 +94,8 @@ public abstract class BaseZone : IZone, IDisposable
     public IScriptManager ScriptManager => _scriptManager;
     public ScriptRuntime ScriptRuntime => _scriptRuntime;
 
-    public Pathfinder<MapNode>? Pathfinder { get; }
-
-    private readonly TerrainMesh? _terrainMesh;
-    private readonly NavMeshPathfinder? _navMeshPathfinder;
-    private readonly NavMeshPathfinder? _clientNavMeshPathfinder;
-
-    private const float RoadRouteMinDistance = 50f;
-    private const float RouteReachDistance = 1f;
+    public DtNavMeshQuery? NavMeshQuery { get; }
+    public IDtQueryFilter NavMeshFilter { get; } = new DtQueryDefaultFilter();
 
     public ulong? OwnerId { get; init; }
 
@@ -112,6 +110,8 @@ public abstract class BaseZone : IZone, IDisposable
         var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
 
         _logger = loggerFactory.CreateLogger($"Zone {Name} ({Id})");
+
+        Routines = new RoutineManager(_logger, TickDelta);
 
         _scriptManager = serviceProvider.GetRequiredService<IScriptManager>();
         _questManager = serviceProvider.GetRequiredService<IQuestManager>();
@@ -130,66 +130,9 @@ public abstract class BaseZone : IZone, IDisposable
             ArgumentNullException.ThrowIfNull(tile.Value.VisibleTiles);
         }
 
-        // Just in case we don't actually have the `.map` file for a particular zone.
-        if (_resourceManager.Maps.TryGetValue(Name, out var mapGraph))
-            Pathfinder = new Pathfinder<MapNode>(mapGraph.Nodes, _logger);
-
-        if (_resourceManager.Terrains.TryGetValue(Name, out var terrainMesh))
-            _terrainMesh = terrainMesh;
-
         if (_resourceManager.NavMeshes.TryGetValue(Name, out var navMesh))
-        {
-            _navMeshPathfinder = new NavMeshPathfinder(navMesh);
-            _clientNavMeshPathfinder = new NavMeshPathfinder(navMesh);
-        }
+            NavMeshQuery = new DtNavMeshQuery(navMesh);
     }
-
-    public bool HasGroundData => _terrainMesh is not null;
-
-    public bool TryGetGroundHeight(float x, float z, float fromY, float maxDrop, out float height)
-    {
-        if (_terrainMesh is not null)
-            return _terrainMesh.TryGetGroundHeight(x, z, fromY, maxDrop, out height);
-
-        height = default;
-        return false;
-    }
-
-    public bool IsWalkable(Vector3 start, Vector3 goal, float maxStepUp, float maxStepDown, out float goalHeight)
-    {
-        if (_terrainMesh is not null)
-            return _terrainMesh.IsWalkable(start, goal, maxStepUp, maxStepDown, out goalHeight);
-
-        goalHeight = goal.Y;
-        return true;
-    }
-
-    public bool TryGetWalkableGoal(Vector3 start, Vector3 goal, float maxStepUp, float maxStepDown, out Vector3 walkableGoal)
-    {
-        walkableGoal = goal;
-
-        if (!IsWalkable(start, goal, maxStepUp, maxStepDown, out var goalHeight))
-            return false;
-
-        walkableGoal.Y = goalHeight;
-        return true;
-    }
-
-    public Vector3 GetGroundPosition(Vector3 position, float maxStepUp, float maxDrop)
-    {
-        if (TryGetGroundHeight(position.X, position.Z, position.Y + maxStepUp, maxDrop, out var groundHeight))
-            position.Y = groundHeight;
-
-        return position;
-    }
-
-    public bool HasNavMesh => _navMeshPathfinder is not null;
-
-    public bool TryFindNavMeshPath(Vector3 start, Vector3 goal, Queue<Vector3> waypoints) =>
-        _navMeshPathfinder is not null && _navMeshPathfinder.TryFindPath(start, goal, waypoints);
-
-    public bool TryFindClientNavMeshPath(Vector3 start, Vector3 goal, Queue<Vector3> waypoints) =>
-        _clientNavMeshPathfinder is not null && _clientNavMeshPathfinder.TryFindPath(start, goal, waypoints);
 
     public virtual IReadOnlyList<NpcInteractionOption> GetInteractionOptions(Player player, Npc npc) => [];
 
@@ -198,37 +141,6 @@ public abstract class BaseZone : IZone, IDisposable
     public virtual bool IsHiddenByQuest(Player player, Npc npc) => false;
 
     public virtual int GetQuestEffectId(Player player, Npc npc) => 0;
-
-    public bool TryFindRoute(Vector3 start, Vector3 goal, Queue<Vector3> waypoints)
-    {
-        if (Pathfinder is null || start.DistanceSquaredXZ(goal) < RoadRouteMinDistance * RoadRouteMinDistance)
-            return TryFindNavMeshPath(start, goal, waypoints);
-
-        var roadNodes = Pathfinder.FindPath(start, goal);
-
-        if (roadNodes.Count == 0 || !TryFindNavMeshPath(start, roadNodes[0].Position, waypoints)
-            || waypoints.Last().DistanceSquaredXZ(roadNodes[0].Position) > RouteReachDistance * RouteReachDistance)
-        {
-            return TryFindNavMeshPath(start, goal, waypoints);
-        }
-
-        for (var node = 1; node < roadNodes.Count; node++)
-            waypoints.Enqueue(roadNodes[node].Position);
-
-        var legWaypoints = new Queue<Vector3>();
-
-        if (TryFindNavMeshPath(roadNodes[^1].Position, goal, legWaypoints))
-        {
-            foreach (var waypoint in legWaypoints)
-                waypoints.Enqueue(waypoint);
-        }
-
-        return true;
-    }
-
-    public bool TryFindReachableRoute(Vector3 start, Vector3 goal, Queue<Vector3> waypoints, bool followRoads) =>
-        (followRoads ? TryFindRoute(start, goal, waypoints) : TryFindNavMeshPath(start, goal, waypoints))
-        && waypoints.Last().DistanceSquaredXZ(goal) <= RouteReachDistance * RouteReachDistance;
 
     #region Events
 
@@ -1588,6 +1500,8 @@ public abstract class BaseZone : IZone, IDisposable
             try
             {
                 ProcessCollectionNodeRefills();
+
+                Routines.OnTick();
 
                 foreach (var entity in _entities)
                 {
