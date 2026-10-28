@@ -222,6 +222,11 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     b.Property<int>("CurrentGoalId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTimeOffset>("Started")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("DATE()");
+
                     b.HasKey("QuestId", "CharacterId");
 
                     b.HasIndex("CharacterId");

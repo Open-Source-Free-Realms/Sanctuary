@@ -10,7 +10,7 @@ public enum NpcMovementType
 
 public sealed class NpcMovementDefinition
 {
-    public ulong Guid { get; set; }
+    public int NpcId { get; set; }
     public string? ModelFileName { get; set; }
     public NpcMovementType Type { get; set; }
 

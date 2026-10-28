@@ -83,6 +83,7 @@ public class Npc : IScriptableNpc, IEntity
     public int CompositeEffectId { get; set; }
 
     public int InteractRange { get; set; } = 100;
+    public int QuestInteractRange { get; set; }
     public bool IsInteractable { get; set; } = true;
     public bool OpensAtlas { get; set; }
     public bool AutoSelectSingleInteraction { get; set; }

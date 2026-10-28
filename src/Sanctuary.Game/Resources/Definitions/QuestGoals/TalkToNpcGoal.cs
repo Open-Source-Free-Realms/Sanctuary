@@ -12,6 +12,8 @@ public sealed class TalkToNpcGoal : QuestGoal
 
     public bool IsCounted => RequiredCount > 1;
 
+    public bool CompleteAfterDialogue { get; set; }
+
     public int TargetNpcId(QuestDefinition quest)
         => AllTalkTargetNpcIds().FirstOrDefault() is var npcId and not 0 ? npcId : quest.TargetNpcId;
 

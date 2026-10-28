@@ -20,6 +20,7 @@ public class CommandPacketShowDialog : BaseCommandPacket, ISerializablePacket
     public int DialogueTextId;
     public int TitleTextId;
     public ulong NpcGuid;
+    public bool Closable;
 
     public float CameraFocusParam = 1f;
 
@@ -38,7 +39,7 @@ public class CommandPacketShowDialog : BaseCommandPacket, ISerializablePacket
         writer.Write(DialogueTextId);
         writer.Write(TitleTextId);
         writer.Write(NpcGuid);
-        writer.Write(false);
+        writer.Write(Closable);
         writer.Write(CameraFocusParam);
 
         writer.Write(Responses.Count);
