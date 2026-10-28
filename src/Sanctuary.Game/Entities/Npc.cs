@@ -13,6 +13,7 @@ using Sanctuary.Game.Pathfinding;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Interactions;
+using Sanctuary.Game.Routines;
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -41,6 +42,8 @@ public class Npc : IScriptableNpc, IEntity
     public ConcurrentDictionary<ulong, Npc> VisibleNpcs { get; } = [];
     public ConcurrentDictionary<ulong, Player> VisiblePlayers { get; } = [];
     public ILogger Logger => Zone.Logger;
+
+    public RoutineManager Routines { get; }
     public ScriptRuntime ScriptRuntime => Zone.ScriptRuntime;
 
     public int DefinitionId { get; set; }
@@ -137,6 +140,8 @@ public class Npc : IScriptableNpc, IEntity
     public Npc(IZone zone)
     {
         Zone = zone;
+
+        Routines = new RoutineManager(Logger, zone.TickDelta);
     }
 
     #region Events
@@ -206,6 +211,8 @@ public class Npc : IScriptableNpc, IEntity
 
     public void UpdateEveryTick()
     {
+        Routines.OnTick();
+
         UpdateEveryTickAction?.Invoke();
         if (!_scripts.IsEmpty)
             GetOrCreateScriptContext().FireEvent("tick");

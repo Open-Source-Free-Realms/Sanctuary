@@ -21,6 +21,7 @@ using Sanctuary.Game.Interactions;
 using Sanctuary.Game.Quests;
 using Sanctuary.Game.Resources.Definitions.Combat;
 using Sanctuary.Game.Resources.Definitions;
+using Sanctuary.Game.Routines;
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -53,6 +54,8 @@ public sealed class Player : ClientPcData, IEntity
     private readonly IZoneManager _zoneManager;
 
     public bool Visible { get; set; }
+
+    public RoutineManager Routines { get; }
 
     public IZone Zone { get; set; }
     public ZoneTile ZoneTile { get; private set; } = ZoneTile.Empty;
@@ -213,6 +216,8 @@ public sealed class Player : ClientPcData, IEntity
         _resourceManager = resourceManager;
         _zoneManager = zoneManager;
         PlayerPet = new PlayerPet(this, resourceManager);
+
+        Routines = new RoutineManager(zone.Logger, zone.TickDelta);
     }
 
     #region Connection
@@ -358,6 +363,8 @@ public sealed class Player : ClientPcData, IEntity
     public void UpdateEveryTick()
     {
         var now = DateTimeOffset.UtcNow;
+
+        Routines.OnTick();
 
         TickEffects(now);
 
