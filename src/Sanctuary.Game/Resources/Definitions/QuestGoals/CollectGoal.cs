@@ -25,10 +25,10 @@ public sealed class CollectGoal : QuestGoal
 
     public override QuestGoalResult Progress(QuestDefinition quest, QuestEvent questEvent, GoalProgress progress)
     {
-        if (!Matches(quest, questEvent))
+        if (!Matches(quest, questEvent) || questEvent is not NodeGatheredEvent { Node: var node })
             return QuestGoalResult.None;
 
-        if (progress is not CollectProgress collectProgress || !collectProgress.TryAdd(((NodeGatheredEvent)questEvent).Node.SpawnDefinition.Id))
+        if (progress is not CollectProgress collectProgress || !collectProgress.TryAdd(node.SpawnDefinition.Id))
             return QuestGoalResult.None;
 
         return progress.Count >= RequiredCount ? QuestGoalResult.Completed : QuestGoalResult.Progressed;
