@@ -24,7 +24,7 @@ public sealed class FrostfangGrowlerEncounter : CombatEncounter
     private const int RewardItemQuantity = 1;
     private const int NoTintId = -1;
 
-    private const int RetailEncounterDefinitionId = 1008;
+    private const int DefaultEncounterDefinitionId = 1008;
     private const int FrostfangGrowlerNameId = 93276;
     private const int FrostfangGrowlerIconId = 28605;
     private const int FrostfangGrowlerDescriptionId = 104171;
@@ -180,7 +180,7 @@ public sealed class FrostfangGrowlerEncounter : CombatEncounter
         return new MiniGameUiDefinition
         {
             GameId = FrostfangGrowlerGameId,
-            EncounterDefinitionId = RetailEncounterDefinitionId,
+            EncounterDefinitionId = DefaultEncounterDefinitionId,
             NameId = FrostfangGrowlerNameId,
             IconId = FrostfangGrowlerIconId,
             DescriptionId = FrostfangGrowlerDescriptionId,

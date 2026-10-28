@@ -41358,5 +41358,64 @@
     "Name": "Vampire Cake",
     "ModelId": 3324,
     "ModelFileName": "mkt_cakes_vampire_01.adr"
+  },
+  {
+    "Id": 40013,
+    "NameId": 4217,
+    "Name": "Ice Block",
+    "ModelId": 68,
+    "ModelFileName": "sh_icecube_01.adr",
+    "Scale": 4,
+    "HasCursor": true,
+    "CursorId": 17
+  },
+  {
+    "Id": 40016,
+    "NameId": 389719,
+    "Name": "Cat Bowl",
+    "ModelId": 349,
+    "ModelFileName": "bowl_basic.adr"
+  },
+  {
+    "Id": 40017,
+    "NameId": 389719,
+    "Name": "Cat Bowl",
+    "ModelId": 349,
+    "ModelFileName": "bowl_basic.adr"
+  },
+  {
+    "Id": 40018,
+    "NameId": 389719,
+    "Name": "Cat Bowl",
+    "ModelId": 349,
+    "ModelFileName": "bowl_basic.adr"
+  },
+  {
+    "Id": 40019,
+    "NameId": 389719,
+    "Name": "Cat Bowl",
+    "ModelId": 349,
+    "ModelFileName": "bowl_basic.adr"
+  },
+  {
+    "Id": 40032,
+    "NameId": 438962,
+    "Name": "Freewheeler",
+    "ModelId": 3840,
+    "ModelFileName": "dwarf_m_sunstonebikerthuglonghair.adr"
+  },
+  {
+    "Id": 40033,
+    "NameId": 438963,
+    "Name": "Freewheeler",
+    "ModelId": 1639,
+    "ModelFileName": "dwarf_m_biker.adr"
+  },
+  {
+    "Id": 40034,
+    "NameId": 438964,
+    "Name": "Freewheeler",
+    "ModelId": 3987,
+    "ModelFileName": "dwarf_f_bikerthug.adr"
   }
 ]

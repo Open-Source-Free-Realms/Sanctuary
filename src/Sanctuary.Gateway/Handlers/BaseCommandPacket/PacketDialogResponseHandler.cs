@@ -3,6 +3,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using Sanctuary.Game.Quests;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
@@ -26,6 +27,9 @@ public static class PacketDialogResponseHandler
             _logger.LogError("Failed to deserialize {packet}.", nameof(PacketDialogResponse));
             return false;
         }
+
+        if (QuestDialogue.TryAdvance(connection.Player, packet.ResponseId))
+            return true;
 
         connection.Player.SendTunneled(new CommandPacketEndDialog());
         return true;

@@ -22,6 +22,7 @@ public class QuestDefinitionCollection
     // NPC definition id -> the quests it offers, and the quests it is a goal target or turn-in for.
     public ConcurrentDictionary<int, List<int>> ByGiver { get; } = new();
     public ConcurrentDictionary<int, List<int>> ByTarget { get; } = new();
+    public ConcurrentDictionary<int, List<int>> ByStateNpc { get; } = new();
 
     public QuestDefinitionCollection(ILogger logger)
     {
@@ -29,6 +30,28 @@ public class QuestDefinitionCollection
     }
 
     public bool TryGet(int questId, out QuestDefinition definition) => Quests.TryGetValue(questId, out definition!);
+
+    public bool TryGetNpcCursorId(int npcId, out byte cursorId)
+    {
+        cursorId = 0;
+
+        foreach (var index in new[] { ByGiver, ByTarget })
+        {
+            if (!index.TryGetValue(npcId, out var questIds))
+                continue;
+
+            foreach (var questId in questIds)
+                if (TryGet(questId, out var quest))
+                    foreach (var goal in quest.Goals)
+                        if (goal.CursorId != 0)
+                        {
+                            cursorId = goal.CursorId;
+                            return true;
+                        }
+        }
+
+        return false;
+    }
 
     public bool TryGetNpcInteractRange(int npcId, out int interactRange)
     {
@@ -104,6 +127,9 @@ public class QuestDefinitionCollection
                     ByTarget.GetOrAdd(entry.TargetNpcId, _ => []).Add(entry.QuestId);
 
                 IndexGoals(entry, filePath);
+
+                foreach (var stateNpcId in entry.StateNpcIds())
+                    ByStateNpc.GetOrAdd(stateNpcId, _ => []).Add(entry.QuestId);
             }
 
             EnforceSymmetricExclusions(filePath);

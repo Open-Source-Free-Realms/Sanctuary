@@ -6,10 +6,10 @@ namespace Sanctuary.Game.MiniGames;
 
 public static class SignUpMiniGameDefinitions
 {
-    private const int RetailEncounterDefinitionId = 1008;
-    private const int RetailDurationMs = 2000;
-    private const int RetailRespawnTime = 10000;
-    private const int RetailDifficulty = 1;
+    private const int DefaultEncounterDefinitionId = 1008;
+    private const int DefaultDurationMs = 2000;
+    private const int DefaultRespawnTime = 10000;
+    private const int DefaultDifficulty = 1;
     private const int NoRewardIconId = -1;
     private const int NoRewardNameId = -1;
     private const float DefaultRewardMultiplier = 1f;
@@ -62,17 +62,17 @@ public static class SignUpMiniGameDefinitions
         return new MiniGameUiDefinition
         {
             GameId = activityId,
-            EncounterDefinitionId = RetailEncounterDefinitionId,
+            EncounterDefinitionId = DefaultEncounterDefinitionId,
             DetailsType = detailsType,
             DetailsUnknown3 = false,
             PreselectedGameId = miniGameId,
             NameId = nameId,
             IconId = iconId,
             DescriptionId = descriptionId,
-            Difficulty = RetailDifficulty,
+            Difficulty = DefaultDifficulty,
             Type = miniGameType,
-            DurationMs = RetailDurationMs,
-            RespawnTime = RetailRespawnTime,
+            DurationMs = DefaultDurationMs,
+            RespawnTime = DefaultRespawnTime,
             ShowStarCounter = true,
             ShowStatusIcon = true,
             ShowActionBar = true,

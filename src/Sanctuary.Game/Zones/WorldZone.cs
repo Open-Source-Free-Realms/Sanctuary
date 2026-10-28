@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Extensions;
 using Sanctuary.Core.IO;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
+using Sanctuary.Game.Interactions;
+using Sanctuary.Game.Quests;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Zones;
 using Sanctuary.Packet;
@@ -19,10 +22,15 @@ namespace Sanctuary.Game.Zones;
 public sealed class WorldZone : BaseZone
 {
     private readonly WorldZoneDefinition _zoneDefinition;
+    private readonly IQuestManager _questManager;
 
     private readonly object _clientAreasLock = new();
     private readonly HashSet<SeasonalClientAreaDefinition> _activeSeasonalClientAreas = [];
     private readonly HashSet<int> _scriptEnabledClientAreaIds = [];
+
+    private readonly Dictionary<(int Longitude, int Latitude), ZoneAreaDefinition> _tileZoneAreas = [];
+    private readonly List<ZoneAreaDefinition> _shapeZoneAreas = [];
+    private readonly Dictionary<int, List<ZoneAreaDefinition>> _environmentZoneAreas = [];
 
     private const int ClientAreaRefreshSeconds = 3;
     private int _secondsSinceClientAreaRefresh;
@@ -32,11 +40,41 @@ public sealed class WorldZone : BaseZone
     {
         _zoneDefinition = zoneDefinition;
 
+        foreach (var areaDefinition in _zoneDefinition.AreaDefinitions)
+        {
+            if (areaDefinition.Tiles.Count > 0)
+            {
+                foreach (var tile in areaDefinition.Tiles)
+                    _tileZoneAreas[(tile[0], tile[1])] = areaDefinition;
+
+                continue;
+            }
+
+            if (areaDefinition.EnvironmentIds.Count == 0)
+            {
+                _shapeZoneAreas.Add(areaDefinition);
+                continue;
+            }
+
+            foreach (var environmentId in areaDefinition.EnvironmentIds)
+            {
+                if (!_environmentZoneAreas.TryGetValue(environmentId, out var environmentZoneAreas))
+                {
+                    environmentZoneAreas = [];
+                    _environmentZoneAreas[environmentId] = environmentZoneAreas;
+                }
+
+                environmentZoneAreas.Add(areaDefinition);
+            }
+        }
+
         foreach (var seasonalClientArea in _zoneDefinition.SeasonalClientAreas)
         {
             if (seasonalClientArea.IsActive(DateTime.Now))
                 _activeSeasonalClientAreas.Add(seasonalClientArea);
         }
+
+        _questManager = serviceProvider.GetRequiredService<IQuestManager>();
     }
 
     public override void OnClientIsReady(Player player)
@@ -51,13 +89,41 @@ public sealed class WorldZone : BaseZone
 
         if (player.SeenOneTimeNotifications.TryAdd(OneTimeNotification.WelcomeInfo))
             SendWelcomeInfo(player);
+
+        _questManager.RestoreJournal(player);
+
+        foreach (var npc in Npcs)
+        {
+            if (!_questManager.IsQuestNpc(npc.DefinitionId))
+                continue;
+
+            if (_resourceManager.Quests.TryGetNpcCursorId(npc.DefinitionId, out var cursorId))
+                npc.CursorId = cursorId;
+
+            if (_resourceManager.Quests.TryGetNpcInteractRange(npc.DefinitionId, out var interactRange))
+                npc.QuestInteractRange = interactRange;
+
+            _questManager.RefreshQuestNotification(player, npc.Guid);
+        }
     }
+
+    public override IReadOnlyList<NpcInteractionOption> GetInteractionOptions(Player player, Npc npc)
+        => _questManager.IsQuestNpc(npc.DefinitionId) ? _questManager.GetInteractionOptions(player, npc) : [];
+
+    public override NotificationInfo? GetQuestBadge(Player player, Npc npc)
+        => _questManager.IsQuestNpc(npc.DefinitionId) ? _questManager.GetQuestBadge(player, npc) : null;
+
+    public override bool IsHiddenByQuest(Player player, Npc npc) => _questManager.IsHiddenByQuest(player, npc);
+
+    public override int GetQuestEffectId(Player player, Npc npc) => _questManager.GetQuestEffectId(player, npc);
 
     public override void OnClientFinishedLoading(Player player)
     {
         base.OnClientFinishedLoading(player);
 
         SendEnabledClientAreas(player);
+
+        player.UpdatePointOfInterest(GetNearestZoneArea(player.Position));
     }
 
     protected override void UpdateEverySecond()
@@ -139,12 +205,17 @@ public sealed class WorldZone : BaseZone
             player.SendTunneled(new PacketSetClientArea { AreaId = areaId, Enabled = enabled });
     }
 
-    public int GetZoneAreaId(Vector4 position)
+    public ZoneAreaDefinition? GetZoneArea(Vector4 position)
     {
-        if (_zoneDefinition.Name != "FabledRealms")
-            return 0;
+        return GetZoneArea(position, GetTileFromPosition(position));
+    }
 
-        foreach (var areaDefinition in _zoneDefinition.AreaDefinitions)
+    public ZoneAreaDefinition? GetZoneArea(Vector4 position, ZoneTile zoneTile)
+    {
+        if (_tileZoneAreas.TryGetValue((zoneTile.Longitude, zoneTile.Latitude), out var tileZoneArea))
+            return tileZoneArea;
+
+        foreach (var areaDefinition in _shapeZoneAreas)
         {
             var isInArea = areaDefinition.Shape switch
             {
@@ -156,10 +227,40 @@ public sealed class WorldZone : BaseZone
             };
 
             if (isInArea)
-                return areaDefinition.Id;
+                return areaDefinition;
         }
 
-        return 0;
+        if (!_environmentZoneAreas.TryGetValue(zoneTile.EnvironmentId, out var environmentZoneAreas))
+            return null;
+
+        return environmentZoneAreas.FirstOrDefault(x => x.IsInEnvironmentXRange(position.X));
+    }
+
+    public ZoneAreaDefinition? GetNearestZoneArea(Vector4 position)
+    {
+        var zoneArea = GetZoneArea(position);
+
+        if (zoneArea is not null)
+            return zoneArea;
+
+        ZoneAreaDefinition? nearestZoneArea = null;
+        var nearestDistance = float.MaxValue;
+
+        foreach (var areaDefinition in _zoneDefinition.AreaDefinitions)
+        {
+            if (!_resourceManager.PointOfInterests.TryGetValue(areaDefinition.PointOfInterestId, out var pointOfInterest))
+                continue;
+
+            var distance = pointOfInterest.Position.ToVector3().DistanceSquaredXZ(position.ToVector3());
+
+            if (distance >= nearestDistance)
+                continue;
+
+            nearestDistance = distance;
+            nearestZoneArea = areaDefinition;
+        }
+
+        return nearestZoneArea;
     }
 
     private void SendPointOfInterests(Player player)

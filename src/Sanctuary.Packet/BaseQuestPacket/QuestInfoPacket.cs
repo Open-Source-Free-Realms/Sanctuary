@@ -10,11 +10,11 @@ public class QuestInfoPacket : BaseQuestPacket, ISerializablePacket
     public new const int OpCode = 1;
 
     public int QuestId;
-    public int TitleId;
+    public int NpcDialogId;
+    public int NpcAnimationId;
+    public int NameId;
     public int DescriptionId;
-    public int HelperTextId;
-    public int IconId;
-    public int GoalsTextId;
+    public int Unused;
     public bool MembersOnly;
 
     public ulong NpcGuid;
@@ -41,11 +41,11 @@ public class QuestInfoPacket : BaseQuestPacket, ISerializablePacket
         Write(writer);
 
         writer.Write(QuestId);
-        writer.Write(TitleId);
+        writer.Write(NpcDialogId);
+        writer.Write(NpcAnimationId);
+        writer.Write(NameId);
         writer.Write(DescriptionId);
-        writer.Write(HelperTextId);
-        writer.Write(IconId);
-        writer.Write(GoalsTextId);
+        writer.Write(Unused);
         writer.Write(MembersOnly);
 
         RewardBundle.Serialize(writer);

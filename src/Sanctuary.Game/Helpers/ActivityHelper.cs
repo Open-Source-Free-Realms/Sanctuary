@@ -13,9 +13,9 @@ public static class ActivityHelper
     public const int WorldServerType = 1;
     public const int ZoneServerType = 2;
 
-    private const int RetailEncounterDefinitionId = 1008;
-    private const int RetailDurationMs = 2000;
-    private const int RetailRespawnTime = 10000;
+    private const int DefaultEncounterDefinitionId = 1008;
+    private const int DefaultDurationMs = 2000;
+    private const int DefaultRespawnTime = 10000;
     public const int MiniGameAppSystemId = 1;
     private const int CombatMiniGameType = 4;
     private const int NoRewardIconId = -1;
@@ -92,15 +92,15 @@ public static class ActivityHelper
         return new MiniGameUiDefinition
         {
             GameId = clientActivityDefinition.Id,
-            EncounterDefinitionId = RetailEncounterDefinitionId,
+            EncounterDefinitionId = DefaultEncounterDefinitionId,
             NameId = clientActivityDefinition.NameId,
             IconId = clientActivityDefinition.ImageSetId,
             DescriptionId = clientActivityDefinition.DescriptionId,
             Difficulty = clientActivityDefinition.Difficulty,
             Type = miniGameType,
             PreselectedGameId = miniGameDefinition?.Id ?? default,
-            DurationMs = RetailDurationMs,
-            RespawnTime = RetailRespawnTime,
+            DurationMs = DefaultDurationMs,
+            RespawnTime = DefaultRespawnTime,
             ShowStarCounter = true,
             ShowStatusIcon = true,
             ShowActionBar = true,

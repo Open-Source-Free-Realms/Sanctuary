@@ -39,6 +39,21 @@ public static class CommandPacketInteractionSelectHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(CommandPacketInteractionSelect), packet);
 
+        if (connection.Player.OpenInteractionMenu is { } menu
+            && menu.Guid == packet.Guid
+            && menu.Options.TryGetValue(packet.Id, out var action))
+        {
+            connection.Player.OpenInteractionMenu = null;
+
+            if (!connection.Player.VisibleNpcs.TryGetValue(packet.Guid, out var menuNpc))
+                return true;
+
+            if (!InteractionMenuHelper.CanInteract(menuNpc, connection.Player))
+                return true;
+
+            action(connection.Player);
+            return true;
+        }
         if (connection.Player.VisibleNpcs.TryGetValue(packet.Guid, out var miniGameNpc) &&
             MiniGameNpcHelper.TryInteract(connection.Player, miniGameNpc, packet.Id, _resourceManager))
             return true;

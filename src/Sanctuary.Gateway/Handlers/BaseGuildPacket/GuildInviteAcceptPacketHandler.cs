@@ -61,11 +61,11 @@ public static class GuildInviteAcceptPacketHandler
         if (dbCharacter is null)
             return true;
 
-        var guildGuid = player.GuildData.Guid;
+        var guildId = GuidHelper.GetGuildId(player.GuildData.Guid);
 
         var dbGuild = dbContext.Guilds
             .Include(x => x.Members)
-            .SingleOrDefault(x => x.Id == guildGuid);
+            .SingleOrDefault(x => x.Id == guildId);
 
         if (dbGuild is null)
             return true;

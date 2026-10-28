@@ -33,6 +33,7 @@ public static class BaseCommandPacketHandler
             FreeInteractionNpc.OpCode => FreeInteractionNpcHandler.HandlePacket(connection, reader.Span),
             CommandPacketInteractRequest.OpCode => CommandPacketInteractRequestHandler.HandlePacket(connection, reader.Span),
             PacketDialogResponse.OpCode => PacketDialogResponseHandler.HandlePacket(connection, reader.Span),
+            CommandPacketEndDialog.OpCode => CommandPacketEndDialogHandler.HandlePacket(connection, reader.Span),
             CommandPacketInteractionSelect.OpCode => CommandPacketInteractionSelectHandler.HandlePacket(connection, reader.Span),
             CommandPacketSetProfile.OpCode => CommandPacketSetProfileHandler.HandlePacket(connection, reader.Span),
             CommandPacketAddFriendRequest.OpCode => CommandPacketAddFriendRequestHandler.HandlePacket(connection, reader.Span),
@@ -44,6 +45,7 @@ public static class BaseCommandPacketHandler
             CommandPacketIgnoreRequest.OpCode => CommandPacketIgnoreRequestHandler.HandlePacket(connection, reader.Span),
             CommandPacketChatChannelOn.OpCode => CommandPacketChatChannelOnHandler.HandlePacket(connection, reader.Span),
             CommandPacketChatChannelOff.OpCode => CommandPacketChatChannelOffHandler.HandlePacket(connection, reader.Span),
+            CommandPacketQuestAbandon.OpCode => CommandPacketQuestAbandonHandler.HandlePacket(connection, reader.Span),
             CommandPacketClosedMinigameEndScreen.OpCode => CommandPacketClosedMinigameEndScreenHandler.HandlePacket(connection, reader.Span),
             _ => false
         };

@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Resources.Definitions.Zones;
 
 namespace Sanctuary.Game.Zones;
 
@@ -15,16 +16,21 @@ public struct ZoneTile : IEquatable<ZoneTile>
     public int Longitude;
     public int Latitude;
 
+    public int EnvironmentId;
+
+    public readonly bool IsOutOfBounds => EnvironmentId == ZoneEnvironmentDefinition.OutOfBoundsEnvironmentId;
+
     public List<ZoneTile> VisibleTiles;
 
     public ConcurrentDictionary<ulong, IEntity> Entities;
 
     public static readonly ZoneTile Empty = new(int.MinValue, int.MinValue);
 
-    public ZoneTile(int longitude, int latitude)
+    public ZoneTile(int longitude, int latitude, int environmentId = default)
     {
         Longitude = longitude;
         Latitude = latitude;
+        EnvironmentId = environmentId;
 
         Entities = [];
         VisibleTiles = [];

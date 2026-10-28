@@ -45,16 +45,17 @@ public static class GuildRemovePacketHandler
 
         var removerId = GuidHelper.GetPlayerId(connection.Player.Guid);
         var targetId = GuidHelper.GetPlayerId(packet.PlayerGuid);
+        var guildId = GuidHelper.GetGuildId(packet.GuildGuid);
 
         using var dbContext = _dbContextFactory.CreateDbContext();
 
         var removerGuildMember = dbContext.GuildMembers
             .AsNoTracking()
-            .SingleOrDefault(x => x.GuildId == packet.GuildGuid && x.Id == removerId);
+            .SingleOrDefault(x => x.GuildId == guildId && x.Id == removerId);
 
         var targetGuildMember = dbContext.GuildMembers
             .AsNoTracking()
-            .SingleOrDefault(x => x.GuildId == packet.GuildGuid && x.Id == targetId);
+            .SingleOrDefault(x => x.GuildId == guildId && x.Id == targetId);
 
         if (removerGuildMember is null || targetGuildMember is null)
             return true;
@@ -79,7 +80,7 @@ public static class GuildRemovePacketHandler
                 .ExecuteUpdate(x => x.SetProperty(x => x.GuildMemberId, (ulong?)null));
 
             var deleted = dbContext.GuildMembers
-                .Where(x => x.GuildId == packet.GuildGuid && x.Id == targetId)
+                .Where(x => x.GuildId == guildId && x.Id == targetId)
                 .ExecuteDelete();
 
             if (deleted <= 0)

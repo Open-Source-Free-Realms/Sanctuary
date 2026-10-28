@@ -32,7 +32,7 @@ public interface IEntity : IEquatable<IEntity>, IDisposable
 
     #region Update
 
-    void UpdatePosition(Vector4 position, Quaternion rotation, bool updateZoneArea = true);
+    void UpdatePosition(Vector4 position, Quaternion rotation);
     bool TeleportToZone(IZone zone, Vector4 position, Quaternion rotation);
 
     void UpdateEveryTick();
