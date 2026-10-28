@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using System.Threading;
 
 namespace Sanctuary.Core.Helpers;
 
@@ -10,7 +9,6 @@ public static class GuidHelper
     {
         Player = 1,
         Npc = 2,
-        Encounter = 0xE,
 
         Max = 15
     }
@@ -44,13 +42,6 @@ public static class GuidHelper
     public const ulong MaxNpcInstanceId = (1UL << NpcInstanceIdBits) - 1;
     public const ulong MaxFixedNpcCounter = (1UL << FixedNpcCounterBits) - 1;
     public const ulong MaxPrefixedId = (1UL << PrefixShift) - 1;
-
-    private static ulong _encounterId;
-
-    public static int GetNextEncounterId()
-    {
-        return checked((int)GetGuid(GuidType.Encounter, Interlocked.Increment(ref _encounterId)));
-    }
 
     public static ulong GetPlayerGuid(ulong id)
     {

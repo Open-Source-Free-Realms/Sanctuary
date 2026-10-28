@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
-using Sanctuary.Core.Helpers;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.MiniGames;
 using Sanctuary.Game.MiniGames.CombatEncounters;
@@ -47,9 +47,11 @@ public static class MiniGameHelper
     private const int DefaultQuickCompletionTime = 3600;
     private const int DefaultNpcKOValue = 1;
 
+    private static int _encounterId;
+
     public static MiniGameUiSession ShowDetails(Player player, MiniGameUiDefinition definition)
     {
-        var miniGameUiSession = new MiniGameUiSession(GuidHelper.GetNextEncounterId(), definition, player);
+        var miniGameUiSession = new MiniGameUiSession(Interlocked.Increment(ref _encounterId), definition, player);
 
         player.MiniGameUiSession = miniGameUiSession;
 
