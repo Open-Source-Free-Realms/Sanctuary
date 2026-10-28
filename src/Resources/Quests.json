@@ -123,9 +123,9 @@
     "Name": "Hasti's Homework Heist",
     "QuestId": 3002,
     "TitleId": 74437,
-    "DescriptionId": 74456,
+    "DescriptionId": 74438,
     "GiverDialogueId": 74436,
-    "ObjectiveDescriptionId": 74456,
+    "ObjectiveDescriptionId": 74441,
     "IconId": 43278,
     "GiverNpcId": 2335,
     "TargetNpcId": 2335,
@@ -135,10 +135,11 @@
     "PrerequisiteQuestId": 3001,
     "NotificationAvailable": 2,
     "NotificationActive": 6,
+    "RewardCollectionId": 313,
     "Goals": [
       {
-        "NameId": 46489,
-        "DescriptionId": 74456,
+        "NameId": 74443,
+        "DescriptionId": 74444,
         "Type": 2,
         "RequiredCount": 8,
         "CollectNodeType": "hastis-homework"
@@ -498,7 +499,7 @@
     "TitleId": 38385,
     "DescriptionId": 38386,
     "GiverDialogueId": 38384,
-    "ObjectiveDescriptionId": 38386,
+    "ObjectiveDescriptionId": 38392,
     "IconId": 43278,
     "GiverNpcId": 3145,
     "TargetNpcId": 3145,
@@ -552,7 +553,7 @@
     "TitleId": 70107,
     "DescriptionId": 70106,
     "GiverDialogueId": 70102,
-    "ObjectiveDescriptionId": 70106,
+    "ObjectiveDescriptionId": 70109,
     "IconId": 43278,
     "GiverNpcId": 3145,
     "TargetNpcId": 3120,
@@ -577,9 +578,9 @@
     "Name": "Tools for Smashing",
     "QuestId": 3042,
     "TitleId": 70218,
-    "DescriptionId": 70219,
+    "DescriptionId": 70301,
     "GiverDialogueId": 70299,
-    "ObjectiveDescriptionId": 70301,
+    "ObjectiveDescriptionId": 70219,
     "IconId": 43278,
     "GiverNpcId": 3120,
     "TargetNpcId": 3120,
@@ -590,6 +591,7 @@
     "NextQuestId": 3043,
     "NotificationAvailable": 2,
     "NotificationActive": 6,
+    "RewardCollectionId": 314,
     "Goals": [
       {
         "NameId": 70221,
@@ -620,7 +622,7 @@
     "TitleId": 70201,
     "DescriptionId": 70202,
     "GiverDialogueId": 70505,
-    "ObjectiveDescriptionId": 70202,
+    "ObjectiveDescriptionId": 70288,
     "IconId": 43278,
     "GiverNpcId": 3120,
     "TargetNpcId": 3145,
@@ -630,6 +632,7 @@
     "PrerequisiteQuestId": 3042,
     "NotificationAvailable": 2,
     "NotificationActive": 6,
+    "RewardCollectionId": 315,
     "Goals": [
       {
         "NameId": 70289,
@@ -688,38 +691,6 @@
         "DescriptionId": 101401,
         "DialogueId": 101411,
         "Targets": [{ "NpcId": 1964 }]
-      }
-    ]
-  },
-  {
-    "Name": "A Booming Problem",
-    "QuestId": 3061,
-    "TitleId": 400355,
-    "DescriptionId": 400356,
-    "GiverDialogueId": 400433,
-    "ObjectiveDescriptionId": 400435,
-    "IconId": 43278,
-    "GiverNpcId": 1925,
-    "TargetNpcId": 1925,
-    "RewardCoins": 30,
-    "RewardExperience": 90,
-    "RewardItems": [15916],
-    "NotificationAvailable": 2,
-    "NotificationActive": 6,
-    "Goals": [
-      {
-        "NameId": 400357,
-        "DescriptionId": 400358,
-        "Type": 2,
-        "RequiredCount": 5,
-        "CollectNodeType": "tin-ore"
-      },
-      {
-        "Type": 0,
-        "NameId": 400426,
-        "DescriptionId": 400427,
-        "DialogueId": 400436,
-        "Targets": [{ "NpcId": 1925 }]
       }
     ]
   },
@@ -2217,6 +2188,7 @@
     "PrerequisiteQuestId": 3301,
     "NotificationAvailable": 2,
     "NotificationActive": 6,
+    "RewardCollectionId": 317,
     "Goals": [
       {
         "Type": 2,
@@ -2257,6 +2229,7 @@
     "NotificationAvailable": 2,
     "NotificationActive": 6,
     "HideObjectiveTarget": true,
+    "RewardCollectionId": 318,
     "Goals": [
       {
         "Type": 2,

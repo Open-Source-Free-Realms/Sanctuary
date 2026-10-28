@@ -160,7 +160,9 @@
     "CompositeEffectId": 5742,
     "InteractRange": 12,
     "CursorId": 17,
-    "PlacementYOffset": 0
+    "PlacementYOffset": 0,
+    "CollectionId": 313,
+    "CollectionEntryId": 2204
   },
   {
     "Key": "smashing-hammers",
@@ -170,7 +172,9 @@
     "CompositeEffectId": 5742,
     "InteractRange": 12,
     "CursorId": 17,
-    "PlacementYOffset": 0
+    "PlacementYOffset": 0,
+    "CollectionId": 314,
+    "CollectionEntryId": 2205
   },
   {
     "Key": "smashing-chisels",
@@ -180,7 +184,9 @@
     "CompositeEffectId": 5742,
     "InteractRange": 12,
     "CursorId": 17,
-    "PlacementYOffset": 0
+    "PlacementYOffset": 0,
+    "CollectionId": 314,
+    "CollectionEntryId": 2206
   },
   {
     "Key": "box-o-rocks",
@@ -190,17 +196,9 @@
     "CompositeEffectId": 5742,
     "InteractRange": 12,
     "CursorId": 17,
-    "PlacementYOffset": 0
-  },
-  {
-    "Key": "tin-ore",
-    "Name": "Tin Ore",
-    "ModelId": 611,
-    "Scale": 1,
-    "CompositeEffectId": 5742,
-    "InteractRange": 12,
-    "CursorId": 17,
-    "PlacementYOffset": 0
+    "PlacementYOffset": 0,
+    "CollectionId": 315,
+    "CollectionEntryId": 2207
   },
   {
     "Key": "woe-is-willie-flowers",
@@ -210,7 +208,9 @@
     "CompositeEffectId": 5742,
     "InteractRange": 12,
     "CursorId": 17,
-    "PlacementYOffset": 0
+    "PlacementYOffset": 0,
+    "CollectionId": 317,
+    "CollectionEntryId": 2209
   },
   {
     "Key": "one-mans-trash-camp",
@@ -220,7 +220,9 @@
     "CompositeEffectId": 5742,
     "InteractRange": 12,
     "CursorId": 17,
-    "PlacementYOffset": 0
+    "PlacementYOffset": 0,
+    "CollectionId": 318,
+    "CollectionEntryId": 2210
   },
   {
     "Key": "one-mans-trash-chugawug",
@@ -230,7 +232,9 @@
     "CompositeEffectId": 5742,
     "InteractRange": 12,
     "CursorId": 17,
-    "PlacementYOffset": 0
+    "PlacementYOffset": 0,
+    "CollectionId": 318,
+    "CollectionEntryId": 2211
   },
   {
     "Key": "one-mans-trash-vendors",
@@ -240,7 +244,9 @@
     "CompositeEffectId": 5742,
     "InteractRange": 12,
     "CursorId": 17,
-    "PlacementYOffset": 0
+    "PlacementYOffset": 0,
+    "CollectionId": 318,
+    "CollectionEntryId": 2212
   },
   {
     "Key": "one-mans-trash-stage",
@@ -250,6 +256,8 @@
     "CompositeEffectId": 5742,
     "InteractRange": 12,
     "CursorId": 17,
-    "PlacementYOffset": 0
+    "PlacementYOffset": 0,
+    "CollectionId": 318,
+    "CollectionEntryId": 2213
   }
 ]

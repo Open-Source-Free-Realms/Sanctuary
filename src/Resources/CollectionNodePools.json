@@ -8104,69 +8104,62 @@
     "ZoneDefinitionId": 1,
     "NodeType": "hastis-homework",
     "MaxActiveNodes": 8,
-    "RespawnSeconds": 30
+    "PlayerSpecific": true
   },
   {
     "Key": "briarwood-smashing-hammers",
     "ZoneDefinitionId": 1,
     "NodeType": "smashing-hammers",
     "MaxActiveNodes": 5,
-    "RespawnSeconds": 30
+    "PlayerSpecific": true
   },
   {
     "Key": "briarwood-smashing-chisels",
     "ZoneDefinitionId": 1,
     "NodeType": "smashing-chisels",
     "MaxActiveNodes": 5,
-    "RespawnSeconds": 30
+    "PlayerSpecific": true
   },
   {
     "Key": "briarwood-box-o-rocks",
     "ZoneDefinitionId": 1,
     "NodeType": "box-o-rocks",
     "MaxActiveNodes": 3,
-    "RespawnSeconds": 30
-  },
-  {
-    "Key": "briarwood-tin-ore",
-    "ZoneDefinitionId": 1,
-    "NodeType": "tin-ore",
-    "MaxActiveNodes": 5,
-    "RespawnSeconds": 30
+    "PlayerSpecific": true
   },
   {
     "Key": "pixie-nursery-woe-is-willie-flowers",
     "ZoneDefinitionId": 1,
     "NodeType": "woe-is-willie-flowers",
     "MaxActiveNodes": 1,
-    "RespawnSeconds": 10
+    "PlayerSpecific": true
   },
   {
     "Key": "merryvale-one-mans-trash-camp",
     "ZoneDefinitionId": 1,
     "NodeType": "one-mans-trash-camp",
     "MaxActiveNodes": 1,
-    "RespawnSeconds": 10
+    "PlayerSpecific": true
   },
   {
     "Key": "merryvale-one-mans-trash-chugawug",
     "ZoneDefinitionId": 1,
     "NodeType": "one-mans-trash-chugawug",
     "MaxActiveNodes": 1,
-    "RespawnSeconds": 10
+    "PlayerSpecific": true
   },
   {
     "Key": "merryvale-one-mans-trash-vendors",
     "ZoneDefinitionId": 1,
     "NodeType": "one-mans-trash-vendors",
     "MaxActiveNodes": 1,
-    "RespawnSeconds": 10
+    "PlayerSpecific": true
   },
   {
     "Key": "merryvale-one-mans-trash-stage",
     "ZoneDefinitionId": 1,
     "NodeType": "one-mans-trash-stage",
     "MaxActiveNodes": 1,
-    "RespawnSeconds": 10
+    "PlayerSpecific": true
   }
 ]
