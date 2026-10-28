@@ -140,51 +140,11 @@ public static class CommandPacketInteractRequestHandler
 
         try
         {
-            if (!_resourceManager.Collections.TryGetValue(coin.Definition.CollectionId, out var collection))
-                return false;
-
-            var entryIndex = collection.Entries.FindIndex(entry => entry.Id == coin.Definition.EntryId);
-
-            if (entryIndex < 0)
-                return false;
-
-            var ownedItemDefinitionIds = connection.Player.Items
-                .Select(item => item.Definition)
-                .ToHashSet();
-            var collectedEntryIds = connection.Player.CollectedCollectionEntryIds.ToHashSet();
-            var collectionWasStarted = collection.IsStarted(ownedItemDefinitionIds, collectedEntryIds);
-            var characterId = GuidHelper.GetPlayerId(connection.Player.Guid);
-
-            using var dbContext = _dbContextFactory.CreateDbContext();
-            dbContext.CollectionEntries.Add(new DbCollectionEntry
+            return TryAddCollectionEntry(connection, coin.Definition.CollectionId, coin.Definition.EntryId, () =>
             {
-                CharacterId = characterId,
-                CollectionId = coin.Definition.CollectionId,
-                EntryId = coin.Definition.EntryId
+                connection.Player.OnRemoveVisibleNpcGracefully(coin, animate: true);
+                coin.OnRemoveVisiblePlayers(connection.Player);
             });
-
-            if (dbContext.SaveChanges() <= 0)
-                return false;
-
-            connection.Player.CollectedCollectionEntryIds.TryAdd(coin.Definition.EntryId);
-            collectedEntryIds.Add(coin.Definition.EntryId);
-            var collectionWillBeComplete = collection.IsComplete(ownedItemDefinitionIds, collectedEntryIds);
-
-            connection.Player.OnRemoveVisibleNpcGracefully(coin, animate: true);
-            coin.OnRemoveVisiblePlayers(connection.Player);
-
-            if (collectionWasStarted && collectionWillBeComplete)
-            {
-                connection.SendTunneled(new ClientUpdatePacketCollectionRemoveEntry
-                {
-                    CollectionId = collection.Id,
-                    EntryId = coin.Definition.EntryId
-                });
-            }
-
-            SendCollectionEntryUpdate(
-                connection, collection, collection.Entries[entryIndex], entryIndex, collectionWasStarted);
-            return true;
         }
         catch (Exception ex)
         {
@@ -196,6 +156,81 @@ public static class CommandPacketInteractRequestHandler
         {
             coin.Release(connection.Player.Guid);
         }
+    }
+
+    private static bool TryAddCollectionEntry(GatewayConnection connection, int collectionId, int entryId, Action? onCollected = null)
+    {
+        if (!_resourceManager.Collections.TryGetValue(collectionId, out var collection))
+            return false;
+
+        var entryIndex = collection.Entries.FindIndex(entry => entry.Id == entryId);
+
+        if (entryIndex < 0)
+            return false;
+
+        var ownedItemDefinitionIds = connection.Player.Items
+            .Select(item => item.Definition)
+            .ToHashSet();
+        var collectedEntryIds = connection.Player.CollectedCollectionEntryIds.ToHashSet();
+        var collectionWasStarted = collection.IsStarted(ownedItemDefinitionIds, collectedEntryIds);
+        var characterId = GuidHelper.GetPlayerId(connection.Player.Guid);
+
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        dbContext.CollectionEntries.Add(new DbCollectionEntry
+        {
+            CharacterId = characterId,
+            CollectionId = collectionId,
+            EntryId = entryId
+        });
+
+        if (dbContext.SaveChanges() <= 0)
+            return false;
+
+        connection.Player.CollectedCollectionEntryIds.TryAdd(entryId);
+        collectedEntryIds.Add(entryId);
+        var collectionWillBeComplete = collection.IsComplete(ownedItemDefinitionIds, collectedEntryIds);
+
+        onCollected?.Invoke();
+
+        if (collectionWasStarted && collectionWillBeComplete)
+        {
+            connection.SendTunneled(new ClientUpdatePacketCollectionRemoveEntry
+            {
+                CollectionId = collection.Id,
+                EntryId = entryId
+            });
+        }
+
+        SendCollectionEntryUpdate(
+            connection, collection, collection.Entries[entryIndex], entryIndex, collectionWasStarted);
+        return true;
+    }
+
+    private static bool HandlePlayerCollectionNode(GatewayConnection connection, CollectionNode node)
+    {
+        var player = connection.Player;
+
+        if (!_questManager.CanGatherQuestNode(player, node))
+            return true;
+
+        player.OnRemoveVisibleNpcGracefully(node, animate: true);
+
+        var typeDefinition = node.TypeDefinition;
+        if (typeDefinition.CollectionEntryId != 0 && !player.CollectedCollectionEntryIds.Contains(typeDefinition.CollectionEntryId))
+        {
+            try
+            {
+                TryAddCollectionEntry(connection, typeDefinition.CollectionId, typeDefinition.CollectionEntryId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to add collection entry {entryId} for node {nodeId} ({type}).",
+                    typeDefinition.CollectionEntryId, node.SpawnDefinition.Id, typeDefinition.Key);
+            }
+        }
+
+        _questManager.OnEvent(player, new NodeGatheredEvent(node));
+        return true;
     }
 
     private static bool HandleCollectionNode(GatewayConnection connection, CollectionNode node)
@@ -217,6 +252,9 @@ public static class CommandPacketInteractRequestHandler
             connection.SendTunneled(commandPacketMoveAndInteract);
             return true;
         }
+
+        if (node.PoolDefinition.PlayerSpecific)
+            return HandlePlayerCollectionNode(connection, node);
 
         if (!node.TryReserve())
             return true;

@@ -821,7 +821,7 @@ public sealed class Player : ClientPcData, IEntity
 
     public void OnAddVisibleNpcs(params IEnumerable<Npc> npcs)
     {
-        var visibleNpcs = npcs.Where(npc => npc.IsVisibleTo(this)).ToArray();
+        var visibleNpcs = npcs.Where(npc => npc.IsVisibleTo(this) && !Zone.IsHiddenByQuest(this, npc)).ToArray();
 
         foreach (var npc in visibleNpcs)
         {
@@ -835,10 +835,23 @@ public sealed class Player : ClientPcData, IEntity
 
             SendTunneled(playerUpdatePacketAddNpc);
             SendTunneled(new PlayerUpdatePacketUpdateCharacterState { Guid = npc.Guid, State = IdleCharacterState });
+
+            var questEffectId = Zone.GetQuestEffectId(this, npc);
+            if (questEffectId != 0)
+            {
+                SendTunneled(new PlayerUpdatePacketAddEffectTagCompositeEffect
+                {
+                    Guid = npc.Guid,
+                    TagId = EffectTagIdGenerator.Next(),
+                    CompositeEffectId = questEffectId,
+                    SourceGuid = npc.Guid
+                });
+            }
         }
 
         var playerUpdatePacketNpcRelevance = InteractionMenuHelper.GetNpcRelevancePacket(
-            visibleNpcs.Where(npc => npc is not PetTreasureChest petTreasureChest || petTreasureChest.IsOwner(this)));
+            visibleNpcs.Where(npc => npc is not PetTreasureChest petTreasureChest || petTreasureChest.IsOwner(this)),
+            npc => Zone.GetQuestBadge(this, npc) is { } badge && !ReferenceEquals(badge, npc.Notification));
         if (playerUpdatePacketNpcRelevance.Entries.Count > 0)
             SendTunneled(playerUpdatePacketNpcRelevance);
 
@@ -936,7 +949,7 @@ public sealed class Player : ClientPcData, IEntity
     private static RemoveNotificationInfo GetRemoveNotificationInfo(NotificationInfo notification) => new()
     {
         Guid = notification.Guid,
-        ThoughtBubbleIconId = notification.Unknown,
+        ThoughtBubbleIconId = notification.IconState,
         CompositeEffectId = notification.Unknown2
     };
 

@@ -95,4 +95,8 @@ public interface IZone : IScriptableZone, IDisposable
     IReadOnlyList<NpcInteractionOption> GetInteractionOptions(Player player, Npc npc);
 
     NotificationInfo? GetQuestBadge(Player player, Npc npc);
+
+    bool IsHiddenByQuest(Player player, Npc npc);
+
+    int GetQuestEffectId(Player player, Npc npc);
 }

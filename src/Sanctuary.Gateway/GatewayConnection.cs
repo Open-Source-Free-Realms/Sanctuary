@@ -306,7 +306,7 @@ public class GatewayConnection : UdpConnection
                 continue;
             }
 
-            var questProgress = new QuestProgress(dbQuest.QuestId);
+            var questProgress = new QuestProgress(dbQuest.QuestId) { Started = dbQuest.Started };
             Player.Quests.Add(questProgress);
 
             var goalIndex = dbQuest.CurrentGoalId == QuestManager.AllGoalsDoneGoalId
@@ -317,14 +317,23 @@ public class GatewayConnection : UdpConnection
             {
                 _logger.LogWarning("Character {character} was on goal {goal} of quest {quest}, which no longer has that goal. Restarting the quest from its first goal.",
                     dbCharacter.Id, dbQuest.CurrentGoalId, dbQuest.QuestId);
-                questProgress.StartGoal(questDefinition, 0);
+                questProgress.StartStep(questDefinition, 0);
                 continue;
             }
 
-            questProgress.StartGoal(questDefinition, goalIndex);
+            questProgress.StartStep(questDefinition, questDefinition.StepStartOf(goalIndex));
 
-            foreach (var progress in dbQuest.Progress.Where(progress => progress.GoalId == dbQuest.CurrentGoalId))
-                questProgress.Goal.Load(progress.TargetId, progress.Count);
+            foreach (var progress in dbQuest.Progress)
+            {
+                var progressGoalIndex = questDefinition.Goals.FindIndex(goal => goal.NameId == progress.GoalId);
+                if (!questProgress.OpenGoals.TryGetValue(progressGoalIndex, out var goalProgress))
+                    continue;
+
+                if (progress.Count == QuestManager.GoalDoneCount)
+                    questProgress.FinishGoal(questDefinition, progressGoalIndex);
+                else
+                    goalProgress.Load(progress.TargetId, progress.Count);
+            }
         }
 
         Player.Birthday = dbCharacter.Created;
@@ -537,7 +546,7 @@ public class GatewayConnection : UdpConnection
         {
             var guildData = new GuildData
             {
-                Guid = dbGuild.Id,
+                Guid = GuidHelper.GetGuildGuid(dbGuild.Id),
 
                 Name = dbGuild.Name,
 

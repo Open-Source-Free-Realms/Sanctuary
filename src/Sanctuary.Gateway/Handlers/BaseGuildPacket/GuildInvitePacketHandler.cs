@@ -47,10 +47,11 @@ public static class GuildInvitePacketHandler
         using var dbContext = _dbContextFactory.CreateDbContext();
 
         var guildGuid = connection.Player.GuildData.Guid;
+        var guildId = GuidHelper.GetGuildId(guildGuid);
 
         var dbGuild = dbContext.Guilds
             .Include(x => x.Members)
-            .SingleOrDefault(x => x.Id == guildGuid);
+            .SingleOrDefault(x => x.Id == guildId);
 
         if (dbGuild is null)
             return true;
@@ -58,7 +59,7 @@ public static class GuildInvitePacketHandler
         var inviterId = GuidHelper.GetPlayerId(connection.Player.Guid);
         var inviterRole = dbContext.GuildMembers
             .AsNoTracking()
-            .Where(x => x.GuildId == guildGuid && x.Id == inviterId)
+            .Where(x => x.GuildId == guildId && x.Id == inviterId)
             .Select(x => (int?)x.Role)
             .SingleOrDefault();
 

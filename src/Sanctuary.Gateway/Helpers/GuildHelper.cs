@@ -54,10 +54,11 @@ public static class GuildHelper
     public static int? GetMemberRole(DatabaseContext dbContext, ulong guildGuid, ulong playerGuid)
     {
         var characterId = GuidHelper.GetPlayerId(playerGuid);
+        var guildId = GuidHelper.GetGuildId(guildGuid);
 
         return dbContext.GuildMembers
             .AsNoTracking()
-            .Where(x => x.GuildId == guildGuid && x.Id == characterId)
+            .Where(x => x.GuildId == guildId && x.Id == characterId)
             .Select(x => (int?)x.Role)
             .SingleOrDefault();
     }
@@ -67,8 +68,9 @@ public static class GuildHelper
     public static bool IsNameTaken(DatabaseContext dbContext, ulong guildGuid, string normalizedName)
     {
         var loweredName = normalizedName.ToLower();
+        var guildId = GuidHelper.GetGuildId(guildGuid);
 
-        return dbContext.Guilds.Any(x => x.Id != guildGuid && x.Name.ToLower() == loweredName);
+        return dbContext.Guilds.Any(x => x.Id != guildId && x.Name.ToLower() == loweredName);
     }
 
     /// <summary>
@@ -89,8 +91,10 @@ public static class GuildHelper
         if (guildData is null)
             return false;
 
+        var guildId = GuidHelper.GetGuildId(guildGuid);
+
         var updated = dbContext.Guilds
-            .Where(x => x.Id == guildGuid)
+            .Where(x => x.Id == guildId)
             .ExecuteUpdate(x => x.SetProperty(g => g.Name, normalizedName));
 
         if (updated <= 0)

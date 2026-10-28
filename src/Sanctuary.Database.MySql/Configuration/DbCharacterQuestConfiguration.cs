@@ -14,6 +14,7 @@ public sealed class DbCharacterQuestConfiguration : IEntityTypeConfiguration<DbC
 
         builder.Property(q => q.Completed).IsRequired();
         builder.Property(q => q.CurrentGoalId).IsRequired();
+        builder.Property(q => q.Started).IsRequired().HasDefaultValueSql("NOW()");
 
         builder.HasMany(q => q.Progress)
             .WithOne(p => p.Quest)

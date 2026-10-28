@@ -9,14 +9,14 @@ public class ObjectiveTargetUpdatePacket : BaseUiPacket, ISerializablePacket
     public bool Active = true;
 
     public ulong TaskId;
-    public int Unknown = 2;
+    public int SelectTaskId = 2;
     public ulong Guid;
     public int NameId;
     public float PositionX;
     public float PositionY;
     public float PositionZ;
     public float PositionW = 1f;
-    public int Unknown2 = 1;
+    public int TargetType = 2;
 
     public ObjectiveTargetUpdatePacket() : base(OpCode)
     {
@@ -33,14 +33,14 @@ public class ObjectiveTargetUpdatePacket : BaseUiPacket, ISerializablePacket
         if (Active)
         {
             writer.Write(TaskId);
-            writer.Write(Unknown);
+            writer.Write(SelectTaskId);
             writer.Write(Guid);
             writer.Write(NameId);
             writer.Write(PositionX);
             writer.Write(PositionY);
             writer.Write(PositionZ);
             writer.Write(PositionW);
-            writer.Write(Unknown2);
+            writer.Write(TargetType);
         }
 
         return writer.Buffer;

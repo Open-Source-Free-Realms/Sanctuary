@@ -143,7 +143,7 @@ public static class GuildCreatePacketHandler
 
         var guildData = new GuildData
         {
-            Guid = dbGuild.Id,
+            Guid = GuidHelper.GetGuildGuid(dbGuild.Id),
 
             Name = dbGuild.Name,
 
