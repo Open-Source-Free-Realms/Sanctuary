@@ -40,7 +40,7 @@ public static class RatingPacketRemoveCandidateHandler
         using var dbContext = _dbContextFactory.CreateDbContext();
 
         if (!HousingHelper.TryGetHouse(dbContext, ratingPacketRemoveCandidate.InstanceGuid, out var houseGuid, out var dbHouse)
-            || HousingHelper.GetHouseOwnerGuid(houseGuid) != player.Guid)
+            || HousingHelper.GetHouseOwnerGuid(dbHouse) != player.Guid)
         {
             _logger.LogWarning("{player} could not remove house {houseGuid} from the directory.", player.Guid, ratingPacketRemoveCandidate.InstanceGuid);
             return true;

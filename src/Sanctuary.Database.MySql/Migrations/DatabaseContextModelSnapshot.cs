@@ -75,6 +75,9 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.Property<int>("ActiveProfileId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("ActiveQuestId")
+                        .HasColumnType("int");
+
                     b.Property<int?>("ActiveTitleId")
                         .HasColumnType("int");
 
@@ -212,6 +215,56 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.ToTable("Characters");
                 });
 
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbCharacterQuest", b =>
+                {
+                    b.Property<int>("QuestId")
+                        .HasColumnType("int");
+
+                    b.Property<ulong>("CharacterId")
+                        .HasColumnType("bigint unsigned");
+
+                    b.Property<bool>("Completed")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("CurrentGoalId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("Started")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.HasKey("QuestId", "CharacterId");
+
+                    b.HasIndex("CharacterId");
+
+                    b.ToTable("CharacterQuests");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbCharacterQuestProgress", b =>
+                {
+                    b.Property<ulong>("CharacterId")
+                        .HasColumnType("bigint unsigned");
+
+                    b.Property<int>("QuestId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GoalId")
+                        .HasColumnType("int");
+
+                    b.Property<ulong>("TargetId")
+                        .HasColumnType("bigint unsigned");
+
+                    b.Property<int>("Count")
+                        .HasColumnType("int");
+
+                    b.HasKey("CharacterId", "QuestId", "GoalId", "TargetId");
+
+                    b.HasIndex("QuestId", "CharacterId");
+
+                    b.ToTable("CharacterQuestProgress");
+                });
+
             modelBuilder.Entity("Sanctuary.Database.Entities.DbCollectionEntry", b =>
                 {
                     b.Property<ulong>("CharacterId")
@@ -309,8 +362,8 @@ namespace Sanctuary.Database.MySql.Migrations
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbHouse", b =>
                 {
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
+                    b.Property<ulong>("Id")
+                        .HasColumnType("bigint unsigned");
 
                     b.Property<ulong>("CharacterId")
                         .HasColumnType("bigint unsigned");
@@ -334,6 +387,9 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.Property<bool>("IsPublished")
                         .HasColumnType("tinyint(1)");
 
+                    b.Property<int>("Key")
+                        .HasColumnType("int");
+
                     b.Property<string>("Keywords")
                         .IsRequired()
                         .HasMaxLength(128)
@@ -353,19 +409,17 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.Property<int>("ZoneId")
                         .HasColumnType("int");
 
-                    b.HasKey("Id", "CharacterId");
+                    b.HasKey("Id");
 
-                    b.HasIndex("CharacterId");
+                    b.HasIndex("CharacterId", "Key")
+                        .IsUnique();
 
                     b.ToTable("Houses");
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbHouseVote", b =>
                 {
-                    b.Property<int>("HouseId")
-                        .HasColumnType("int");
-
-                    b.Property<ulong>("CharacterId")
+                    b.Property<ulong>("HouseId")
                         .HasColumnType("bigint unsigned");
 
                     b.Property<ulong>("VoterId")
@@ -384,9 +438,27 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.Property<float>("Rating")
                         .HasColumnType("float");
 
-                    b.HasKey("HouseId", "CharacterId", "VoterId");
+                    b.HasKey("HouseId", "VoterId");
 
                     b.ToTable("HouseVotes");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbHousingGuid", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint unsigned");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<ulong>("Id"));
+
+                    b.Property<DateTimeOffset>("Created")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("NOW()");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HousingGuids");
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbIgnore", b =>
@@ -705,6 +777,28 @@ namespace Sanctuary.Database.MySql.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbCharacterQuest", b =>
+                {
+                    b.HasOne("Sanctuary.Database.Entities.DbCharacter", "Character")
+                        .WithMany("Quests")
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Character");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbCharacterQuestProgress", b =>
+                {
+                    b.HasOne("Sanctuary.Database.Entities.DbCharacterQuest", "Quest")
+                        .WithMany("Progress")
+                        .HasForeignKey("QuestId", "CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Quest");
+                });
+
             modelBuilder.Entity("Sanctuary.Database.Entities.DbCollectionEntry", b =>
                 {
                     b.HasOne("Sanctuary.Database.Entities.DbCharacter", "Character")
@@ -761,7 +855,7 @@ namespace Sanctuary.Database.MySql.Migrations
                 {
                     b.HasOne("Sanctuary.Database.Entities.DbHouse", "House")
                         .WithMany("Votes")
-                        .HasForeignKey("HouseId", "CharacterId")
+                        .HasForeignKey("HouseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -860,7 +954,14 @@ namespace Sanctuary.Database.MySql.Migrations
 
                     b.Navigation("Profiles");
 
+                    b.Navigation("Quests");
+
                     b.Navigation("Titles");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbCharacterQuest", b =>
+                {
+                    b.Navigation("Progress");
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbGuild", b =>

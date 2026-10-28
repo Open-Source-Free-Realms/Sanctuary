@@ -32,6 +32,7 @@ public interface IResourceManager
     StoreBundleCategoryGroupDefinitionCollection StoreBundleCategoryGroups { get; }
 
     ZoneDefinitionCollection Zones { get; }
+    ZoneEnvironmentCollection ZoneEnvironments { get; }
     HouseDefinitionCollection Houses { get; }
     ZoneNpcsCollection ZoneNpcs { get; }
     MountDefinitionCollection Mounts { get; }
@@ -45,6 +46,7 @@ public interface IResourceManager
     NameFilterCollection NameFilter { get; }
     NpcMovementDefinitionCollection NpcMovements { get; }
     NpcAmbientDefinitionCollection NpcAmbient { get; }
+    QuestDefinitionCollection Quests { get; }
     MapGraphCollection Maps { get; }
     TerrainCollection Terrains { get; }
     NavMeshCollection NavMeshes { get; }

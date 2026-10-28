@@ -15,7 +15,6 @@ public class ZoneNpcsDefinition
 public class ZoneNpcSpawnDefinition
 {
     public int NpcId { get; set; }
-    public ulong? Guid { get; set; }
 
     [JsonConverter(typeof(Vector4JsonConverter))]
     public Vector4 Position { get; set; }

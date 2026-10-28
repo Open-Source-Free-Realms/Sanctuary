@@ -13,7 +13,10 @@ public sealed class CollectionNodePoolDefinition
     public required string NodeType { get; set; }
     public int MaxActiveNodes { get; set; }
     public int RespawnSeconds { get; set; } = 30;
+    public bool PlayerSpecific { get; set; }
     public List<CollectionNodeDropDefinition> DropTable { get; set; } = [];
+
+    public bool HasDrop => DropTable.Count > 0;
 
     private WeightedDropTable<CollectionNodeDropDefinition>? _table;
     public WeightedDropTable<CollectionNodeDropDefinition> Table =>

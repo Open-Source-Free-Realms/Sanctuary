@@ -1,11 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using Sanctuary.Core.Helpers;
 using Sanctuary.Game;
-using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
@@ -39,9 +39,10 @@ public static class ClientHousingPacketDeclineInviteHandler
 
         _logger.LogInformation("{player} declined a house invite. ( {guid} )", player.Guid, clientHousingPacketDeclineInvite.Guid);
 
-        var inviterGuid = GuidHelper.IsHouseGuid(clientHousingPacketDeclineInvite.Guid) ? HousingHelper.GetHouseOwnerGuid(clientHousingPacketDeclineInvite.Guid) : clientHousingPacketDeclineInvite.Guid;
+        var inviterGuid = player.HouseInvites.GetValueOrDefault(clientHousingPacketDeclineInvite.Guid, clientHousingPacketDeclineInvite.Guid);
 
-        player.HouseInvites.RemoveWhere(houseGuid => houseGuid == clientHousingPacketDeclineInvite.Guid || HousingHelper.GetHouseOwnerGuid(houseGuid) == inviterGuid);
+        foreach (var houseGuid in player.HouseInvites.Where(houseInvite => houseInvite.Value == inviterGuid).Select(houseInvite => houseInvite.Key).ToList())
+            player.HouseInvites.Remove(houseGuid);
 
         if (!_zoneManager.TryGetPlayer(inviterGuid, out var inviter))
             return true;

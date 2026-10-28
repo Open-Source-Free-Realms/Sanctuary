@@ -1,8 +1,10 @@
 ﻿using System;
 
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using Sanctuary.Database;
 using Sanctuary.Game;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
@@ -16,6 +18,7 @@ public static class ClientHousingPacketPreviewByItemDefinitionIdRequestHandler
 {
     private static ILogger _logger = null!;
     private static IResourceManager _resourceManager = null!;
+    private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -23,6 +26,7 @@ public static class ClientHousingPacketPreviewByItemDefinitionIdRequestHandler
         _logger = loggerFactory.CreateLogger(nameof(ClientHousingPacketPreviewByItemDefinitionIdRequestHandler));
 
         _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
+        _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -37,7 +41,7 @@ public static class ClientHousingPacketPreviewByItemDefinitionIdRequestHandler
 
         var player = connection.Player;
 
-        if (!HousingHelper.TryPreviewHouse(_resourceManager, player, clientHousingPacketPreviewByItemDefinitionIdRequest.ItemDefinitionId, out var housingError))
+        if (!HousingHelper.TryPreviewHouse(_resourceManager, _dbContextFactory, player, clientHousingPacketPreviewByItemDefinitionIdRequest.ItemDefinitionId, out var housingError))
         {
             _logger.LogWarning("{player} could not preview house item {itemDefinitionId}. ( {error} )", player.Guid, clientHousingPacketPreviewByItemDefinitionIdRequest.ItemDefinitionId, housingError);
 

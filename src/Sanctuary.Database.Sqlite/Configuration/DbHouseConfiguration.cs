@@ -9,8 +9,11 @@ public sealed class DbHouseConfiguration : IEntityTypeConfiguration<DbHouse>
 {
     public void Configure(EntityTypeBuilder<DbHouse> builder)
     {
-        builder.HasKey(h => new { h.Id, h.CharacterId });
+        builder.HasKey(h => h.Id);
         builder.Property(h => h.Id).IsRequired().ValueGeneratedNever();
+
+        builder.HasIndex(h => new { h.CharacterId, h.Key }).IsUnique();
+        builder.Property(h => h.Key).IsRequired();
         builder.Property(h => h.ZoneId).IsRequired();
 
         builder.Property(h => h.Name).IsRequired().HasMaxLength(32);
@@ -26,7 +29,7 @@ public sealed class DbHouseConfiguration : IEntityTypeConfiguration<DbHouse>
 
         builder.HasMany(h => h.Votes)
             .WithOne(v => v.House)
-            .HasForeignKey(v => new { v.HouseId, v.CharacterId })
+            .HasForeignKey(v => v.HouseId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

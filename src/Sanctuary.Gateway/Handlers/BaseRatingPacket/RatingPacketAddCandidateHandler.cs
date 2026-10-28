@@ -8,7 +8,6 @@ using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
-using Sanctuary.Database.Entities;
 using Sanctuary.Game;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
@@ -49,31 +48,18 @@ public static class RatingPacketAddCandidateHandler
 
         if (ratingPacketAddCandidate.OwnerGuid != player.Guid
             || !ulong.TryParse(ratingPacketAddCandidate.InstanceGuid, CultureInfo.InvariantCulture, out var houseGuid)
-            || !HousingHelper.TryGetOwnedHouse(_resourceManager, player, houseGuid, out var ownedHouse)
+            || !HousingHelper.TryGetOwnedHouse(_resourceManager, _dbContextFactory, player, houseGuid, out var ownedHouse)
             || HousingHelper.IsStaffOnlyHouse(_resourceManager, ownedHouse.Definition))
         {
             _logger.LogWarning("{player} could not publish house {houseGuid}.", player.Guid, ratingPacketAddCandidate.InstanceGuid);
             return true;
         }
 
-        var characterId = GuidHelper.GetPlayerId(player.Guid);
+        var houseId = GuidHelper.GetHouseId(houseGuid);
 
         using var dbContext = _dbContextFactory.CreateDbContext();
 
-        var dbHouse = dbContext.Houses.Include(house => house.Votes)
-            .FirstOrDefault(house => house.Id == ownedHouse.Key && house.CharacterId == characterId);
-
-        if (dbHouse is null)
-        {
-            dbHouse = new DbHouse
-            {
-                Id = ownedHouse.Key,
-                ZoneId = ownedHouse.Definition.ZoneId,
-                CharacterId = characterId
-            };
-
-            dbContext.Houses.Add(dbHouse);
-        }
+        var dbHouse = dbContext.Houses.Include(house => house.Votes).First(house => house.Id == houseId);
 
         dbHouse.IsPublished = true;
         dbHouse.PublishedAt = DateTimeOffset.UtcNow;

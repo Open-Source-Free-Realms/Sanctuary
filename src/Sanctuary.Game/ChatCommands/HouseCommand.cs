@@ -1,5 +1,8 @@
 ﻿using System.Linq;
 
+using Microsoft.EntityFrameworkCore;
+
+using Sanctuary.Database;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Resources.Definitions.Zones;
@@ -10,16 +13,18 @@ public class HouseCommand : IChatCommand
 {
     private readonly IResourceManager _resourceManager;
     private readonly IZoneManager _zoneManager;
+    private readonly IDbContextFactory<DatabaseContext> _dbContextFactory;
 
     public string KeyWord => "house";
     public string Usage => "visit <zone>|leave";
     public string Description => "Visits a housing zone or leaves the current one.";
     public ChatCommandRole RequiredRole => ChatCommandRole.Mod;
 
-    public HouseCommand(IResourceManager resourceManager, IZoneManager zoneManager)
+    public HouseCommand(IResourceManager resourceManager, IZoneManager zoneManager, IDbContextFactory<DatabaseContext> dbContextFactory)
     {
         _resourceManager = resourceManager;
         _zoneManager = zoneManager;
+        _dbContextFactory = dbContextFactory;
     }
 
     public bool Handle(Player invoker, string[] args)
@@ -54,7 +59,7 @@ public class HouseCommand : IChatCommand
             ? HousingHelper.GetReservedHouseKey(houseDefinition)
             : HousingHelper.PreviewHouseKey;
 
-        if (!invoker.TeleportToZone(zoneDefinition.Id, HousingHelper.GetHouseGuid(invoker.Guid, houseKey), zoneDefinition.SpawnPosition, zoneDefinition.SpawnRotation))
+        if (!invoker.TeleportToZone(zoneDefinition.Id, HousingHelper.GetHouseGuid(_dbContextFactory, invoker.Guid, houseKey, zoneDefinition.Id), zoneDefinition.SpawnPosition, zoneDefinition.SpawnRotation))
             ChatHelper.SendSystemMessage(invoker, $"Could not visit {zoneName}.");
 
         return true;

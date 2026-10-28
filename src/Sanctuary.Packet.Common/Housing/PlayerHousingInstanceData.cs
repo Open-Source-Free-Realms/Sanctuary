@@ -46,7 +46,7 @@ public class PlayerHousingInstanceData
     public string? Unknown23;
     public string? Unknown22;
 
-    // public FactoryInstanceData? FactoryInstance; // TODO
+    public FactoryInstanceData? FactoryInstance;
 
     public bool Unknown24;
 
@@ -106,6 +106,8 @@ public class PlayerHousingInstanceData
 
         writer.Write(Unknown24);
 
-        writer.Write(false); // TODO: FactoryInstance
+        writer.Write(FactoryInstance is not null);
+
+        FactoryInstance?.Serialize(writer);
     }
 }

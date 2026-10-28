@@ -1,0 +1,2274 @@
+[
+  {
+    "Name": "Introduce Yourself",
+    "QuestId": 2563,
+    "TitleId": 94247,
+    "DescriptionId": 94360,
+    "GiverDialogueId": 94246,
+    "ObjectiveDescriptionId": 94248,
+    "IconId": 43278,
+    "GiverNpcId": 2045,
+    "TargetNpcId": 2049,
+    "RewardCoins": 5,
+    "RewardExperience": 60,
+    "RewardItems": [],
+    "NextQuestId": 1801,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "ExcludesQuestIds": [2564],
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 94359,
+        "DescriptionId": 94248,
+        "DialogueId": 94388,
+        "Targets": [{ "NpcId": 2049 }]
+      }
+    ]
+  },
+  {
+    "Name": "Call the Crew",
+    "QuestId": 1801,
+    "TitleId": 94255,
+    "DescriptionId": 94256,
+    "GiverDialogueId": 94254,
+    "ObjectiveDescriptionId": 100080,
+    "IconId": 43278,
+    "GiverNpcId": 2049,
+    "TargetNpcId": 2049,
+    "RewardCoins": 7,
+    "RewardExperience": 70,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 2563,
+    "NextQuestId": 3290,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 100103,
+        "DescriptionId": 100104,
+        "DialogueId": 384144,
+        "Targets": [{ "NpcId": 3018 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 94511,
+        "DescriptionId": 94512,
+        "DialogueId": 94257,
+        "Targets": [{ "NpcId": 2049 }]
+      }
+    ]
+  },
+  {
+    "Name": "Introduce Yourself",
+    "QuestId": 2564,
+    "TitleId": 94247,
+    "DescriptionId": 104099,
+    "GiverDialogueId": 104097,
+    "ObjectiveDescriptionId": 104099,
+    "IconId": 43278,
+    "GiverNpcId": 2912,
+    "TargetNpcId": 2889,
+    "RewardCoins": 5,
+    "RewardExperience": 60,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "ExcludesQuestIds": [2563],
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 115453,
+        "DescriptionId": 104099,
+        "DialogueId": 104100,
+        "Targets": [{ "NpcId": 2889 }]
+      }
+    ]
+  },
+  {
+    "Name": "Nomi's Little Brother",
+    "QuestId": 3001,
+    "TitleId": 46280,
+    "DescriptionId": 46621,
+    "GiverDialogueId": 46279,
+    "ObjectiveDescriptionId": 46281,
+    "IconId": 43278,
+    "GiverNpcId": 2335,
+    "TargetNpcId": 2335,
+    "RewardCoins": 30,
+    "RewardExperience": 50,
+    "RewardItems": [],
+    "NextQuestId": 3002,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 46621,
+        "DescriptionId": 46281,
+        "DialogueId": 140679,
+        "Targets": [{ "NpcId": 3016 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 74455,
+        "DescriptionId": 74456,
+        "DialogueId": 73239,
+        "Targets": [{ "NpcId": 2335 }]
+      }
+    ]
+  },
+  {
+    "Name": "Hasti's Homework Heist",
+    "QuestId": 3002,
+    "TitleId": 74437,
+    "DescriptionId": 74438,
+    "GiverDialogueId": 74436,
+    "ObjectiveDescriptionId": 74441,
+    "IconId": 43278,
+    "GiverNpcId": 2335,
+    "TargetNpcId": 2335,
+    "RewardCoins": 30,
+    "RewardExperience": 100,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3001,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "RewardCollectionId": 313,
+    "Goals": [
+      {
+        "NameId": 74443,
+        "DescriptionId": 74444,
+        "Type": 2,
+        "RequiredCount": 8,
+        "CollectNodeType": "hastis-homework"
+      },
+      {
+        "Type": 0,
+        "NameId": 74455,
+        "DescriptionId": 74456,
+        "DialogueId": 72906,
+        "Targets": [{ "NpcId": 2335 }]
+      }
+    ]
+  },
+  {
+    "Name": "Brawler: Restless Rumors",
+    "QuestId": 104146,
+    "TitleId": 104146,
+    "DescriptionId": 104147,
+    "GiverDialogueId": 104145,
+    "ObjectiveDescriptionId": 104147,
+    "IconId": 43278,
+    "GiverNpcId": 2912,
+    "TargetNpcId": 34006,
+    "RewardCoins": 6,
+    "RewardExperience": 50,
+    "RewardItems": [75289],
+    "NextQuestId": 104154,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 115619,
+        "DescriptionId": 115620,
+        "DialogueId": 104148,
+        "Targets": [{ "NpcId": 34006 }]
+      }
+    ]
+  },
+  {
+    "Name": "Brawler: The Growler Report",
+    "QuestId": 104154,
+    "TitleId": 104154,
+    "DescriptionId": 104155,
+    "GiverDialogueId": 104153,
+    "ObjectiveDescriptionId": 104155,
+    "IconId": 43278,
+    "GiverNpcId": 34006,
+    "TargetNpcId": 33741,
+    "RewardCoins": 15,
+    "RewardExperience": 63,
+    "RewardItems": [75855],
+    "PrerequisiteQuestId": 104146,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 115711,
+        "DescriptionId": 115712,
+        "DialogueId": 104156,
+        "Targets": [{ "NpcId": 33741 }]
+      }
+    ]
+  },
+  {
+    "Name": "Looking for Lavender",
+    "QuestId": 3010,
+    "TitleId": 390787,
+    "DescriptionId": 390788,
+    "GiverDialogueId": 390786,
+    "ObjectiveDescriptionId": 390797,
+    "IconId": 43278,
+    "GiverNpcId": 2419,
+    "TargetNpcId": 2419,
+    "RewardCoins": 36,
+    "RewardExperience": 100,
+    "RewardItems": [],
+    "NextQuestId": 3011,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 390798,
+        "DescriptionId": 390797,
+        "DialogueId": 390817,
+        "Targets": [{ "NpcId": 33373 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 390800,
+        "DescriptionId": 390797,
+        "DialogueId": 390820,
+        "Targets": [{ "NpcId": 33146 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 390802,
+        "DescriptionId": 390797,
+        "DialogueId": 390822,
+        "Targets": [{ "NpcId": 2359 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 390804,
+        "DescriptionId": 390797,
+        "DialogueId": 390789,
+        "Targets": [{ "NpcId": 2419 }]
+      }
+    ]
+  },
+  {
+    "Name": "A Reliable Source",
+    "QuestId": 3011,
+    "TitleId": 390845,
+    "DescriptionId": 390846,
+    "GiverDialogueId": 390844,
+    "ObjectiveDescriptionId": 390846,
+    "IconId": 43278,
+    "GiverNpcId": 2419,
+    "TargetNpcId": 2419,
+    "RewardCoins": 24,
+    "RewardExperience": 80,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3010,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 390850,
+        "DescriptionId": 390851,
+        "DialogueId": 390855,
+        "Targets": [{ "NpcId": 1419 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 390804,
+        "DescriptionId": 390849,
+        "DialogueId": 390847,
+        "Targets": [{ "NpcId": 2419 }]
+      }
+    ]
+  },
+  {
+    "Name": "Welcome to Seaside",
+    "QuestId": 3020,
+    "TitleId": 93283,
+    "DescriptionId": 93284,
+    "GiverDialogueId": 93282,
+    "ObjectiveDescriptionId": 93291,
+    "IconId": 43278,
+    "GiverNpcId": 1885,
+    "TargetNpcId": 1748,
+    "RewardCoins": 30,
+    "RewardExperience": 80,
+    "RewardItems": [],
+    "NextQuestId": 3021,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "NameId": 93294,
+        "DescriptionId": 93295,
+        "Type": 1,
+        "ReachPosition": [-690.38, 2.3, -1060.25],
+        "ReachRadius": 15
+      },
+      {
+        "Type": 0,
+        "NameId": 93310,
+        "DescriptionId": 93291,
+        "DialogueId": 93316,
+        "Targets": [{ "NpcId": 1885 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 101743,
+        "DescriptionId": 93334,
+        "DialogueId": 93335,
+        "Targets": [{ "NpcId": 1748 }]
+      }
+    ]
+  },
+  {
+    "Name": "The Oldest Building",
+    "QuestId": 3021,
+    "TitleId": 93399,
+    "DescriptionId": 140222,
+    "GiverDialogueId": 93398,
+    "ObjectiveDescriptionId": 93400,
+    "IconId": 43278,
+    "GiverNpcId": 1748,
+    "TargetNpcId": 1748,
+    "RewardCoins": 30,
+    "RewardExperience": 80,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3020,
+    "NextQuestId": 3022,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 93405,
+        "DescriptionId": 93406,
+        "DialogueId": 93409,
+        "Targets": [{ "NpcId": 1756 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 93407,
+        "DescriptionId": 93408,
+        "DialogueId": 93401,
+        "Targets": [{ "NpcId": 1748 }]
+      }
+    ]
+  },
+  {
+    "Name": "Purr...fect Secret",
+    "QuestId": 3031,
+    "TitleId": 389700,
+    "DescriptionId": 116709,
+    "GiverDialogueId": 38042,
+    "ObjectiveDescriptionId": 116709,
+    "IconId": 43278,
+    "GiverNpcId": 3380,
+    "TargetNpcId": 3380,
+    "RewardCoins": 2,
+    "RewardExperience": 90,
+    "RewardItems": [29361],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 389708,
+        "DescriptionId": 116709,
+        "DialogueId": 389904,
+        "Targets": [{ "NpcId": 40016 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 389709,
+        "DescriptionId": 116709,
+        "DialogueId": 389905,
+        "Targets": [{ "NpcId": 40017 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 389710,
+        "DescriptionId": 116709,
+        "DialogueId": 389910,
+        "Targets": [{ "NpcId": 40018 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 389712,
+        "DescriptionId": 116709,
+        "DialogueId": 389911,
+        "Targets": [{ "NpcId": 40019 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 38127,
+        "DescriptionId": 116709,
+        "DialogueId": 45612,
+        "Targets": [{ "NpcId": 3380 }]
+      }
+    ]
+  },
+  {
+    "Name": "Who Done It?",
+    "QuestId": 3032,
+    "TitleId": 389951,
+    "DescriptionId": 389952,
+    "GiverDialogueId": 389950,
+    "ObjectiveDescriptionId": 389952,
+    "IconId": 43278,
+    "GiverNpcId": 3380,
+    "TargetNpcId": 3386,
+    "RewardCoins": 5,
+    "RewardExperience": 90,
+    "RewardItems": [11014, 11014, 11014, 11014, 11014],
+    "PrerequisiteQuestId": 3031,
+    "NextQuestId": 3033,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 38049,
+        "DescriptionId": 38050,
+        "DialogueId": 389967,
+        "Targets": [{ "NpcId": 3389 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 38051,
+        "DescriptionId": 38052,
+        "DialogueId": 389970,
+        "Targets": [{ "NpcId": 3388 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 38053,
+        "DescriptionId": 38054,
+        "DialogueId": 390019,
+        "Targets": [{ "NpcId": 3386 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 390017,
+        "DescriptionId": 38054,
+        "DialogueId": 389953,
+        "Targets": [{ "NpcId": 3386 }]
+      }
+    ]
+  },
+  {
+    "Name": "Making Amends",
+    "QuestId": 3033,
+    "TitleId": 3787,
+    "DescriptionId": 38144,
+    "GiverDialogueId": 38142,
+    "ObjectiveDescriptionId": 38144,
+    "IconId": 43278,
+    "GiverNpcId": 3386,
+    "TargetNpcId": 3379,
+    "RewardCoins": 2,
+    "RewardExperience": 80,
+    "RewardItems": [7289],
+    "PrerequisiteQuestId": 3032,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 38154,
+        "DescriptionId": 38155,
+        "DialogueId": 38163,
+        "Targets": [{ "NpcId": 3370 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 38156,
+        "DescriptionId": 38157,
+        "DialogueId": 2134,
+        "Targets": [{ "NpcId": 3379 }]
+      }
+    ]
+  },
+  {
+    "Name": "Lazy Trolls",
+    "QuestId": 3040,
+    "TitleId": 38385,
+    "DescriptionId": 38386,
+    "GiverDialogueId": 38384,
+    "ObjectiveDescriptionId": 38392,
+    "IconId": 43278,
+    "GiverNpcId": 3145,
+    "TargetNpcId": 3145,
+    "RewardCoins": 30,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "NextQuestId": 3041,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 38393,
+        "DescriptionId": 38394,
+        "DialogueId": 38511,
+        "Targets": [{ "NpcId": 3097 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 38400,
+        "DescriptionId": 38401,
+        "DialogueId": 38402,
+        "Targets": [{ "NpcId": 3113 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 38442,
+        "DescriptionId": 38443,
+        "DialogueId": 38511,
+        "Targets": [{ "NpcId": 3095 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 38515,
+        "DescriptionId": 38516,
+        "DialogueId": 38530,
+        "Targets": [{ "NpcId": 3108 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 38518,
+        "DescriptionId": 38519,
+        "DialogueId": 9585,
+        "Targets": [{ "NpcId": 3145 }]
+      }
+    ]
+  },
+  {
+    "Name": "Question at the Quarry",
+    "QuestId": 3041,
+    "TitleId": 70107,
+    "DescriptionId": 70106,
+    "GiverDialogueId": 70102,
+    "ObjectiveDescriptionId": 70109,
+    "IconId": 43278,
+    "GiverNpcId": 3145,
+    "TargetNpcId": 3120,
+    "RewardCoins": 30,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3040,
+    "NextQuestId": 3042,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 70110,
+        "DescriptionId": 70109,
+        "DialogueId": 70105,
+        "Targets": [{ "NpcId": 3120 }]
+      }
+    ]
+  },
+  {
+    "Name": "Tools for Smashing",
+    "QuestId": 3042,
+    "TitleId": 70218,
+    "DescriptionId": 70301,
+    "GiverDialogueId": 70299,
+    "ObjectiveDescriptionId": 70219,
+    "IconId": 43278,
+    "GiverNpcId": 3120,
+    "TargetNpcId": 3120,
+    "RewardCoins": 30,
+    "RewardExperience": 100,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3041,
+    "NextQuestId": 3043,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "RewardCollectionId": 314,
+    "Goals": [
+      {
+        "NameId": 70221,
+        "DescriptionId": 70222,
+        "Type": 2,
+        "RequiredCount": 5,
+        "CollectNodeType": "smashing-hammers"
+      },
+      {
+        "NameId": 70227,
+        "DescriptionId": 70228,
+        "Type": 2,
+        "RequiredCount": 5,
+        "CollectNodeType": "smashing-chisels"
+      },
+      {
+        "Type": 0,
+        "NameId": 70230,
+        "DescriptionId": 70231,
+        "DialogueId": 70196,
+        "Targets": [{ "NpcId": 3120 }]
+      }
+    ]
+  },
+  {
+    "Name": "Box O' Rocks",
+    "QuestId": 3043,
+    "TitleId": 70201,
+    "DescriptionId": 70202,
+    "GiverDialogueId": 70505,
+    "ObjectiveDescriptionId": 70288,
+    "IconId": 43278,
+    "GiverNpcId": 3120,
+    "TargetNpcId": 3145,
+    "RewardCoins": 30,
+    "RewardExperience": 100,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3042,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "RewardCollectionId": 315,
+    "Goals": [
+      {
+        "NameId": 70289,
+        "DescriptionId": 70290,
+        "Type": 2,
+        "RequiredCount": 3,
+        "CollectNodeType": "box-o-rocks"
+      },
+      {
+        "Type": 0,
+        "NameId": 70291,
+        "DescriptionId": 70292,
+        "DialogueId": 70202,
+        "Targets": [{ "NpcId": 3145 }]
+      }
+    ]
+  },
+  {
+    "Name": "Feminine Touch",
+    "QuestId": 3060,
+    "TitleId": 101400,
+    "DescriptionId": 101410,
+    "GiverDialogueId": 101408,
+    "ObjectiveDescriptionId": 101401,
+    "IconId": 43278,
+    "GiverNpcId": 1964,
+    "TargetNpcId": 1964,
+    "RewardCoins": 30,
+    "RewardExperience": 80,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 101402,
+        "DescriptionId": 101401,
+        "Targets": [{ "NpcId": 1777 }],
+        "Dialogue": [
+          { "TextId": 101412, "ResponseTextId": 101413 }
+        ]
+      },
+      {
+        "Type": 0,
+        "NameId": 101404,
+        "DescriptionId": 101401,
+        "Targets": [{ "NpcId": 1758 }],
+        "Dialogue": [
+          { "TextId": 101414, "ResponseTextId": 101415 },
+          { "TextId": 101416, "ResponseTextId": 103597 }
+        ]
+      },
+      {
+        "Type": 0,
+        "NameId": 101406,
+        "DescriptionId": 101401,
+        "DialogueId": 101411,
+        "Targets": [{ "NpcId": 1964 }]
+      }
+    ]
+  },
+  {
+    "Name": "The Party Pooper",
+    "QuestId": 3070,
+    "TitleId": 385597,
+    "DescriptionId": 385598,
+    "GiverDialogueId": 385596,
+    "ObjectiveDescriptionId": 385601,
+    "IconId": 43278,
+    "GiverNpcId": 2177,
+    "TargetNpcId": 4355,
+    "RewardCoins": 6,
+    "RewardExperience": 60,
+    "RewardItems": [],
+    "NextQuestId": 3071,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 385602,
+        "DescriptionId": 385603,
+        "DialogueId": 385599,
+        "Targets": [{ "NpcId": 4355 }]
+      }
+    ]
+  },
+  {
+    "Name": "Suspicious Serenity",
+    "QuestId": 3071,
+    "TitleId": 74199,
+    "DescriptionId": 74200,
+    "GiverDialogueId": 74198,
+    "ObjectiveDescriptionId": 116184,
+    "IconId": 43278,
+    "GiverNpcId": 4355,
+    "TargetNpcId": 4355,
+    "RewardCoins": 30,
+    "RewardExperience": 100,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3070,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 74204,
+        "DescriptionId": 74205,
+        "DialogueId": 74217,
+        "Targets": [{ "NpcId": 2280 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 74206,
+        "DescriptionId": 74207,
+        "DialogueId": 74222,
+        "Targets": [{ "NpcId": 2222 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 74208,
+        "DescriptionId": 74209,
+        "DialogueId": 74214,
+        "Targets": [{ "NpcId": 2187 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 74210,
+        "DescriptionId": 74211,
+        "DialogueId": 74226,
+        "Targets": [{ "NpcId": 2185 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 74212,
+        "DescriptionId": 74213,
+        "DialogueId": 74201,
+        "Targets": [{ "NpcId": 4355 }]
+      }
+    ]
+  },
+  {
+    "Name": "Aiding our Allies",
+    "QuestId": 3080,
+    "TitleId": 440466,
+    "DescriptionId": 440467,
+    "GiverDialogueId": 440465,
+    "ObjectiveDescriptionId": 440470,
+    "IconId": 43278,
+    "GiverNpcId": 1454,
+    "TargetNpcId": 3841,
+    "RewardCoins": 30,
+    "RewardExperience": 120,
+    "RewardItems": [],
+    "NextQuestId": 3081,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 440471,
+        "DialogueId": 440468,
+        "Targets": [{ "NpcId": 3841 }]
+      }
+    ]
+  },
+  {
+    "Name": "Sobering Homecoming",
+    "QuestId": 3081,
+    "TitleId": 438840,
+    "DescriptionId": 438841,
+    "GiverDialogueId": 438839,
+    "ObjectiveDescriptionId": 438900,
+    "IconId": 43278,
+    "GiverNpcId": 3840,
+    "TargetNpcId": 3840,
+    "RewardCoins": 20,
+    "RewardExperience": 140,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3080,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 438901,
+        "Targets": [{ "NpcId": 3842 }],
+        "Dialogue": [
+          { "TextId": 438967, "ResponseTextId": 423585 }
+        ]
+      },
+      {
+        "Type": 0,
+        "NameId": 438499,
+        "Targets": [{ "NpcId": 3841 }],
+        "Dialogue": [
+          { "TextId": 438969, "ResponseTextId": 428407 }
+        ]
+      },
+      {
+        "Type": 0,
+        "NameId": 438985,
+        "RequiredCount": 3,
+        "Targets": [
+          { "NpcId": 40032, "DialogueId": 438971, "ResponseId": 438972 },
+          { "NpcId": 40033, "DialogueId": 438973, "ResponseId": 438974 },
+          { "NpcId": 40034, "DialogueId": 438975, "ResponseId": 8136 }
+        ]
+      },
+      {
+        "Type": 0,
+        "NameId": 437816,
+        "DialogueId": 438842,
+        "Targets": [{ "NpcId": 3840 }]
+      }
+    ]
+  },
+  {
+    "Name": "Noisy Neighbors",
+    "QuestId": 3090,
+    "TitleId": 36810,
+    "DescriptionId": 36811,
+    "GiverDialogueId": 36809,
+    "ObjectiveDescriptionId": 385625,
+    "IconId": 43278,
+    "GiverNpcId": 33762,
+    "TargetNpcId": 3568,
+    "RewardCoins": 9,
+    "RewardExperience": 60,
+    "RewardItems": [],
+    "NextQuestId": 435,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 36816,
+        "DescriptionId": 385625,
+        "DialogueId": 36818,
+        "Targets": [{ "NpcId": 3568 }]
+      }
+    ]
+  },
+  {
+    "Name": "Noise Permit",
+    "QuestId": 435,
+    "TitleId": 36830,
+    "DescriptionId": 36831,
+    "GiverDialogueId": 36829,
+    "ObjectiveDescriptionId": 103958,
+    "IconId": 43278,
+    "GiverNpcId": 3568,
+    "TargetNpcId": 3568,
+    "RewardCoins": 9,
+    "RewardExperience": 0,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3090,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 36834,
+        "DescriptionId": 103958,
+        "Targets": [{ "NpcId": 33678 }],
+        "HideNpcIdsWhenDone": [33678],
+        "HideDelayMs": 5000
+      },
+      {
+        "Type": 0,
+        "NameId": 36735,
+        "DescriptionId": 36831,
+        "DialogueId": 36837,
+        "Targets": [{ "NpcId": 3568 }]
+      }
+    ]
+  },
+  {
+    "Name": "Warm Welcome",
+    "QuestId": 3100,
+    "TitleId": 413080,
+    "DescriptionId": 413081,
+    "GiverDialogueId": 413079,
+    "ObjectiveDescriptionId": 413212,
+    "IconId": 43278,
+    "GiverNpcId": 4025,
+    "TargetNpcId": 4028,
+    "RewardCoins": 30,
+    "RewardExperience": 60,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 413213,
+        "DescriptionId": 413214,
+        "DialogueId": 413082,
+        "Targets": [{ "NpcId": 4028 }]
+      }
+    ]
+  },
+  {
+    "Name": "Ninja: The Ninja Path",
+    "QuestId": 3110,
+    "TitleId": 20960,
+    "DescriptionId": 20965,
+    "GiverDialogueId": 24829,
+    "ObjectiveDescriptionId": 20963,
+    "IconId": 43278,
+    "GiverNpcId": 3081,
+    "TargetNpcId": 3095,
+    "RewardCoins": 30,
+    "RewardExperience": 80,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 93206,
+        "DescriptionId": 37674,
+        "DialogueId": 9731,
+        "Targets": [{ "NpcId": 3095 }]
+      }
+    ]
+  },
+  {
+    "Name": "Touring Seaside",
+    "QuestId": 3022,
+    "TitleId": 93420,
+    "DescriptionId": 93421,
+    "GiverDialogueId": 93419,
+    "ObjectiveDescriptionId": 93424,
+    "IconId": 43278,
+    "GiverNpcId": 1748,
+    "TargetNpcId": 1748,
+    "RewardCoins": 30,
+    "RewardExperience": 80,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3021,
+    "NextQuestId": 3023,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 1,
+        "NameId": 93425,
+        "DescriptionId": 93424,
+        "ReachPosition": [-379.92, -6.58, -1168.87],
+        "ReachRadius": 10
+      },
+      {
+        "Type": 1,
+        "NameId": 93427,
+        "DescriptionId": 93424,
+        "ReachPosition": [-426.24, -18.72, -1223.69],
+        "ReachRadius": 20
+      },
+      {
+        "Type": 0,
+        "NameId": 93429,
+        "DescriptionId": 93424,
+        "DialogueId": 93435,
+        "Targets": [{ "NpcId": 4265 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 93407,
+        "DescriptionId": 93408,
+        "DialogueId": 93422,
+        "Targets": [{ "NpcId": 1748 }]
+      }
+    ]
+  },
+  {
+    "Name": "Testing the Tour",
+    "QuestId": 3023,
+    "TitleId": 93447,
+    "DescriptionId": 140239,
+    "GiverDialogueId": 93449,
+    "ObjectiveDescriptionId": 140239,
+    "IconId": 43278,
+    "GiverNpcId": 1748,
+    "TargetNpcId": 1748,
+    "RewardCoins": 30,
+    "RewardExperience": 80,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3022,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 93454,
+        "DescriptionId": 140239,
+        "CompleteAfterDialogue": true,
+        "Targets": [{ "NpcId": 1749 }],
+        "Dialogue": [
+          { "TextId": 93464, "ResponseTextId": 93465 },
+          {
+            "TextId": 93466,
+            "Choices": [
+              { "ResponseTextId": 21311, "Retry": true, "Then": [{ "TextId": 93471, "ResponseTextId": 93472 }] },
+              { "ResponseTextId": 21302, "Then": [{ "TextId": 93470, "ResponseTextId": 93473 }] },
+              { "ResponseTextId": 93337, "Retry": true, "Then": [{ "TextId": 93471, "ResponseTextId": 93472 }] }
+            ]
+          },
+          {
+            "TextId": 93474,
+            "Choices": [
+              { "ResponseTextId": 93475, "Retry": true, "Then": [{ "TextId": 93479, "ResponseTextId": 93472 }] },
+              { "ResponseTextId": 93476, "Retry": true, "Then": [{ "TextId": 93479, "ResponseTextId": 93472 }] },
+              { "ResponseTextId": 93477 }
+            ]
+          },
+          { "TextId": 93516 }
+        ]
+      },
+      {
+        "Type": 0,
+        "NameId": 93457,
+        "DescriptionId": 93408,
+        "DialogueId": 93451,
+        "Targets": [{ "NpcId": 1748 }]
+      }
+    ]
+  },
+  {
+    "Name": "Bigger Fish to Fry",
+    "QuestId": 3120,
+    "TitleId": 20836,
+    "DescriptionId": 20839,
+    "GiverDialogueId": 20842,
+    "ObjectiveDescriptionId": 20839,
+    "IconId": 43278,
+    "GiverNpcId": 4064,
+    "TargetNpcId": 3072,
+    "RewardCoins": 24,
+    "RewardExperience": 60,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 20840,
+        "DescriptionId": 20841,
+        "DialogueId": 20844,
+        "Targets": [{ "NpcId": 3072 }]
+      }
+    ]
+  },
+  {
+    "Name": "A New Star is Born!",
+    "QuestId": 3131,
+    "TitleId": 46709,
+    "DescriptionId": 46710,
+    "GiverDialogueId": 46708,
+    "ObjectiveDescriptionId": 46714,
+    "IconId": 43278,
+    "GiverNpcId": 2288,
+    "TargetNpcId": 2288,
+    "RewardCoins": 30,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3130,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 46715,
+        "DescriptionId": 46716,
+        "DialogueId": 47315,
+        "Targets": [{ "NpcId": 2295 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 46718,
+        "DescriptionId": 46719,
+        "DialogueId": 47318,
+        "Targets": [{ "NpcId": 2290 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 46720,
+        "DescriptionId": 46721,
+        "DialogueId": 47320,
+        "Targets": [{ "NpcId": 2282 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 46671,
+        "DescriptionId": 46724,
+        "DialogueId": 46712,
+        "Targets": [{ "NpcId": 2288 }]
+      }
+    ]
+  },
+  {
+    "Name": "Birthday Surprises",
+    "QuestId": 3141,
+    "TitleId": 387044,
+    "DescriptionId": 387045,
+    "GiverDialogueId": 387043,
+    "ObjectiveDescriptionId": 387048,
+    "IconId": 43278,
+    "GiverNpcId": 2271,
+    "TargetNpcId": 2271,
+    "RewardCoins": 24,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3140,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 387049,
+        "DescriptionId": 387050,
+        "DialogueId": 387057,
+        "Targets": [{ "NpcId": 2279 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 71001,
+        "DescriptionId": 387052,
+        "DialogueId": 387059,
+        "Targets": [{ "NpcId": 2200 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 387053,
+        "DescriptionId": 387054,
+        "DialogueId": 387061,
+        "Targets": [{ "NpcId": 2219 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 387055,
+        "DescriptionId": 387056,
+        "DialogueId": 387046,
+        "Targets": [{ "NpcId": 2271 }]
+      }
+    ]
+  },
+  {
+    "Name": "Electric Scouting",
+    "QuestId": 3150,
+    "TitleId": 93923,
+    "DescriptionId": 93924,
+    "GiverDialogueId": 93922,
+    "ObjectiveDescriptionId": 93924,
+    "IconId": 43278,
+    "GiverNpcId": 1813,
+    "TargetNpcId": 1813,
+    "RewardCoins": 15,
+    "RewardExperience": 60,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 93929,
+        "DescriptionId": 93930,
+        "DialogueId": 93935,
+        "Targets": [{ "NpcId": 1801 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 93931,
+        "DescriptionId": 93924,
+        "DialogueId": 93925,
+        "Targets": [{ "NpcId": 1813 }]
+      }
+    ]
+  },
+  {
+    "Name": "Cargug, Cargug, Let Me In!",
+    "QuestId": 3160,
+    "TitleId": 46954,
+    "DescriptionId": 46955,
+    "GiverDialogueId": 46953,
+    "ObjectiveDescriptionId": 46955,
+    "IconId": 43278,
+    "GiverNpcId": 2798,
+    "TargetNpcId": 2798,
+    "RewardCoins": 30,
+    "RewardExperience": 100,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 45669,
+        "DescriptionId": 46972,
+        "Targets": [{ "NpcId": 2801 }],
+        "Dialogue": [
+          {
+            "TextId": 46982,
+            "Choices": [
+              { "ResponseTextId": 46983, "Then": [{ "TextId": 46985 }] },
+              { "ResponseTextId": 46984, "Then": [{ "TextId": 46987 }] }
+            ]
+          }
+        ]
+      },
+      {
+        "Type": 0,
+        "NameId": 46973,
+        "DescriptionId": 46974,
+        "DialogueId": 46989,
+        "Targets": [{ "NpcId": 2799 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 38779,
+        "DescriptionId": 46976,
+        "Targets": [{ "NpcId": 2805 }],
+        "Dialogue": [
+          {
+            "TextId": 46991,
+            "Choices": [
+              {
+                "ResponseTextId": 46993,
+                "Then": [
+                  {
+                    "TextId": 46995,
+                    "Choices": [
+                      { "ResponseTextId": 46996, "Retry": true, "Then": [{ "TextId": 46998 }] },
+                      { "ResponseTextId": 46997, "Then": [{ "TextId": 47000 }] }
+                    ]
+                  }
+                ]
+              },
+              { "ResponseTextId": 46994, "Retry": true, "Then": [{ "TextId": 47003 }] }
+            ]
+          }
+        ]
+      },
+      {
+        "Type": 0,
+        "NameId": 46977,
+        "DescriptionId": 46978,
+        "DialogueId": 46992,
+        "Targets": [{ "NpcId": 1324 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 46979,
+        "DescriptionId": 46980,
+        "DialogueId": 46957,
+        "Targets": [{ "NpcId": 2798 }]
+      }
+    ]
+  },
+  {
+    "Name": "A Change of Script",
+    "QuestId": 3130,
+    "TitleId": 46674,
+    "DescriptionId": 46675,
+    "GiverDialogueId": 46673,
+    "ObjectiveDescriptionId": 46679,
+    "IconId": 43278,
+    "GiverNpcId": 2288,
+    "TargetNpcId": 2288,
+    "RewardCoins": 9,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "NextQuestId": 3131,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 46680,
+        "DescriptionId": 46681,
+        "DialogueId": 46726,
+        "Targets": [{ "NpcId": 2295 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 46682,
+        "DescriptionId": 46683,
+        "DialogueId": 46733,
+        "Targets": [{ "NpcId": 2221 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 46684,
+        "DescriptionId": 46685,
+        "DialogueId": 46735,
+        "Targets": [{ "NpcId": 2290 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 46688,
+        "DescriptionId": 46689,
+        "DialogueId": 46750,
+        "Targets": [{ "NpcId": 2282 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 46690,
+        "DescriptionId": 46691,
+        "DialogueId": 46752,
+        "Targets": [{ "NpcId": 2209 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 46671,
+        "DescriptionId": 47290,
+        "DialogueId": 46677,
+        "Targets": [{ "NpcId": 2288 }]
+      }
+    ]
+  },
+  {
+    "Name": "Picking Petals",
+    "QuestId": 3140,
+    "TitleId": 387034,
+    "DescriptionId": 387035,
+    "GiverDialogueId": 387033,
+    "ObjectiveDescriptionId": 387038,
+    "IconId": 43278,
+    "GiverNpcId": 2220,
+    "TargetNpcId": 2271,
+    "RewardCoins": 10,
+    "RewardExperience": 60,
+    "RewardItems": [],
+    "NextQuestId": 3141,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 387039,
+        "DescriptionId": 387040,
+        "DialogueId": 387036,
+        "Targets": [{ "NpcId": 2271 }]
+      }
+    ]
+  },
+  {
+    "Name": "Fortune Find",
+    "QuestId": 3170,
+    "TitleId": 100231,
+    "DescriptionId": 100232,
+    "GiverDialogueId": 100230,
+    "ObjectiveDescriptionId": 100236,
+    "IconId": 43278,
+    "GiverNpcId": 1785,
+    "TargetNpcId": 1766,
+    "RewardCoins": 30,
+    "RewardExperience": 60,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 100237,
+        "DescriptionId": 100236,
+        "DialogueId": 100233,
+        "Targets": [{ "NpcId": 1766 }]
+      }
+    ]
+  },
+  {
+    "Name": "Fisher Poem",
+    "QuestId": 3180,
+    "TitleId": 94562,
+    "DescriptionId": 94572,
+    "GiverDialogueId": 94570,
+    "ObjectiveDescriptionId": 94565,
+    "IconId": 43278,
+    "GiverNpcId": 1962,
+    "TargetNpcId": 1962,
+    "RewardCoins": 30,
+    "RewardExperience": 80,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 94564,
+        "DescriptionId": 94565,
+        "DialogueId": 94574,
+        "Targets": [{ "NpcId": 1874 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 94566,
+        "DescriptionId": 94567,
+        "DialogueId": 94573,
+        "Targets": [{ "NpcId": 1962 }]
+      }
+    ]
+  },
+  {
+    "Name": "Sister Feud",
+    "QuestId": 3190,
+    "TitleId": 94547,
+    "DescriptionId": 94553,
+    "GiverDialogueId": 94551,
+    "ObjectiveDescriptionId": 94550,
+    "IconId": 43278,
+    "GiverNpcId": 1813,
+    "TargetNpcId": 3567,
+    "RewardCoins": 61,
+    "RewardExperience": 80,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 94549,
+        "DescriptionId": 94550,
+        "DialogueId": 94554,
+        "Targets": [{ "NpcId": 3567 }]
+      }
+    ]
+  },
+  {
+    "Name": "Delivery for Rimpadun",
+    "QuestId": 3200,
+    "TitleId": 46566,
+    "DescriptionId": 46567,
+    "GiverDialogueId": 46565,
+    "ObjectiveDescriptionId": 46573,
+    "IconId": 43278,
+    "GiverNpcId": 1615,
+    "TargetNpcId": 1615,
+    "RewardCoins": 90,
+    "RewardExperience": 100,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 46574,
+        "DescriptionId": 46575,
+        "DialogueId": 46570,
+        "Targets": [{ "NpcId": 2280 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 46562,
+        "DescriptionId": 46577,
+        "Targets": [{ "NpcId": 1615 }]
+      }
+    ]
+  },
+  {
+    "Name": "Keep it Down!",
+    "QuestId": 3210,
+    "TitleId": 38095,
+    "DescriptionId": 38096,
+    "GiverDialogueId": 38183,
+    "ObjectiveDescriptionId": 101927,
+    "IconId": 43278,
+    "GiverNpcId": 2806,
+    "TargetNpcId": 2811,
+    "RewardCoins": 30,
+    "RewardExperience": 80,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 38105,
+        "DescriptionId": 38106,
+        "DialogueId": 38182,
+        "Targets": [{ "NpcId": 2811 }]
+      }
+    ]
+  },
+  {
+    "Name": "Asking the Expert",
+    "QuestId": 3220,
+    "TitleId": 47248,
+    "DescriptionId": 47249,
+    "GiverDialogueId": 47247,
+    "ObjectiveDescriptionId": 101963,
+    "IconId": 43278,
+    "GiverNpcId": 2844,
+    "TargetNpcId": 2844,
+    "RewardCoins": 15,
+    "RewardExperience": 60,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 47253,
+        "DescriptionId": 116122,
+        "Targets": [{ "NpcId": 2672 }],
+        "Dialogue": [
+          { "TextId": 47255, "ResponseTextId": 47553 },
+          { "TextId": 47255, "ResponseTextId": 47556 },
+          { "TextId": 47255, "ResponseTextId": 47558 },
+          { "TextId": 47255, "ResponseTextId": 47560 },
+          { "TextId": 47255, "ResponseTextId": 47562 },
+          { "TextId": 47255, "ResponseTextId": 47564 },
+          { "TextId": 47255, "ResponseTextId": 47566 },
+          { "TextId": 47567, "ResponseTextId": 47568 },
+          { "TextId": 47255, "ResponseTextId": 1911 }
+        ]
+      },
+      {
+        "Type": 0,
+        "NameId": 41514,
+        "DescriptionId": 41515,
+        "DialogueId": 47250,
+        "Targets": [{ "NpcId": 2844 }]
+      }
+    ]
+  },
+  {
+    "Name": "Washing it Down",
+    "QuestId": 3230,
+    "TitleId": 38841,
+    "DescriptionId": 38842,
+    "GiverDialogueId": 38840,
+    "ObjectiveDescriptionId": 38842,
+    "IconId": 43278,
+    "GiverNpcId": 2851,
+    "TargetNpcId": 2851,
+    "RewardCoins": 30,
+    "RewardExperience": 80,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 38848,
+        "DescriptionId": 38849,
+        "CompleteAfterDialogue": true,
+        "Targets": [{ "NpcId": 2806 }],
+        "Dialogue": [
+          {
+            "TextId": 38836,
+            "Choices": [
+              { "ResponseTextId": 38860, "Then": [{ "TextId": 38866 }] },
+              { "ResponseTextId": 38863, "Retry": true, "Then": [{ "TextId": 38867 }] }
+            ]
+          }
+        ]
+      },
+      {
+        "Type": 0,
+        "NameId": 39037,
+        "DescriptionId": 39038,
+        "DialogueId": 39044,
+        "Targets": [{ "NpcId": 2851 }]
+      }
+    ]
+  },
+  {
+    "Name": "Funding the Fun",
+    "QuestId": 3240,
+    "TitleId": 45181,
+    "DescriptionId": 45182,
+    "GiverDialogueId": 45180,
+    "ObjectiveDescriptionId": 45182,
+    "IconId": 43278,
+    "GiverNpcId": 1661,
+    "TargetNpcId": 1661,
+    "RewardCoins": 6,
+    "RewardExperience": 60,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 45946,
+        "DescriptionId": 45450,
+        "DialogueId": 45445,
+        "Targets": [{ "NpcId": 1615 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 45041,
+        "DescriptionId": 45042,
+        "DialogueId": 45184,
+        "Targets": [{ "NpcId": 1661 }]
+      }
+    ]
+  },
+  {
+    "Name": "The Search for Snorg",
+    "QuestId": 3250,
+    "TitleId": 46203,
+    "DescriptionId": 46204,
+    "GiverDialogueId": 46202,
+    "ObjectiveDescriptionId": 46204,
+    "IconId": 43278,
+    "GiverNpcId": 33348,
+    "TargetNpcId": 2740,
+    "RewardCoins": 15,
+    "RewardExperience": 60,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 46218,
+        "DescriptionId": 46219,
+        "DialogueId": 46206,
+        "Targets": [{ "NpcId": 2740 }]
+      }
+    ]
+  },
+  {
+    "Name": "Meet the Mayor!",
+    "QuestId": 3260,
+    "TitleId": 5544,
+    "DescriptionId": 5655,
+    "GiverDialogueId": 24825,
+    "ObjectiveDescriptionId": 103961,
+    "IconId": 43278,
+    "GiverNpcId": 33609,
+    "TargetNpcId": 33737,
+    "RewardCoins": 9,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "NextQuestId": 3261,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 72647,
+        "DescriptionId": 78762,
+        "DialogueId": 78760,
+        "Targets": [{ "NpcId": 33737 }]
+      }
+    ]
+  },
+  {
+    "Name": "Hot Mess",
+    "QuestId": 3261,
+    "TitleId": 79019,
+    "DescriptionId": 79020,
+    "GiverDialogueId": 79018,
+    "ObjectiveDescriptionId": 79020,
+    "IconId": 43278,
+    "GiverNpcId": 33741,
+    "TargetNpcId": 33670,
+    "RewardCoins": 9,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3260,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 79025,
+        "DescriptionId": 79024,
+        "DialogueId": 79021,
+        "Targets": [{ "NpcId": 33670 }]
+      }
+    ]
+  },
+  {
+    "Name": "Glugmort's Palate",
+    "QuestId": 3270,
+    "TitleId": 20550,
+    "DescriptionId": 20551,
+    "GiverDialogueId": 24816,
+    "ObjectiveDescriptionId": 20551,
+    "IconId": 43278,
+    "GiverNpcId": 3476,
+    "TargetNpcId": 3474,
+    "RewardCoins": 24,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 15861,
+        "DescriptionId": 20562,
+        "DialogueId": 20560,
+        "Targets": [{ "NpcId": 4064 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 20563,
+        "DescriptionId": 20564,
+        "DialogueId": 20565,
+        "Targets": [{ "NpcId": 3474 }]
+      }
+    ]
+  },
+  {
+    "Name": "Spinnerette",
+    "QuestId": 3271,
+    "TitleId": 16111,
+    "DescriptionId": 16121,
+    "GiverDialogueId": 24895,
+    "ObjectiveDescriptionId": 16121,
+    "IconId": 43278,
+    "GiverNpcId": 2792,
+    "TargetNpcId": 2792,
+    "RewardCoins": 15,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 16127,
+        "DescriptionId": 16126,
+        "Targets": [{ "NpcId": 2714 }],
+        "Dialogue": [
+          { "TextId": 16132 },
+          { "TextId": 16134 }
+        ]
+      },
+      {
+        "Type": 0,
+        "NameId": 16138,
+        "DescriptionId": 16139,
+        "DialogueId": 16140,
+        "Targets": [{ "NpcId": 2792 }]
+      }
+    ]
+  },
+  {
+    "Name": "Pirri's Sketches",
+    "QuestId": 3272,
+    "TitleId": 46259,
+    "DescriptionId": 46260,
+    "GiverDialogueId": 46258,
+    "ObjectiveDescriptionId": 46260,
+    "IconId": 43278,
+    "GiverNpcId": 2429,
+    "TargetNpcId": 1799,
+    "RewardCoins": 15,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 46268,
+        "DescriptionId": 46269,
+        "DialogueId": 46264,
+        "Targets": [{ "NpcId": 1799 }]
+      }
+    ]
+  },
+  {
+    "Name": "Done Deal",
+    "QuestId": 3273,
+    "TitleId": 391804,
+    "DescriptionId": 391805,
+    "GiverDialogueId": 391803,
+    "ObjectiveDescriptionId": 391805,
+    "IconId": 43278,
+    "GiverNpcId": 1626,
+    "TargetNpcId": 1813,
+    "RewardCoins": 5,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 391809,
+        "DescriptionId": 391808,
+        "DialogueId": 391806,
+        "Targets": [{ "NpcId": 1813 }]
+      }
+    ]
+  },
+  {
+    "Name": "Hooligan Hassles",
+    "QuestId": 3274,
+    "TitleId": 74527,
+    "DescriptionId": 74528,
+    "GiverDialogueId": 74526,
+    "ObjectiveDescriptionId": 74528,
+    "IconId": 43278,
+    "GiverNpcId": 2386,
+    "TargetNpcId": 3234,
+    "RewardCoins": 75,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 74532,
+        "DescriptionId": 74531,
+        "DialogueId": 74529,
+        "Targets": [{ "NpcId": 3234 }]
+      }
+    ]
+  },
+  {
+    "Name": "Seafoam's Sweet Tooth",
+    "QuestId": 3280,
+    "TitleId": 15105,
+    "DescriptionId": 15268,
+    "GiverDialogueId": 24874,
+    "ObjectiveDescriptionId": 15268,
+    "IconId": 43278,
+    "GiverNpcId": 3547,
+    "TargetNpcId": 3547,
+    "RewardCoins": 6,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "NextQuestId": 3281,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 15832,
+        "DescriptionId": 15268,
+        "DialogueId": 15836,
+        "Targets": [{ "NpcId": 2416 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 15834,
+        "DescriptionId": 15835,
+        "DialogueId": 15813,
+        "Targets": [{ "NpcId": 3547 }]
+      }
+    ]
+  },
+  {
+    "Name": "Seafoam is Picky",
+    "QuestId": 3281,
+    "TitleId": 15107,
+    "DescriptionId": 15108,
+    "GiverDialogueId": 24875,
+    "ObjectiveDescriptionId": 15108,
+    "IconId": 43278,
+    "GiverNpcId": 3547,
+    "TargetNpcId": 3547,
+    "RewardCoins": 61,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3280,
+    "NextQuestId": 3282,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 15861,
+        "DescriptionId": 15862,
+        "DialogueId": 15865,
+        "Targets": [{ "NpcId": 4064 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 15834,
+        "DescriptionId": 15835,
+        "DialogueId": 15867,
+        "Targets": [{ "NpcId": 3547 }]
+      }
+    ]
+  },
+  {
+    "Name": "Seafoam's Last Idea",
+    "QuestId": 3282,
+    "TitleId": 15109,
+    "DescriptionId": 15110,
+    "GiverDialogueId": 24876,
+    "ObjectiveDescriptionId": 15110,
+    "IconId": 43278,
+    "GiverNpcId": 3547,
+    "TargetNpcId": 3547,
+    "RewardCoins": 61,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3281,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 15926,
+        "DescriptionId": 15272,
+        "DialogueId": 15924,
+        "Targets": [{ "NpcId": 1658 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 15834,
+        "DescriptionId": 15835,
+        "DialogueId": 15930,
+        "Targets": [{ "NpcId": 3547 }]
+      }
+    ]
+  },
+  {
+    "Name": "Such a Show Off!",
+    "QuestId": 3283,
+    "TitleId": 391884,
+    "DescriptionId": 391885,
+    "GiverDialogueId": 391883,
+    "ObjectiveDescriptionId": 391885,
+    "IconId": 43278,
+    "GiverNpcId": 1813,
+    "TargetNpcId": 3567,
+    "RewardCoins": 2,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 94549,
+        "DescriptionId": 391889,
+        "DialogueId": 391886,
+        "Targets": [{ "NpcId": 3567 }]
+      }
+    ]
+  },
+  {
+    "Name": "Broken Axle",
+    "QuestId": 3284,
+    "TitleId": 10128,
+    "DescriptionId": 10129,
+    "GiverDialogueId": 24841,
+    "ObjectiveDescriptionId": 10129,
+    "IconId": 43278,
+    "GiverNpcId": 33086,
+    "TargetNpcId": 33416,
+    "RewardCoins": 30,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 14868,
+        "DescriptionId": 14869,
+        "DialogueId": 9527,
+        "Targets": [{ "NpcId": 33416 }]
+      }
+    ]
+  },
+  {
+    "Name": "Back for More",
+    "QuestId": 3290,
+    "TitleId": 94263,
+    "DescriptionId": 94264,
+    "GiverDialogueId": 94262,
+    "ObjectiveDescriptionId": 94264,
+    "IconId": 43278,
+    "GiverNpcId": 2049,
+    "TargetNpcId": 2045,
+    "RewardCoins": 7,
+    "RewardExperience": 70,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 1801,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 100150,
+        "DescriptionId": 94264,
+        "DialogueId": 94265,
+        "Targets": [{ "NpcId": 2045 }]
+      }
+    ]
+  },
+  {
+    "Name": "Career Change",
+    "QuestId": 3291,
+    "TitleId": 36592,
+    "DescriptionId": 36593,
+    "GiverDialogueId": 36591,
+    "ObjectiveDescriptionId": 36593,
+    "IconId": 43278,
+    "GiverNpcId": 3069,
+    "TargetNpcId": 3069,
+    "RewardCoins": 5,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 36594,
+        "DescriptionId": 36593,
+        "DialogueId": 36598,
+        "Targets": [{ "NpcId": 33086 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 36596,
+        "DescriptionId": 36593,
+        "DialogueId": 36599,
+        "Targets": [{ "NpcId": 3069 }]
+      }
+    ]
+  },
+  {
+    "Name": "Flattery is Everything",
+    "QuestId": 3300,
+    "TitleId": 36840,
+    "DescriptionId": 36841,
+    "GiverDialogueId": 36839,
+    "ObjectiveDescriptionId": 103104,
+    "IconId": 43278,
+    "GiverNpcId": 33691,
+    "TargetNpcId": 33691,
+    "RewardCoins": 30,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "NextQuestId": 3301,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 36842,
+        "DescriptionId": 36843,
+        "DialogueId": 140713,
+        "Targets": [{ "NpcId": 4863 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 140711,
+        "DescriptionId": 36856,
+        "DialogueId": 9541,
+        "Targets": [{ "NpcId": 33691 }]
+      }
+    ]
+  },
+  {
+    "Name": "Getting the Girl",
+    "QuestId": 3301,
+    "TitleId": 36850,
+    "DescriptionId": 36851,
+    "GiverDialogueId": 36849,
+    "ObjectiveDescriptionId": 103108,
+    "IconId": 43278,
+    "GiverNpcId": 33691,
+    "TargetNpcId": 33691,
+    "RewardCoins": 30,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "PrerequisiteQuestId": 3300,
+    "NextQuestId": 3303,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 36855,
+        "DescriptionId": 36856,
+        "Targets": [{ "NpcId": 33647 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 36857,
+        "DescriptionId": 36843,
+        "DialogueId": 140715,
+        "Targets": [{ "NpcId": 4863 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 140711,
+        "DescriptionId": 36856,
+        "DialogueId": 9767,
+        "Targets": [{ "NpcId": 33691 }]
+      }
+    ]
+  },
+  {
+    "Name": "Encased in Ice",
+    "QuestId": 3302,
+    "TitleId": 91754,
+    "DescriptionId": 91755,
+    "GiverDialogueId": 91753,
+    "ObjectiveDescriptionId": 115028,
+    "IconId": 43278,
+    "GiverNpcId": 1419,
+    "TargetNpcId": 1421,
+    "RewardCoins": 15,
+    "RewardExperience": 90,
+    "RewardItems": [],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 0,
+        "NameId": 91761,
+        "DescriptionId": 91762,
+        "Targets": [{ "NpcId": 33671 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 91763,
+        "DescriptionId": 91764,
+        "HideNpcIdsWhenDone": [40013],
+        "HideEffectId": 56,
+        "NpcEffectsUntilDone": [{ "NpcId": 1421, "EffectId": 5337 }],
+        "Targets": [{ "NpcId": 40013 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 91765,
+        "DescriptionId": 91766,
+        "DialogueId": 91756,
+        "Targets": [{ "NpcId": 1421 }]
+      }
+    ]
+  },
+  {
+    "Name": "Woe is Willie",
+    "QuestId": 3303,
+    "TitleId": 36873,
+    "DescriptionId": 36874,
+    "GiverDialogueId": 36872,
+    "ObjectiveDescriptionId": 104094,
+    "IconId": 43278,
+    "GiverNpcId": 33691,
+    "TargetNpcId": 33691,
+    "RewardCoins": 61,
+    "RewardExperience": 90,
+    "RewardItems": [3382],
+    "PrerequisiteQuestId": 3301,
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "RewardCollectionId": 317,
+    "Goals": [
+      {
+        "Type": 2,
+        "NameId": 36876,
+        "DescriptionId": 36877,
+        "RequiredCount": 1,
+        "CollectNodeType": "woe-is-willie-flowers"
+      },
+      {
+        "Type": 0,
+        "NameId": 36878,
+        "DescriptionId": 36843,
+        "DialogueId": 140719,
+        "Targets": [{ "NpcId": 4863 }]
+      },
+      {
+        "Type": 0,
+        "NameId": 140711,
+        "DescriptionId": 36856,
+        "DialogueId": 9768,
+        "Targets": [{ "NpcId": 33691 }]
+      }
+    ]
+  },
+  {
+    "Name": "One Man's Trash",
+    "QuestId": 624,
+    "TitleId": 47534,
+    "DescriptionId": 47535,
+    "GiverDialogueId": 47533,
+    "ObjectiveDescriptionId": 47542,
+    "IconId": 43278,
+    "GiverNpcId": 2222,
+    "TargetNpcId": 2222,
+    "RewardCoins": 10,
+    "RewardExperience": 0,
+    "RewardItems": [3850, 3023],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "HideObjectiveTarget": true,
+    "RewardCollectionId": 318,
+    "Goals": [
+      {
+        "Type": 2,
+        "NameId": 47543,
+        "DescriptionId": 47544,
+        "RequiredCount": 1,
+        "CollectNodeType": "one-mans-trash-camp"
+      },
+      {
+        "Type": 2,
+        "NameId": 47545,
+        "DescriptionId": 47546,
+        "RequiredCount": 1,
+        "CollectNodeType": "one-mans-trash-chugawug",
+        "WithPrevious": true
+      },
+      {
+        "Type": 2,
+        "NameId": 47547,
+        "DescriptionId": 47548,
+        "RequiredCount": 1,
+        "CollectNodeType": "one-mans-trash-vendors",
+        "WithPrevious": true
+      },
+      {
+        "Type": 2,
+        "NameId": 47549,
+        "DescriptionId": 47550,
+        "RequiredCount": 1,
+        "CollectNodeType": "one-mans-trash-stage",
+        "WithPrevious": true
+      },
+      {
+        "Type": 0,
+        "NameId": 47551,
+        "DescriptionId": 47552,
+        "DialogueId": 47536,
+        "Targets": [{ "NpcId": 2222 }]
+      }
+    ]
+  }
+]

@@ -9,7 +9,7 @@ public sealed class DbHouseVoteConfiguration : IEntityTypeConfiguration<DbHouseV
 {
     public void Configure(EntityTypeBuilder<DbHouseVote> builder)
     {
-        builder.HasKey(v => new { v.HouseId, v.CharacterId, v.VoterId });
+        builder.HasKey(v => new { v.HouseId, v.VoterId });
 
         builder.Property(v => v.Rating).IsRequired();
         builder.Property(v => v.Category).IsRequired().HasMaxLength(32);

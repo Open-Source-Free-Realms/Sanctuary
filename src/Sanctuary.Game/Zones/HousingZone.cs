@@ -32,6 +32,8 @@ public sealed class HousingZone : BaseZone
     private readonly Dictionary<int, Npc> _housePets = [];
 
     private bool _isHouseLoaded;
+    private ulong? _ownerGuid;
+    private int _houseKey;
 
     public string HouseName { get; private set; } = string.Empty;
 
@@ -59,7 +61,14 @@ public sealed class HousingZone : BaseZone
             SpawnHousePets(player);
     }
 
-    public ulong? OwnerGuid => OwnerId is { } houseGuid ? HousingHelper.GetHouseOwnerGuid(houseGuid) : null;
+    public ulong? OwnerGuid
+    {
+        get
+        {
+            LoadHouse();
+            return _ownerGuid;
+        }
+    }
 
     public bool IsOwner(Player player) => OwnerGuid == player.Guid && !player.IsPreviewingHouse;
 
@@ -192,44 +201,30 @@ public sealed class HousingZone : BaseZone
 
         _isHouseLoaded = true;
 
-        var characterId = HousingHelper.GetHouseCharacterId(houseGuid);
-        var houseKey = HousingHelper.GetHouseKey(houseGuid);
+        if (!HousingHelper.TryGetHouse(_dbContextFactory, houseGuid, out var dbHouse))
+            return;
 
-        using var dbContext = _dbContextFactory.CreateDbContext();
+        _ownerGuid = HousingHelper.GetHouseOwnerGuid(dbHouse);
+        _houseKey = dbHouse.Key;
 
-        var dbHouse = dbContext.Houses.AsNoTracking().FirstOrDefault(house => house.Id == houseKey && house.CharacterId == characterId);
-
-        if (dbHouse is not null)
-            ApplyHouse(dbHouse);
+        ApplyHouse(dbHouse);
     }
 
     private void UpdateHouse(Action<DbHouse> update)
     {
-        if (OwnerId is not { } houseGuid || HousingHelper.GetHouseKey(houseGuid) == HousingHelper.PreviewHouseKey)
+        LoadHouse();
+
+        if (OwnerId is not { } houseGuid || _houseKey == HousingHelper.PreviewHouseKey)
             return;
 
-        var characterId = HousingHelper.GetHouseCharacterId(houseGuid);
-        var houseKey = HousingHelper.GetHouseKey(houseGuid);
+        var houseId = GuidHelper.GetHouseId(houseGuid);
 
         using var dbContext = _dbContextFactory.CreateDbContext();
 
-        var dbHouse = dbContext.Houses.FirstOrDefault(house => house.Id == houseKey && house.CharacterId == characterId);
+        var dbHouse = dbContext.Houses.FirstOrDefault(house => house.Id == houseId);
 
         if (dbHouse is null)
-        {
-            dbHouse = new DbHouse
-            {
-                Id = houseKey,
-                ZoneId = DefinitionId,
-                Name = HouseName,
-                IsLocked = IsLocked,
-                IsFloraAllowed = IsFloraAllowed,
-                PetAutospawn = PetAutospawn,
-                CharacterId = characterId
-            };
-
-            dbContext.Houses.Add(dbHouse);
-        }
+            return;
 
         update(dbHouse);
         dbContext.SaveChanges();
@@ -259,24 +254,20 @@ public sealed class HousingZone : BaseZone
 
     private void SendZoneData(Player player)
     {
-        if (!HousingHelper.TryGetHouseDefinition(_resourceManager, DefinitionId, out var houseDefinition) || OwnerId is not { } houseGuid)
+        if (!HousingHelper.TryGetHouseDefinition(_resourceManager, DefinitionId, out var houseDefinition) || OwnerId is not { } houseGuid || OwnerGuid is not { } ownerGuid)
             return;
 
-        var ownerName = GetOwnerName(HousingHelper.GetHouseOwnerGuid(houseGuid));
-
-        var instanceInfo = HousingHelper.GetInstanceInfo(houseGuid, ownerName, houseDefinition);
+        var instanceInfo = HousingHelper.GetInstanceInfo(houseGuid, ownerGuid, GetOwnerName(ownerGuid), houseDefinition);
 
         instanceInfo.HouseName = HouseName;
         instanceInfo.IsLocked = IsLocked;
         instanceInfo.IsFloraAllowed = IsFloraAllowed;
 
-        var characterId = HousingHelper.GetHouseCharacterId(houseGuid);
-        var houseKey = HousingHelper.GetHouseKey(houseGuid);
+        var houseId = GuidHelper.GetHouseId(houseGuid);
 
         using var dbContext = _dbContextFactory.CreateDbContext();
 
-        var dbHouse = dbContext.Houses.AsNoTracking().Include(house => house.Votes)
-            .FirstOrDefault(house => house.Id == houseKey && house.CharacterId == characterId);
+        var dbHouse = dbContext.Houses.AsNoTracking().Include(house => house.Votes).FirstOrDefault(house => house.Id == houseId);
 
         if (dbHouse is not null)
             HousingHelper.SetRatingInfo(instanceInfo, dbHouse, player.Guid);
@@ -291,12 +282,10 @@ public sealed class HousingZone : BaseZone
 
     private void SendInstanceData(Player player)
     {
-        if (!HousingHelper.TryGetHouseDefinition(_resourceManager, DefinitionId, out var houseDefinition) || OwnerId is not { } houseGuid)
+        if (!HousingHelper.TryGetHouseDefinition(_resourceManager, DefinitionId, out var houseDefinition) || OwnerId is not { } houseGuid || OwnerGuid is not { } ownerGuid)
             return;
 
-        var ownerName = GetOwnerName(HousingHelper.GetHouseOwnerGuid(houseGuid));
-
-        var instanceData = HousingHelper.GetInstanceData(houseGuid, ownerName, houseDefinition);
+        var instanceData = HousingHelper.GetInstanceData(houseGuid, ownerGuid, GetOwnerName(ownerGuid), houseDefinition);
 
         instanceData.Name = HouseName;
         instanceData.IsLocked = IsLocked;

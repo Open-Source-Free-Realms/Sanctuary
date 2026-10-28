@@ -4,7 +4,7 @@ namespace Sanctuary.Database.Entities;
 
 public class DbHouseVote
 {
-    public int HouseId { get; set; }
+    public ulong HouseId { get; set; }
 
     public ulong VoterId { get; set; }
 
@@ -13,6 +13,5 @@ public class DbHouseVote
 
     public DateTimeOffset Created { get; set; } = DateTimeOffset.UtcNow;
 
-    public ulong CharacterId { get; set; }
     public DbHouse House { get; set; } = null!;
 }

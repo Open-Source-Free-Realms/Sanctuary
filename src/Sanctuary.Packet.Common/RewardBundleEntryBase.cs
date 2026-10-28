@@ -17,7 +17,7 @@ public abstract class RewardBundleEntryBase
     public int ItemTextColor;
     public bool MembersOnly;
 
-    internal void Serialize(PacketWriter writer)
+    internal void Serialize(PacketWriter writer, bool writeTail)
     {
         writer.Write((int)Type);
         writer.Write(IsHidden);
@@ -31,7 +31,8 @@ public abstract class RewardBundleEntryBase
         writer.Write(ItemTextColor);
         writer.Write(MembersOnly);
 
-        SerializeData(writer);
+        if (writeTail)
+            SerializeData(writer);
     }
 
     protected abstract void SerializeData(PacketWriter writer);

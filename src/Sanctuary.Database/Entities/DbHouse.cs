@@ -5,7 +5,8 @@ namespace Sanctuary.Database.Entities;
 
 public class DbHouse
 {
-    public int Id { get; set; }
+    public ulong Id { get; set; }
+    public int Key { get; set; }
 
     public int ZoneId { get; set; }
 

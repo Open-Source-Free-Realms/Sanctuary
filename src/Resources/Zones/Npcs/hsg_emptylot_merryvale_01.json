@@ -1,7 +1,7 @@
 ﻿{
   "Definitions": [
     {
-      "Id": 40018,
+      "Id": 40054,
       "NameId": 4826,
       "ModelId": 271,
       "ModelFileName": "invisible_cube.adr",
@@ -50,8 +50,7 @@
   ],
   "Spawns": [
     {
-      "NpcId": 40018,
-      "Guid": 2496234992435218,
+      "NpcId": 40054,
       "Position": [
         448.49,
         0.65,

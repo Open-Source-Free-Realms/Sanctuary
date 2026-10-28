@@ -45,7 +45,7 @@ public static class ClientHousingPacketInvitePlayerHandler
             return true;
         }
 
-        invitee.HouseInvites.Add(houseGuid);
+        invitee.HouseInvites[houseGuid] = player.Guid;
 
         invitee.SendTunneled(new HousingPacketInviteNotification
         {

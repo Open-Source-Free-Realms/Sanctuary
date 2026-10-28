@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -8,6 +8,8 @@ using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.Extensions.Logging;
+
 using Sanctuary.Core.Collections;
 using Sanctuary.Core.Extensions;
 using Sanctuary.Core.IO;
@@ -16,6 +18,7 @@ using Sanctuary.Game;
 using Sanctuary.Game.ChatCommands;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Interactions;
+using Sanctuary.Game.Quests;
 using Sanctuary.Game.Resources.Definitions.Combat;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Zones;
@@ -43,6 +46,7 @@ public sealed class Player : ClientPcData, IEntity
     private const int ActionBarSlotUnknown6 = 4;
     private const int ActionBarSlotUnknown7 = 15;
     private const float OnFootMovementSpeed = 8f;
+    private const long AreaSettleMilliseconds = 1500;
 
     private readonly UdpConnection _connection;
     private readonly IResourceManager _resourceManager;
@@ -59,7 +63,11 @@ public sealed class Player : ClientPcData, IEntity
     private uint? _pendingPortraitCrc;
     private DateTimeOffset _portraitUpdateExpiresAt;
 
-    private int ZoneAreaId { get; set; }
+    public int PointOfInterestId { get; private set; }
+    public int ChatAreaNameId { get; private set; }
+
+    private ZoneAreaDefinition? _pendingZoneArea;
+    private long _pendingZoneAreaSince;
 
     public int ChatBubbleForegroundColor { get; set; }
     public int ChatBubbleBackgroundColor { get; set; }
@@ -80,7 +88,7 @@ public sealed class Player : ClientPcData, IEntity
     public Dictionary<int, PetTrait> PetTraits { get; } = [];
     public Dictionary<int, DateTimeOffset> PetTreasureFoundAt { get; } = [];
 
-    public HashSet<ulong> HouseInvites { get; } = [];
+    public Dictionary<ulong, ulong> HouseInvites { get; } = [];
     public bool IsPreviewingHouse { get; set; }
 
     public PetClientInfo? GetPetClientInfo(int petId) => Pets.FirstOrDefault(petClientInfo => petClientInfo.Id == petId);
@@ -93,7 +101,18 @@ public sealed class Player : ClientPcData, IEntity
     public ConcurrentSet<ulong> IncomingFriendRequests { get; } = [];
     public ConcurrentSet<ulong> IncomingGuildInvites { get; } = [];
 
+
+    public ulong CharacterId { get; set; }
+
+    public QuestLog Quests { get; } = new();
+
+    public QuestConversation QuestConversation { get; } = new();
+
+    public ulong ObjectiveTaskId { get; } = (ulong)Random.Shared.NextInt64();
+
     public ConcurrentDictionary<ChatChannel, bool> ChatChannelStatus { get; set; } = [];
+
+    private static readonly ChatChannel[] DefaultEnabledChatChannels = [ChatChannel.WorldArea, ChatChannel.WorldMembersOnly];
 
     public DateTimeOffset LoginStartedAt { get; set; }
 
@@ -344,6 +363,10 @@ public sealed class Player : ClientPcData, IEntity
         var now = DateTimeOffset.UtcNow;
 
         TickEffects(now);
+
+        if (QuestConversation.TalkingNpcGuid != 0 && now >= QuestConversation.TalkAnimationEndsAt)
+            QuestDialogue.StopTalkAnimation(this);
+
         PlayerPet.UpdateEveryTick();
         SendVisiblePositions();
 
@@ -395,6 +418,7 @@ public sealed class Player : ClientPcData, IEntity
     {
         SnowballInteraction.Update(this);
         UpdatePortrait();
+        UpdatePendingPointOfInterest();
     }
 
     public void RelayPosition(PlayerUpdatePacketUpdatePosition playerUpdatePacketUpdatePosition)
@@ -561,20 +585,22 @@ public sealed class Player : ClientPcData, IEntity
         return clientUpdatePacketUpdateActionBarSlot;
     }
 
-    public void UpdatePosition(Vector4 position, Quaternion rotation, bool updateZoneArea = true)
+    public void UpdatePosition(Vector4 position, Quaternion rotation)
     {
         Position = position;
         Rotation = rotation;
 
-        Mount?.UpdatePosition(position, rotation, updateZoneArea);
+        Mount?.UpdatePosition(position, rotation);
 
         if (Visible)
-        {
             UpdateZoneTile();
+    }
 
-            if (updateZoneArea)
-                UpdateZoneArea();
-        }
+    public bool IsChatChannelOn(ChatChannel chatChannel)
+    {
+        return ChatChannelStatus.TryGetValue(chatChannel, out var channelStatus)
+            ? channelStatus
+            : DefaultEnabledChatChannels.Contains(chatChannel);
     }
 
     // Nearest other player in the zone within range, excluding excludeGuid if given.
@@ -635,9 +661,14 @@ public sealed class Player : ClientPcData, IEntity
         if (newZoneTile == ZoneTile)
             return;
 
+        if (!Zone.IsOutOfBounds(ZoneTile) && Zone.IsOutOfBounds(newZoneTile))
+            Zone.Logger.LogWarning("{name} entered out of bounds tile {tile} at {position}.", Name.FullName, newZoneTile, Position);
+
         Zone.UpdateEntityZoneTile(this, ZoneTile, newZoneTile);
 
         ZoneTile = newZoneTile;
+
+        QueuePointOfInterest();
     }
 
     public bool TeleportToZone(IZone destinationZone, Vector4 position, Quaternion rotation)
@@ -662,6 +693,9 @@ public sealed class Player : ClientPcData, IEntity
         if (!_zoneManager.TryMovePlayerToZone(zoneDefinitionId, ownerId, this, position, rotation, out var zone))
             return false;
 
+        PointOfInterestId = 0;
+        ChatAreaNameId = 0;
+
         if (_appearanceEffectId != 0 && _effects.TryGetValue(_appearanceEffectId, out var appearanceEffect) && appearanceEffect.ExpiresAt is null)
             RemoveTemporaryAppearance();
 
@@ -681,27 +715,67 @@ public sealed class Player : ClientPcData, IEntity
 
         SendTunneled(packetClientBeginZoning);
 
+        ClearObjectives();
+
         return true;
     }
 
-    private void UpdateZoneArea()
+    private void QueuePointOfInterest()
     {
-        if (Zone is not WorldZone worldZone || worldZone.Name != "FabledRealms")
+        var zoneAreaDefinition = Zone is WorldZone worldZone ? worldZone.GetZoneArea(Position, ZoneTile) : null;
+
+        if (zoneAreaDefinition is null || zoneAreaDefinition.Id == PointOfInterestId)
+        {
+            _pendingZoneArea = null;
+            return;
+        }
+
+        if (_pendingZoneArea?.Id == zoneAreaDefinition.Id)
             return;
 
-        var zoneAreaId = worldZone.GetZoneAreaId(Position);
+        _pendingZoneArea = zoneAreaDefinition;
+        _pendingZoneAreaSince = Environment.TickCount64;
+    }
 
-        if (ZoneAreaId == zoneAreaId)
+    private void UpdatePendingPointOfInterest()
+    {
+        if (_pendingZoneArea is null || Environment.TickCount64 - _pendingZoneAreaSince < AreaSettleMilliseconds)
             return;
 
-        ZoneAreaId = zoneAreaId;
+        UpdatePointOfInterest(_pendingZoneArea);
+    }
+
+    public void UpdatePointOfInterest()
+    {
+        if (Zone is WorldZone worldZone && worldZone.GetZoneArea(Position, ZoneTile) is { } zoneAreaDefinition && zoneAreaDefinition.Id != PointOfInterestId)
+            UpdatePointOfInterest(zoneAreaDefinition);
+    }
+
+    public void UpdatePointOfInterest(ZoneAreaDefinition? zoneAreaDefinition)
+    {
+        _pendingZoneArea = null;
+
+        if (zoneAreaDefinition is null || zoneAreaDefinition.Id == PointOfInterestId)
+            return;
+
+        PointOfInterestId = zoneAreaDefinition.Id;
+        ChatAreaNameId = zoneAreaDefinition.ChatAreaNameId;
 
         var packetPOIChangeMessage = new PacketPOIChangeMessage
         {
-            ZoneId = zoneAreaId
+            NameId = zoneAreaDefinition.NameId,
+            ZoneId = zoneAreaDefinition.Id,
+            AreaId = zoneAreaDefinition.AreaId
         };
 
         SendTunneled(packetPOIChangeMessage);
+
+        var chatPacketEnterArea = new ChatPacketEnterArea
+        {
+            AreaNameId = ChatAreaNameId
+        };
+
+        SendTunneled(chatPacketEnterArea);
     }
 
     public void SetMountMovementSpeed(float? mountMovementSpeed)
@@ -752,7 +826,7 @@ public sealed class Player : ClientPcData, IEntity
 
     public void OnAddVisibleNpcs(params IEnumerable<Npc> npcs)
     {
-        var visibleNpcs = npcs.Where(npc => npc.IsVisibleTo(this)).ToArray();
+        var visibleNpcs = npcs.Where(npc => npc.IsVisibleTo(this) && !Zone.IsHiddenByQuest(this, npc)).ToArray();
 
         foreach (var npc in visibleNpcs)
         {
@@ -766,27 +840,45 @@ public sealed class Player : ClientPcData, IEntity
 
             SendTunneled(playerUpdatePacketAddNpc);
             SendTunneled(new PlayerUpdatePacketUpdateCharacterState { Guid = npc.Guid, State = IdleCharacterState });
+
+            var questEffectId = Zone.GetQuestEffectId(this, npc);
+            if (questEffectId != 0)
+            {
+                SendTunneled(new PlayerUpdatePacketAddEffectTagCompositeEffect
+                {
+                    Guid = npc.Guid,
+                    TagId = EffectTagIdGenerator.Next(),
+                    CompositeEffectId = questEffectId,
+                    SourceGuid = npc.Guid
+                });
+            }
         }
 
         var playerUpdatePacketNpcRelevance = InteractionMenuHelper.GetNpcRelevancePacket(
-            visibleNpcs.Where(npc => npc is not PetTreasureChest petTreasureChest || petTreasureChest.IsOwner(this)));
+            visibleNpcs.Where(npc => npc is not PetTreasureChest petTreasureChest || petTreasureChest.IsOwner(this)),
+            npc => Zone.GetQuestBadge(this, npc) is { } badge && !ReferenceEquals(badge, npc.Notification));
         if (playerUpdatePacketNpcRelevance.Entries.Count > 0)
             SendTunneled(playerUpdatePacketNpcRelevance);
 
         var playerUpdatePacketAddNotifications = new PlayerUpdatePacketAddNotifications();
 
         foreach (var npc in visibleNpcs)
-        {
-            playerUpdatePacketAddNotifications.Notifications.AddRange(npc.Notifications);
-            if (npc.Notification is not null)
-                playerUpdatePacketAddNotifications.Notifications.Add(npc.Notification);
-        }
+            playerUpdatePacketAddNotifications.Notifications.AddRange(GetNotificationsFor(npc));
 
         if (playerUpdatePacketAddNotifications.Notifications.Count > 0)
             SendTunneled(playerUpdatePacketAddNotifications);
 
         foreach (var npc in visibleNpcs)
             VisibleNpcs.TryAdd(npc.Guid, npc);
+    }
+
+    public IEnumerable<NotificationInfo> GetNotificationsFor(Npc npc)
+    {
+        foreach (var notification in npc.Notifications)
+            yield return notification;
+
+        if ((Zone.GetQuestBadge(this, npc) ?? npc.Notification) is { } badge)
+            yield return badge;
     }
 
     public void OnAddVisiblePlayers(params IEnumerable<Player> players)
@@ -862,7 +954,7 @@ public sealed class Player : ClientPcData, IEntity
     private static RemoveNotificationInfo GetRemoveNotificationInfo(NotificationInfo notification) => new()
     {
         Guid = notification.Guid,
-        ThoughtBubbleIconId = notification.Unknown,
+        ThoughtBubbleIconId = notification.IconState,
         CompositeEffectId = notification.Unknown2
     };
 
@@ -1487,6 +1579,12 @@ public sealed class Player : ClientPcData, IEntity
         }
     }
 
+    public void ClearObjectives()
+    {
+        SendTunneled(new ObjectiveTargetUpdatePacket { Active = false });
+        SendTunneled(new ObjectiveClientClearPacket { Unknown = Random.Shared.Next() });
+    }
+
     public void OnZoneChanged(IZone zone, Vector4 position, Quaternion rotation)
     {
         PlayerPet.RecallPet(remember: zone is not CombatZone);
@@ -1516,5 +1614,45 @@ public sealed class Player : ClientPcData, IEntity
         ZoneTile.Entities.Remove(Guid, out _);
         Zone.TryRemovePlayer(Guid);
         _zoneManager.EvictIfEmpty(Zone);
+    }
+
+    public sealed record InteractionMenu(ulong Guid, IReadOnlyDictionary<int, Action<Player>> Options);
+
+    public InteractionMenu? OpenInteractionMenu { get; set; }
+
+    private const int NpcInteractionIdBase = 1_000_000;
+
+    public void SendInteractionMenu(Npc npc, IReadOnlyList<NpcInteractionOption> options, IEnumerable<InteractionData>? npcInteractions = null)
+    {
+        var npcInteractionList = npcInteractions?.ToList() ?? [];
+        var usedIds = npcInteractionList.Select(interaction => interaction.Id).ToHashSet();
+
+        var interactions = new List<InteractionData>(options.Count);
+        var actions = new Dictionary<int, Action<Player>>(options.Count);
+        var nextId = NpcInteractionIdBase;
+
+        foreach (var option in options)
+        {
+            while (!usedIds.Add(nextId))
+                nextId++;
+
+            var id = nextId++;
+
+            interactions.Add(new InteractionData
+            {
+                Id = id,
+                IconId = option.IconId,
+                ButtonText = option.ButtonTextId,
+                TooltipId = option.TooltipId
+            });
+
+            actions[id] = option.Invoke;
+        }
+
+        interactions.AddRange(npcInteractionList);
+
+        OpenInteractionMenu = new InteractionMenu(npc.Guid, actions);
+
+        SendTunneled(InteractionMenuHelper.GetInteractionListPacket(npc.Guid, npc.Name, interactions));
     }
 }
