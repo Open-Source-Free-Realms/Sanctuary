@@ -6,24 +6,24 @@ public sealed class MiniGameScoreInfo : ISerializableType, IDeserializableType
 {
     public string? Name;
 
-    public int Unknown;
+    public int IconId;
 
-    public int Unknown2;
+    public int Type;
 
-    public int Unknown3;
+    public int Count;
 
-    public int Unknown4;
+    public int MaxCount;
 
-    public int Unknown5;
+    public int Points;
 
     public void Serialize(PacketWriter writer)
     {
         writer.Write(Name);
-        writer.Write(Unknown);
-        writer.Write(Unknown2);
-        writer.Write(Unknown3);
-        writer.Write(Unknown4);
-        writer.Write(Unknown5);
+        writer.Write(IconId);
+        writer.Write(Type);
+        writer.Write(Count);
+        writer.Write(MaxCount);
+        writer.Write(Points);
     }
 
     public bool TryRead(ref PacketReader reader)
@@ -36,19 +36,19 @@ public sealed class MiniGameScoreInfo : ISerializableType, IDeserializableType
         if (!reader.TryRead(out Name))
             return false;
 
-        if (!reader.TryRead(out Unknown))
+        if (!reader.TryRead(out IconId))
             return false;
 
-        if (!reader.TryRead(out Unknown2))
+        if (!reader.TryRead(out Type))
             return false;
 
-        if (!reader.TryRead(out Unknown3))
+        if (!reader.TryRead(out Count))
             return false;
 
-        if (!reader.TryRead(out Unknown4))
+        if (!reader.TryRead(out MaxCount))
             return false;
 
-        if (!reader.TryRead(out Unknown5))
+        if (!reader.TryRead(out Points))
             return false;
 
         return true;
