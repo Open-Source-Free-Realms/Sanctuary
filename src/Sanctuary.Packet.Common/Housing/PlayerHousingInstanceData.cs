@@ -11,7 +11,7 @@ public class PlayerHousingInstanceData
 
     public string? OwnerName;
 
-    public long Unknown4;
+    public long OwnerLaunchTicket;
 
     public int Unknown7;
 
@@ -63,7 +63,7 @@ public class PlayerHousingInstanceData
 
         writer.Write(OwnerName);
 
-        writer.Write(Unknown4);
+        writer.Write(OwnerLaunchTicket);
 
         writer.Write(NameId);
         writer.Write(Name);
