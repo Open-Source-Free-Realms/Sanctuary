@@ -3,7 +3,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using Sanctuary.Game.Zones;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
@@ -30,7 +30,7 @@ public static class ClientHousingPacketSetEditModeHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(ClientHousingPacketSetEditMode), packet);
 
-        if (connection.Player.Zone is not HousingZone housingZone || !housingZone.IsOwner(connection.Player))
+        if (!HousingHelper.TryGetOwnedZone(connection.Player, out var housingZone))
             return true;
 
         housingZone.SetEditMode(connection.Player, packet.InEditMode);

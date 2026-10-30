@@ -260,6 +260,13 @@ public static class HousingHelper
         return true;
     }
 
+    public static bool TryGetOwnedZone(Player player, [MaybeNullWhen(false)] out HousingZone housingZone)
+    {
+        housingZone = player.Zone as HousingZone;
+
+        return housingZone is not null && housingZone.IsOwner(player);
+    }
+
     public static bool TryLeaveHouse(Player player, IZoneManager zoneManager)
     {
         if (player.Zone is not HousingZone)
