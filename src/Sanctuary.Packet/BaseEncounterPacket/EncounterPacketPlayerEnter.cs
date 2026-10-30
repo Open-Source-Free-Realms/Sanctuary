@@ -21,8 +21,6 @@ public class EncounterPacketPlayerEnter : BaseEncounterPacket, ISerializablePack
 
         Write(writer);
 
-        writer.Write(Unknown);
-        writer.Write(Unknown2);
         writer.Write(Unknown3);
         writer.Write(IsInNPXTutorial);
 
@@ -35,16 +33,7 @@ public class EncounterPacketPlayerEnter : BaseEncounterPacket, ISerializablePack
 
         var reader = new PacketReader(data);
 
-        if (!reader.TryRead(out short opCode) || opCode != BaseEncounterPacket.OpCode)
-            return false;
-
-        if (!reader.TryRead(out short subOpCode) || subOpCode != OpCode)
-            return false;
-
-        if (!reader.TryRead(out encounterPacketPlayerEnter.Unknown))
-            return false;
-
-        if (!reader.TryRead(out encounterPacketPlayerEnter.Unknown2))
+        if (!encounterPacketPlayerEnter.TryRead(ref reader))
             return false;
 
         if (!reader.TryRead(out encounterPacketPlayerEnter.Unknown3))

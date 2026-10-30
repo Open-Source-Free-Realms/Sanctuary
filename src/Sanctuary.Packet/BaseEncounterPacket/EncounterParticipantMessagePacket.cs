@@ -22,8 +22,6 @@ public class EncounterParticipantMessagePacket : BaseEncounterPacket, ISerializa
 
         Write(writer);
 
-        writer.Write(Unknown);
-        writer.Write(Unknown2);
         writer.Write(Unknown3);
         writer.Write(Guid);
         writer.Write(Unknown4);
@@ -37,16 +35,7 @@ public class EncounterParticipantMessagePacket : BaseEncounterPacket, ISerializa
 
         var reader = new PacketReader(data);
 
-        if (!reader.TryRead(out short opCode) || opCode != BaseEncounterPacket.OpCode)
-            return false;
-
-        if (!reader.TryRead(out short subOpCode) || subOpCode != OpCode)
-            return false;
-
-        if (!reader.TryRead(out encounterParticipantMessagePacket.Unknown))
-            return false;
-
-        if (!reader.TryRead(out encounterParticipantMessagePacket.Unknown2))
+        if (!encounterParticipantMessagePacket.TryRead(ref reader))
             return false;
 
         if (!reader.TryRead(out encounterParticipantMessagePacket.Unknown3))

@@ -35,7 +35,7 @@ public static class EncounterParticipantRequestEntrancePacketHandler
 
         var miniGameUiSession = connection.Player.MiniGameUiSession;
 
-        if (miniGameUiSession is null || miniGameUiSession.EncounterId != encounterParticipantRequestEntrancePacket.Unknown)
+        if (miniGameUiSession is null || miniGameUiSession.EncounterId != encounterParticipantRequestEntrancePacket.MiniGameStateId)
             return true;
 
         CombatEncounterHelper.Go(connection.Player, miniGameUiSession, _zoneManager);

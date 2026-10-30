@@ -8,8 +8,6 @@ public class EncounterParticipantRequestExitPacket : BaseEncounterPacket, ISeria
 {
     public new const short OpCode = 109;
 
-
-
     public EncounterParticipantRequestExitPacket() : base(OpCode)
     {
     }
@@ -20,10 +18,6 @@ public class EncounterParticipantRequestExitPacket : BaseEncounterPacket, ISeria
 
         Write(writer);
 
-        writer.Write(Unknown);
-        writer.Write(Unknown2);
-
-
         return writer.Buffer;
     }
 
@@ -33,19 +27,8 @@ public class EncounterParticipantRequestExitPacket : BaseEncounterPacket, ISeria
 
         var reader = new PacketReader(data);
 
-        if (!reader.TryRead(out short opCode) || opCode != BaseEncounterPacket.OpCode)
+        if (!encounterParticipantRequestExitPacket.TryRead(ref reader))
             return false;
-
-        if (!reader.TryRead(out short subOpCode) || subOpCode != OpCode)
-            return false;
-
-        if (!reader.TryRead(out encounterParticipantRequestExitPacket.Unknown))
-            return false;
-
-        if (!reader.TryRead(out encounterParticipantRequestExitPacket.Unknown2))
-            return false;
-
-
 
         return reader.RemainingLength == 0;
     }

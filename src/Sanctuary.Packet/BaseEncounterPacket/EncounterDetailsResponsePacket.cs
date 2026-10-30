@@ -27,8 +27,6 @@ public class EncounterDetailsResponsePacket : BaseEncounterPacket, ISerializable
         using var writer = new PacketWriter();
 
         Write(writer);
-        writer.Write(Unknown);
-        writer.Write(Unknown2);
         Details.Serialize(writer);
         writer.Write(Unknown3);
         writer.Write(Unknown4);
@@ -46,16 +44,7 @@ public class EncounterDetailsResponsePacket : BaseEncounterPacket, ISerializable
 
         var reader = new PacketReader(data);
 
-        if (!reader.TryRead(out short opCode) || opCode != BaseEncounterPacket.OpCode)
-            return false;
-
-        if (!reader.TryRead(out short subOpCode) || subOpCode != OpCode)
-            return false;
-
-        if (!reader.TryRead(out encounterDetailsResponsePacket.Unknown))
-            return false;
-
-        if (!reader.TryRead(out encounterDetailsResponsePacket.Unknown2))
+        if (!encounterDetailsResponsePacket.TryRead(ref reader))
             return false;
 
         if (!encounterDetailsResponsePacket.Details.TryRead(ref reader))

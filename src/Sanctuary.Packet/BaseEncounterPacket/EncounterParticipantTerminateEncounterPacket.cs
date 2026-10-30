@@ -20,8 +20,6 @@ public class EncounterParticipantTerminateEncounterPacket : BaseEncounterPacket,
 
         Write(writer);
 
-        writer.Write(Unknown);
-        writer.Write(Unknown2);
         writer.Write(Unknown3);
 
         return writer.Buffer;
@@ -33,16 +31,7 @@ public class EncounterParticipantTerminateEncounterPacket : BaseEncounterPacket,
 
         var reader = new PacketReader(data);
 
-        if (!reader.TryRead(out short opCode) || opCode != BaseEncounterPacket.OpCode)
-            return false;
-
-        if (!reader.TryRead(out short subOpCode) || subOpCode != OpCode)
-            return false;
-
-        if (!reader.TryRead(out encounterParticipantTerminateEncounterPacket.Unknown))
-            return false;
-
-        if (!reader.TryRead(out encounterParticipantTerminateEncounterPacket.Unknown2))
+        if (!encounterParticipantTerminateEncounterPacket.TryRead(ref reader))
             return false;
 
         if (!reader.TryRead(out encounterParticipantTerminateEncounterPacket.Unknown3))

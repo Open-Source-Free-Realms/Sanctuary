@@ -60,8 +60,8 @@ public static class MiniGameHelper
 
         player.SendTunneled(new EncounterZoneIsReadyPacket
         {
-            Unknown = miniGameUiSession.EncounterId,
-            Unknown2 = definition.EncounterDefinitionId
+            MiniGameStateId = miniGameUiSession.EncounterId,
+            EncounterDefinitionId = definition.EncounterDefinitionId
         });
 
         SendEncounterState(miniGameUiSession, EncounterState.ZoneReady);
@@ -120,15 +120,15 @@ public static class MiniGameHelper
 
         player.SendTunneled(new EncounterPacketPlayerEnter
         {
-            Unknown = miniGameUiSession.EncounterId,
-            Unknown2 = miniGameUiSession.Definition.EncounterDefinitionId,
+            MiniGameStateId = miniGameUiSession.EncounterId,
+            EncounterDefinitionId = miniGameUiSession.Definition.EncounterDefinitionId,
             Unknown3 = NoParticipantGuid
         });
 
         player.SendTunneled(new EncounterPacketPlayerEnter
         {
-            Unknown = miniGameUiSession.EncounterId,
-            Unknown2 = miniGameUiSession.Definition.EncounterDefinitionId,
+            MiniGameStateId = miniGameUiSession.EncounterId,
+            EncounterDefinitionId = miniGameUiSession.Definition.EncounterDefinitionId,
             Unknown3 = player.Guid
         });
 
@@ -207,8 +207,8 @@ public static class MiniGameHelper
 
         player.SendTunneled(new EncounterPacketEncounterComplete
         {
-            Unknown = NoEncounterId,
-            Unknown2 = NoEncounterDefinitionId,
+            MiniGameStateId = NoEncounterId,
+            EncounterDefinitionId = NoEncounterDefinitionId,
             Unknown3 = true,
             EarnedStars = earnedStars,
             TimeRemaining = timeRemaining,
@@ -258,8 +258,8 @@ public static class MiniGameHelper
     {
         player.SendTunneled(new EncounterParticipantTerminateEncounterPacket
         {
-            Unknown = miniGameUiSession.EncounterId,
-            Unknown2 = miniGameUiSession.Definition.EncounterDefinitionId
+            MiniGameStateId = miniGameUiSession.EncounterId,
+            EncounterDefinitionId = miniGameUiSession.Definition.EncounterDefinitionId
         });
     }
 
@@ -278,8 +278,8 @@ public static class MiniGameHelper
     {
         miniGameUiSession.Player.SendTunneled(new EncounterStatePacket
         {
-            Unknown = miniGameUiSession.EncounterId,
-            Unknown2 = miniGameUiSession.Definition.EncounterDefinitionId,
+            MiniGameStateId = miniGameUiSession.EncounterId,
+            EncounterDefinitionId = miniGameUiSession.Definition.EncounterDefinitionId,
             State = (int)encounterState
         });
     }
@@ -292,8 +292,8 @@ public static class MiniGameHelper
 
         var encounterDetailsResponsePacket = new EncounterDetailsResponsePacket
         {
-            Unknown = miniGameUiSession.EncounterId,
-            Unknown2 = definition.EncounterDefinitionId,
+            MiniGameStateId = miniGameUiSession.EncounterId,
+            EncounterDefinitionId = definition.EncounterDefinitionId,
             Unknown3 = isRunning,
             Unknown4 = isRunning ? default : definition.GameId
         };

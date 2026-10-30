@@ -27,8 +27,6 @@ public class EncounterPacketEncounterComplete : BaseEncounterPacket, ISerializab
 
         Write(writer);
 
-        writer.Write(Unknown);
-        writer.Write(Unknown2);
         writer.Write(Unknown3);
         writer.Write(Unknown4);
         writer.Write(EarnedStars);
@@ -47,16 +45,7 @@ public class EncounterPacketEncounterComplete : BaseEncounterPacket, ISerializab
 
         var reader = new PacketReader(data);
 
-        if (!reader.TryRead(out short opCode) || opCode != BaseEncounterPacket.OpCode)
-            return false;
-
-        if (!reader.TryRead(out short subOpCode) || subOpCode != OpCode)
-            return false;
-
-        if (!reader.TryRead(out encounterPacketEncounterComplete.Unknown))
-            return false;
-
-        if (!reader.TryRead(out encounterPacketEncounterComplete.Unknown2))
+        if (!encounterPacketEncounterComplete.TryRead(ref reader))
             return false;
 
         if (!reader.TryRead(out encounterPacketEncounterComplete.Unknown3))

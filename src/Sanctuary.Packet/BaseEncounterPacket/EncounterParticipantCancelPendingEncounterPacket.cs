@@ -8,8 +8,6 @@ public class EncounterParticipantCancelPendingEncounterPacket : BaseEncounterPac
 {
     public new const short OpCode = 124;
 
-
-
     public EncounterParticipantCancelPendingEncounterPacket() : base(OpCode)
     {
     }
@@ -20,10 +18,6 @@ public class EncounterParticipantCancelPendingEncounterPacket : BaseEncounterPac
 
         Write(writer);
 
-        writer.Write(Unknown);
-        writer.Write(Unknown2);
-
-
         return writer.Buffer;
     }
 
@@ -33,19 +27,8 @@ public class EncounterParticipantCancelPendingEncounterPacket : BaseEncounterPac
 
         var reader = new PacketReader(data);
 
-        if (!reader.TryRead(out short opCode) || opCode != BaseEncounterPacket.OpCode)
+        if (!encounterParticipantCancelPendingEncounterPacket.TryRead(ref reader))
             return false;
-
-        if (!reader.TryRead(out short subOpCode) || subOpCode != OpCode)
-            return false;
-
-        if (!reader.TryRead(out encounterParticipantCancelPendingEncounterPacket.Unknown))
-            return false;
-
-        if (!reader.TryRead(out encounterParticipantCancelPendingEncounterPacket.Unknown2))
-            return false;
-
-
 
         return reader.RemainingLength == 0;
     }

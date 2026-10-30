@@ -8,8 +8,6 @@ public class EncounterZoneIsReadyPacket : BaseEncounterPacket, ISerializablePack
 {
     public new const short OpCode = 107;
 
-
-
     public EncounterZoneIsReadyPacket() : base(OpCode)
     {
     }
@@ -20,10 +18,6 @@ public class EncounterZoneIsReadyPacket : BaseEncounterPacket, ISerializablePack
 
         Write(writer);
 
-        writer.Write(Unknown);
-        writer.Write(Unknown2);
-
-
         return writer.Buffer;
     }
 
@@ -33,19 +27,8 @@ public class EncounterZoneIsReadyPacket : BaseEncounterPacket, ISerializablePack
 
         var reader = new PacketReader(data);
 
-        if (!reader.TryRead(out short opCode) || opCode != BaseEncounterPacket.OpCode)
+        if (!encounterZoneIsReadyPacket.TryRead(ref reader))
             return false;
-
-        if (!reader.TryRead(out short subOpCode) || subOpCode != OpCode)
-            return false;
-
-        if (!reader.TryRead(out encounterZoneIsReadyPacket.Unknown))
-            return false;
-
-        if (!reader.TryRead(out encounterZoneIsReadyPacket.Unknown2))
-            return false;
-
-
 
         return reader.RemainingLength == 0;
     }

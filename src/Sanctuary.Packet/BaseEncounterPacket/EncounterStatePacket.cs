@@ -20,8 +20,6 @@ public class EncounterStatePacket : BaseEncounterPacket, ISerializablePacket, ID
 
         Write(writer);
 
-        writer.Write(Unknown);
-        writer.Write(Unknown2);
         writer.Write(State);
 
         return writer.Buffer;
@@ -33,16 +31,7 @@ public class EncounterStatePacket : BaseEncounterPacket, ISerializablePacket, ID
 
         var reader = new PacketReader(data);
 
-        if (!reader.TryRead(out short opCode) || opCode != BaseEncounterPacket.OpCode)
-            return false;
-
-        if (!reader.TryRead(out short subOpCode) || subOpCode != OpCode)
-            return false;
-
-        if (!reader.TryRead(out encounterStatePacket.Unknown))
-            return false;
-
-        if (!reader.TryRead(out encounterStatePacket.Unknown2))
+        if (!encounterStatePacket.TryRead(ref reader))
             return false;
 
         if (!reader.TryRead(out encounterStatePacket.State))
