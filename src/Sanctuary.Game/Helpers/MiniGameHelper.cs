@@ -115,7 +115,7 @@ public static class MiniGameHelper
             player.SendTunneled(new TaskAddPacket
             {
                 TaskId = miniGameUiObjective.Id,
-                Unknown2 = miniGameUiObjective.NameId
+                NameId = miniGameUiObjective.NameId
             });
         }
 

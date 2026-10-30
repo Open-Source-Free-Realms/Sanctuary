@@ -10,19 +10,19 @@ public class TaskAddPacket : BaseUiPacket, ISerializablePacket, IDeserializable<
 
     public int TaskId;
 
-    public int Unknown;
+    public int IconId;
 
-    public int Unknown2;
+    public int NameId;
 
-    public bool Unknown3;
+    public bool IsBonus;
 
-    public bool Unknown4;
+    public bool MembersOnly;
 
-    public int Unknown5;
+    public int Category;
 
     public bool Unknown6;
 
-    public int Unknown7;
+    public int RequiredCount;
 
     public TaskAddPacket() : base(OpCode)
     {
@@ -35,13 +35,13 @@ public class TaskAddPacket : BaseUiPacket, ISerializablePacket, IDeserializable<
         Write(writer);
 
         writer.Write(TaskId);
-        writer.Write(Unknown);
-        writer.Write(Unknown2);
-        writer.Write(Unknown3);
-        writer.Write(Unknown4);
-        writer.Write(Unknown5);
+        writer.Write(IconId);
+        writer.Write(NameId);
+        writer.Write(IsBonus);
+        writer.Write(MembersOnly);
+        writer.Write(Category);
         writer.Write(Unknown6);
-        writer.Write(Unknown7);
+        writer.Write(RequiredCount);
 
         return writer.Buffer;
     }
@@ -58,25 +58,25 @@ public class TaskAddPacket : BaseUiPacket, ISerializablePacket, IDeserializable<
         if (!reader.TryRead(out taskAddPacket.TaskId))
             return false;
 
-        if (!reader.TryRead(out taskAddPacket.Unknown))
+        if (!reader.TryRead(out taskAddPacket.IconId))
             return false;
 
-        if (!reader.TryRead(out taskAddPacket.Unknown2))
+        if (!reader.TryRead(out taskAddPacket.NameId))
             return false;
 
-        if (!reader.TryRead(out taskAddPacket.Unknown3))
+        if (!reader.TryRead(out taskAddPacket.IsBonus))
             return false;
 
-        if (!reader.TryRead(out taskAddPacket.Unknown4))
+        if (!reader.TryRead(out taskAddPacket.MembersOnly))
             return false;
 
-        if (!reader.TryRead(out taskAddPacket.Unknown5))
+        if (!reader.TryRead(out taskAddPacket.Category))
             return false;
 
         if (!reader.TryRead(out taskAddPacket.Unknown6))
             return false;
 
-        if (!reader.TryRead(out taskAddPacket.Unknown7))
+        if (!reader.TryRead(out taskAddPacket.RequiredCount))
             return false;
 
         return reader.RemainingLength == 0;
