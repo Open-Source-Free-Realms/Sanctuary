@@ -122,14 +122,14 @@ public static class MiniGameHelper
         {
             MiniGameStateId = miniGameUiSession.EncounterId,
             EncounterDefinitionId = miniGameUiSession.Definition.EncounterDefinitionId,
-            Unknown3 = NoParticipantGuid
+            PlayerGuid = NoParticipantGuid
         });
 
         player.SendTunneled(new EncounterPacketPlayerEnter
         {
             MiniGameStateId = miniGameUiSession.EncounterId,
             EncounterDefinitionId = miniGameUiSession.Definition.EncounterDefinitionId,
-            Unknown3 = player.Guid
+            PlayerGuid = player.Guid
         });
 
         player.SendTunneled(miniGameUiSession.Definition.EncounterDataCommon);
@@ -299,7 +299,7 @@ public static class MiniGameHelper
         };
 
         if (!isRunning)
-            encounterDetailsResponsePacket.Unknown5.AddRange(StoreAdvertisementBundleIds);
+            encounterDetailsResponsePacket.StoreBundleIds.AddRange(StoreAdvertisementBundleIds);
 
         var details = encounterDetailsResponsePacket.Details;
 

@@ -8,7 +8,7 @@ public class EncounterPacketPlayerEnter : BaseEncounterPacket, ISerializablePack
 {
     public new const short OpCode = 2;
 
-    public ulong Unknown3;
+    public ulong PlayerGuid;
     public bool IsInNPXTutorial;
 
     public EncounterPacketPlayerEnter() : base(OpCode)
@@ -21,7 +21,7 @@ public class EncounterPacketPlayerEnter : BaseEncounterPacket, ISerializablePack
 
         Write(writer);
 
-        writer.Write(Unknown3);
+        writer.Write(PlayerGuid);
         writer.Write(IsInNPXTutorial);
 
         return writer.Buffer;
@@ -36,7 +36,7 @@ public class EncounterPacketPlayerEnter : BaseEncounterPacket, ISerializablePack
         if (!encounterPacketPlayerEnter.TryRead(ref reader))
             return false;
 
-        if (!reader.TryRead(out encounterPacketPlayerEnter.Unknown3))
+        if (!reader.TryRead(out encounterPacketPlayerEnter.PlayerGuid))
             return false;
 
         if (!reader.TryRead(out encounterPacketPlayerEnter.IsInNPXTutorial))

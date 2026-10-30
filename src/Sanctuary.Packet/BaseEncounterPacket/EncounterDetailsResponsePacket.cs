@@ -16,7 +16,7 @@ public class EncounterDetailsResponsePacket : BaseEncounterPacket, ISerializable
 
     public int Unknown4;
 
-    public List<int> Unknown5 { get; } = [];
+    public List<int> StoreBundleIds { get; } = [];
 
     public EncounterDetailsResponsePacket() : base(OpCode)
     {
@@ -30,7 +30,7 @@ public class EncounterDetailsResponsePacket : BaseEncounterPacket, ISerializable
         Details.Serialize(writer);
         writer.Write(Unknown3);
         writer.Write(Unknown4);
-        writer.Write(Unknown5);
+        writer.Write(StoreBundleIds);
 
         return writer.Buffer;
     }
@@ -61,7 +61,7 @@ public class EncounterDetailsResponsePacket : BaseEncounterPacket, ISerializable
             if (!reader.TryRead(out int id))
                 return false;
 
-            encounterDetailsResponsePacket.Unknown5.Add(id);
+            encounterDetailsResponsePacket.StoreBundleIds.Add(id);
         }
 
         return reader.RemainingLength == 0;
