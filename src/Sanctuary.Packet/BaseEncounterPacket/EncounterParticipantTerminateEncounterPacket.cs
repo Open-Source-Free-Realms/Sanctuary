@@ -8,7 +8,7 @@ public class EncounterParticipantTerminateEncounterPacket : BaseEncounterPacket,
 {
     public new const short OpCode = 121;
 
-    public bool Unknown3;
+    public bool TookTooLong;
 
     public EncounterParticipantTerminateEncounterPacket() : base(OpCode)
     {
@@ -20,7 +20,7 @@ public class EncounterParticipantTerminateEncounterPacket : BaseEncounterPacket,
 
         Write(writer);
 
-        writer.Write(Unknown3);
+        writer.Write(TookTooLong);
 
         return writer.Buffer;
     }
@@ -34,7 +34,7 @@ public class EncounterParticipantTerminateEncounterPacket : BaseEncounterPacket,
         if (!encounterParticipantTerminateEncounterPacket.TryRead(ref reader))
             return false;
 
-        if (!reader.TryRead(out encounterParticipantTerminateEncounterPacket.Unknown3))
+        if (!reader.TryRead(out encounterParticipantTerminateEncounterPacket.TookTooLong))
             return false;
 
         return reader.RemainingLength == 0;

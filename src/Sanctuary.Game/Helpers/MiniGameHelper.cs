@@ -212,7 +212,7 @@ public static class MiniGameHelper
         {
             MiniGameStateId = NoEncounterId,
             EncounterDefinitionId = NoEncounterDefinitionId,
-            Unknown3 = true,
+            Won = true,
             EarnedStars = earnedStars,
             TimeRemaining = timeRemaining,
             RewardBundle = rewardBundle,
@@ -298,7 +298,7 @@ public static class MiniGameHelper
             MiniGameStateId = miniGameUiSession.EncounterId,
             EncounterDefinitionId = definition.EncounterDefinitionId,
             Unknown3 = isRunning,
-            Unknown4 = isRunning ? default : definition.GameId
+            MarketplaceAdReferrerContext = isRunning ? default : definition.GameId
         };
 
         if (!isRunning)

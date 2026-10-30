@@ -30,7 +30,7 @@ public static class CombatEncounterHelper
 
             player.SendTunneled(new EncounterParticipantMessagePacket
             {
-                Unknown3 = requiredProfile.Type == (int)ProfileType.Combat ? CombatJobSwitchedMessageId : MiniGameJobSwitchedMessageId
+                MessageId = requiredProfile.Type == (int)ProfileType.Combat ? CombatJobSwitchedMessageId : MiniGameJobSwitchedMessageId
             });
         }
 

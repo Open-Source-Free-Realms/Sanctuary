@@ -14,7 +14,7 @@ public class EncounterDetailsResponsePacket : BaseEncounterPacket, ISerializable
 
     public bool Unknown3;
 
-    public int Unknown4;
+    public int MarketplaceAdReferrerContext;
 
     public List<int> StoreBundleIds { get; } = [];
 
@@ -29,7 +29,7 @@ public class EncounterDetailsResponsePacket : BaseEncounterPacket, ISerializable
         Write(writer);
         Details.Serialize(writer);
         writer.Write(Unknown3);
-        writer.Write(Unknown4);
+        writer.Write(MarketplaceAdReferrerContext);
         writer.Write(StoreBundleIds);
 
         return writer.Buffer;
@@ -50,7 +50,7 @@ public class EncounterDetailsResponsePacket : BaseEncounterPacket, ISerializable
         if (!reader.TryRead(out encounterDetailsResponsePacket.Unknown3))
             return false;
 
-        if (!reader.TryRead(out encounterDetailsResponsePacket.Unknown4))
+        if (!reader.TryRead(out encounterDetailsResponsePacket.MarketplaceAdReferrerContext))
             return false;
 
         if (!reader.TryRead(out int idCount) || idCount < 0 || idCount > reader.RemainingLength / 4)

@@ -8,9 +8,9 @@ public class EncounterParticipantMessagePacket : BaseEncounterPacket, ISerializa
 {
     public new const short OpCode = 120;
 
-    public int Unknown3;
+    public int MessageId;
     public ulong Guid;
-    public string? Unknown4;
+    public string? PlayerName;
 
     public EncounterParticipantMessagePacket() : base(OpCode)
     {
@@ -22,9 +22,9 @@ public class EncounterParticipantMessagePacket : BaseEncounterPacket, ISerializa
 
         Write(writer);
 
-        writer.Write(Unknown3);
+        writer.Write(MessageId);
         writer.Write(Guid);
-        writer.Write(Unknown4);
+        writer.Write(PlayerName);
 
         return writer.Buffer;
     }
@@ -38,7 +38,7 @@ public class EncounterParticipantMessagePacket : BaseEncounterPacket, ISerializa
         if (!encounterParticipantMessagePacket.TryRead(ref reader))
             return false;
 
-        if (!reader.TryRead(out encounterParticipantMessagePacket.Unknown3))
+        if (!reader.TryRead(out encounterParticipantMessagePacket.MessageId))
             return false;
 
         if (!reader.TryRead(out encounterParticipantMessagePacket.Guid))
@@ -48,7 +48,7 @@ public class EncounterParticipantMessagePacket : BaseEncounterPacket, ISerializa
         if (!stringReader.TryRead(out int length) || length < 0 || length > stringReader.RemainingLength)
             return false;
 
-        if (!reader.TryRead(out encounterParticipantMessagePacket.Unknown4))
+        if (!reader.TryRead(out encounterParticipantMessagePacket.PlayerName))
             return false;
 
         return reader.RemainingLength == 0;

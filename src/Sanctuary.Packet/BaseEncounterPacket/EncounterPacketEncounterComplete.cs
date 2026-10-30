@@ -9,8 +9,8 @@ public class EncounterPacketEncounterComplete : BaseEncounterPacket, ISerializab
 {
     public new const short OpCode = 3;
 
-    public bool Unknown3;
-    public int Unknown4;
+    public bool Won;
+    public int CompositeEffectId;
     public int EarnedStars;
     public int TimeRemaining;
     public RewardBundleBase RewardBundle = RewardBundleBase.CreateEmpty();
@@ -27,8 +27,8 @@ public class EncounterPacketEncounterComplete : BaseEncounterPacket, ISerializab
 
         Write(writer);
 
-        writer.Write(Unknown3);
-        writer.Write(Unknown4);
+        writer.Write(Won);
+        writer.Write(CompositeEffectId);
         writer.Write(EarnedStars);
         writer.Write(TimeRemaining);
 
@@ -48,10 +48,10 @@ public class EncounterPacketEncounterComplete : BaseEncounterPacket, ISerializab
         if (!encounterPacketEncounterComplete.TryRead(ref reader))
             return false;
 
-        if (!reader.TryRead(out encounterPacketEncounterComplete.Unknown3))
+        if (!reader.TryRead(out encounterPacketEncounterComplete.Won))
             return false;
 
-        if (!reader.TryRead(out encounterPacketEncounterComplete.Unknown4))
+        if (!reader.TryRead(out encounterPacketEncounterComplete.CompositeEffectId))
             return false;
 
         if (!reader.TryRead(out encounterPacketEncounterComplete.EarnedStars))
