@@ -15,15 +15,11 @@ public class MiniGameLootWheelSetItemToLandOnPacket : BaseMiniGamePacket, ISeria
     {
     }
 
-    public new byte[] Serialize()
+    public byte[] Serialize()
     {
         using var writer = new PacketWriter();
 
         Write(writer);
-
-        writer.Write(StateId);
-        writer.Write(GameId);
-        writer.Write(GroupId);
 
         RewardBundle.Serialize(writer);
 
@@ -36,19 +32,7 @@ public class MiniGameLootWheelSetItemToLandOnPacket : BaseMiniGamePacket, ISeria
 
         var reader = new PacketReader(data);
 
-        if (!reader.TryRead(out short opCode) || opCode != BaseMiniGamePacket.OpCode)
-            return false;
-
-        if (!reader.TryRead(out byte subOpCode) || subOpCode != OpCode)
-            return false;
-
-        if (!reader.TryRead(out miniGameLootWheelSetItemToLandOnPacket.StateId))
-            return false;
-
-        if (!reader.TryRead(out miniGameLootWheelSetItemToLandOnPacket.GameId))
-            return false;
-
-        if (!reader.TryRead(out miniGameLootWheelSetItemToLandOnPacket.GroupId))
+        if (!miniGameLootWheelSetItemToLandOnPacket.TryRead(ref reader))
             return false;
 
         if (!miniGameLootWheelSetItemToLandOnPacket.RewardBundle.TryRead(ref reader))

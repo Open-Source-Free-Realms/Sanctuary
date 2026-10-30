@@ -16,18 +16,13 @@ public class MiniGameGameEndScorePacket : BaseMiniGamePacket, ISerializablePacke
     {
     }
 
-    public new byte[] Serialize()
+    public byte[] Serialize()
     {
         using var writer = new PacketWriter();
 
         Write(writer);
-        writer.Write(StateId);
-        writer.Write(GameId);
-        writer.Write(GroupId);
-        writer.Write(Scores.Count);
 
-        foreach (var miniGameScoreInfo in Scores)
-            miniGameScoreInfo.Serialize(writer);
+        writer.Write(Scores);
 
         return writer.Buffer;
     }
@@ -38,33 +33,13 @@ public class MiniGameGameEndScorePacket : BaseMiniGamePacket, ISerializablePacke
 
         var reader = new PacketReader(data);
 
-        if (!reader.TryRead(out short opCode) || opCode != BaseMiniGamePacket.OpCode)
+        if (!miniGameGameEndScorePacket.TryRead(ref reader))
             return false;
 
-        if (!reader.TryRead(out byte subOpCode) || subOpCode != OpCode)
+        if (!reader.TryReadList(out List<MiniGameScoreInfo> scores))
             return false;
 
-        if (!reader.TryRead(out miniGameGameEndScorePacket.StateId))
-            return false;
-
-        if (!reader.TryRead(out miniGameGameEndScorePacket.GameId))
-            return false;
-
-        if (!reader.TryRead(out miniGameGameEndScorePacket.GroupId))
-            return false;
-
-        if (!reader.TryRead(out int scoreCount) || scoreCount < 0 || scoreCount > reader.RemainingLength / 24)
-            return false;
-
-        for (var i = 0; i < scoreCount; i++)
-        {
-            var miniGameScoreInfo = new MiniGameScoreInfo();
-
-            if (!miniGameScoreInfo.TryRead(ref reader))
-                return false;
-
-            miniGameGameEndScorePacket.Scores.Add(miniGameScoreInfo);
-        }
+        miniGameGameEndScorePacket.Scores.AddRange(scores);
 
         return reader.RemainingLength == 0;
     }

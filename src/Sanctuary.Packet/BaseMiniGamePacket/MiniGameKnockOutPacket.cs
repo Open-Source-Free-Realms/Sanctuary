@@ -16,15 +16,12 @@ public class MiniGameKnockOutPacket : BaseMiniGamePacket, ISerializablePacket, I
     {
     }
 
-    public new byte[] Serialize()
+    public byte[] Serialize()
     {
         using var writer = new PacketWriter();
 
         Write(writer);
 
-        writer.Write(StateId);
-        writer.Write(GameId);
-        writer.Write(GroupId);
         writer.Write(Unknown);
         writer.Write(Unknown2);
 
@@ -37,19 +34,7 @@ public class MiniGameKnockOutPacket : BaseMiniGamePacket, ISerializablePacket, I
 
         var reader = new PacketReader(data);
 
-        if (!reader.TryRead(out short opCode) || opCode != BaseMiniGamePacket.OpCode)
-            return false;
-
-        if (!reader.TryRead(out byte subOpCode) || subOpCode != OpCode)
-            return false;
-
-        if (!reader.TryRead(out miniGameKnockOutPacket.StateId))
-            return false;
-
-        if (!reader.TryRead(out miniGameKnockOutPacket.GameId))
-            return false;
-
-        if (!reader.TryRead(out miniGameKnockOutPacket.GroupId))
+        if (!miniGameKnockOutPacket.TryRead(ref reader))
             return false;
 
         if (!reader.TryRead(out miniGameKnockOutPacket.Unknown))
