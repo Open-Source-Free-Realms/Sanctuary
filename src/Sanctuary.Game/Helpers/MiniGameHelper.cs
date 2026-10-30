@@ -347,7 +347,7 @@ public static class MiniGameHelper
         miniGame.ShowActionBar = definition.ShowActionBar;
         miniGame.Unknown11 = definition.StartupInCombat;
         miniGame.ShowEndDialog = definition.ShowEndDialog;
-        miniGame.Unknown13 = string.Empty;
+        miniGame.PreloadFilename = string.Empty;
         miniGame.Unknown14 = MiniGameUnknown14;
         miniGame.Unknown15 = true;
         miniGame.PreselectedGameId = definition.PreselectedGameId;

@@ -39,7 +39,7 @@ public sealed class MiniGameInfo : ISerializableType, IDeserializableType
 
     public bool ShowEndDialog;
 
-    public string? Unknown13;
+    public string? PreloadFilename;
 
     public int Unknown14;
 
@@ -91,7 +91,7 @@ public sealed class MiniGameInfo : ISerializableType, IDeserializableType
 
         writer.Write(ShowEndDialog);
 
-        writer.Write(Unknown13);
+        writer.Write(PreloadFilename);
 
         writer.Write(Unknown14);
 
@@ -163,11 +163,11 @@ public sealed class MiniGameInfo : ISerializableType, IDeserializableType
         if (!reader.TryRead(out ShowEndDialog))
             return false;
 
-        var unknown13Reader = reader;
-        if (!unknown13Reader.TryRead(out int unknown13Length) || unknown13Length < 0 || unknown13Length > unknown13Reader.RemainingLength)
+        var preloadFilenameReader = reader;
+        if (!preloadFilenameReader.TryRead(out int preloadFilenameLength) || preloadFilenameLength < 0 || preloadFilenameLength > preloadFilenameReader.RemainingLength)
             return false;
 
-        if (!reader.TryRead(out Unknown13))
+        if (!reader.TryRead(out PreloadFilename))
             return false;
 
         if (!reader.TryRead(out Unknown14))
