@@ -27,7 +27,7 @@ public sealed class MiniGameInfo : ISerializableType, IDeserializableType
 
     public RewardBundleBase PreviewRewardBundle = RewardBundleBase.CreateEmpty();
 
-    public List<AchievementObjectiveInfo> Objectives { get; } = [];
+    public List<QuestObjectiveInfo> Objectives { get; } = [];
 
     public bool ShowStarCounter;
 
@@ -147,20 +147,11 @@ public sealed class MiniGameInfo : ISerializableType, IDeserializableType
         if (!PreviewRewardBundle.TryRead(ref reader))
             return false;
 
-        if (!reader.TryRead(out int objectivesCount) || objectivesCount < 0 || objectivesCount > reader.RemainingLength / 103)
+        if (!reader.TryReadList(out List<QuestObjectiveInfo> objectives))
             return false;
 
         Objectives.Clear();
-
-        for (var i = 0; i < objectivesCount; i++)
-        {
-            var achievementObjectiveInfo = new AchievementObjectiveInfo();
-
-            if (!achievementObjectiveInfo.TryRead(ref reader))
-                return false;
-
-            Objectives.Add(achievementObjectiveInfo);
-        }
+        Objectives.AddRange(objectives);
 
         if (!reader.TryRead(out ShowStarCounter))
             return false;

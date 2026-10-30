@@ -847,7 +847,7 @@ public sealed class QuestManager : IQuestManager
                 player.SendTunneled(new QuestObjectiveAddedPacket
                 {
                     QuestId = quest.QuestId,
-                    Objective = ObjectiveFor(goals[openGoalIndex], ObjectiveActive)
+                    Objective = ObjectiveFor(goals[openGoalIndex], ObjectiveState.Active)
                 });
                 SendObjectiveActivated(player, quest.QuestId, goals[openGoalIndex], restored: false);
             }
@@ -946,8 +946,8 @@ public sealed class QuestManager : IQuestManager
         for (int i = 0; i < progress.StepEnd; i++)
         {
             clientQuest.Objectives[i + 1] = progress.IsGoalDone(i)
-                ? ObjectiveFor(goals[i], ObjectiveComplete)
-                : ObjectiveFor(goals[i], ObjectiveInactive, progress.ProgressFor(i).Count);
+                ? ObjectiveFor(goals[i], ObjectiveState.Complete)
+                : ObjectiveFor(goals[i], ObjectiveState.Inactive, progress.ProgressFor(i).Count);
         }
 
         return clientQuest;
@@ -972,8 +972,8 @@ public sealed class QuestManager : IQuestManager
             {
                 QuestId = quest.QuestId,
                 Objective = progress.IsGoalDone(i)
-                    ? ObjectiveFor(goals[i], ObjectiveComplete)
-                    : ObjectiveFor(goals[i], ObjectiveActive, progress.ProgressFor(i).Count)
+                    ? ObjectiveFor(goals[i], ObjectiveState.Complete)
+                    : ObjectiveFor(goals[i], ObjectiveState.Active, progress.ProgressFor(i).Count)
             });
         }
 
@@ -983,17 +983,14 @@ public sealed class QuestManager : IQuestManager
         SendObjectiveForGoal(player, quest, progress.FirstOpenGoalIndex);
     }
 
-    private const int ObjectiveInactive = 0;
-    private const int ObjectiveActive = 1;
-    private const int ObjectiveComplete = 2;
 
-    private static QuestObjectiveInfo ObjectiveFor(QuestGoal goal, int state, int currentCount = 0) => new()
+    private static QuestObjectiveInfo ObjectiveFor(QuestGoal goal, ObjectiveState state, int currentCount = 0) => new()
     {
         ObjectiveId = goal.NameId,
         NameId = goal.NameId,
         DescriptionId = goal.DescriptionId != 0 ? goal.DescriptionId : goal.NameId,
         State = state,
-        CurrentCount = state == ObjectiveComplete ? goal.RequiredCount : currentCount,
+        CurrentCount = state == ObjectiveState.Complete ? goal.RequiredCount : currentCount,
         RequiredCount = goal.RequiredCount
     };
 

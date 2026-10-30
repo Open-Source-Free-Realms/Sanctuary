@@ -29,12 +29,6 @@ public static class MiniGameHelper
         Running = 4
     }
 
-    private enum ObjectiveStatus
-    {
-        Inactive,
-        Active
-    }
-
     private const int NoMiniGameId = -1;
     private const int NoEncounterId = 0;
     private const int NoEncounterDefinitionId = 0;
@@ -360,16 +354,16 @@ public static class MiniGameHelper
         {
             miniGameUiSession.ObjectiveProgress.TryGetValue(miniGameUiObjective.Id, out var progress);
 
-            miniGame.Objectives.Add(new AchievementObjectiveInfo
+            miniGame.Objectives.Add(new QuestObjectiveInfo
             {
-                Id = miniGameUiObjective.Id,
+                ObjectiveId = miniGameUiObjective.Id,
                 NameId = miniGameUiObjective.NameId,
                 DescriptionId = miniGameUiObjective.DescriptionId,
                 RewardBundle = miniGameUiObjective.RewardBundle,
-                Status = (int)(isRunning ? ObjectiveStatus.Active : ObjectiveStatus.Inactive),
-                Count = progress,
-                Total = isRunning ? miniGameUiObjective.Total : default,
-                Unknown8 = Convert.ToInt32(miniGameUiObjective.IsFailCondition)
+                State = isRunning ? ObjectiveState.Active : ObjectiveState.Inactive,
+                CurrentCount = progress,
+                RequiredCount = isRunning ? miniGameUiObjective.Total : default,
+                Unknown6 = Convert.ToInt32(miniGameUiObjective.IsFailCondition)
             });
         }
 
