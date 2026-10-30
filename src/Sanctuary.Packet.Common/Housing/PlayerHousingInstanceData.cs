@@ -39,7 +39,7 @@ public class PlayerHousingInstanceData
 
     public int FurnitureScore;
 
-    public long Unknown20;
+    public long LastVisited;
 
     public bool IsMembersOnly;
 
@@ -97,7 +97,7 @@ public class PlayerHousingInstanceData
 
         writer.Write(FurnitureScore);
 
-        writer.Write(Unknown20);
+        writer.Write(LastVisited);
 
         writer.Write(IsMembersOnly);
 
