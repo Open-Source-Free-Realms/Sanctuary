@@ -15,7 +15,7 @@
         "ShowStarCounter": true,
         "ShowStatusIcon": true,
         "ShowActionBar": true,
-        "StartupInCombat": true,
+        "ShowFullInterface": true,
         "ShowEndDialog": true
     },
     {
@@ -34,7 +34,7 @@
         "ShowStarCounter": true,
         "ShowStatusIcon": true,
         "ShowActionBar": true,
-        "StartupInCombat": true,
+        "ShowFullInterface": true,
         "ShowEndDialog": true
     },
     {
@@ -53,7 +53,7 @@
         "ShowStarCounter": true,
         "ShowStatusIcon": true,
         "ShowActionBar": true,
-        "StartupInCombat": true,
+        "ShowFullInterface": true,
         "ShowEndDialog": true,
         "Objectives": [
             {

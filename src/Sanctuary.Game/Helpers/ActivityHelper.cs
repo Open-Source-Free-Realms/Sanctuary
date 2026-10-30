@@ -101,7 +101,7 @@ public static class ActivityHelper
             ShowStarCounter = true,
             ShowStatusIcon = true,
             ShowActionBar = true,
-            StartupInCombat = true,
+            ShowFullInterface = true,
             ProfileType = profileType == ProfileType.Combat ? (int)ProfileType.Combat : default,
             MembersOnly = clientActivityDefinition.MembersOnly,
             ShowEndDialog = true,

@@ -26,7 +26,7 @@ public sealed class MiniGameUiDefinition
     public bool ShowStarCounter { get; init; }
     public bool ShowStatusIcon { get; init; }
     public bool ShowActionBar { get; init; }
-    public bool StartupInCombat { get; init; }
+    public bool ShowFullInterface { get; init; }
     public bool ShowEndDialog { get; init; }
     public RewardBundleBase RewardBundle { get; init; } = RewardBundleBase.CreateEmpty();
     public RewardBundleBase MemberRewardBundle { get; init; } = RewardBundleBase.CreateEmpty();

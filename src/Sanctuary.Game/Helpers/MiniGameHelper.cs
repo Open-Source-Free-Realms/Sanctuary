@@ -345,7 +345,7 @@ public static class MiniGameHelper
         miniGame.ShowStarCounter = definition.ShowStarCounter;
         miniGame.ShowStatusIcon = definition.ShowStatusIcon;
         miniGame.ShowActionBar = definition.ShowActionBar;
-        miniGame.Unknown11 = definition.StartupInCombat;
+        miniGame.ShowFullInterface = definition.ShowFullInterface;
         miniGame.ShowEndDialog = definition.ShowEndDialog;
         miniGame.PreloadFilename = string.Empty;
         miniGame.Unknown14 = MiniGameUnknown14;

@@ -35,7 +35,7 @@ public sealed class MiniGameInfo : ISerializableType, IDeserializableType
 
     public bool ShowActionBar;
 
-    public bool Unknown11;
+    public bool ShowFullInterface;
 
     public bool ShowEndDialog;
 
@@ -87,7 +87,7 @@ public sealed class MiniGameInfo : ISerializableType, IDeserializableType
 
         writer.Write(ShowActionBar);
 
-        writer.Write(Unknown11);
+        writer.Write(ShowFullInterface);
 
         writer.Write(ShowEndDialog);
 
@@ -157,7 +157,7 @@ public sealed class MiniGameInfo : ISerializableType, IDeserializableType
         if (!reader.TryRead(out ShowActionBar))
             return false;
 
-        if (!reader.TryRead(out Unknown11))
+        if (!reader.TryRead(out ShowFullInterface))
             return false;
 
         if (!reader.TryRead(out ShowEndDialog))
