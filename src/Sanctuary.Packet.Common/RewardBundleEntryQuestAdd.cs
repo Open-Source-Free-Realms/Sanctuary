@@ -1,8 +1,8 @@
-using Sanctuary.Core.IO;
+﻿using Sanctuary.Core.IO;
 
 namespace Sanctuary.Packet.Common;
 
-public sealed class RewardBundleEntryQuestAddInfo : RewardBundleEntryInfo
+public sealed class RewardBundleEntryQuestAdd : RewardBundleEntryBase
 {
     public override RewardBundleEntryType Type => RewardBundleEntryType.QuestAdd;
 
@@ -17,6 +17,7 @@ public sealed class RewardBundleEntryQuestAddInfo : RewardBundleEntryInfo
     {
         if (!reader.TryRead(out QuestId))
             return false;
+
         return true;
     }
 }

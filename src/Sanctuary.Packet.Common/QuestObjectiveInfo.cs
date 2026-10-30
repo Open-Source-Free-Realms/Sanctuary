@@ -11,13 +11,7 @@ public class QuestObjectiveInfo : ISerializableType
     // Never read by the client.
     public bool Unknown { get; set; }
 
-    public RewardBundleBase RewardBundle { get; set; } = new()
-    {
-        Success = false,
-        Unknown3 = 0,
-        IconId = -1,
-        NameId = -1
-    };
+    public RewardBundleBase RewardBundle { get; set; } = RewardBundleBase.CreateEmpty();
 
     // 0 = inactive, 1 = active, 2 = complete, 3 = failed.
     public int State { get; set; }

@@ -13,9 +13,9 @@ public class EncounterPacketEncounterComplete : BaseEncounterPacket, ISerializab
     public int Unknown4;
     public int EarnedStars;
     public int TimeRemaining;
-    public RewardBundleInfo RewardBundle = new();
-    public RewardBundleInfo MemberRewardBundle = new();
-    public RewardBundleInfo RewardBundle3 = new();
+    public RewardBundleBase RewardBundle = RewardBundleBase.CreateEmpty();
+    public RewardBundleBase MemberRewardBundle = RewardBundleBase.CreateEmpty();
+    public RewardBundleBase RewardBundle3 = RewardBundleBase.CreateEmpty();
 
     public EncounterPacketEncounterComplete() : base(OpCode)
     {

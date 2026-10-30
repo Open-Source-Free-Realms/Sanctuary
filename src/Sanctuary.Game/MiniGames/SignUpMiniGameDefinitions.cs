@@ -10,9 +10,6 @@ public static class SignUpMiniGameDefinitions
     private const int DefaultDurationMs = 2000;
     private const int DefaultRespawnTime = 10000;
     private const int DefaultDifficulty = 1;
-    private const int NoRewardIconId = -1;
-    private const int NoRewardNameId = -1;
-    private const float DefaultRewardMultiplier = 1f;
 
     private const int DemolitionDerbyActivityId = 65;
     private const int DemolitionDerbyDetailsType = 3;
@@ -52,7 +49,7 @@ public static class SignUpMiniGameDefinitions
                 Id = SoccerObjectiveId,
                 NameId = SoccerObjectiveNameId,
                 DescriptionId = SoccerObjectiveDescriptionId,
-                RewardBundle = CreateEmptyRewardBundle()
+                RewardBundle = RewardBundleBase.CreateEmpty()
             }
         ])
     ];
@@ -78,20 +75,10 @@ public static class SignUpMiniGameDefinitions
             ShowActionBar = true,
             StartupInCombat = true,
             ShowEndDialog = true,
-            RewardBundle = CreateEmptyRewardBundle(),
-            MemberRewardBundle = CreateEmptyRewardBundle(),
-            PreviewRewardBundle = CreateEmptyRewardBundle(),
+            RewardBundle = RewardBundleBase.CreateEmpty(),
+            MemberRewardBundle = RewardBundleBase.CreateEmpty(),
+            PreviewRewardBundle = RewardBundleBase.CreateEmpty(),
             Objectives = objectives
-        };
-    }
-
-    private static RewardBundleInfo CreateEmptyRewardBundle()
-    {
-        return new RewardBundleInfo
-        {
-            Multiplier = DefaultRewardMultiplier,
-            IconId = NoRewardIconId,
-            NameId = NoRewardNameId
         };
     }
 }

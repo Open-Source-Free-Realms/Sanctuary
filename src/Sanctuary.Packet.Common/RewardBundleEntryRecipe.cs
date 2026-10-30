@@ -1,8 +1,8 @@
-using Sanctuary.Core.IO;
+﻿using Sanctuary.Core.IO;
 
 namespace Sanctuary.Packet.Common;
 
-public sealed class RewardBundleEntryRecipeInfo : RewardBundleEntryInfo
+public sealed class RewardBundleEntryRecipe : RewardBundleEntryBase
 {
     public override RewardBundleEntryType Type => RewardBundleEntryType.Recipe;
 
@@ -17,6 +17,7 @@ public sealed class RewardBundleEntryRecipeInfo : RewardBundleEntryInfo
     {
         if (!reader.TryRead(out RecipeId))
             return false;
+
         return true;
     }
 }

@@ -9,7 +9,7 @@ public class MiniGameLootWheelSetItemToLandOnPacket : BaseMiniGamePacket, ISeria
 {
     public new const byte OpCode = 45;
 
-    public RewardBundleInfo RewardBundle = new();
+    public RewardBundleBase RewardBundle = RewardBundleBase.CreateEmpty();
 
     public MiniGameLootWheelSetItemToLandOnPacket() : base(OpCode)
     {

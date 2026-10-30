@@ -1,8 +1,8 @@
-using Sanctuary.Core.IO;
+﻿using Sanctuary.Core.IO;
 
 namespace Sanctuary.Packet.Common;
 
-public sealed class RewardBundleEntryZoneFlagInfo : RewardBundleEntryInfo
+public sealed class RewardBundleEntryZoneFlag : RewardBundleEntryBase
 {
     public override RewardBundleEntryType Type => RewardBundleEntryType.ZoneFlag;
 
@@ -19,10 +19,6 @@ public sealed class RewardBundleEntryZoneFlagInfo : RewardBundleEntryInfo
 
     protected override bool TryReadData(ref PacketReader reader)
     {
-        var stringReader = reader;
-        if (!stringReader.TryRead(out int stringLength) || stringLength < 0 || stringLength > stringReader.RemainingLength)
-            return false;
-
         if (!reader.TryRead(out ZoneFlag))
             return false;
 
@@ -31,6 +27,7 @@ public sealed class RewardBundleEntryZoneFlagInfo : RewardBundleEntryInfo
 
         if (!reader.TryRead(out FlagType))
             return false;
+
         return true;
     }
 }

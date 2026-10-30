@@ -185,7 +185,7 @@ public static class MiniGameHelper
         player.SendTunneled(rewardBundlePacket);
     }
 
-    public static void ShowEndScreen(Player player, MiniGameUiSession miniGameUiSession, List<MiniGameScoreInfo> scores, int earnedStars, int timeRemaining, RewardBundleInfo rewardBundle, RewardBundleInfo memberRewardBundle, RewardBundleInfo? lootWheelRewardBundle = null)
+    public static void ShowEndScreen(Player player, MiniGameUiSession miniGameUiSession, List<MiniGameScoreInfo> scores, int earnedStars, int timeRemaining, RewardBundleBase rewardBundle, RewardBundleBase memberRewardBundle, RewardBundleBase? lootWheelRewardBundle = null)
     {
         miniGameUiSession.State = MiniGameUiState.Ended;
 

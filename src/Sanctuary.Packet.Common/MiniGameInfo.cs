@@ -21,11 +21,11 @@ public sealed class MiniGameInfo : ISerializableType, IDeserializableType
 
     public bool MembersOnly;
 
-    public RewardBundleInfo RewardBundle = new();
+    public RewardBundleBase RewardBundle = RewardBundleBase.CreateEmpty();
 
-    public RewardBundleInfo MemberRewardBundle = new();
+    public RewardBundleBase MemberRewardBundle = RewardBundleBase.CreateEmpty();
 
-    public RewardBundleInfo PreviewRewardBundle = new();
+    public RewardBundleBase PreviewRewardBundle = RewardBundleBase.CreateEmpty();
 
     public List<AchievementObjectiveInfo> Objectives { get; } = [];
 

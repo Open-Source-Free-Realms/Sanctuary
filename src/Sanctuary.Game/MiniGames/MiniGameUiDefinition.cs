@@ -28,10 +28,10 @@ public sealed class MiniGameUiDefinition
     public bool ShowActionBar { get; init; }
     public bool StartupInCombat { get; init; }
     public bool ShowEndDialog { get; init; }
-    public RewardBundleInfo RewardBundle { get; init; } = new();
-    public RewardBundleInfo MemberRewardBundle { get; init; } = new();
-    public RewardBundleInfo PreviewRewardBundle { get; init; } = new();
-    public Dictionary<int, RewardBundleInfo> ProfilePreviewRewardBundles { get; init; } = [];
+    public RewardBundleBase RewardBundle { get; init; } = RewardBundleBase.CreateEmpty();
+    public RewardBundleBase MemberRewardBundle { get; init; } = RewardBundleBase.CreateEmpty();
+    public RewardBundleBase PreviewRewardBundle { get; init; } = RewardBundleBase.CreateEmpty();
+    public Dictionary<int, RewardBundleBase> ProfilePreviewRewardBundles { get; init; } = [];
     public List<MiniGameUiObjective> Objectives { get; init; } = [];
     public EncounterDataCommon EncounterDataCommon { get; init; } = new();
 }

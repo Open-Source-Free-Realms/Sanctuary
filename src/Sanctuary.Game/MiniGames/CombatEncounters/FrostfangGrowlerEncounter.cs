@@ -17,11 +17,7 @@ public sealed class FrostfangGrowlerEncounter : CombatEncounter
     private const float EncounterRotationX = 0.2211563f;
     private const float EncounterRotationZ = 0.9752384f;
 
-    private const int NoRewardIconId = -1;
-    private const int NoRewardNameId = -1;
-    private const float DefaultRewardMultiplier = 1f;
-    private const int RewardBundleUnknown5 = 15;
-    private const int RewardItemQuantity = 1;
+    private const int RewardBundleUnknown3 = 15;
     private const int NoTintId = -1;
 
     private const int DefaultEncounterDefinitionId = 1008;
@@ -37,12 +33,12 @@ public sealed class FrostfangGrowlerEncounter : CombatEncounter
     private const int CoinsRewardIconId = 102;
     private const int CoinsRewardNameId = 6513;
     private const int FrostfangGrowlerMemberCoins = 36;
-    private const int FrostfangGrowlerMemberRewardUnknown15 = 3796;
+    private const int FrostfangGrowlerMemberRewardDescriptionId = 3796;
 
     private const int FrostfangGrowlerPreviewCoins = 20;
     private const int FrostfangGrowlerPreviewIconId = 2483;
     private const int FrostfangGrowlerPreviewNameId = 133217;
-    private const int FrostfangGrowlerPreviewUnknown15 = 957;
+    private const int FrostfangGrowlerPreviewDescriptionId = 957;
 
     private const int PreviewItem1DefinitionId = 76209;
     private const int PreviewItem1IconId = 2483;
@@ -138,7 +134,7 @@ public sealed class FrostfangGrowlerEncounter : CombatEncounter
     private const int StarRewardExperience = 10;
     private const int StarRewardIconId = 3901;
     private const int StarRewardNameId = 2416;
-    private const int StarRewardUnknown15 = 5240;
+    private const int StarRewardDescriptionId = 5240;
 
     private const int CombatGameTimeOverride = -1;
     private const float CombatObjectiveMultiplier = 500f;
@@ -162,11 +158,11 @@ public sealed class FrostfangGrowlerEncounter : CombatEncounter
         var memberRewardBundle = CreateRewardBundle(CoinsRewardIconId, CoinsRewardNameId);
         memberRewardBundle.HasOptionalData = true;
         memberRewardBundle.Coins = FrostfangGrowlerMemberCoins;
-        memberRewardBundle.Unknown15 = FrostfangGrowlerMemberRewardUnknown15;
+        memberRewardBundle.DescriptionId = FrostfangGrowlerMemberRewardDescriptionId;
 
         var previewRewardBundle = CreateRewardBundle(FrostfangGrowlerPreviewIconId, FrostfangGrowlerPreviewNameId);
         previewRewardBundle.Coins = FrostfangGrowlerPreviewCoins;
-        previewRewardBundle.Unknown15 = FrostfangGrowlerPreviewUnknown15;
+        previewRewardBundle.DescriptionId = FrostfangGrowlerPreviewDescriptionId;
         previewRewardBundle.Entries.Add(CreateRewardItem(PreviewItem1DefinitionId, PreviewItem1IconId, PreviewItem1TintId, PreviewItem1NameId, true));
         previewRewardBundle.Entries.Add(CreateRewardItem(PreviewItem2DefinitionId, PreviewItem2IconId, PreviewItem2TintId, PreviewItem2NameId, false));
         previewRewardBundle.Entries.Add(CreateRewardItem(PreviewItem3DefinitionId, PreviewItem3IconId, PreviewItem3TintId, PreviewItem3NameId, false));
@@ -175,7 +171,7 @@ public sealed class FrostfangGrowlerEncounter : CombatEncounter
 
         var starRewardBundle = CreateRewardBundle(StarRewardIconId, StarRewardNameId);
         starRewardBundle.Experience = StarRewardExperience;
-        starRewardBundle.Unknown15 = StarRewardUnknown15;
+        starRewardBundle.DescriptionId = StarRewardDescriptionId;
 
         return new MiniGameUiDefinition
         {
@@ -194,7 +190,7 @@ public sealed class FrostfangGrowlerEncounter : CombatEncounter
             ShowActionBar = true,
             StartupInCombat = true,
             ShowEndDialog = true,
-            RewardBundle = CreateEmptyRewardBundle(),
+            RewardBundle = RewardBundleBase.CreateEmpty(),
             MemberRewardBundle = memberRewardBundle,
             PreviewRewardBundle = previewRewardBundle,
             ProfilePreviewRewardBundles = new()
@@ -230,7 +226,7 @@ public sealed class FrostfangGrowlerEncounter : CombatEncounter
                     DescriptionId = KnockOutObjectiveDescriptionId,
                     Total = KnockOutObjectiveTotal,
                     IsFailCondition = true,
-                    RewardBundle = CreateEmptyRewardBundle()
+                    RewardBundle = RewardBundleBase.CreateEmpty()
                 },
                 new MiniGameUiObjective
                 {
@@ -268,47 +264,36 @@ public sealed class FrostfangGrowlerEncounter : CombatEncounter
         };
     }
 
-    private static RewardBundleInfo CreateEmptyRewardBundle()
+    private static RewardBundleBase CreateRewardBundle(int iconId, int nameId)
     {
-        return new RewardBundleInfo
+        return new RewardBundleBase
         {
-            Multiplier = DefaultRewardMultiplier,
-            IconId = NoRewardIconId,
-            NameId = NoRewardNameId
-        };
-    }
-
-    private static RewardBundleInfo CreateRewardBundle(int iconId, int nameId)
-    {
-        return new RewardBundleInfo
-        {
-            Unknown5 = RewardBundleUnknown5,
-            Multiplier = DefaultRewardMultiplier,
+            HasOptionalData = false,
+            Unknown3 = RewardBundleUnknown3,
             IconId = iconId,
             NameId = nameId
         };
     }
 
-    private static RewardBundleInfo CreatePreviewRewardBundle(params RewardBundleEntryItemInfo[] rewardBundleEntryItemInfos)
+    private static RewardBundleBase CreatePreviewRewardBundle(params RewardBundleEntryItem[] rewardBundleEntryItems)
     {
-        var previewRewardBundle = CreateRewardBundle(rewardBundleEntryItemInfos[0].IconId, rewardBundleEntryItemInfos[0].NameId);
+        var previewRewardBundle = CreateRewardBundle(rewardBundleEntryItems[0].IconId, rewardBundleEntryItems[0].NameId);
         previewRewardBundle.Coins = FrostfangGrowlerPreviewCoins;
-        previewRewardBundle.Unknown15 = FrostfangGrowlerPreviewUnknown15;
-        previewRewardBundle.Entries.AddRange(rewardBundleEntryItemInfos);
+        previewRewardBundle.DescriptionId = FrostfangGrowlerPreviewDescriptionId;
+        previewRewardBundle.Entries.AddRange(rewardBundleEntryItems);
         previewRewardBundle.Entries.Add(CreateRewardItem(BattleItemMysteryPackDefinitionId, BattleItemMysteryPackIconId, NoTintId, BattleItemMysteryPackNameId, true));
 
         return previewRewardBundle;
     }
 
-    private static RewardBundleEntryItemInfo CreateRewardItem(int definitionId, int iconId, int tintId, int nameId, bool isHidden)
+    private static RewardBundleEntryItem CreateRewardItem(int definitionId, int iconId, int tintId, int nameId, bool isHidden)
     {
-        return new RewardBundleEntryItemInfo
+        return new RewardBundleEntryItem
         {
             IsHidden = isHidden,
             IconId = iconId,
             TintId = tintId,
             NameId = nameId,
-            Quantity = RewardItemQuantity,
             DefinitionId = definitionId
         };
     }

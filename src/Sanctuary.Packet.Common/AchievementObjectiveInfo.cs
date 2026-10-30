@@ -12,7 +12,7 @@ public sealed class AchievementObjectiveInfo : ISerializableType, IDeserializabl
 
     public bool Unknown4;
 
-    public RewardBundleInfo RewardBundle = new();
+    public RewardBundleBase RewardBundle = RewardBundleBase.CreateEmpty();
 
     public int Status;
 

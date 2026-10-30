@@ -18,9 +18,6 @@ public static class ActivityHelper
     private const int DefaultRespawnTime = 10000;
     public const int MiniGameAppSystemId = 1;
     private const int CombatMiniGameType = 4;
-    private const int NoRewardIconId = -1;
-    private const int NoRewardNameId = -1;
-    private const float DefaultRewardMultiplier = 1f;
 
     public static void SendActivities(Player player, IResourceManager resourceManager)
     {
@@ -108,9 +105,9 @@ public static class ActivityHelper
             ProfileType = profileType == ProfileType.Combat ? (int)ProfileType.Combat : default,
             MembersOnly = clientActivityDefinition.MembersOnly,
             ShowEndDialog = true,
-            RewardBundle = CreateEmptyRewardBundle(),
-            MemberRewardBundle = CreateEmptyRewardBundle(),
-            PreviewRewardBundle = CreateEmptyRewardBundle()
+            RewardBundle = RewardBundleBase.CreateEmpty(),
+            MemberRewardBundle = RewardBundleBase.CreateEmpty(),
+            PreviewRewardBundle = RewardBundleBase.CreateEmpty()
         };
     }
 
@@ -123,16 +120,6 @@ public static class ActivityHelper
             .SelectMany(requirementGroupDefinition => requirementGroupDefinition.Requirements)
             .Select(rankRequirementDefinition => (ProfileType?)rankRequirementDefinition.ProfileType)
             .FirstOrDefault();
-    }
-
-    private static RewardBundleInfo CreateEmptyRewardBundle()
-    {
-        return new RewardBundleInfo
-        {
-            Multiplier = DefaultRewardMultiplier,
-            IconId = NoRewardIconId,
-            NameId = NoRewardNameId
-        };
     }
 
     public static bool TryGetRequiredProfile(Player player, IResourceManager resourceManager, ClientActivityDefinition clientActivityDefinition, out ClientPcProfile? requiredProfile)

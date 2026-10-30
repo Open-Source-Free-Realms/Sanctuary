@@ -1,28 +1,25 @@
-using Sanctuary.Core.IO;
+﻿using Sanctuary.Core.IO;
 
 namespace Sanctuary.Packet.Common;
 
-public sealed class RewardBundleEntryChestInfo : RewardBundleEntryInfo
+public sealed class RewardBundleEntryChest : RewardBundleEntryBase
 {
     public override RewardBundleEntryType Type => RewardBundleEntryType.Chest;
 
     public int ItemGuid;
 
+    protected override bool IsDataOptional => true;
+
     protected override void SerializeData(PacketWriter writer)
     {
-        if (!HasOptionalData)
-            return;
-
         writer.Write(ItemGuid);
     }
 
     protected override bool TryReadData(ref PacketReader reader)
     {
-        if (!HasOptionalData)
-            return true;
-
         if (!reader.TryRead(out ItemGuid))
             return false;
+
         return true;
     }
 }

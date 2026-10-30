@@ -1,8 +1,8 @@
-using Sanctuary.Core.IO;
+﻿using Sanctuary.Core.IO;
 
 namespace Sanctuary.Packet.Common;
 
-public sealed class RewardBundleEntryPetTrickExperienceInfo : RewardBundleEntryInfo
+public sealed class RewardBundleEntryPetTrickExperience : RewardBundleEntryBase
 {
     public override RewardBundleEntryType Type => RewardBundleEntryType.PetTrickExperience;
 
@@ -22,6 +22,7 @@ public sealed class RewardBundleEntryPetTrickExperienceInfo : RewardBundleEntryI
 
         if (!reader.TryRead(out Unknown2))
             return false;
+
         return true;
     }
 }

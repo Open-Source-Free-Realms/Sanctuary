@@ -1,8 +1,8 @@
-using Sanctuary.Core.IO;
+﻿using Sanctuary.Core.IO;
 
 namespace Sanctuary.Packet.Common;
 
-public sealed class RewardBundleEntryProfileAddInfo : RewardBundleEntryInfo
+public sealed class RewardBundleEntryProfileAdd : RewardBundleEntryBase
 {
     public override RewardBundleEntryType Type => RewardBundleEntryType.ProfileAdd;
 
@@ -17,6 +17,7 @@ public sealed class RewardBundleEntryProfileAddInfo : RewardBundleEntryInfo
     {
         if (!reader.TryRead(out ProfileId))
             return false;
+
         return true;
     }
 }

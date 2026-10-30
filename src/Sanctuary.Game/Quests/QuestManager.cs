@@ -758,7 +758,7 @@ public sealed class QuestManager : IQuestManager
         foreach (var entry in BuildRewardEntries(quest))
             bundle.Entries.Add(entry);
 
-        bundle.Success = bundle.Entries.Any(entry => entry is RewardBundleEntryCollectionAdd);
+        bundle.HasOptionalData = bundle.Entries.Any(entry => entry is RewardBundleEntryCollectionAdd);
     }
 
     private List<RewardBundleEntryBase> BuildRewardEntries(QuestDefinition quest)
@@ -1185,9 +1185,7 @@ public sealed class QuestManager : IQuestManager
         {
             var celebration = new RewardBundlePacket();
 
-            // Success also gates whether each entry's tail is written; only the actual
-            // collection id needs one here, so only flip it when there is a collection to report.
-            celebration.RewardBundle.Success = grantedCollection is not null;
+            celebration.RewardBundle.HasOptionalData = grantedCollection is not null;
             celebration.RewardBundle.Coins = coins;
             celebration.RewardBundle.Experience = experience;
             celebration.RewardBundle.Unknown3 = 0;

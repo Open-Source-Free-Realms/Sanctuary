@@ -11,5 +11,5 @@ public sealed class MiniGameUiObjective
     public int CompleteValue { get; init; }
     public bool IsFailCondition { get; init; }
     public bool ShowTask { get; init; }
-    public RewardBundleInfo RewardBundle { get; init; } = new();
+    public RewardBundleBase RewardBundle { get; init; } = RewardBundleBase.CreateEmpty();
 }

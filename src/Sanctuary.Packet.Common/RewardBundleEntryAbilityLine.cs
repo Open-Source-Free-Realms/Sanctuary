@@ -1,8 +1,8 @@
-using Sanctuary.Core.IO;
+﻿using Sanctuary.Core.IO;
 
 namespace Sanctuary.Packet.Common;
 
-public sealed class RewardBundleEntryAbilityLineInfo : RewardBundleEntryInfo
+public sealed class RewardBundleEntryAbilityLine : RewardBundleEntryBase
 {
     public override RewardBundleEntryType Type => RewardBundleEntryType.AbilityLine;
 
@@ -17,6 +17,7 @@ public sealed class RewardBundleEntryAbilityLineInfo : RewardBundleEntryInfo
     {
         if (!reader.TryRead(out AbilityLineId))
             return false;
+
         return true;
     }
 }
