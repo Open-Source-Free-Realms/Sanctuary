@@ -9,7 +9,7 @@ public class ActivityPacketJoinActivityRequest : BaseActivityPacket, ISerializab
     public new const byte OpCode = 2;
 
     public int ActivityId;
-    public int Unknown;
+    public int TimezoneOffset;
 
     public ActivityPacketJoinActivityRequest() : base(OpCode)
     {
@@ -22,7 +22,7 @@ public class ActivityPacketJoinActivityRequest : BaseActivityPacket, ISerializab
         Write(writer);
 
         writer.Write(ActivityId);
-        writer.Write(Unknown);
+        writer.Write(TimezoneOffset);
 
         return writer.Buffer;
     }
@@ -39,7 +39,7 @@ public class ActivityPacketJoinActivityRequest : BaseActivityPacket, ISerializab
         if (!reader.TryRead(out activityPacketJoinActivityRequest.ActivityId))
             return false;
 
-        if (!reader.TryRead(out activityPacketJoinActivityRequest.Unknown))
+        if (!reader.TryRead(out activityPacketJoinActivityRequest.TimezoneOffset))
             return false;
 
         return reader.RemainingLength == 0;
