@@ -38,7 +38,7 @@ public class ActivityDefinitionCollection
 
     public bool TryGetByMiniGameId(int miniGameAppSystemId, int miniGameId, [MaybeNullWhen(false)] out ClientActivityDefinition clientActivityDefinition)
     {
-        clientActivityDefinition = _activities.Values.FirstOrDefault(activity => activity.AppSystemId == miniGameAppSystemId && activity.Unknown3 == miniGameId);
+        clientActivityDefinition = _activities.Values.FirstOrDefault(activity => activity.AppSystemId == miniGameAppSystemId && activity.AppSystemDataId == miniGameId);
 
         return clientActivityDefinition is not null;
     }

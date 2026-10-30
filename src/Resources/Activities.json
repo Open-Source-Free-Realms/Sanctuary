@@ -14,7 +14,7 @@
       "DetailImageFilename": "daily_wheel_detail.dds",
       "ThumbnailImageFilename": "daily_wheel_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 8
+      "AppSystemDataId": 8
     },
     {
       "Id": 515,
@@ -31,7 +31,7 @@
       "DetailImageFilename": "chess_detail.dds",
       "ThumbnailImageFilename": "chess_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 20
+      "AppSystemDataId": 20
     },
     {
       "Id": 514,
@@ -48,7 +48,7 @@
       "DetailImageFilename": "checkers_detail.dds",
       "ThumbnailImageFilename": "checkers_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 21
+      "AppSystemDataId": 21
     },
     {
       "Id": 62,
@@ -66,7 +66,7 @@
       "DetailImageFilename": "wildwood_racing_detail.dds",
       "ThumbnailImageFilename": "wildwood_racing_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 28
+      "AppSystemDataId": 28
     },
     {
       "Id": 63,
@@ -84,7 +84,7 @@
       "DetailImageFilename": "frost_ridge_racing_detail.dds",
       "ThumbnailImageFilename": "frost_ridge_racing_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 37
+      "AppSystemDataId": 37
     },
     {
       "Id": 64,
@@ -102,7 +102,7 @@
       "DetailImageFilename": "tangletrack_racing_detail.dds",
       "ThumbnailImageFilename": "tangletrack_racing_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 38
+      "AppSystemDataId": 38
     },
     {
       "Id": 65,
@@ -120,7 +120,7 @@
       "DetailImageFilename": "wildwood_derby_detail.dds",
       "ThumbnailImageFilename": "wildwood_derby_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 39
+      "AppSystemDataId": 39
     },
     {
       "Id": 67,
@@ -138,7 +138,7 @@
       "DetailImageFilename": "frost_ridge_derby_detail.dds",
       "ThumbnailImageFilename": "frost_ridge_derby_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 40
+      "AppSystemDataId": 40
     },
     {
       "Id": 68,
@@ -156,7 +156,7 @@
       "DetailImageFilename": "tangletrack_derby_detail.dds",
       "ThumbnailImageFilename": "tangletrack_derby_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 41
+      "AppSystemDataId": 41
     },
     {
       "Id": 413,
@@ -173,7 +173,7 @@
       "DetailImageFilename": "artifact_hunt_detail.dds",
       "ThumbnailImageFilename": "artifact_hunt_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 57
+      "AppSystemDataId": 57
     },
     {
       "Id": 72,
@@ -191,7 +191,7 @@
       "DetailImageFilename": "Soccer_Sanctuary.dds",
       "ThumbnailImageFilename": "Soccer_Sanctuary.dds",
       "Difficulty": 1,
-      "Unknown3": 61
+      "AppSystemDataId": 61
     },
     {
       "Id": 73,
@@ -209,7 +209,7 @@
       "DetailImageFilename": "Soccer_Snowhill.dds",
       "ThumbnailImageFilename": "Soccer_Snowhill.dds",
       "Difficulty": 1,
-      "Unknown3": 62
+      "AppSystemDataId": 62
     },
     {
       "Id": 18,
@@ -226,7 +226,7 @@
       "DetailImageFilename": "Soccer_Briarwood.dds",
       "ThumbnailImageFilename": "Soccer_Briarwood.dds",
       "Difficulty": 1,
-      "Unknown3": 63
+      "AppSystemDataId": 63
     },
     {
       "Id": 516,
@@ -243,7 +243,7 @@
       "DetailImageFilename": "smelting_copper_detail.dds",
       "ThumbnailImageFilename": "smelting_copper_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 77
+      "AppSystemDataId": 77
     },
     {
       "Id": 510,
@@ -260,7 +260,7 @@
       "DetailImageFilename": "hacknslash_detail.dds",
       "ThumbnailImageFilename": "hacknslash_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 79
+      "AppSystemDataId": 79
     },
     {
       "Id": 400,
@@ -277,7 +277,7 @@
       "DetailImageFilename": "copper_mining_detail.dds",
       "ThumbnailImageFilename": "copper_mining_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 91
+      "AppSystemDataId": 91
     },
     {
       "Id": 401,
@@ -295,7 +295,7 @@
       "DetailImageFilename": "tin_mining_detail.dds",
       "ThumbnailImageFilename": "tin_mining_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 93
+      "AppSystemDataId": 93
     },
     {
       "Id": 402,
@@ -312,7 +312,7 @@
       "DetailImageFilename": "iron_mining_detail.dds",
       "ThumbnailImageFilename": "iron_mining_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 95
+      "AppSystemDataId": 95
     },
     {
       "Id": 577,
@@ -329,7 +329,7 @@
       "DetailImageFilename": "silver_mining_detail.dds",
       "ThumbnailImageFilename": "silver_mining_thumb.dds",
       "Difficulty": 4,
-      "Unknown3": 97
+      "AppSystemDataId": 97
     },
     {
       "Id": 578,
@@ -346,7 +346,7 @@
       "DetailImageFilename": "gold_mining_detail.dds",
       "ThumbnailImageFilename": "gold_mining_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 99
+      "AppSystemDataId": 99
     },
     {
       "Id": 410,
@@ -363,7 +363,7 @@
       "DetailImageFilename": "queensfields_harvesting_detail.dds",
       "ThumbnailImageFilename": "queensfields_harvesting_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 109
+      "AppSystemDataId": 109
     },
     {
       "Id": 411,
@@ -380,7 +380,7 @@
       "DetailImageFilename": "farnums_harvesting_detail.dds",
       "ThumbnailImageFilename": "farnums_harvesting_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 111
+      "AppSystemDataId": 111
     },
     {
       "Id": 412,
@@ -397,7 +397,7 @@
       "DetailImageFilename": "chugaroot_harvesting_detail.dds",
       "ThumbnailImageFilename": "chugaroot_harvesting_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 113
+      "AppSystemDataId": 113
     },
     {
       "Id": 566,
@@ -414,7 +414,7 @@
       "DetailImageFilename": "perrys_harvesting_detail.dds",
       "ThumbnailImageFilename": "perrys_harvesting_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 115
+      "AppSystemDataId": 115
     },
     {
       "Id": 570,
@@ -431,7 +431,7 @@
       "DetailImageFilename": "lakesfield_harvesting_detail.dds",
       "ThumbnailImageFilename": "lakesfield_harvesting_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 117
+      "AppSystemDataId": 117
     },
     {
       "Id": 1036,
@@ -448,7 +448,7 @@
       "DetailImageFilename": "thorny_harvesting_detail.dds",
       "ThumbnailImageFilename": "thorny_harvesting_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 119
+      "AppSystemDataId": 119
     },
     {
       "Id": 569,
@@ -466,7 +466,7 @@
       "DetailImageFilename": "smelting_tin_detail.dds",
       "ThumbnailImageFilename": "smelting_tin_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 134
+      "AppSystemDataId": 134
     },
     {
       "Id": 48,
@@ -482,7 +482,7 @@
       "DetailImageFilename": "smelting_iron_detail.dds",
       "ThumbnailImageFilename": "smelting_iron_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 135
+      "AppSystemDataId": 135
     },
     {
       "Id": 49,
@@ -507,7 +507,7 @@
       "DetailImageFilename": "smelting_silver_detail.dds",
       "ThumbnailImageFilename": "smelting_silver_thumb.dds",
       "Difficulty": 4,
-      "Unknown3": 136
+      "AppSystemDataId": 136
     },
     {
       "Id": 47,
@@ -523,7 +523,7 @@
       "DetailImageFilename": "smelting_gold_detail.dds",
       "ThumbnailImageFilename": "smelting_gold_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 137
+      "AppSystemDataId": 137
     },
     {
       "Id": 420,
@@ -540,7 +540,7 @@
       "DetailImageFilename": "quick_shot_bow_detail.dds",
       "ThumbnailImageFilename": "quick_shot_bow_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 138
+      "AppSystemDataId": 138
     },
     {
       "Id": 421,
@@ -557,7 +557,7 @@
       "DetailImageFilename": "spunky_scrapper_hammer_detail.dds",
       "ThumbnailImageFilename": "spunky_scrapper_hammer_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 139
+      "AppSystemDataId": 139
     },
     {
       "Id": 422,
@@ -574,7 +574,7 @@
       "DetailImageFilename": "first_aid_hammer_detail.dds",
       "ThumbnailImageFilename": "first_aid_hammer_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 140
+      "AppSystemDataId": 140
     },
     {
       "Id": 423,
@@ -591,7 +591,7 @@
       "DetailImageFilename": "dancing_monkey_bokken_detail.dds",
       "ThumbnailImageFilename": "dancing_monkey_bokken_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 141
+      "AppSystemDataId": 141
     },
     {
       "Id": 424,
@@ -608,7 +608,7 @@
       "DetailImageFilename": "power_charmed_wand_detail.dds",
       "ThumbnailImageFilename": "power_charmed_wand_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 142
+      "AppSystemDataId": 142
     },
     {
       "Id": 425,
@@ -626,7 +626,7 @@
       "DetailImageFilename": "fast_blast_bow_detail.dds",
       "ThumbnailImageFilename": "fast_blast_bow_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 143
+      "AppSystemDataId": 143
     },
     {
       "Id": 426,
@@ -644,7 +644,7 @@
       "DetailImageFilename": "rowdy_rumbler_hammer_detail.dds",
       "ThumbnailImageFilename": "rowdy_rumbler_hammer_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 144
+      "AppSystemDataId": 144
     },
     {
       "Id": 427,
@@ -661,7 +661,7 @@
       "DetailImageFilename": "field_support_scalpel_detail.dds",
       "ThumbnailImageFilename": "field_support_scalpel_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 145
+      "AppSystemDataId": 145
     },
     {
       "Id": 428,
@@ -679,7 +679,7 @@
       "DetailImageFilename": "biting_mongoose_blade_detail.dds",
       "ThumbnailImageFilename": "biting_mongoose_blade_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 146
+      "AppSystemDataId": 146
     },
     {
       "Id": 429,
@@ -697,7 +697,7 @@
       "DetailImageFilename": "lunar_enchanted_wand_detail.dds",
       "ThumbnailImageFilename": "lunar_enchanted_wand_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 147
+      "AppSystemDataId": 147
     },
     {
       "Id": 430,
@@ -714,7 +714,7 @@
       "DetailImageFilename": "alley_fighter_hammer_detail.dds",
       "ThumbnailImageFilename": "alley_fighter_hammer_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 148
+      "AppSystemDataId": 148
     },
     {
       "Id": 431,
@@ -731,7 +731,7 @@
       "DetailImageFilename": "anguish_aid_bonesaw_detail.dds",
       "ThumbnailImageFilename": "anguish_aid_bonesaw_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 149
+      "AppSystemDataId": 149
     },
     {
       "Id": 195,
@@ -748,7 +748,7 @@
       "DetailImageFilename": "penguin1_hard_detail.dds",
       "ThumbnailImageFilename": "penguin1_hard_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 150
+      "AppSystemDataId": 150
     },
     {
       "Id": 196,
@@ -765,7 +765,7 @@
       "DetailImageFilename": "penguin2_hard_detail.dds",
       "ThumbnailImageFilename": "penguin2_hard_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 151
+      "AppSystemDataId": 151
     },
     {
       "Id": 197,
@@ -782,7 +782,7 @@
       "DetailImageFilename": "penguin3_hard_detail.dds",
       "ThumbnailImageFilename": "penguin3_hard_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 152
+      "AppSystemDataId": 152
     },
     {
       "Id": 198,
@@ -799,7 +799,7 @@
       "DetailImageFilename": "briarwood1_hard_detail.dds",
       "ThumbnailImageFilename": "briarwood1_hard_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 153
+      "AppSystemDataId": 153
     },
     {
       "Id": 199,
@@ -816,7 +816,7 @@
       "DetailImageFilename": "briarwood2_hard_detail.dds",
       "ThumbnailImageFilename": "briarwood2_hard_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 154
+      "AppSystemDataId": 154
     },
     {
       "Id": 200,
@@ -833,7 +833,7 @@
       "DetailImageFilename": "briarwood3_hard_detail.dds",
       "ThumbnailImageFilename": "briarwood3_hard_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 155
+      "AppSystemDataId": 155
     },
     {
       "Id": 201,
@@ -850,7 +850,7 @@
       "DetailImageFilename": "farm1_hard_detail.dds",
       "ThumbnailImageFilename": "farm1_hard_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 156
+      "AppSystemDataId": 156
     },
     {
       "Id": 202,
@@ -867,7 +867,7 @@
       "DetailImageFilename": "farm2_hard_detail.dds",
       "ThumbnailImageFilename": "farm2_hard_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 157
+      "AppSystemDataId": 157
     },
     {
       "Id": 203,
@@ -884,7 +884,7 @@
       "DetailImageFilename": "farm3_hard_detail.dds",
       "ThumbnailImageFilename": "farm3_hard_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 158
+      "AppSystemDataId": 158
     },
     {
       "Id": 204,
@@ -901,7 +901,7 @@
       "DetailImageFilename": "bixies1_hard_detail.dds",
       "ThumbnailImageFilename": "bixies1_hard_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 159
+      "AppSystemDataId": 159
     },
     {
       "Id": 205,
@@ -918,7 +918,7 @@
       "DetailImageFilename": "bixies2_hard_detail.dds",
       "ThumbnailImageFilename": "bixies2_hard_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 160
+      "AppSystemDataId": 160
     },
     {
       "Id": 206,
@@ -935,7 +935,7 @@
       "DetailImageFilename": "bixies3_hard_detail.dds",
       "ThumbnailImageFilename": "bixies3_hard_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 161
+      "AppSystemDataId": 161
     },
     {
       "Id": 432,
@@ -952,7 +952,7 @@
       "DetailImageFilename": "diving_hawk_scythe_detail.dds",
       "ThumbnailImageFilename": "diving_hawk_scythe_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 162
+      "AppSystemDataId": 162
     },
     {
       "Id": 433,
@@ -969,7 +969,7 @@
       "DetailImageFilename": "chivalrous_guardian_hammer_detail.dds",
       "ThumbnailImageFilename": "chivalrous_guardian_hammer_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 163
+      "AppSystemDataId": 163
     },
     {
       "Id": 434,
@@ -986,7 +986,7 @@
       "DetailImageFilename": "strong_scrapper_hammer_detail.dds",
       "ThumbnailImageFilename": "strong_scrapper_hammer_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 164
+      "AppSystemDataId": 164
     },
     {
       "Id": 435,
@@ -1003,7 +1003,7 @@
       "DetailImageFilename": "pain_relief_bonesaw_detail.dds",
       "ThumbnailImageFilename": "pain_relief_bonesaw_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 165
+      "AppSystemDataId": 165
     },
     {
       "Id": 436,
@@ -1020,7 +1020,7 @@
       "DetailImageFilename": "stalking_panther_scythe_detail.dds",
       "ThumbnailImageFilename": "stalking_panther_scythe_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 166
+      "AppSystemDataId": 166
     },
     {
       "Id": 437,
@@ -1037,7 +1037,7 @@
       "DetailImageFilename": "stalwart_protector_hammer_detail.dds",
       "ThumbnailImageFilename": "stalwart_protector_hammer_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 167
+      "AppSystemDataId": 167
     },
     {
       "Id": 438,
@@ -1054,7 +1054,7 @@
       "DetailImageFilename": "frenzy_fighter_hammer_detail.dds",
       "ThumbnailImageFilename": "frenzy_fighter_hammer_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 168
+      "AppSystemDataId": 168
     },
     {
       "Id": 439,
@@ -1071,7 +1071,7 @@
       "DetailImageFilename": "trauma_support_shockrod_detail.dds",
       "ThumbnailImageFilename": "trauma_support_shockrod_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 169
+      "AppSystemDataId": 169
     },
     {
       "Id": 571,
@@ -1087,7 +1087,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 170
+      "AppSystemDataId": 170
     },
     {
       "Id": 440,
@@ -1104,7 +1104,7 @@
       "DetailImageFilename": "striking_serpent_sword_detail.dds",
       "ThumbnailImageFilename": "striking_serpent_sword_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 170
+      "AppSystemDataId": 170
     },
     {
       "Id": 572,
@@ -1120,7 +1120,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 171
+      "AppSystemDataId": 171
     },
     {
       "Id": 441,
@@ -1137,7 +1137,7 @@
       "DetailImageFilename": "intrepid_protector_axe_detail.dds",
       "ThumbnailImageFilename": "intrepid_protector_axe_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 171
+      "AppSystemDataId": 171
     },
     {
       "Id": 450,
@@ -1154,7 +1154,7 @@
       "DetailImageFilename": "spiralmint_steak_detail.dds",
       "ThumbnailImageFilename": "spiralmint_steak_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 173
+      "AppSystemDataId": 173
     },
     {
       "Id": 451,
@@ -1171,7 +1171,7 @@
       "DetailImageFilename": "spiralmint_soup_detail.dds",
       "ThumbnailImageFilename": "spiralmint_soup_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 174
+      "AppSystemDataId": 174
     },
     {
       "Id": 452,
@@ -1188,7 +1188,7 @@
       "DetailImageFilename": "gummyfruit_gumbo_detail.dds",
       "ThumbnailImageFilename": "gummyfruit_gumbo_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 175
+      "AppSystemDataId": 175
     },
     {
       "Id": 453,
@@ -1205,7 +1205,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 176
+      "AppSystemDataId": 176
     },
     {
       "Id": 454,
@@ -1222,7 +1222,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 177
+      "AppSystemDataId": 177
     },
     {
       "Id": 455,
@@ -1239,7 +1239,7 @@
       "DetailImageFilename": "burnettas_curious_creation_detail.dds",
       "ThumbnailImageFilename": "burnettas_curious_creation_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 178
+      "AppSystemDataId": 178
     },
     {
       "Id": 456,
@@ -1257,7 +1257,7 @@
       "DetailImageFilename": "crispy_choychoy_delight_detail.dds",
       "ThumbnailImageFilename": "crispy_choychoy_delight_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 179
+      "AppSystemDataId": 179
     },
     {
       "Id": 457,
@@ -1275,7 +1275,7 @@
       "DetailImageFilename": "mystery_potroast_detail.dds",
       "ThumbnailImageFilename": "mystery_potroast_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 180
+      "AppSystemDataId": 180
     },
     {
       "Id": 458,
@@ -1293,7 +1293,7 @@
       "DetailImageFilename": "slugmud_surprise_detail.dds",
       "ThumbnailImageFilename": "slugmud_surprise_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 181
+      "AppSystemDataId": 181
     },
     {
       "Id": 459,
@@ -1311,7 +1311,7 @@
       "DetailImageFilename": "gourmet_goulash_detail.dds",
       "ThumbnailImageFilename": "gourmet_goulash_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 182
+      "AppSystemDataId": 182
     },
     {
       "Id": 460,
@@ -1329,7 +1329,7 @@
       "DetailImageFilename": "gummyfruit_topped_sundae_detail.dds",
       "ThumbnailImageFilename": "gummyfruit_topped_sundae_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 183
+      "AppSystemDataId": 183
     },
     {
       "Id": 462,
@@ -1347,7 +1347,7 @@
       "DetailImageFilename": "sizzling_snowberry_saute_detail.dds",
       "ThumbnailImageFilename": "sizzling_snowberry_saute_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 184
+      "AppSystemDataId": 184
     },
     {
       "Id": 463,
@@ -1365,7 +1365,7 @@
       "DetailImageFilename": "fried_starnut_stick_detail.dds",
       "ThumbnailImageFilename": "fried_starnut_stick_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 185
+      "AppSystemDataId": 185
     },
     {
       "Id": 464,
@@ -1383,7 +1383,7 @@
       "DetailImageFilename": "starnut_sundae_detail.dds",
       "ThumbnailImageFilename": "starnut_sundae_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 186
+      "AppSystemDataId": 186
     },
     {
       "Id": 465,
@@ -1401,7 +1401,7 @@
       "DetailImageFilename": "stainberry_chocolate_gumdrop_detail.dds",
       "ThumbnailImageFilename": "stainberry_chocolate_gumdrop_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 187
+      "AppSystemDataId": 187
     },
     {
       "Id": 466,
@@ -1419,7 +1419,7 @@
       "DetailImageFilename": "rainleaf_wrapped_dumpling_detail.dds",
       "ThumbnailImageFilename": "rainleaf_wrapped_dumpling_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 188
+      "AppSystemDataId": 188
     },
     {
       "Id": 467,
@@ -1437,7 +1437,7 @@
       "DetailImageFilename": "merris_marinated_mystery_meat_detail.dds",
       "ThumbnailImageFilename": "merris_marinated_mystery_meat_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 189
+      "AppSystemDataId": 189
     },
     {
       "Id": 468,
@@ -1455,7 +1455,7 @@
       "DetailImageFilename": "royal_stew_du_jour_detail.dds",
       "ThumbnailImageFilename": "royal_stew_du_jour_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 190
+      "AppSystemDataId": 190
     },
     {
       "Id": 469,
@@ -1473,7 +1473,7 @@
       "DetailImageFilename": "seared_stainberry_detail.dds",
       "ThumbnailImageFilename": "seared_stainberry_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 191
+      "AppSystemDataId": 191
     },
     {
       "Id": 470,
@@ -1491,7 +1491,7 @@
       "DetailImageFilename": "spicy_vegetable_stirfry_detail.dds",
       "ThumbnailImageFilename": "spicy_vegetable_stirfry_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 192
+      "AppSystemDataId": 192
     },
     {
       "Id": 471,
@@ -1509,7 +1509,7 @@
       "DetailImageFilename": "oddly_colored_omelette_detail.dds",
       "ThumbnailImageFilename": "oddly_colored_omelette_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 193
+      "AppSystemDataId": 193
     },
     {
       "Id": 472,
@@ -1527,7 +1527,7 @@
       "DetailImageFilename": "deflor_family_fried_dumplings_detail.dds",
       "ThumbnailImageFilename": "deflor_family_fried_dumplings_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 194
+      "AppSystemDataId": 194
     },
     {
       "Id": 473,
@@ -1545,7 +1545,7 @@
       "DetailImageFilename": "honey_roasted_moonbean_detail.dds",
       "ThumbnailImageFilename": "honey_roasted_moonbean_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 195
+      "AppSystemDataId": 195
     },
     {
       "Id": 474,
@@ -1563,7 +1563,7 @@
       "DetailImageFilename": "moonbean_sundae_sweettreat_detail.dds",
       "ThumbnailImageFilename": "moonbean_sundae_sweettreat_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 196
+      "AppSystemDataId": 196
     },
     {
       "Id": 475,
@@ -1581,7 +1581,7 @@
       "DetailImageFilename": "candied_briarmelon_detail.dds",
       "ThumbnailImageFilename": "candied_briarmelon_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 197
+      "AppSystemDataId": 197
     },
     {
       "Id": 476,
@@ -1599,7 +1599,7 @@
       "DetailImageFilename": "briarmelon_surprise_detail.dds",
       "ThumbnailImageFilename": "briarmelon_surprise_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 198
+      "AppSystemDataId": 198
     },
     {
       "Id": 477,
@@ -1617,7 +1617,7 @@
       "DetailImageFilename": "moonbean_mouse_detail.dds",
       "ThumbnailImageFilename": "moonbean_mouse_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 199
+      "AppSystemDataId": 199
     },
     {
       "Id": 511,
@@ -1634,7 +1634,7 @@
       "DetailImageFilename": "feel_the_beat_veryeasy_detail.dds",
       "ThumbnailImageFilename": "feel_the_beat_veryeasy_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 201
+      "AppSystemDataId": 201
     },
     {
       "Id": 512,
@@ -1651,7 +1651,7 @@
       "DetailImageFilename": "feel_the_beat_easy_detail.dds",
       "ThumbnailImageFilename": "feel_the_beat_easy_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 202
+      "AppSystemDataId": 202
     },
     {
       "Id": 513,
@@ -1668,7 +1668,7 @@
       "DetailImageFilename": "feel_the_beat_medium_detail.dds",
       "ThumbnailImageFilename": "feel_the_beat_medium_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 203
+      "AppSystemDataId": 203
     },
     {
       "Id": 568,
@@ -1685,7 +1685,7 @@
       "DetailImageFilename": "feel_the_beat_hard_detail.dds",
       "ThumbnailImageFilename": "feel_the_beat_hard_thumb.dds",
       "Difficulty": 4,
-      "Unknown3": 204
+      "AppSystemDataId": 204
     },
     {
       "Id": 520,
@@ -1703,7 +1703,7 @@
       "DetailImageFilename": "penguin1_medium_detail.dds",
       "ThumbnailImageFilename": "penguin1_medium_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 250
+      "AppSystemDataId": 250
     },
     {
       "Id": 521,
@@ -1721,7 +1721,7 @@
       "DetailImageFilename": "penguin2_medium_detail.dds",
       "ThumbnailImageFilename": "penguin2_medium_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 251
+      "AppSystemDataId": 251
     },
     {
       "Id": 522,
@@ -1739,7 +1739,7 @@
       "DetailImageFilename": "penguin3_medium_detail.dds",
       "ThumbnailImageFilename": "penguin3_medium_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 252
+      "AppSystemDataId": 252
     },
     {
       "Id": 523,
@@ -1757,7 +1757,7 @@
       "DetailImageFilename": "briarwood1_medium_detail.dds",
       "ThumbnailImageFilename": "briarwood1_medium_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 253
+      "AppSystemDataId": 253
     },
     {
       "Id": 524,
@@ -1775,7 +1775,7 @@
       "DetailImageFilename": "briarwood2_medium_detail.dds",
       "ThumbnailImageFilename": "briarwood2_medium_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 254
+      "AppSystemDataId": 254
     },
     {
       "Id": 525,
@@ -1793,7 +1793,7 @@
       "DetailImageFilename": "briarwood3_medium_detail.dds",
       "ThumbnailImageFilename": "briarwood3_medium_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 255
+      "AppSystemDataId": 255
     },
     {
       "Id": 526,
@@ -1811,7 +1811,7 @@
       "DetailImageFilename": "farm1_medium_detail.dds",
       "ThumbnailImageFilename": "farm1_medium_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 256
+      "AppSystemDataId": 256
     },
     {
       "Id": 527,
@@ -1829,7 +1829,7 @@
       "DetailImageFilename": "farm2_medium_detail.dds",
       "ThumbnailImageFilename": "farm2_medium_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 257
+      "AppSystemDataId": 257
     },
     {
       "Id": 528,
@@ -1847,7 +1847,7 @@
       "DetailImageFilename": "farm3_medium_detail.dds",
       "ThumbnailImageFilename": "farm3_medium_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 258
+      "AppSystemDataId": 258
     },
     {
       "Id": 529,
@@ -1865,7 +1865,7 @@
       "DetailImageFilename": "bixies1_medium_detail.dds",
       "ThumbnailImageFilename": "bixies1_medium_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 259
+      "AppSystemDataId": 259
     },
     {
       "Id": 530,
@@ -1883,7 +1883,7 @@
       "DetailImageFilename": "bixies2_medium_detail.dds",
       "ThumbnailImageFilename": "bixies2_medium_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 260
+      "AppSystemDataId": 260
     },
     {
       "Id": 531,
@@ -1901,7 +1901,7 @@
       "DetailImageFilename": "bixies3_medium_detail.dds",
       "ThumbnailImageFilename": "bixies3_medium_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 261
+      "AppSystemDataId": 261
     },
     {
       "Id": 1048,
@@ -1917,7 +1917,7 @@
       "DetailImageFilename": "tutorial_racing_detail.dds",
       "ThumbnailImageFilename": "tutorial_racing_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 277
+      "AppSystemDataId": 277
     },
     {
       "Id": 1047,
@@ -1933,7 +1933,7 @@
       "DetailImageFilename": "tutorial_derby_detail.dds",
       "ThumbnailImageFilename": "tutorial_derby_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 289
+      "AppSystemDataId": 289
     },
     {
       "Id": 532,
@@ -1951,7 +1951,7 @@
       "DetailImageFilename": "penguin1_easy_detail.dds",
       "ThumbnailImageFilename": "penguin1_easy_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 350
+      "AppSystemDataId": 350
     },
     {
       "Id": 533,
@@ -1969,7 +1969,7 @@
       "DetailImageFilename": "penguin2_easy_detail.dds",
       "ThumbnailImageFilename": "penguin2_easy_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 351
+      "AppSystemDataId": 351
     },
     {
       "Id": 534,
@@ -1987,7 +1987,7 @@
       "DetailImageFilename": "penguin3_easy_detail.dds",
       "ThumbnailImageFilename": "penguin3_easy_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 352
+      "AppSystemDataId": 352
     },
     {
       "Id": 535,
@@ -2005,7 +2005,7 @@
       "DetailImageFilename": "briarwood1_easy_detail.dds",
       "ThumbnailImageFilename": "briarwood1_easy_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 353
+      "AppSystemDataId": 353
     },
     {
       "Id": 536,
@@ -2023,7 +2023,7 @@
       "DetailImageFilename": "briarwood2_easy_detail.dds",
       "ThumbnailImageFilename": "briarwood2_easy_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 354
+      "AppSystemDataId": 354
     },
     {
       "Id": 537,
@@ -2041,7 +2041,7 @@
       "DetailImageFilename": "briarwood3_easy_detail.dds",
       "ThumbnailImageFilename": "briarwood3_easy_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 355
+      "AppSystemDataId": 355
     },
     {
       "Id": 538,
@@ -2059,7 +2059,7 @@
       "DetailImageFilename": "farm1_easy_detail.dds",
       "ThumbnailImageFilename": "farm1_easy_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 356
+      "AppSystemDataId": 356
     },
     {
       "Id": 539,
@@ -2077,7 +2077,7 @@
       "DetailImageFilename": "farm2_easy_detail.dds",
       "ThumbnailImageFilename": "farm2_easy_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 357
+      "AppSystemDataId": 357
     },
     {
       "Id": 540,
@@ -2095,7 +2095,7 @@
       "DetailImageFilename": "farm3_easy_detail.dds",
       "ThumbnailImageFilename": "farm3_easy_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 358
+      "AppSystemDataId": 358
     },
     {
       "Id": 549,
@@ -2113,7 +2113,7 @@
       "DetailImageFilename": "bixies1_easy_detail.dds",
       "ThumbnailImageFilename": "bixies1_easy_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 359
+      "AppSystemDataId": 359
     },
     {
       "Id": 550,
@@ -2131,7 +2131,7 @@
       "DetailImageFilename": "bixies2_easy_detail.dds",
       "ThumbnailImageFilename": "bixies2_easy_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 360
+      "AppSystemDataId": 360
     },
     {
       "Id": 551,
@@ -2149,7 +2149,7 @@
       "DetailImageFilename": "bixies3_easy_detail.dds",
       "ThumbnailImageFilename": "bixies3_easy_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 361
+      "AppSystemDataId": 361
     },
     {
       "Id": 442,
@@ -2166,7 +2166,7 @@
       "DetailImageFilename": "valiant_guardian_cudgel_detail.dds",
       "ThumbnailImageFilename": "valiant_guardian_cudgel_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 362
+      "AppSystemDataId": 362
     },
     {
       "Id": 443,
@@ -2184,7 +2184,7 @@
       "DetailImageFilename": "spirited_protector_axe_detail.dds",
       "ThumbnailImageFilename": "spirited_protector_axe_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 363
+      "AppSystemDataId": 363
     },
     {
       "Id": 444,
@@ -2201,7 +2201,7 @@
       "DetailImageFilename": "focus_fire_bow_detail.dds",
       "ThumbnailImageFilename": "focus_fire_bow_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 364
+      "AppSystemDataId": 364
     },
     {
       "Id": 445,
@@ -2218,7 +2218,7 @@
       "DetailImageFilename": "eclipse_infused_wand_detail.dds",
       "ThumbnailImageFilename": "eclipse_infused_wand_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 365
+      "AppSystemDataId": 365
     },
     {
       "Id": 573,
@@ -2235,7 +2235,7 @@
       "DetailImageFilename": "savage_sting_bow_detail.dds",
       "ThumbnailImageFilename": "savage_sting_bow_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 366
+      "AppSystemDataId": 366
     },
     {
       "Id": 574,
@@ -2252,7 +2252,7 @@
       "DetailImageFilename": "tempest_woven_wand_detail.dds",
       "ThumbnailImageFilename": "tempest_woven_wand_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 367
+      "AppSystemDataId": 367
     },
     {
       "Id": 575,
@@ -2269,7 +2269,7 @@
       "DetailImageFilename": "brutal_blast_bow_detail.dds",
       "ThumbnailImageFilename": "brutal_blast_bow_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 368
+      "AppSystemDataId": 368
     },
     {
       "Id": 576,
@@ -2286,7 +2286,7 @@
       "DetailImageFilename": "void_woven_wand_detail.dds",
       "ThumbnailImageFilename": "void_woven_wand_detail.dds",
       "Difficulty": 5,
-      "Unknown3": 369
+      "AppSystemDataId": 369
     },
     {
       "Id": 1113,
@@ -2302,7 +2302,7 @@
       "DetailImageFilename": "mining_practice_detail.dds",
       "ThumbnailImageFilename": "mining_practice_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 375
+      "AppSystemDataId": 375
     },
     {
       "Id": 414,
@@ -2319,7 +2319,7 @@
       "DetailImageFilename": "sanctuary_mail_detail.dds",
       "ThumbnailImageFilename": "sanctuary_mail_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 376
+      "AppSystemDataId": 376
     },
     {
       "Id": 415,
@@ -2337,7 +2337,7 @@
       "DetailImageFilename": "seaside_mail_detail.dds",
       "ThumbnailImageFilename": "seaside_mail_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 377
+      "AppSystemDataId": 377
     },
     {
       "Id": 416,
@@ -2355,7 +2355,7 @@
       "DetailImageFilename": "wugachug_mail_detail.dds",
       "ThumbnailImageFilename": "wugachug_mail_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 378
+      "AppSystemDataId": 378
     },
     {
       "Id": 567,
@@ -2373,7 +2373,7 @@
       "DetailImageFilename": "snowhill_mail_detail.dds",
       "ThumbnailImageFilename": "snowhill_mail_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 379
+      "AppSystemDataId": 379
     },
     {
       "Id": 1037,
@@ -2391,7 +2391,7 @@
       "DetailImageFilename": "shrouded_glade_mail_detail.dds",
       "ThumbnailImageFilename": "shrouded_glade_mail_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 380
+      "AppSystemDataId": 380
     },
     {
       "Id": 1038,
@@ -2409,7 +2409,7 @@
       "DetailImageFilename": "merry_vale_mail_detail.dds",
       "ThumbnailImageFilename": "merry_vale_mail_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 381
+      "AppSystemDataId": 381
     },
     {
       "Id": 546,
@@ -2426,7 +2426,7 @@
       "DetailImageFilename": "penguin1_easy_detail.dds",
       "ThumbnailImageFilename": "penguin1_easy_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 450
+      "AppSystemDataId": 450
     },
     {
       "Id": 547,
@@ -2443,7 +2443,7 @@
       "DetailImageFilename": "penguin2_medium_detail.dds",
       "ThumbnailImageFilename": "penguin2_medium_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 451
+      "AppSystemDataId": 451
     },
     {
       "Id": 541,
@@ -2460,7 +2460,7 @@
       "DetailImageFilename": "briarwood1_easy_detail.dds",
       "ThumbnailImageFilename": "briarwood1_easy_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 452
+      "AppSystemDataId": 452
     },
     {
       "Id": 542,
@@ -2477,7 +2477,7 @@
       "DetailImageFilename": "briarwood2_easy_detail.dds",
       "ThumbnailImageFilename": "briarwood2_easy_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 453
+      "AppSystemDataId": 453
     },
     {
       "Id": 543,
@@ -2494,7 +2494,7 @@
       "DetailImageFilename": "farm1_easy_detail.dds",
       "ThumbnailImageFilename": "farm1_easy_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 454
+      "AppSystemDataId": 454
     },
     {
       "Id": 544,
@@ -2511,7 +2511,7 @@
       "DetailImageFilename": "farm2_easy_detail.dds",
       "ThumbnailImageFilename": "farm2_easy_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 455
+      "AppSystemDataId": 455
     },
     {
       "Id": 548,
@@ -2528,7 +2528,7 @@
       "DetailImageFilename": "bixies1_easy_detail.dds",
       "ThumbnailImageFilename": "bixies1_easy_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 456
+      "AppSystemDataId": 456
     },
     {
       "Id": 545,
@@ -2545,7 +2545,7 @@
       "DetailImageFilename": "bixies2_medium_detail.dds",
       "ThumbnailImageFilename": "bixies2_medium_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 457
+      "AppSystemDataId": 457
     },
     {
       "Id": 7,
@@ -2562,7 +2562,7 @@
       "DetailImageFilename": "tcg_lobby_detail.dds",
       "ThumbnailImageFilename": "tcg_lobby_thumb.dds",
       "Difficulty": -1,
-      "Unknown3": 499
+      "AppSystemDataId": 499
     },
     {
       "Id": 490,
@@ -2580,7 +2580,7 @@
       "DetailImageFilename": "sams_trick_detail.dds",
       "ThumbnailImageFilename": "sams_trick_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 500
+      "AppSystemDataId": 500
     },
     {
       "Id": 498,
@@ -2598,7 +2598,7 @@
       "DetailImageFilename": "sams_tournament_detail.dds",
       "ThumbnailImageFilename": "sams_tournament_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 503
+      "AppSystemDataId": 503
     },
     {
       "Id": 491,
@@ -2616,7 +2616,7 @@
       "DetailImageFilename": "poes_trick_detail.dds",
       "ThumbnailImageFilename": "poes_trick_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 504
+      "AppSystemDataId": 504
     },
     {
       "Id": 499,
@@ -2634,7 +2634,7 @@
       "DetailImageFilename": "poes_tournament_detail.dds",
       "ThumbnailImageFilename": "poes_tournament_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 507
+      "AppSystemDataId": 507
     },
     {
       "Id": 492,
@@ -2652,7 +2652,7 @@
       "DetailImageFilename": "brys_trick_detail.dds",
       "ThumbnailImageFilename": "brys_trick_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 508
+      "AppSystemDataId": 508
     },
     {
       "Id": 500,
@@ -2670,7 +2670,7 @@
       "DetailImageFilename": "brys_tournament_detail.dds",
       "ThumbnailImageFilename": "brys_tournament_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 511
+      "AppSystemDataId": 511
     },
     {
       "Id": 493,
@@ -2687,7 +2687,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 512
+      "AppSystemDataId": 512
     },
     {
       "Id": 501,
@@ -2704,7 +2704,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 515
+      "AppSystemDataId": 515
     },
     {
       "Id": 494,
@@ -2722,7 +2722,7 @@
       "DetailImageFilename": "shiftys_trick_detail.dds",
       "ThumbnailImageFilename": "shiftys_trick_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 516
+      "AppSystemDataId": 516
     },
     {
       "Id": 502,
@@ -2740,7 +2740,7 @@
       "DetailImageFilename": "shiftys_tournament_detail.dds",
       "ThumbnailImageFilename": "shiftys_tournament_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 519
+      "AppSystemDataId": 519
     },
     {
       "Id": 495,
@@ -2758,7 +2758,7 @@
       "DetailImageFilename": "jammis_trick_detail.dds",
       "ThumbnailImageFilename": "jammis_trick_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 520
+      "AppSystemDataId": 520
     },
     {
       "Id": 503,
@@ -2776,7 +2776,7 @@
       "DetailImageFilename": "jammis_tournament_detail.dds",
       "ThumbnailImageFilename": "jammis_tournament_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 523
+      "AppSystemDataId": 523
     },
     {
       "Id": 496,
@@ -2794,7 +2794,7 @@
       "DetailImageFilename": "aris_trick_detail.dds",
       "ThumbnailImageFilename": "aris_trick_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 524
+      "AppSystemDataId": 524
     },
     {
       "Id": 504,
@@ -2812,7 +2812,7 @@
       "DetailImageFilename": "aris_tournament_detail.dds",
       "ThumbnailImageFilename": "aris_tournament_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 527
+      "AppSystemDataId": 527
     },
     {
       "Id": 497,
@@ -2830,7 +2830,7 @@
       "DetailImageFilename": "maples_trick_detail.dds",
       "ThumbnailImageFilename": "maples_trick_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 528
+      "AppSystemDataId": 528
     },
     {
       "Id": 505,
@@ -2848,7 +2848,7 @@
       "DetailImageFilename": "maples_tournament_detail.dds",
       "ThumbnailImageFilename": "maples_tournament_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 531
+      "AppSystemDataId": 531
     },
     {
       "Id": 1049,
@@ -2865,7 +2865,7 @@
       "DetailImageFilename": "tcg_tutorial_detail.dds",
       "ThumbnailImageFilename": "tcg_tutorial_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 537
+      "AppSystemDataId": 537
     },
     {
       "Id": 461,
@@ -2881,7 +2881,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 560
+      "AppSystemDataId": 560
     },
     {
       "Id": 228,
@@ -2899,7 +2899,7 @@
       "DetailImageFilename": "thunder_falls_racing_detail.dds",
       "ThumbnailImageFilename": "thunder_falls_racing_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 567
+      "AppSystemDataId": 567
     },
     {
       "Id": 231,
@@ -2917,7 +2917,7 @@
       "DetailImageFilename": "sandstorm_racing_detail.dds",
       "ThumbnailImageFilename": "sandstorm_racing_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 578
+      "AppSystemDataId": 578
     },
     {
       "Id": 560,
@@ -2934,7 +2934,7 @@
       "DetailImageFilename": "Fishing_DarklitLagoon.dds",
       "ThumbnailImageFilename": "Fishing_DarklitLagoon.dds",
       "Difficulty": 1,
-      "Unknown3": 596
+      "AppSystemDataId": 596
     },
     {
       "Id": 561,
@@ -2951,7 +2951,7 @@
       "DetailImageFilename": "Fishing_Bayou.dds",
       "ThumbnailImageFilename": "Fishing_Bayou.dds",
       "Difficulty": 1,
-      "Unknown3": 597
+      "AppSystemDataId": 597
     },
     {
       "Id": 562,
@@ -2968,7 +2968,7 @@
       "DetailImageFilename": "Fishing_RainbowLake.dds",
       "ThumbnailImageFilename": "Fishing_RainbowLake.dds",
       "Difficulty": 1,
-      "Unknown3": 598
+      "AppSystemDataId": 598
     },
     {
       "Id": 563,
@@ -2985,7 +2985,7 @@
       "DetailImageFilename": "Fishing_SacredGrove.dds",
       "ThumbnailImageFilename": "Fishing_SacredGrove.dds",
       "Difficulty": 1,
-      "Unknown3": 599
+      "AppSystemDataId": 599
     },
     {
       "Id": 564,
@@ -3002,7 +3002,7 @@
       "DetailImageFilename": "Fishing_WinteryBasin.dds",
       "ThumbnailImageFilename": "Fishing_WinteryBasin.dds",
       "Difficulty": 1,
-      "Unknown3": 600
+      "AppSystemDataId": 600
     },
     {
       "Id": 565,
@@ -3019,7 +3019,7 @@
       "DetailImageFilename": "Fishing_FrostBitten.dds",
       "ThumbnailImageFilename": "Fishing_FrostBitten.dds",
       "Difficulty": 1,
-      "Unknown3": 601
+      "AppSystemDataId": 601
     },
     {
       "Id": 1078,
@@ -3035,7 +3035,7 @@
       "DetailImageFilename": "treasure_wars_detail.dds",
       "ThumbnailImageFilename": "treasure_wars_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 727
+      "AppSystemDataId": 727
     },
     {
       "Id": 1050,
@@ -3051,7 +3051,7 @@
       "DetailImageFilename": "Soccer_Tutorial.dds",
       "ThumbnailImageFilename": "Soccer_Tutorial.dds",
       "Difficulty": 1,
-      "Unknown3": 1030
+      "AppSystemDataId": 1030
     },
     {
       "Id": 1051,
@@ -3068,7 +3068,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 1036
+      "AppSystemDataId": 1036
     },
     {
       "Id": 1087,
@@ -3085,7 +3085,7 @@
       "DetailImageFilename": "spot_the_diff_easy_detail.dds",
       "ThumbnailImageFilename": "spot_the_diff_easy_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 1040
+      "AppSystemDataId": 1040
     },
     {
       "Id": 1088,
@@ -3102,7 +3102,7 @@
       "DetailImageFilename": "spot_the_diff_hard_detail.dds",
       "ThumbnailImageFilename": "spot_the_diff_hard_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 1042
+      "AppSystemDataId": 1042
     },
     {
       "Id": 1089,
@@ -3119,7 +3119,7 @@
       "DetailImageFilename": "spot_the_diff_medium_detail.dds",
       "ThumbnailImageFilename": "spot_the_diff_medium_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 1044
+      "AppSystemDataId": 1044
     }
   ],
   "WorldServer": [
@@ -3136,7 +3136,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 12
+      "AppSystemDataId": 12
     },
     {
       "Id": 1013,
@@ -3151,7 +3151,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 13
+      "AppSystemDataId": 13
     },
     {
       "Id": 1014,
@@ -3167,7 +3167,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 14
+      "AppSystemDataId": 14
     },
     {
       "Id": 1015,
@@ -3183,7 +3183,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 15
+      "AppSystemDataId": 15
     },
     {
       "Id": 1016,
@@ -3199,7 +3199,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 16
+      "AppSystemDataId": 16
     },
     {
       "Id": 1017,
@@ -3215,7 +3215,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 17
+      "AppSystemDataId": 17
     },
     {
       "Id": 1018,
@@ -3231,7 +3231,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 18
+      "AppSystemDataId": 18
     },
     {
       "Id": 1019,
@@ -3247,7 +3247,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 19
+      "AppSystemDataId": 19
     },
     {
       "Id": 1020,
@@ -3263,7 +3263,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 20
+      "AppSystemDataId": 20
     },
     {
       "Id": 1021,
@@ -3279,7 +3279,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 21
+      "AppSystemDataId": 21
     },
     {
       "Id": 1022,
@@ -3295,7 +3295,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 22
+      "AppSystemDataId": 22
     },
     {
       "Id": 1023,
@@ -3311,7 +3311,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 23
+      "AppSystemDataId": 23
     },
     {
       "Id": 1024,
@@ -3327,7 +3327,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 24
+      "AppSystemDataId": 24
     },
     {
       "Id": 1025,
@@ -3343,7 +3343,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 25
+      "AppSystemDataId": 25
     },
     {
       "Id": 1026,
@@ -3358,7 +3358,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 26
+      "AppSystemDataId": 26
     },
     {
       "Id": 1027,
@@ -3374,7 +3374,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 27
+      "AppSystemDataId": 27
     },
     {
       "Id": 1028,
@@ -3390,7 +3390,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 28
+      "AppSystemDataId": 28
     },
     {
       "Id": 1029,
@@ -3406,7 +3406,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 29
+      "AppSystemDataId": 29
     },
     {
       "Id": 1030,
@@ -3422,7 +3422,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 30
+      "AppSystemDataId": 30
     },
     {
       "Id": 1031,
@@ -3438,7 +3438,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 31
+      "AppSystemDataId": 31
     },
     {
       "Id": 1032,
@@ -3454,7 +3454,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 32
+      "AppSystemDataId": 32
     },
     {
       "Id": 1033,
@@ -3470,7 +3470,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 33
+      "AppSystemDataId": 33
     },
     {
       "Id": 1034,
@@ -3486,7 +3486,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 34
+      "AppSystemDataId": 34
     },
     {
       "Id": 1035,
@@ -3502,7 +3502,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 35
+      "AppSystemDataId": 35
     },
     {
       "Id": 1039,
@@ -3516,7 +3516,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 36
+      "AppSystemDataId": 36
     },
     {
       "Id": 1040,
@@ -3530,7 +3530,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 37
+      "AppSystemDataId": 37
     },
     {
       "Id": 1041,
@@ -3544,7 +3544,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 38
+      "AppSystemDataId": 38
     },
     {
       "Id": 1042,
@@ -3558,7 +3558,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 39
+      "AppSystemDataId": 39
     },
     {
       "Id": 1043,
@@ -3574,7 +3574,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "Playground_Seaside.dds",
       "ThumbnailImageFilename": "Playground_Seaside.dds",
-      "Unknown3": 40
+      "AppSystemDataId": 40
     },
     {
       "Id": 1044,
@@ -3590,7 +3590,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "Playground_Snowhill.dds",
       "ThumbnailImageFilename": "Playground_Snowhill.dds",
-      "Unknown3": 41
+      "AppSystemDataId": 41
     },
     {
       "Id": 1045,
@@ -3604,7 +3604,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 42
+      "AppSystemDataId": 42
     },
     {
       "Id": 1046,
@@ -3618,7 +3618,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 43
+      "AppSystemDataId": 43
     },
     {
       "Id": 1054,
@@ -3634,7 +3634,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 44
+      "AppSystemDataId": 44
     },
     {
       "Id": 1055,
@@ -3649,7 +3649,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 45
+      "AppSystemDataId": 45
     },
     {
       "Id": 1056,
@@ -3664,7 +3664,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 46
+      "AppSystemDataId": 46
     },
     {
       "Id": 1057,
@@ -3679,7 +3679,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 47
+      "AppSystemDataId": 47
     },
     {
       "Id": 1058,
@@ -3694,7 +3694,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 48
+      "AppSystemDataId": 48
     },
     {
       "Id": 13,
@@ -3709,7 +3709,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 49
+      "AppSystemDataId": 49
     },
     {
       "Id": 14,
@@ -3724,7 +3724,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 50
+      "AppSystemDataId": 50
     },
     {
       "Id": 53,
@@ -3739,7 +3739,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 51
+      "AppSystemDataId": 51
     },
     {
       "Id": 54,
@@ -3754,7 +3754,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 52
+      "AppSystemDataId": 52
     },
     {
       "Id": 55,
@@ -3769,7 +3769,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 53
+      "AppSystemDataId": 53
     },
     {
       "Id": 1077,
@@ -3782,7 +3782,7 @@
       "DescriptionId": 427743,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 54
+      "AppSystemDataId": 54
     },
     {
       "Id": 1059,
@@ -3799,7 +3799,7 @@
       "MembersOnly": true,
       "DetailImageFilename": "Pirates_Arctic.dds",
       "ThumbnailImageFilename": "Pirates_Arctic.dds",
-      "Unknown3": 54
+      "AppSystemDataId": 54
     },
     {
       "Id": 1060,
@@ -3815,7 +3815,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 55
+      "AppSystemDataId": 55
     },
     {
       "Id": 1061,
@@ -3831,7 +3831,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 56
+      "AppSystemDataId": 56
     },
     {
       "Id": 1062,
@@ -3847,7 +3847,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 57
+      "AppSystemDataId": 57
     },
     {
       "Id": 1063,
@@ -3863,7 +3863,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 58
+      "AppSystemDataId": 58
     },
     {
       "Id": 1064,
@@ -3879,7 +3879,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 59
+      "AppSystemDataId": 59
     },
     {
       "Id": 1065,
@@ -3895,7 +3895,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 60
+      "AppSystemDataId": 60
     },
     {
       "Id": 1066,
@@ -3910,7 +3910,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 61
+      "AppSystemDataId": 61
     },
     {
       "Id": 1067,
@@ -3925,7 +3925,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 62
+      "AppSystemDataId": 62
     },
     {
       "Id": 16,
@@ -3941,7 +3941,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 63
+      "AppSystemDataId": 63
     },
     {
       "Id": 74,
@@ -3956,7 +3956,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 64
+      "AppSystemDataId": 64
     },
     {
       "Id": 75,
@@ -3972,7 +3972,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 65
+      "AppSystemDataId": 65
     },
     {
       "Id": 76,
@@ -3987,7 +3987,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 66
+      "AppSystemDataId": 66
     },
     {
       "Id": 77,
@@ -4002,7 +4002,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 67
+      "AppSystemDataId": 67
     },
     {
       "Id": 1068,
@@ -4017,7 +4017,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 68
+      "AppSystemDataId": 68
     },
     {
       "Id": 1069,
@@ -4032,7 +4032,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 69
+      "AppSystemDataId": 69
     },
     {
       "Id": 1070,
@@ -4047,7 +4047,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 70
+      "AppSystemDataId": 70
     },
     {
       "Id": 1071,
@@ -4062,7 +4062,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 71
+      "AppSystemDataId": 71
     },
     {
       "Id": 1072,
@@ -4077,7 +4077,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 72
+      "AppSystemDataId": 72
     },
     {
       "Id": 1073,
@@ -4092,7 +4092,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 73
+      "AppSystemDataId": 73
     },
     {
       "Id": 83,
@@ -4108,7 +4108,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 74
+      "AppSystemDataId": 74
     },
     {
       "Id": 84,
@@ -4123,7 +4123,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 75
+      "AppSystemDataId": 75
     },
     {
       "Id": 85,
@@ -4138,7 +4138,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 76
+      "AppSystemDataId": 76
     },
     {
       "Id": 86,
@@ -4153,7 +4153,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 77
+      "AppSystemDataId": 77
     },
     {
       "Id": 87,
@@ -4168,7 +4168,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 78
+      "AppSystemDataId": 78
     },
     {
       "Id": 98,
@@ -4183,7 +4183,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 79
+      "AppSystemDataId": 79
     },
     {
       "Id": 99,
@@ -4198,7 +4198,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 80
+      "AppSystemDataId": 80
     },
     {
       "Id": 100,
@@ -4213,7 +4213,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 81
+      "AppSystemDataId": 81
     },
     {
       "Id": 101,
@@ -4228,7 +4228,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 82
+      "AppSystemDataId": 82
     },
     {
       "Id": 50,
@@ -4243,7 +4243,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 83
+      "AppSystemDataId": 83
     },
     {
       "Id": 51,
@@ -4258,7 +4258,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 84
+      "AppSystemDataId": 84
     },
     {
       "Id": 102,
@@ -4273,7 +4273,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 85
+      "AppSystemDataId": 85
     },
     {
       "Id": 103,
@@ -4288,7 +4288,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 86
+      "AppSystemDataId": 86
     },
     {
       "Id": 104,
@@ -4303,7 +4303,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 87
+      "AppSystemDataId": 87
     },
     {
       "Id": 105,
@@ -4318,7 +4318,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 88
+      "AppSystemDataId": 88
     },
     {
       "Id": 106,
@@ -4333,7 +4333,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 89
+      "AppSystemDataId": 89
     },
     {
       "Id": 120,
@@ -4349,7 +4349,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 90
+      "AppSystemDataId": 90
     },
     {
       "Id": 121,
@@ -4365,7 +4365,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 91
+      "AppSystemDataId": 91
     },
     {
       "Id": 122,
@@ -4381,7 +4381,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 92
+      "AppSystemDataId": 92
     },
     {
       "Id": 123,
@@ -4397,7 +4397,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 93
+      "AppSystemDataId": 93
     },
     {
       "Id": 69,
@@ -4412,7 +4412,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 94
+      "AppSystemDataId": 94
     },
     {
       "Id": 70,
@@ -4427,7 +4427,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 95
+      "AppSystemDataId": 95
     },
     {
       "Id": 71,
@@ -4442,7 +4442,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 96
+      "AppSystemDataId": 96
     },
     {
       "Id": 207,
@@ -4455,7 +4455,7 @@
       "DescriptionId": 31491,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 97
+      "AppSystemDataId": 97
     },
     {
       "Id": 208,
@@ -4468,7 +4468,7 @@
       "DescriptionId": 31492,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 98
+      "AppSystemDataId": 98
     },
     {
       "Id": 209,
@@ -4481,7 +4481,7 @@
       "DescriptionId": 31493,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 99
+      "AppSystemDataId": 99
     },
     {
       "Id": 210,
@@ -4494,7 +4494,7 @@
       "DescriptionId": 31494,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 100
+      "AppSystemDataId": 100
     },
     {
       "Id": 124,
@@ -4507,7 +4507,7 @@
       "DescriptionId": 15044,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 101
+      "AppSystemDataId": 101
     },
     {
       "Id": 125,
@@ -4520,7 +4520,7 @@
       "DescriptionId": 15046,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 102
+      "AppSystemDataId": 102
     },
     {
       "Id": 126,
@@ -4533,7 +4533,7 @@
       "DescriptionId": 15048,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 103
+      "AppSystemDataId": 103
     },
     {
       "Id": 127,
@@ -4546,7 +4546,7 @@
       "DescriptionId": 15050,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 104
+      "AppSystemDataId": 104
     },
     {
       "Id": 1080,
@@ -4559,7 +4559,7 @@
       "DescriptionId": 434534,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 105
+      "AppSystemDataId": 105
     },
     {
       "Id": 1081,
@@ -4572,7 +4572,7 @@
       "DescriptionId": 434536,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 106
+      "AppSystemDataId": 106
     },
     {
       "Id": 1082,
@@ -4585,7 +4585,7 @@
       "DescriptionId": 434538,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 107
+      "AppSystemDataId": 107
     },
     {
       "Id": 1083,
@@ -4598,7 +4598,7 @@
       "DescriptionId": 434540,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 108
+      "AppSystemDataId": 108
     },
     {
       "Id": 1084,
@@ -4611,7 +4611,7 @@
       "DescriptionId": 435796,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 109
+      "AppSystemDataId": 109
     },
     {
       "Id": 1085,
@@ -4624,7 +4624,7 @@
       "DescriptionId": 435798,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 110
+      "AppSystemDataId": 110
     },
     {
       "Id": 1086,
@@ -4637,7 +4637,7 @@
       "DescriptionId": 435800,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 111
+      "AppSystemDataId": 111
     },
     {
       "Id": 234,
@@ -4650,7 +4650,7 @@
       "DescriptionId": 436159,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 114
+      "AppSystemDataId": 114
     },
     {
       "Id": 235,
@@ -4663,7 +4663,7 @@
       "DescriptionId": 436161,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 115
+      "AppSystemDataId": 115
     },
     {
       "Id": 236,
@@ -4676,7 +4676,7 @@
       "DescriptionId": 436163,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 116
+      "AppSystemDataId": 116
     },
     {
       "Id": 237,
@@ -4689,7 +4689,7 @@
       "DescriptionId": 436165,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 117
+      "AppSystemDataId": 117
     },
     {
       "Id": 238,
@@ -4702,7 +4702,7 @@
       "DescriptionId": 436167,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 118
+      "AppSystemDataId": 118
     },
     {
       "Id": 239,
@@ -4715,7 +4715,7 @@
       "DescriptionId": 436169,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 119
+      "AppSystemDataId": 119
     },
     {
       "Id": 240,
@@ -4728,7 +4728,7 @@
       "DescriptionId": 436429,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 120
+      "AppSystemDataId": 120
     },
     {
       "Id": 1052,
@@ -4744,7 +4744,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 141
+      "AppSystemDataId": 141
     },
     {
       "Id": 1053,
@@ -4760,7 +4760,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 142
+      "AppSystemDataId": 142
     },
     {
       "Id": 1075,
@@ -4774,7 +4774,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "Playground_Sanctuary.dds",
       "ThumbnailImageFilename": "Playground_Sanctuary.dds",
-      "Unknown3": 144
+      "AppSystemDataId": 144
     },
     {
       "Id": 1076,
@@ -4789,7 +4789,7 @@
       "PlayerCanJoin": true,
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
-      "Unknown3": 145
+      "AppSystemDataId": 145
     },
     {
       "Id": 1092,
@@ -4802,7 +4802,7 @@
       "DescriptionId": 436447,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 146
+      "AppSystemDataId": 146
     },
     {
       "Id": 1093,
@@ -4815,7 +4815,7 @@
       "DescriptionId": 436449,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 147
+      "AppSystemDataId": 147
     },
     {
       "Id": 1094,
@@ -4828,7 +4828,7 @@
       "DescriptionId": 436451,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 148
+      "AppSystemDataId": 148
     },
     {
       "Id": 1095,
@@ -4841,7 +4841,7 @@
       "DescriptionId": 436454,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 149
+      "AppSystemDataId": 149
     },
     {
       "Id": 1096,
@@ -4854,7 +4854,7 @@
       "DescriptionId": 436456,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 150
+      "AppSystemDataId": 150
     },
     {
       "Id": 1097,
@@ -4867,7 +4867,7 @@
       "DescriptionId": 436458,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 151
+      "AppSystemDataId": 151
     },
     {
       "Id": 1098,
@@ -4880,7 +4880,7 @@
       "DescriptionId": 436460,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 152
+      "AppSystemDataId": 152
     },
     {
       "Id": 1099,
@@ -4893,7 +4893,7 @@
       "DescriptionId": 436462,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 153
+      "AppSystemDataId": 153
     },
     {
       "Id": 1100,
@@ -4906,7 +4906,7 @@
       "DescriptionId": 436464,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 154
+      "AppSystemDataId": 154
     },
     {
       "Id": 1101,
@@ -4919,7 +4919,7 @@
       "DescriptionId": 436466,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 155
+      "AppSystemDataId": 155
     },
     {
       "Id": 1103,
@@ -4932,7 +4932,7 @@
       "DescriptionId": 2777,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 156
+      "AppSystemDataId": 156
     },
     {
       "Id": 1104,
@@ -4945,7 +4945,7 @@
       "DescriptionId": 2779,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 157
+      "AppSystemDataId": 157
     },
     {
       "Id": 1105,
@@ -4958,7 +4958,7 @@
       "DescriptionId": 2781,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 158
+      "AppSystemDataId": 158
     },
     {
       "Id": 1106,
@@ -4971,7 +4971,7 @@
       "DescriptionId": 2783,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 159
+      "AppSystemDataId": 159
     },
     {
       "Id": 1107,
@@ -4984,7 +4984,7 @@
       "DescriptionId": 2785,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 160
+      "AppSystemDataId": 160
     },
     {
       "Id": 1108,
@@ -4997,7 +4997,7 @@
       "DescriptionId": 2787,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 161
+      "AppSystemDataId": 161
     },
     {
       "Id": 1109,
@@ -5010,7 +5010,7 @@
       "DescriptionId": 2789,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 162
+      "AppSystemDataId": 162
     },
     {
       "Id": 1110,
@@ -5023,7 +5023,7 @@
       "DescriptionId": 2791,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 163
+      "AppSystemDataId": 163
     },
     {
       "Id": 1111,
@@ -5036,7 +5036,7 @@
       "DescriptionId": 2793,
       "ServerType": 1,
       "PlayerCanJoin": true,
-      "Unknown3": 164
+      "AppSystemDataId": 164
     },
     {
       "Id": 12,
@@ -5054,7 +5054,7 @@
       "DetailImageFilename": "arachnias_lair_detail.dds",
       "ThumbnailImageFilename": "arachnias_lair_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 12
+      "AppSystemDataId": 12
     },
     {
       "Id": 15,
@@ -5072,7 +5072,7 @@
       "DetailImageFilename": "snowy_canyon_detail.dds",
       "ThumbnailImageFilename": "snowy_canyon_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 15
+      "AppSystemDataId": 15
     },
     {
       "Id": 17,
@@ -5090,7 +5090,7 @@
       "DetailImageFilename": "snarling_hedges_detail.dds",
       "ThumbnailImageFilename": "snarling_hedges_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 17
+      "AppSystemDataId": 17
     },
     {
       "Id": 19,
@@ -5108,7 +5108,7 @@
       "DetailImageFilename": "dark_spore_depths_detail.dds",
       "ThumbnailImageFilename": "dark_spore_depths_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 19
+      "AppSystemDataId": 19
     },
     {
       "Id": 21,
@@ -5126,7 +5126,7 @@
       "DetailImageFilename": "howling_hills_detail.dds",
       "ThumbnailImageFilename": "howling_hills_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 21
+      "AppSystemDataId": 21
     },
     {
       "Id": 23,
@@ -5144,7 +5144,7 @@
       "DetailImageFilename": "briar_patch_detail.dds",
       "ThumbnailImageFilename": "briar_patch_thumb.dds",
       "Difficulty": 4,
-      "Unknown3": 23
+      "AppSystemDataId": 23
     },
     {
       "Id": 24,
@@ -5161,7 +5161,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 24
+      "AppSystemDataId": 24
     },
     {
       "Id": 25,
@@ -5179,7 +5179,7 @@
       "DetailImageFilename": "mushroom_caverns_detail.dds",
       "ThumbnailImageFilename": "mushroom_caverns_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 25
+      "AppSystemDataId": 25
     },
     {
       "Id": 26,
@@ -5197,7 +5197,7 @@
       "DetailImageFilename": "grexan's_camp_detail.dds",
       "ThumbnailImageFilename": "grexan's_camp_thumb.dds",
       "Difficulty": 4,
-      "Unknown3": 26
+      "AppSystemDataId": 26
     },
     {
       "Id": 27,
@@ -5215,7 +5215,7 @@
       "DetailImageFilename": "bat_caves_detail.dds",
       "ThumbnailImageFilename": "bat_caves_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 27
+      "AppSystemDataId": 27
     },
     {
       "Id": 28,
@@ -5233,7 +5233,7 @@
       "DetailImageFilename": "treeleafs_retreat_detail.dds",
       "ThumbnailImageFilename": "treeleafs_retreat_thumb.dds",
       "Difficulty": 4,
-      "Unknown3": 28
+      "AppSystemDataId": 28
     },
     {
       "Id": 29,
@@ -5251,7 +5251,7 @@
       "DetailImageFilename": "bandit_hideout_detail.dds",
       "ThumbnailImageFilename": "bandit_hideout_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 29
+      "AppSystemDataId": 29
     },
     {
       "Id": 30,
@@ -5269,7 +5269,7 @@
       "DetailImageFilename": "tavern_cellar_detail.dds",
       "ThumbnailImageFilename": "tavern_cellar_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 30
+      "AppSystemDataId": 30
     },
     {
       "Id": 31,
@@ -5287,7 +5287,7 @@
       "DetailImageFilename": "hot_spring_haven_detail.dds",
       "ThumbnailImageFilename": "hot_spring_haven_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 31
+      "AppSystemDataId": 31
     },
     {
       "Id": 32,
@@ -5305,7 +5305,7 @@
       "DetailImageFilename": "robgoblin_treasure_trove_detail.dds",
       "ThumbnailImageFilename": "robgoblin_treasure_trove_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 32
+      "AppSystemDataId": 32
     },
     {
       "Id": 33,
@@ -5323,7 +5323,7 @@
       "DetailImageFilename": "frostfang_caverns_detail.dds",
       "ThumbnailImageFilename": "frostfang_caverns_thumb.dds",
       "Difficulty": 4,
-      "Unknown3": 33
+      "AppSystemDataId": 33
     },
     {
       "Id": 34,
@@ -5341,7 +5341,7 @@
       "DetailImageFilename": "deep_mines_detail.dds",
       "ThumbnailImageFilename": "deep_mines_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 34
+      "AppSystemDataId": 34
     },
     {
       "Id": 36,
@@ -5368,7 +5368,7 @@
       "DetailImageFilename": "bristlewood_glade_detail.dds",
       "ThumbnailImageFilename": "bristlewood_glade_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 36
+      "AppSystemDataId": 36
     },
     {
       "Id": 37,
@@ -5386,7 +5386,7 @@
       "DetailImageFilename": "bixie_hive_detail.dds",
       "ThumbnailImageFilename": "bixie_hive_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 37
+      "AppSystemDataId": 37
     },
     {
       "Id": 38,
@@ -5404,7 +5404,7 @@
       "DetailImageFilename": "forgotten_caves_detail.dds",
       "ThumbnailImageFilename": "forgotten_caves_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 38
+      "AppSystemDataId": 38
     },
     {
       "Id": 39,
@@ -5422,7 +5422,7 @@
       "DetailImageFilename": "mugworts_hollow_detail.dds",
       "ThumbnailImageFilename": "mugworts_hollow_thumb.dds",
       "Difficulty": 4,
-      "Unknown3": 39
+      "AppSystemDataId": 39
     },
     {
       "Id": 40,
@@ -5440,7 +5440,7 @@
       "DetailImageFilename": "floren_forest_detail.dds",
       "ThumbnailImageFilename": "floren_forest_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 40
+      "AppSystemDataId": 40
     },
     {
       "Id": 41,
@@ -5458,7 +5458,7 @@
       "DetailImageFilename": "trail_of_betrayal_detail.dds",
       "ThumbnailImageFilename": "trail_of_betrayal_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 41
+      "AppSystemDataId": 41
     },
     {
       "Id": 42,
@@ -5476,7 +5476,7 @@
       "DetailImageFilename": "briarheart_caverns_detail.dds",
       "ThumbnailImageFilename": "briarheart_caverns_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 42
+      "AppSystemDataId": 42
     },
     {
       "Id": 43,
@@ -5494,7 +5494,7 @@
       "DetailImageFilename": "forest_troll_fort_detail.dds",
       "ThumbnailImageFilename": "forest_troll_fort_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 43
+      "AppSystemDataId": 43
     },
     {
       "Id": 45,
@@ -5512,7 +5512,7 @@
       "DetailImageFilename": "highroad_hijinx_detail.dds",
       "ThumbnailImageFilename": "highroad_hijinx_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 45
+      "AppSystemDataId": 45
     },
     {
       "Id": 46,
@@ -5530,7 +5530,7 @@
       "DetailImageFilename": "danger_peaks_detail.dds",
       "ThumbnailImageFilename": "danger_peaks_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 46
+      "AppSystemDataId": 46
     },
     {
       "Id": 52,
@@ -5548,7 +5548,7 @@
       "DetailImageFilename": "vale_of_the_ancients_detail.dds",
       "ThumbnailImageFilename": "vale_of_the_ancients_thumb.dds",
       "Difficulty": 4,
-      "Unknown3": 52
+      "AppSystemDataId": 52
     },
     {
       "Id": 56,
@@ -5565,7 +5565,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 56
+      "AppSystemDataId": 56
     },
     {
       "Id": 58,
@@ -5583,7 +5583,7 @@
       "DetailImageFilename": "darvons_descent_detail.dds",
       "ThumbnailImageFilename": "darvons_descent_thumb.dds",
       "Difficulty": 4,
-      "Unknown3": 58
+      "AppSystemDataId": 58
     },
     {
       "Id": 59,
@@ -5601,7 +5601,7 @@
       "DetailImageFilename": "croaking_vale_detail.dds",
       "ThumbnailImageFilename": "croaking_vale_thumb.dds",
       "Difficulty": 4,
-      "Unknown3": 59
+      "AppSystemDataId": 59
     },
     {
       "Id": 82,
@@ -5618,7 +5618,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 82
+      "AppSystemDataId": 82
     },
     {
       "Id": 90,
@@ -5635,7 +5635,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 90
+      "AppSystemDataId": 90
     },
     {
       "Id": 91,
@@ -5653,7 +5653,7 @@
       "DetailImageFilename": "haunted_mines_detail.dds",
       "ThumbnailImageFilename": "haunted_mines_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 91
+      "AppSystemDataId": 91
     },
     {
       "Id": 93,
@@ -5671,7 +5671,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 93
+      "AppSystemDataId": 93
     },
     {
       "Id": 94,
@@ -5689,7 +5689,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 94
+      "AppSystemDataId": 94
     },
     {
       "Id": 95,
@@ -5708,7 +5708,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 95
+      "AppSystemDataId": 95
     },
     {
       "Id": 96,
@@ -5726,7 +5726,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 96
+      "AppSystemDataId": 96
     },
     {
       "Id": 97,
@@ -5744,7 +5744,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 97
+      "AppSystemDataId": 97
     },
     {
       "Id": 110,
@@ -5763,7 +5763,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 110
+      "AppSystemDataId": 110
     },
     {
       "Id": 111,
@@ -5781,7 +5781,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 111
+      "AppSystemDataId": 111
     },
     {
       "Id": 112,
@@ -5799,7 +5799,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 112
+      "AppSystemDataId": 112
     },
     {
       "Id": 113,
@@ -5818,7 +5818,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 4,
-      "Unknown3": 113
+      "AppSystemDataId": 113
     },
     {
       "Id": 114,
@@ -5836,7 +5836,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 114
+      "AppSystemDataId": 114
     },
     {
       "Id": 115,
@@ -5854,7 +5854,7 @@
       "DetailImageFilename": "cray_caves_detail.dds",
       "ThumbnailImageFilename": "cray_caves_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 115
+      "AppSystemDataId": 115
     },
     {
       "Id": 116,
@@ -5872,7 +5872,7 @@
       "DetailImageFilename": "sweetwater_climb_detail.dds",
       "ThumbnailImageFilename": "sweetwater_climb_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 116
+      "AppSystemDataId": 116
     },
     {
       "Id": 117,
@@ -5890,7 +5890,7 @@
       "DetailImageFilename": "den_of_secrets_detail.dds",
       "ThumbnailImageFilename": "den_of_secrets_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 117
+      "AppSystemDataId": 117
     },
     {
       "Id": 118,
@@ -5908,7 +5908,7 @@
       "DetailImageFilename": "cracked_claw_cavern_detail.dds",
       "ThumbnailImageFilename": "cracked_claw_cavern_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 118
+      "AppSystemDataId": 118
     },
     {
       "Id": 119,
@@ -5935,7 +5935,7 @@
       "DetailImageFilename": "sheep_watch_detail.dds",
       "ThumbnailImageFilename": "sheep_watch_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 119
+      "AppSystemDataId": 119
     },
     {
       "Id": 1079,
@@ -5950,7 +5950,7 @@
       "DetailImageFilename": "kart_garage_detail.dds",
       "ThumbnailImageFilename": "kart_garage_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 121
+      "AppSystemDataId": 121
     },
     {
       "Id": 130,
@@ -5969,7 +5969,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 130
+      "AppSystemDataId": 130
     },
     {
       "Id": 131,
@@ -5988,7 +5988,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 4,
-      "Unknown3": 131
+      "AppSystemDataId": 131
     },
     {
       "Id": 132,
@@ -6007,7 +6007,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 132
+      "AppSystemDataId": 132
     },
     {
       "Id": 133,
@@ -6026,7 +6026,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 133
+      "AppSystemDataId": 133
     },
     {
       "Id": 134,
@@ -6044,7 +6044,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 134
+      "AppSystemDataId": 134
     },
     {
       "Id": 135,
@@ -6063,7 +6063,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 135
+      "AppSystemDataId": 135
     },
     {
       "Id": 136,
@@ -6082,7 +6082,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 136
+      "AppSystemDataId": 136
     },
     {
       "Id": 137,
@@ -6101,7 +6101,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 137
+      "AppSystemDataId": 137
     },
     {
       "Id": 140,
@@ -6119,7 +6119,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 140
+      "AppSystemDataId": 140
     },
     {
       "Id": 141,
@@ -6137,7 +6137,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 141
+      "AppSystemDataId": 141
     },
     {
       "Id": 142,
@@ -6155,7 +6155,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 142
+      "AppSystemDataId": 142
     },
     {
       "Id": 143,
@@ -6173,7 +6173,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 143
+      "AppSystemDataId": 143
     },
     {
       "Id": 145,
@@ -6192,7 +6192,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 145
+      "AppSystemDataId": 145
     },
     {
       "Id": 146,
@@ -6210,7 +6210,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 146
+      "AppSystemDataId": 146
     },
     {
       "Id": 147,
@@ -6227,7 +6227,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 147
+      "AppSystemDataId": 147
     },
     {
       "Id": 148,
@@ -6244,7 +6244,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 148
+      "AppSystemDataId": 148
     },
     {
       "Id": 149,
@@ -6262,7 +6262,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 149
+      "AppSystemDataId": 149
     },
     {
       "Id": 150,
@@ -6281,7 +6281,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 150
+      "AppSystemDataId": 150
     },
     {
       "Id": 151,
@@ -6300,7 +6300,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 151
+      "AppSystemDataId": 151
     },
     {
       "Id": 152,
@@ -6319,7 +6319,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 152
+      "AppSystemDataId": 152
     },
     {
       "Id": 153,
@@ -6338,7 +6338,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 153
+      "AppSystemDataId": 153
     },
     {
       "Id": 155,
@@ -6357,7 +6357,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 4,
-      "Unknown3": 155
+      "AppSystemDataId": 155
     },
     {
       "Id": 158,
@@ -6375,7 +6375,7 @@
       "DetailImageFilename": "tanglewood_fort_detail.dds",
       "ThumbnailImageFilename": "tanglewood_fort_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 158
+      "AppSystemDataId": 158
     },
     {
       "Id": 159,
@@ -6393,7 +6393,7 @@
       "DetailImageFilename": "misty_mountain_detail.dds",
       "ThumbnailImageFilename": "misty_mountain_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 159
+      "AppSystemDataId": 159
     },
     {
       "Id": 161,
@@ -6412,7 +6412,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 4,
-      "Unknown3": 161
+      "AppSystemDataId": 161
     },
     {
       "Id": 162,
@@ -6430,7 +6430,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 162
+      "AppSystemDataId": 162
     },
     {
       "Id": 163,
@@ -6449,7 +6449,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 163
+      "AppSystemDataId": 163
     },
     {
       "Id": 164,
@@ -6467,7 +6467,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 164
+      "AppSystemDataId": 164
     },
     {
       "Id": 165,
@@ -6486,7 +6486,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 4,
-      "Unknown3": 165
+      "AppSystemDataId": 165
     },
     {
       "Id": 168,
@@ -6504,7 +6504,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 168
+      "AppSystemDataId": 168
     },
     {
       "Id": 169,
@@ -6523,7 +6523,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 169
+      "AppSystemDataId": 169
     },
     {
       "Id": 171,
@@ -6542,7 +6542,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 171
+      "AppSystemDataId": 171
     },
     {
       "Id": 172,
@@ -6561,7 +6561,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 172
+      "AppSystemDataId": 172
     },
     {
       "Id": 173,
@@ -6579,7 +6579,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 173
+      "AppSystemDataId": 173
     },
     {
       "Id": 174,
@@ -6597,7 +6597,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 174
+      "AppSystemDataId": 174
     },
     {
       "Id": 175,
@@ -6615,7 +6615,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 175
+      "AppSystemDataId": 175
     },
     {
       "Id": 176,
@@ -6633,7 +6633,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 176
+      "AppSystemDataId": 176
     },
     {
       "Id": 182,
@@ -6652,7 +6652,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 182
+      "AppSystemDataId": 182
     },
     {
       "Id": 184,
@@ -6670,7 +6670,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 184
+      "AppSystemDataId": 184
     },
     {
       "Id": 186,
@@ -6689,7 +6689,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 186
+      "AppSystemDataId": 186
     },
     {
       "Id": 187,
@@ -6708,7 +6708,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 187
+      "AppSystemDataId": 187
     },
     {
       "Id": 188,
@@ -6726,7 +6726,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 188
+      "AppSystemDataId": 188
     },
     {
       "Id": 190,
@@ -6745,7 +6745,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 4,
-      "Unknown3": 190
+      "AppSystemDataId": 190
     },
     {
       "Id": 194,
@@ -6764,7 +6764,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 4,
-      "Unknown3": 194
+      "AppSystemDataId": 194
     },
     {
       "Id": 215,
@@ -6783,7 +6783,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 4,
-      "Unknown3": 215
+      "AppSystemDataId": 215
     },
     {
       "Id": 216,
@@ -6802,7 +6802,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 5,
-      "Unknown3": 216
+      "AppSystemDataId": 216
     },
     {
       "Id": 217,
@@ -6820,7 +6820,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 217
+      "AppSystemDataId": 217
     },
     {
       "Id": 218,
@@ -6839,7 +6839,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 2,
-      "Unknown3": 218
+      "AppSystemDataId": 218
     },
     {
       "Id": 219,
@@ -6858,7 +6858,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 219
+      "AppSystemDataId": 219
     },
     {
       "Id": 220,
@@ -6877,7 +6877,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 220
+      "AppSystemDataId": 220
     },
     {
       "Id": 232,
@@ -6893,7 +6893,7 @@
       "PlayerCanJoin": true,
       "TutorialActivityId": 1048,
       "Difficulty": 1,
-      "Unknown3": 232
+      "AppSystemDataId": 232
     },
     {
       "Id": 233,
@@ -6909,7 +6909,7 @@
       "PlayerCanJoin": true,
       "TutorialActivityId": 1048,
       "Difficulty": 1,
-      "Unknown3": 233
+      "AppSystemDataId": 233
     },
     {
       "Id": 339,
@@ -6927,7 +6927,7 @@
       "DetailImageFilename": "bone_bog_cemetery_detail.dds",
       "ThumbnailImageFilename": "bone_bog_cemetery_thumb.dds",
       "Difficulty": 3,
-      "Unknown3": 339
+      "AppSystemDataId": 339
     },
     {
       "Id": 349,
@@ -6944,7 +6944,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 349
+      "AppSystemDataId": 349
     },
     {
       "Id": 351,
@@ -6961,7 +6961,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 351
+      "AppSystemDataId": 351
     },
     {
       "Id": 363,
@@ -6978,7 +6978,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 363
+      "AppSystemDataId": 363
     },
     {
       "Id": 371,
@@ -6995,7 +6995,7 @@
       "DetailImageFilename": "placeholder_detail.dds",
       "ThumbnailImageFilename": "placeholder_thumb.dds",
       "Difficulty": 1,
-      "Unknown3": 371
+      "AppSystemDataId": 371
     }
   ]
 }

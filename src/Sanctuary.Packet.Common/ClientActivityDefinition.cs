@@ -10,7 +10,7 @@ public class ClientActivityDefinition : ISerializableType, IDeserializableType
 
     public int AppSystemId;
 
-    public int Unknown3;
+    public int AppSystemDataId;
 
     public int Category;
 
@@ -110,7 +110,7 @@ public class ClientActivityDefinition : ISerializableType, IDeserializableType
         writer.Write(DetailImageFilename);
         writer.Write(ThumbnailImageFilename);
         writer.Write(Difficulty);
-        writer.Write(Unknown3);
+        writer.Write(AppSystemDataId);
         writer.Write(MysteryChestId);
         writer.Write(MysteryChestIcon);
     }
@@ -188,7 +188,7 @@ public class ClientActivityDefinition : ISerializableType, IDeserializableType
         if (!reader.TryRead(out Difficulty))
             return false;
 
-        if (!reader.TryRead(out Unknown3))
+        if (!reader.TryRead(out AppSystemDataId))
             return false;
 
         if (!reader.TryRead(out MysteryChestId))

@@ -47,7 +47,7 @@ public static class ActivityHelper
         {
             Id = clientActivityDefinition.Id,
             AppSystemId = clientActivityDefinition.AppSystemId,
-            Unknown3 = clientActivityDefinition.Unknown3,
+            AppSystemDataId = clientActivityDefinition.AppSystemDataId,
             Category = clientActivityDefinition.Category,
             ImageSetId = clientActivityDefinition.ImageSetId,
             ImagePositionId = clientActivityDefinition.ImagePositionId,
@@ -82,7 +82,7 @@ public static class ActivityHelper
         MiniGameDefinition? miniGameDefinition = null;
 
         if (clientActivityDefinition.AppSystemId == MiniGameAppSystemId)
-            resourceManager.MiniGames.TryGetValue(clientActivityDefinition.Unknown3, out miniGameDefinition);
+            resourceManager.MiniGames.TryGetValue(clientActivityDefinition.AppSystemDataId, out miniGameDefinition);
 
         var miniGameType = profileType == ProfileType.Combat ? CombatMiniGameType : (int?)miniGameDefinition?.Type ?? default;
 
@@ -162,7 +162,7 @@ public static class ActivityHelper
         MiniGameDefinition? miniGameDefinition = null;
 
         if (clientActivityDefinition.AppSystemId == MiniGameAppSystemId)
-            resourceManager.MiniGames.TryGetValue(clientActivityDefinition.Unknown3, out miniGameDefinition);
+            resourceManager.MiniGames.TryGetValue(clientActivityDefinition.AppSystemDataId, out miniGameDefinition);
 
         return resourceManager.ActivityProfileTypes.TryGet(clientActivityDefinition, miniGameDefinition, out profileType);
     }
