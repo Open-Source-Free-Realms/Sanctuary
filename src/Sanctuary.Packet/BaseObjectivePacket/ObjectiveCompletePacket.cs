@@ -10,9 +10,9 @@ public class ObjectiveCompletePacket : BaseObjectivePacket, ISerializablePacket,
 
     public int ObjectiveId;
 
-    public int Unknown;
+    public int CompositeEffectId;
 
-    public int Unknown2;
+    public int Points;
 
     public ObjectiveCompletePacket() : base(OpCode)
     {
@@ -25,8 +25,8 @@ public class ObjectiveCompletePacket : BaseObjectivePacket, ISerializablePacket,
         Write(writer);
 
         writer.Write(ObjectiveId);
-        writer.Write(Unknown);
-        writer.Write(Unknown2);
+        writer.Write(CompositeEffectId);
+        writer.Write(Points);
 
         return writer.Buffer;
     }
@@ -43,10 +43,10 @@ public class ObjectiveCompletePacket : BaseObjectivePacket, ISerializablePacket,
         if (!reader.TryRead(out objectiveCompletePacket.ObjectiveId))
             return false;
 
-        if (!reader.TryRead(out objectiveCompletePacket.Unknown))
+        if (!reader.TryRead(out objectiveCompletePacket.CompositeEffectId))
             return false;
 
-        if (!reader.TryRead(out objectiveCompletePacket.Unknown2))
+        if (!reader.TryRead(out objectiveCompletePacket.Points))
             return false;
 
         return reader.RemainingLength == 0;

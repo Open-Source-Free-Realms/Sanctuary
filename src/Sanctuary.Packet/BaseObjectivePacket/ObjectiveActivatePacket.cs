@@ -10,7 +10,7 @@ public class ObjectiveActivatePacket : BaseObjectivePacket, ISerializablePacket,
 
     public int ObjectiveId;
 
-    public int Unknown;
+    public int RequiredCount;
 
     public ObjectiveActivatePacket() : base(OpCode)
     {
@@ -23,7 +23,7 @@ public class ObjectiveActivatePacket : BaseObjectivePacket, ISerializablePacket,
         Write(writer);
 
         writer.Write(ObjectiveId);
-        writer.Write(Unknown);
+        writer.Write(RequiredCount);
 
         return writer.Buffer;
     }
@@ -40,7 +40,7 @@ public class ObjectiveActivatePacket : BaseObjectivePacket, ISerializablePacket,
         if (!reader.TryRead(out objectiveActivatePacket.ObjectiveId))
             return false;
 
-        if (!reader.TryRead(out objectiveActivatePacket.Unknown))
+        if (!reader.TryRead(out objectiveActivatePacket.RequiredCount))
             return false;
 
         return reader.RemainingLength == 0;

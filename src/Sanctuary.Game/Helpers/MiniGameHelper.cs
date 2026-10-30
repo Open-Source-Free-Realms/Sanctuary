@@ -106,7 +106,7 @@ public static class MiniGameHelper
             player.SendTunneled(new ObjectiveActivatePacket
             {
                 ObjectiveId = miniGameUiObjective.Id,
-                Unknown = miniGameUiObjective.Total
+                RequiredCount = miniGameUiObjective.Total
             });
 
             if (!miniGameUiObjective.ShowTask)
@@ -150,7 +150,7 @@ public static class MiniGameHelper
         player.SendTunneled(new ObjectiveCompletePacket
         {
             ObjectiveId = miniGameUiObjective.Id,
-            Unknown2 = miniGameUiObjective.CompleteValue
+            Points = miniGameUiObjective.CompleteValue
         });
 
         if (!miniGameUiObjective.ShowTask)
