@@ -43,6 +43,7 @@ public sealed class Player : ClientPcData, IEntity
     private const int WeaponSlot = 7;
     private const int FlairShardSlot = 13;
     private const int IdleCharacterState = 1;
+    private const int DefaultZoningGeometryId = 214;
     private const int ActionBarSlotUnknown5 = 1;
     private const int ActionBarSlotUnknown6 = 4;
     private const int ActionBarSlotUnknown7 = 15;
@@ -678,13 +679,18 @@ public sealed class Player : ClientPcData, IEntity
         if (Zone == destinationZone)
             return true;
 
+        return TeleportToZone(destinationZone.DefinitionId, destinationZone.OwnerId, position, rotation, destinationZone.Id, default, DefaultZoningGeometryId, out _);
+    }
+
+    public bool TeleportToZone(int zoneDefinitionId, ulong? ownerId, Vector4 position, Quaternion rotation, int zoningId, byte zoningUnknown, int zoningGeometryId, [MaybeNullWhen(false)] out IZone zone)
+    {
         if (Zone is WorldZone)
         {
             StartingZonePosition = Position;
             StartingZoneRotation = Rotation;
         }
 
-        if (!_zoneManager.TryMovePlayerToZone(destinationZone.DefinitionId, destinationZone.OwnerId, this, position, rotation, out var zone))
+        if (!_zoneManager.TryMovePlayerToZone(zoneDefinitionId, ownerId, this, position, rotation, out zone))
             return false;
 
         PointOfInterestId = 0;
@@ -702,8 +708,9 @@ public sealed class Player : ClientPcData, IEntity
             Position = position,
             Rotation = rotation,
             Sky = Zone.Sky,
-            Id = Zone.Id,
-            GeometryId = 214,
+            Unknown = zoningUnknown,
+            Id = zoningId,
+            GeometryId = zoningGeometryId,
             OverrideUpdateRadius = true
         };
 
