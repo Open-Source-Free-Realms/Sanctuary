@@ -8,9 +8,9 @@ public class MiniGameKnockOutPacket : BaseMiniGamePacket, ISerializablePacket, I
 {
     public new const byte OpCode = 23;
 
-    public int Unknown;
+    public int KnockOuts;
 
-    public int Unknown2;
+    public int MaxKnockOuts;
 
     public MiniGameKnockOutPacket() : base(OpCode)
     {
@@ -22,8 +22,8 @@ public class MiniGameKnockOutPacket : BaseMiniGamePacket, ISerializablePacket, I
 
         Write(writer);
 
-        writer.Write(Unknown);
-        writer.Write(Unknown2);
+        writer.Write(KnockOuts);
+        writer.Write(MaxKnockOuts);
 
         return writer.Buffer;
     }
@@ -37,10 +37,10 @@ public class MiniGameKnockOutPacket : BaseMiniGamePacket, ISerializablePacket, I
         if (!miniGameKnockOutPacket.TryRead(ref reader))
             return false;
 
-        if (!reader.TryRead(out miniGameKnockOutPacket.Unknown))
+        if (!reader.TryRead(out miniGameKnockOutPacket.KnockOuts))
             return false;
 
-        if (!reader.TryRead(out miniGameKnockOutPacket.Unknown2))
+        if (!reader.TryRead(out miniGameKnockOutPacket.MaxKnockOuts))
             return false;
 
         return reader.RemainingLength == 0;

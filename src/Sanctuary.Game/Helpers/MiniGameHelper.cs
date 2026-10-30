@@ -172,8 +172,8 @@ public static class MiniGameHelper
             StateId = NoMiniGameId,
             GameId = NoMiniGameId,
             GroupId = NoMiniGameId,
-            Unknown = knockOuts,
-            Unknown2 = maxKnockOuts
+            KnockOuts = knockOuts,
+            MaxKnockOuts = maxKnockOuts
         });
     }
 
