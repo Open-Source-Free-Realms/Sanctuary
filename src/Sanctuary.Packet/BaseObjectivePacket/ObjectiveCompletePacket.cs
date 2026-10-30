@@ -37,10 +37,7 @@ public class ObjectiveCompletePacket : BaseObjectivePacket, ISerializablePacket,
 
         var reader = new PacketReader(data);
 
-        if (!reader.TryRead(out short opCode) || opCode != BaseObjectivePacket.OpCode)
-            return false;
-
-        if (!reader.TryRead(out byte subOpCode) || subOpCode != OpCode)
+        if (!objectiveCompletePacket.TryRead(ref reader))
             return false;
 
         if (!reader.TryRead(out objectiveCompletePacket.ObjectiveId))

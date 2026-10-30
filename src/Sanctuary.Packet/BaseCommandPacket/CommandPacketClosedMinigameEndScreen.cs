@@ -29,10 +29,7 @@ public class CommandPacketClosedMinigameEndScreen : BaseCommandPacket, ISerializ
 
         var reader = new PacketReader(data);
 
-        if (!reader.TryRead(out short opCode) || opCode != BaseCommandPacket.OpCode)
-            return false;
-
-        if (!reader.TryRead(out short subOpCode) || subOpCode != OpCode)
+        if (!commandPacketClosedMinigameEndScreen.TryRead(ref reader))
             return false;
 
 

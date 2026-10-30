@@ -41,19 +41,9 @@ public sealed class EncounterDetailsInfo : ISerializableType, IDeserializableTyp
 
         writer.Write(Unknown2);
 
-        writer.Write(ParticipantGroups.Count);
+        writer.Write(ParticipantGroups);
 
-        foreach (var encounterParticipantGroupInfo in ParticipantGroups)
-        {
-            encounterParticipantGroupInfo.Serialize(writer);
-        }
-
-        writer.Write(Teams.Count);
-
-        foreach (var encounterTeamInfo in Teams)
-        {
-            encounterTeamInfo.Serialize(writer);
-        }
+        writer.Write(Teams);
 
         writer.Write(Type);
 

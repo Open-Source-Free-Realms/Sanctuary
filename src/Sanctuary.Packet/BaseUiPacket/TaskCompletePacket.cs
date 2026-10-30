@@ -31,10 +31,7 @@ public class TaskCompletePacket : BaseUiPacket, ISerializablePacket, IDeserializ
 
         var reader = new PacketReader(data);
 
-        if (!reader.TryRead(out short opCode) || opCode != BaseUiPacket.OpCode)
-            return false;
-
-        if (!reader.TryRead(out byte subOpCode) || subOpCode != OpCode)
+        if (!taskCompletePacket.TryRead(ref reader))
             return false;
 
         if (!reader.TryRead(out taskCompletePacket.TaskId))

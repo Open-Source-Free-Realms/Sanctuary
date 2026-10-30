@@ -30,10 +30,7 @@ public class EncounterDetailsResponsePacket : BaseEncounterPacket, ISerializable
         Details.Serialize(writer);
         writer.Write(Unknown3);
         writer.Write(Unknown4);
-        writer.Write(Unknown5.Count);
-
-        foreach (var id in Unknown5)
-            writer.Write(id);
+        writer.Write(Unknown5);
 
         return writer.Buffer;
     }

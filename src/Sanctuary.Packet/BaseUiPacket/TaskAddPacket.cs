@@ -52,10 +52,7 @@ public class TaskAddPacket : BaseUiPacket, ISerializablePacket, IDeserializable<
 
         var reader = new PacketReader(data);
 
-        if (!reader.TryRead(out short opCode) || opCode != BaseUiPacket.OpCode)
-            return false;
-
-        if (!reader.TryRead(out byte subOpCode) || subOpCode != OpCode)
+        if (!taskAddPacket.TryRead(ref reader))
             return false;
 
         if (!reader.TryRead(out taskAddPacket.TaskId))

@@ -79,12 +79,7 @@ public sealed class MiniGameInfo : ISerializableType, IDeserializableType
 
         PreviewRewardBundle.Serialize(writer);
 
-        writer.Write(Objectives.Count);
-
-        foreach (var achievementObjectiveInfo in Objectives)
-        {
-            achievementObjectiveInfo.Serialize(writer);
-        }
+        writer.Write(Objectives);
 
         writer.Write(ShowStarCounter);
 
