@@ -8,8 +8,7 @@ public class QuestObjectiveInfo : ISerializableType, IDeserializableType
     public int NameId;
     public int DescriptionId;
 
-    // Never read by the client.
-    public bool Unknown;
+    public bool IsBonus;
 
     public RewardBundleBase RewardBundle = RewardBundleBase.CreateEmpty();
 
@@ -17,9 +16,8 @@ public class QuestObjectiveInfo : ISerializableType, IDeserializableType
     public int CurrentCount;
     public int RequiredCount;
 
-    // Never read by the client.
-    public int Unknown6;
-    public int Unknown8;
+    public int FailureCondition;
+    public int Category;
 
     public bool MembersOnly;
 
@@ -28,16 +26,16 @@ public class QuestObjectiveInfo : ISerializableType, IDeserializableType
         writer.Write(ObjectiveId);
         writer.Write(NameId);
         writer.Write(DescriptionId);
-        writer.Write(Unknown);
+        writer.Write(IsBonus);
 
         RewardBundle.Serialize(writer);
 
         writer.Write((int)State);
         writer.Write(CurrentCount);
         writer.Write(RequiredCount);
-        writer.Write(Unknown6);
+        writer.Write(FailureCondition);
         writer.Write(MembersOnly);
-        writer.Write(Unknown8);
+        writer.Write(Category);
     }
 
     public bool TryRead(ref PacketReader reader)
@@ -51,7 +49,7 @@ public class QuestObjectiveInfo : ISerializableType, IDeserializableType
         if (!reader.TryRead(out DescriptionId))
             return false;
 
-        if (!reader.TryRead(out Unknown))
+        if (!reader.TryRead(out IsBonus))
             return false;
 
         if (!RewardBundle.TryRead(ref reader))
@@ -68,13 +66,13 @@ public class QuestObjectiveInfo : ISerializableType, IDeserializableType
         if (!reader.TryRead(out RequiredCount))
             return false;
 
-        if (!reader.TryRead(out Unknown6))
+        if (!reader.TryRead(out FailureCondition))
             return false;
 
         if (!reader.TryRead(out MembersOnly))
             return false;
 
-        if (!reader.TryRead(out Unknown8))
+        if (!reader.TryRead(out Category))
             return false;
 
         return true;

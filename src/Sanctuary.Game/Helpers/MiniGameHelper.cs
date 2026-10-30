@@ -366,7 +366,7 @@ public static class MiniGameHelper
                 State = isRunning ? ObjectiveState.Active : ObjectiveState.Inactive,
                 CurrentCount = progress,
                 RequiredCount = isRunning ? miniGameUiObjective.Total : default,
-                Unknown6 = Convert.ToInt32(miniGameUiObjective.IsFailCondition)
+                FailureCondition = Convert.ToInt32(miniGameUiObjective.IsFailCondition)
             });
         }
 
