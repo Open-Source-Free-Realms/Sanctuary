@@ -1182,7 +1182,6 @@ public sealed class QuestManager : IQuestManager
         {
             var celebration = new RewardBundlePacket();
 
-            celebration.RewardBundle.HasOptionalData = grantedCollection is not null;
             celebration.RewardBundle.Coins = coins;
             celebration.RewardBundle.Experience = experience;
             celebration.RewardBundle.Unknown3 = 0;
