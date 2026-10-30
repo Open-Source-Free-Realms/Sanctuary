@@ -7,7 +7,7 @@ namespace Sanctuary.Packet.Common;
 
 public sealed class EncounterParticipantInfo : ISerializableType, IDeserializableType
 {
-    public ulong Unknown;
+    public ulong Guid;
 
     public bool Unknown2;
 
@@ -27,7 +27,7 @@ public sealed class EncounterParticipantInfo : ISerializableType, IDeserializabl
 
     public Vector4 Unknown10;
 
-    public string? Unknown11;
+    public string? Name;
 
     public bool Unknown12;
 
@@ -41,7 +41,7 @@ public sealed class EncounterParticipantInfo : ISerializableType, IDeserializabl
 
     public void Serialize(PacketWriter writer)
     {
-        writer.Write(Unknown);
+        writer.Write(Guid);
 
         writer.Write(Unknown2);
 
@@ -61,7 +61,7 @@ public sealed class EncounterParticipantInfo : ISerializableType, IDeserializabl
 
         writer.Write(Unknown10);
 
-        writer.Write(Unknown11);
+        writer.Write(Name);
 
         writer.Write(Unknown12);
 
@@ -76,7 +76,7 @@ public sealed class EncounterParticipantInfo : ISerializableType, IDeserializabl
 
     public bool TryRead(ref PacketReader reader)
     {
-        if (!reader.TryRead(out Unknown))
+        if (!reader.TryRead(out Guid))
             return false;
 
         if (!reader.TryRead(out Unknown2))
@@ -106,11 +106,11 @@ public sealed class EncounterParticipantInfo : ISerializableType, IDeserializabl
         if (!reader.TryRead(out Unknown10))
             return false;
 
-        var unknown11Reader = reader;
-        if (!unknown11Reader.TryRead(out int unknown11Length) || unknown11Length < 0 || unknown11Length > unknown11Reader.RemainingLength)
+        var nameReader = reader;
+        if (!nameReader.TryRead(out int nameLength) || nameLength < 0 || nameLength > nameReader.RemainingLength)
             return false;
 
-        if (!reader.TryRead(out Unknown11))
+        if (!reader.TryRead(out Name))
             return false;
 
         if (!reader.TryRead(out Unknown12))

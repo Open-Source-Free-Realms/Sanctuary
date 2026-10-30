@@ -319,12 +319,12 @@ public static class MiniGameHelper
 
         encounterParticipantGroupInfo.Participants.Add(new(default, new EncounterParticipantInfo
         {
-            Unknown = player.Guid,
+            Guid = player.Guid,
             Unknown3 = ParticipantUnknown3,
             Unknown6 = true,
             Unknown7 = isRunning,
             Unknown10 = player.Position,
-            Unknown11 = player.Name.FullName,
+            Name = player.Name.FullName,
             Unknown14 = definition.EncounterDefinitionId
         }));
 
