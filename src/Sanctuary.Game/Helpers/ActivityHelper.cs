@@ -71,7 +71,7 @@ public static class ActivityHelper
 
     public static MiniGameUiDefinition GetMiniGameUiDefinition(IResourceManager resourceManager, ClientActivityDefinition clientActivityDefinition)
     {
-        if (MiniGameUiDefinitions.TryGet(clientActivityDefinition.Id, out var definition))
+        if (MiniGameUiDefinitions.TryGet(resourceManager, clientActivityDefinition.Id, out var definition))
             return definition;
 
         var profileType = GetProfileType(resourceManager, clientActivityDefinition);

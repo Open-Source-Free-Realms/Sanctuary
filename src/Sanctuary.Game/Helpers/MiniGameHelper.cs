@@ -43,9 +43,12 @@ public static class MiniGameHelper
 
     private static int _encounterId;
 
-    public static MiniGameUiSession ShowDetails(Player player, MiniGameUiDefinition definition)
+    public static MiniGameUiSession ShowDetails(Player player, MiniGameUiDefinition definition, CombatEncounter? combatEncounter = null)
     {
-        var miniGameUiSession = new MiniGameUiSession(Interlocked.Increment(ref _encounterId), definition, player);
+        var miniGameUiSession = new MiniGameUiSession(Interlocked.Increment(ref _encounterId), definition, player)
+        {
+            CombatEncounter = combatEncounter
+        };
 
         player.MiniGameUiSession = miniGameUiSession;
 
@@ -55,7 +58,7 @@ public static class MiniGameHelper
 
         SendEncounterDetails(miniGameUiSession, EncounterDetailsPhase.Details);
 
-        if (!CombatEncounterRegistry.TryGet(definition.GameId, out _))
+        if (combatEncounter is null)
             return miniGameUiSession;
 
         player.SendTunneled(new EncounterZoneIsReadyPacket
@@ -69,7 +72,7 @@ public static class MiniGameHelper
         return miniGameUiSession;
     }
 
-    public static bool TryShowDetails(Player player, MiniGameUiDefinition definition)
+    public static bool TryShowDetails(Player player, MiniGameUiDefinition definition, CombatEncounter? combatEncounter = null)
     {
         if (player.MiniGameUiSession is { State: not MiniGameUiState.Details })
             return false;
@@ -77,7 +80,7 @@ public static class MiniGameHelper
         if (player.MiniGameUiSession is not null)
             Close(player, player.MiniGameUiSession);
 
-        ShowDetails(player, definition);
+        ShowDetails(player, definition, combatEncounter);
 
         return true;
     }

@@ -1,0 +1,329 @@
+{
+    "ZoneDefinitionId": 200,
+    "EntryPosition": [
+        130.108,
+        0.688,
+        120.036
+    ],
+    "EntryRotation": [
+        0.2211563,
+        0.9752384
+    ],
+    "Definition": {
+        "GameId": 174,
+        "EncounterDefinitionId": 1008,
+        "NameId": 93276,
+        "IconId": 28605,
+        "DescriptionId": 104171,
+        "Difficulty": 1,
+        "Type": 4,
+        "ProfileType": 2,
+        "DurationMs": 2000,
+        "RespawnTime": 10000,
+        "ShowStarCounter": true,
+        "ShowStatusIcon": true,
+        "ShowActionBar": true,
+        "StartupInCombat": true,
+        "ShowEndDialog": true,
+        "MemberRewardBundle": {
+            "HasOptionalData": true,
+            "Coins": 36,
+            "Unknown3": 15,
+            "IconId": 102,
+            "NameId": 6513,
+            "DescriptionId": 3796
+        },
+        "PreviewRewardBundle": {
+            "Coins": 20,
+            "Unknown3": 15,
+            "IconId": 2483,
+            "NameId": 133217,
+            "DescriptionId": 957,
+            "Items": [
+                {
+                    "IsHidden": true,
+                    "IconId": 2483,
+                    "TintId": 234,
+                    "NameId": 133217,
+                    "DefinitionId": 76209
+                },
+                {
+                    "IconId": 3717,
+                    "TintId": 264,
+                    "NameId": 131152,
+                    "DefinitionId": 75408
+                },
+                {
+                    "IconId": 3229,
+                    "TintId": 247,
+                    "NameId": 131975,
+                    "DefinitionId": 75091
+                },
+                {
+                    "IconId": 1198,
+                    "NameId": 131129,
+                    "DefinitionId": 75385
+                },
+                {
+                    "IsHidden": true,
+                    "IconId": 973,
+                    "TintId": -1,
+                    "NameId": 6666,
+                    "DefinitionId": 10482
+                }
+            ]
+        },
+        "ProfilePreviewRewardBundles": {
+            "2": {
+                "Coins": 20,
+                "Unknown3": 15,
+                "IconId": 2483,
+                "NameId": 133217,
+                "DescriptionId": 957,
+                "Items": [
+                    {
+                        "IsHidden": true,
+                        "IconId": 2483,
+                        "TintId": 234,
+                        "NameId": 133217,
+                        "DefinitionId": 76209
+                    },
+                    {
+                        "IconId": 3717,
+                        "TintId": 264,
+                        "NameId": 131152,
+                        "DefinitionId": 75408
+                    },
+                    {
+                        "IconId": 3229,
+                        "TintId": 247,
+                        "NameId": 131975,
+                        "DefinitionId": 75091
+                    },
+                    {
+                        "IconId": 1198,
+                        "NameId": 131129,
+                        "DefinitionId": 75385
+                    },
+                    {
+                        "IsHidden": true,
+                        "IconId": 973,
+                        "TintId": -1,
+                        "NameId": 6666,
+                        "DefinitionId": 10482
+                    }
+                ]
+            },
+            "35": {
+                "Coins": 20,
+                "Unknown3": 15,
+                "IconId": 3721,
+                "NameId": 130968,
+                "DescriptionId": 957,
+                "Items": [
+                    {
+                        "IconId": 3721,
+                        "TintId": 230,
+                        "NameId": 130968,
+                        "DefinitionId": 75224
+                    },
+                    {
+                        "IconId": 547,
+                        "NameId": 130924,
+                        "DefinitionId": 75180
+                    },
+                    {
+                        "IconId": 3104,
+                        "TintId": 228,
+                        "NameId": 131884,
+                        "DefinitionId": 75000
+                    },
+                    {
+                        "IsHidden": true,
+                        "IconId": 973,
+                        "TintId": -1,
+                        "NameId": 6666,
+                        "DefinitionId": 10482
+                    }
+                ]
+            },
+            "11": {
+                "Coins": 20,
+                "Unknown3": 15,
+                "IconId": 3717,
+                "NameId": 131087,
+                "DescriptionId": 957,
+                "Items": [
+                    {
+                        "IconId": 3717,
+                        "TintId": 232,
+                        "NameId": 131087,
+                        "DefinitionId": 75343
+                    },
+                    {
+                        "IconId": 3133,
+                        "TintId": 232,
+                        "NameId": 131945,
+                        "DefinitionId": 75061
+                    },
+                    {
+                        "IconId": 1198,
+                        "NameId": 131064,
+                        "DefinitionId": 75320
+                    },
+                    {
+                        "IsHidden": true,
+                        "IconId": 973,
+                        "TintId": -1,
+                        "NameId": 6666,
+                        "DefinitionId": 10482
+                    }
+                ]
+            },
+            "12": {
+                "Coins": 20,
+                "Unknown3": 15,
+                "IconId": 3717,
+                "NameId": 131282,
+                "DescriptionId": 957,
+                "Items": [
+                    {
+                        "IconId": 3717,
+                        "TintId": 264,
+                        "NameId": 131282,
+                        "DefinitionId": 75538
+                    },
+                    {
+                        "IconId": 3158,
+                        "TintId": 247,
+                        "NameId": 132035,
+                        "DefinitionId": 75151
+                    },
+                    {
+                        "IconId": 1198,
+                        "NameId": 131259,
+                        "DefinitionId": 75515
+                    },
+                    {
+                        "IsHidden": true,
+                        "IconId": 973,
+                        "TintId": -1,
+                        "NameId": 6666,
+                        "DefinitionId": 10482
+                    }
+                ]
+            },
+            "32": {
+                "Coins": 20,
+                "Unknown3": 15,
+                "IconId": 3717,
+                "NameId": 131217,
+                "DescriptionId": 957,
+                "Items": [
+                    {
+                        "IconId": 3717,
+                        "TintId": 232,
+                        "NameId": 131217,
+                        "DefinitionId": 75473
+                    },
+                    {
+                        "IconId": 3120,
+                        "TintId": 232,
+                        "NameId": 132005,
+                        "DefinitionId": 75121
+                    },
+                    {
+                        "IconId": 1198,
+                        "NameId": 131194,
+                        "DefinitionId": 75450
+                    },
+                    {
+                        "IsHidden": true,
+                        "IconId": 973,
+                        "TintId": -1,
+                        "NameId": 6666,
+                        "DefinitionId": 10482
+                    }
+                ]
+            },
+            "43": {
+                "Coins": 20,
+                "Unknown3": 15,
+                "IconId": 3717,
+                "NameId": 131022,
+                "DescriptionId": 957,
+                "Items": [
+                    {
+                        "IconId": 3717,
+                        "TintId": 264,
+                        "NameId": 131022,
+                        "DefinitionId": 75278
+                    },
+                    {
+                        "IconId": 3131,
+                        "TintId": 247,
+                        "NameId": 131915,
+                        "DefinitionId": 75031
+                    },
+                    {
+                        "IconId": 1198,
+                        "NameId": 130999,
+                        "DefinitionId": 75255
+                    },
+                    {
+                        "IsHidden": true,
+                        "IconId": 973,
+                        "TintId": -1,
+                        "NameId": 6666,
+                        "DefinitionId": 10482
+                    }
+                ]
+            }
+        },
+        "Objectives": [
+            {
+                "Id": 12288,
+                "NameId": 2286,
+                "DescriptionId": 100712,
+                "Total": 5,
+                "IsFailCondition": true
+            },
+            {
+                "Id": 12642,
+                "NameId": 104176,
+                "DescriptionId": 104177,
+                "Total": 1,
+                "CompleteValue": 5000,
+                "ShowTask": true,
+                "RewardBundle": {
+                    "Experience": 10,
+                    "Unknown3": 15,
+                    "IconId": 3901,
+                    "NameId": 2416,
+                    "DescriptionId": 5240
+                }
+            }
+        ],
+        "EncounterDataCommon": {
+            "CombatStance": true,
+            "CanTakeDamage": true,
+            "CanUseAbilities": true,
+            "CanUseConsumables": true,
+            "CanMelee": true,
+            "CanUseTraits": true,
+            "CanChangeMaxMoveSpeed": true,
+            "ShowHpBar": true,
+            "ShowCombatUi": true,
+            "UseCombatCamera": true,
+            "CombatType": true,
+            "GameTimeOverride": -1,
+            "ObjectiveMultiplier": 500,
+            "QuickCompletionTime": 1,
+            "QuickCompletionValue": 100000,
+            "QuickCompletionLoss": 500,
+            "NpcKOValue": 300,
+            "KnockoutRewardValue": 25000,
+            "KnockoutPenalty": 5000
+        }
+    }
+}

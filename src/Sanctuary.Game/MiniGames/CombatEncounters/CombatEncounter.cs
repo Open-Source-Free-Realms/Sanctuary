@@ -5,19 +5,19 @@ using Sanctuary.Game.Zones;
 
 namespace Sanctuary.Game.MiniGames.CombatEncounters;
 
-public abstract class CombatEncounter
+public class CombatEncounter
 {
     private const int EncounterZoningId = 0;
     private const byte EncounterZoningUnknown = 3;
     private const int EncounterZoningGeometryId = 96;
 
-    public abstract MiniGameUiDefinition Definition { get; }
+    public MiniGameUiDefinition Definition { get; init; } = new();
 
-    public abstract int ZoneDefinitionId { get; }
+    public int ZoneDefinitionId { get; init; }
 
-    public abstract Vector4 EntryPosition { get; }
+    public Vector4 EntryPosition { get; init; }
 
-    public abstract Quaternion EntryRotation { get; }
+    public Quaternion EntryRotation { get; init; }
 
     public virtual void OnGo(Player player, MiniGameUiSession miniGameUiSession, IZoneManager zoneManager)
     {

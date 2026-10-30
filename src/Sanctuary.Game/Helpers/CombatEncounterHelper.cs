@@ -34,13 +34,14 @@ public static class CombatEncounterHelper
             });
         }
 
-        return MiniGameHelper.TryShowDetails(player, definition);
+        resourceManager.CombatEncounters.TryGetValue(definition.GameId, out var combatEncounter);
+
+        return MiniGameHelper.TryShowDetails(player, definition, combatEncounter);
     }
 
     public static void Go(Player player, MiniGameUiSession miniGameUiSession, IZoneManager zoneManager)
     {
-        if (miniGameUiSession.State != MiniGameUiState.Details ||
-            !CombatEncounterRegistry.TryGet(miniGameUiSession.Definition.GameId, out var combatEncounter))
+        if (miniGameUiSession.State != MiniGameUiState.Details || miniGameUiSession.CombatEncounter is not { } combatEncounter)
             return;
 
         combatEncounter.OnGo(player, miniGameUiSession, zoneManager);
@@ -51,8 +52,7 @@ public static class CombatEncounterHelper
         if (miniGameUiSession.State == MiniGameUiState.Leaving)
             return;
 
-        if (miniGameUiSession.State == MiniGameUiState.Details ||
-            !CombatEncounterRegistry.TryGet(miniGameUiSession.Definition.GameId, out var combatEncounter))
+        if (miniGameUiSession.State == MiniGameUiState.Details || miniGameUiSession.CombatEncounter is not { } combatEncounter)
         {
             MiniGameHelper.Close(player, miniGameUiSession);
             return;

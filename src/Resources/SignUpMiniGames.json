@@ -1,0 +1,66 @@
+[
+    {
+        "GameId": 65,
+        "EncounterDefinitionId": 1008,
+        "DetailsType": 3,
+        "DetailsUnknown3": false,
+        "PreselectedGameId": 39,
+        "NameId": 37938,
+        "IconId": 9869,
+        "DescriptionId": 37941,
+        "Difficulty": 1,
+        "Type": 11,
+        "DurationMs": 2000,
+        "RespawnTime": 10000,
+        "ShowStarCounter": true,
+        "ShowStatusIcon": true,
+        "ShowActionBar": true,
+        "StartupInCombat": true,
+        "ShowEndDialog": true
+    },
+    {
+        "GameId": 62,
+        "EncounterDefinitionId": 1008,
+        "DetailsType": 2,
+        "DetailsUnknown3": false,
+        "PreselectedGameId": 28,
+        "NameId": 17958,
+        "IconId": 9870,
+        "DescriptionId": 37935,
+        "Difficulty": 1,
+        "Type": 10,
+        "DurationMs": 2000,
+        "RespawnTime": 10000,
+        "ShowStarCounter": true,
+        "ShowStatusIcon": true,
+        "ShowActionBar": true,
+        "StartupInCombat": true,
+        "ShowEndDialog": true
+    },
+    {
+        "GameId": 72,
+        "EncounterDefinitionId": 1008,
+        "DetailsType": 4,
+        "DetailsUnknown3": false,
+        "PreselectedGameId": 61,
+        "NameId": 37944,
+        "IconId": 20992,
+        "DescriptionId": 6703,
+        "Difficulty": 1,
+        "Type": 12,
+        "DurationMs": 2000,
+        "RespawnTime": 10000,
+        "ShowStarCounter": true,
+        "ShowStatusIcon": true,
+        "ShowActionBar": true,
+        "StartupInCombat": true,
+        "ShowEndDialog": true,
+        "Objectives": [
+            {
+                "Id": 2350,
+                "NameId": 20136,
+                "DescriptionId": 20137
+            }
+        ]
+    }
+]

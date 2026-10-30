@@ -59,6 +59,8 @@ public class ResourceManager : IResourceManager, IDisposable
     public static readonly string MiniGamesFile = Path.Combine(BaseDirectory, "MiniGames.json");
     public static readonly string ActivityProfileTypesFile = Path.Combine(BaseDirectory, "ActivityProfileTypes.json");
     public static readonly string MiniGameNpcsFile = Path.Combine(BaseDirectory, "MiniGameNpcs.json");
+    public static readonly string SignUpMiniGamesFile = Path.Combine(BaseDirectory, "SignUpMiniGames.json");
+    public static readonly string EncountersDirectory = Path.Combine(BaseDirectory, "Encounters");
     public static readonly string ConsumablesFile = Path.Combine(BaseDirectory, "Consumables.json");
     public static readonly string NpcsFile = Path.Combine(BaseDirectory, "Npcs.json");
     public static readonly string NpcMovementsFile = Path.Combine(BaseDirectory, "NpcMovements.json");
@@ -114,6 +116,8 @@ public class ResourceManager : IResourceManager, IDisposable
     public MiniGameDefinitionCollection MiniGames { get; }
     public ActivityProfileTypeCollection ActivityProfileTypes { get; }
     public MiniGameNpcDefinitionCollection MiniGameNpcs { get; }
+    public SignUpMiniGameDefinitionCollection SignUpMiniGames { get; }
+    public CombatEncounterCollection CombatEncounters { get; }
     public ConsumableCollection Consumables { get; }
     public NpcDefinitionCollection Npcs { get; }
     public NameFilterCollection NameFilter { get; }
@@ -181,6 +185,8 @@ public class ResourceManager : IResourceManager, IDisposable
         MiniGames = new(_logger);
         ActivityProfileTypes = new(_logger);
         MiniGameNpcs = new(_logger);
+        SignUpMiniGames = new(_logger);
+        CombatEncounters = new(_logger);
         Consumables = new(_logger);
         Npcs = new(_logger);
         NameFilter = new(_logger);
@@ -393,6 +399,12 @@ public class ResourceManager : IResourceManager, IDisposable
         if (!MiniGameNpcs.Load(MiniGameNpcsFile))
             return false;
 
+        if (!SignUpMiniGames.Load(SignUpMiniGamesFile))
+            return false;
+
+        if (!CombatEncounters.Load(EncountersDirectory))
+            return false;
+
         if (!Consumables.Load(ConsumablesFile))
             return false;
 
@@ -546,6 +558,10 @@ public class ResourceManager : IResourceManager, IDisposable
                 loaded = ActivityProfileTypes.Load(ActivityProfileTypesFile);
             else if (e.FullPath == MiniGameNpcsFile)
                 loaded = MiniGameNpcs.Load(MiniGameNpcsFile);
+            else if (e.FullPath == SignUpMiniGamesFile)
+                loaded = SignUpMiniGames.Load(SignUpMiniGamesFile);
+            else if (Path.GetDirectoryName(e.FullPath) == EncountersDirectory)
+                loaded = CombatEncounters.Load(EncountersDirectory);
             else if (e.FullPath == NpcsFile)
                 loaded = Npcs.Load(NpcsFile);
             else if (e.FullPath == NpcMovementsFile)

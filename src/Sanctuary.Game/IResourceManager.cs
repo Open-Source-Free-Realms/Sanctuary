@@ -44,6 +44,8 @@ public interface IResourceManager
     MiniGameDefinitionCollection MiniGames { get; }
     ActivityProfileTypeCollection ActivityProfileTypes { get; }
     MiniGameNpcDefinitionCollection MiniGameNpcs { get; }
+    SignUpMiniGameDefinitionCollection SignUpMiniGames { get; }
+    CombatEncounterCollection CombatEncounters { get; }
     ConsumableCollection Consumables { get; }
     NpcDefinitionCollection Npcs { get; }
     NameFilterCollection NameFilter { get; }
