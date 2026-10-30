@@ -19,11 +19,9 @@ public class QuestObjectiveInfo : ISerializableType, IDeserializableType
 
     // Never read by the client.
     public int Unknown6;
+    public int Unknown8;
 
     public bool MembersOnly;
-
-    // Never read by the client.
-    public int Unknown8;
 
     public void Serialize(PacketWriter writer)
     {
