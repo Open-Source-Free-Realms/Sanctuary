@@ -48,6 +48,7 @@ public static class RatingPacketAddVoteHandler
 
         if (!HousingHelper.TryGetHouse(dbContext, ratingPacketAddVote.HouseGuid, out var houseGuid, out var dbHouse)
             || !HousingHelper.CanVote(dbHouse, player.Guid)
+            || !float.IsFinite(ratingPacketAddVote.Rating)
             || ratingPacketAddVote.Rating is < MinRating or > MaxRating)
         {
             _logger.LogWarning("{player} could not vote on house {houseGuid}.", player.Guid, ratingPacketAddVote.HouseGuid);
