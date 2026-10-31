@@ -152,7 +152,7 @@ public static class InventoryPacketEquipByItemRecordHandler
 
         clientUpdatePacketEquipItem.ProfileId = inventoryPacketEquipByItemRecord.ProfileId;
 
-        clientUpdatePacketEquipItem.Equip = !string.IsNullOrEmpty(clientItemDefinition.ModelName);
+        clientUpdatePacketEquipItem.Equip = false;
 
         connection.SendTunneled(clientUpdatePacketEquipItem);
 
@@ -177,7 +177,7 @@ public static class InventoryPacketEquipByItemRecordHandler
         playerUpdatePacketEquipItemChange.WieldType = connection.Player.GetWieldType();
 
         if (inventoryPacketEquipByItemRecord.ProfileId == connection.Player.ActiveProfileId)
-            connection.Player.SendTunneledToVisible(playerUpdatePacketEquipItemChange);
+            connection.Player.SendTunneledToVisible(playerUpdatePacketEquipItemChange, !string.IsNullOrEmpty(clientItemDefinition.ModelName));
 
         connection.Player.SendToolbar();
 
