@@ -57,6 +57,7 @@ public static class PacketTunneledClientPacketHandler
             PlayerUpdatePacketUpdatePosition.OpCode => PlayerUpdatePacketUpdatePositionHandler.HandlePacket(connection, packetTunneledClientPacket.Payload),
             PlayerUpdatePacketCameraUpdate.OpCode => PlayerUpdatePacketCameraUpdateHandler.HandlePacket(connection, packetTunneledClientPacket.Payload),
             BaseHousingPacket.OpCode => BaseHousingPacketHandler.HandlePacket(connection, reader),
+            BaseGroupPacket.OpCode => BaseGroupPacketHandler.HandlePacket(connection, reader),
             BasePlayerTitlePacket.OpCode => BasePlayerTitlePacketHandler.HandlePacket(connection, reader),
             PacketAddClientPortraitCrc.OpCode => PacketAddClientPortraitCrcHandler.HandlePacket(connection, packetTunneledClientPacket.Payload),
             BaseFotomatPacket.OpCode => BaseFotomatPacketHandler.HandlePacket(connection, reader),

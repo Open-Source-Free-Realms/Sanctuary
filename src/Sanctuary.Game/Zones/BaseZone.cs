@@ -17,6 +17,7 @@ using Sanctuary.Core.Extensions;
 using Sanctuary.Core.Helpers;
 using Sanctuary.Core.IO;
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Groups;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Interactions;
 using Sanctuary.Game.Quests;
@@ -39,6 +40,7 @@ public abstract class BaseZone : IZone, IDisposable
     private readonly IZoneManager _zoneManager;
     private readonly IScriptManager _scriptManager;
     private readonly IQuestManager _questManager;
+    private readonly IGroupManager _groupManager;
     private readonly ScriptRuntime _scriptRuntime;
     private readonly BaseZoneDefinition _zoneDefinition;
     private readonly CancellationTokenSource _cancellationTokenSource = new();
@@ -115,6 +117,7 @@ public abstract class BaseZone : IZone, IDisposable
 
         _scriptManager = serviceProvider.GetRequiredService<IScriptManager>();
         _questManager = serviceProvider.GetRequiredService<IQuestManager>();
+        _groupManager = serviceProvider.GetRequiredService<IGroupManager>();
         _scriptRuntime = new ScriptRuntime(_logger);
 
         foreach (var script in _zoneDefinition.Scripts ?? [])
@@ -351,6 +354,8 @@ public abstract class BaseZone : IZone, IDisposable
         SendIgnoreList(player);
 
         UpdateFriendStatus(player);
+
+        _groupManager.SendGroup(player);
     }
 
     public virtual void OnClientFinishedLoading(Player player)
