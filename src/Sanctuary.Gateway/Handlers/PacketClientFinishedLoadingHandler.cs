@@ -3,6 +3,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
@@ -36,7 +37,11 @@ public static class PacketClientFinishedLoadingHandler
             connection.Player.SendTunneled(connection.Player.Mount.GetMountResponsePacket());
         }
 
+        connection.ReloadZoneAreas();
+
         connection.Player.Zone.OnClientFinishedLoading(connection.Player);
+
+        connection.Player.SendTunneled(GameTimeHelper.GetGameTimeSyncPacket());
 
         connection.Player.PlayerPet.RestorePet();
 

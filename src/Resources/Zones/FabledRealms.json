@@ -56,7 +56,6 @@
       "NameId": 3500,
       "AreaId": 0,
       "ChatAreaNameId": 3500,
-      "PointOfInterestId": 16,
       "EnvironmentIds": [
         10,
         70
@@ -68,7 +67,6 @@
       "NameId": 18140,
       "AreaId": 0,
       "ChatAreaNameId": 18140,
-      "PointOfInterestId": 4,
       "EnvironmentIds": [
         2
       ]
@@ -79,7 +77,6 @@
       "NameId": 4428,
       "AreaId": 0,
       "ChatAreaNameId": 4428,
-      "PointOfInterestId": 14,
       "EnvironmentIds": [
         12
       ]
@@ -90,7 +87,6 @@
       "NameId": 3499,
       "AreaId": 291,
       "ChatAreaNameId": 3499,
-      "PointOfInterestId": 5,
       "Tiles": [
         [-1, -23], [-1, -22], [-1, -21], [-1, -20], [0, -24], [0, -23], [0, -22], [0, -21], [0, -20], [0, -19], [0, -18], [1, -24],
         [1, -23], [1, -22], [1, -21], [1, -20], [1, -19], [1, -18], [2, -24], [2, -23], [2, -22], [2, -21], [2, -20],
@@ -110,7 +106,6 @@
       "NameId": 3501,
       "AreaId": 0,
       "ChatAreaNameId": 3501,
-      "PointOfInterestId": 13,
       "EnvironmentIds": [
         6,
         11
@@ -122,7 +117,6 @@
       "NameId": 3502,
       "AreaId": 0,
       "ChatAreaNameId": 3502,
-      "PointOfInterestId": 8,
       "EnvironmentIds": [
         56,
         82
@@ -134,7 +128,6 @@
       "NameId": 3961,
       "AreaId": 290,
       "ChatAreaNameId": 3961,
-      "PointOfInterestId": 3,
       "EnvironmentIds": [
         1
       ]
@@ -145,7 +138,6 @@
       "NameId": 3505,
       "AreaId": 0,
       "ChatAreaNameId": 3505,
-      "PointOfInterestId": 12,
       "EnvironmentIds": [
         71
       ]
@@ -156,18 +148,26 @@
       "NameId": 74159,
       "AreaId": 1178,
       "ChatAreaNameId": 74159,
-      "PointOfInterestId": 152,
       "EnvironmentIds": [
         83
       ]
     },
     {
+      "Comment": "Cobblestone Village",
+      "Id": 13,
+      "NameId": 18142,
+      "AreaId": 0,
+      "ChatAreaNameId": 18142,
+      "EnvironmentIds": [
+        58
+      ]
+    },
+    {
       "Comment": "North Sacred Grove",
       "Id": 11,
-      "NameId": 393157,
+      "NameId": 0,
       "AreaId": 0,
       "ChatAreaNameId": 393157,
-      "PointOfInterestId": 0,
       "EnvironmentIds": [
         3
       ],
@@ -176,10 +176,9 @@
     {
       "Comment": "South Sacred Grove",
       "Id": 12,
-      "NameId": 393156,
+      "NameId": 0,
       "AreaId": 0,
       "ChatAreaNameId": 393156,
-      "PointOfInterestId": 0,
       "EnvironmentIds": [
         3
       ],

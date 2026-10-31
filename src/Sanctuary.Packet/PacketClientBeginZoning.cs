@@ -19,12 +19,7 @@ public class PacketClientBeginZoning : ISerializablePacket
 
     public bool Tutorial;
 
-    // Used in;
-    // PlayerUpdatePacketJump
-    // ClientUpdatePacketUpdateLocation
-    // PlayerUpdatePacketUpdatePosition
-    // PlayerUpdatePacketUpdatePositionOnPlatform
-    public byte Unknown;
+    public byte TeleportSequence;
 
     public int Id;
 
@@ -51,7 +46,7 @@ public class PacketClientBeginZoning : ISerializablePacket
         writer.Write(Sky);
 
         writer.Write(Tutorial);
-        writer.Write(Unknown);
+        writer.Write(TeleportSequence);
 
         writer.Write(Id);
 

@@ -10,7 +10,6 @@ public class ZoneAreaDefinition
     public int NameId { get; set; }
     public int AreaId { get; set; }
     public int ChatAreaNameId { get; set; }
-    public int PointOfInterestId { get; set; }
     public List<int> EnvironmentIds { get; set; } = [];
     public float? EnvironmentMinX { get; set; }
     public float? EnvironmentMaxX { get; set; }
