@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Game;
+using Sanctuary.Gateway.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 using Sanctuary.Packet.Common.Chat;
@@ -16,12 +17,14 @@ public static class QuickChatSendChatToChannelPacketHandler
 {
     private static ILogger _logger = null!;
     private static IZoneManager _zoneManager = null!;
+    private static IResourceManager _resourceManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
         var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
         _logger = loggerFactory.CreateLogger(nameof(QuickChatSendChatToChannelPacketHandler));
         _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
+        _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -39,6 +42,13 @@ public static class QuickChatSendChatToChannelPacketHandler
 
         packet.Guid = connection.Player.Guid;
         packet.Name = connection.Player.Name;
+
+        if (_resourceManager.QuickChats.TryGetValue(packet.Id, out var quickChatDefinition)
+            && OutfitGestureHelper.IsOutfitQuickChat(quickChatDefinition))
+        {
+            OutfitGestureHelper.Hold(connection, packet, quickChatDefinition.AnimationId);
+            return true;
+        }
 
         switch (packet.Channel)
         {

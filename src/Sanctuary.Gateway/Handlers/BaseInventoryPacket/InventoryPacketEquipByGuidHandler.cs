@@ -9,6 +9,7 @@ using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Game;
 using Sanctuary.Game.Helpers;
+using Sanctuary.Gateway.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -76,6 +77,8 @@ public static class InventoryPacketEquipByGuidHandler
             _logger.LogWarning("Invalid player profile. {guid} {profile}", inventoryPacketEquipByGuid.Guid, inventoryPacketEquipByGuid.ProfileId);
             return true;
         }
+
+        var previousWieldType = connection.Player.GetWieldType();
 
         int? oldItemId = null;
 
@@ -153,9 +156,16 @@ public static class InventoryPacketEquipByGuidHandler
 
         clientUpdatePacketEquipItem.ProfileId = inventoryPacketEquipByGuid.ProfileId;
 
-        clientUpdatePacketEquipItem.Equip = true;
+        clientUpdatePacketEquipItem.Equip = !string.IsNullOrEmpty(clientItemDefinition.ModelName);
 
         connection.SendTunneled(clientUpdatePacketEquipItem);
+
+        var wieldTypeChanged = connection.Player.GetWieldType() != previousWieldType;
+
+        if (wieldTypeChanged)
+            connection.Player.SendActiveWieldType();
+
+        OutfitGestureHelper.OnEquipReply(connection, itemClass.WieldType, wieldTypeChanged);
 
         var playerUpdatePacketEquipItemChange = new PlayerUpdatePacketEquipItemChange();
 

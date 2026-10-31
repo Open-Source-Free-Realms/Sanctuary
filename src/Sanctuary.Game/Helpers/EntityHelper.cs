@@ -7,7 +7,7 @@ namespace Sanctuary.Game.Helpers;
 
 public static class EntityHelper
 {
-    private const float QueueAnimationUnknown3 = 1f;
+    private const float QueueAnimationPlaybackSpeed = 1f;
     private const byte SetBaseAnimationFlags = 3;
     private const int PlayOnce = 0;
     private const byte PlayNowFlags = 2;
@@ -52,22 +52,24 @@ public static class EntityHelper
         Duration = duration
     };
 
-    public static void QueueAnimation(IEntity entity, int animationGroupId, int loopCount, bool unknown6, bool unknown7, bool unknown8)
+    public static void QueueAnimation(IEntity entity, int animationGroupId, int loopCount, bool unknown6, bool unknown7, bool unknown8,
+        float delay = default, IEnumerable<Player>? recipients = null)
     {
         var playerUpdatePacketQueueAnimation = new PlayerUpdatePacketQueueAnimation
         {
             Guid = entity.Guid,
             AnimationGroupId = animationGroupId,
             LoopCount = loopCount,
-            Unknown3 = QueueAnimationUnknown3,
+            PlaybackSpeed = QueueAnimationPlaybackSpeed,
+            Delay = delay,
             Unknown6 = unknown6,
             Unknown7 = unknown7,
             Unknown8 = unknown8
         };
         var data = Player.SerializeTunneled(playerUpdatePacketQueueAnimation);
 
-        foreach (var (_, visiblePlayer) in entity.VisiblePlayers)
-            visiblePlayer.SendSerialized(data);
+        foreach (var player in recipients ?? entity.VisiblePlayers.Values)
+            player.SendSerialized(data);
     }
 
     public static void SetBaseAnimation(Player owner, IEntity entity, int animationId)

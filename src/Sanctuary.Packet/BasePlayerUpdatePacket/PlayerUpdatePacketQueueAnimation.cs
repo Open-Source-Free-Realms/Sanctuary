@@ -9,9 +9,9 @@ public class PlayerUpdatePacketQueueAnimation : BasePlayerUpdatePacket, ISeriali
     public ulong Guid;
     public int AnimationGroupId;
     public int LoopCount;
-    public float Unknown3;
-    public float Unknown4;
-    public float Unknown5;
+    public float PlaybackSpeed;
+    public float Delay;
+    public float EndTime;
     public bool Unknown6;
     public bool Unknown7;
     public bool Unknown8;
@@ -29,9 +29,9 @@ public class PlayerUpdatePacketQueueAnimation : BasePlayerUpdatePacket, ISeriali
         writer.Write(Guid);
         writer.Write(AnimationGroupId);
         writer.Write(LoopCount);
-        writer.Write(Unknown3);
-        writer.Write(Unknown4);
-        writer.Write(Unknown5);
+        writer.Write(PlaybackSpeed);
+        writer.Write(Delay);
+        writer.Write(EndTime);
         writer.Write(Unknown6);
         writer.Write(Unknown7);
         writer.Write(Unknown8);
