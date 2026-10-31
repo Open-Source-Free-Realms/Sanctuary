@@ -16,6 +16,7 @@ using Sanctuary.Core.IO;
 using Sanctuary.Core.Helpers;
 using Sanctuary.Game;
 using Sanctuary.Game.ChatCommands;
+using Sanctuary.Game.Groups;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Interactions;
 using Sanctuary.Game.Quests;
@@ -121,6 +122,10 @@ public sealed class Player : ClientPcData, IEntity
     public List<CoinStoreTransactionRecord> CoinStoreTransactions { get; set; } = [];
 
     public GuildData? GuildData { get; set; }
+
+    public PlayerGroup? Group { get; set; }
+    public PendingGroupInvite? PendingGroupInvite { get; set; }
+    public bool IsChangingJob { get; set; }
 
     public int TimezoneOffset { get; set; }
 
@@ -999,6 +1004,9 @@ public sealed class Player : ClientPcData, IEntity
         {
             commandPacketInteractionList.List.Interactions.Add(IgnoreInteraction.Data);
         }
+
+        if (GroupManager.CanInvite(player, this))
+            commandPacketInteractionList.List.Interactions.Add(GroupInviteInteraction.Data);
 
         if (GuildData is null && GuildInviteInteraction.CanInvite(player))
             commandPacketInteractionList.List.Interactions.Add(GuildInviteInteraction.Data);

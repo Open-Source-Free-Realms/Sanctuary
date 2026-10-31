@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.IO;
 using Sanctuary.Game;
+using Sanctuary.Game.Groups;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
@@ -16,6 +17,7 @@ public static class CommandPacketSetProfileHandler
 {
     private static ILogger _logger = null!;
     private static IZoneManager _zoneManager = null!;
+    private static IGroupManager _groupManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -23,6 +25,7 @@ public static class CommandPacketSetProfileHandler
         _logger = loggerFactory.CreateLogger(nameof(CommandPacketSetProfileHandler));
 
         _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
+        _groupManager = serviceProvider.GetRequiredService<IGroupManager>();
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -89,6 +92,8 @@ public static class CommandPacketSetProfileHandler
 
             friendPlayer.SendTunneled(friendStatusPacket);
         }
+
+        _groupManager.UpdateMember(connection.Player);
 
         return true;
     }
