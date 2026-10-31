@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Game;
+using Sanctuary.Gateway.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -72,6 +73,8 @@ public static class InventoryPacketEquipByItemRecordHandler
             _logger.LogWarning("Invalid player profile. {id} {profile}", clientItem.Id, inventoryPacketEquipByItemRecord.ProfileId);
             return true;
         }
+
+        var previousWieldType = connection.Player.GetWieldType();
 
         int? oldItemId = null;
 
@@ -149,9 +152,16 @@ public static class InventoryPacketEquipByItemRecordHandler
 
         clientUpdatePacketEquipItem.ProfileId = inventoryPacketEquipByItemRecord.ProfileId;
 
-        clientUpdatePacketEquipItem.Equip = true;
+        clientUpdatePacketEquipItem.Equip = false;
 
         connection.SendTunneled(clientUpdatePacketEquipItem);
+
+        var wieldTypeChanged = connection.Player.GetWieldType() != previousWieldType;
+
+        if (wieldTypeChanged)
+            connection.Player.SendActiveWieldType();
+
+        OutfitGestureHelper.OnEquipReply(connection, itemClass.WieldType, wieldTypeChanged);
 
         var playerUpdatePacketEquipItemChange = new PlayerUpdatePacketEquipItemChange();
 
@@ -167,7 +177,7 @@ public static class InventoryPacketEquipByItemRecordHandler
         playerUpdatePacketEquipItemChange.WieldType = connection.Player.GetWieldType();
 
         if (inventoryPacketEquipByItemRecord.ProfileId == connection.Player.ActiveProfileId)
-            connection.Player.SendTunneledToVisible(playerUpdatePacketEquipItemChange);
+            connection.Player.SendTunneledToVisible(playerUpdatePacketEquipItemChange, !string.IsNullOrEmpty(clientItemDefinition.ModelName));
 
         connection.Player.SendToolbar();
 
