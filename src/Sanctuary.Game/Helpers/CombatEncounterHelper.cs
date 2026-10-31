@@ -36,15 +36,17 @@ public static class CombatEncounterHelper
 
         resourceManager.CombatEncounters.TryGetValue(definition.GameId, out var combatEncounter);
 
-        return MiniGameHelper.TryShowDetails(player, definition, combatEncounter);
+        MiniGameHelper.ShowDetails(player, definition, combatEncounter);
+
+        return true;
     }
 
-    public static void Go(Player player, MiniGameUiSession miniGameUiSession, IZoneManager zoneManager)
+    public static void Go(Player player, MiniGameUiSession miniGameUiSession)
     {
         if (miniGameUiSession.State != MiniGameUiState.Details || miniGameUiSession.CombatEncounter is not { } combatEncounter)
             return;
 
-        combatEncounter.OnGo(player, miniGameUiSession, zoneManager);
+        combatEncounter.OnGo(player, miniGameUiSession);
     }
 
     public static void Close(Player player, MiniGameUiSession miniGameUiSession, IZoneManager zoneManager)

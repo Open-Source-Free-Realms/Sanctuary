@@ -115,6 +115,7 @@ public class ClientActivityDefinition : ISerializableType, IDeserializableType
         writer.Write(MysteryChestIcon);
     }
 
+    public ClientActivityDefinition Clone() => (ClientActivityDefinition)MemberwiseClone();
 
     public bool TryRead(ref PacketReader reader)
     {

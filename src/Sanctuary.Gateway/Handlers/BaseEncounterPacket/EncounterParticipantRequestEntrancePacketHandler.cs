@@ -3,7 +3,6 @@ using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using Sanctuary.Game;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
@@ -14,13 +13,11 @@ namespace Sanctuary.Gateway.Handlers;
 public static class EncounterParticipantRequestEntrancePacketHandler
 {
     private static ILogger _logger = null!;
-    private static IZoneManager _zoneManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
         var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
         _logger = loggerFactory.CreateLogger(nameof(EncounterParticipantRequestEntrancePacketHandler));
-        _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -38,7 +35,7 @@ public static class EncounterParticipantRequestEntrancePacketHandler
         if (miniGameUiSession is null || miniGameUiSession.EncounterId != encounterParticipantRequestEntrancePacket.MiniGameStateId)
             return true;
 
-        CombatEncounterHelper.Go(connection.Player, miniGameUiSession, _zoneManager);
+        CombatEncounterHelper.Go(connection.Player, miniGameUiSession);
 
         return true;
     }

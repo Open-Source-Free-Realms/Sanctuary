@@ -13,9 +13,6 @@ public static class ActivityHelper
     public const int WorldServerType = 1;
     public const int ZoneServerType = 2;
 
-    private const int DefaultEncounterDefinitionId = 1008;
-    private const int DefaultDurationMs = 2000;
-    private const int DefaultRespawnTime = 10000;
     public const int MiniGameAppSystemId = 1;
     private const int CombatMiniGameType = 4;
 
@@ -43,30 +40,11 @@ public static class ActivityHelper
         if (!clientActivityDefinition.PlayerCanJoin || TryGetRequiredProfile(player, resourceManager, clientActivityDefinition, out _))
             return clientActivityDefinition;
 
-        return new ClientActivityDefinition
-        {
-            Id = clientActivityDefinition.Id,
-            AppSystemId = clientActivityDefinition.AppSystemId,
-            AppSystemDataId = clientActivityDefinition.AppSystemDataId,
-            Category = clientActivityDefinition.Category,
-            ImageSetId = clientActivityDefinition.ImageSetId,
-            ImagePositionId = clientActivityDefinition.ImagePositionId,
-            ServerType = clientActivityDefinition.ServerType,
-            DisplayNameId = clientActivityDefinition.DisplayNameId,
-            DisplayDescriptionId = clientActivityDefinition.DisplayDescriptionId,
-            NameId = clientActivityDefinition.NameId,
-            DescriptionId = clientActivityDefinition.DescriptionId,
-            PlayerCanJoin = false,
-            PreferredRequirementId = clientActivityDefinition.PreferredRequirementId,
-            TutorialActivityId = clientActivityDefinition.TutorialActivityId,
-            MembersOnly = clientActivityDefinition.MembersOnly,
-            DetailImageFilename = clientActivityDefinition.DetailImageFilename,
-            ThumbnailImageFilename = clientActivityDefinition.ThumbnailImageFilename,
-            Difficulty = clientActivityDefinition.Difficulty,
-            MysteryChestIcon = clientActivityDefinition.MysteryChestIcon,
-            MysteryChestId = clientActivityDefinition.MysteryChestId,
-            FeaturedActivities = clientActivityDefinition.FeaturedActivities
-        };
+        var playerActivity = clientActivityDefinition.Clone();
+
+        playerActivity.PlayerCanJoin = false;
+
+        return playerActivity;
     }
 
     public static MiniGameUiDefinition GetMiniGameUiDefinition(IResourceManager resourceManager, ClientActivityDefinition clientActivityDefinition)
@@ -89,25 +67,14 @@ public static class ActivityHelper
         return new MiniGameUiDefinition
         {
             GameId = clientActivityDefinition.Id,
-            EncounterDefinitionId = DefaultEncounterDefinitionId,
             NameId = clientActivityDefinition.NameId,
             IconId = clientActivityDefinition.ImageSetId,
             DescriptionId = clientActivityDefinition.DescriptionId,
             Difficulty = clientActivityDefinition.Difficulty,
             Type = miniGameType,
             PreselectedGameId = miniGameDefinition?.Id ?? default,
-            DurationMs = DefaultDurationMs,
-            RespawnTime = DefaultRespawnTime,
-            ShowStarCounter = true,
-            ShowStatusIcon = true,
-            ShowActionBar = true,
-            ShowFullInterface = true,
             ProfileType = profileType == ProfileType.Combat ? (int)ProfileType.Combat : default,
-            MembersOnly = clientActivityDefinition.MembersOnly,
-            ShowEndDialog = true,
-            RewardBundle = RewardBundleBase.CreateEmpty(),
-            MemberRewardBundle = RewardBundleBase.CreateEmpty(),
-            PreviewRewardBundle = RewardBundleBase.CreateEmpty()
+            MembersOnly = clientActivityDefinition.MembersOnly
         };
     }
 

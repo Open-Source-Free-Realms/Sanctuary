@@ -43,8 +43,11 @@ public static class MiniGameHelper
 
     private static int _encounterId;
 
-    public static MiniGameUiSession ShowDetails(Player player, MiniGameUiDefinition definition, CombatEncounter? combatEncounter = null)
+    public static void ShowDetails(Player player, MiniGameUiDefinition definition, CombatEncounter? combatEncounter = null)
     {
+        if (player.MiniGameUiSession is not null)
+            Close(player, player.MiniGameUiSession);
+
         var miniGameUiSession = new MiniGameUiSession(Interlocked.Increment(ref _encounterId), definition, player)
         {
             CombatEncounter = combatEncounter
@@ -59,7 +62,7 @@ public static class MiniGameHelper
         SendEncounterDetails(miniGameUiSession, EncounterDetailsPhase.Details);
 
         if (combatEncounter is null)
-            return miniGameUiSession;
+            return;
 
         player.SendTunneled(new EncounterZoneIsReadyPacket
         {
@@ -68,21 +71,6 @@ public static class MiniGameHelper
         });
 
         SendEncounterState(miniGameUiSession, EncounterState.ZoneReady);
-
-        return miniGameUiSession;
-    }
-
-    public static bool TryShowDetails(Player player, MiniGameUiDefinition definition, CombatEncounter? combatEncounter = null)
-    {
-        if (player.MiniGameUiSession is { State: not MiniGameUiState.Details })
-            return false;
-
-        if (player.MiniGameUiSession is not null)
-            Close(player, player.MiniGameUiSession);
-
-        ShowDetails(player, definition, combatEncounter);
-
-        return true;
     }
 
     public static void RefreshDetails(Player player, MiniGameUiSession miniGameUiSession)
@@ -121,19 +109,15 @@ public static class MiniGameHelper
 
         SendEncounterDetails(miniGameUiSession, EncounterDetailsPhase.Running);
 
-        player.SendTunneled(new EncounterPacketPlayerEnter
+        foreach (var playerGuid in new[] { NoParticipantGuid, player.Guid })
         {
-            MiniGameStateId = miniGameUiSession.EncounterId,
-            EncounterDefinitionId = miniGameUiSession.Definition.EncounterDefinitionId,
-            PlayerGuid = NoParticipantGuid
-        });
-
-        player.SendTunneled(new EncounterPacketPlayerEnter
-        {
-            MiniGameStateId = miniGameUiSession.EncounterId,
-            EncounterDefinitionId = miniGameUiSession.Definition.EncounterDefinitionId,
-            PlayerGuid = player.Guid
-        });
+            player.SendTunneled(new EncounterPacketPlayerEnter
+            {
+                MiniGameStateId = miniGameUiSession.EncounterId,
+                EncounterDefinitionId = miniGameUiSession.Definition.EncounterDefinitionId,
+                PlayerGuid = playerGuid
+            });
+        }
 
         player.SendTunneled(miniGameUiSession.Definition.EncounterDataCommon);
     }

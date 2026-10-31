@@ -19,7 +19,7 @@ public class CombatEncounter
 
     public Quaternion EntryRotation { get; init; }
 
-    public virtual void OnGo(Player player, MiniGameUiSession miniGameUiSession, IZoneManager zoneManager)
+    public virtual void OnGo(Player player, MiniGameUiSession miniGameUiSession)
     {
         if (player.Mount is not null)
             player.Dismount();
