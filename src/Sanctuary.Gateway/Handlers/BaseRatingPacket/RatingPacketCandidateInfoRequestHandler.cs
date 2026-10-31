@@ -50,9 +50,9 @@ public static class RatingPacketCandidateInfoRequestHandler
         {
             var ownerId = GuidHelper.GetPlayerId(ratingPacketCandidateInfoRequest.OwnerGuid);
 
-            foreach (var dbHouse in HousingHelper.GetPublishedHouses(dbContext).AsNoTracking().Where(house => house.CharacterId == ownerId))
+            foreach (var dbHouse in HousingHelper.GetPublishedHouses(dbContext).Where(house => house.CharacterId == ownerId))
             {
-                ratingPacketCandidateInfoReply.Candidates.Add(HousingHelper.GetCandidateRatingInfo(HousingHelper.GetHouseGuid(dbHouse), dbHouse, player.Guid));
+                ratingPacketCandidateInfoReply.Candidates.Add(HousingHelper.GetCandidateRatingInfo(GuidHelper.GetHouseGuid(dbHouse.Id), dbHouse, player.Guid));
             }
         }
         else if (HousingHelper.TryGetHouse(dbContext, ratingPacketCandidateInfoRequest.InstanceGuid, out var houseGuid, out var dbHouse)

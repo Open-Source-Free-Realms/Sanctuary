@@ -47,7 +47,7 @@ public static class RatingPacketClientDataRequestHandler
 
         using var dbContext = _dbContextFactory.CreateDbContext();
 
-        var dbHouses = HousingHelper.GetPublishedHouses(dbContext).AsNoTracking().ToList();
+        var dbHouses = HousingHelper.GetPublishedHouses(dbContext).ToList();
 
         var friendIds = player.Friends.Select(friend => GuidHelper.GetPlayerId(friend.Guid)).ToHashSet();
 

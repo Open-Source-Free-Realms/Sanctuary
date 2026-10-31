@@ -43,7 +43,7 @@ public static class RatingPacketSearchRequestHandler
 
         using var dbContext = _dbContextFactory.CreateDbContext();
 
-        var dbHouses = HousingHelper.GetPublishedHouses(dbContext).AsNoTracking().ToList()
+        var dbHouses = HousingHelper.GetPublishedHouses(dbContext).ToList()
             .Where(dbHouse => dbHouse.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase)
                 || (dbHouse.Character.FullName?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false)
                 || dbHouse.Keywords.Contains(searchText, StringComparison.OrdinalIgnoreCase))

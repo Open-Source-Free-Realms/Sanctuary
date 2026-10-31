@@ -33,9 +33,6 @@ public static class HousingHelper
 
     private const float DefaultRating = 3.0f;
 
-    public static IEnumerable<HouseDefinition> GetStarterHouses(IResourceManager resourceManager) =>
-        resourceManager.Houses.Values.Where(house => house.IsStarter).OrderBy(house => house.Id);
-
     public static IEnumerable<OwnedHouse> GetOwnedHouses(IResourceManager resourceManager, Player player)
     {
         var reservedHouses = resourceManager.Houses.Values
@@ -84,16 +81,12 @@ public static class HousingHelper
 
     private static bool IsReservedHouseKey(int houseKey) => (houseKey & ReservedHouseKeyFlag) != 0;
 
-    public static ulong GetHouseGuid(DbHouse dbHouse) => GuidHelper.GetHouseGuid(dbHouse.Id);
-
     public static ulong GetHouseGuid(IDbContextFactory<DatabaseContext> dbContextFactory, ulong ownerGuid, int houseKey, int zoneId)
     {
         using var dbContext = dbContextFactory.CreateDbContext();
 
-        return GetHouseGuid(GetOrAddHouses(dbContext, GuidHelper.GetPlayerId(ownerGuid), [(houseKey, zoneId)])[houseKey]);
+        return GuidHelper.GetHouseGuid(GetOrAddHouses(dbContext, GuidHelper.GetPlayerId(ownerGuid), [(houseKey, zoneId)])[houseKey].Id);
     }
-
-    public static ulong GetHouseOwnerGuid(DbHouse dbHouse) => GuidHelper.GetPlayerGuid(dbHouse.CharacterId);
 
     private static Dictionary<int, DbHouse> GetOrAddHouses(DatabaseContext dbContext, ulong characterId, IEnumerable<(int Key, int ZoneId)> houses)
     {
@@ -130,6 +123,13 @@ public static class HousingHelper
 
     public static bool TryGetHouse(IDbContextFactory<DatabaseContext> dbContextFactory, ulong houseGuid, [MaybeNullWhen(false)] out DbHouse dbHouse)
     {
+        using var dbContext = dbContextFactory.CreateDbContext();
+
+        return TryGetHouse(dbContext, houseGuid, out dbHouse);
+    }
+
+    public static bool TryGetHouse(DatabaseContext dbContext, ulong houseGuid, [MaybeNullWhen(false)] out DbHouse dbHouse)
+    {
         dbHouse = null;
 
         if (!GuidHelper.IsHouseGuid(houseGuid))
@@ -137,51 +137,44 @@ public static class HousingHelper
 
         var houseId = GuidHelper.GetHouseId(houseGuid);
 
-        using var dbContext = dbContextFactory.CreateDbContext();
-
-        dbHouse = dbContext.Houses.AsNoTracking().FirstOrDefault(house => house.Id == houseId);
+        dbHouse = dbContext.Houses.Include(house => house.Votes).Include(house => house.Character)
+            .FirstOrDefault(house => house.Id == houseId);
 
         return dbHouse is not null;
     }
 
-    public static bool TryGetOwnedHouse(IResourceManager resourceManager, IDbContextFactory<DatabaseContext> dbContextFactory, Player player, ulong houseGuid,
-        [MaybeNullWhen(false)] out OwnedHouse ownedHouse)
+    public static bool TryGetOwnedHouse(IResourceManager resourceManager, Player player, DbHouse dbHouse, [MaybeNullWhen(false)] out OwnedHouse ownedHouse)
     {
-        ownedHouse = TryGetHouse(dbContextFactory, houseGuid, out var dbHouse) && GetHouseOwnerGuid(dbHouse) == player.Guid
+        ownedHouse = GuidHelper.GetPlayerGuid(dbHouse.CharacterId) == player.Guid
             ? GetOwnedHouses(resourceManager, player).FirstOrDefault(house => house.Key == dbHouse.Key)
             : null;
 
         return ownedHouse is not null;
     }
 
-    public static bool CanEnterHouseZone(IResourceManager resourceManager, Player player, int zoneDefinitionId) =>
-        resourceManager.Zones.TryGetValue(zoneDefinitionId, out var zoneDefinition)
-        && zoneDefinition is HousingZoneDefinition { IsBroken: false } housingZoneDefinition
-        && (!housingZoneDefinition.StaffOnly || IsStaff(player));
+    private static bool TryGetEnterableZone(IResourceManager resourceManager, Player player, int zoneDefinitionId, [MaybeNullWhen(false)] out HousingZoneDefinition housingZoneDefinition)
+    {
+        housingZoneDefinition = resourceManager.Zones.TryGetValue(zoneDefinitionId, out var zoneDefinition)
+            && zoneDefinition is HousingZoneDefinition { IsBroken: false } enterableZoneDefinition
+            && (!enterableZoneDefinition.StaffOnly || player.IsAdmin || player.IsMod)
+            ? enterableZoneDefinition
+            : null;
 
-    private static bool IsStaff(Player player) => player.IsAdmin || player.IsMod;
+        return housingZoneDefinition is not null;
+    }
 
     private static bool IsStaffHouse(IResourceManager resourceManager, Player player, HouseDefinition houseDefinition) =>
-        IsStaff(player) && IsStaffOnlyHouse(resourceManager, houseDefinition);
+        (player.IsAdmin || player.IsMod) && IsStaffOnlyHouse(resourceManager, houseDefinition);
 
     public static bool IsStaffOnlyHouse(IResourceManager resourceManager, HouseDefinition houseDefinition) =>
         resourceManager.Zones.TryGetValue(houseDefinition.ZoneId, out var zoneDefinition) && zoneDefinition is HousingZoneDefinition { StaffOnly: true };
 
-    private static bool TryGetHouseDefinition(IResourceManager resourceManager, IDbContextFactory<DatabaseContext> dbContextFactory, IZoneManager zoneManager,
-        Player player, DbHouse dbHouse, [MaybeNullWhen(false)] out HouseDefinition houseDefinition)
+    private static bool TryGetHouseDefinition(IResourceManager resourceManager, IDbContextFactory<DatabaseContext> dbContextFactory, DbHouse dbHouse,
+        [MaybeNullWhen(false)] out HouseDefinition houseDefinition)
     {
         houseDefinition = null;
 
-        var ownerGuid = GetHouseOwnerGuid(dbHouse);
         var houseKey = dbHouse.Key;
-
-        var owner = ownerGuid == player.Guid ? player : zoneManager.TryGetPlayer(ownerGuid, out var onlineOwner) ? onlineOwner : null;
-
-        if (owner is not null)
-        {
-            houseDefinition = GetOwnedHouses(resourceManager, owner).FirstOrDefault(house => house.Key == houseKey)?.Definition;
-            return houseDefinition is not null;
-        }
 
         if (IsReservedHouseKey(houseKey))
         {
@@ -203,19 +196,17 @@ public static class HousingHelper
         return itemDefinitionId is { } houseItemDefinitionId && TryGetItemHouseDefinition(resourceManager, houseItemDefinitionId, out houseDefinition);
     }
 
-    public static bool TryEnterHouse(IResourceManager resourceManager, IDbContextFactory<DatabaseContext> dbContextFactory, IZoneManager zoneManager,
-        Player player, ulong houseGuid, out HousingError housingError)
+    public static bool TryEnterHouse(IResourceManager resourceManager, IDbContextFactory<DatabaseContext> dbContextFactory, Player player, ulong houseGuid, out HousingError housingError)
     {
         if (!TryGetHouse(dbContextFactory, houseGuid, out var dbHouse)
-            || !TryGetHouseDefinition(resourceManager, dbContextFactory, zoneManager, player, dbHouse, out var houseDefinition)
-            || !CanEnterHouseZone(resourceManager, player, houseDefinition.ZoneId)
-            || !resourceManager.Zones.TryGetValue(houseDefinition.ZoneId, out var zoneDefinition))
+            || !TryGetHouseDefinition(resourceManager, dbContextFactory, dbHouse, out var houseDefinition)
+            || !TryGetEnterableZone(resourceManager, player, houseDefinition.ZoneId, out var zoneDefinition))
         {
             housingError = HousingError.ZoneNotFound;
             return false;
         }
 
-        if (GetHouseOwnerGuid(dbHouse) != player.Guid && !player.HouseInvites.ContainsKey(houseGuid) && dbHouse.IsLocked && !dbHouse.IsPublished)
+        if (GuidHelper.GetPlayerGuid(dbHouse.CharacterId) != player.Guid && !player.HouseInvites.ContainsKey(houseGuid) && dbHouse.IsLocked && !dbHouse.IsPublished)
         {
             housingError = HousingError.PermissionDenied;
             return false;
@@ -240,8 +231,7 @@ public static class HousingHelper
     public static bool TryPreviewHouse(IResourceManager resourceManager, IDbContextFactory<DatabaseContext> dbContextFactory, Player player, int itemDefinitionId, out HousingError housingError)
     {
         if (!TryGetItemHouseDefinition(resourceManager, itemDefinitionId, out var houseDefinition)
-            || !CanEnterHouseZone(resourceManager, player, houseDefinition.ZoneId)
-            || !resourceManager.Zones.TryGetValue(houseDefinition.ZoneId, out var zoneDefinition))
+            || !TryGetEnterableZone(resourceManager, player, houseDefinition.ZoneId, out var zoneDefinition))
         {
             housingError = HousingError.ZoneNotFound;
             return false;
@@ -290,15 +280,24 @@ public static class HousingHelper
         BuildAreas = houseDefinition.BuildAreas
     };
 
-    public static PlayerHousingInstanceInfo GetInstanceInfo(ulong houseGuid, ulong ownerGuid, string ownerName, HouseDefinition houseDefinition) => new()
+    public static PlayerHousingInstanceInfo GetInstanceInfo(DbHouse dbHouse, ulong ownerGuid, string ownerName, HouseDefinition houseDefinition, ulong requesterGuid) => new()
     {
         OwnerGuid = ownerGuid,
-        InstanceGuid = houseGuid,
+        InstanceGuid = GuidHelper.GetHouseGuid(dbHouse.Id),
         NameId = houseDefinition.NameId,
         OwnerName = ownerName,
         IconId = houseDefinition.Icon,
         LastVisited = DateTimeOffset.UtcNow,
-        WhenCreated = DateTimeOffset.UtcNow
+        WhenCreated = DateTimeOffset.UtcNow,
+        HouseName = dbHouse.Name,
+        IsLocked = dbHouse.IsLocked,
+        IsFloraAllowed = dbHouse.IsFloraAllowed,
+        Description = dbHouse.Description,
+        KeywordList = dbHouse.Keywords,
+        Rating = GetRating(dbHouse),
+        Votes = dbHouse.Votes.Count,
+        HasRating = dbHouse.IsPublished,
+        CanVote = CanVote(dbHouse, requesterGuid)
     };
 
     public static HousingPacketInstanceList GetInstanceList(IResourceManager resourceManager, IDbContextFactory<DatabaseContext> dbContextFactory, Player player)
@@ -320,42 +319,24 @@ public static class HousingHelper
             PlayerGuid = player.Guid,
             Instances = ownedHouses.Select(house =>
             {
-                var dbHouse = dbHouses[house.Key];
-
-                var instanceInfo = GetInstanceInfo(GetHouseGuid(dbHouse), player.Guid, player.Name.FullName, house.Definition);
+                var instanceInfo = GetInstanceInfo(dbHouses[house.Key], player.Guid, player.Name.FullName, house.Definition, player.Guid);
 
                 instanceInfo.WhenCreated = !IsReservedHouseKey(house.Key) && itemCreated.TryGetValue(house.Key, out var houseCreated) ? houseCreated : characterCreated;
-
-                instanceInfo.HouseName = dbHouse.Name;
-                instanceInfo.IsLocked = dbHouse.IsLocked;
-                instanceInfo.IsFloraAllowed = dbHouse.IsFloraAllowed;
-
-                SetRatingInfo(instanceInfo, dbHouse, player.Guid);
 
                 return instanceInfo;
             }).ToList()
         };
     }
 
-    public static string GetRatingHouseGuid(ulong houseGuid) => houseGuid.ToString(CultureInfo.InvariantCulture);
-
     public static IQueryable<DbHouse> GetPublishedHouses(DatabaseContext dbContext) =>
-        dbContext.Houses.Include(house => house.Votes).Include(house => house.Character).Where(house => house.IsPublished);
+        dbContext.Houses.AsNoTracking().Include(house => house.Votes).Include(house => house.Character).Where(house => house.IsPublished);
 
     public static bool TryGetHouse(DatabaseContext dbContext, string ratingHouseGuid,
         out ulong houseGuid, [MaybeNullWhen(false)] out DbHouse dbHouse)
     {
         dbHouse = null;
 
-        if (!ulong.TryParse(ratingHouseGuid, CultureInfo.InvariantCulture, out houseGuid) || !GuidHelper.IsHouseGuid(houseGuid))
-            return false;
-
-        var houseId = GuidHelper.GetHouseId(houseGuid);
-
-        dbHouse = dbContext.Houses.Include(house => house.Votes).Include(house => house.Character)
-            .FirstOrDefault(house => house.Id == houseId);
-
-        return dbHouse is not null;
+        return ulong.TryParse(ratingHouseGuid, CultureInfo.InvariantCulture, out houseGuid) && TryGetHouse(dbContext, houseGuid, out dbHouse);
     }
 
     public static float GetRating(DbHouse dbHouse) => dbHouse.Votes.Count == 0 ? DefaultRating : dbHouse.Votes.Average(vote => vote.Rating);
@@ -369,7 +350,7 @@ public static class HousingHelper
 
     public static CandidateRatingInfo GetCandidateRatingInfo(ulong houseGuid, DbHouse dbHouse, ulong requesterGuid) => new()
     {
-        InstanceGuid = GetRatingHouseGuid(houseGuid),
+        InstanceGuid = houseGuid.ToString(CultureInfo.InvariantCulture),
         Description = dbHouse.Description,
         KeywordList = dbHouse.Keywords,
         Rating = GetRating(dbHouse),
@@ -380,7 +361,7 @@ public static class HousingHelper
 
     public static RatingDataEntry GetRatingDataEntry(ulong houseGuid, DbHouse dbHouse) => new()
     {
-        HouseGuid = GetRatingHouseGuid(houseGuid),
+        HouseGuid = houseGuid.ToString(CultureInfo.InvariantCulture),
         OwnerName = dbHouse.Character.FullName,
         HouseName = dbHouse.Name,
         OwnerGuid = GuidHelper.GetPlayerGuid(dbHouse.CharacterId),
@@ -399,7 +380,7 @@ public static class HousingHelper
             if (!TryGetHouseDefinition(resourceManager, dbHouse.ZoneId, out var houseDefinition))
                 continue;
 
-            var ratingDataEntry = GetRatingDataEntry(GetHouseGuid(dbHouse), dbHouse);
+            var ratingDataEntry = GetRatingDataEntry(GuidHelper.GetHouseGuid(dbHouse.Id), dbHouse);
 
             ratingDataEntry.Snapshot = houseDefinition.Snapshot;
 
@@ -423,15 +404,5 @@ public static class HousingHelper
                 Candidates = [GetCandidateRatingInfo(houseGuid, dbHouse, zonePlayer.Guid)]
             });
         }
-    }
-
-    public static void SetRatingInfo(PlayerHousingInstanceInfo instanceInfo, DbHouse dbHouse, ulong requesterGuid)
-    {
-        instanceInfo.Description = dbHouse.Description;
-        instanceInfo.KeywordList = dbHouse.Keywords;
-        instanceInfo.Rating = GetRating(dbHouse);
-        instanceInfo.Votes = dbHouse.Votes.Count;
-        instanceInfo.HasRating = dbHouse.IsPublished;
-        instanceInfo.CanVote = CanVote(dbHouse, requesterGuid);
     }
 }

@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Globalization;
-using System.Linq;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Game;
 using Sanctuary.Game.Helpers;
@@ -46,20 +43,16 @@ public static class RatingPacketAddCandidateHandler
 
         var player = connection.Player;
 
+        using var dbContext = _dbContextFactory.CreateDbContext();
+
         if (ratingPacketAddCandidate.OwnerGuid != player.Guid
-            || !ulong.TryParse(ratingPacketAddCandidate.InstanceGuid, CultureInfo.InvariantCulture, out var houseGuid)
-            || !HousingHelper.TryGetOwnedHouse(_resourceManager, _dbContextFactory, player, houseGuid, out var ownedHouse)
+            || !HousingHelper.TryGetHouse(dbContext, ratingPacketAddCandidate.InstanceGuid, out var houseGuid, out var dbHouse)
+            || !HousingHelper.TryGetOwnedHouse(_resourceManager, player, dbHouse, out var ownedHouse)
             || HousingHelper.IsStaffOnlyHouse(_resourceManager, ownedHouse.Definition))
         {
             _logger.LogWarning("{player} could not publish house {houseGuid}.", player.Guid, ratingPacketAddCandidate.InstanceGuid);
             return true;
         }
-
-        var houseId = GuidHelper.GetHouseId(houseGuid);
-
-        using var dbContext = _dbContextFactory.CreateDbContext();
-
-        var dbHouse = dbContext.Houses.Include(house => house.Votes).First(house => house.Id == houseId);
 
         dbHouse.IsPublished = true;
         dbHouse.PublishedAt = DateTimeOffset.UtcNow;

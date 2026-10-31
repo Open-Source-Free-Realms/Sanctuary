@@ -130,7 +130,7 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
                     return SendOrderResult(connection, packetInGamePurchasePlaceOrderResponse, InGamePurchaseOrderResult.OrderFailure);
                 }
 
-                var dbItem = ItemDefinitionHelper.IsStackable(clientItemDefinition)
+                var dbItem = clientItemDefinition.Type != ItemDefinitionHelper.HouseItemType
                     ? dbCharacter.Items.SingleOrDefault(i => i.Definition == clientItemDefinition.Id && i.Tint == orderDetailTint)
                     : null;
 

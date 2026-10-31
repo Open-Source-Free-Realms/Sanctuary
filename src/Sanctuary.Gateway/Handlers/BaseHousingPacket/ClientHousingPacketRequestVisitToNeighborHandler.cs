@@ -19,7 +19,6 @@ public static class ClientHousingPacketRequestVisitToNeighborHandler
     private static ILogger _logger = null!;
     private static IResourceManager _resourceManager = null!;
     private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
-    private static IZoneManager _zoneManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -28,7 +27,6 @@ public static class ClientHousingPacketRequestVisitToNeighborHandler
 
         _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
         _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
-        _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -45,7 +43,7 @@ public static class ClientHousingPacketRequestVisitToNeighborHandler
 
         _logger.LogInformation("{player} requested a visit to neighbor {guid}.", player.Guid, clientHousingPacketRequestVisitToNeighbor.Guid);
 
-        if (!HousingHelper.TryEnterHouse(_resourceManager, _dbContextFactory, _zoneManager, player, clientHousingPacketRequestVisitToNeighbor.Guid, out var housingError))
+        if (!HousingHelper.TryEnterHouse(_resourceManager, _dbContextFactory, player, clientHousingPacketRequestVisitToNeighbor.Guid, out var housingError))
         {
             _logger.LogWarning("{player} could not visit {guid}. ( {error} )", player.Guid, clientHousingPacketRequestVisitToNeighbor.Guid, housingError);
 

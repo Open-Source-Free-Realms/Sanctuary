@@ -76,7 +76,7 @@ public class RewardManager : IRewardManager
         if (dbCharacter is null)
             return false;
 
-        var dbItem = ItemDefinitionHelper.IsStackable(itemDefinition)
+        var dbItem = itemDefinition.Type != ItemDefinitionHelper.HouseItemType
             ? dbCharacter.Items.SingleOrDefault(item => item.Definition == itemDefinitionId && item.Tint == tint)
             : null;
 

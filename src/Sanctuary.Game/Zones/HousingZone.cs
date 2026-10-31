@@ -4,8 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 
-using Microsoft.EntityFrameworkCore;
-
 using Sanctuary.Core.Extensions;
 using Sanctuary.Core.Helpers;
 using Sanctuary.Database.Entities;
@@ -114,11 +112,8 @@ public sealed class HousingZone : BaseZone
 
     private void SpawnHousePets(Player owner)
     {
-        if (!HousingHelper.TryGetHouseDefinition(_resourceManager, DefinitionId, out var houseDefinition)
-            || houseDefinition.NoHousePets || houseDefinition.BuildAreas.Count == 0 || !_resourceManager.Zones.TryGetValue(DefinitionId, out var zoneDefinition))
+        if (!TryGetHousePetArea(out var buildArea))
             return;
-
-        var spawnPosition = zoneDefinition.SpawnPosition;
 
         foreach (var petClientInfo in owner.Pets)
         {
@@ -132,12 +127,12 @@ public sealed class HousingZone : BaseZone
             PetHelper.ApplyPetAppearance(_resourceManager, owner, npc, petClientInfo, clientItemDefinition, modelDefinition);
 
             var heading = Random.Shared.NextSingle() * MathF.Tau;
-            var position = new Vector4(spawnPosition.X + MathF.Sin(heading) * HousePetSpawnRadius, spawnPosition.Y,
-                spawnPosition.Z + MathF.Cos(heading) * HousePetSpawnRadius, 1f);
+            var position = new Vector4(SpawnPosition.X + MathF.Sin(heading) * HousePetSpawnRadius, SpawnPosition.Y,
+                SpawnPosition.Z + MathF.Cos(heading) * HousePetSpawnRadius, 1f);
 
             npc.Visible = true;
             npc.UpdatePosition(position, QuaternionExtensions.FromHeading(heading));
-            npc.MovementController = CreateHousePetMovement(npc, houseDefinition.BuildAreas[0]);
+            npc.MovementController = CreateHousePetMovement(npc, buildArea);
 
             _housePets[petClientInfo.Id] = npc;
         }
@@ -154,17 +149,22 @@ public sealed class HousingZone : BaseZone
 
     public bool TryReturnHousePet(Player player, int petId, Npc npc)
     {
-        if (!PetAutospawn || !IsOwner(player) || _housePets.ContainsKey(petId)
-            || !HousingHelper.TryGetHouseDefinition(_resourceManager, DefinitionId, out var houseDefinition)
-            || houseDefinition.NoHousePets || houseDefinition.BuildAreas.Count == 0)
-        {
+        if (!PetAutospawn || !IsOwner(player) || _housePets.ContainsKey(petId) || !TryGetHousePetArea(out var buildArea))
             return false;
-        }
 
         npc.PositionSendIntervalMs = default;
-        npc.MovementController = CreateHousePetMovement(npc, houseDefinition.BuildAreas[0]);
+        npc.MovementController = CreateHousePetMovement(npc, buildArea);
         _housePets[petId] = npc;
         return true;
+    }
+
+    private bool TryGetHousePetArea([MaybeNullWhen(false)] out BoundingBox buildArea)
+    {
+        buildArea = HousingHelper.TryGetHouseDefinition(_resourceManager, DefinitionId, out var houseDefinition) && !houseDefinition.NoHousePets
+            ? houseDefinition.BuildAreas.FirstOrDefault()
+            : null;
+
+        return buildArea is not null;
     }
 
     private static NpcMovementController CreateHousePetMovement(Npc npc, BoundingBox buildArea) => new(npc, new NpcMovementDefinition
@@ -204,7 +204,7 @@ public sealed class HousingZone : BaseZone
         if (!HousingHelper.TryGetHouse(_dbContextFactory, houseGuid, out var dbHouse))
             return;
 
-        _ownerGuid = HousingHelper.GetHouseOwnerGuid(dbHouse);
+        _ownerGuid = GuidHelper.GetPlayerGuid(dbHouse.CharacterId);
         _houseKey = dbHouse.Key;
 
         ApplyHouse(dbHouse);
@@ -217,13 +217,9 @@ public sealed class HousingZone : BaseZone
         if (OwnerId is not { } houseGuid || _houseKey == HousingHelper.PreviewHouseKey)
             return;
 
-        var houseId = GuidHelper.GetHouseId(houseGuid);
-
         using var dbContext = _dbContextFactory.CreateDbContext();
 
-        var dbHouse = dbContext.Houses.FirstOrDefault(house => house.Id == houseId);
-
-        if (dbHouse is null)
+        if (!HousingHelper.TryGetHouse(dbContext, houseGuid, out var dbHouse))
             return;
 
         update(dbHouse);
@@ -254,29 +250,15 @@ public sealed class HousingZone : BaseZone
 
     private void SendZoneData(Player player)
     {
-        if (!HousingHelper.TryGetHouseDefinition(_resourceManager, DefinitionId, out var houseDefinition) || OwnerId is not { } houseGuid || OwnerGuid is not { } ownerGuid)
+        if (!HousingHelper.TryGetHouseDefinition(_resourceManager, DefinitionId, out var houseDefinition) || OwnerId is not { } houseGuid || OwnerGuid is not { } ownerGuid
+            || !HousingHelper.TryGetHouse(_dbContextFactory, houseGuid, out var dbHouse))
             return;
-
-        var instanceInfo = HousingHelper.GetInstanceInfo(houseGuid, ownerGuid, GetOwnerName(ownerGuid), houseDefinition);
-
-        instanceInfo.HouseName = HouseName;
-        instanceInfo.IsLocked = IsLocked;
-        instanceInfo.IsFloraAllowed = IsFloraAllowed;
-
-        var houseId = GuidHelper.GetHouseId(houseGuid);
-
-        using var dbContext = _dbContextFactory.CreateDbContext();
-
-        var dbHouse = dbContext.Houses.AsNoTracking().Include(house => house.Votes).FirstOrDefault(house => house.Id == houseId);
-
-        if (dbHouse is not null)
-            HousingHelper.SetRatingInfo(instanceInfo, dbHouse, player.Guid);
 
         player.SendTunneled(new HousingPacketZoneData
         {
             IsPreview = player.IsPreviewingHouse,
             HeadSize = HousingZoneHeadSize,
-            InstanceInfo = instanceInfo
+            InstanceInfo = HousingHelper.GetInstanceInfo(dbHouse, ownerGuid, GetOwnerName(ownerGuid), houseDefinition, player.Guid)
         });
     }
 
@@ -298,5 +280,5 @@ public sealed class HousingZone : BaseZone
         });
     }
 
-    private string GetOwnerName(ulong ownerGuid) => Players.FirstOrDefault(zonePlayer => zonePlayer.Guid == ownerGuid)?.Name.FullName ?? string.Empty;
+    private string GetOwnerName(ulong ownerGuid) => TryGetPlayer(ownerGuid, out var owner) ? owner.Name.FullName : string.Empty;
 }

@@ -41,7 +41,7 @@ public static class RatingPacketRequestFeaturedHandler
 
         using var dbContext = _dbContextFactory.CreateDbContext();
 
-        var dbHouses = HousingHelper.GetPublishedHouses(dbContext).AsNoTracking().ToList().OrderByDescending(HousingHelper.GetRating);
+        var dbHouses = HousingHelper.GetPublishedHouses(dbContext).ToList().OrderByDescending(HousingHelper.GetRating);
 
         var featuredRatingDataEntry = HousingHelper.GetRatingDataEntries(_resourceManager, dbHouses).FirstOrDefault();
 
