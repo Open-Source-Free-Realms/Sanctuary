@@ -54,6 +54,13 @@ public class ResourceManager : IResourceManager, IDisposable
     public static readonly string QuickChatsFile = Path.Combine(BaseDirectory, "QuickChats.json");
     public static readonly string PlayerTitlesFile = Path.Combine(BaseDirectory, "PlayerTitles.json");
     public static readonly string PointOfInterestsFile = Path.Combine(BaseDirectory, "PointOfInterests.json");
+    public static readonly string ActivitiesFile = Path.Combine(BaseDirectory, "Activities.json");
+    public static readonly string RequirementsFile = Path.Combine(BaseDirectory, "Requirements.json");
+    public static readonly string MiniGamesFile = Path.Combine(BaseDirectory, "MiniGames.json");
+    public static readonly string ActivityProfileTypesFile = Path.Combine(BaseDirectory, "ActivityProfileTypes.json");
+    public static readonly string MiniGameNpcsFile = Path.Combine(BaseDirectory, "MiniGameNpcs.json");
+    public static readonly string SignUpMiniGamesFile = Path.Combine(BaseDirectory, "SignUpMiniGames.json");
+    public static readonly string EncountersDirectory = Path.Combine(BaseDirectory, "Encounters");
     public static readonly string ConsumablesFile = Path.Combine(BaseDirectory, "Consumables.json");
     public static readonly string NpcsFile = Path.Combine(BaseDirectory, "Npcs.json");
     public static readonly string NpcMovementsFile = Path.Combine(BaseDirectory, "NpcMovements.json");
@@ -104,6 +111,13 @@ public class ResourceManager : IResourceManager, IDisposable
     public ProfileDefinitionCollection Profiles { get; }
     public QuickChatDefinitionCollection QuickChats { get; }
     public PointOfInterestDefinitionCollection PointOfInterests { get; }
+    public ActivityDefinitionCollection Activities { get; }
+    public RequirementSetDefinitionCollection RequirementSets { get; }
+    public MiniGameDefinitionCollection MiniGames { get; }
+    public ActivityProfileTypeCollection ActivityProfileTypes { get; }
+    public MiniGameNpcDefinitionCollection MiniGameNpcs { get; }
+    public SignUpMiniGameDefinitionCollection SignUpMiniGames { get; }
+    public CombatEncounterCollection CombatEncounters { get; }
     public ConsumableCollection Consumables { get; }
     public NpcDefinitionCollection Npcs { get; }
     public NameFilterCollection NameFilter { get; }
@@ -166,6 +180,13 @@ public class ResourceManager : IResourceManager, IDisposable
         QuickChats = new(_logger);
         PlayerTitles = new(_logger);
         PointOfInterests = new(_logger);
+        Activities = new(_logger);
+        RequirementSets = new(_logger);
+        MiniGames = new(_logger);
+        ActivityProfileTypes = new(_logger);
+        MiniGameNpcs = new(_logger);
+        SignUpMiniGames = new(_logger);
+        CombatEncounters = new(_logger);
         Consumables = new(_logger);
         Npcs = new(_logger);
         NameFilter = new(_logger);
@@ -363,6 +384,27 @@ public class ResourceManager : IResourceManager, IDisposable
         if (!PointOfInterests.Load(PointOfInterestsFile))
             return false;
 
+        if (!Activities.Load(ActivitiesFile))
+            return false;
+
+        if (!RequirementSets.Load(RequirementsFile))
+            return false;
+
+        if (!MiniGames.Load(MiniGamesFile))
+            return false;
+
+        if (!ActivityProfileTypes.Load(ActivityProfileTypesFile))
+            return false;
+
+        if (!MiniGameNpcs.Load(MiniGameNpcsFile))
+            return false;
+
+        if (!SignUpMiniGames.Load(SignUpMiniGamesFile))
+            return false;
+
+        if (!CombatEncounters.Load(EncountersDirectory))
+            return false;
+
         if (!Consumables.Load(ConsumablesFile))
             return false;
 
@@ -506,6 +548,20 @@ public class ResourceManager : IResourceManager, IDisposable
                 loaded = PlayerTitles.Load(PlayerTitlesFile);
             else if (e.FullPath == PointOfInterestsFile)
                 loaded = PointOfInterests.Load(PointOfInterestsFile);
+            else if (e.FullPath == ActivitiesFile)
+                loaded = Activities.Load(ActivitiesFile);
+            else if (e.FullPath == RequirementsFile)
+                loaded = RequirementSets.Load(RequirementsFile);
+            else if (e.FullPath == MiniGamesFile)
+                loaded = MiniGames.Load(MiniGamesFile);
+            else if (e.FullPath == ActivityProfileTypesFile)
+                loaded = ActivityProfileTypes.Load(ActivityProfileTypesFile);
+            else if (e.FullPath == MiniGameNpcsFile)
+                loaded = MiniGameNpcs.Load(MiniGameNpcsFile);
+            else if (e.FullPath == SignUpMiniGamesFile)
+                loaded = SignUpMiniGames.Load(SignUpMiniGamesFile);
+            else if (Path.GetDirectoryName(e.FullPath) == EncountersDirectory)
+                loaded = CombatEncounters.Load(EncountersDirectory);
             else if (e.FullPath == NpcsFile)
                 loaded = Npcs.Load(NpcsFile);
             else if (e.FullPath == NpcMovementsFile)

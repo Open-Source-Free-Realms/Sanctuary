@@ -343,6 +343,13 @@ public abstract class BaseZone : IZone, IDisposable
 
         player.SendTunneled(packetZoneDoneSendingInitialData);
 
+        if (!player.ActivitiesSent)
+        {
+            ActivityHelper.SendActivities(player, _resourceManager);
+
+            player.ActivitiesSent = true;
+        }
+
         var clientUpdatePacketDoneSendingPreloadCharacters = new ClientUpdatePacketDoneSendingPreloadCharacters();
 
         player.SendTunneled(clientUpdatePacketDoneSendingPreloadCharacters);

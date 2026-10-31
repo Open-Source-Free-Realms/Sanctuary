@@ -18,7 +18,7 @@ public class ClientQuest : ISerializableType
 
     public RewardBundleBase RewardBundle { get; set; } = new()
     {
-        Success = false,
+        HasOptionalData = false,
         Unknown3 = 0,
         Multiplier = 0f
     };

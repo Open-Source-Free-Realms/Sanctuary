@@ -8,8 +8,8 @@ public class BaseEncounterPacket
 
     private short SubOpCode;
 
-    public int Unknown;
-    public int Unknown2;
+    public int MiniGameStateId;
+    public int EncounterDefinitionId;
 
     public BaseEncounterPacket(short subOpCode)
     {
@@ -20,5 +20,24 @@ public class BaseEncounterPacket
     {
         writer.Write(OpCode);
         writer.Write(SubOpCode);
+        writer.Write(MiniGameStateId);
+        writer.Write(EncounterDefinitionId);
+    }
+
+    public bool TryRead(ref PacketReader reader)
+    {
+        if (!reader.TryRead(out short opCode) || opCode != OpCode)
+            return false;
+
+        if (!reader.TryRead(out short subOpCode) || subOpCode != SubOpCode)
+            return false;
+
+        if (!reader.TryRead(out MiniGameStateId))
+            return false;
+
+        if (!reader.TryRead(out EncounterDefinitionId))
+            return false;
+
+        return true;
     }
 }

@@ -46,6 +46,7 @@ public static class BaseCommandPacketHandler
             CommandPacketChatChannelOn.OpCode => CommandPacketChatChannelOnHandler.HandlePacket(connection, reader.Span),
             CommandPacketChatChannelOff.OpCode => CommandPacketChatChannelOffHandler.HandlePacket(connection, reader.Span),
             CommandPacketQuestAbandon.OpCode => CommandPacketQuestAbandonHandler.HandlePacket(connection, reader.Span),
+            CommandPacketClosedMinigameEndScreen.OpCode => CommandPacketClosedMinigameEndScreenHandler.HandlePacket(connection, reader.Span),
             _ => false
         };
     }
