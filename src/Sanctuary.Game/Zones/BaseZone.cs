@@ -9,6 +9,7 @@ using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -16,6 +17,7 @@ using Sanctuary.Core.Collections;
 using Sanctuary.Core.Extensions;
 using Sanctuary.Core.Helpers;
 using Sanctuary.Core.IO;
+using Sanctuary.Database;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Interactions;
@@ -36,6 +38,7 @@ public abstract class BaseZone : IZone, IDisposable
 {
     private readonly ILogger _logger;
     protected readonly IResourceManager _resourceManager;
+    protected readonly IDbContextFactory<DatabaseContext> _dbContextFactory;
     private readonly IZoneManager _zoneManager;
     private readonly IScriptManager _scriptManager;
     private readonly IQuestManager _questManager;
@@ -107,6 +110,7 @@ public abstract class BaseZone : IZone, IDisposable
     {
         _zoneDefinition = zoneDefinition;
         _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
+        _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
         _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
 
         var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
@@ -239,6 +243,7 @@ public abstract class BaseZone : IZone, IDisposable
 
         _started = true;
 
+        SpawnZoneNpcs();
         GetOrCreateScriptContext().FireEvent("start");
         ActivateCollectionNodePools();
         CreateNpcConversationGroups();
@@ -296,6 +301,8 @@ public abstract class BaseZone : IZone, IDisposable
     {
         SendQuickChatData(player);
 
+        player.SendTunneled(HousingHelper.GetInstanceList(_resourceManager, _dbContextFactory, player));
+
         SendUpdateStat(player);
 
         var clientUpdatePacketHitpoints = new ClientUpdatePacketHitpoints
@@ -351,6 +358,7 @@ public abstract class BaseZone : IZone, IDisposable
         SendIgnoreList(player);
 
         UpdateFriendStatus(player);
+        UpdateFriendLocality(player);
     }
 
     public virtual void OnClientFinishedLoading(Player player)
@@ -663,6 +671,9 @@ public abstract class BaseZone : IZone, IDisposable
 
     private void SendFriendList(Player player)
     {
+        foreach (var friend in player.Friends)
+            SetFriendLocality(friend, _zoneManager.TryGetPlayer(friend.Guid, out var friendPlayer) && friendPlayer.Zone == _zoneManager.StartingZone);
+
         var friendListPacket = new FriendListPacket();
 
         friendListPacket.Friends = player.Friends;
@@ -677,6 +688,33 @@ public abstract class BaseZone : IZone, IDisposable
         ignoreListPacket.Ignores = player.Ignores;
 
         player.SendTunneled(ignoreListPacket);
+    }
+
+    private void UpdateFriendLocality(Player player)
+    {
+        var isLocal = this == _zoneManager.StartingZone;
+
+        foreach (var friend in player.Friends)
+        {
+            if (!_zoneManager.TryGetPlayer(friend.Guid, out var friendPlayer))
+                continue;
+
+            var otherFriend = friendPlayer.Friends.FirstOrDefault(x => x.Guid == player.Guid);
+
+            if (otherFriend is null || otherFriend.IsLocal == isLocal)
+                continue;
+
+            SetFriendLocality(otherFriend, isLocal);
+
+            friendPlayer.SendTunneled(new FriendListPacket { Friends = friendPlayer.Friends });
+        }
+    }
+
+    private static void SetFriendLocality(FriendData friend, bool isLocal)
+    {
+        friend.IsLocal = isLocal;
+        friend.IsInStaticZone = isLocal;
+        friend.InEncounter = !isLocal;
     }
 
     private void UpdateFriendStatus(Player player)
@@ -763,6 +801,15 @@ public abstract class BaseZone : IZone, IDisposable
     #endregion
 
     #region Scripting API
+
+    private void SpawnZoneNpcs()
+    {
+        if (!_resourceManager.ZoneNpcs.TryGetValue(Name, out var zoneNpcs))
+            return;
+
+        foreach (var spawn in zoneNpcs.Spawns)
+            TrySpawnNpc(spawn.NpcId, GuidHelper.GetNpcGuid((ulong)spawn.NpcId, GuidHelper.OpenWorldInstanceId), spawn.Position.X, spawn.Position.Y, spawn.Position.Z, spawn.Heading, 0f, 0f, out _);
+    }
 
     public bool TrySpawnNpc(int npcId, ulong? npcGuid, float x, float y, float z, float heading, float pitch, float roll, [MaybeNullWhen(false)] out IScriptableNpc npc)
     {

@@ -118,7 +118,8 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
             }
 
             if (clientItemDefinition.Type == 1 || clientItemDefinition.Type == ItemDefinitionHelper.PetClothingItemType
-                || clientItemDefinition.Type == ItemDefinitionHelper.PetUtilityItemType || clientItemDefinition.Type == 12)
+                || clientItemDefinition.Type == ItemDefinitionHelper.PetUtilityItemType || clientItemDefinition.Type == 12
+                || clientItemDefinition.Type == ItemDefinitionHelper.HouseItemType)
             {
                 var totalQuantity = orderDetail.Quantity * bundleEntry.Quantity;
 
@@ -129,8 +130,9 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
                     return SendOrderResult(connection, packetInGamePurchasePlaceOrderResponse, InGamePurchaseOrderResult.OrderFailure);
                 }
 
-                var dbItem = dbCharacter.Items.SingleOrDefault(i =>
-                    i.Definition == clientItemDefinition.Id && i.Tint == orderDetailTint);
+                var dbItem = clientItemDefinition.Type != ItemDefinitionHelper.HouseItemType
+                    ? dbCharacter.Items.SingleOrDefault(i => i.Definition == clientItemDefinition.Id && i.Tint == orderDetailTint)
+                    : null;
 
                 if (dbItem is not null)
                 {
@@ -155,7 +157,7 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
 
                 pendingUpdates.Add(() =>
                 {
-                    var clientItem = connection.Player.Items.SingleOrDefault(x => x.Definition == itemDefinition.Id && x.Tint == orderDetailTint);
+                    var clientItem = connection.Player.Items.SingleOrDefault(x => x.Id == savedItem.Id);
 
                     var addItem = false;
 
@@ -191,6 +193,8 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
                         clientUpdatePacketItemAdd.Payload = writer.Buffer;
 
                         connection.SendTunneled(clientUpdatePacketItemAdd);
+
+                        HousingHelper.NotifyHouseAdded(_resourceManager, _dbContextFactory, connection.Player, itemDefinition, clientItem.Id);
                     }
                     else
                     {

@@ -47,6 +47,7 @@ public class ResourceManager : IResourceManager, IDisposable
 
     public static readonly string ZonesDirectory = Path.Combine(BaseDirectory, "Zones");
     public static readonly string ZoneEnvironmentsDirectory = Path.Combine(ZonesDirectory, "Environments");
+    public static readonly string ZoneNpcsDirectory = Path.Combine(ZonesDirectory, "Npcs");
     public static readonly string HousesFile = Path.Combine(BaseDirectory, "Houses.json");
     public static readonly string PetsFile = Path.Combine(BaseDirectory, "Pets.json");
     public static readonly string MountsFile = Path.Combine(BaseDirectory, "Mounts.json");
@@ -98,6 +99,7 @@ public class ResourceManager : IResourceManager, IDisposable
     public ZoneDefinitionCollection Zones { get; }
     public ZoneEnvironmentCollection ZoneEnvironments { get; }
     public HouseDefinitionCollection Houses { get; }
+    public ZoneNpcsCollection ZoneNpcs { get; }
     public MountDefinitionCollection Mounts { get; }
     public PetDefinitionCollection Pets { get; }
     public PlayerTitleCollection PlayerTitles { get; }
@@ -168,6 +170,7 @@ public class ResourceManager : IResourceManager, IDisposable
         PointOfInterests = new(_logger);
         Consumables = new(_logger);
         Npcs = new(_logger);
+        ZoneNpcs = new(_logger);
         NameFilter = new(_logger);
         NpcMovements = new(_logger);
         NpcAmbient = new(_logger);
@@ -369,6 +372,9 @@ public class ResourceManager : IResourceManager, IDisposable
         if (!Npcs.Load(NpcsFile))
             return false;
 
+        if (!ZoneNpcs.Load(ZoneNpcsDirectory) || !ZoneNpcs.AddDefinitionsTo(Npcs))
+            return false;
+
         if (!NpcMovements.Load(NpcMovementsFile))
             return false;
 
@@ -507,7 +513,7 @@ public class ResourceManager : IResourceManager, IDisposable
             else if (e.FullPath == PointOfInterestsFile)
                 loaded = PointOfInterests.Load(PointOfInterestsFile);
             else if (e.FullPath == NpcsFile)
-                loaded = Npcs.Load(NpcsFile);
+                loaded = Npcs.Load(NpcsFile) && ZoneNpcs.AddDefinitionsTo(Npcs);
             else if (e.FullPath == NpcMovementsFile)
                 loaded = NpcMovements.Load(NpcMovementsFile);
             else if (e.FullPath == NpcAmbientFile)

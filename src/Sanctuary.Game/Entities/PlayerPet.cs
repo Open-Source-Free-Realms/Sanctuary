@@ -89,8 +89,6 @@ public sealed class PlayerPet
     private const int PetFeedHungerDelayMs = 900;
     private const int PetGroomDurationSeconds = 25;
     private const float PetGroomHygienePerMovement = 1f / 65536f;
-    private const float PetDefaultScale = 1f;
-    private const int PetNpcDisposition = 2;
     private const float PetWaypointTolerance = 0.5f;
     private const float PetFollowBehindDistance = 2f;
     private const float PetFollowSideDistance = 1.5f;
@@ -322,49 +320,32 @@ public sealed class PlayerPet
         if (_player.Zone is not WorldZone && _player.Zone is not HousingZone)
             return;
 
-        var petClientInfo = _player.GetPetClientInfo(id);
-
-        if (petClientInfo is null || !_player.PetDefinitions.TryGetValue(id, out var definitionId) ||
-            !_resourceManager.ClientItemDefinitions.TryGetValue(definitionId, out var clientItemDefinition) ||
-            !PetHelper.TryGetModel(_resourceManager, clientItemDefinition, out var modelDefinition))
-        {
+        if (!PetHelper.TryGetPetModel(_resourceManager, _player, id, out var petClientInfo, out var clientItemDefinition, out var modelDefinition))
             return;
-        }
 
         RecallPet();
 
-        if (!_player.Zone.TryCreateNpc(out var npc))
+        Npc? npc = null;
+
+        var isFromHouse = _player.Zone is HousingZone housingZone && housingZone.TryTakeHousePet(id, out npc);
+
+        if (!isFromHouse && !_player.Zone.TryCreateNpc(out npc))
+            return;
+
+        if (npc is null)
             return;
 
         npc.PositionSendIntervalMs = Npc.FollowerPositionIntervalMs;
-        npc.Name = petClientInfo.Name;
-        npc.NameId = petClientInfo.NameId;
-        npc.ModelId = modelDefinition.Id;
-        npc.TextureAlias = petClientInfo.TextureAlias;
-        _resourceManager.Pets.TryGetValue(modelDefinition.Id, out var petDefinition);
-        npc.TintAlias = petDefinition?.DefaultTintAlias is not null && petClientInfo.TintId == petDefinition.DefaultTintId
-            ? petDefinition.DefaultTintAlias
-            : clientItemDefinition.TintAlias;
-        npc.TintId = petClientInfo.TintId;
-        foreach (var itemGuid in petClientInfo.ItemGuids)
-        {
-            var clientItem = _player.Items.FirstOrDefault(item => item.Id == itemGuid);
 
-            if (clientItem is not null && _resourceManager.ClientItemDefinitions.TryGetValue(clientItem.Definition, out var definition)
-                && definition.Type == ItemDefinitionHelper.PetClothingItemType)
-            {
-                npc.Attachments.Add(PetHelper.GetAttachment(clientItem.Tint, definition));
-            }
-        }
-
-        npc.IsInteractable = false;
-        npc.Scale = modelDefinition.Scale > 0f ? modelDefinition.Scale : PetDefaultScale;
-        npc.Disposition = PetNpcDisposition;
+        if (!isFromHouse)
+            PetHelper.ApplyPetAppearance(_resourceManager, _player, npc, petClientInfo, clientItemDefinition, modelDefinition);
         npc.WaypointTolerance = PetWaypointTolerance;
         var followSide = GetRandomPetSide();
         var ownerPosition = _player.Position.ToVector3();
-        var summonPosition = GetPetStandPosition(_player.Zone, ownerPosition,
-            ownerPosition + Vector3.Cross(Vector3.UnitY, _player.GetFacingDirection()) * PetSummonSideDistance * followSide);
+        var summonPosition = isFromHouse
+            ? npc.Position.ToVector3()
+            : GetPetStandPosition(_player.Zone, ownerPosition,
+                ownerPosition + Vector3.Cross(Vector3.UnitY, _player.GetFacingDirection()) * PetSummonSideDistance * followSide);
         npc.Visible = true;
         npc.UpdateEverySecondAction = () =>
         {
@@ -390,16 +371,20 @@ public sealed class PlayerPet
         _player.ActivePetId = id;
         _player.ActivePetGuid = npc.Guid;
         _summonedPetId = id;
-        npc.UpdatePosition(summonPosition.ToVector4(), _player.Rotation);
         SendPetList();
 
-        _player.SendTunneledToVisible(new PlayerUpdatePacketPlayCompositeEffect
+        if (!isFromHouse)
         {
-            Guid = npc.Guid,
-            Unknown2 = _player.Guid,
-            CompositeEffectId = PetTeleportCompositeEffectId,
-            Position = npc.Position
-        }, true);
+            npc.UpdatePosition(summonPosition.ToVector4(), _player.Rotation);
+
+            _player.SendTunneledToVisible(new PlayerUpdatePacketPlayCompositeEffect
+            {
+                Guid = npc.Guid,
+                Unknown2 = _player.Guid,
+                CompositeEffectId = PetTeleportCompositeEffectId,
+                Position = npc.Position
+            }, true);
+        }
 
         UpdatePetSpeedBuff();
 
@@ -1623,13 +1608,16 @@ public sealed class PlayerPet
         if (!remember)
             _summonedPetId = 0;
 
+        var petId = _player.ActivePetId;
         var npc = DetachPet();
 
         if (npc is null)
             return;
 
         EntityHelper.ClearThoughtBubble(_player, npc);
-        EntityHelper.RemovePlayerGracefully(npc, compositeEffectId: PetTeleportCompositeEffectId);
+
+        if (_player.Zone is not HousingZone housingZone || !housingZone.TryReturnHousePet(_player, petId, npc))
+            EntityHelper.RemovePlayerGracefully(npc, compositeEffectId: PetTeleportCompositeEffectId);
 
         _player.ActivePetId = 0;
         _player.ActivePetGuid = 0;
