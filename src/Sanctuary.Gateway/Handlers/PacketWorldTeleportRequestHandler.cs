@@ -43,18 +43,7 @@ public static class PacketWorldTeleportRequestHandler
         var position = player.Position;
         var rotation = player.Rotation;
 
-        connection.Player.UpdatePosition(position, rotation);
-
-        connection.Player.UpdatePointOfInterest();
-
-        var clientUpdatePacketUpdateLocation = new ClientUpdatePacketUpdateLocation
-        {
-            Position = position,
-            Rotation = rotation,
-            Teleport = true
-        };
-
-        connection.SendTunneled(clientUpdatePacketUpdateLocation);
+        connection.Player.Teleport(position, rotation);
 
         return true;
     }

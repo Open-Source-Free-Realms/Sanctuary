@@ -15,7 +15,7 @@ public struct PlayerUpdatePacketUpdatePosition : ISerializablePacket, IDeseriali
     public Quaternion Rotation;
 
     public byte State;
-    public byte Unknown;
+    public byte TeleportSequence;
 
     public byte[] Serialize()
     {
@@ -29,7 +29,7 @@ public struct PlayerUpdatePacketUpdatePosition : ISerializablePacket, IDeseriali
         writer.Write(Rotation, true);
 
         writer.Write(State);
-        writer.Write(Unknown);
+        writer.Write(TeleportSequence);
 
         return writer.Buffer;
     }
@@ -55,7 +55,7 @@ public struct PlayerUpdatePacketUpdatePosition : ISerializablePacket, IDeseriali
         if (!reader.TryRead(out value.State))
             return false;
 
-        if (!reader.TryRead(out value.Unknown))
+        if (!reader.TryRead(out value.TeleportSequence))
             return false;
 
         return reader.RemainingLength == 0;
@@ -63,6 +63,6 @@ public struct PlayerUpdatePacketUpdatePosition : ISerializablePacket, IDeseriali
 
     public override string ToString()
     {
-        return $"{nameof(Guid)}: {Guid}, {nameof(Position)}: {Position}, {nameof(Rotation)}: {Rotation}, {nameof(State)}: {State}, {nameof(Unknown)}: {Unknown}";
+        return $"{nameof(Guid)}: {Guid}, {nameof(Position)}: {Position}, {nameof(Rotation)}: {Rotation}, {nameof(State)}: {State}, {nameof(TeleportSequence)}: {TeleportSequence}";
     }
 }

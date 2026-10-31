@@ -50,18 +50,7 @@ public static class PacketZoneSafeTeleportRequestHandler
         var position = pointOfInterest.SpawnPosition;
         var rotation = new Quaternion(rotationZ, 0f, rotationX, 0f);
 
-        connection.Player.UpdatePosition(position, rotation);
-
-        connection.Player.UpdatePointOfInterest();
-
-        var clientUpdatePacketUpdateLocation = new ClientUpdatePacketUpdateLocation
-        {
-            Position = position,
-            Rotation = rotation,
-            Teleport = true
-        };
-
-        connection.SendTunneled(clientUpdatePacketUpdateLocation);
+        connection.Player.Teleport(position, rotation);
 
         return true;
     }

@@ -12,7 +12,7 @@ public class ClientUpdatePacketUpdateLocation : BaseClientUpdatePacket, ISeriali
     public Quaternion Rotation;
 
     public bool Teleport;
-    public byte Unknown;
+    public byte TeleportSequence;
 
     public ClientUpdatePacketUpdateLocation() : base(OpCode)
     {
@@ -28,7 +28,7 @@ public class ClientUpdatePacketUpdateLocation : BaseClientUpdatePacket, ISeriali
         writer.Write(Rotation);
 
         writer.Write(Teleport);
-        writer.Write(Unknown);
+        writer.Write(TeleportSequence);
 
         return writer.Buffer;
     }
