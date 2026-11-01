@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
-using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Chat;
 
@@ -19,7 +18,7 @@ public static class OutfitGestureHelper
     private const int NoAnimation = 0;
     private const int QuickChatLoopCount = -1;
 
-    private const float GestureSeconds = 3f;
+    private const int GestureMilliseconds = 3000;
     private const int UnmatchedGestureDelayMilliseconds = 600;
     private const float GestureQueueDelaySeconds = 0.3f;
     private const float MarkerDelaySeconds = 0.01f;
@@ -29,8 +28,6 @@ public static class OutfitGestureHelper
     private sealed class PlayerGestures
     {
         public DateTimeOffset StartedAt;
-        public IZone? Zone;
-        public readonly HashSet<int> PlayedAnimationIds = [];
     }
 
     private static readonly ConcurrentDictionary<ulong, PendingGesture> PendingGestures = new();
@@ -68,35 +65,21 @@ public static class OutfitGestureHelper
             return;
 
         var playerGestures = GestureStates.GetValue(player, _ => new PlayerGestures());
-        bool firstPlay;
 
         lock (playerGestures)
         {
             var now = DateTimeOffset.UtcNow;
 
-            if (now < playerGestures.StartedAt.AddSeconds(GestureSeconds))
+            if (now < playerGestures.StartedAt.AddMilliseconds(GestureMilliseconds))
                 return;
 
             playerGestures.StartedAt = now;
-
-            if (playerGestures.Zone != player.Zone)
-            {
-                playerGestures.Zone = player.Zone;
-                playerGestures.PlayedAnimationIds.Clear();
-            }
-
-            firstPlay = playerGestures.PlayedAnimationIds.Add(pendingGesture.AnimationId);
         }
 
         var delay = queue ? GestureQueueDelaySeconds : default;
 
         EntityHelper.QueueAnimation(player, pendingGesture.AnimationId, loopCount: QuickChatLoopCount, unknown6: false, unknown7: true, unknown8: false,
             delay: delay, recipients: [player]);
-
-        if (firstPlay)
-            EntityHelper.QueueAnimation(player, NoAnimation, loopCount: QuickChatLoopCount, unknown6: false, unknown7: true, unknown8: false,
-                endTime: delay + GestureSeconds, recipients: [player]);
-
         EntityHelper.QueueAnimation(player, NoAnimation, loopCount: QuickChatLoopCount, unknown6: false, unknown7: true, unknown8: false,
             delay: MarkerDelaySeconds, recipients: [player]);
 

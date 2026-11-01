@@ -53,7 +53,7 @@ public static class EntityHelper
     };
 
     public static void QueueAnimation(IEntity entity, int animationGroupId, int loopCount, bool unknown6, bool unknown7, bool unknown8,
-        float delay = default, float endTime = default, IEnumerable<Player>? recipients = null)
+        float delay = default, IEnumerable<Player>? recipients = null)
     {
         var playerUpdatePacketQueueAnimation = new PlayerUpdatePacketQueueAnimation
         {
@@ -62,7 +62,6 @@ public static class EntityHelper
             LoopCount = loopCount,
             PlaybackSpeed = QueueAnimationPlaybackSpeed,
             Delay = delay,
-            EndTime = endTime,
             Unknown6 = unknown6,
             Unknown7 = unknown7,
             Unknown8 = unknown8
