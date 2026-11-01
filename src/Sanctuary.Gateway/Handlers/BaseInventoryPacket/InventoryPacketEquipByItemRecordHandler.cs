@@ -169,7 +169,7 @@ public static class InventoryPacketEquipByItemRecordHandler
 
         playerUpdatePacketEquipItemChange.Id = clientItem.Id;
 
-        playerUpdatePacketEquipItemChange.Attachment = clientUpdatePacketEquipItem.Attachment;
+        playerUpdatePacketEquipItemChange.Attachment = connection.Player.GetAttachment(clientItemDefinition.Slot) ?? clientUpdatePacketEquipItem.Attachment;
 
         playerUpdatePacketEquipItemChange.ProfileId = connection.Player.ActiveProfileId;
 

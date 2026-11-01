@@ -1069,23 +1069,6 @@ public sealed class Player : ClientPcData, IEntity
         if (profileId != ActiveProfileId || (changedSlot != WeaponSlot && changedSlot != FlairShardSlot))
             return;
 
-        // Job switches reuse the cached attachment effect until the new weapon appears.
-        if (changedSlot == WeaponSlot
-            && GetEquippedItem(WeaponSlot) is { } item
-            && _resourceManager.ClientItemDefinitions.TryGetValue(item.Definition, out var definition)
-            && GetAttachment(WeaponSlot) is { } attachment)
-        {
-            SendTunneledToVisible(new PlayerUpdatePacketEquipItemChange
-            {
-                Guid = Guid,
-                Id = item.Id,
-                Attachment = attachment,
-                ProfileId = ActiveProfileId,
-                ItemClassId = definition.Class,
-                WieldType = GetWieldType()
-            }, true);
-        }
-
         SendTunneledToVisible(GetWeaponFlairOverridePacket(), true);
     }
 
