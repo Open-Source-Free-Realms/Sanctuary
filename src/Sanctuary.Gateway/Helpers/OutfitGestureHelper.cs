@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
+using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
+using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Chat;
 
@@ -15,15 +18,22 @@ public static class OutfitGestureHelper
     private const int NoAnimation = 0;
     private const int QuickChatLoopCount = -1;
 
-    private const int GestureMilliseconds = 3000;
+    private const float GestureSeconds = 3f;
     private const int UnmatchedGestureDelayMilliseconds = 600;
     private const float GestureQueueDelaySeconds = 0.3f;
     private const float MarkerDelaySeconds = 0.01f;
 
     private sealed record PendingGesture(GatewayConnection Connection, QuickChatSendChatToChannelPacket QuickChatSendChatToChannelPacket, int AnimationId);
 
+    private sealed class PlayerGestures
+    {
+        public DateTimeOffset StartedAt;
+        public IZone? Zone;
+        public readonly HashSet<int> PlayedAnimationIds = [];
+    }
+
     private static readonly ConcurrentDictionary<ulong, PendingGesture> PendingGestures = new();
-    private static readonly ConcurrentDictionary<ulong, DateTimeOffset> GestureStartTimes = new();
+    private static readonly ConditionalWeakTable<Player, PlayerGestures> GestureStates = new();
 
     public static bool IsOutfitQuickChat(QuickChatDefinition quickChatDefinition) => quickChatDefinition.ParentId == OutfitQuickChatMenu;
 
@@ -56,15 +66,36 @@ public static class OutfitGestureHelper
         if (!PendingGestures.TryRemove(new KeyValuePair<ulong, PendingGesture>(player.Guid, pendingGesture)))
             return;
 
-        var now = DateTimeOffset.UtcNow;
+        var playerGestures = GestureStates.GetValue(player, _ => new PlayerGestures());
+        bool firstPlay;
 
-        if (GestureStartTimes.TryGetValue(player.Guid, out var gestureStartTime) && now < gestureStartTime.AddMilliseconds(GestureMilliseconds))
-            return;
+        lock (playerGestures)
+        {
+            var now = DateTimeOffset.UtcNow;
 
-        GestureStartTimes[player.Guid] = now;
+            if (now < playerGestures.StartedAt.AddSeconds(GestureSeconds))
+                return;
+
+            playerGestures.StartedAt = now;
+
+            if (playerGestures.Zone != player.Zone)
+            {
+                playerGestures.Zone = player.Zone;
+                playerGestures.PlayedAnimationIds.Clear();
+            }
+
+            firstPlay = playerGestures.PlayedAnimationIds.Add(pendingGesture.AnimationId);
+        }
+
+        var delay = queue ? GestureQueueDelaySeconds : default;
 
         EntityHelper.QueueAnimation(player, pendingGesture.AnimationId, loopCount: QuickChatLoopCount, unknown6: false, unknown7: true, unknown8: false,
-            delay: queue ? GestureQueueDelaySeconds : default, recipients: [player]);
+            delay: delay, recipients: [player]);
+
+        if (firstPlay)
+            EntityHelper.QueueAnimation(player, NoAnimation, loopCount: QuickChatLoopCount, unknown6: false, unknown7: true, unknown8: false,
+                endTime: delay + GestureSeconds, recipients: [player]);
+
         EntityHelper.QueueAnimation(player, NoAnimation, loopCount: QuickChatLoopCount, unknown6: false, unknown7: true, unknown8: false,
             delay: MarkerDelaySeconds, recipients: [player]);
 
