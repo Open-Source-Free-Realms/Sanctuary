@@ -64,6 +64,7 @@ public static class OutfitGestureHelper
         if (!PendingGestures.TryRemove(new KeyValuePair<ulong, PendingGesture>(player.Guid, pendingGesture)))
             return;
 
+        var delay = queue ? GestureQueueDelaySeconds : default;
         var playerGestures = GestureStates.GetValue(player, _ => new PlayerGestures());
 
         lock (playerGestures)
@@ -73,10 +74,8 @@ public static class OutfitGestureHelper
             if (now < playerGestures.StartedAt.AddMilliseconds(GestureMilliseconds))
                 return;
 
-            playerGestures.StartedAt = now;
+            playerGestures.StartedAt = now.AddSeconds(delay);
         }
-
-        var delay = queue ? GestureQueueDelaySeconds : default;
 
         EntityHelper.QueueAnimation(player, pendingGesture.AnimationId, loopCount: QuickChatLoopCount, unknown6: false, unknown7: true, unknown8: false,
             delay: delay, recipients: [player]);
