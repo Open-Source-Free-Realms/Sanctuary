@@ -20,8 +20,8 @@ public static class OutfitGestureHelper
 
     private const int GestureMilliseconds = 3000;
     private const int UnmatchedGestureDelayMilliseconds = 600;
-    private const float GestureQueueDelaySeconds = 0.3f;
-    private const float MarkerDelaySeconds = 0.01f;
+    private const float WieldTypeGestureDelaySeconds = 0.3f;
+    private const float TimelineGapSeconds = 0.01f;
 
     private sealed record PendingGesture(GatewayConnection Connection, QuickChatSendChatToChannelPacket QuickChatSendChatToChannelPacket, int AnimationId);
 
@@ -57,14 +57,14 @@ public static class OutfitGestureHelper
             Release(pendingGesture, wieldTypeChanged);
     }
 
-    private static void Release(PendingGesture pendingGesture, bool queue = false)
+    private static void Release(PendingGesture pendingGesture, bool wieldTypeChanged = false)
     {
         var player = pendingGesture.Connection.Player;
 
         if (!PendingGestures.TryRemove(new KeyValuePair<ulong, PendingGesture>(player.Guid, pendingGesture)))
             return;
 
-        var delay = queue ? GestureQueueDelaySeconds : default;
+        var delay = wieldTypeChanged ? WieldTypeGestureDelaySeconds : TimelineGapSeconds;
         var playerGestures = GestureStates.GetValue(player, _ => new PlayerGestures());
 
         lock (playerGestures)
@@ -80,7 +80,7 @@ public static class OutfitGestureHelper
         EntityHelper.QueueAnimation(player, pendingGesture.AnimationId, loopCount: QuickChatLoopCount, unknown6: false, unknown7: true, unknown8: false,
             delay: delay, recipients: [player]);
         EntityHelper.QueueAnimation(player, NoAnimation, loopCount: QuickChatLoopCount, unknown6: false, unknown7: true, unknown8: false,
-            delay: MarkerDelaySeconds, recipients: [player]);
+            delay: TimelineGapSeconds, recipients: [player]);
 
         var delayMilliseconds = (int)TimeSpan.FromSeconds(delay).TotalMilliseconds;
 
