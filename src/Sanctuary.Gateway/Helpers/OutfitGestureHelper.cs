@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
@@ -99,6 +100,14 @@ public static class OutfitGestureHelper
         EntityHelper.QueueAnimation(player, NoAnimation, loopCount: QuickChatLoopCount, unknown6: false, unknown7: true, unknown8: false,
             delay: MarkerDelaySeconds, recipients: [player]);
 
-        player.SendTunneledToVisible(pendingGesture.QuickChatSendChatToChannelPacket);
+        var delayMilliseconds = (int)TimeSpan.FromSeconds(delay).TotalMilliseconds;
+
+        foreach (var visiblePlayer in player.VisiblePlayers.Values)
+        {
+            if (visiblePlayer.Ignores.Any(x => x.Guid == player.Guid))
+                continue;
+
+            visiblePlayer.SendTunneledDelayed(pendingGesture.QuickChatSendChatToChannelPacket, delayMilliseconds);
+        }
     }
 }
