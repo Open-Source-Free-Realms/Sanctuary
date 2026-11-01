@@ -54,16 +54,17 @@ public static class OutfitGestureHelper
         if (wieldType != 0 && wieldTypeChanged)
             PendingGestures.TryRemove(new KeyValuePair<ulong, PendingGesture>(guid, pendingGesture));
         else
-            Release(pendingGesture);
+            Release(pendingGesture, wieldTypeChanged);
     }
 
-    private static void Release(PendingGesture pendingGesture)
+    private static void Release(PendingGesture pendingGesture, bool queue = false)
     {
         var player = pendingGesture.Connection.Player;
 
         if (!PendingGestures.TryRemove(new KeyValuePair<ulong, PendingGesture>(player.Guid, pendingGesture)))
             return;
 
+        var delay = queue ? GestureQueueDelaySeconds : default;
         var playerGestures = GestureStates.GetValue(player, _ => new PlayerGestures());
 
         lock (playerGestures)
@@ -73,15 +74,15 @@ public static class OutfitGestureHelper
             if (now < playerGestures.StartedAt.AddMilliseconds(GestureMilliseconds))
                 return;
 
-            playerGestures.StartedAt = now.AddSeconds(GestureQueueDelaySeconds);
+            playerGestures.StartedAt = now.AddSeconds(delay);
         }
 
         EntityHelper.QueueAnimation(player, pendingGesture.AnimationId, loopCount: QuickChatLoopCount, unknown6: false, unknown7: true, unknown8: false,
-            delay: GestureQueueDelaySeconds, recipients: [player]);
+            delay: delay, recipients: [player]);
         EntityHelper.QueueAnimation(player, NoAnimation, loopCount: QuickChatLoopCount, unknown6: false, unknown7: true, unknown8: false,
             delay: MarkerDelaySeconds, recipients: [player]);
 
-        var delayMilliseconds = (int)TimeSpan.FromSeconds(GestureQueueDelaySeconds).TotalMilliseconds;
+        var delayMilliseconds = (int)TimeSpan.FromSeconds(delay).TotalMilliseconds;
 
         foreach (var visiblePlayer in player.VisiblePlayers.Values)
         {
