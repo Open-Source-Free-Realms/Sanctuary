@@ -99,6 +99,7 @@ public static class BoomboxHelper
                 var targets = zone.Players.Where(p => dancing.Contains(p.Guid)
                     && p.BoomboxDanceOwner == boomboxNpc.Guid
                     && zoneDances.Selection.Owns(p.Guid, boomboxNpc.Guid)
+                    && now >= p.OutfitGestureEndsAt
                     && definition.DanceDurationsMs.ContainsKey(p.TemporaryAppearance != 0 ? p.TemporaryAppearance : p.Model)).ToList();
                 if (targets.Count > 0 && !wasPlaying)
                     sharedPlayback.Resume();
@@ -117,7 +118,8 @@ public static class BoomboxHelper
             }
             foreach (var player in zone.Players.Where(p => dancing.Contains(p.Guid)
                          && p.BoomboxDanceOwner == boomboxNpc.Guid
-                         && zoneDances.Selection.Owns(p.Guid, boomboxNpc.Guid)))
+                         && zoneDances.Selection.Owns(p.Guid, boomboxNpc.Guid)
+                         && now >= p.OutfitGestureEndsAt))
             {
                 if (definition.IndependentDanceDurationsMs.TryGetValue(player.Model, out var choices))
                 {

@@ -22,6 +22,8 @@ public static class OutfitGestureHelper
     private const int UnmatchedGestureDelayMilliseconds = 600;
     private const float WieldTypeGestureDelaySeconds = 0.3f;
     private const float TimelineGapSeconds = 0.01f;
+    private const int LongestGestureMilliseconds = 4000;
+    private const int GestureEndMarginMilliseconds = 100;
 
     private sealed record PendingGesture(GatewayConnection Connection, QuickChatSendChatToChannelPacket QuickChatSendChatToChannelPacket, int AnimationId);
 
@@ -76,6 +78,9 @@ public static class OutfitGestureHelper
 
             playerGestures.StartedAt = now.AddSeconds(delay);
         }
+
+        player.OutfitGestureEndsAt = Environment.TickCount64 + (long)TimeSpan.FromSeconds(delay + TimelineGapSeconds).TotalMilliseconds
+            + LongestGestureMilliseconds + GestureEndMarginMilliseconds;
 
         EntityHelper.QueueAnimation(player, pendingGesture.AnimationId, loopCount: QuickChatLoopCount, unknown6: false, unknown7: true, unknown8: false,
             delay: delay, recipients: [player]);
