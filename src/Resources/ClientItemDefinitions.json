@@ -171785,7 +171785,6 @@
     "DescriptionId": 16983,
     "Icon": {
       "Id": 6475
-      
     },
     "Cost": 370,
     "Class": 72,
@@ -171799,7 +171798,6 @@
     "ModelName": "freestyle_<race>_<gender>_head_chattyhat.adr",
     "CategoryId": 101,
     "MembersOnly": true
-    
   },
   {
     "Comment": "Camp Robbie Hat",
@@ -171809,7 +171807,6 @@
     "DescriptionId": 16984,
     "Icon": {
       "Id": 6476
-     
     },
     "Cost": 370,
     "Class": 72,
