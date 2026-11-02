@@ -13,6 +13,7 @@ public static class ItemDefinitionHelper
     public const int PetClothingItemType = 3;
     public const int PetUtilityItemType = 4;
     public const int MountItemType = 19;
+    public const int HousingItemType = 29;
 
     private const int NoPurchasesLeftMaxStackSize = 0;
 
