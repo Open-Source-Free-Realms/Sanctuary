@@ -24,6 +24,7 @@ public static class OutfitGestureHelper
     private const float TimelineGapSeconds = 0.01f;
     private const int LongestGestureMilliseconds = 4000;
     private const int GestureEndMarginMilliseconds = 100;
+    private const int DancingGestureDelayMilliseconds = 100;
 
     private sealed record PendingGesture(GatewayConnection Connection, QuickChatSendChatToChannelPacket QuickChatSendChatToChannelPacket, int AnimationId);
 
@@ -67,6 +68,8 @@ public static class OutfitGestureHelper
             return;
 
         var delay = wieldTypeChanged ? WieldTypeGestureDelaySeconds : TimelineGapSeconds;
+        var dancing = player.BoomboxDanceOwner != 0 && player.BoomboxDanceAnimation != 0;
+        var dancingDelayMilliseconds = dancing ? DancingGestureDelayMilliseconds : default;
         var playerGestures = GestureStates.GetValue(player, _ => new PlayerGestures());
 
         lock (playerGestures)
@@ -76,18 +79,19 @@ public static class OutfitGestureHelper
             if (now < playerGestures.StartedAt.AddMilliseconds(GestureMilliseconds))
                 return;
 
-            playerGestures.StartedAt = now.AddSeconds(delay);
+            playerGestures.StartedAt = now.AddMilliseconds(dancingDelayMilliseconds).AddSeconds(delay);
         }
 
-        player.OutfitGestureEndsAt = Environment.TickCount64 + (long)TimeSpan.FromSeconds(delay + TimelineGapSeconds).TotalMilliseconds
+        player.OutfitGestureEndsAt = Environment.TickCount64 + dancingDelayMilliseconds
+            + (long)TimeSpan.FromSeconds(delay + TimelineGapSeconds).TotalMilliseconds
             + LongestGestureMilliseconds + GestureEndMarginMilliseconds;
 
-        EntityHelper.QueueAnimation(player, pendingGesture.AnimationId, loopCount: QuickChatLoopCount, unknown6: false, unknown7: true, unknown8: false,
-            delay: delay, recipients: [player]);
-        EntityHelper.QueueAnimation(player, NoAnimation, loopCount: QuickChatLoopCount, unknown6: false, unknown7: true, unknown8: false,
-            delay: TimelineGapSeconds, recipients: [player]);
+        if (dancing)
+            _ = Task.Delay(dancingDelayMilliseconds).ContinueWith(_ => QueueGesture(player, pendingGesture.AnimationId, delay));
+        else
+            QueueGesture(player, pendingGesture.AnimationId, delay);
 
-        var delayMilliseconds = (int)TimeSpan.FromSeconds(delay).TotalMilliseconds;
+        var delayMilliseconds = dancingDelayMilliseconds + (int)TimeSpan.FromSeconds(delay).TotalMilliseconds;
 
         foreach (var visiblePlayer in player.VisiblePlayers.Values)
         {
@@ -96,5 +100,13 @@ public static class OutfitGestureHelper
 
             visiblePlayer.SendTunneledDelayed(pendingGesture.QuickChatSendChatToChannelPacket, delayMilliseconds);
         }
+    }
+
+    private static void QueueGesture(Player player, int animationId, float delay)
+    {
+        EntityHelper.QueueAnimation(player, animationId, loopCount: QuickChatLoopCount, unknown6: false, unknown7: true, unknown8: false,
+            delay: delay, recipients: [player]);
+        EntityHelper.QueueAnimation(player, NoAnimation, loopCount: QuickChatLoopCount, unknown6: false, unknown7: true, unknown8: false,
+            delay: TimelineGapSeconds, recipients: [player]);
     }
 }
