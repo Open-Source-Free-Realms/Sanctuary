@@ -171784,8 +171784,8 @@
     "NameId": 16979,
     "DescriptionId": 16983,
     "Icon": {
-      "Id": 6475,
-      "TintId": 228
+      "Id": 6475
+      
     },
     "Cost": 370,
     "Class": 72,
@@ -171798,8 +171798,8 @@
     "Slot": 1,
     "ModelName": "freestyle_<race>_<gender>_head_chattyhat.adr",
     "CategoryId": 101,
-    "MembersOnly": true,
-    "IsTintable": true
+    "MembersOnly": true
+    
   },
   {
     "Comment": "Camp Robbie Hat",
@@ -171808,8 +171808,8 @@
     "NameId": 16980,
     "DescriptionId": 16984,
     "Icon": {
-      "Id": 6476,
-      "TintId": 228
+      "Id": 6476
+     
     },
     "Cost": 370,
     "Class": 72,
@@ -171822,8 +171822,8 @@
     "Slot": 1,
     "ModelName": "freestyle_<race>_<gender>_head_robgoblinhelmet.adr",
     "CategoryId": 101,
-    "MembersOnly": true,
-    "IsTintable": true
+    "MembersOnly": true
+ 
   },
   {
     "Comment": "Camp Chatty Shorts",
@@ -171832,8 +171832,7 @@
     "NameId": 16981,
     "DescriptionId": 16983,
     "Icon": {
-      "Id": 6463,
-      "TintId": 227
+      "Id": 6463
     },
     "Cost": 370,
     "Class": 72,
@@ -171846,8 +171845,7 @@
     "Slot": 4,
     "ModelName": "freestyle_<race>_<gender>_legs_cargoshortsbaggy.adr",
     "CategoryId": 104,
-    "MembersOnly": true,
-    "IsTintable": true
+    "MembersOnly": true
   },
   {
     "Comment": "Camp Robbie Shorts",
@@ -171856,8 +171854,7 @@
     "NameId": 16982,
     "DescriptionId": 16984,
     "Icon": {
-      "Id": 6464,
-      "TintId": 227
+      "Id": 6464
     },
     "Cost": 370,
     "Class": 72,
@@ -171870,8 +171867,7 @@
     "Slot": 4,
     "ModelName": "freestyle_<race>_<gender>_legs_cargoshortsbaggy.adr",
     "CategoryId": 104,
-    "MembersOnly": true,
-    "IsTintable": true
+    "MembersOnly": true
   },
   {
     "Comment": "Boat Paddle",
