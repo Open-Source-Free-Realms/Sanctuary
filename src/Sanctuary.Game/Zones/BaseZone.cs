@@ -1684,6 +1684,8 @@ public abstract class BaseZone : IZone, IDisposable
 
         Task.WaitAll(_updateEveryTickTask, _updateEverySecondTask);
 
+        Routines.CancelAll();
+
         lock (_collectionNodeLock)
             _collectionNodeRefills.Clear();
 
