@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 using Microsoft.Extensions.Logging;
@@ -13,6 +15,8 @@ namespace Sanctuary.Game.Resources;
 public class NavMeshCollection : ObservableConcurrentDictionary<string, DtNavMesh>
 {
     private readonly ILogger _logger;
+    private readonly ConcurrentDictionary<string, string> _filePaths = new();
+    private readonly object _loadLock = new();
 
     public NavMeshCollection(ILogger logger)
     {
@@ -28,23 +32,45 @@ public class NavMeshCollection : ObservableConcurrentDictionary<string, DtNavMes
             return true;
         }
 
-        foreach (var filePath in Directory.GetFiles(directoryPath, "*.navmesh"))
-        {
-            var zoneName = Path.GetFileNameWithoutExtension(filePath);
+        Clear();
+        _filePaths.Clear();
 
-            if (!NavMeshLoader.TryLoad(filePath, _logger, out var navMesh))
+        foreach (var filePath in Directory.GetFiles(directoryPath, "*.navmesh"))
+            _filePaths[Path.GetFileNameWithoutExtension(filePath)] = filePath;
+
+        _logger.LogInformation("Found {Count} navmesh(es) in \"{Path}\"; each loads when its zone is first created.", _filePaths.Count, directoryPath);
+        return true;
+    }
+
+    public bool TryGetNavMesh(string zoneName, [MaybeNullWhen(false)] out DtNavMesh navMesh)
+    {
+        if (TryGetValue(zoneName, out navMesh))
+            return true;
+
+        if (!_filePaths.TryGetValue(zoneName, out var filePath))
+            return false;
+
+        lock (_loadLock)
+        {
+            if (TryGetValue(zoneName, out navMesh))
+                return true;
+
+            if (!NavMeshLoader.TryLoad(filePath, _logger, out var loadedNavMesh))
             {
                 _logger.LogWarning(
                     "Skipping navmesh file \"{Path}\" due to a load failure (see error above). " +
                     "Zone \"{ZoneName}\" will have no navmesh pathfinding available.",
                     filePath, zoneName);
-                continue;
+
+                _filePaths.TryRemove(zoneName, out _);
+                return false;
             }
 
-            this[zoneName] = navMesh!;
-        }
+            navMesh = loadedNavMesh!;
+            this[zoneName] = navMesh;
 
-        _logger.LogInformation("Loaded {Count} navmesh(es) from \"{Path}\".", Count, directoryPath);
-        return true;
+            _logger.LogInformation("Loaded navmesh for zone \"{ZoneName}\" from \"{Path}\".", zoneName, filePath);
+            return true;
+        }
     }
 }

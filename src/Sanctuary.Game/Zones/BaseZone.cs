@@ -136,7 +136,7 @@ public abstract class BaseZone : IZone, IDisposable
             ArgumentNullException.ThrowIfNull(tile.Value.VisibleTiles);
         }
 
-        if (_resourceManager.NavMeshes.TryGetValue(Name, out var navMesh))
+        if (_resourceManager.NavMeshes.TryGetNavMesh(Name, out var navMesh))
             NavMeshQuery = new DtNavMeshQuery(navMesh);
     }
 
