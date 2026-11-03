@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Game;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -58,7 +59,8 @@ public static class InventoryPacketEquipByItemRecordHandler
         if (clientItemDefinition.Type != 1)
             return true;
 
-        if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out var itemClass))
+        if (clientItemDefinition.Class != ItemDefinitionHelper.NoItemClass
+            && !_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out _))
         {
             _logger.LogWarning("User tried to equip item with unknown class. {id} {definition} {class}",
                 clientItem.Id, clientItem.Definition, clientItemDefinition.Class);
