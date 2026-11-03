@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 
+using DotRecast.Core;
 using DotRecast.Core.Numerics;
 using DotRecast.Detour;
 
@@ -19,6 +21,7 @@ public sealed class Pathfinder
     private const float ReachableFraction = 0.9f;
 
     private static readonly RcVec3f NearestPolygonExtents = new(2f, 4f, 2f);
+    private static readonly RcRand RandomPointSource = new(Random.Shared);
 
     private readonly int _maxSearchIterations;
 
@@ -151,11 +154,28 @@ public sealed class Pathfinder
         }
     }
 
-    public bool TryGetNearestWalkablePoint(Vector3 position, out Vector3 point)
+    public bool TryGetNearestWalkablePoint(Vector3 position, out Vector3 point) => TryGetNearestWalkablePoint(position, NearestPolygonExtents, out point);
+
+    public bool TryGetNearestWalkablePoint(Vector3 position, Vector3 extents, out Vector3 point) => TryGetNearestWalkablePoint(position, extents.ToRecast(), out point);
+
+    private bool TryGetNearestWalkablePoint(Vector3 position, RcVec3f extents, out Vector3 point)
     {
-        Query.FindNearestPoly(position.ToRecast(), NearestPolygonExtents, Filter, out var polygon, out var nearest, out _);
+        Query.FindNearestPoly(position.ToRecast(), extents, Filter, out var polygon, out var nearest, out _);
 
         point = polygon != 0 ? nearest.ToVector3() : position;
         return polygon != 0;
+    }
+
+    public bool TryGetRandomWalkablePoint(Vector3 center, float radius, out Vector3 point)
+    {
+        point = center;
+
+        Query.FindNearestPoly(center.ToRecast(), NearestPolygonExtents, Filter, out var polygon, out var nearest, out _);
+
+        if (polygon == 0 || Query.FindRandomPointWithinCircle(polygon, nearest, radius, Filter, RandomPointSource, out _, out var randomPoint).Failed())
+            return false;
+
+        point = randomPoint.ToVector3();
+        return true;
     }
 }

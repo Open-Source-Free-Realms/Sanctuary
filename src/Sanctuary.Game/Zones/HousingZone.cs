@@ -127,11 +127,9 @@ public sealed class HousingZone : BaseZone
             PetHelper.ApplyPetAppearance(_resourceManager, owner, npc, petClientInfo, clientItemDefinition, modelDefinition);
 
             var heading = Random.Shared.NextSingle() * MathF.Tau;
-            var position = new Vector4(SpawnPosition.X + MathF.Sin(heading) * HousePetSpawnRadius, SpawnPosition.Y,
-                SpawnPosition.Z + MathF.Cos(heading) * HousePetSpawnRadius, 1f);
 
             npc.Visible = true;
-            npc.UpdatePosition(position, QuaternionExtensions.FromHeading(heading));
+            npc.UpdatePosition(GetHousePetSpawnPosition(npc, buildArea, heading).ToVector4(), QuaternionExtensions.FromHeading(heading));
             npc.MovementController = CreateHousePetMovement(npc, buildArea);
 
             _housePets[petClientInfo.Id] = npc;
@@ -154,9 +152,33 @@ public sealed class HousingZone : BaseZone
 
         npc.PositionUpdateFrequency = Npc.DefaultPositionUpdateFrequency;
         npc.NavMeshFilter = NavMeshFilter;
+
+        var position = npc.Position.ToVector3();
+
+        if (TryGetHousePetGround(npc, buildArea, position, out var ground) && ground.DistanceSquaredXZ(position) > HousePetSpawnRadius * HousePetSpawnRadius)
+            npc.UpdatePosition(ground.ToVector4(), npc.Rotation);
+
         npc.MovementController = CreateHousePetMovement(npc, buildArea);
         _housePets[petId] = npc;
         return true;
+    }
+
+    private Vector3 GetHousePetSpawnPosition(Npc npc, BoundingBox buildArea, float heading)
+    {
+        var spawnPosition = SpawnPosition.ToVector3();
+
+        if (TryGetHousePetGround(npc, buildArea, spawnPosition, out var ground) && npc.TryGetRandomWalkablePoint(ground, HousePetSpawnRadius, out var position))
+            return position;
+
+        return spawnPosition + new Vector3(MathF.Sin(heading), 0f, MathF.Cos(heading)) * HousePetSpawnRadius;
+    }
+
+    private static bool TryGetHousePetGround(Npc npc, BoundingBox buildArea, Vector3 position, out Vector3 ground)
+    {
+        var buildAreaMin = buildArea.Min.ToVector3();
+        var buildAreaMax = buildArea.Max.ToVector3();
+
+        return npc.TryGetNearestWalkablePoint(Vector3.Clamp(position, buildAreaMin, buildAreaMax), buildAreaMax - buildAreaMin, out ground);
     }
 
     private bool TryGetHousePetArea([MaybeNullWhen(false)] out BoundingBox buildArea)

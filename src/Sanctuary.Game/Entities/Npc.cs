@@ -833,6 +833,18 @@ public class Npc : IScriptableNpc, IEntity
 
     public Vector3 GetReachablePoint(Vector3 from, Vector3 to) => _pathfinder?.GetReachablePoint(from, to) ?? to;
 
+    public bool TryGetNearestWalkablePoint(Vector3 position, Vector3 extents, out Vector3 point)
+    {
+        point = position;
+        return _pathfinder is not null && _pathfinder.TryGetNearestWalkablePoint(position, extents, out point);
+    }
+
+    public bool TryGetRandomWalkablePoint(Vector3 center, float radius, out Vector3 point)
+    {
+        point = center;
+        return _pathfinder is not null && _pathfinder.TryGetRandomWalkablePoint(center, radius, out point);
+    }
+
     public bool TrySpawnNear(Vector3 position, Quaternion rotation, float maxHeightOffset = DefaultSpawnMaxHeightOffset)
     {
         var spawnPosition = position;
