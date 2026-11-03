@@ -5,6 +5,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Numerics;
 
+using DotRecast.Detour;
+
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Collections;
@@ -140,7 +142,8 @@ public class Npc : IScriptableNpc, IEntity
     );
     private const string MovementRoutineName = "Movement";
     private const float DefaultSpawnMaxHeightOffset = 3f;
-    private readonly Pathfinder? _pathfinder;
+    private Pathfinder? _pathfinder;
+    private IDtQueryFilter _navMeshFilter;
     private readonly PathFollower _pathFollower;
 
     // TODO: May be worth re-evaluating this check at a later date.
@@ -153,8 +156,10 @@ public class Npc : IScriptableNpc, IEntity
         Routines = new RoutineManager(Logger, zone.TickDelta);
 
         // TODO: these need to be rebuilt/reset on zone change in the future.
+        _navMeshFilter = zone.NavMeshFilter;
+
         if (zone.NavMeshQuery is not null)
-            _pathfinder = new Pathfinder(zone.NavMeshQuery, zone.NavMeshFilter, MaxSearchIterations);
+            _pathfinder = new Pathfinder(zone.NavMeshQuery, _navMeshFilter, MaxSearchIterations);
 
         _pathFollower = new PathFollower(zone.NavMeshQuery);
     }
@@ -812,6 +817,18 @@ public class Npc : IScriptableNpc, IEntity
         ZoneTile.Entities.Remove(Guid, out _);
 
         Zone.TryRemoveNpc(Guid);
+    }
+
+    public IDtQueryFilter NavMeshFilter
+    {
+        get => _navMeshFilter;
+        set
+        {
+            _navMeshFilter = value;
+
+            if (Zone.NavMeshQuery is not null)
+                _pathfinder = new Pathfinder(Zone.NavMeshQuery, value, MaxSearchIterations);
+        }
     }
 
     public bool TrySpawnNear(Vector3 position, Quaternion rotation, float maxHeightOffset = DefaultSpawnMaxHeightOffset)

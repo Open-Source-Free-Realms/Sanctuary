@@ -23,6 +23,7 @@ using Sanctuary.Database;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Interactions;
+using Sanctuary.Game.Pathing;
 using Sanctuary.Game.Quests;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Zones;
@@ -98,7 +99,8 @@ public abstract class BaseZone : IZone, IDisposable
     public ScriptRuntime ScriptRuntime => _scriptRuntime;
 
     public DtNavMeshQuery? NavMeshQuery { get; }
-    public IDtQueryFilter NavMeshFilter { get; } = new DtQueryDefaultFilter();
+    public IDtQueryFilter NavMeshFilter { get; } = CreateNavMeshFilter(NavMeshPolyFlags.Walk);
+    public IDtQueryFilter FollowerNavMeshFilter { get; } = CreateNavMeshFilter(NavMeshPolyFlags.Walk | NavMeshPolyFlags.Swim | NavMeshPolyFlags.Outside);
 
     public ulong? OwnerId { get; init; }
 
@@ -1366,6 +1368,13 @@ public abstract class BaseZone : IZone, IDisposable
     public bool IsOutOfBounds(Vector4 position)
     {
         return IsOutOfBounds(GetTileFromPosition(position));
+    }
+
+    private static DtQueryDefaultFilter CreateNavMeshFilter(NavMeshPolyFlags includeFlags)
+    {
+        var filter = new DtQueryDefaultFilter();
+        filter.SetIncludeFlags((int)includeFlags);
+        return filter;
     }
 
     public ZoneTile GetTileFromPosition(Vector4 position)

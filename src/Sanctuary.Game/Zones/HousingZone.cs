@@ -153,6 +153,7 @@ public sealed class HousingZone : BaseZone
             return false;
 
         npc.PositionUpdateFrequency = Npc.DefaultPositionUpdateFrequency;
+        npc.NavMeshFilter = NavMeshFilter;
         npc.MovementController = CreateHousePetMovement(npc, buildArea);
         _housePets[petId] = npc;
         return true;

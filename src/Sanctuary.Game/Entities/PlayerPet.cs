@@ -327,6 +327,7 @@ public sealed class PlayerPet
             return;
 
         npc.PositionUpdateFrequency = Npc.FollowerPositionUpdateFrequency;
+        npc.NavMeshFilter = _player.Zone.FollowerNavMeshFilter;
 
         if (!isFromHouse)
             PetHelper.ApplyPetAppearance(_resourceManager, _player, npc, petClientInfo, clientItemDefinition, modelDefinition);
