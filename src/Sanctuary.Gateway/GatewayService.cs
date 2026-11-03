@@ -81,7 +81,7 @@ public class GatewayService : BackgroundService
         }
 
         // Load resources.
-        if (!_resourceManager.Load() || !_resourceManager.LoadZoneGeometry())
+        if (!_resourceManager.Load() || !_resourceManager.LoadNavMeshes())
         {
             _logger.LogCritical("Cannot start {server}, failed to load resources.", nameof(GatewayServer));
 
