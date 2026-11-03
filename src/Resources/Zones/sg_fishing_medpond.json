@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 370,
+  "Name": "sg_fishing_medpond",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 16,
+  "EndLongitude": 16,
+  "SpawnPosition": [
+    490.0,
+    -75.43,
+    371.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

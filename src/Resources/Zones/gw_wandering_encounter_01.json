@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 342,
+  "Name": "gw_wandering_encounter_01",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 5,
+  "EndLongitude": 5,
+  "SpawnPosition": [
+    272.0,
+    0.0,
+    280.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

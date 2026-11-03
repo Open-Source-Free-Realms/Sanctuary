@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 353,
+  "Name": "sea_side_test_area_02",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 24,
+  "EndLongitude": 24,
+  "SpawnPosition": [
+    768.0,
+    0.0,
+    1280.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}
