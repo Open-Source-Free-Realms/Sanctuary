@@ -9,11 +9,14 @@ namespace Sanctuary.Game.Helpers;
 
 public static class ItemDefinitionHelper
 {
+    public const int NoItemClass = 0;
+    public const int CommunityColourIdStep = 10_000_000;
     public const int PetItemType = 2;
     public const int PetClothingItemType = 3;
     public const int PetUtilityItemType = 4;
     public const int HouseItemType = 16;
     public const int MountItemType = 19;
+    public const int HousingItemType = 29;
 
     private const int NoPurchasesLeftMaxStackSize = 0;
 

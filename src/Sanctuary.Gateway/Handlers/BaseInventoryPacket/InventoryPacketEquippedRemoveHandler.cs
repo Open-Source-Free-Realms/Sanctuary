@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Game;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
@@ -67,7 +68,8 @@ public static class InventoryPacketEquippedRemoveHandler
             return true;
         }
 
-        if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out _))
+        if (clientItemDefinition.Class != ItemDefinitionHelper.NoItemClass
+            && !_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out _))
         {
             _logger.LogWarning("User tried to equip unknown item class. {id} {definition}", profileItem.Id, clientItemDefinition.Class);
             return true;
