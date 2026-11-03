@@ -1,12 +1,11 @@
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
+using Sanctuary.Game.Routines;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Chat;
 
@@ -18,19 +17,22 @@ public static class OutfitGestureHelper
     private const int NoAnimation = 0;
     private const int QuickChatLoopCount = -1;
 
-    private const int GestureMilliseconds = 3000;
-    private const int UnmatchedGestureDelayMilliseconds = 600;
+    private const string HoldRoutine = "OutfitGestureHold";
+    private const string GestureRoutine = "OutfitGesture";
+
+    private const double GestureSeconds = 3;
+    private const double UnmatchedGestureDelaySeconds = 0.6;
     private const float WieldTypeGestureDelaySeconds = 0.3f;
     private const float TimelineGapSeconds = 0.01f;
-    private const int LongestGestureMilliseconds = 4000;
-    private const int GestureEndMarginMilliseconds = 100;
-    private const int DancingGestureDelayMilliseconds = 100;
+    private const double LongestGestureSeconds = 4;
+    private const double GestureEndMarginSeconds = 0.1;
+    private const double DancingGestureDelaySeconds = 0.1;
 
     private sealed record PendingGesture(GatewayConnection Connection, QuickChatSendChatToChannelPacket QuickChatSendChatToChannelPacket, int AnimationId);
 
     private sealed class PlayerGestures
     {
-        public DateTimeOffset StartedAt;
+        public bool IsCoolingDown;
     }
 
     private static readonly ConcurrentDictionary<ulong, PendingGesture> PendingGestures = new();
@@ -44,7 +46,7 @@ public static class OutfitGestureHelper
 
         PendingGestures[connection.Player.Guid] = pendingGesture;
 
-        _ = Task.Delay(UnmatchedGestureDelayMilliseconds).ContinueWith(_ => Release(pendingGesture));
+        connection.Player.Routines.SetRoutine(HoldRoutine, new DelayedRoutine(new InstantRoutine(() => Release(pendingGesture)), UnmatchedGestureDelaySeconds));
     }
 
     public static void OnEquipReply(GatewayConnection connection, int wieldType, bool wieldTypeChanged)
@@ -53,6 +55,8 @@ public static class OutfitGestureHelper
 
         if (!PendingGestures.TryGetValue(guid, out var pendingGesture))
             return;
+
+        connection.Player.Routines.Cancel(HoldRoutine);
 
         if (wieldType != 0 && wieldTypeChanged)
             PendingGestures.TryRemove(new KeyValuePair<ulong, PendingGesture>(guid, pendingGesture));
@@ -69,36 +73,56 @@ public static class OutfitGestureHelper
 
         var delay = wieldTypeChanged ? WieldTypeGestureDelaySeconds : TimelineGapSeconds;
         var dancing = player.BoomboxDanceOwner != 0 && player.BoomboxDanceAnimation != 0;
-        var dancingDelayMilliseconds = dancing ? DancingGestureDelayMilliseconds : default;
         var playerGestures = GestureStates.GetValue(player, _ => new PlayerGestures());
 
         lock (playerGestures)
         {
-            var now = DateTimeOffset.UtcNow;
-
-            if (now < playerGestures.StartedAt.AddMilliseconds(GestureMilliseconds))
+            if (playerGestures.IsCoolingDown)
                 return;
 
-            playerGestures.StartedAt = now.AddMilliseconds(dancingDelayMilliseconds).AddSeconds(delay);
+            playerGestures.IsCoolingDown = true;
         }
 
-        player.OutfitGestureEndsAt = Environment.TickCount64 + dancingDelayMilliseconds
-            + (long)TimeSpan.FromSeconds(delay + TimelineGapSeconds).TotalMilliseconds
-            + LongestGestureMilliseconds + GestureEndMarginMilliseconds;
+        player.IsPlayingOutfitGesture = true;
+
+        var steps = new List<Routine>();
 
         if (dancing)
-            _ = Task.Delay(dancingDelayMilliseconds).ContinueWith(_ => QueueGesture(player, pendingGesture.AnimationId, delay));
+        {
+            steps.Add(new WaitRoutine(DancingGestureDelaySeconds));
+            steps.Add(new InstantRoutine(() => QueueGesture(player, pendingGesture.AnimationId, delay)));
+        }
         else
+        {
             QueueGesture(player, pendingGesture.AnimationId, delay);
+        }
 
-        var delayMilliseconds = dancingDelayMilliseconds + (int)TimeSpan.FromSeconds(delay).TotalMilliseconds;
+        steps.Add(new WaitRoutine(delay));
+        steps.Add(new InstantRoutine(() => SendQuickChatToVisible(player, pendingGesture.QuickChatSendChatToChannelPacket)));
+        steps.Add(new WaitRoutine(GestureSeconds));
+        steps.Add(new InstantRoutine(() => EndCooldown(playerGestures)));
+        steps.Add(new WaitRoutine(TimelineGapSeconds + LongestGestureSeconds + GestureEndMarginSeconds - GestureSeconds));
+        steps.Add(new InstantRoutine(() => player.IsPlayingOutfitGesture = false));
 
+        player.Routines.SetRoutine(GestureRoutine, new SequentialRoutine(steps));
+    }
+
+    private static void EndCooldown(PlayerGestures playerGestures)
+    {
+        lock (playerGestures)
+        {
+            playerGestures.IsCoolingDown = false;
+        }
+    }
+
+    private static void SendQuickChatToVisible(Player player, QuickChatSendChatToChannelPacket quickChatSendChatToChannelPacket)
+    {
         foreach (var visiblePlayer in player.VisiblePlayers.Values)
         {
             if (visiblePlayer.Ignores.Any(x => x.Guid == player.Guid))
                 continue;
 
-            visiblePlayer.SendTunneledDelayed(pendingGesture.QuickChatSendChatToChannelPacket, delayMilliseconds);
+            visiblePlayer.SendTunneled(quickChatSendChatToChannelPacket);
         }
     }
 

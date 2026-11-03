@@ -144,7 +144,7 @@ public sealed class Player : ClientPcData, IEntity
     public int BoomboxDanceAnimation { get; set; }
     public bool BoomboxDanceIsStanding { get; set; }
     public int BoomboxDanceTransform { get; set; }
-    public long OutfitGestureEndsAt { get; set; }
+    public bool IsPlayingOutfitGesture { get; set; }
 
     public const float DefaultScale = 1f;
 
