@@ -39,21 +39,21 @@ public class RewardChatCommand : IChatCommand
 
             if (!_zoneManager.TryGetPlayer(targetName, out var targetPlayer))
             {
-                ChatHelper.SendSystemMessage(invoker, $"Invalid name specified. No online player with that name.");
+                ChatHelper.SendSystemMessage(invoker, $"Invalid name specified. No online player named \"{targetName}\".");
                 return true;
             }
             target = targetPlayer;
         }
 
-        if (!_rewardManager.TryRollRewardUnowned(invoker, tableKey, out var drop, out var tint) || drop is null)
+        if (!_rewardManager.TryRollRewardUnowned(target, tableKey, out var drop, out var tint) || drop is null)
         {
             ChatHelper.SendSystemMessage(invoker, $"Nothing left to win in '{tableKey}'.");
             return true;
         }
 
         var granted = drop is ItemRewardDropDefinition item
-            ? _rewardManager.TryGrantItem(invoker, item.ItemDefinitionId, tint, item.Quantity)
-            : _rewardManager.TryGrantReward(invoker, drop);
+            ? _rewardManager.TryGrantItem(target, item.ItemDefinitionId, tint, item.Quantity)
+            : _rewardManager.TryGrantReward(target, drop);
 
         if (!granted)
         {
