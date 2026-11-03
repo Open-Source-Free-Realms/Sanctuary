@@ -47,7 +47,8 @@ public sealed class Player : ClientPcData, IEntity
     private const int ActionBarSlotUnknown6 = 4;
     private const int ActionBarSlotUnknown7 = 15;
     private const float OnFootMovementSpeed = 8f;
-    private const long AreaSettleMilliseconds = 1500;
+    private const double AreaSettleSeconds = 1.5;
+    private const string PointOfInterestRoutine = "PointOfInterest";
     private const int TeleportSequenceCount = 4;
 
     private readonly UdpConnection _connection;
@@ -74,7 +75,6 @@ public sealed class Player : ClientPcData, IEntity
 
     private bool _teleportPending;
     private ZoneAreaDefinition? _pendingZoneArea;
-    private long _pendingZoneAreaSince;
 
     public int ChatBubbleForegroundColor { get; set; }
     public int ChatBubbleBackgroundColor { get; set; }
@@ -426,7 +426,6 @@ public sealed class Player : ClientPcData, IEntity
     {
         SnowballInteraction.Update(this);
         UpdatePortrait();
-        UpdatePendingPointOfInterest();
     }
 
     public void RelayPosition(PlayerUpdatePacketUpdatePosition playerUpdatePacketUpdatePosition)
@@ -754,6 +753,7 @@ public sealed class Player : ClientPcData, IEntity
         if (zoneAreaDefinition is null || zoneAreaDefinition.Id == PointOfInterestId)
         {
             _pendingZoneArea = null;
+            Routines.Cancel(PointOfInterestRoutine);
             return;
         }
 
@@ -761,12 +761,12 @@ public sealed class Player : ClientPcData, IEntity
             return;
 
         _pendingZoneArea = zoneAreaDefinition;
-        _pendingZoneAreaSince = Environment.TickCount64;
+        Routines.SetRoutine(PointOfInterestRoutine, new DelayedRoutine(new InstantRoutine(UpdatePendingPointOfInterest), AreaSettleSeconds));
     }
 
     private void UpdatePendingPointOfInterest()
     {
-        if (_teleportPending || _pendingZoneArea is null || Environment.TickCount64 - _pendingZoneAreaSince < AreaSettleMilliseconds)
+        if (_teleportPending || _pendingZoneArea is null)
             return;
 
         UpdatePointOfInterest(_pendingZoneArea);
