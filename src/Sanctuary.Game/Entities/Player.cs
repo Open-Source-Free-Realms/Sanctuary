@@ -1599,6 +1599,8 @@ public sealed class Player : ClientPcData, IEntity
 
     public void Dispose()
     {
+        Routines.CancelAll();
+
         PlayerPet.Dispose();
 
         RemoveFromVisibleEntities(false); // no need to notify self since we're DCing

@@ -60,6 +60,21 @@ public sealed class RoutineManager
                 Interrupt(name, routine);
     }
 
+    public void CancelAll()
+    {
+        foreach (var (name, _) in _routines)
+            Cancel(name);
+    }
+
+    public void CancelAll(string prefix)
+    {
+        foreach (var (name, _) in _routines)
+        {
+            if (name.StartsWith(prefix, StringComparison.Ordinal))
+                Cancel(name);
+        }
+    }
+
     public void OnTick()
     {
         foreach (var (name, routine) in _routines)

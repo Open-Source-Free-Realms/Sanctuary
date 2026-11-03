@@ -797,6 +797,8 @@ public class Npc : IScriptableNpc, IEntity
 
     public virtual void Dispose()
     {
+        Routines.CancelAll();
+
         foreach (var visiblePlayer in VisiblePlayers)
             visiblePlayer.Value.OnRemoveVisibleNpcs([this]);
 
