@@ -33,6 +33,7 @@ public interface IResourceManager
     StoreBundleCategoryGroupDefinitionCollection StoreBundleCategoryGroups { get; }
 
     ZoneDefinitionCollection Zones { get; }
+    ZoneEnvironmentCollection ZoneEnvironments { get; }
     MountDefinitionCollection Mounts { get; }
     PetDefinitionCollection Pets { get; }
     PlayerTitleCollection PlayerTitles { get; }
@@ -44,8 +45,7 @@ public interface IResourceManager
     NameFilterCollection NameFilter { get; }
     NpcMovementDefinitionCollection NpcMovements { get; }
     NpcAmbientDefinitionCollection NpcAmbient { get; }
-    MapGraphCollection Maps { get; }
-    TerrainCollection Terrains { get; }
+    QuestDefinitionCollection Quests { get; }
     NavMeshCollection NavMeshes { get; }
 
     RewardTableDefinitionCollection RewardTables { get; }
@@ -55,5 +55,5 @@ public interface IResourceManager
 
     bool Load();
 
-    bool LoadZoneGeometry();
+    bool LoadNavMeshes();
 }

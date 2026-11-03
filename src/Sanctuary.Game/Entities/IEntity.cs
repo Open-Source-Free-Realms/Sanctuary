@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Numerics;
 
+using Sanctuary.Game.Routines;
 using Sanctuary.Game.Zones;
 
 namespace Sanctuary.Game.Entities;
@@ -15,6 +16,8 @@ public interface IEntity : IEquatable<IEntity>, IDisposable
     Quaternion Rotation { get; }
 
     bool Visible { get; set; }
+
+    RoutineManager Routines { get; }
 
     #region Zone
 
@@ -32,7 +35,7 @@ public interface IEntity : IEquatable<IEntity>, IDisposable
 
     #region Update
 
-    void UpdatePosition(Vector4 position, Quaternion rotation, bool updateZoneArea = true);
+    void UpdatePosition(Vector4 position, Quaternion rotation);
     bool TeleportToZone(IZone zone, Vector4 position, Quaternion rotation);
 
     void UpdateEveryTick();

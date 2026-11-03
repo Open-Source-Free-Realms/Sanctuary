@@ -95,7 +95,7 @@
     "MaxPauseMs": 9800
   },
   {
-    "Guid": 100000004769,
+    "NpcId": 4769,
     "Type": "Patrol",
     "Speed": 2.71,
     "UpdateIntervalMs": 1500,
@@ -164,7 +164,7 @@
     ]
   },
   {
-    "Guid": 100000002372,
+    "NpcId": 2372,
     "Type": "Patrol",
     "Speed": 4.42,
     "UpdateIntervalMs": 1500,
@@ -463,7 +463,7 @@
     ]
   },
   {
-    "Guid": 100000004498,
+    "NpcId": 4498,
     "Type": "Patrol",
     "Speed": 2.98,
     "UpdateIntervalMs": 1500,
@@ -517,7 +517,7 @@
     ]
   },
   {
-    "Guid": 100000004389,
+    "NpcId": 4389,
     "Type": "Patrol",
     "Speed": 3.0,
     "UpdateIntervalMs": 1250,
@@ -556,7 +556,7 @@
     ]
   },
   {
-    "Guid": 100000002973,
+    "NpcId": 2973,
     "Type": "Patrol",
     "Speed": 2.7,
     "UpdateIntervalMs": 1000,
@@ -650,7 +650,7 @@
     ]
   },
   {
-    "Guid": 100000001643,
+    "NpcId": 1643,
     "Type": "Patrol",
     "Speed": 1.97,
     "UpdateIntervalMs": 1000,
@@ -724,7 +724,7 @@
     ]
   },
   {
-    "Guid": 100000003355,
+    "NpcId": 3355,
     "Type": "Patrol",
     "Speed": 3.0,
     "UpdateIntervalMs": 1000,
@@ -753,7 +753,7 @@
     ]
   },
   {
-    "Guid": 100000001758,
+    "NpcId": 1758,
     "Type": "Patrol",
     "Speed": 4.99,
     "UpdateIntervalMs": 1000,
@@ -835,7 +835,7 @@
     "MaxLegDistance": 13.3,
     "MinPauseMs": 4600,
     "MaxPauseMs": 17100,
-    "Guid": 100000033308,
+    "NpcId": 33308,
     "Area": [
       [
         -1412.16,
@@ -903,7 +903,7 @@
     "MaxLegDistance": 16.1,
     "MinPauseMs": 2000,
     "MaxPauseMs": 4400,
-    "Guid": 100000033199
+    "NpcId": 33199
   },
   {
     "Type": "Patrol",
@@ -1002,7 +1002,7 @@
         243.5
       ]
     ],
-    "Guid": 100000033118
+    "NpcId": 33118
   },
   {
     "Type": "Wander",
@@ -1016,7 +1016,7 @@
     "FleeDistance": 5.0,
     "FleeLegDistance": 12.0,
     "FleeSpeed": 8.0,
-    "Guid": 100000033166
+    "NpcId": 33166
   },
   {
     "Type": "Wander",
@@ -1030,7 +1030,7 @@
     "FleeDistance": 5.0,
     "FleeLegDistance": 12.0,
     "FleeSpeed": 8.0,
-    "Guid": 100000033361
+    "NpcId": 33361
   },
   {
     "Type": "Wander",
@@ -1044,7 +1044,7 @@
     "FleeDistance": 5.0,
     "FleeLegDistance": 12.0,
     "FleeSpeed": 8.0,
-    "Guid": 100000033100
+    "NpcId": 33100
   },
   {
     "Type": "Wander",
@@ -1055,7 +1055,7 @@
     "MaxLegDistance": 11.3,
     "MinPauseMs": 8300,
     "MaxPauseMs": 16900,
-    "Guid": 100000033164,
+    "NpcId": 33164,
     "Area": [
       [
         -1410.6,
@@ -1111,7 +1111,7 @@
     "FleeDistance": 5.0,
     "FleeLegDistance": 12.0,
     "FleeSpeed": 8.0,
-    "Guid": 100000033360
+    "NpcId": 33360
   },
   {
     "Type": "Patrol",
@@ -1170,7 +1170,7 @@
         187.06
       ]
     ],
-    "Guid": 100000033372
+    "NpcId": 33372
   },
   {
     "Type": "Patrol",
@@ -1469,7 +1469,7 @@
         182.01
       ]
     ],
-    "Guid": 100000033405
+    "NpcId": 33405
   },
   {
     "Type": "Patrol",
@@ -1543,7 +1543,7 @@
         167.65
       ]
     ],
-    "Guid": 100000033412
+    "NpcId": 33412
   },
   {
     "Type": "Wander",
@@ -1554,7 +1554,7 @@
     "MaxLegDistance": 0.0,
     "MinPauseMs": 11500,
     "MaxPauseMs": 11500,
-    "Guid": 100000033452
+    "NpcId": 33452
   },
   {
     "Type": "Wander",
@@ -1565,7 +1565,7 @@
     "MaxLegDistance": 9.3,
     "MinPauseMs": 5000,
     "MaxPauseMs": 10000,
-    "Guid": 100000033456
+    "NpcId": 33456
   },
   {
     "Type": "Wander",
@@ -1579,7 +1579,7 @@
     "FleeDistance": 5.0,
     "FleeLegDistance": 12.0,
     "FleeSpeed": 8.0,
-    "Guid": 100000033576
+    "NpcId": 33576
   },
   {
     "Type": "Wander",
@@ -1590,7 +1590,7 @@
     "MaxLegDistance": 4,
     "MinPauseMs": 5000,
     "MaxPauseMs": 10000,
-    "Guid": 100000033578
+    "NpcId": 33578
   },
   {
     "Type": "Wander",
@@ -1601,7 +1601,7 @@
     "MaxLegDistance": 11.8,
     "MinPauseMs": 5000,
     "MaxPauseMs": 10000,
-    "Guid": 100000033571
+    "NpcId": 33571
   },
   {
     "Type": "Wander",
@@ -1612,7 +1612,7 @@
     "MaxLegDistance": 7.5,
     "MinPauseMs": 5000,
     "MaxPauseMs": 10000,
-    "Guid": 100000033549
+    "NpcId": 33549
   },
   {
     "Type": "Wander",
@@ -1623,7 +1623,7 @@
     "MaxLegDistance": 7.4,
     "MinPauseMs": 900,
     "MaxPauseMs": 1600,
-    "Guid": 100000033504
+    "NpcId": 33504
   },
   {
     "Type": "Wander",
@@ -1637,7 +1637,7 @@
     "FleeDistance": 5.0,
     "FleeLegDistance": 12.0,
     "FleeSpeed": 8.0,
-    "Guid": 100000033573
+    "NpcId": 33573
   },
   {
     "Type": "Wander",
@@ -1651,7 +1651,7 @@
     "FleeDistance": 5.0,
     "FleeLegDistance": 12.0,
     "FleeSpeed": 8.0,
-    "Guid": 100000033547
+    "NpcId": 33547
   },
   {
     "Type": "Wander",
@@ -1665,7 +1665,7 @@
     "FleeDistance": 5.0,
     "FleeLegDistance": 12.0,
     "FleeSpeed": 8.0,
-    "Guid": 100000033555
+    "NpcId": 33555
   },
   {
     "Type": "Wander",
@@ -1679,7 +1679,7 @@
     "FleeDistance": 5.0,
     "FleeLegDistance": 12.0,
     "FleeSpeed": 8.0,
-    "Guid": 100000033459
+    "NpcId": 33459
   },
   {
     "Type": "Wander",
@@ -1693,7 +1693,7 @@
     "FleeDistance": 5.0,
     "FleeLegDistance": 12.0,
     "FleeSpeed": 8.0,
-    "Guid": 100000033584
+    "NpcId": 33584
   },
   {
     "Type": "Wander",
@@ -1707,7 +1707,7 @@
     "FleeDistance": 5.0,
     "FleeLegDistance": 12.0,
     "FleeSpeed": 8.0,
-    "Guid": 100000033596
+    "NpcId": 33596
   },
   {
     "Type": "Wander",
@@ -1721,7 +1721,7 @@
     "FleeDistance": 5.0,
     "FleeLegDistance": 12.0,
     "FleeSpeed": 8.0,
-    "Guid": 100000033598
+    "NpcId": 33598
   },
   {
     "Type": "Wander",
@@ -1732,7 +1732,7 @@
     "MaxLegDistance": 10.0,
     "MinPauseMs": 900,
     "MaxPauseMs": 12900,
-    "Guid": 100000033597
+    "NpcId": 33597
   },
   {
     "Type": "Patrol",
@@ -1776,7 +1776,7 @@
         491.26
       ]
     ],
-    "Guid": 100000033769
+    "NpcId": 33769
   },
   {
     "Type": "Wander",
@@ -1790,7 +1790,7 @@
     "FleeDistance": 5.0,
     "FleeLegDistance": 12.0,
     "FleeSpeed": 8.0,
-    "Guid": 100000033829
+    "NpcId": 33829
   },
   {
     "Type": "Wander",
@@ -1801,7 +1801,7 @@
     "MaxLegDistance": 10.5,
     "MinPauseMs": 11300,
     "MaxPauseMs": 16100,
-    "Guid": 100000033828
+    "NpcId": 33828
   },
   {
     "Type": "Wander",
@@ -1815,7 +1815,7 @@
     "FleeDistance": 5.0,
     "FleeLegDistance": 12.0,
     "FleeSpeed": 8.0,
-    "Guid": 100000033835
+    "NpcId": 33835
   },
   {
     "Type": "Wander",
@@ -1829,7 +1829,7 @@
     "FleeDistance": 5.0,
     "FleeLegDistance": 12.0,
     "FleeSpeed": 8.0,
-    "Guid": 100000033832
+    "NpcId": 33832
   },
   {
     "Type": "Wander",
@@ -1843,7 +1843,7 @@
     "FleeDistance": 5.0,
     "FleeLegDistance": 12.0,
     "FleeSpeed": 8.0,
-    "Guid": 100000033833
+    "NpcId": 33833
   },
   {
     "Type": "Wander",
@@ -1857,7 +1857,7 @@
     "FleeDistance": 5.0,
     "FleeLegDistance": 12.0,
     "FleeSpeed": 8.0,
-    "Guid": 100000033845
+    "NpcId": 33845
   },
   {
     "Type": "Wander",
@@ -1871,7 +1871,7 @@
     "FleeDistance": 5.0,
     "FleeLegDistance": 12.0,
     "FleeSpeed": 8.0,
-    "Guid": 100000033935
+    "NpcId": 33935
   },
   {
     "Type": "Wander",
@@ -1885,7 +1885,7 @@
     "FleeDistance": 5.0,
     "FleeLegDistance": 12.0,
     "FleeSpeed": 8.0,
-    "Guid": 100000033950
+    "NpcId": 33950
   },
   {
     "Type": "Wander",
@@ -1899,7 +1899,7 @@
     "FleeDistance": 5.0,
     "FleeLegDistance": 12.0,
     "FleeSpeed": 8.0,
-    "Guid": 100000033937
+    "NpcId": 33937
   },
   {
     "Type": "Wander",
@@ -1913,7 +1913,7 @@
     "FleeDistance": 5.0,
     "FleeLegDistance": 12.0,
     "FleeSpeed": 8.0,
-    "Guid": 100000033938
+    "NpcId": 33938
   },
   {
     "Type": "Patrol",
@@ -2007,7 +2007,7 @@
         328.86
       ]
     ],
-    "Guid": 100000033987
+    "NpcId": 33987
   },
   {
     "Type": "Wander",
@@ -2021,7 +2021,7 @@
     "FleeDistance": 5.0,
     "FleeLegDistance": 12.0,
     "FleeSpeed": 8.0,
-    "Guid": 100000033988
+    "NpcId": 33988
   },
   {
     "Type": "Wander",
@@ -2035,7 +2035,7 @@
     "FleeDistance": 5.0,
     "FleeLegDistance": 12.0,
     "FleeSpeed": 8.0,
-    "Guid": 100000034009
+    "NpcId": 34009
   },
   {
     "Type": "Wander",
@@ -2049,7 +2049,7 @@
     "FleeDistance": 5.0,
     "FleeLegDistance": 12.0,
     "FleeSpeed": 8.0,
-    "Guid": 100000033998
+    "NpcId": 33998
   },
   {
     "Type": "Wander",
@@ -2063,6 +2063,6 @@
     "FleeDistance": 5.0,
     "FleeLegDistance": 12.0,
     "FleeSpeed": 8.0,
-    "Guid": 100000034005
+    "NpcId": 34005
   }
 ]

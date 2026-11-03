@@ -49,6 +49,7 @@ public static class GuildQuitPacketHandler
         using var dbContext = _dbContextFactory.CreateDbContext();
 
         var characterId = GuidHelper.GetPlayerId(connection.Player.Guid);
+        var guildId = GuidHelper.GetGuildId(packet.Guid);
 
         GuildMemberStatusUpdatePacket? promotedLeaderStatusUpdatePacket = null;
 
@@ -61,7 +62,7 @@ public static class GuildQuitPacketHandler
 
             var quitRole = dbContext.GuildMembers
                 .AsNoTracking()
-                .Where(x => x.GuildId == packet.Guid && x.Id == characterId)
+                .Where(x => x.GuildId == guildId && x.Id == characterId)
                 .Select(x => (int?)x.Role)
                 .SingleOrDefault();
 
@@ -76,27 +77,27 @@ public static class GuildQuitPacketHandler
                 return false;
 
             var dbGuildMemberToRemove = dbContext.GuildMembers
-                .Where(x => x.GuildId == packet.Guid && x.Id == characterId);
+                .Where(x => x.GuildId == guildId && x.Id == characterId);
 
             if (dbGuildMemberToRemove.ExecuteDelete() <= 0)
                 return false;
 
-            var hasMembers = dbContext.GuildMembers.Any(m => m.GuildId == packet.Guid);
+            var hasMembers = dbContext.GuildMembers.Any(m => m.GuildId == guildId);
 
             if (!hasMembers)
             {
                 var dbGuildToDelete = dbContext.Guilds
-                    .Where(g => g.Id == packet.Guid);
+                    .Where(g => g.Id == guildId);
 
                 if (dbGuildToDelete.ExecuteDelete() <= 0)
                     return false;
             }
             else if (quitRole == GuildRole.Leader.Id
-                     && !dbContext.GuildMembers.Any(m => m.GuildId == packet.Guid && m.Role == GuildRole.Leader.Id))
+                     && !dbContext.GuildMembers.Any(m => m.GuildId == guildId && m.Role == GuildRole.Leader.Id))
             {
                 var newLeader = dbContext.GuildMembers
                     .Include(x => x.Character)
-                    .Where(x => x.GuildId == packet.Guid)
+                    .Where(x => x.GuildId == guildId)
                     .AsEnumerable()
                     .OrderBy(x => x.Role)
                     .ThenBy(x => x.Id)

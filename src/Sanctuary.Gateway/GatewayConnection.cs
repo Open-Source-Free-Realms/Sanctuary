@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -19,6 +20,7 @@ using Sanctuary.Database.Entities;
 using Sanctuary.Game;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
+using Sanctuary.Game.Quests;
 using Sanctuary.Gateway.Handlers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -270,12 +272,69 @@ public class GatewayConnection : UdpConnection
             ? new Quaternion(dbCharacter.RotationX.Value, 0f, dbCharacter.RotationZ.Value, 0f)
             : startingZone.SpawnRotation;
 
+        if (startingZone.IsOutOfBounds(position))
+        {
+            _logger.LogWarning("{name} was saved out of bounds at {position}, moving to the zone spawn.", dbCharacter.FullName, position);
+
+            position = startingZone.SpawnPosition;
+            rotation = startingZone.SpawnRotation;
+        }
+
         Player.UpdatePosition(position, rotation);
 
         Player.Name.FirstName = dbCharacter.FirstName;
         Player.Name.LastName = dbCharacter.LastName ?? string.Empty;
 
         Player.Coins = dbCharacter.Coins;
+
+        Player.CharacterId = dbCharacter.Id;
+
+        Player.Quests.ActiveQuestId = dbCharacter.ActiveQuestId ?? 0;
+
+        foreach (var dbQuest in dbCharacter.Quests)
+        {
+            if (dbQuest.Completed)
+            {
+                Player.Quests.AddCompleted(dbQuest.QuestId);
+                continue;
+            }
+
+            if (!_resourceManager.Quests.TryGet(dbQuest.QuestId, out var questDefinition))
+            {
+                _logger.LogWarning("Character {character} has quest {quest} in progress, but it no longer exists. Skipping it.",
+                    dbCharacter.Id, dbQuest.QuestId);
+                continue;
+            }
+
+            var questProgress = new QuestProgress(dbQuest.QuestId) { Started = dbQuest.Started };
+            Player.Quests.Add(questProgress);
+
+            var goalIndex = dbQuest.CurrentGoalId == QuestManager.AllGoalsDoneGoalId
+                ? questDefinition.Goals.Count
+                : questDefinition.Goals.FindIndex(goal => goal.NameId == dbQuest.CurrentGoalId);
+
+            if (goalIndex < 0)
+            {
+                _logger.LogWarning("Character {character} was on goal {goal} of quest {quest}, which no longer has that goal. Restarting the quest from its first goal.",
+                    dbCharacter.Id, dbQuest.CurrentGoalId, dbQuest.QuestId);
+                questProgress.StartStep(questDefinition, 0);
+                continue;
+            }
+
+            questProgress.StartStep(questDefinition, questDefinition.StepStartOf(goalIndex));
+
+            foreach (var progress in dbQuest.Progress)
+            {
+                var progressGoalIndex = questDefinition.Goals.FindIndex(goal => goal.NameId == progress.GoalId);
+                if (!questProgress.OpenGoals.TryGetValue(progressGoalIndex, out var goalProgress))
+                    continue;
+
+                if (progress.Count == QuestManager.GoalDoneCount)
+                    questProgress.FinishGoal(questDefinition, progressGoalIndex);
+                else
+                    goalProgress.Load(progress.TargetId, progress.Count);
+            }
+        }
 
         Player.Birthday = dbCharacter.Created;
         Player.PlayTime = dbCharacter.PlayTime;
@@ -487,7 +546,7 @@ public class GatewayConnection : UdpConnection
         {
             var guildData = new GuildData
             {
-                Guid = dbGuild.Id,
+                Guid = GuidHelper.GetGuildGuid(dbGuild.Id),
 
                 Name = dbGuild.Name,
 
@@ -551,8 +610,8 @@ public class GatewayConnection : UdpConnection
 
         if (Player.Zone == _zoneManager.StartingZone)
         {
-            position = Player.Position;
-            rotation = Player.Rotation;
+            position = Player.Zone.IsOutOfBounds(Player.Position) ? _zoneManager.StartingZone.SpawnPosition : Player.Position;
+            rotation = Player.Zone.IsOutOfBounds(Player.Position) ? _zoneManager.StartingZone.SpawnRotation : Player.Rotation;
         }
         else
         {
@@ -653,6 +712,8 @@ public class GatewayConnection : UdpConnection
 
         Player.Collections = _resourceManager.Collections.CreateClientCollections(
             Player.Guid, ownedItemDefinitionIds, collectedEntryIds);
+
+        Player.QuestData = _serviceProvider.GetRequiredService<IQuestManager>().GetClientQuestData(Player);
 
         var packetSendSelfToClient = new PacketSendSelfToClient();
 

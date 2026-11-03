@@ -45,16 +45,17 @@ public static class GuildPromotePacketHandler
 
         var promoterId = GuidHelper.GetPlayerId(connection.Player.Guid);
         var targetId = GuidHelper.GetPlayerId(packet.PlayerGuid);
+        var guildId = GuidHelper.GetGuildId(packet.GuildGuid);
 
         using var dbContext = _dbContextFactory.CreateDbContext();
 
         var promoterGuildMember = dbContext.GuildMembers
             .AsNoTracking()
-            .SingleOrDefault(x => x.GuildId == packet.GuildGuid && x.Id == promoterId);
+            .SingleOrDefault(x => x.GuildId == guildId && x.Id == promoterId);
 
         var targetGuildMember = dbContext.GuildMembers
             .Include(x => x.Character)
-            .SingleOrDefault(x => x.GuildId == packet.GuildGuid && x.Id == targetId);
+            .SingleOrDefault(x => x.GuildId == guildId && x.Id == targetId);
 
         if (promoterGuildMember is null || targetGuildMember is null)
             return true;

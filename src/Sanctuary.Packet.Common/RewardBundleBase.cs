@@ -8,9 +8,8 @@ public sealed class RewardBundleBase : ISerializableType
 {
     // This payload is shared by RewardBundlePacket and the reward embedded in client collection data.
     public bool Success = true;
-    public int Unknown1; // This gives you 16 stars and 16 coins visually without actually giving you them if set to 16.. I heard that the pattern is
-    // 16 | 0, 0 | 16, I need to look into it further to confirm or deny
-    public int RewardKind;
+    public int Coins;
+    public int Experience;
     public int Unknown2;
     public int Unknown3 = 3; // This gives you a box reward with "OK" popup if set to 16
     public int Unknown4;
@@ -26,11 +25,13 @@ public sealed class RewardBundleBase : ISerializableType
     public int NameId;
     public List<RewardBundleEntryBase> Entries { get; } = [];
 
+    public int DescriptionId;
+
     public void Serialize(PacketWriter writer)
     {
         writer.Write(Success);
-        writer.Write(Unknown1);
-        writer.Write(RewardKind);
+        writer.Write(Coins);
+        writer.Write(Experience);
         writer.Write(Unknown2);
         writer.Write(Unknown3);
         writer.Write(Unknown4);
@@ -45,6 +46,8 @@ public sealed class RewardBundleBase : ISerializableType
         writer.Write(Entries.Count);
 
         foreach (var entry in Entries)
-            entry.Serialize(writer);
+            entry.Serialize(writer, Success);
+
+        writer.Write(DescriptionId);
     }
 }

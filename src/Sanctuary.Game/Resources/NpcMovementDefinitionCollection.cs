@@ -13,7 +13,7 @@ using Sanctuary.Game.Resources.Definitions;
 
 namespace Sanctuary.Game.Resources;
 
-public class NpcMovementDefinitionCollection : ObservableConcurrentDictionary<ulong, NpcMovementDefinition>
+public class NpcMovementDefinitionCollection : ObservableConcurrentDictionary<int, NpcMovementDefinition>
 {
     private readonly ILogger _logger;
 
@@ -24,9 +24,9 @@ public class NpcMovementDefinitionCollection : ObservableConcurrentDictionary<ul
         _logger = logger;
     }
 
-    public bool TryGetForNpc(ulong guid, string? modelFileName, [MaybeNullWhen(false)] out NpcMovementDefinition npcMovementDefinition)
+    public bool TryGetForNpc(int npcId, string? modelFileName, [MaybeNullWhen(false)] out NpcMovementDefinition npcMovementDefinition)
     {
-        if (TryGetValue(guid, out npcMovementDefinition))
+        if (TryGetValue(npcId, out npcMovementDefinition))
             return true;
 
         npcMovementDefinition = null;
@@ -72,9 +72,9 @@ public class NpcMovementDefinitionCollection : ObservableConcurrentDictionary<ul
                     continue;
                 }
 
-                if (!TryAdd(entry.Guid, entry))
+                if (!TryAdd(entry.NpcId, entry))
                 {
-                    _logger.LogWarning("Failed to add entry. {guid} \"{file}\"", entry.Guid, filePath);
+                    _logger.LogWarning("Failed to add entry. {npcId} \"{file}\"", entry.NpcId, filePath);
                     continue;
                 }
             }

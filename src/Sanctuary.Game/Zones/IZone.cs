@@ -3,11 +3,15 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
+using DotRecast.Detour;
+
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Interactions;
+using Sanctuary.Packet.Common;
 using Sanctuary.Game.Resources.Definitions;
+using Sanctuary.Game.Routines;
 using Sanctuary.Scripting;
 using Sanctuary.UdpLibrary;
-using Sanctuary.Game.Pathfinding;
 
 namespace Sanctuary.Game.Zones;
 
@@ -21,6 +25,8 @@ public interface IZone : IScriptableZone, IDisposable
     Quaternion SpawnRotation { get; }
 
     string? Sky { get; }
+
+    RoutineManager Routines { get; }
 
     #region Events
 
@@ -38,6 +44,7 @@ public interface IZone : IScriptableZone, IDisposable
     bool IsEmpty { get; }
 
     float TickDeltaSeconds { get; }
+    TimeSpan TickDelta { get; }
 
     bool TryGetNpc(ulong guid, [MaybeNullWhen(false)] out Npc npc);
     bool TryGetPlayer(ulong guid, [MaybeNullWhen(false)] out Player player);
@@ -73,30 +80,23 @@ public interface IZone : IScriptableZone, IDisposable
 
     #region Zone System
 
+    bool HasEnvironmentData { get; }
+    bool IsOutOfBounds(ZoneTile zoneTile);
+    bool IsOutOfBounds(Vector4 position);
     ZoneTile GetTileFromPosition(Vector4 position);
     void UpdateEntityZoneTile(IEntity entity, ZoneTile from, ZoneTile to);
 
     #endregion
 
-    Pathfinder<MapNode>? Pathfinder { get; }
+    DtNavMeshQuery? NavMeshQuery { get; }
 
-    bool HasGroundData { get; }
+    IDtQueryFilter NavMeshFilter { get; }
 
-    bool TryGetGroundHeight(float x, float z, float fromY, float maxDrop, out float height);
+    IReadOnlyList<NpcInteractionOption> GetInteractionOptions(Player player, Npc npc);
 
-    bool IsWalkable(Vector3 start, Vector3 goal, float maxStepUp, float maxStepDown, out float goalHeight);
+    NotificationInfo? GetQuestBadge(Player player, Npc npc);
 
-    bool TryGetWalkableGoal(Vector3 start, Vector3 goal, float maxStepUp, float maxStepDown, out Vector3 walkableGoal);
+    bool IsHiddenByQuest(Player player, Npc npc);
 
-    Vector3 GetGroundPosition(Vector3 position, float maxStepUp, float maxDrop);
-
-    bool HasNavMesh { get; }
-
-    bool TryFindNavMeshPath(Vector3 start, Vector3 goal, Queue<Vector3> waypoints);
-
-    bool TryFindClientNavMeshPath(Vector3 start, Vector3 goal, Queue<Vector3> waypoints);
-
-    bool TryFindRoute(Vector3 start, Vector3 goal, Queue<Vector3> waypoints);
-
-    bool TryFindReachableRoute(Vector3 start, Vector3 goal, Queue<Vector3> waypoints, bool followRoads);
+    int GetQuestEffectId(Player player, Npc npc);
 }

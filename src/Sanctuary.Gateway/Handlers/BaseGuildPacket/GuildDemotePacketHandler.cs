@@ -45,16 +45,17 @@ public static class GuildDemotePacketHandler
 
         var demoterId = GuidHelper.GetPlayerId(connection.Player.Guid);
         var targetId = GuidHelper.GetPlayerId(packet.PlayerGuid);
+        var guildId = GuidHelper.GetGuildId(packet.GuildGuid);
 
         using var dbContext = _dbContextFactory.CreateDbContext();
 
         var demoterGuildMember = dbContext.GuildMembers
             .AsNoTracking()
-            .SingleOrDefault(x => x.GuildId == packet.GuildGuid && x.Id == demoterId);
+            .SingleOrDefault(x => x.GuildId == guildId && x.Id == demoterId);
 
         var targetGuildMember = dbContext.GuildMembers
             .Include(x => x.Character)
-            .SingleOrDefault(x => x.GuildId == packet.GuildGuid && x.Id == targetId);
+            .SingleOrDefault(x => x.GuildId == guildId && x.Id == targetId);
 
         if (demoterGuildMember is null || targetGuildMember is null)
             return true;
