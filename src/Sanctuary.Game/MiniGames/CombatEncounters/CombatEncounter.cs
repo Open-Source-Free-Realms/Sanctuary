@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 using Sanctuary.Game.Entities;
@@ -19,15 +21,26 @@ public class CombatEncounter
 
     public Quaternion EntryRotation { get; init; }
 
+    public List<CombatEncounterSpawn> Spawns { get; init; } = [];
+
     public virtual void OnGo(Player player, MiniGameUiSession miniGameUiSession)
     {
         if (player.Mount is not null)
             player.Dismount();
 
-        if (!player.TeleportToZone(ZoneDefinitionId, player.Guid, EntryPosition, EntryRotation, EncounterZoningId, EncounterZoningUnknown, EncounterZoningGeometryId, out _))
+        if (!player.TeleportToZone(ZoneDefinitionId, player.Guid, EntryPosition, EntryRotation, EncounterZoningId, EncounterZoningUnknown, EncounterZoningGeometryId, out var zone))
             return;
 
+        if (!zone.Npcs.Any())
+            SpawnNpcs(zone);
+
         miniGameUiSession.State = MiniGameUiState.Entering;
+    }
+
+    private void SpawnNpcs(IZone zone)
+    {
+        foreach (var spawn in Spawns)
+            zone.TrySpawnNpc(spawn.NpcId, default, spawn.Position.X, spawn.Position.Y, spawn.Position.Z, spawn.Heading, default, default, out _);
     }
 
     public virtual void OnClose(Player player, MiniGameUiSession miniGameUiSession, IZoneManager zoneManager)
