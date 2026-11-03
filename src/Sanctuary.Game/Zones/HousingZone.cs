@@ -152,7 +152,7 @@ public sealed class HousingZone : BaseZone
         if (!PetAutospawn || !IsOwner(player) || _housePets.ContainsKey(petId) || !TryGetHousePetArea(out var buildArea))
             return false;
 
-        npc.PositionSendIntervalMs = default;
+        npc.PositionUpdateFrequency = Npc.DefaultPositionUpdateFrequency;
         npc.MovementController = CreateHousePetMovement(npc, buildArea);
         _housePets[petId] = npc;
         return true;
