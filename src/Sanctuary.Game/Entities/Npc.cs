@@ -831,6 +831,8 @@ public class Npc : IScriptableNpc, IEntity
         }
     }
 
+    public Vector3 GetReachablePoint(Vector3 from, Vector3 to) => _pathfinder?.GetReachablePoint(from, to) ?? to;
+
     public bool TrySpawnNear(Vector3 position, Quaternion rotation, float maxHeightOffset = DefaultSpawnMaxHeightOffset)
     {
         var spawnPosition = position;

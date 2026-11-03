@@ -1187,7 +1187,7 @@ public sealed class PlayerPet
 
     private void SpawnPetBesideOwner(Npc npc, Vector3 ownerPosition, float sideDistance, float side, Quaternion? rotation = null)
     {
-        var besideOwner = ownerPosition + Vector3.Cross(Vector3.UnitY, _player.GetFacingDirection()) * sideDistance * side;
+        var besideOwner = npc.GetReachablePoint(ownerPosition, ownerPosition + Vector3.Cross(Vector3.UnitY, _player.GetFacingDirection()) * sideDistance * side);
 
         if (!npc.TrySpawnNear(besideOwner, rotation ?? GetFacingOwnerRotation(besideOwner)))
             npc.UpdatePosition(ownerPosition.ToVector4(), rotation ?? GetFacingOwnerRotation(ownerPosition));
