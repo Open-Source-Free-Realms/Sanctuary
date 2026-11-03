@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Numerics;
 
+using Sanctuary.Game.Routines;
 using Sanctuary.Game.Zones;
 
 namespace Sanctuary.Game.Entities;
@@ -15,6 +16,8 @@ public interface IEntity : IEquatable<IEntity>, IDisposable
     Quaternion Rotation { get; }
 
     bool Visible { get; set; }
+
+    RoutineManager Routines { get; }
 
     #region Zone
 
