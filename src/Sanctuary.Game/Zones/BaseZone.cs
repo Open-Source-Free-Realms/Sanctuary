@@ -861,7 +861,12 @@ public abstract class BaseZone : IZone, IDisposable
             npc.Notification = Sanctuary.Game.Helpers.InteractionMenuHelper.GetNotification(npc.Guid, definition.Notification);
 
         foreach (var notification in definition.Notifications)
+        {
+            if (notification.NotificationType == QuestManager.QuestBadgeNotificationType)
+                continue;
+
             npc.Notifications.Add(Sanctuary.Game.Helpers.InteractionMenuHelper.GetNotification(npc.Guid, notification));
+        }
 
         if (!TryRegisterEntity(_npcs, npc))
         {
