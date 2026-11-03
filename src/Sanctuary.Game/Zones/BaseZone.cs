@@ -522,7 +522,10 @@ public abstract class BaseZone : IZone, IDisposable
     {
         var coinStoreItemListPacket = new CoinStoreItemListPacket();
 
-        coinStoreItemListPacket.StaticItems = _resourceManager.CoinStoreItems.ToDictionary();
+        coinStoreItemListPacket.StaticItems = _resourceManager.CoinStoreItems.Values
+            .OrderBy(coinStoreItem => coinStoreItem.Id % ItemDefinitionHelper.CommunityColourIdStep)
+            .ThenBy(coinStoreItem => coinStoreItem.Id)
+            .ToDictionary(coinStoreItem => coinStoreItem.Id);
 
         player.SendTunneled(coinStoreItemListPacket);
     }
@@ -643,7 +646,13 @@ public abstract class BaseZone : IZone, IDisposable
             packetInGamePurchaseStoreBundles.Store.DescriptionId = mainStore.DescriptionId;
             packetInGamePurchaseStoreBundles.Store.Image = mainStore.Image;
 
-            foreach (var storeBundle in mainStore.Bundles.Values)
+            var communityColourBundles = mainStore.Bundles.Values
+                .Where(storeBundle => storeBundle.Id >= ItemDefinitionHelper.CommunityColourIdStep)
+                .ToLookup(storeBundle => storeBundle.Id % ItemDefinitionHelper.CommunityColourIdStep);
+
+            foreach (var storeBundle in mainStore.Bundles.Values
+                .Where(storeBundle => storeBundle.Id < ItemDefinitionHelper.CommunityColourIdStep)
+                .SelectMany(storeBundle => communityColourBundles[storeBundle.Id].Prepend(storeBundle)))
             {
                 var valid = storeBundle.Entries.All(x => _resourceManager.ClientItemDefinitions.ContainsKey(x.MarketingItemId));
 

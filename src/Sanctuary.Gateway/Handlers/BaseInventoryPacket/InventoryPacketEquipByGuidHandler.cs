@@ -63,7 +63,10 @@ public static class InventoryPacketEquipByGuidHandler
             return true;
         }
 
-        if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out var itemClass))
+        ItemClassDefinition? itemClass = null;
+
+        if (clientItemDefinition.Class != ItemDefinitionHelper.NoItemClass
+            && !_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out itemClass))
         {
             _logger.LogWarning("User tried to equip item with unknown class. {guid} {definition} {class}",
                 inventoryPacketEquipByGuid.Guid, clientItem.Definition, clientItemDefinition.Class);
@@ -165,7 +168,7 @@ public static class InventoryPacketEquipByGuidHandler
         if (wieldTypeChanged)
             connection.Player.SendActiveWieldType();
 
-        OutfitGestureHelper.OnEquipReply(connection, itemClass.WieldType, wieldTypeChanged);
+        OutfitGestureHelper.OnEquipReply(connection, itemClass?.WieldType ?? default, wieldTypeChanged);
 
         var playerUpdatePacketEquipItemChange = new PlayerUpdatePacketEquipItemChange();
 
