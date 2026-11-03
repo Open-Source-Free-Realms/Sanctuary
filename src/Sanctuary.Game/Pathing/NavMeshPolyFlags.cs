@@ -7,5 +7,6 @@ public enum NavMeshPolyFlags
 {
     Walk = 1,
     Swim = 2,
-    Outside = 4
+    Outside = 4,
+    Indoor = 8
 }
