@@ -49,6 +49,8 @@ public sealed class Player : ClientPcData, IEntity
     private const float OnFootMovementSpeed = 8f;
     private const double AreaSettleSeconds = 1.5;
     private const string PointOfInterestRoutine = "PointOfInterest";
+    private const string TeleportRoutine = "Teleport";
+    private const double TeleportTimeoutSeconds = 3;
     private const int TeleportSequenceCount = 4;
 
     private readonly UdpConnection _connection;
@@ -697,6 +699,8 @@ public sealed class Player : ClientPcData, IEntity
         if (Mount is not null && !Mount.TeleportToZone(zone, position, rotation))
             Dismount();
 
+        BeginTeleport();
+
         var packetClientBeginZoning = new PacketClientBeginZoning
         {
             Name = Zone.Name,
@@ -720,7 +724,8 @@ public sealed class Player : ClientPcData, IEntity
 
     public void Teleport(Vector4 position, Quaternion rotation)
     {
-        _teleportPending = true;
+        BeginTeleport();
+        StartTeleportTimeout();
 
         UpdatePosition(position, rotation);
 
@@ -735,12 +740,43 @@ public sealed class Player : ClientPcData, IEntity
         SendTunneled(clientUpdatePacketUpdateLocation);
     }
 
-    public void CompleteTeleport()
+    private void BeginTeleport()
+    {
+        _teleportPending = true;
+        _pendingZoneArea = null;
+
+        Routines.Cancel(PointOfInterestRoutine);
+    }
+
+    public void StartTeleportTimeout()
+    {
+        if (_teleportPending)
+            Routines.SetRoutine(TeleportRoutine, new DelayedRoutine(new InstantRoutine(() => _teleportPending = false), TeleportTimeoutSeconds));
+    }
+
+    public bool TryAcceptTeleportSequence(byte teleportSequence)
+    {
+        if (teleportSequence != TeleportSequence)
+        {
+            if (_teleportPending)
+                return false;
+
+            TeleportSequence = teleportSequence;
+        }
+
+        CompleteTeleport();
+
+        return true;
+    }
+
+    private void CompleteTeleport()
     {
         if (!_teleportPending)
             return;
 
         _teleportPending = false;
+
+        Routines.Cancel(TeleportRoutine);
 
         UpdatePointOfInterest();
     }
@@ -780,6 +816,8 @@ public sealed class Player : ClientPcData, IEntity
     public void UpdatePointOfInterest(ZoneAreaDefinition? zoneAreaDefinition)
     {
         _pendingZoneArea = null;
+
+        Routines.Cancel(PointOfInterestRoutine);
 
         if (zoneAreaDefinition is null || zoneAreaDefinition.Id == PointOfInterestId)
             return;

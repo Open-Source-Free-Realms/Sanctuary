@@ -33,10 +33,8 @@ public static class PlayerUpdatePacketUpdatePositionHandler
 
         // _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(PlayerUpdatePacketUpdatePosition), packet);
 
-        if (packet.TeleportSequence != connection.Player.TeleportSequence)
+        if (!connection.Player.TryAcceptTeleportSequence(packet.TeleportSequence))
             return true;
-
-        connection.Player.CompleteTeleport();
 
         packet.Guid = connection.Player.Guid;
 
