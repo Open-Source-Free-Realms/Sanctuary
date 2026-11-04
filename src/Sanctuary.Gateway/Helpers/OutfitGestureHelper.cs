@@ -38,7 +38,22 @@ public static class OutfitGestureHelper
     private sealed class PlayerGestures
     {
         public PendingGesture? Pending;
-        public int CoolingDown;
+        private int _coolingDown;
+
+        public bool TryTakePending(PendingGesture pendingGesture)
+        {
+            return ReferenceEquals(Interlocked.CompareExchange(ref Pending, null, pendingGesture), pendingGesture);
+        }
+
+        public bool TryStartCooldown()
+        {
+            return Interlocked.CompareExchange(ref _coolingDown, 1, 0) == 0;
+        }
+
+        public void EndCooldown()
+        {
+            Interlocked.Exchange(ref _coolingDown, 0);
+        }
     }
 
     private static readonly ConditionalWeakTable<Player, PlayerGestures> GestureStates = new();
@@ -76,8 +91,7 @@ public static class OutfitGestureHelper
         var player = pendingGesture.Player;
         var playerGestures = GestureStates.GetValue(player, _ => new PlayerGestures());
 
-        if (!ReferenceEquals(Interlocked.CompareExchange(ref playerGestures.Pending, null, pendingGesture), pendingGesture)
-            || !play || !pendingGesture.IsInStartingZone || Interlocked.Exchange(ref playerGestures.CoolingDown, 1) == 1)
+        if (!playerGestures.TryTakePending(pendingGesture) || !play || !pendingGesture.IsInStartingZone || !playerGestures.TryStartCooldown())
             return;
 
         var delay = wieldTypeChanged ? WieldTypeGestureDelaySeconds : TimelineGapSeconds;
@@ -100,7 +114,7 @@ public static class OutfitGestureHelper
         steps.Add(new WaitRoutine(delay));
         steps.Add(new InstantRoutine(() => SendQuickChatToVisible(pendingGesture)));
         steps.Add(new WaitRoutine(GestureSeconds));
-        steps.Add(new InstantRoutine(() => Volatile.Write(ref playerGestures.CoolingDown, 0)));
+        steps.Add(new InstantRoutine(playerGestures.EndCooldown));
         steps.Add(new WaitRoutine(TimelineGapSeconds + LongestGestureSeconds + GestureEndMarginSeconds - GestureSeconds));
         steps.Add(new InstantRoutine(() => player.IsPlayingOutfitGesture = false));
 
