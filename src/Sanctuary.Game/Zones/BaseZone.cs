@@ -210,6 +210,8 @@ public abstract class BaseZone : IZone, IDisposable
 
         SendUpdateStat(player);
 
+        player.RefreshEquipmentGlide();
+
         var clientUpdatePacketHitpoints = new ClientUpdatePacketHitpoints
         {
             CurrentHitpoints = 2500,
