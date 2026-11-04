@@ -30,7 +30,7 @@ public static class PacketGameTimeSyncHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(PacketGameTimeSync), packet);
 
-        connection.SendTunneled(GameTimeHelper.GetGameTimeSyncPacket());
+        connection.SendTunneled(GameTimeHelper.GetGameTimeSyncPacket(connection.Player));
 
         return true;
     }

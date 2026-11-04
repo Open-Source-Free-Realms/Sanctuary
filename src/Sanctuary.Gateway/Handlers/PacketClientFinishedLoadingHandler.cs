@@ -43,7 +43,7 @@ public static class PacketClientFinishedLoadingHandler
 
         connection.Player.Zone.OnClientFinishedLoading(connection.Player);
 
-        connection.Player.SendTunneled(GameTimeHelper.GetGameTimeSyncPacket());
+        connection.Player.SendTunneled(GameTimeHelper.GetGameTimeSyncPacket(connection.Player));
 
         connection.Player.PlayerPet.RestorePet();
 
