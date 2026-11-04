@@ -111364,8 +111364,8 @@
         "CategoryGroupId":  243,
         "CategoryDisplayOrder":  1,
         "SkuId":  1,
-        "MemberDiscount":  1,
-        "MembersOnlyPrice":  1
+        "MemberDiscount":  2,
+        "MembersOnlyPrice":  2
     },
     {
         "Comment":  "Sunstone Clockwork Mystery Chest",
@@ -111381,7 +111381,7 @@
                             "MarketingItemId":  79519
                         }
                     ],
-        "Id":  78136,
+        "Id":  79519,
         "NameId":  19048,
         "DescriptionId":  2663,
         "Status":  1,
@@ -111394,7 +111394,7 @@
         "SkuId":  1,
         "MemberDiscount":  2,
         "MembersOnlyPrice": 2
-    }
+    },
         {
         "Comment":  "Sci-fi Mystery Chest",
         "LaunchTime":  "2011-10-18T07:00:00+00:00",
@@ -111409,9 +111409,65 @@
                             "MarketingItemId":  79520
                         }
                     ],
-        "Id":  78136,
+        "Id":  79520,
         "NameId":  2662,
         "DescriptionId":  2663,
+        "Status":  1,
+        "CurrencyType":  1,
+        "Price":  2,
+        "AltCurrencyPrice":  1,
+        "StoreId":  1,
+        "CategoryGroupId":  243,
+        "CategoryDisplayOrder":  1,
+        "SkuId":  1,
+        "MemberDiscount":  2,
+        "MembersOnlyPrice": 2
+    },
+    {
+        "Comment":  "Seasonal Snow Days Mystery Chest",
+        "LaunchTime":  "2011-10-18T07:00:00+00:00",
+        "ExpireTime":  "2040-01-01T08:00:00+00:00",
+        "Image":  {
+                      "Image":  "8134"
+                  },
+        "Entries":  [
+                        {
+                            "Quantity":  1,
+                            "GameItemId":  5101,
+                            "MarketingItemId":  79521
+                        }
+                    ],
+        "Id":  79521,
+        "NameId":  4419440,
+        "DescriptionId":  2663,
+        "Status":  1,
+        "CurrencyType":  1,
+        "Price":  2,
+        "AltCurrencyPrice":  1,
+        "StoreId":  1,
+        "CategoryGroupId":  243,
+        "CategoryDisplayOrder":  1,
+        "SkuId":  1,
+        "MemberDiscount":  2,
+        "MembersOnlyPrice": 2
+    },
+    {
+        "Comment":  "Wonders Mystery Chest Chest of Wonders",
+        "LaunchTime":  "2011-10-18T07:00:00+00:00",
+        "ExpireTime":  "2040-01-01T08:00:00+00:00",
+        "Image":  {
+                      "Image":  "8500"
+                  },
+        "Entries":  [
+                        {
+                            "Quantity":  1,
+                            "GameItemId":  5101,
+                            "MarketingItemId":  79522
+                        }
+                    ],
+        "Id":  79522,
+        "NameId":  442890,
+        "DescriptionId": 442901,
         "Status":  1,
         "CurrencyType":  1,
         "Price":  2,

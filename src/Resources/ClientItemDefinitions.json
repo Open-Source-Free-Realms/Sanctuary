@@ -1,4 +1,4 @@
-﻿[
+[
   {
     "Comment": "Penguin Badge",
     "Id": 1,
@@ -144658,13 +144658,8 @@
     "Icon": {
       "Id": 6457
     },
-<<<<<<< HEAD
     "Class": 9,
-    "MaxStackSize": -1,
-=======
-    "Class": 172,
     "MaxStackSize": 1,
->>>>>>> upstream/main
     "NoTrade": true,
     "TextureAlias": "brownwbluelines",
     "Param1": 8211,
@@ -144683,13 +144678,8 @@
     "Icon": {
       "Id": 6456
     },
-<<<<<<< HEAD
     "Class": 9,
-    "MaxStackSize": -1,
-=======
-    "Class": 172,
     "MaxStackSize": 1,
->>>>>>> upstream/main
     "NoTrade": true,
     "TextureAlias": "blackwredlines",
     "Param1": 8212,
@@ -187011,13 +187001,8 @@
     "Icon": {
       "Id": 6820
     },
-<<<<<<< HEAD
     "Class": 9,
-    "MaxStackSize": -1,
-=======
-    "Class": 172,
     "MaxStackSize": 1,
->>>>>>> upstream/main
     "NoTrade": true,
     "TextureAlias": "stormclouddecal",
     "Param1": 697,
@@ -187036,13 +187021,8 @@
     "Icon": {
       "Id": 6802
     },
-<<<<<<< HEAD
     "Class": 9,
-    "MaxStackSize": -1,
-=======
-    "Class": 172,
     "MaxStackSize": 1,
->>>>>>> upstream/main
     "NoTrade": true,
     "TextureAlias": "lavadecal",
     "Param1": 698,
@@ -1238116,7 +1238096,6 @@
     "Rarity": 3,
     "IsTintable": true
   },
-  //chest test :)
   {
     "Comment": "Mystery Chest",
     "Id": 78136,
