@@ -219,7 +219,7 @@ public static class InventoryPacketUseImmediateActivationItemHandler
 
         if (!_rewardManager.TryRollRewardUnowned(connection.Player, rewardTableKey, out var drop, out var tint) || drop is null)
         {
-            _logger.LogError("Could not roll a reward from {table} for {player}, so the chest and key were not used.", rewardTableKey, connection.Player.Name.FullName);
+            _logger.LogError("Could not roll a reward from {table} for {player}.", rewardTableKey, connection.Player.Name.FullName);
             ChatHelper.SendSystemMessage(connection.Player, "This chest can't be opened right now.");
             return true;
         }
@@ -248,24 +248,28 @@ public static class InventoryPacketUseImmediateActivationItemHandler
             return true;
         }
 
-        var deleteChest = TakeOne(dbContext, dbChest, clientItem);
-        var deleteKey = TakeOne(dbContext, dbKey, clientKey);
-
-        if (dbContext.SaveChanges() <= 0)
-        {
-            _logger.LogWarning("Failed to save to database.");
-            return true;
-        }
-
-        UpdatePlayer(connection, clientItem, deleteChest);
-        UpdatePlayer(connection, clientKey, deleteKey);
-
         var granted = drop is ItemRewardDropDefinition item
             ? _rewardManager.TryGrantItem(connection.Player, item.ItemDefinitionId, tint, item.Quantity)
             : _rewardManager.TryGrantReward(connection.Player, drop);
 
         if (!granted)
-            _logger.LogError("{player} opened a chest but rolled reward couldn't be granted. What happened?", connection.Player.Name.FullName);
+        {
+            _logger.LogError("{player} rolled a reward from {table} but it couldn't be granted.", connection.Player.Name.FullName, rewardTableKey);
+            ChatHelper.SendSystemMessage(connection.Player, "This chest can't be opened right now due to an internal error!");
+            return true;
+        }
+
+        var deleteChest = TakeOne(dbContext, dbChest, clientItem);
+        var deleteKey = TakeOne(dbContext, dbKey, clientKey);
+
+        if (dbContext.SaveChanges() <= 0)
+        {
+            _logger.LogError("{player} was granted a reward but the chest and key were retained.", connection.Player.Name.FullName);
+            return true;
+        }
+
+        UpdatePlayer(connection, clientItem, deleteChest);
+        UpdatePlayer(connection, clientKey, deleteKey);
 
         SpawnOpeningChest(connection.Player, clientItemDefinition);
         _logger.LogInformation("Item being opened. GUID is {guid} and item definition is {theitemdefinition}, key is {thekey}", packet.ItemGuid, clientItem.Definition, clientKey.Id);

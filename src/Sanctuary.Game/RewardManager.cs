@@ -99,6 +99,8 @@ public class RewardManager : IRewardManager
             return GetDefaultMountTint(itemDefinition.Param1);
 
         var unownedTints = item.Tints.Where(x => !OwnsMount(player, itemDefinition.Param1, x.TintId)).ToList();
+        if (unownedTints.Count == 0)
+            unownedTints = item.Tints.ToList();
 
         return new WeightedDropTable<TintDropDefinition>(unownedTints).SelectRandom().TintId;
     }
@@ -108,7 +110,7 @@ public class RewardManager : IRewardManager
         return drop switch
         {
             ItemRewardDropDefinition item => TryGrantItem(player, item.ItemDefinitionId,
-                item.TintTable?.SelectRandom().TintId ?? 0, item.Quantity, sourceGuid),
+                PickTint(player, item), item.Quantity, sourceGuid),
             CurrencyRewardDropDefinition currency => TryGrantCurrency(player, currency.CurrencyType, currency.Amount),
             _ => false
         };
