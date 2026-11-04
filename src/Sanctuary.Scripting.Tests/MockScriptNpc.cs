@@ -29,7 +29,7 @@ internal class MockScriptNpc(IScriptableZone _zone) : IScriptableNpc
         throw new NotImplementedException();
     }
 
-    public void MoveTo(float x, float y, float z, bool direct)
+    public void TryMoveTo(float x, float y, float z, bool direct)
     {
         throw new NotImplementedException();
     }
