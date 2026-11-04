@@ -21931,21 +21931,7 @@
     "Name": "Speedy",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 2,
-        "IconState": 2,
-        "Unknown": 0,
-        "NameId": 7608,
-        "ReferenceId": 1114,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33166,
@@ -24121,21 +24107,7 @@
     "Animation": 2110,
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 2,
-        "IconState": 2,
-        "Unknown": 0,
-        "NameId": 430047,
-        "ReferenceId": 0,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33327,
@@ -24398,21 +24370,7 @@
     "Name": "Sam Potts",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 2,
-        "IconState": 2,
-        "Unknown": 0,
-        "NameId": 74093,
-        "ReferenceId": 38093,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33341,
@@ -24525,21 +24483,7 @@
     "Name": "Guard Snapdragon",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 163,
-        "IconState": 237,
-        "Unknown": 0,
-        "NameId": 10100,
-        "ReferenceId": 1114,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33349,
@@ -24578,21 +24522,7 @@
     "Name": "Barton",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 2,
-        "IconState": 2,
-        "Unknown": 0,
-        "NameId": 10095,
-        "ReferenceId": 1114,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33351,
@@ -24853,21 +24783,7 @@
     "TintAlias": "sanctuary_02_Amber",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 2,
-        "IconState": 2,
-        "Unknown": 0,
-        "NameId": 14701,
-        "ReferenceId": 5102738,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33374,
@@ -24894,21 +24810,7 @@
     "Name": "Finklestein",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 163,
-        "IconState": 237,
-        "Unknown": 0,
-        "NameId": 415613,
-        "ReferenceId": -1,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33377,
@@ -25138,21 +25040,7 @@
     "Name": "Jestin",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 2,
-        "IconState": 2,
-        "Unknown": 0,
-        "NameId": 7606,
-        "ReferenceId": 1114,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33393,
@@ -25280,21 +25168,7 @@
     "Name": "Ikee",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 163,
-        "IconState": 237,
-        "Unknown": 0,
-        "NameId": 14699,
-        "ReferenceId": 15717,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33401,
@@ -25357,21 +25231,7 @@
     "Name": "Napoleon",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 2,
-        "IconState": 2,
-        "Unknown": 0,
-        "NameId": 391444,
-        "ReferenceId": -1,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33407,
@@ -25480,21 +25340,7 @@
     "Name": "Crofti",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 163,
-        "IconState": 237,
-        "Unknown": 0,
-        "NameId": 10175,
-        "ReferenceId": 15717,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33417,
@@ -25589,21 +25435,7 @@
     "TintAlias": "sanctuary_03_Black",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 163,
-        "IconState": 237,
-        "Unknown": 0,
-        "NameId": 15413,
-        "ReferenceId": 5102738,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33423,
@@ -25690,21 +25522,7 @@
     "TintAlias": "seaside_dress-yellow",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 163,
-        "IconState": 237,
-        "Unknown": 0,
-        "NameId": 10094,
-        "ReferenceId": 1114,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33428,
@@ -25897,21 +25715,7 @@
     "Name": "Skelly",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 163,
-        "IconState": 237,
-        "Unknown": 0,
-        "NameId": 415500,
-        "ReferenceId": -1,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33439,
@@ -25970,21 +25774,7 @@
     "TintAlias": "sanctuary_02_Purple",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": true,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 164,
-        "IconState": 237,
-        "Unknown": 0,
-        "NameId": 10072,
-        "ReferenceId": 434650,
-        "Unknown3": false,
-        "Unknown2": 5568,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": true
   },
   {
     "Id": 33443,
@@ -26014,21 +25804,7 @@
     "Name": "Sunstone Jones",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 341,
-        "IconState": 378,
-        "Unknown": 0,
-        "NameId": 5102577,
-        "ReferenceId": 0,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33446,
@@ -26339,21 +26115,7 @@
     "Name": "Dori Tendersole",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 2,
-        "IconState": 2,
-        "Unknown": 0,
-        "NameId": 36468,
-        "ReferenceId": 1114,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33466,
@@ -26635,21 +26397,7 @@
     "TintAlias": "sanctuary_03_Blue",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 2,
-        "IconState": 2,
-        "Unknown": 0,
-        "NameId": 19676,
-        "ReferenceId": 15717,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33480,
@@ -28068,21 +27816,7 @@
     "Name": "Lan Spryleaf",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 2,
-        "IconState": 2,
-        "Unknown": 0,
-        "NameId": 76029,
-        "ReferenceId": -1,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33543,
@@ -28249,21 +27983,7 @@
     "Name": "Mister Nooklings",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 2,
-        "IconState": 2,
-        "Unknown": 0,
-        "NameId": 19682,
-        "ReferenceId": 36,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33557,
@@ -29192,20 +28912,6 @@
     "HasCursor": true,
     "CursorId": 17,
     "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 13,
-        "IconState": 0,
-        "Unknown": 0,
-        "NameId": 421142,
-        "ReferenceId": -1,
-        "Unknown3": true,
-        "Unknown2": 1107,
-        "Enabled": true
-      }
-    ],
     "InteractionList": {
       "Unknown": true,
       "Interactions": [
@@ -29589,20 +29295,6 @@
     "HasCursor": true,
     "CursorId": 17,
     "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 13,
-        "IconState": 0,
-        "Unknown": 0,
-        "NameId": 421142,
-        "ReferenceId": -1,
-        "Unknown3": true,
-        "Unknown2": 1107,
-        "Enabled": true
-      }
-    ],
     "InteractionList": {
       "Unknown": true,
       "Interactions": [
@@ -29839,21 +29531,7 @@
     "TintAlias": "dyetint-amethyst",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 2,
-        "IconState": 2,
-        "Unknown": 0,
-        "NameId": 5102405,
-        "ReferenceId": 0,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33624,
@@ -30912,21 +30590,7 @@
     "Name": "Candi Ivy",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 177,
-        "IconState": 242,
-        "Unknown": 0,
-        "NameId": 419832,
-        "ReferenceId": -1,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33669,
@@ -31003,21 +30667,7 @@
     "TintAlias": "barndoor",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 2,
-        "IconState": 2,
-        "Unknown": 0,
-        "NameId": 5454,
-        "ReferenceId": 1114,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33673,
@@ -31097,20 +30747,6 @@
     "HasCursor": true,
     "CursorId": 17,
     "RelevanceUnknown2": true,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 11,
-        "IconState": 6,
-        "Unknown": 0,
-        "NameId": 36828,
-        "ReferenceId": -1,
-        "Unknown3": true,
-        "Unknown2": 5192,
-        "Enabled": true
-      }
-    ],
     "InteractionList": {
       "Unknown": true,
       "Interactions": [],
@@ -31232,21 +30868,7 @@
     "TintAlias": "goggles-brown",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 2,
-        "IconState": 2,
-        "Unknown": 0,
-        "NameId": 36827,
-        "ReferenceId": -1,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33692,
@@ -31607,20 +31229,6 @@
     "HasCursor": true,
     "CursorId": 17,
     "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 13,
-        "IconState": 0,
-        "Unknown": 0,
-        "NameId": 421142,
-        "ReferenceId": -1,
-        "Unknown3": true,
-        "Unknown2": 1107,
-        "Enabled": true
-      }
-    ],
     "InteractionList": {
       "Unknown": true,
       "Interactions": [
@@ -32247,21 +31855,7 @@
     "Name": "Autumn Mistflower",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 118,
-        "IconState": 201,
-        "Unknown": 0,
-        "NameId": 394914,
-        "ReferenceId": -1,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33744,
@@ -32412,21 +32006,7 @@
     "Name": "Everett",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 177,
-        "IconState": 242,
-        "Unknown": 0,
-        "NameId": 420809,
-        "ReferenceId": 420810,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33764,
@@ -32594,21 +32174,7 @@
     "Name": "Steele",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 2,
-        "IconState": 2,
-        "Unknown": 0,
-        "NameId": 47830,
-        "ReferenceId": 1114,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33777,
@@ -32673,21 +32239,7 @@
     "CompositeEffectId": 15588,
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 2,
-        "IconState": 2,
-        "Unknown": 0,
-        "NameId": 420171,
-        "ReferenceId": 0,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33791,
@@ -32857,21 +32409,7 @@
     "Name": "Wintara",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 2,
-        "IconState": 2,
-        "Unknown": 0,
-        "NameId": 7053,
-        "ReferenceId": -1,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33815,
@@ -33150,21 +32688,7 @@
     "Name": "Ree Peatpants",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 2,
-        "IconState": 2,
-        "Unknown": 0,
-        "NameId": 388454,
-        "ReferenceId": -1,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33835,
@@ -34171,21 +33695,7 @@
     "Name": "Perry",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 2,
-        "IconState": 2,
-        "Unknown": 0,
-        "NameId": 3059,
-        "ReferenceId": 5102849,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33880,
@@ -35746,21 +35256,7 @@
     "Name": "Manager Landon",
     "HasCursor": true,
     "CursorId": 5,
-    "RelevanceUnknown2": false,
-    "Notifications": [
-      {
-        "IsCompact": false,
-        "NotificationType": 2,
-        "IconId": 2,
-        "IconState": 2,
-        "Unknown": 0,
-        "NameId": 401744,
-        "ReferenceId": 408589,
-        "Unknown3": false,
-        "Unknown2": 0,
-        "Enabled": true
-      }
-    ]
+    "RelevanceUnknown2": false
   },
   {
     "Id": 33955,

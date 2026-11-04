@@ -45,8 +45,6 @@ public interface IResourceManager
     NpcMovementDefinitionCollection NpcMovements { get; }
     NpcAmbientDefinitionCollection NpcAmbient { get; }
     QuestDefinitionCollection Quests { get; }
-    MapGraphCollection Maps { get; }
-    TerrainCollection Terrains { get; }
     NavMeshCollection NavMeshes { get; }
 
     RewardTableDefinitionCollection RewardTables { get; }
@@ -56,5 +54,5 @@ public interface IResourceManager
 
     bool Load();
 
-    bool LoadZoneGeometry();
+    bool LoadNavMeshes();
 }

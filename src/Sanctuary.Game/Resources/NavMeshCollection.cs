@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using DotRecast.Detour;
 
 using Sanctuary.Core.Collections;
-using Sanctuary.Game.Pathfinding;
+using Sanctuary.Game.Pathing;
 
 namespace Sanctuary.Game.Resources;
 
