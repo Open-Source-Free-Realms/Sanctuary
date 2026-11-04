@@ -756,29 +756,19 @@ public sealed class Player : ClientPcData, IEntity
 
     public bool TryAcceptTeleportSequence(byte teleportSequence)
     {
-        if (teleportSequence != TeleportSequence)
-        {
-            if (_teleportPending)
-                return false;
+        if (teleportSequence != TeleportSequence && _teleportPending)
+            return false;
 
-            TeleportSequence = teleportSequence;
+        TeleportSequence = teleportSequence;
+
+        if (_teleportPending)
+        {
+            _teleportPending = false;
+            Routines.Cancel(TeleportRoutine);
+            UpdatePointOfInterest();
         }
 
-        CompleteTeleport();
-
         return true;
-    }
-
-    private void CompleteTeleport()
-    {
-        if (!_teleportPending)
-            return;
-
-        _teleportPending = false;
-
-        Routines.Cancel(TeleportRoutine);
-
-        UpdatePointOfInterest();
     }
 
     private void QueuePointOfInterest()
