@@ -163,12 +163,7 @@ public static class InventoryPacketEquipByGuidHandler
 
         connection.SendTunneled(clientUpdatePacketEquipItem);
 
-        var wieldTypeChanged = connection.Player.GetWieldType() != previousWieldType;
-
-        if (wieldTypeChanged)
-            connection.Player.SendActiveWieldType();
-
-        OutfitGestureHelper.OnEquipReply(connection, itemClass?.WieldType ?? default, wieldTypeChanged);
+        OutfitGestureHelper.OnEquipReply(connection, itemClass, previousWieldType);
 
         var playerUpdatePacketEquipItemChange = new PlayerUpdatePacketEquipItemChange();
 

@@ -1,12 +1,14 @@
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Routines;
+using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
+using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Chat;
 
 namespace Sanctuary.Gateway.Helpers;
@@ -28,60 +30,58 @@ public static class OutfitGestureHelper
     private const double GestureEndMarginSeconds = 0.1;
     private const double DancingGestureDelaySeconds = 0.1;
 
-    private sealed record PendingGesture(GatewayConnection Connection, QuickChatSendChatToChannelPacket QuickChatSendChatToChannelPacket, int AnimationId);
+    private sealed record PendingGesture(Player Player, IZone Zone, QuickChatSendChatToChannelPacket QuickChatSendChatToChannelPacket, int AnimationId)
+    {
+        public bool IsInStartingZone => Player.Zone == Zone;
+    }
 
     private sealed class PlayerGestures
     {
-        public bool IsCoolingDown;
+        public PendingGesture? Pending;
+        public int CoolingDown;
     }
 
-    private static readonly ConcurrentDictionary<ulong, PendingGesture> PendingGestures = new();
     private static readonly ConditionalWeakTable<Player, PlayerGestures> GestureStates = new();
 
     public static bool IsOutfitQuickChat(QuickChatDefinition quickChatDefinition) => quickChatDefinition.ParentId == OutfitQuickChatMenu;
 
     public static void Hold(GatewayConnection connection, QuickChatSendChatToChannelPacket quickChatSendChatToChannelPacket, int animationId)
     {
-        var pendingGesture = new PendingGesture(connection, quickChatSendChatToChannelPacket, animationId);
+        var player = connection.Player;
+        var pendingGesture = new PendingGesture(player, player.Zone, quickChatSendChatToChannelPacket, animationId);
 
-        PendingGestures[connection.Player.Guid] = pendingGesture;
+        GestureStates.GetValue(player, _ => new PlayerGestures()).Pending = pendingGesture;
 
-        connection.Player.Routines.SetRoutine(HoldRoutine, new DelayedRoutine(new InstantRoutine(() => Release(pendingGesture)), UnmatchedGestureDelaySeconds));
+        player.Routines.SetRoutine(HoldRoutine, new DelayedRoutine(new InstantRoutine(() => Release(pendingGesture)), UnmatchedGestureDelaySeconds));
     }
 
-    public static void OnEquipReply(GatewayConnection connection, int wieldType, bool wieldTypeChanged)
+    public static void OnEquipReply(GatewayConnection connection, ItemClassDefinition? itemClass, int previousWieldType)
     {
-        var guid = connection.Player.Guid;
+        var player = connection.Player;
+        var wieldTypeChanged = player.GetWieldType() != previousWieldType;
 
-        if (!PendingGestures.TryGetValue(guid, out var pendingGesture))
+        if (wieldTypeChanged)
+            player.SendActiveWieldType();
+
+        if (!GestureStates.TryGetValue(player, out var playerGestures) || playerGestures.Pending is not { } pendingGesture)
             return;
 
-        connection.Player.Routines.Cancel(HoldRoutine);
+        player.Routines.Cancel(HoldRoutine);
 
-        if (wieldType != 0 && wieldTypeChanged)
-            PendingGestures.TryRemove(new KeyValuePair<ulong, PendingGesture>(guid, pendingGesture));
-        else
-            Release(pendingGesture, wieldTypeChanged);
+        Release(pendingGesture, wieldTypeChanged, itemClass?.WieldType is null or 0 || !wieldTypeChanged);
     }
 
-    private static void Release(PendingGesture pendingGesture, bool wieldTypeChanged = false)
+    private static void Release(PendingGesture pendingGesture, bool wieldTypeChanged = false, bool play = true)
     {
-        var player = pendingGesture.Connection.Player;
+        var player = pendingGesture.Player;
+        var playerGestures = GestureStates.GetValue(player, _ => new PlayerGestures());
 
-        if (!PendingGestures.TryRemove(new KeyValuePair<ulong, PendingGesture>(player.Guid, pendingGesture)))
+        if (!ReferenceEquals(Interlocked.CompareExchange(ref playerGestures.Pending, null, pendingGesture), pendingGesture)
+            || !play || !pendingGesture.IsInStartingZone || Interlocked.Exchange(ref playerGestures.CoolingDown, 1) == 1)
             return;
 
         var delay = wieldTypeChanged ? WieldTypeGestureDelaySeconds : TimelineGapSeconds;
         var dancing = player.BoomboxDanceOwner != 0 && player.BoomboxDanceAnimation != 0;
-        var playerGestures = GestureStates.GetValue(player, _ => new PlayerGestures());
-
-        lock (playerGestures)
-        {
-            if (playerGestures.IsCoolingDown)
-                return;
-
-            playerGestures.IsCoolingDown = true;
-        }
 
         player.IsPlayingOutfitGesture = true;
 
@@ -90,45 +90,47 @@ public static class OutfitGestureHelper
         if (dancing)
         {
             steps.Add(new WaitRoutine(DancingGestureDelaySeconds));
-            steps.Add(new InstantRoutine(() => QueueGesture(player, pendingGesture.AnimationId, delay)));
+            steps.Add(new InstantRoutine(() => QueueGesture(pendingGesture, delay)));
         }
         else
         {
-            QueueGesture(player, pendingGesture.AnimationId, delay);
+            QueueGesture(pendingGesture, delay);
         }
 
         steps.Add(new WaitRoutine(delay));
-        steps.Add(new InstantRoutine(() => SendQuickChatToVisible(player, pendingGesture.QuickChatSendChatToChannelPacket)));
+        steps.Add(new InstantRoutine(() => SendQuickChatToVisible(pendingGesture)));
         steps.Add(new WaitRoutine(GestureSeconds));
-        steps.Add(new InstantRoutine(() => EndCooldown(playerGestures)));
+        steps.Add(new InstantRoutine(() => Volatile.Write(ref playerGestures.CoolingDown, 0)));
         steps.Add(new WaitRoutine(TimelineGapSeconds + LongestGestureSeconds + GestureEndMarginSeconds - GestureSeconds));
         steps.Add(new InstantRoutine(() => player.IsPlayingOutfitGesture = false));
 
         player.Routines.SetRoutine(GestureRoutine, new SequentialRoutine(steps));
     }
 
-    private static void EndCooldown(PlayerGestures playerGestures)
+    private static void SendQuickChatToVisible(PendingGesture pendingGesture)
     {
-        lock (playerGestures)
-        {
-            playerGestures.IsCoolingDown = false;
-        }
-    }
+        if (!pendingGesture.IsInStartingZone)
+            return;
 
-    private static void SendQuickChatToVisible(Player player, QuickChatSendChatToChannelPacket quickChatSendChatToChannelPacket)
-    {
+        var player = pendingGesture.Player;
+
         foreach (var visiblePlayer in player.VisiblePlayers.Values)
         {
             if (visiblePlayer.Ignores.Any(x => x.Guid == player.Guid))
                 continue;
 
-            visiblePlayer.SendTunneled(quickChatSendChatToChannelPacket);
+            visiblePlayer.SendTunneled(pendingGesture.QuickChatSendChatToChannelPacket);
         }
     }
 
-    private static void QueueGesture(Player player, int animationId, float delay)
+    private static void QueueGesture(PendingGesture pendingGesture, float delay)
     {
-        EntityHelper.QueueAnimation(player, animationId, loopCount: QuickChatLoopCount, unknown6: false, unknown7: true, unknown8: false,
+        if (!pendingGesture.IsInStartingZone)
+            return;
+
+        var player = pendingGesture.Player;
+
+        EntityHelper.QueueAnimation(player, pendingGesture.AnimationId, loopCount: QuickChatLoopCount, unknown6: false, unknown7: true, unknown8: false,
             delay: delay, recipients: [player]);
         EntityHelper.QueueAnimation(player, NoAnimation, loopCount: QuickChatLoopCount, unknown6: false, unknown7: true, unknown8: false,
             delay: TimelineGapSeconds, recipients: [player]);
