@@ -132,7 +132,8 @@ public class RewardManager : IRewardManager
             if (!TryGrantPet(player, itemDefinition, tint))
                 return false;
 
-            SendMountRewardToast(player, itemDefinition, tint, quantity, sourceGuid);
+            SendItemDefinition(player, itemDefinition);
+            SendRewardToast(player, itemDefinition, quantity, sourceGuid, tintId: tint != 0 ? tint : itemDefinition.Icon.TintId, showRewardPanel: true);
             return true;
         }
 
@@ -141,7 +142,8 @@ public class RewardManager : IRewardManager
             if (!TryGrantMount(player, itemDefinition.Param1, tint))
                 return false;
 
-            SendMountRewardToast(player, itemDefinition, tint, quantity, sourceGuid);
+            SendItemDefinition(player, itemDefinition);
+            SendRewardToast(player, itemDefinition, quantity, sourceGuid, tintId: tint != 0 ? tint : itemDefinition.Icon.TintId, showRewardPanel: true);
             return true;
         }
 
@@ -207,7 +209,7 @@ public class RewardManager : IRewardManager
             });
         }
 
-        SendRewardToast(player, clientItem, itemDefinition, quantity, sourceGuid);
+        SendRewardToast(player, itemDefinition, quantity, sourceGuid, itemGuid: clientItem.Id, tint: clientItem.Tint);
 
         return true;
     }
@@ -381,60 +383,38 @@ public class RewardManager : IRewardManager
         return true;
     }
 
-    private static void SendRewardToast(Player player, ClientItem clientItem, ClientItemDefinition itemDefinition, int quantity, ulong sourceGuid)
+    private static void SendItemDefinition(Player player, ClientItemDefinition itemDefinition)
     {
-        // TODO: Is there a coin/station cash toast? How about for other types of rewards..?
-        var notificationId = Environment.TickCount & int.MaxValue;
-
-        var packet = new RewardBundlePacket();
-        packet.RewardBundle.DescriptionId = itemDefinition.DescriptionId;
-        packet.RewardBundle.SourceGuid = sourceGuid ^ (uint)notificationId;
-        packet.RewardBundle.PlayerGuid = player.Guid;
-        packet.RewardBundle.IconId = itemDefinition.Icon.Id;
-        packet.RewardBundle.NameId = itemDefinition.NameId;
-        packet.RewardBundle.Entries.Add(new RewardBundleEntryItem
-        {
-            IconId = itemDefinition.Icon.Id,
-            NameId = itemDefinition.NameId,
-            DefinitionId = clientItem.Definition,
-            Tint = clientItem.Tint,
-            Quantity = quantity,
-            ItemGuid = clientItem.Id
-        });
-
-        player.SendTunneled(packet);
-    }
-    private static void SendMountRewardToast(Player player, ClientItemDefinition itemDefinition, int tint, int quantity, ulong sourceGuid)
-    //Answer to TODO: Yes, but we only know this one right now. Unknown1 appears to be part of Coins & XP Toasts. -Erwynne
-    {
-        var clientItemDefinitions = new List<ClientItemDefinition> { itemDefinition };
-
         using var writer = new PacketWriter();
+        writer.Write(new List<ClientItemDefinition> { itemDefinition });
 
-        writer.Write(clientItemDefinitions);
+        player.SendTunneled(new PlayerUpdatePacketItemDefinitions { Payload = writer.Buffer });
+    }
 
-        var playerUpdatePacketItemDefinitions = new PlayerUpdatePacketItemDefinitions();
-
-        playerUpdatePacketItemDefinitions.Payload = writer.Buffer;
-
-        player.SendTunneled(playerUpdatePacketItemDefinitions);
-
+    private static void SendRewardToast(Player player, ClientItemDefinition clientDefinition, int quantity, ulong sourceGuid,
+    int itemGuid = 0, int tint = 0, int tintId = 0, bool showRewardPanel = false)
+    {
         var notificationId = Environment.TickCount & int.MaxValue;
 
         var packet = new RewardBundlePacket();
-        packet.RewardBundle.DescriptionId = itemDefinition.DescriptionId;
+        packet.RewardBundle.DescriptionId = clientDefinition.DescriptionId;
         packet.RewardBundle.SourceGuid = sourceGuid ^ (uint)notificationId;
         packet.RewardBundle.PlayerGuid = player.Guid;
-        packet.RewardBundle.IconId = itemDefinition.Icon.Id;
-        packet.RewardBundle.NameId = itemDefinition.NameId;
-        packet.RewardBundle.Unknown3 = 16; //16 gives a mystery box panel, which doesn't need to be for a classic item the way an item is an item is an item
+        packet.RewardBundle.IconId = clientDefinition.Icon.Id;
+        packet.RewardBundle.NameId = clientDefinition.NameId;
+
+        if (showRewardPanel)
+            packet.RewardBundle.Unknown3 = 16;
+
         packet.RewardBundle.Entries.Add(new RewardBundleEntryItem
         {
-            IconId = itemDefinition.Icon.Id,
-            NameId = itemDefinition.NameId,
-            DefinitionId = itemDefinition.Id,
-            TintId = itemDefinition.Icon.TintId,
+            IconId = clientDefinition.Icon.Id,
+            NameId = clientDefinition.NameId,
+            DefinitionId = clientDefinition.Id,
+            Tint = tint,
+            TintId = tintId,
             Quantity = quantity,
+            ItemGuid = itemGuid
         });
 
         player.SendTunneled(packet);
