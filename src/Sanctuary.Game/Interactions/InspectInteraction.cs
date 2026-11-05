@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 
@@ -58,6 +59,11 @@ public class InspectInteraction : IInteraction
             if (!_resourceManager.ClientItemDefinitions.TryGetValue(clientItem.Definition, out var clientItemDefinition))
                 continue;
 
+            var tintedItemDefinition = ItemDefinitionHelper.GetTintedItemDefinition(clientItemDefinition, clientItem.Tint);
+
+            if (tintedItemDefinition != clientItemDefinition)
+                player.InspectedItemDefinitionIds.TryAdd(clientItemDefinition.Id);
+
             inspectProxy.Items.Add(new InspectProxy.ItemEntry
             {
                 Slot = profileItem.Slot,
@@ -67,7 +73,7 @@ public class InspectInteraction : IInteraction
                     Definition = clientItem.Definition,
                     Tint = clientItem.Tint
                 },
-                ItemDefinition = clientItemDefinition
+                ItemDefinition = tintedItemDefinition
             });
         }
 

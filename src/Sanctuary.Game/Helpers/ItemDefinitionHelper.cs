@@ -20,6 +20,7 @@ public static class ItemDefinitionHelper
     public const int CustomizationItemType = 17;
 
     private const int NoPurchasesLeftMaxStackSize = 0;
+    private const int NoTint = 0;
 
     public static ClientItemDefinition GetPlayerItemDefinition(Player player, IResourceManager resourceManager, ClientItemDefinition clientItemDefinition)
     {
@@ -34,6 +35,22 @@ public static class ItemDefinitionHelper
         playerItemDefinition.MaxStackSize = NoPurchasesLeftMaxStackSize;
 
         return playerItemDefinition;
+    }
+
+    public static ClientItemDefinition GetTintedItemDefinition(ClientItemDefinition clientItemDefinition, int tint)
+    {
+        if (tint == NoTint || clientItemDefinition.Icon.TintId == tint)
+            return clientItemDefinition;
+
+        var tintedItemDefinition = clientItemDefinition.Clone();
+
+        tintedItemDefinition.Icon = new IconData
+        {
+            Id = clientItemDefinition.Icon.Id,
+            TintId = tint
+        };
+
+        return tintedItemDefinition;
     }
 
     public static void SendItemDefinition(Player player, IResourceManager resourceManager, ClientItemDefinition clientItemDefinition)

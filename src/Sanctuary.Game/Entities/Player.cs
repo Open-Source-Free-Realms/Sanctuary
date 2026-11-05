@@ -118,6 +118,7 @@ public sealed class Player : ClientPcData, IEntity
 
     public int SecondsSinceLastLogin { get; set; } = -1;
     public ConcurrentSet<int> CollectedCollectionEntryIds { get; } = [];
+    public ConcurrentSet<int> InspectedItemDefinitionIds { get; } = [];
 
     public int StationCash { get; set; }
     public List<CoinStoreTransactionRecord> CoinStoreTransactions { get; set; } = [];
