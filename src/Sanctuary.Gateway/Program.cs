@@ -101,6 +101,8 @@ builder.ConfigureServices((hostBuilderContext, serviceCollection) =>
     serviceCollection.AddSingleton<IResourceManager, ResourceManager>();
     serviceCollection.AddSingleton<IScriptManager, ScriptManager>();
     serviceCollection.AddSingleton<IInteractionManager, InteractionManager>();
+    serviceCollection.AddSingleton<ITradeSettlement, TradeSettlement>();
+    serviceCollection.AddSingleton<TradeManager>();
     serviceCollection.AddSingleton<IChatCommandManager, ChatCommandManager>();
     serviceCollection.AddSingleton<IQuestManager, QuestManager>();
     serviceCollection.AddSingleton<IRewardManager, RewardManager>();

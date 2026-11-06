@@ -74,6 +74,12 @@ public class GatewayConnection : UdpConnection
 
     public override void OnTerminated()
     {
+        lock (InventorySynchronization.Gate)
+            OnTerminatedCore();
+    }
+
+    private void OnTerminatedCore()
+    {
         var reason = DisconnectReason == DisconnectReason.OtherSideTerminated
             ? OtherSideDisconnectReason
             : DisconnectReason;
@@ -83,6 +89,8 @@ public class GatewayConnection : UdpConnection
         // Just in case check if player is null.
         if (Player is null)
             return;
+
+        _serviceProvider.GetRequiredService<TradeManager>().Disconnect(Player);
 
         SendFriendOffline();
 
@@ -103,7 +111,8 @@ public class GatewayConnection : UdpConnection
             {
                 try
                 {
-                    work();
+                    lock (InventorySynchronization.Gate)
+                        work();
                 }
                 catch (Exception ex)
                 {
@@ -126,6 +135,12 @@ public class GatewayConnection : UdpConnection
     }
 
     private void OnHandlePacket(Span<byte> data)
+    {
+        lock (InventorySynchronization.Gate)
+            OnHandlePacketCore(data);
+    }
+
+    private void OnHandlePacketCore(Span<byte> data)
     {
         var reader = new PacketReader(data);
 

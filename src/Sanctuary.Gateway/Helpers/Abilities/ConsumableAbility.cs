@@ -51,72 +51,77 @@ public abstract class ConsumableAbility(AbilityServices services)
 
     protected bool ConsumeItem(Player player, ClientItem clientItem, ClientItemDefinition clientItemDefinition, int actionBarSlot)
     {
-        using var dbContext = _dbContextFactory.CreateDbContext();
-
-        var characterId = GuidHelper.GetPlayerId(player.Guid);
-        var dbItem = dbContext.Items.SingleOrDefault(i => i.CharacterId == characterId && i.Id == clientItem.Id);
-
-        if (dbItem is null)
-            return SendFailure(player);
-
-        dbItem.Count--;
-
-        var shouldDeleteItem = dbItem.Count <= 0;
-
-        if (shouldDeleteItem)
-            dbContext.Items.Remove(dbItem);
-
-        if (dbContext.SaveChanges() <= 0)
-            return SendFailure(player);
-
-        if (shouldDeleteItem)
+        lock (InventorySynchronization.Gate)
         {
-            player.Items.Remove(clientItem);
-            player.SendTunneled(new ClientUpdatePacketItemDelete { ItemGuid = clientItem.Id });
+            if (!player.Items.Any(item => ReferenceEquals(item, clientItem)) || clientItem.Count <= 0)
+                return SendFailure(player);
+            using var dbContext = _dbContextFactory.CreateDbContext();
 
-            // A pending cooldown re-enable would fire after this and un-delete the slot.
-            player.CancelScheduledSlotPacket(ActionBarId, actionBarSlot);
+            var characterId = GuidHelper.GetPlayerId(player.Guid);
+            var dbItem = dbContext.Items.SingleOrDefault(i => i.CharacterId == characterId && i.Id == clientItem.Id);
 
-            var slotPacket = new ClientUpdatePacketUpdateActionBarSlot { Data = { Id = ActionBarId, Slot = actionBarSlot } };
-            slotPacket.Slot.IsEmpty = true;
+            if (dbItem is null)
+                return SendFailure(player);
 
-            if (player.ActionBarItemGuids.TryGetValue(ActionBarId, out var trackedItems))
-                trackedItems.Remove(actionBarSlot);
+            dbItem.Count--;
 
-            player.SendTunneled(slotPacket);
-        }
-        else
-        {
-            clientItem.Count--;
+            var shouldDeleteItem = dbItem.Count <= 0;
 
-            player.SendTunneled(new ClientUpdatePacketItemUpdate
+            if (shouldDeleteItem)
+                dbContext.Items.Remove(dbItem);
+
+            if (dbContext.SaveChanges() <= 0)
+                return SendFailure(player);
+
+            if (shouldDeleteItem)
             {
-                ItemGuid = clientItem.Id,
-                Count = clientItem.Count,
-                ConsumedCount = clientItem.ConsumedCount,
-                AbilityCount = clientItem.AbilityCount,
-                RentalExpirationTime = 0
-            });
+                player.Items.Remove(clientItem);
+                player.SendTunneled(new ClientUpdatePacketItemDelete { ItemGuid = clientItem.Id });
 
-            var slotPacket = new ClientUpdatePacketUpdateActionBarSlot { Data = { Id = ActionBarId, Slot = actionBarSlot } };
-            slotPacket.Slot.IsEmpty = false;
-            slotPacket.Slot.IconId = clientItemDefinition.Icon.Id;
-            slotPacket.Slot.IconTintId = IconTintId(clientItem, clientItemDefinition.Icon.TintId);
-            slotPacket.Slot.NameId = clientItemDefinition.NameId;
-            slotPacket.Slot.Unknown5 = 1;
-            slotPacket.Slot.Unknown6 = 4;
-            slotPacket.Slot.Unknown7 = 15;
-            slotPacket.Slot.Enabled = true;
-            slotPacket.Slot.Unknown10 = 1000;
-            slotPacket.Slot.TotalRefreshTime = 1000;
-            slotPacket.Slot.Quantity = clientItem.Count;
-            slotPacket.Slot.ForceDismount = true;
-            slotPacket.Slot.Unknown15 = 1000;
+                // A pending cooldown re-enable would fire after this and un-delete the slot.
+                player.CancelScheduledSlotPacket(ActionBarId, actionBarSlot);
 
-            player.SendTunneled(slotPacket);
+                var slotPacket = new ClientUpdatePacketUpdateActionBarSlot { Data = { Id = ActionBarId, Slot = actionBarSlot } };
+                slotPacket.Slot.IsEmpty = true;
+
+                if (player.ActionBarItemGuids.TryGetValue(ActionBarId, out var trackedItems))
+                    trackedItems.Remove(actionBarSlot);
+
+                player.SendTunneled(slotPacket);
+            }
+            else
+            {
+                clientItem.Count--;
+
+                player.SendTunneled(new ClientUpdatePacketItemUpdate
+                {
+                    ItemGuid = clientItem.Id,
+                    Count = clientItem.Count,
+                    ConsumedCount = clientItem.ConsumedCount,
+                    AbilityCount = clientItem.AbilityCount,
+                    RentalExpirationTime = 0
+                });
+
+                var slotPacket = new ClientUpdatePacketUpdateActionBarSlot { Data = { Id = ActionBarId, Slot = actionBarSlot } };
+                slotPacket.Slot.IsEmpty = false;
+                slotPacket.Slot.IconId = clientItemDefinition.Icon.Id;
+                slotPacket.Slot.IconTintId = IconTintId(clientItem, clientItemDefinition.Icon.TintId);
+                slotPacket.Slot.NameId = clientItemDefinition.NameId;
+                slotPacket.Slot.Unknown5 = 1;
+                slotPacket.Slot.Unknown6 = 4;
+                slotPacket.Slot.Unknown7 = 15;
+                slotPacket.Slot.Enabled = true;
+                slotPacket.Slot.Unknown10 = 1000;
+                slotPacket.Slot.TotalRefreshTime = 1000;
+                slotPacket.Slot.Quantity = clientItem.Count;
+                slotPacket.Slot.ForceDismount = true;
+                slotPacket.Slot.Unknown15 = 1000;
+
+                player.SendTunneled(slotPacket);
+            }
+
+            return true;
         }
-
-        return true;
     }
 
     protected static void ApplyFoodEffect(Player player, int nameId, int effectId, int durationMs, int delayMs = 0, float scale = 0)
