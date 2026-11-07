@@ -1513,18 +1513,14 @@ public abstract class BaseZone : IZone, IDisposable
         {
             try
             {
-                // Never wait on this gate from a tick: zone disposal may be waiting for us
-                // while a gateway callback owns it. Skip a frame during inventory commits.
-                if (!Monitor.TryEnter(InventorySynchronization.Gate))
-                    continue;
-                try
+                ProcessCollectionNodeRefills();
+
+                Routines.OnTick();
+
+                foreach (var entity in _entities)
                 {
-                    ProcessCollectionNodeRefills();
-                    Routines.OnTick();
-                    foreach (var entity in _entities)
-                        entity.Value.UpdateEveryTick();
+                    entity.Value.UpdateEveryTick();
                 }
-                finally { Monitor.Exit(InventorySynchronization.Gate); }
             }
             catch (Exception ex)
             {
@@ -1539,15 +1535,12 @@ public abstract class BaseZone : IZone, IDisposable
         {
             try
             {
-                if (!Monitor.TryEnter(InventorySynchronization.Gate))
-                    continue;
-                try
+                foreach (var entity in _entities)
                 {
-                    foreach (var entity in _entities)
-                        entity.Value.UpdateEverySecond();
-                    UpdateEverySecond();
+                    entity.Value.UpdateEverySecond();
                 }
-                finally { Monitor.Exit(InventorySynchronization.Gate); }
+
+                UpdateEverySecond();
             }
             catch (Exception ex)
             {

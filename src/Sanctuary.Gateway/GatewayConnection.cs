@@ -74,12 +74,6 @@ public class GatewayConnection : UdpConnection
 
     public override void OnTerminated()
     {
-        lock (InventorySynchronization.Gate)
-            OnTerminatedCore();
-    }
-
-    private void OnTerminatedCore()
-    {
         var reason = DisconnectReason == DisconnectReason.OtherSideTerminated
             ? OtherSideDisconnectReason
             : DisconnectReason;
@@ -111,8 +105,7 @@ public class GatewayConnection : UdpConnection
             {
                 try
                 {
-                    lock (InventorySynchronization.Gate)
-                        work();
+                    work();
                 }
                 catch (Exception ex)
                 {
@@ -135,12 +128,6 @@ public class GatewayConnection : UdpConnection
     }
 
     private void OnHandlePacket(Span<byte> data)
-    {
-        lock (InventorySynchronization.Gate)
-            OnHandlePacketCore(data);
-    }
-
-    private void OnHandlePacketCore(Span<byte> data)
     {
         var reader = new PacketReader(data);
 

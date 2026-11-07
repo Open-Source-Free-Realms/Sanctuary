@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Threading;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -270,7 +269,9 @@ public sealed class TradeSettlementTests
     }
 
     [TestMethod]
-    public void InventoryMutationGateSerializesSaleBeforeFinalAcceptance()
+    [DataRow(true)]
+    [DataRow(false)]
+    public void SaleBeforeFinalAcceptanceInvalidatesOffer(bool updateLiveInventory)
     {
         using var f = new Fixture();
         f.Add(f.A, 7, 100, 2);
@@ -280,33 +281,27 @@ public sealed class TradeSettlementTests
         manager.Reply(f.B, id, true); manager.OfferItem(f.A, id, 7, 2);
         manager.SetLocked(f.A, id, 2, true); manager.SetLocked(f.B, id, 2, true);
         clock.Now += TradeManager.ReviewDelay; manager.Accept(f.A, id, 2);
-        using var sellerHasGate = new ManualResetEventSlim();
-        using var releaseSeller = new ManualResetEventSlim();
-        using var acceptStarted = new ManualResetEventSlim();
-        var sale = Task.Run(() =>
+        // A sale has committed before the second acceptance. Check both a fully
+        // published sale and a database change whose live update is still pending.
+        using (var db = f.Factory.CreateDbContext())
         {
-            lock (InventorySynchronization.Gate)
-            {
-                sellerHasGate.Set();
-                if (!releaseSeller.Wait(TimeSpan.FromSeconds(10))) throw new TimeoutException();
-                using var db = f.Factory.CreateDbContext();
-                db.Items.Single().Count = 1; db.SaveChanges();
-                f.A.Items[7].Count = 1;
-            }
-        });
-        Assert.IsTrue(sellerHasGate.Wait(TimeSpan.FromSeconds(10)));
-        var accept = Task.Run(() => { acceptStarted.Set(); manager.Accept(f.B, id, 2); });
-        try
-        {
-            Assert.IsTrue(acceptStarted.Wait(TimeSpan.FromSeconds(10)));
-            Assert.IsFalse(accept.IsCompleted);
+            db.Items.Single().Count = 1;
+            db.SaveChanges();
         }
-        finally { releaseSeller.Set(); }
-        Assert.IsTrue(Task.WaitAll([sale, accept], TimeSpan.FromSeconds(10)));
+        if (updateLiveInventory)
+            f.A.Items[7].Count = 1;
+        manager.Accept(f.B, id, 2);
         Assert.AreEqual(1, f.Rows().Single().Count);
         Assert.AreEqual((ulong)1, f.Rows().Single().CharacterId);
         Assert.AreEqual(0, f.B.Items.Count);
-        Assert.AreEqual(0, f.B.Packets.OfType<TradeMessagePacket>().Count());
+        foreach (var peer in new[] { f.A, f.B })
+        {
+            Assert.AreEqual(0, peer.Packets.OfType<TradeMessagePacket>().Count());
+            Assert.AreEqual(1, peer.Packets.OfType<TradeEndSessionPacket>().Count());
+            Assert.IsTrue(peer.Packets.OfType<ExecuteScriptWithStringParamsPacket>()
+                .Any(packet => packet.Params[0].StartsWith("Trade could not be completed.")));
+        }
+        Assert.IsTrue(manager.Invite(f.A, f.B));
     }
 
     [TestMethod]

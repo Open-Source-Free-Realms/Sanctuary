@@ -33,7 +33,9 @@ public sealed class TradeManager : IDisposable
         public bool Contains(ITradeParticipant player) => ReferenceEquals(player, Inviter) || ReferenceEquals(player, Target);
     }
 
-    private readonly object _gate = InventorySynchronization.Gate;
+    // Serializes trade session transitions, including duplicate final accepts.
+    // Other gameplay inventory changes are not synchronized by this lock.
+    private readonly object _gate = new();
     private readonly ITradeSettlement? _settlement;
     private readonly Dictionary<int, Session> _sessions = [];
     private readonly Dictionary<ulong, Session> _players = [];
