@@ -1,0 +1,23 @@
+{
+  "$type": "Housing",
+  "Id": 121,
+  "Name": "hsg_hum_blackspore_01",
+  "Type": "Housing",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 16,
+  "EndLongitude": 16,
+  "Sky": "sky_wilds24.xml",
+  "SpawnPosition": [
+    641.3,
+    5.15,
+    558.01
+  ],
+  "SpawnRotation": [
+    -0.9986,
+    0,
+    -0.0528,
+    0
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 314,
+  "Name": "bw_hidden_valley",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 8,
+  "EndLongitude": 8,
+  "SpawnPosition": [
+    285.0,
+    24.58,
+    214.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

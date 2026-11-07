@@ -27,10 +27,23 @@ public static class CommandPacketFriendsPositionRequestHandler
     {
         var friendUpdatePositionsPacket = new FriendUpdatePositionsPacket();
 
-        foreach (var friend in connection.Player.Friends)
+        var friends = connection.Player.Zone == _zoneManager.StartingZone ? connection.Player.Friends : [];
+
+        foreach (var friend in friends)
         {
-            if (!_zoneManager.StartingZone.TryGetPlayer(friend.Guid, out var friendPlayer))
+            if (!_zoneManager.TryGetPlayer(friend.Guid, out var friendPlayer))
                 continue;
+
+            if (friendPlayer.Zone != _zoneManager.StartingZone)
+            {
+                friendUpdatePositionsPacket.Entries.Add(new FriendUpdatePositionsPacket.Entry
+                {
+                    Guid = friendPlayer.Guid,
+                    InEncounter = true
+                });
+
+                continue;
+            }
 
             if (!friendPlayer.Visible)
                 continue;
@@ -44,8 +57,7 @@ public static class CommandPacketFriendsPositionRequestHandler
             });
         }
 
-        if (friendUpdatePositionsPacket.Entries.Count > 0)
-            connection.SendTunneled(friendUpdatePositionsPacket);
+        connection.SendTunneled(friendUpdatePositionsPacket);
 
         return true;
     }

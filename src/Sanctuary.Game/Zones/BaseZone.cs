@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 using DotRecast.Detour;
 
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -18,9 +19,11 @@ using Sanctuary.Core.Collections;
 using Sanctuary.Core.Extensions;
 using Sanctuary.Core.Helpers;
 using Sanctuary.Core.IO;
+using Sanctuary.Database;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Interactions;
+using Sanctuary.Game.Pathing;
 using Sanctuary.Game.Quests;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.Zones;
@@ -37,6 +40,7 @@ public abstract class BaseZone : IZone, IDisposable
 {
     private readonly ILogger _logger;
     protected readonly IResourceManager _resourceManager;
+    protected readonly IDbContextFactory<DatabaseContext> _dbContextFactory;
     private readonly IZoneManager _zoneManager;
     private readonly IScriptManager _scriptManager;
     private readonly IQuestManager _questManager;
@@ -95,7 +99,8 @@ public abstract class BaseZone : IZone, IDisposable
     public ScriptRuntime ScriptRuntime => _scriptRuntime;
 
     public DtNavMeshQuery? NavMeshQuery { get; }
-    public IDtQueryFilter NavMeshFilter { get; } = new DtQueryDefaultFilter();
+    public IDtQueryFilter NavMeshFilter { get; } = CreateNavMeshFilter(NavMeshPolyFlags.Walk);
+    public IDtQueryFilter FollowerNavMeshFilter { get; } = CreateNavMeshFilter(NavMeshPolyFlags.Walk | NavMeshPolyFlags.Swim | NavMeshPolyFlags.Outside);
 
     public ulong? OwnerId { get; init; }
 
@@ -105,6 +110,7 @@ public abstract class BaseZone : IZone, IDisposable
     {
         _zoneDefinition = zoneDefinition;
         _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
+        _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
         _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
 
         var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
@@ -130,7 +136,7 @@ public abstract class BaseZone : IZone, IDisposable
             ArgumentNullException.ThrowIfNull(tile.Value.VisibleTiles);
         }
 
-        if (_resourceManager.NavMeshes.TryGetValue(Name, out var navMesh))
+        if (_resourceManager.NavMeshes.TryGetNavMesh(Name, out var navMesh))
             NavMeshQuery = new DtNavMeshQuery(navMesh);
     }
 
@@ -151,6 +157,7 @@ public abstract class BaseZone : IZone, IDisposable
 
         _started = true;
 
+        SpawnZoneNpcs();
         GetOrCreateScriptContext().FireEvent("start");
         ActivateCollectionNodePools();
         CreateNpcConversationGroups();
@@ -207,6 +214,8 @@ public abstract class BaseZone : IZone, IDisposable
     public virtual void OnClientIsReady(Player player)
     {
         SendQuickChatData(player);
+
+        player.SendTunneled(HousingHelper.GetInstanceList(_resourceManager, _dbContextFactory, player));
 
         SendUpdateStat(player);
 
@@ -265,6 +274,7 @@ public abstract class BaseZone : IZone, IDisposable
         SendIgnoreList(player);
 
         UpdateFriendStatus(player);
+        UpdateFriendLocality(player);
     }
 
     public virtual void OnClientFinishedLoading(Player player)
@@ -586,6 +596,9 @@ public abstract class BaseZone : IZone, IDisposable
 
     private void SendFriendList(Player player)
     {
+        foreach (var friend in player.Friends)
+            SetFriendLocality(friend, _zoneManager.TryGetPlayer(friend.Guid, out var friendPlayer) && friendPlayer.Zone == _zoneManager.StartingZone);
+
         var friendListPacket = new FriendListPacket();
 
         friendListPacket.Friends = player.Friends;
@@ -600,6 +613,33 @@ public abstract class BaseZone : IZone, IDisposable
         ignoreListPacket.Ignores = player.Ignores;
 
         player.SendTunneled(ignoreListPacket);
+    }
+
+    private void UpdateFriendLocality(Player player)
+    {
+        var isLocal = this == _zoneManager.StartingZone;
+
+        foreach (var friend in player.Friends)
+        {
+            if (!_zoneManager.TryGetPlayer(friend.Guid, out var friendPlayer))
+                continue;
+
+            var otherFriend = friendPlayer.Friends.FirstOrDefault(x => x.Guid == player.Guid);
+
+            if (otherFriend is null || otherFriend.IsLocal == isLocal)
+                continue;
+
+            SetFriendLocality(otherFriend, isLocal);
+
+            friendPlayer.SendTunneled(new FriendListPacket { Friends = friendPlayer.Friends });
+        }
+    }
+
+    private static void SetFriendLocality(FriendData friend, bool isLocal)
+    {
+        friend.IsLocal = isLocal;
+        friend.IsInStaticZone = isLocal;
+        friend.InEncounter = !isLocal;
     }
 
     private void UpdateFriendStatus(Player player)
@@ -686,6 +726,15 @@ public abstract class BaseZone : IZone, IDisposable
     #endregion
 
     #region Scripting API
+
+    private void SpawnZoneNpcs()
+    {
+        if (!_resourceManager.ZoneNpcs.TryGetValue(Name, out var zoneNpcs))
+            return;
+
+        foreach (var spawn in zoneNpcs.Spawns)
+            TrySpawnNpc(spawn.NpcId, GuidHelper.GetNpcGuid((ulong)spawn.NpcId, GuidHelper.OpenWorldInstanceId), spawn.Position.X, spawn.Position.Y, spawn.Position.Z, spawn.Heading, 0f, 0f, out _);
+    }
 
     public bool TrySpawnNpc(int npcId, ulong? npcGuid, float x, float y, float z, float heading, float pitch, float roll, [MaybeNullWhen(false)] out IScriptableNpc npc)
     {
@@ -1335,6 +1384,13 @@ public abstract class BaseZone : IZone, IDisposable
     public bool IsOutOfBounds(Vector4 position)
     {
         return IsOutOfBounds(GetTileFromPosition(position));
+    }
+
+    private static DtQueryDefaultFilter CreateNavMeshFilter(NavMeshPolyFlags includeFlags)
+    {
+        var filter = new DtQueryDefaultFilter();
+        filter.SetIncludeFlags((int)includeFlags);
+        return filter;
     }
 
     public ZoneTile GetTileFromPosition(Vector4 position)

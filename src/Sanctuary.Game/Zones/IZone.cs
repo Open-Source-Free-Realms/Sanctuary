@@ -92,6 +92,8 @@ public interface IZone : IScriptableZone, IDisposable
 
     IDtQueryFilter NavMeshFilter { get; }
 
+    IDtQueryFilter FollowerNavMeshFilter { get; }
+
     IReadOnlyList<NpcInteractionOption> GetInteractionOptions(Player player, Npc npc);
 
     NotificationInfo? GetQuestBadge(Player player, Npc npc);

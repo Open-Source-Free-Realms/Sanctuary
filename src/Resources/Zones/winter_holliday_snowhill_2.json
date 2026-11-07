@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 448,
+  "Name": "winter_holliday_snowhill_2",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 32,
+  "EndLongitude": 32,
+  "SpawnPosition": [
+    1152.0,
+    0.0,
+    1152.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

@@ -115,6 +115,11 @@ public static class GuidHelper
         return GetPrefixedId(GuidPrefix.House, guid);
     }
 
+    public static bool IsHouseGuid(ulong guid)
+    {
+        return HasPrefix(GuidPrefix.House, guid);
+    }
+
     public static ulong GetFixtureGuid(ulong id)
     {
         return GetPrefixedGuid(GuidPrefix.Fixture, id);

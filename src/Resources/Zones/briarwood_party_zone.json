@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 300,
+  "Name": "briarwood_party_zone",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": -32,
+  "StartLongitude": -32,
+  "EndLatitude": 80,
+  "EndLongitude": 80,
+  "SpawnPosition": [
+    608.0,
+    0.0,
+    448.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "$type": "Housing",
+  "Id": 112,
+  "Name": "hsg_emptylot_seaside_beach_01",
+  "Type": "Housing",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 12,
+  "EndLongitude": 12,
+  "Sky": "sky_seaside24.xml",
+  "SpawnPosition": [
+    440.632,
+    -0.071,
+    432.801
+  ],
+  "SpawnRotation": [
+    -0.9999741,
+    0,
+    -0.0072035603,
+    0
+  ]
+}

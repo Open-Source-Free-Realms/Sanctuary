@@ -11,7 +11,7 @@ public class PlayerHousingInstanceData
 
     public string? OwnerName;
 
-    public long Unknown4;
+    public long OwnerLaunchTicket;
 
     public int Unknown7;
 
@@ -39,14 +39,14 @@ public class PlayerHousingInstanceData
 
     public int FurnitureScore;
 
-    public long Unknown20;
+    public long LastVisited;
 
     public bool IsMembersOnly;
 
     public string? Unknown23;
     public string? Unknown22;
 
-    // public FactoryInstanceData? FactoryInstance; // TODO
+    public FactoryInstanceData? FactoryInstance;
 
     public bool Unknown24;
 
@@ -63,7 +63,7 @@ public class PlayerHousingInstanceData
 
         writer.Write(OwnerName);
 
-        writer.Write(Unknown4);
+        writer.Write(OwnerLaunchTicket);
 
         writer.Write(NameId);
         writer.Write(Name);
@@ -97,7 +97,7 @@ public class PlayerHousingInstanceData
 
         writer.Write(FurnitureScore);
 
-        writer.Write(Unknown20);
+        writer.Write(LastVisited);
 
         writer.Write(IsMembersOnly);
 
@@ -106,6 +106,8 @@ public class PlayerHousingInstanceData
 
         writer.Write(Unknown24);
 
-        writer.Write(false); // TODO: FactoryInstance
+        writer.Write(FactoryInstance is not null);
+
+        FactoryInstance?.Serialize(writer);
     }
 }

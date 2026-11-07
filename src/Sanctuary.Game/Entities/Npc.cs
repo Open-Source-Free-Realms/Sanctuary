@@ -5,6 +5,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Numerics;
 
+using DotRecast.Detour;
+
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Collections;
@@ -140,7 +142,8 @@ public class Npc : IScriptableNpc, IEntity
     );
     private const string MovementRoutineName = "Movement";
     private const float DefaultSpawnMaxHeightOffset = 3f;
-    private readonly Pathfinder? _pathfinder;
+    private Pathfinder? _pathfinder;
+    private IDtQueryFilter _navMeshFilter;
     private readonly PathFollower _pathFollower;
 
     // TODO: May be worth re-evaluating this check at a later date.
@@ -153,8 +156,10 @@ public class Npc : IScriptableNpc, IEntity
         Routines = new RoutineManager(Logger, zone.TickDelta);
 
         // TODO: these need to be rebuilt/reset on zone change in the future.
+        _navMeshFilter = zone.NavMeshFilter;
+
         if (zone.NavMeshQuery is not null)
-            _pathfinder = new Pathfinder(zone.NavMeshQuery, zone.NavMeshFilter, MaxSearchIterations);
+            _pathfinder = new Pathfinder(zone.NavMeshQuery, _navMeshFilter, MaxSearchIterations);
 
         _pathFollower = new PathFollower(zone.NavMeshQuery);
     }
@@ -812,6 +817,32 @@ public class Npc : IScriptableNpc, IEntity
         ZoneTile.Entities.Remove(Guid, out _);
 
         Zone.TryRemoveNpc(Guid);
+    }
+
+    public IDtQueryFilter NavMeshFilter
+    {
+        get => _navMeshFilter;
+        set
+        {
+            _navMeshFilter = value;
+
+            if (Zone.NavMeshQuery is not null)
+                _pathfinder = new Pathfinder(Zone.NavMeshQuery, value, MaxSearchIterations);
+        }
+    }
+
+    public Vector3 GetReachablePoint(Vector3 from, Vector3 to) => _pathfinder?.GetReachablePoint(from, to) ?? to;
+
+    public bool TryGetNearestWalkablePoint(Vector3 position, Vector3 extents, out Vector3 point)
+    {
+        point = position;
+        return _pathfinder is not null && _pathfinder.TryGetNearestWalkablePoint(position, extents, out point);
+    }
+
+    public bool TryGetRandomWalkablePoint(Vector3 center, float radius, out Vector3 point)
+    {
+        point = center;
+        return _pathfinder is not null && _pathfinder.TryGetRandomWalkablePoint(center, radius, out point);
     }
 
     public bool TrySpawnNear(Vector3 position, Quaternion rotation, float maxHeightOffset = DefaultSpawnMaxHeightOffset)

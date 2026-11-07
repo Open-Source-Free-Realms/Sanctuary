@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 364,
+  "Name": "sg_coin_cloud_climb",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 5,
+  "EndLongitude": 5,
+  "SpawnPosition": [
+    168.0,
+    1.02,
+    141.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

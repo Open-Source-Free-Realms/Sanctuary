@@ -11,7 +11,7 @@ public sealed class DbItemConfiguration : IEntityTypeConfiguration<DbItem>
     {
         builder.HasKey(i => new { i.Id, i.CharacterId });
         builder.Property(i => i.Id).IsRequired().ValueGeneratedNever();
-        builder.HasIndex(i => new { i.Tint, i.Definition, i.CharacterId }).IsUnique();
+        builder.HasIndex(i => new { i.Tint, i.Definition, i.CharacterId });
 
         builder.Property(i => i.Tint).IsRequired();
         builder.Property(i => i.Count).IsRequired();

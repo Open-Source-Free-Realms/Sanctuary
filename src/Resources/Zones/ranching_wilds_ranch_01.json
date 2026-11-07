@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 351,
+  "Name": "ranching_wilds_ranch_01",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 32,
+  "EndLongitude": 32,
+  "SpawnPosition": [
+    1024.0,
+    0.0,
+    1344.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}
