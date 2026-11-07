@@ -751,7 +751,7 @@ public sealed class Player : ClientPcData, IEntity
     public void StartTeleportTimeout()
     {
         if (_teleportPending)
-            Routines.SetRoutine(TeleportRoutine, new DelayedRoutine(new InstantRoutine(() => _teleportPending = false), TeleportTimeoutSeconds));
+            Routines.SetRoutine(TeleportRoutine, new DelayedRoutine(new InstantRoutine(CompleteTeleport), TeleportTimeoutSeconds));
     }
 
     public bool TryAcceptTeleportSequence(byte teleportSequence)
@@ -763,12 +763,17 @@ public sealed class Player : ClientPcData, IEntity
 
         if (_teleportPending)
         {
-            _teleportPending = false;
             Routines.Cancel(TeleportRoutine);
-            UpdatePointOfInterest();
+            CompleteTeleport();
         }
 
         return true;
+    }
+
+    private void CompleteTeleport()
+    {
+        _teleportPending = false;
+        UpdatePointOfInterest();
     }
 
     private void QueuePointOfInterest()
