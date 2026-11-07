@@ -43,6 +43,8 @@ public class GatewayConnection : UdpConnection
     private readonly object _workLock = new();
     private Task _workTail = Task.CompletedTask;
 
+    private bool _zoneAreasReloaded;
+
     private ICipher _cipher;
 #pragma warning disable CS0649
     private bool _useEncryption; // Hardcoded in the client.
@@ -663,6 +665,16 @@ public class GatewayConnection : UdpConnection
         };
 
         SendTunneled(packetSendZoneDetails);
+    }
+
+    public void ReloadZoneAreas()
+    {
+        if (_zoneAreasReloaded)
+            return;
+
+        _zoneAreasReloaded = true;
+
+        SendZoneDetails();
     }
 
     public void ClientGameSettings()
