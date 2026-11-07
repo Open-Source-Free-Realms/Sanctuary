@@ -313,6 +313,29 @@ public sealed class QuestManager : IQuestManager
         RefreshQuestNodes(player, quest);
 
         player.SendTunneled(new CommandPacketQuestDialogComplete());
+
+        GrantAcceptItems(player, quest);
+
+        CheckEquippedItems(player, quest);
+    }
+
+    private void GrantAcceptItems(Player player, QuestDefinition quest)
+    {
+        foreach (var group in quest.AcceptItems.GroupBy(itemDefinitionId => itemDefinitionId))
+        {
+            if (_resourceManager.ClientItemDefinitions.TryGetValue(group.Key, out var itemDefinition))
+                _rewardManager.TryGrantItem(player, group.Key, itemDefinition.IsTintable ? 0 : itemDefinition.Icon.TintId, group.Count());
+        }
+    }
+
+    private void CheckEquippedItems(Player player, QuestDefinition quest)
+    {
+        var equippedItemDefinitionIds = player.ActiveProfile.Items.Values
+            .Select(profileItem => player.Items.FirstOrDefault(item => item.Id == profileItem.Id)?.Definition ?? 0)
+            .ToHashSet();
+
+        foreach (var itemDefinitionId in quest.Goals.OfType<EquipItemGoal>().Select(goal => goal.ItemDefinitionId).Where(equippedItemDefinitionIds.Contains).Distinct().ToList())
+            OnEvent(player, new ItemEquippedEvent(itemDefinitionId));
     }
 
     public bool CompleteQuest(Player player, int questId)
@@ -862,6 +885,9 @@ public sealed class QuestManager : IQuestManager
 
             QuestDialogue.Begin(player, completedGoal.ConversationFor(speakerNpcId), speakerGuid);
         }
+
+        if (stepDone)
+            CheckEquippedItems(player, quest);
     }
 
     private const int YouGotItTextId = 103085;
@@ -1066,16 +1092,24 @@ public sealed class QuestManager : IQuestManager
             return;
         }
 
-        if (goalIndex >= 0 && goalIndex < goals.Count
-            && goals[goalIndex] is ReachLocationGoal reachGoal && reachGoal.ReachPosition != Vector3.Zero)
+        var goalSpot = goalIndex >= 0 && goalIndex < goals.Count
+            ? goals[goalIndex] switch
+            {
+                ReachLocationGoal reachGoal => (Position: reachGoal.ReachPosition, reachGoal.ZoneDefinitionId),
+                UseItemGoal useItemGoal => (Position: useItemGoal.TargetPosition, useItemGoal.ZoneDefinitionId),
+                _ => (Position: Vector3.Zero, ZoneDefinitionId: 0)
+            }
+            : (Position: Vector3.Zero, ZoneDefinitionId: 0);
+
+        if (goalSpot.Position != Vector3.Zero)
         {
-            if (reachGoal.ZoneDefinitionId != player.Zone.DefinitionId)
+            if (goalSpot.ZoneDefinitionId != player.Zone.DefinitionId)
             {
                 player.SendTunneled(new ObjectiveTargetUpdatePacket { Active = false });
                 return;
             }
 
-            var reachPos = new Vector4(reachGoal.ReachPosition, 1f);
+            var reachPos = new Vector4(goalSpot.Position, 1f);
 
             player.SendTunneled(new ObjectiveTargetUpdatePacket
             {

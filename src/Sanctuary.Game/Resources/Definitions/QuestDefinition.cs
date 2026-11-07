@@ -38,6 +38,8 @@ public sealed class QuestDefinition
     // Item definition ids.
     public List<int> RewardItems { get; set; } = [];
 
+    public List<int> AcceptItems { get; set; } = [];
+
     public int RewardCollectionId { get; set; }
 
     public int? PrerequisiteQuestId { get; set; }

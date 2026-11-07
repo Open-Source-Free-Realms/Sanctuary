@@ -9,6 +9,7 @@ using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Game;
 using Sanctuary.Game.Helpers;
+using Sanctuary.Game.Quests;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -21,6 +22,7 @@ public static class InventoryPacketEquipByGuidHandler
     private static ILogger _logger = null!;
     private static IResourceManager _resourceManager = null!;
     private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
+    private static IQuestManager _questManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -29,6 +31,7 @@ public static class InventoryPacketEquipByGuidHandler
 
         _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
         _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
+        _questManager = serviceProvider.GetRequiredService<IQuestManager>();
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -98,6 +101,8 @@ public static class InventoryPacketEquipByGuidHandler
         }
 
         connection.Player.RefreshEquipmentGlide();
+
+        _questManager.OnEvent(connection.Player, new ItemEquippedEvent(clientItem.Definition));
 
         var characterId = GuidHelper.GetPlayerId(connection.Player.Guid);
         var profileId = inventoryPacketEquipByGuid.ProfileId;

@@ -9,6 +9,7 @@ using Sanctuary.Database;
 using Sanctuary.Game;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Interactions;
+using Sanctuary.Game.Quests;
 using Sanctuary.Gateway.Helpers.Abilities;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
@@ -35,7 +36,8 @@ public static class AbilityPacketClientRequestStartAbilityHandler
             _logger,
             _resourceManager,
             serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>(),
-            serviceProvider.GetRequiredService<IRewardManager>());
+            serviceProvider.GetRequiredService<IRewardManager>(),
+            serviceProvider.GetRequiredService<IQuestManager>());
 
         _consumableAbilities =
         [

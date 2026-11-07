@@ -11,6 +11,7 @@ using Sanctuary.Database;
 using Sanctuary.Game;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
+using Sanctuary.Game.Quests;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 
@@ -20,7 +21,8 @@ public sealed record AbilityServices(
     ILogger Logger,
     IResourceManager ResourceManager,
     IDbContextFactory<DatabaseContext> DbContextFactory,
-    IRewardManager RewardManager);
+    IRewardManager RewardManager,
+    IQuestManager QuestManager);
 
 public abstract class ConsumableAbility(AbilityServices services)
 {
@@ -34,6 +36,7 @@ public abstract class ConsumableAbility(AbilityServices services)
     protected readonly ILogger _logger = services.Logger;
     protected readonly IResourceManager _resourceManager = services.ResourceManager;
     protected readonly IRewardManager _rewardManager = services.RewardManager;
+    private readonly IQuestManager _questManager = services.QuestManager;
 
     private readonly IDbContextFactory<DatabaseContext> _dbContextFactory = services.DbContextFactory;
 
@@ -254,5 +257,7 @@ public abstract class ConsumableAbility(AbilityServices services)
         if (hasItemLeft)
             player.StartActionBarCooldown(ActionBarId, slot, itemDefinition.Icon.Id, itemDefinition.NameId,
                 itemDefinition.SingleUse ? count - 1 : count, cooldownMs, iconTintId);
+
+        _questManager.OnEvent(player, new ItemUsedEvent(itemDefinition.Id));
     }
 }

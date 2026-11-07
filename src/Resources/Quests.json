@@ -2270,5 +2270,44 @@
         "Targets": [{ "NpcId": 2222 }]
       }
     ]
+  },
+  {
+    "Name": "Falling With Style",
+    "QuestId": 3600,
+    "TitleId": 440569,
+    "DescriptionId": 440570,
+    "GiverDialogueId": 440568,
+    "ObjectiveDescriptionId": 440573,
+    "IconId": 43278,
+    "GiverNpcId": 1735,
+    "TargetNpcId": 1735,
+    "RewardCoins": 0,
+    "RewardExperience": 0,
+    "RewardItems": [930008],
+    "AcceptItems": [960205, 960205, 960205, 960205, 960205, 960205, 960205, 960205, 960205, 960205],
+    "NotificationAvailable": 2,
+    "NotificationActive": 6,
+    "Goals": [
+      {
+        "Type": 11,
+        "NameId": 440574,
+        "DescriptionId": 440574,
+        "ItemDefinitionId": 960205
+      },
+      {
+        "Type": 10,
+        "NameId": 440576,
+        "DescriptionId": 440577,
+        "ItemDefinitionId": 960205,
+        "TargetPosition": [-591.961, 2.407, -1133.201]
+      },
+      {
+        "Type": 0,
+        "NameId": 440578,
+        "DescriptionId": 440578,
+        "DialogueId": 440571,
+        "Targets": [{ "NpcId": 1735 }]
+      }
+    ]
   }
 ]

@@ -17,3 +17,7 @@ public sealed record NodeGatheredEvent(CollectionNode Node) : QuestEvent
 }
 
 public sealed record PlayerMovedEvent(Vector4 Position, int ZoneDefinitionId) : QuestEvent;
+
+public sealed record ItemUsedEvent(int ItemDefinitionId) : QuestEvent;
+
+public sealed record ItemEquippedEvent(int ItemDefinitionId) : QuestEvent;
