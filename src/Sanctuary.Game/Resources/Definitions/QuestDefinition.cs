@@ -45,6 +45,8 @@ public sealed class QuestDefinition
 
     public bool HideObjectiveTarget { get; set; }
 
+    public QuestSceneDefinition? CompletionScene { get; set; }
+
     // Quests that block this one while active or completed, for mutually exclusive quests such as the
     // two race-specific introductions. Each lists the other so the check is symmetric.
     public List<int> ExcludesQuestIds { get; set; } = [];

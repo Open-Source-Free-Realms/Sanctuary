@@ -343,6 +343,9 @@ public sealed class QuestManager : IQuestManager
 
         GrantReward(player, quest);
 
+        if (quest.CompletionScene is { } scene)
+            QuestScene.Play(player, scene);
+
         RefreshQuestNotifications(player, quest);
 
         if (quest.NextQuestId is { } nextQuestId && _resourceManager.Quests.TryGet(nextQuestId, out var next))
@@ -872,6 +875,9 @@ public sealed class QuestManager : IQuestManager
 
     private void TurnIn(Player player, QuestDefinition quest)
     {
+        if (player.Quests.PendingTurnInQuestId == quest.QuestId)
+            return;
+
         var end = new QuestEndPacket
         {
             NpcGuid = NearestNpcGuid(player, quest.GoalTargetNpcId(quest.Goals.Count - 1)),
@@ -1003,7 +1009,7 @@ public sealed class QuestManager : IQuestManager
         {
             QuestId = questId,
             ObjectiveId = goal.NameId,
-            RequiredCount = restored ? goal.RequiredCount : 0,
+            RequiredCount = restored || goal.RequiredCount > 1 ? goal.RequiredCount : 0,
             Unknown2 = restored
         });
     }
