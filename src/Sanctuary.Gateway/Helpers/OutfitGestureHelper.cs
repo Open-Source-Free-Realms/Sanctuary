@@ -144,9 +144,9 @@ public static class OutfitGestureHelper
 
         var player = pendingGesture.Player;
 
-        EntityHelper.QueueAnimation(player, pendingGesture.AnimationId, loopCount: QuickChatLoopCount, unknown6: false, unknown7: true, unknown8: false,
+        EntityHelper.QueueAnimation(player, pendingGesture.AnimationId, loopCount: QuickChatLoopCount, easeOutLoopingAnimations: false, useTransitions: true, useAnimationPriority: false,
             delay: delay, recipients: [player]);
-        EntityHelper.QueueAnimation(player, NoAnimation, loopCount: QuickChatLoopCount, unknown6: false, unknown7: true, unknown8: false,
+        EntityHelper.QueueAnimation(player, NoAnimation, loopCount: QuickChatLoopCount, easeOutLoopingAnimations: false, useTransitions: true, useAnimationPriority: false,
             delay: TimelineGapSeconds, recipients: [player]);
     }
 }

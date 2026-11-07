@@ -12,9 +12,9 @@ public class PlayerUpdatePacketQueueAnimation : BasePlayerUpdatePacket, ISeriali
     public float PlaybackSpeed;
     public float Delay;
     public float EndTime;
-    public bool Unknown6;
-    public bool Unknown7;
-    public bool Unknown8;
+    public bool EaseOutLoopingAnimations;
+    public bool UseTransitions;
+    public bool UseAnimationPriority;
 
     public PlayerUpdatePacketQueueAnimation() : base(OpCode)
     {
@@ -32,9 +32,9 @@ public class PlayerUpdatePacketQueueAnimation : BasePlayerUpdatePacket, ISeriali
         writer.Write(PlaybackSpeed);
         writer.Write(Delay);
         writer.Write(EndTime);
-        writer.Write(Unknown6);
-        writer.Write(Unknown7);
-        writer.Write(Unknown8);
+        writer.Write(EaseOutLoopingAnimations);
+        writer.Write(UseTransitions);
+        writer.Write(UseAnimationPriority);
 
         return writer.Buffer;
     }

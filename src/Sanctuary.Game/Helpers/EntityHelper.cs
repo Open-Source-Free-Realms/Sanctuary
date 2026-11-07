@@ -52,7 +52,7 @@ public static class EntityHelper
         Duration = duration
     };
 
-    public static void QueueAnimation(IEntity entity, int animationGroupId, int loopCount, bool unknown6, bool unknown7, bool unknown8,
+    public static void QueueAnimation(IEntity entity, int animationGroupId, int loopCount, bool easeOutLoopingAnimations, bool useTransitions, bool useAnimationPriority,
         float delay = default, IEnumerable<Player>? recipients = null)
     {
         var playerUpdatePacketQueueAnimation = new PlayerUpdatePacketQueueAnimation
@@ -62,9 +62,9 @@ public static class EntityHelper
             LoopCount = loopCount,
             PlaybackSpeed = QueueAnimationPlaybackSpeed,
             Delay = delay,
-            Unknown6 = unknown6,
-            Unknown7 = unknown7,
-            Unknown8 = unknown8
+            EaseOutLoopingAnimations = easeOutLoopingAnimations,
+            UseTransitions = useTransitions,
+            UseAnimationPriority = useAnimationPriority
         };
         var data = Player.SerializeTunneled(playerUpdatePacketQueueAnimation);
 
