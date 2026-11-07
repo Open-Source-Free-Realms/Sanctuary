@@ -5,6 +5,7 @@ using System.Numerics;
 using Sanctuary.Core.Extensions;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Interactions;
+using Sanctuary.Game.Pathing;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 
@@ -15,6 +16,8 @@ public static class InteractionMenuHelper
     public const byte QuestCursorId = 5;
 
     private const float TalkStandDistance = 2.2f;
+
+    private static readonly ChaseSettings ApproachSettings = new(TalkStandDistance, TalkStandDistance, 0f, 0f, 0f);
 
     public static CommandPacketInteractionList GetInteractionListPacket(ulong guid, string? name,
         IEnumerable<InteractionData> interactions, bool autoSelectSingle = false)
@@ -116,7 +119,7 @@ public static class InteractionMenuHelper
         {
             player.SendTunneled(new CommandPacketMoveAndInteract
             {
-                Position = GetTalkPosition(npc),
+                Position = GetApproachPosition(npc.Position, player.Position),
                 Guid = npc.Guid
             });
             return true;
@@ -142,25 +145,8 @@ public static class InteractionMenuHelper
         return npc.InteractRange >= 0 && IsWithinRange(npc, player, npc.InteractRange);
     }
 
-    public static Vector4 GetTalkPosition(Npc npc)
-    {
-        var facing = npc.Rotation.GetFacing() with { Y = 0f };
-
-        if (facing.LengthSquared() == 0f)
-            return npc.Position;
-
-        return new Vector4(npc.Position.ToVector3() + Vector3.Normalize(facing) * TalkStandDistance, 1f);
-    }
-
     public static Vector4 GetApproachPosition(Vector4 target, Vector4 from)
-    {
-        var direction = (from - target).ToVector3() with { Y = 0f };
-
-        if (direction.LengthSquared() == 0f)
-            return target;
-
-        return new Vector4(target.ToVector3() + Vector3.Normalize(direction) * TalkStandDistance, 1f);
-    }
+        => new(target.ToVector3() + ApproachSettings.GetOffset(from.ToVector3(), target.ToVector3()), 1f);
 
     private static bool IsWithinRange(Npc npc, Player player, int range)
     {

@@ -1108,7 +1108,7 @@ public sealed class QuestManager : IQuestManager
         if (targetGuid == 0 || !player.Zone.TryGetNpc(targetGuid, out var target))
             return;
 
-        var pos = InteractionMenuHelper.GetTalkPosition(target);
+        var pos = InteractionMenuHelper.GetApproachPosition(target.Position, player.Position);
 
         player.SendTunneled(new ObjectiveTargetUpdatePacket
         {
