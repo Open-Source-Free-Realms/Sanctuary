@@ -228,13 +228,7 @@ public abstract class BaseZone : IZone, IDisposable
 
         player.SendTunneled(clientUpdatePacketMana);
 
-        var playerUpdatePacketUpdateActiveWieldType = new PlayerUpdatePacketUpdateActiveWieldType
-        {
-            Guid = player.Guid,
-            WieldType = player.GetWieldType()
-        };
-
-        player.SendTunneled(playerUpdatePacketUpdateActiveWieldType);
+        player.SendActiveWieldType();
 
         SendGuildData(player);
 
