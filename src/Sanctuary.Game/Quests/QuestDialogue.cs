@@ -17,13 +17,13 @@ public static class QuestDialogue
 
     private const int GreenButtonImageSet = 17;
 
-    public const int TalkAnimationId = 3105;
+    public const int TalkAnimationId = 3106;
 
     private const int IdleAnimationId = 1;
 
     private const byte SetBaseAnimation = 1;
 
-    private const int TalkAnimationMs = 1500;
+    private const int TalkAnimationMs = 7500;
 
     public static void PlayTalkAnimation(Player player, ulong npcGuid)
     {

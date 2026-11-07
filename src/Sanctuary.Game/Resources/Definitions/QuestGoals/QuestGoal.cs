@@ -35,6 +35,8 @@ public abstract class QuestGoal
     public int HideDelayMs { get; set; }
     public List<QuestNpcEffect> NpcEffectsUntilDone { get; set; } = [];
 
+    public QuestSceneDefinition? CompletionScene { get; set; }
+
     public virtual GoalProgress CreateProgress() => new();
 
     public abstract bool Matches(QuestDefinition quest, QuestEvent questEvent);

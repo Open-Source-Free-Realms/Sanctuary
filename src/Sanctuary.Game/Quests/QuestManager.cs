@@ -343,6 +343,9 @@ public sealed class QuestManager : IQuestManager
 
         GrantReward(player, quest);
 
+        if (quest.CompletionScene is { } scene)
+            QuestScene.Play(player, scene, $"quest-scene-{quest.QuestId}");
+
         RefreshQuestNotifications(player, quest);
 
         if (quest.NextQuestId is { } nextQuestId && _resourceManager.Quests.TryGet(nextQuestId, out var next))
@@ -831,6 +834,9 @@ public sealed class QuestManager : IQuestManager
 
         RemoveHiddenNpcs(player, completedGoal);
         RefreshNpcEffects(player, completedGoal);
+
+        if (completedGoal.CompletionScene is { } goalScene)
+            QuestScene.Play(player, goalScene, $"quest-scene-{quest.QuestId}-{completedGoal.NameId}");
         RefreshQuestNodes(player, quest);
         RefreshQuestNotifications(player, quest);
 
@@ -872,6 +878,9 @@ public sealed class QuestManager : IQuestManager
 
     private void TurnIn(Player player, QuestDefinition quest)
     {
+        if (player.Quests.PendingTurnInQuestId == quest.QuestId)
+            return;
+
         var end = new QuestEndPacket
         {
             NpcGuid = NearestNpcGuid(player, quest.GoalTargetNpcId(quest.Goals.Count - 1)),
@@ -1003,7 +1012,7 @@ public sealed class QuestManager : IQuestManager
         {
             QuestId = questId,
             ObjectiveId = goal.NameId,
-            RequiredCount = restored ? goal.RequiredCount : 0,
+            RequiredCount = restored || goal.RequiredCount > 1 ? goal.RequiredCount : 0,
             Unknown2 = restored
         });
     }
@@ -1099,7 +1108,7 @@ public sealed class QuestManager : IQuestManager
         if (targetGuid == 0 || !player.Zone.TryGetNpc(targetGuid, out var target))
             return;
 
-        var pos = target.Position;
+        var pos = InteractionMenuHelper.GetApproachPosition(target.Position, player.Position);
 
         player.SendTunneled(new ObjectiveTargetUpdatePacket
         {
