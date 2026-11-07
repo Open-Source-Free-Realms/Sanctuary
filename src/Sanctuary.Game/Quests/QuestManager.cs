@@ -344,7 +344,7 @@ public sealed class QuestManager : IQuestManager
         GrantReward(player, quest);
 
         if (quest.CompletionScene is { } scene)
-            QuestScene.Play(player, scene);
+            QuestScene.Play(player, scene, $"quest-scene-{quest.QuestId}");
 
         RefreshQuestNotifications(player, quest);
 
@@ -834,6 +834,9 @@ public sealed class QuestManager : IQuestManager
 
         RemoveHiddenNpcs(player, completedGoal);
         RefreshNpcEffects(player, completedGoal);
+
+        if (completedGoal.CompletionScene is { } goalScene)
+            QuestScene.Play(player, goalScene, $"quest-scene-{quest.QuestId}-{completedGoal.NameId}");
         RefreshQuestNodes(player, quest);
         RefreshQuestNotifications(player, quest);
 

@@ -26,4 +26,7 @@ public sealed class QuestSceneLine
 {
     public int NpcId { get; set; }
     public int TextId { get; set; }
+
+    public int? DelayMs { get; set; }
+    public int? AnimationId { get; set; }
 }

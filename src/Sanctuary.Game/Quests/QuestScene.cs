@@ -7,6 +7,7 @@ using Sanctuary.Core.Extensions;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Resources.Definitions;
+using Sanctuary.Game.Routines;
 using Sanctuary.Packet;
 
 namespace Sanctuary.Game.Quests;
@@ -17,8 +18,9 @@ public static class QuestScene
     private const int IdleCharacterState = 1;
     private const byte SetBaseAnimation = 1;
     private const int MaxTalkMs = 7500;
+    private const double MillisecondsPerSecond = 1000d;
 
-    public static void Play(Player player, QuestSceneDefinition scene)
+    public static void Play(Player player, QuestSceneDefinition scene, string name)
     {
         var speakers = new Dictionary<int, ulong>();
         var actorGuids = new List<ulong>();
@@ -45,6 +47,8 @@ public static class QuestScene
         }
 
         var talkMs = Math.Min(scene.LineDelayMs, MaxTalkMs);
+        var steps = new List<Routine>();
+        var lastAt = 0;
 
         for (var i = 0; i < scene.Lines.Count; i++)
         {
@@ -59,34 +63,56 @@ public static class QuestScene
                 speakers[line.NpcId] = speakerGuid;
             }
 
-            var at = scene.StartDelayMs + i * scene.LineDelayMs;
+            var at = line.DelayMs ?? scene.StartDelayMs + i * scene.LineDelayMs;
+            var animationId = line.AnimationId ?? QuestDialogue.TalkAnimationId;
 
-            player.SendTunneledDelayed(new PlayerUpdatePacketSetAnimation
-            {
-                Guid = speakerGuid,
-                AnimationId = QuestDialogue.TalkAnimationId,
-                Flags = SetBaseAnimation
-            }, at);
+            lastAt = Math.Max(lastAt, at);
 
-            player.SendTunneledDelayed(new ChatPacketFromStringId
+            steps.Add(At(at, () =>
             {
-                SpeakerGuid = speakerGuid,
-                StringId = line.TextId,
-                TargetGuid = player.Guid
-            }, at);
+                if (animationId != 0)
+                    SetAnimation(player, speakerGuid, animationId);
 
-            player.SendTunneledDelayed(new PlayerUpdatePacketSetAnimation
-            {
-                Guid = speakerGuid,
-                AnimationId = IdleAnimationId,
-                Flags = SetBaseAnimation
-            }, at + talkMs);
+                player.SendTunneled(new ChatPacketFromStringId
+                {
+                    SpeakerGuid = speakerGuid,
+                    StringId = line.TextId,
+                    TargetGuid = player.Guid
+                });
+            }));
+
+            if (animationId != 0)
+                steps.Add(At(at + talkMs, () => SetAnimation(player, speakerGuid, IdleAnimationId)));
         }
 
-        var endAt = scene.StartDelayMs + scene.Lines.Count * scene.LineDelayMs;
+        if (actorGuids.Count > 0)
+            steps.Add(At(lastAt + scene.LineDelayMs, () => RemoveActors(player, actorGuids)));
 
+        if (steps.Count == 0)
+            return;
+
+        player.Routines.SetRoutine(name, new SceneRoutine(new ParallelRoutine(steps), () => RemoveActors(player, actorGuids)));
+    }
+
+    private static DelayedRoutine At(int ms, Action action)
+        => new(new InstantRoutine(action), ms / MillisecondsPerSecond);
+
+    private static void SetAnimation(Player player, ulong guid, int animationId)
+    {
+        player.SendTunneled(new PlayerUpdatePacketSetAnimation
+        {
+            Guid = guid,
+            AnimationId = animationId,
+            Flags = SetBaseAnimation
+        });
+    }
+
+    private static void RemoveActors(Player player, List<ulong> actorGuids)
+    {
         foreach (var guid in actorGuids)
-            player.SendTunneledDelayed(EntityHelper.GetRemovePlayerGracefullyPacket(guid, animate: true), endAt);
+            player.SendTunneled(EntityHelper.GetRemovePlayerGracefullyPacket(guid, animate: true));
+
+        actorGuids.Clear();
     }
 
     private static ulong NearestNpcGuid(Player player, int npcId)
@@ -111,5 +137,29 @@ public static class QuestScene
         }
 
         return nearest?.Guid ?? 0;
+    }
+
+    private sealed class SceneRoutine : Routine
+    {
+        private readonly Routine _inner;
+        private readonly Action _onInterrupted;
+
+        public SceneRoutine(Routine inner, Action onInterrupted)
+        {
+            _inner = inner;
+            _onInterrupted = onInterrupted;
+        }
+
+        protected override void OnStart() => _inner.Start();
+
+        protected override bool OnStep(TimeSpan delta) => _inner.Step(delta);
+
+        protected override void OnEnd() { }
+
+        protected override void OnInterrupted()
+        {
+            _inner.Interrupt();
+            _onInterrupted();
+        }
     }
 }
