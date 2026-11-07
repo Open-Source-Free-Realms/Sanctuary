@@ -71,6 +71,14 @@ public static class CommandPacketInteractRequestHandler
         if (entity is CollectionCoin collectionCoin)
             return HandleCollectionCoin(connection, collectionCoin);
 
+        if (entity is Npc npc && MiniGameNpcHelper.TryGetInteractionListPacket(npc, connection.Player, _resourceManager, out var commandPacketInteractionList))
+        {
+            if (commandPacketInteractionList is not null)
+                connection.SendTunneled(commandPacketInteractionList);
+
+            return true;
+        }
+
         entity.OnInteract(connection.Player);
         return true;
     }

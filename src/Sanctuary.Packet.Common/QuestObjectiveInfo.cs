@@ -2,47 +2,79 @@ using Sanctuary.Core.IO;
 
 namespace Sanctuary.Packet.Common;
 
-public class QuestObjectiveInfo : ISerializableType
+public class QuestObjectiveInfo : ISerializableType, IDeserializableType
 {
-    public int ObjectiveId { get; set; }
-    public int NameId { get; set; }
-    public int DescriptionId { get; set; }
+    public int ObjectiveId;
+    public int NameId;
+    public int DescriptionId;
 
-    // Never read by the client.
-    public bool Unknown { get; set; }
+    public bool IsBonus;
 
-    public RewardBundleBase RewardBundle { get; set; } = new()
-    {
-        Success = false,
-        Unknown3 = 0,
-        IconId = -1,
-        NameId = -1
-    };
+    public RewardBundleBase RewardBundle = RewardBundleBase.CreateEmpty();
 
-    // 0 = inactive, 1 = active, 2 = complete, 3 = failed.
-    public int State { get; set; }
-    public int CurrentCount { get; set; }
-    public int RequiredCount { get; set; }
+    public ObjectiveState State;
+    public int CurrentCount;
+    public int RequiredCount;
 
-    // Never read by the client.
-    public int Unknown6 { get; set; }
-    public bool Unknown7 { get; set; }
-    public int Unknown8 { get; set; }
+    public int FailureCondition;
+    public int Category;
+
+    public bool MembersOnly;
 
     public void Serialize(PacketWriter writer)
     {
         writer.Write(ObjectiveId);
         writer.Write(NameId);
         writer.Write(DescriptionId);
-        writer.Write(Unknown);
+        writer.Write(IsBonus);
 
         RewardBundle.Serialize(writer);
 
-        writer.Write(State);
+        writer.Write((int)State);
         writer.Write(CurrentCount);
         writer.Write(RequiredCount);
-        writer.Write(Unknown6);
-        writer.Write(Unknown7);
-        writer.Write(Unknown8);
+        writer.Write(FailureCondition);
+        writer.Write(MembersOnly);
+        writer.Write(Category);
+    }
+
+    public bool TryRead(ref PacketReader reader)
+    {
+        if (!reader.TryRead(out ObjectiveId))
+            return false;
+
+        if (!reader.TryRead(out NameId))
+            return false;
+
+        if (!reader.TryRead(out DescriptionId))
+            return false;
+
+        if (!reader.TryRead(out IsBonus))
+            return false;
+
+        if (!RewardBundle.TryRead(ref reader))
+            return false;
+
+        if (!reader.TryRead(out int state))
+            return false;
+
+        State = (ObjectiveState)state;
+
+        if (!reader.TryRead(out CurrentCount))
+            return false;
+
+        if (!reader.TryRead(out RequiredCount))
+            return false;
+
+        if (!reader.TryRead(out FailureCondition))
+            return false;
+
+        if (!reader.TryRead(out MembersOnly))
+            return false;
+
+        if (!reader.TryRead(out Category))
+            return false;
+
+        return true;
     }
 }

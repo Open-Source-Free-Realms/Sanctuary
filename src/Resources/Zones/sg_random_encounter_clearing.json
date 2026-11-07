@@ -1,0 +1,21 @@
+{
+  "$type": "Dungeon",
+  "Id": 200,
+  "Name": "sg_random_encounter_clearing",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 4,
+  "EndLongitude": 4,
+  "Sky": "sky_wilds24.xml",
+  "SpawnPosition": [
+    130.108,
+    0.688,
+    120.036
+  ],
+  "SpawnRotation": [
+    0.2211563,
+    0.9752384
+  ]
+}

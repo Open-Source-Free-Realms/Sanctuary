@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.IO;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -69,6 +70,9 @@ public static class PacketTunneledClientPacketHandler
             BaseQuestPacket.OpCode => BaseQuestPacketHandler.HandlePacket(connection, reader),
             BaseUiPacket.OpCode => BaseUiPacketHandler.HandlePacket(connection, reader),
             ClientPathBasePacket.OpCode => ClientPathBasePacketHandler.HandlePacket(connection, reader),
+            BaseEncounterPacket.OpCode => BaseEncounterPacketHandler.HandlePacket(connection, reader),
+            BaseMiniGamePacket.OpCode => BaseMiniGamePacketHandler.HandlePacket(connection, reader),
+            BaseActivityServicePacket.OpCode => BaseActivityServicePacketHandler.HandlePacket(connection, reader, ActivityHelper.ZoneServerType),
             _ => false
         };
 

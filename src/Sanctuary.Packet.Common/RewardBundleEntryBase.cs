@@ -17,7 +17,9 @@ public abstract class RewardBundleEntryBase
     public int ItemTextColor;
     public bool MembersOnly;
 
-    internal void Serialize(PacketWriter writer, bool writeTail)
+    protected virtual bool IsDataOptional => false;
+
+    internal void Serialize(PacketWriter writer, bool hasOptionalData)
     {
         writer.Write((int)Type);
         writer.Write(IsHidden);
@@ -31,9 +33,54 @@ public abstract class RewardBundleEntryBase
         writer.Write(ItemTextColor);
         writer.Write(MembersOnly);
 
-        if (writeTail)
+        if (hasOptionalData || !IsDataOptional)
             SerializeData(writer);
     }
 
-    protected abstract void SerializeData(PacketWriter writer);
+    internal bool TryRead(ref PacketReader reader, bool hasOptionalData)
+    {
+        if (!reader.TryRead(out IsHidden))
+            return false;
+
+        if (!reader.TryRead(out IconId))
+            return false;
+
+        if (!reader.TryRead(out TintId))
+            return false;
+
+        if (!reader.TryRead(out NameId))
+            return false;
+
+        if (!reader.TryRead(out Quantity))
+            return false;
+
+        if (!reader.TryRead(out DefinitionId))
+            return false;
+
+        if (!reader.TryRead(out Tint))
+            return false;
+
+        if (!reader.TryRead(out Description))
+            return false;
+
+        if (!reader.TryRead(out ItemTextColor))
+            return false;
+
+        if (!reader.TryRead(out MembersOnly))
+            return false;
+
+        if (!hasOptionalData && IsDataOptional)
+            return true;
+
+        return TryReadData(ref reader);
+    }
+
+    protected virtual void SerializeData(PacketWriter writer)
+    {
+    }
+
+    protected virtual bool TryReadData(ref PacketReader reader)
+    {
+        return true;
+    }
 }

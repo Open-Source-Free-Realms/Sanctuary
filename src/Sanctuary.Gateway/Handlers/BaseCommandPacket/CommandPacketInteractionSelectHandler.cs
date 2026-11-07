@@ -16,6 +16,7 @@ public static class CommandPacketInteractionSelectHandler
     private static ILogger _logger = null!;
     private static IZoneManager _zoneManager = null!;
     private static IInteractionManager _interactionManager = null!;
+    private static IResourceManager _resourceManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -25,6 +26,7 @@ public static class CommandPacketInteractionSelectHandler
 
         _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
         _interactionManager = serviceProvider.GetRequiredService<IInteractionManager>();
+        _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -52,6 +54,10 @@ public static class CommandPacketInteractionSelectHandler
             action(connection.Player);
             return true;
         }
+        if (connection.Player.VisibleNpcs.TryGetValue(packet.Guid, out var miniGameNpc) &&
+            MiniGameNpcHelper.TryInteract(connection.Player, miniGameNpc, packet.Id, _resourceManager))
+            return true;
+
         if (!_interactionManager.TryGet(packet.Id, out var interaction))
         {
             _logger.LogError("Invalid interaction. {interaction}", packet.Id);

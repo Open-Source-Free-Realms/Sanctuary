@@ -3,6 +3,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
@@ -25,6 +26,8 @@ public static class PacketClientIsReadyHandler
         _logger.LogTrace("Received {name} packet.", nameof(PacketClientIsReady));
 
         connection.Player.Zone.OnClientIsReady(connection.Player);
+
+        MiniGameHelper.OnClientIsReady(connection.Player);
 
         return true;
     }
