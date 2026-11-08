@@ -1065,6 +1065,8 @@ public sealed class QuestManager : IQuestManager
         return NearestNpcGuid(player, quest.GoalTargetNpcId(goalIndex));
     }
 
+    private const ulong LocationTargetGuidBase = 0x7000000000000000;
+
     private void SendObjectiveForGoal(Player player, QuestDefinition quest, int goalIndex)
     {
         var goals = quest.Goals;
@@ -1090,7 +1092,7 @@ public sealed class QuestManager : IQuestManager
             {
                 Active = true,
                 TaskId = player.ObjectiveTaskId,
-                Guid = 0,
+                Guid = LocationTargetGuidBase | ((ulong)(uint)goals[goalIndex].NameId << 4),
                 NameId = goals[goalIndex].NameId,
                 PositionX = reachPos.X,
                 PositionY = reachPos.Y,
