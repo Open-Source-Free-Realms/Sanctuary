@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Extensions;
+using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game.Entities;
@@ -1065,8 +1066,6 @@ public sealed class QuestManager : IQuestManager
         return NearestNpcGuid(player, quest.GoalTargetNpcId(goalIndex));
     }
 
-    private const ulong LocationTargetGuidBase = 0x7000000000000000;
-
     private void SendObjectiveForGoal(Player player, QuestDefinition quest, int goalIndex)
     {
         var goals = quest.Goals;
@@ -1092,7 +1091,7 @@ public sealed class QuestManager : IQuestManager
             {
                 Active = true,
                 TaskId = player.ObjectiveTaskId,
-                Guid = LocationTargetGuidBase | ((ulong)(uint)goals[goalIndex].NameId << 4),
+                Guid = GuidHelper.GetLocationTargetGuid(goals[goalIndex].NameId),
                 NameId = goals[goalIndex].NameId,
                 PositionX = reachPos.X,
                 PositionY = reachPos.Y,
