@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 
 using Sanctuary.Core.IO;
@@ -47,6 +48,27 @@ public static class ItemDefinitionHelper
         };
 
         player.SendTunneled(playerUpdatePacketItemDefinitionRequest);
+    }
+
+    public static void SendItemDefinitions(Player player, IResourceManager resourceManager, IEnumerable<ClientItemDefinition> clientItemDefinitions)
+    {
+        var playerItemDefinitions = clientItemDefinitions
+            .Select(clientItemDefinition => GetPlayerItemDefinition(player, resourceManager, clientItemDefinition))
+            .ToList();
+
+        if (playerItemDefinitions.Count == 0)
+            return;
+
+        using var writer = new PacketWriter();
+
+        writer.Write(playerItemDefinitions);
+
+        var playerUpdatePacketItemDefinitions = new PlayerUpdatePacketItemDefinitions
+        {
+            Payload = writer.Buffer
+        };
+
+        player.SendTunneled(playerUpdatePacketItemDefinitions);
     }
 
     private static bool HasTintChoice(IResourceManager resourceManager, ClientItemDefinition clientItemDefinition) =>

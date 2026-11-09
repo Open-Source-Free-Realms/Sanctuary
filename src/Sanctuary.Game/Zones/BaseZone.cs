@@ -576,6 +576,14 @@ public abstract class BaseZone : IZone, IDisposable
                     packetInGamePurchaseStoreBundles.Store.Bundles.Add(storeBundle.Id, storeBundle);
             }
 
+            var storeBundleItemDefinitions = packetInGamePurchaseStoreBundles.Store.Bundles.Values
+                .SelectMany(storeBundle => storeBundle.Entries)
+                .Select(entry => entry.MarketingItemId)
+                .Distinct()
+                .Select(marketingItemId => _resourceManager.ClientItemDefinitions[marketingItemId]);
+
+            ItemDefinitionHelper.SendItemDefinitions(player, _resourceManager, storeBundleItemDefinitions);
+
             player.SendTunneled(packetInGamePurchaseStoreBundles);
 
             if (packetInGamePurchaseStoreBundleGroups.BundleGroups.TryGetValue(WelcomeScreenHelper.PopularItemsGroupId, out var popularItems))
