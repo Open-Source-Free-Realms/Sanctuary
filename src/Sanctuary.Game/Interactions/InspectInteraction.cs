@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
@@ -40,6 +41,9 @@ public class InspectInteraction : IInteraction
 
         foreach (var profile in otherPlayer.Profiles)
         {
+            if (Enum.IsDefined((SpecialProfileIds)profile.Id) && profile.Id != otherPlayer.ActiveProfileId)
+                continue;
+
             inspectProxy.Profiles.Add(new InspectProxy.ProfileEntry
             {
                 Id = profile.Id,
