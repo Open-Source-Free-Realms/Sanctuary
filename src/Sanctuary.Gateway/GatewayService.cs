@@ -18,6 +18,9 @@ namespace Sanctuary.Gateway;
 
 public class GatewayService : BackgroundService
 {
+    private static readonly TimeSpan DatabaseWaitTime = TimeSpan.FromSeconds(30);
+    private static readonly TimeSpan DatabaseRetryDelay = TimeSpan.FromSeconds(1);
+
     private readonly ILogger _logger;
     private readonly LoginClient _client;
     private readonly GatewayServer _server;
@@ -66,12 +69,25 @@ public class GatewayService : BackgroundService
         await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
     }
 
+    private static bool WaitForDatabase(DatabaseContext dbContext, CancellationToken cancellationToken)
+    {
+        var deadline = DateTime.UtcNow + DatabaseWaitTime;
+
+        while (!dbContext.Database.CanConnect())
+        {
+            if (DateTime.UtcNow >= deadline || cancellationToken.WaitHandle.WaitOne(DatabaseRetryDelay))
+                return false;
+        }
+
+        return true;
+    }
+
     protected override Task ExecuteAsync(CancellationToken cancellationToken)
     {
         // Check we can connect to the database.
         using var dbContext = _dbContextFactory.CreateDbContext();
 
-        if (!dbContext.Database.CanConnect())
+        if (!WaitForDatabase(dbContext, cancellationToken))
         {
             _logger.LogCritical("Cannot start {server}, failed to connect to database.", nameof(GatewayServer));
 

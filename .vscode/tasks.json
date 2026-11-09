@@ -42,6 +42,18 @@
       "problemMatcher": "$msCompile"
     },
     {
+      "label": "build DevClient",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "build",
+        "${workspaceFolder}/src/Sanctuary.DevClient/Sanctuary.DevClient.csproj",
+        "-c",
+        "Debug"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
       "label": "build WebAPI",
       "type": "process",
       "command": "dotnet",
