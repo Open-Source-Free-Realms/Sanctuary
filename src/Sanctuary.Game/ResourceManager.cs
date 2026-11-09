@@ -59,6 +59,10 @@ public class ResourceManager : IResourceManager, IDisposable
     public static readonly string NpcMovementsFile = Path.Combine(BaseDirectory, "NpcMovements.json");
     public static readonly string NpcAmbientFile = Path.Combine(BaseDirectory, "NpcAmbient.json");
     public static readonly string NameFilterFile = Path.Combine(BaseDirectory, "NameFilter.txt");
+    public static readonly string ChatBlacklistFile = Path.Combine(BaseDirectory, "ChatBlacklist.json");
+    public static readonly string ChatBlacklistLocalFile = Path.Combine(BaseDirectory, "ChatBlacklist.local.json");
+    public static readonly string ChatWhitelistFile = Path.Combine(BaseDirectory, "ChatWhitelist.json");
+    public static readonly string ChatWhitelistLocalFile = Path.Combine(BaseDirectory, "ChatWhitelist.local.json");
     public static readonly string QuestsFile = Path.Combine(BaseDirectory, "Quests.json");
     public static readonly string NavMeshDirectory = Path.Combine(BaseDirectory, "NavMeshes");
     public static readonly string RewardTablesFile = Path.Combine(BaseDirectory, "Rewards.json");
@@ -105,6 +109,8 @@ public class ResourceManager : IResourceManager, IDisposable
     public ConsumableCollection Consumables { get; }
     public NpcDefinitionCollection Npcs { get; }
     public NameFilterCollection NameFilter { get; }
+    public ChatFilterCollection ChatBlacklist { get; }
+    public ChatFilterCollection ChatWhitelist { get; }
     public NpcMovementDefinitionCollection NpcMovements { get; }
     public NpcAmbientDefinitionCollection NpcAmbient { get; }
     public QuestDefinitionCollection Quests { get; }
@@ -124,6 +130,7 @@ public class ResourceManager : IResourceManager, IDisposable
         };
 
         _fileSystemWatcher.Changed += _fileSystemWatcher_Changed;
+        _fileSystemWatcher.Deleted += _fileSystemWatcher_Deleted;
         _fileSystemWatcher.EnableRaisingEvents = true;
 
         HairMappings = new(_logger);
@@ -165,6 +172,8 @@ public class ResourceManager : IResourceManager, IDisposable
         Consumables = new(_logger);
         Npcs = new(_logger);
         NameFilter = new(_logger);
+        ChatBlacklist = new(_logger);
+        ChatWhitelist = new(_logger);
         NpcMovements = new(_logger);
         NpcAmbient = new(_logger);
         Quests = new(_logger);
@@ -177,6 +186,12 @@ public class ResourceManager : IResourceManager, IDisposable
     public bool Load()
     {
         if (!NameFilter.Load(NameFilterFile))
+            return false;
+
+        if (!ChatBlacklist.Load(ChatBlacklistFile, ChatBlacklistLocalFile))
+            return false;
+
+        if (!ChatWhitelist.Load(ChatWhitelistFile, ChatWhitelistLocalFile))
             return false;
 
         if (!HairMappings.Load(HairMappingsFile))
@@ -496,6 +511,10 @@ public class ResourceManager : IResourceManager, IDisposable
                 loaded = NpcAmbient.Load(NpcAmbientFile);
             else if (e.FullPath == NameFilterFile)
                 loaded = NameFilter.Load(NameFilterFile);
+            else if (e.FullPath == ChatBlacklistFile || e.FullPath == ChatBlacklistLocalFile)
+                loaded = ChatBlacklist.Load(ChatBlacklistFile, ChatBlacklistLocalFile);
+            else if (e.FullPath == ChatWhitelistFile || e.FullPath == ChatWhitelistLocalFile)
+                loaded = ChatWhitelist.Load(ChatWhitelistFile, ChatWhitelistLocalFile);
             else if (e.FullPath == RewardTablesFile)
                 loaded = RewardTables.Load(RewardTablesFile);
             else if (e.FullPath == CombatAbilitiesFile)
@@ -520,9 +539,26 @@ public class ResourceManager : IResourceManager, IDisposable
         }
     }
 
+    // deleting a chat filter local file goes back to the defaults without a restart
+    private void _fileSystemWatcher_Deleted(object sender, FileSystemEventArgs e)
+    {
+        try
+        {
+            if (e.FullPath == ChatBlacklistLocalFile)
+                ChatBlacklist.Load(ChatBlacklistFile, ChatBlacklistLocalFile);
+            else if (e.FullPath == ChatWhitelistLocalFile)
+                ChatWhitelist.Load(ChatWhitelistFile, ChatWhitelistLocalFile);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error handling deleted file. File: {filepath}", e.FullPath);
+        }
+    }
+
     public void Dispose()
     {
         _fileSystemWatcher.Changed -= _fileSystemWatcher_Changed;
+        _fileSystemWatcher.Deleted -= _fileSystemWatcher_Deleted;
         _fileSystemWatcher.Dispose();
     }
 

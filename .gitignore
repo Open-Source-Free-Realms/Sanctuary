@@ -438,3 +438,6 @@ FodyWeavers.xsd
 # Ignore JetBrains Rider/ReSharper temporary files
 .idea/
 *.sln.iml
+
+# Server owner overrides for resource files (e.g. ChatBlacklist.local.json)
+src/Resources/*.local.json*

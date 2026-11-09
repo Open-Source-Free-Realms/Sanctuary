@@ -12,6 +12,8 @@
     <Project Path="Sanctuary.UdpLibrary/Sanctuary.UdpLibrary.csproj" />
   </Folder>
   <Folder Name="/Resources/">
+    <File Path="Resources/ChatBlacklist.json" />
+    <File Path="Resources/ChatWhitelist.json" />
     <File Path="Resources/ClientItemDefinitions.json" />
     <File Path="Resources/CoinStoreItems.json" />
     <File Path="Resources/CollectionNodeSpawns/1/briarwood-mushrooms.json" />

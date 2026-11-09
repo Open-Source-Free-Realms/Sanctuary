@@ -42,6 +42,8 @@ public interface IResourceManager
     ConsumableCollection Consumables { get; }
     NpcDefinitionCollection Npcs { get; }
     NameFilterCollection NameFilter { get; }
+    ChatFilterCollection ChatBlacklist { get; }
+    ChatFilterCollection ChatWhitelist { get; }
     NpcMovementDefinitionCollection NpcMovements { get; }
     NpcAmbientDefinitionCollection NpcAmbient { get; }
     QuestDefinitionCollection Quests { get; }
