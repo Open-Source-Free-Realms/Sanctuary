@@ -409,7 +409,9 @@ public abstract class BaseZone : IZone, IDisposable
 
         var referenceDataPacketItemCategoryDefinitions = new ReferenceDataPacketItemCategoryDefinitions();
 
-        referenceDataPacketItemCategoryDefinitions.ItemCategories = _resourceManager.ItemCategories.ToDictionary();
+        referenceDataPacketItemCategoryDefinitions.ItemCategories = _resourceManager.ItemCategories
+            .OrderBy(itemCategory => itemCategory.Value.Unknown)
+            .ToDictionary();
         referenceDataPacketItemCategoryDefinitions.ItemCategoryGroups = _resourceManager.ItemCategoryGroups.ToDictionary();
 
         player.SendTunneled(referenceDataPacketItemCategoryDefinitions);
