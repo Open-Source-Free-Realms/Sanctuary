@@ -58,7 +58,6 @@ public class ResourceManager : IResourceManager, IDisposable
     public static readonly string NpcsFile = Path.Combine(BaseDirectory, "Npcs.json");
     public static readonly string NpcMovementsFile = Path.Combine(BaseDirectory, "NpcMovements.json");
     public static readonly string NpcAmbientFile = Path.Combine(BaseDirectory, "NpcAmbient.json");
-    public static readonly string NameFilterFile = Path.Combine(BaseDirectory, "NameFilter.txt");
     public static readonly string ChatBlacklistFile = Path.Combine(BaseDirectory, "ChatBlacklist.json");
     public static readonly string ChatBlacklistLocalFile = Path.Combine(BaseDirectory, "ChatBlacklist.local.json");
     public static readonly string ChatWhitelistFile = Path.Combine(BaseDirectory, "ChatWhitelist.json");
@@ -108,7 +107,6 @@ public class ResourceManager : IResourceManager, IDisposable
     public PointOfInterestDefinitionCollection PointOfInterests { get; }
     public ConsumableCollection Consumables { get; }
     public NpcDefinitionCollection Npcs { get; }
-    public NameFilterCollection NameFilter { get; }
     public ChatFilterCollection ChatBlacklist { get; }
     public ChatFilterCollection ChatWhitelist { get; }
     public NpcMovementDefinitionCollection NpcMovements { get; }
@@ -171,7 +169,6 @@ public class ResourceManager : IResourceManager, IDisposable
         PointOfInterests = new(_logger);
         Consumables = new(_logger);
         Npcs = new(_logger);
-        NameFilter = new(_logger);
         ChatBlacklist = new(_logger);
         ChatWhitelist = new(_logger);
         NpcMovements = new(_logger);
@@ -185,9 +182,6 @@ public class ResourceManager : IResourceManager, IDisposable
 
     public bool Load()
     {
-        if (!NameFilter.Load(NameFilterFile))
-            return false;
-
         if (!ChatBlacklist.Load(ChatBlacklistFile, ChatBlacklistLocalFile))
             return false;
 
@@ -509,8 +503,6 @@ public class ResourceManager : IResourceManager, IDisposable
                 loaded = NpcMovements.Load(NpcMovementsFile);
             else if (e.FullPath == NpcAmbientFile)
                 loaded = NpcAmbient.Load(NpcAmbientFile);
-            else if (e.FullPath == NameFilterFile)
-                loaded = NameFilter.Load(NameFilterFile);
             else if (e.FullPath == ChatBlacklistFile || e.FullPath == ChatBlacklistLocalFile)
                 loaded = ChatBlacklist.Load(ChatBlacklistFile, ChatBlacklistLocalFile);
             else if (e.FullPath == ChatWhitelistFile || e.FullPath == ChatWhitelistLocalFile)

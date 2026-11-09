@@ -95,6 +95,24 @@ public sealed class ChatFilterTests
     }
 
     [TestMethod]
+    public void IsBlocked_MatchesInsideNames_AndRespectsWhitelist()
+    {
+        var blacklist = List("ass");
+
+        Assert.IsTrue(ChatFilter.IsBlocked("Big Ass", blacklist, Off));
+        Assert.IsTrue(ChatFilter.IsBlocked("A.s.s Kicker", blacklist, Off));
+        Assert.IsFalse(ChatFilter.IsBlocked("Bass Fisher", blacklist, List(@"\bbass\b")));
+        Assert.IsFalse(ChatFilter.IsBlocked("Big Ass", new ChatFilterList(false, blacklist.Patterns), Off), "blacklist off");
+    }
+
+    [TestMethod]
+    public void IsBlocked_WholeWordPatternsMissJoinedNames()
+    {
+        Assert.IsFalse(ChatFilter.IsBlocked("DarnKing", List(@"\bdarn\b"), Off));
+        Assert.IsTrue(ChatFilter.IsBlocked("DarnKing", List("darn"), Off));
+    }
+
+    [TestMethod]
     public void Load_MergesDefaultAndLocalFiles()
     {
         using var files = new TempFiles();

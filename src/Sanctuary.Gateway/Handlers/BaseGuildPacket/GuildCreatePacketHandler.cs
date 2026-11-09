@@ -8,6 +8,8 @@ using Microsoft.Extensions.Logging;
 using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Database.Entities;
+using Sanctuary.Game;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Gateway.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -20,6 +22,7 @@ public static class GuildCreatePacketHandler
 {
     private static ILogger _logger = null!;
     private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
+    private static IResourceManager _resourceManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -27,6 +30,7 @@ public static class GuildCreatePacketHandler
         _logger = loggerFactory.CreateLogger(nameof(GuildCreatePacketHandler));
 
         _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
+        _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -48,7 +52,7 @@ public static class GuildCreatePacketHandler
             packet.Locale,
             guildName);
 
-        if (!GuildHelper.IsValidName(guildName))
+        if (!GuildHelper.IsValidName(guildName) || ChatFilter.IsBlocked(guildName, _resourceManager))
         {
             connection.SendTunneled(new GuildErrorPacket
             {

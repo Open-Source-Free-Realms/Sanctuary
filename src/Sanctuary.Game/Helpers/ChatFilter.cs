@@ -63,6 +63,31 @@ public static class ChatFilter
         return censored ? new string(result) : message;
     }
 
+    // true if a name (character or guild) has blacklisted text the whitelist doesn't allow
+    public static bool IsBlocked(string name, IResourceManager resourceManager)
+        => IsBlocked(name, resourceManager.ChatBlacklist.Current, resourceManager.ChatWhitelist.Current);
+
+    // same check, with the lists passed in
+    public static bool IsBlocked(string name, ChatFilterList blacklist, ChatFilterList whitelist)
+    {
+        // blacklist off means names aren't checked
+        if (string.IsNullOrEmpty(name) || !blacklist.IsActive)
+            return false;
+
+        var stripped = Strip(name, out var strippedToOriginal);
+        var blocked = FindMatches(name, stripped, strippedToOriginal, blacklist.Patterns, null);
+
+        if (blocked.Count == 0)
+            return false;
+
+        var allowed = whitelist.IsActive
+            ? FindMatches(name, stripped, strippedToOriginal, whitelist.Patterns, null)
+            : [];
+
+        // blocked if any match isn't inside a whitelist match
+        return blocked.Exists(b => !allowed.Exists(a => a.Start <= b.Start && b.End <= a.End));
+    }
+
     // removes punctuation/symbols and records where each kept character came from
     internal static string Strip(string message, out int[] strippedToOriginal)
     {

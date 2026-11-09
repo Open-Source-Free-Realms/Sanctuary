@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Game;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Gateway.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -100,8 +101,7 @@ public static class CheckNamePacketHandler
             return CheckNameResponse.IllegalCharacters;
         }
 
-        if (_resourceManager.NameFilter.Any(token =>
-            packet.Name.FullName.Contains(token, StringComparison.OrdinalIgnoreCase)))
+        if (ChatFilter.IsBlocked(packet.Name.FullName, _resourceManager))
         {
             return CheckNameResponse.Profane;
         }
@@ -127,7 +127,7 @@ public static class CheckNamePacketHandler
                 return CheckNameResponse.IllegalCharacters;
         }
 
-        if (GuildHelper.IsProfane(guildName, _resourceManager.NameFilter))
+        if (ChatFilter.IsBlocked(guildName, _resourceManager))
             return CheckNameResponse.Profane;
 
         using var dbContext = _dbContextFactory.CreateDbContext();

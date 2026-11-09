@@ -27,7 +27,6 @@
     <File Path="Resources/ItemClasses.txt" />
     <File Path="Resources/Models.txt" />
     <File Path="Resources/Mounts.json" />
-    <File Path="Resources/NameFilter.txt" />
     <File Path="Resources/PlayerTitles.json" />
     <File Path="Resources/PointOfInterests.json" />
     <File Path="Resources/Profiles.json" />

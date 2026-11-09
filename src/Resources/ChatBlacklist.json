@@ -1,4 +1,5 @@
-// matches (.NET regex, ignores case and punctuation) are replaced with #. don't edit this file, use ChatBlacklist.local.json or !chatfilter in game:
+// matches (.NET regex, ignores case and punctuation) are replaced with # in chat and block character/guild names.
+// don't edit this file, use ChatBlacklist.local.json or !chatfilter in game:
 // { "Enabled": true, "Add": [ { "Key": "badword", "Pattern": "\\bbadword\\b", "Note": "whole word" } ], "Remove": [ "default-key" ] }  (double your backslashes)
 {
   "Enabled": false,

@@ -41,7 +41,6 @@ public interface IResourceManager
     PointOfInterestDefinitionCollection PointOfInterests { get; }
     ConsumableCollection Consumables { get; }
     NpcDefinitionCollection Npcs { get; }
-    NameFilterCollection NameFilter { get; }
     ChatFilterCollection ChatBlacklist { get; }
     ChatFilterCollection ChatWhitelist { get; }
     NpcMovementDefinitionCollection NpcMovements { get; }
