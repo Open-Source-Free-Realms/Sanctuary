@@ -97,6 +97,8 @@ public static class InventoryPacketEquipByGuidHandler
             profileItem.Slot = clientItemDefinition.Slot;
         }
 
+        connection.Player.RefreshEquipmentGlide();
+
         var characterId = GuidHelper.GetPlayerId(connection.Player.Guid);
         var profileId = inventoryPacketEquipByGuid.ProfileId;
         var itemId = clientItem.Id;

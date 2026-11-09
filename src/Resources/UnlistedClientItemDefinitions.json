@@ -17077,28 +17077,6 @@
     "IsTintable": true
   },
   {
-    "Comment": "Giant Toilet Bowl",
-    "Id": 18136,
-    "Type": 1,
-    "NameId": 147965,
-    "DescriptionId": 148041,
-    "Icon": {
-      "Id": 6689
-    },
-    "Cost": 50,
-    "MaxStackSize": -1,
-    "NoTrade": true,
-    "MinProfileRank": 1,
-    "TintAlias": "dyetint",
-    "TextureAlias": "fun-pooltoilet-L1",
-    "MemberDiscount": 10,
-    "ModelName": "hsg_pool_toilet_01_complete.agr",
-    "CategoryId": 57,
-    "NoSale": true,
-    "Rarity": 3,
-    "ForceDisablePreview": true
-  },
-  {
     "Comment": "Entertainer's Stage",
     "Id": 18149,
     "Type": 1,
@@ -83981,105 +83959,6 @@
     "MemberDiscount": 10
   },
   {
-    "Comment": "Ghost Diver Outfit",
-    "Id": 69119,
-    "Type": 1,
-    "NameId": 119198,
-    "DescriptionId": 119261,
-    "Icon": {
-      "Id": 5174,
-      "TintId": 248
-    },
-    "Cost": 50,
-    "Class": 1,
-    "MaxStackSize": 1,
-    "NoTrade": true,
-    "MinProfileRank": 1,
-    "TintAlias": "dyetint",
-    "TextureAlias": "freestyle-ghostdivesuitblue-M",
-    "MemberDiscount": 10,
-    "Slot": 17,
-    "ModelName": "freestyle_<race>_<gender>_chest_ghostdivesuit.adr",
-    "CategoryId": 103,
-    "NoSale": true,
-    "Rarity": 3
-  },
-  {
-    "Comment": "Ghost Diver Outfit",
-    "Id": 69120,
-    "Type": 1,
-    "NameId": 119198,
-    "DescriptionId": 119261,
-    "Icon": {
-      "Id": 4582,
-      "TintId": 228
-    },
-    "Cost": 50,
-    "Class": 1,
-    "MaxStackSize": 1,
-    "NoTrade": true,
-    "MinProfileRank": 1,
-    "TintAlias": "dyetint",
-    "TextureAlias": "freestyle-ghostdivesuitgreen-M",
-    "MemberDiscount": 10,
-    "Slot": 17,
-    "ModelName": "freestyle_<race>_<gender>_chest_ghostdivesuit.adr",
-    "CategoryId": 201,
-    "NoSale": true,
-    "Rarity": 3,
-    "IsTintable": true
-  },
-  {
-    "Comment": "Ghost Diver Outfit",
-    "Id": 69121,
-    "Type": 1,
-    "NameId": 119198,
-    "DescriptionId": 119261,
-    "Icon": {
-      "Id": 4582,
-      "TintId": 227
-    },
-    "Cost": 50,
-    "Class": 1,
-    "MaxStackSize": 1,
-    "NoTrade": true,
-    "MinProfileRank": 1,
-    "TintAlias": "dyetint",
-    "TextureAlias": "freestyle-ghostdivesuitpink-M",
-    "MemberDiscount": 10,
-    "Slot": 17,
-    "ModelName": "freestyle_<race>_<gender>_chest_ghostdivesuit.adr",
-    "CategoryId": 201,
-    "NoSale": true,
-    "Rarity": 3,
-    "IsTintable": true
-  },
-  {
-    "Comment": "Ghost Diver Outfit",
-    "Id": 69122,
-    "Type": 1,
-    "NameId": 119198,
-    "DescriptionId": 119261,
-    "Icon": {
-      "Id": 4582,
-      "TintId": 227
-    },
-    "Cost": 50,
-    "Class": 1,
-    "MaxStackSize": 1,
-    "NoTrade": true,
-    "MinProfileRank": 1,
-    "TintAlias": "dyetint",
-    "TextureAlias": "freestyle-ghostdivesuityellow-M",
-    "MemberDiscount": 10,
-    "Slot": 17,
-    "ModelName": "freestyle_<race>_<gender>_chest_ghostdivesuit.adr",
-    "CategoryId": 201,
-    "NoSale": true,
-    "Rarity": 3,
-    "IsTintable": true
-  },
-  {
     "Comment": "Gas Mask",
     "Id": 56622,
     "Type": 1,
@@ -84374,56 +84253,6 @@
     "Rarity": 2
   },
   {
-    "Comment": "Cardboard Robot Head",
-    "Id": 76724,
-    "Type": 1,
-    "NameId": 42247,
-    "DescriptionId": 42330,
-    "Icon": {
-      "Id": 3636,
-      "TintId": 227
-    },
-    "Cost": 270,
-    "Class": 1,
-    "MaxStackSize": -1,
-    "NoTrade": true,
-    "MinProfileRank": 1,
-    "TintAlias": "dyetint",
-    "TextureAlias": "adventurer-flame-M",
-    "MemberDiscount": 10,
-    "Slot": 1,
-    "ModelName": "freestyle_<race>_<gender>_head_cardboardbot.adr",
-    "CategoryId": 101,
-    "NoSale": true,
-    "Rarity": 3,
-    "IsTintable": true
-  },
-  {
-    "Comment": "Vintage Diving Suit",
-    "Id": 76755,
-    "Type": 1,
-    "NameId": 142512,
-    "DescriptionId": 145265,
-    "Icon": {
-      "Id": 3607,
-      "TintId": 260
-    },
-    "Cost": 270,
-    "Class": 173,
-    "MaxStackSize": -1,
-    "NoTrade": true,
-    "MinProfileRank": 1,
-    "TintAlias": "dyetint",
-    "TextureAlias": "adventurer-antiquedivesuit-M",
-    "MemberDiscount": 10,
-    "Slot": 17,
-    "ModelName": "freestyle_<race>_<gender>_chest_divesuit.adr",
-    "CategoryId": 201,
-    "NoSale": true,
-    "Rarity": 3,
-    "IsTintable": true
-  },
-  {
     "Comment": "Baconfish Bits Recipe",
     "Id": 76836,
     "Type": 1,
@@ -84448,30 +84277,6 @@
     "TintAlias": "dyetint",
     "MemberDiscount": 10,
     "ActivatableAbilityId": 4286
-  },
-  {
-    "Comment": "Brawler's Power Fist",
-    "Id": 78197,
-    "Type": 1,
-    "NameId": 438176,
-    "DescriptionId": 438181,
-    "Icon": {
-      "Id": 7852,
-      "TintId": 227
-    },
-    "Class": 71,
-    "MaxStackSize": -1,
-    "NoTrade": true,
-    "TintAlias": "dyetint",
-    "TextureAlias": "brawler-spiked-L1",
-    "MemberDiscount": 10,
-    "Slot": 7,
-    "ModelName": "fist_ar_ag_weapon_bikerfist.adr",
-    "CategoryId": 207,
-    "PowerRating": 5,
-    "NoSale": true,
-    "Rarity": 3,
-    "IsTintable": true
   },
   {
     "Comment": "Freewheeler Biker Backpack",
@@ -84561,5 +84366,30 @@
     "ModelName": "robgoblin_mechpet.adr",
     "NoSale": true,
     "Rarity": 3
+  },
+  {
+    "Comment": "Donut Belt",
+    "Id": 2921,
+    "Type": 1,
+    "NameId": 403307,
+    "DescriptionId": 403309,
+    "Icon": {
+      "Id": 4166,
+      "TintId": 233
+    },
+    "Cost": 270,
+    "Class": 1,
+    "MaxStackSize": 1,
+    "NoTrade": true,
+    "MinProfileRank": 1,
+    "TintAlias": "dyetint",
+    "TextureAlias": "adventurer-glazedsprinkles-P",
+    "MemberDiscount": 10,
+    "Slot": 6,
+    "ModelName": "freestyle_<race>_<gender>_shoulders_donutbelt.adr",
+    "CategoryId": 106,
+    "NoSale": true,
+    "Rarity": 3,
+    "IsTintable": true
   }
 ]
