@@ -14,13 +14,36 @@ namespace Sanctuary.Game;
 // access by other gameplay code. That still needs zone-owned packet marshalling.
 public sealed class TradeSettlement(IDbContextFactory<DatabaseContext> factory) : ITradeSettlement
 {
-    public TradeSettlementResult Commit(ITradeParticipant first, ITradeParticipant second,
-        IReadOnlyCollection<TradeItemOffer> firstItems, IReadOnlyCollection<TradeItemOffer> secondItems,
-        int firstCoins, int secondCoins)
+    public TradeSettlementResult Commit(TradeOffer first, TradeOffer second)
     {
+        // Freeze offer collections so every attempt validates the same accepted exchange.
+        first = first with { Items = first.Items.ToArray() };
+        second = second with { Items = second.Items.ToArray() };
+        using var strategyContext = factory.CreateDbContext();
+        var strategy = strategyContext.Database.CreateExecutionStrategy();
+        var commitAttempted = false;
+        return strategy.Execute(() =>
+        {
+            // A lost commit response must trigger the manager's reload path, not replay
+            // an exchange that might already be durable.
+            if (commitAttempted)
+                throw new InvalidOperationException("Trade commit outcome is uncertain; reload both inventories.");
+            using var db = factory.CreateDbContext();
+            return CommitAttempt(db, first, second, () => commitAttempted = true);
+        });
+    }
+
+    private static TradeSettlementResult CommitAttempt(DatabaseContext db, TradeOffer firstOffer,
+        TradeOffer secondOffer, Action beforeCommit)
+    {
+        var first = firstOffer.Participant;
+        var second = secondOffer.Participant;
+        var firstItems = firstOffer.Items;
+        var secondItems = secondOffer.Items;
+        var firstCoins = firstOffer.Coins;
+        var secondCoins = secondOffer.Coins;
         if (!first.TradeAvailable || !second.TradeAvailable || first.TradeCharacterId == second.TradeCharacterId)
             throw new TradeValidationException("A trade participant is unavailable.");
-        using var db = factory.CreateDbContext();
         using var transaction = db.Database.BeginTransaction(IsolationLevel.Serializable);
         var firstId = first.TradeCharacterId;
         var secondId = second.TradeCharacterId;
@@ -30,28 +53,28 @@ public sealed class TradeSettlement(IDbContextFactory<DatabaseContext> factory) 
         var rows = db.Items.Where(x => x.CharacterId == firstId || x.CharacterId == secondId)
             .Include(x => x.Profiles).Include(x => x.Pets).AsSplitQuery().ToList();
         var pets = db.Pets.Where(x => x.CharacterId == firstId || x.CharacterId == secondId).ToList();
-        var original = rows.ToDictionary(x => (x.CharacterId, x.Id), x => new TradeInventoryChange(x.Id, x.Definition, x.Tint, x.Count));
+        var original = rows.ToDictionary(x => (x.CharacterId, x.Id), x => new TradeItem(x.Id, x.Definition, x.Tint, x.Count));
         var nextIds = characters.ToDictionary(x => x.Id, x => rows.Where(i => i.CharacterId == x.Id).Select(i => i.Id).DefaultIfEmpty(0).Max());
         var maxStacks = new Dictionary<(int, int), int>();
 
-        void Validate(ITradeParticipant owner, IReadOnlyCollection<TradeItemOffer> offers)
+        void Validate(ITradeParticipant owner, IReadOnlyCollection<TradeItem> offers)
         {
-            if (offers.Select(x => x.ItemId).Distinct().Count() != offers.Count)
+            if (offers.Select(x => x.Id).Distinct().Count() != offers.Count)
                 throw new TradeValidationException("Duplicate item in trade offer.");
             foreach (var offer in offers)
             {
-                var row = rows.SingleOrDefault(x => x.CharacterId == owner.TradeCharacterId && x.Id == offer.ItemId);
-                if (row is null || offer.Quantity <= 0 || row.Definition != offer.Definition || row.Tint != offer.Tint
-                    || !owner.TryGetTradeItem(offer.ItemId, out var live, out var definition, out var available)
+                var row = rows.SingleOrDefault(x => x.CharacterId == owner.TradeCharacterId && x.Id == offer.Id);
+                if (row is null || offer.Count <= 0 || row.Definition != offer.Definition || row.Tint != offer.Tint
+                    || !owner.TryGetTradeItem(offer.Id, out var live, out var definition, out var available)
                     || live.Definition != row.Definition || live.Tint != row.Tint || live.Count != row.Count
                     || definition.NoTrade || !SupportsItemType(definition.Type) || live.AbilityCount != 0
-                    || available < offer.Quantity)
+                    || available < offer.Count)
                     throw new TradeValidationException("An offered item changed or is no longer tradable.");
                 var reserved = row.Profiles.Count > 0 ? 1 : 0;
                 reserved += pets.Count(p => p.CharacterId == row.CharacterId && (row.Pets.Any(r => r.Id == p.Id)
                     || p.ShampooItemId == row.Id || p.ConditionerItemId == row.Id || p.ToyItemId == row.Id
                     || p.BrushItemId == row.Id || p.FoodBowlItemId == row.Id || p.FoodItemId == row.Id || p.VitaminItemId == row.Id));
-                if ((long)row.Count - Math.Max(0, live.ConsumedCount) - reserved < offer.Quantity)
+                if ((long)row.Count - Math.Max(0, live.ConsumedCount) - reserved < offer.Count)
                     throw new TradeValidationException("An offered item is equipped or unavailable.");
                 maxStacks[(row.Definition, row.Tint)] = definition.MaxStackSize;
             }
@@ -68,7 +91,7 @@ public sealed class TradeSettlement(IDbContextFactory<DatabaseContext> factory) 
         // This supports cross-offers of the same stack without transient capacity failures.
         foreach (var (owner, offers) in new[] { (firstId, firstItems), (secondId, secondItems) })
             foreach (var offer in offers)
-                rows.Single(x => x.CharacterId == owner && x.Id == offer.ItemId).Count -= offer.Quantity;
+                rows.Single(x => x.CharacterId == owner && x.Id == offer.Id).Count -= offer.Count;
         foreach (var (recipient, offers) in new[] { (secondId, firstItems), (firstId, secondItems) })
             foreach (var offer in offers)
             {
@@ -80,10 +103,10 @@ public sealed class TradeSettlement(IDbContextFactory<DatabaseContext> factory) 
                     rows.Add(row);
                     db.Items.Add(row);
                 }
-                row.Count = checked(row.Count + offer.Quantity);
+                row.Count = checked(row.Count + offer.Count);
             }
 
-        var changes = new Dictionary<ulong, List<TradeInventoryChange>> { [firstId] = [], [secondId] = [] };
+        var changes = new Dictionary<ulong, List<TradeItem>> { [firstId] = [], [secondId] = [] };
         foreach (var row in rows)
         {
             original.TryGetValue((row.CharacterId, row.Id), out var before);
@@ -109,6 +132,7 @@ public sealed class TradeSettlement(IDbContextFactory<DatabaseContext> factory) 
         a.Coins = finalA;
         b.Coins = finalB;
         db.SaveChanges();
+        beforeCommit();
         transaction.Commit();
         return new(new(changes[firstId], finalA), new(changes[secondId], finalB));
     }

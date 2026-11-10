@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sanctuary.Core.IO;
@@ -19,11 +21,43 @@ namespace Sanctuary.Game.Tests;
 [TestClass]
 public sealed class TradeSettlementTests
 {
+    private sealed class TransientFailure : Exception;
+    private sealed class RetryingStrategy(ExecutionStrategyDependencies dependencies)
+        : ExecutionStrategy(dependencies, 2, TimeSpan.Zero)
+    {
+        protected override bool ShouldRetryOn(Exception exception) => exception is TransientFailure;
+    }
+    private sealed class RetryingStrategyFactory(ExecutionStrategyDependencies dependencies) : IExecutionStrategyFactory
+    {
+        public IExecutionStrategy Create() => new RetryingStrategy(dependencies);
+    }
+    private sealed class CommitFault : DbTransactionInterceptor
+    {
+        public bool LoseNextCommitResponse;
+        public int Commits;
+        public override void TransactionCommitted(DbTransaction transaction, TransactionEndEventData eventData)
+        {
+            Commits++;
+            if (LoseNextCommitResponse)
+            {
+                LoseNextCommitResponse = false;
+                throw new TransientFailure();
+            }
+        }
+    }
     private sealed class Fault : SaveChangesInterceptor
     {
         public bool FailAfterSave;
+        public int TransientFailures;
+        public readonly HashSet<DbContext> SavedContexts = [];
         public override int SavedChanges(SaveChangesCompletedEventData eventData, int result)
         {
+            SavedContexts.Add(eventData.Context!);
+            if (TransientFailures > 0)
+            {
+                TransientFailures--;
+                throw new TransientFailure();
+            }
             if (FailAfterSave) throw new InvalidOperationException("Injected failure after writes, before commit.");
             return result;
         }
@@ -78,15 +112,19 @@ public sealed class TradeSettlementTests
     {
         private readonly SqliteConnection _connection = new("Data Source=:memory:");
         public readonly Fault Fault = new();
+        public readonly CommitFault CommitFault = new();
         public readonly Factory Factory;
         public readonly Peer A;
         public readonly Peer B;
         public readonly TradeSettlement Settlement;
-        public Fixture()
+        public Fixture(bool retries = false)
         {
             _connection.Open();
-            var options = new DbContextOptionsBuilder<SqliteDatabaseContext>().UseSqlite(_connection).AddInterceptors(Fault).Options;
-            Factory = new Factory(options);
+            var builder = new DbContextOptionsBuilder<SqliteDatabaseContext>().UseSqlite(_connection)
+                .AddInterceptors(Fault, CommitFault);
+            if (retries)
+                builder.ReplaceService<IExecutionStrategyFactory, RetryingStrategyFactory>();
+            Factory = new Factory(builder.Options);
             using var db = Factory.CreateDbContext();
             db.Database.EnsureCreated();
             db.Users.Add(new DbUser { Id = 1, Username = "trade-test", Password = "test", Created = DateTimeOffset.UtcNow });
@@ -121,11 +159,64 @@ public sealed class TradeSettlementTests
     }
 
     [TestMethod]
+    [DataRow(0)]
+    [DataRow(1)]
+    public void RetryingStrategyRunsTransactionAndRetriesRolledBackWritesWithFreshContext(int failures)
+    {
+        using var f = new Fixture(retries: true);
+        f.Add(f.A, 7, 100, 5);
+        f.Fault.SavedContexts.Clear();
+        f.Fault.TransientFailures = failures;
+        var result = f.Settlement.Commit(new(f.A, [new(7, 100, 0, 2)], 10), new(f.B, [], 0));
+        Assert.AreEqual(failures + 1, f.Fault.SavedContexts.Count);
+        Assert.AreEqual(3, f.Rows().Single(x => x.CharacterId == 1).Count);
+        Assert.AreEqual(2, f.Rows().Single(x => x.CharacterId == 2).Count);
+        Assert.AreEqual(90, result.First.Coins);
+        Assert.AreEqual(110, result.Second.Coins);
+        Assert.AreEqual(5, f.A.Items[7].Count);
+        Assert.AreEqual(0, f.B.Items.Count);
+    }
+
+    [TestMethod]
+    public void LostCommitResponseDoesNotReplayOrPublishAndDisconnectsBothPlayers()
+    {
+        using var f = new Fixture(retries: true);
+        f.Add(f.A, 7, 100, 5);
+        var clock = new Clock();
+        using var manager = new TradeManager(NullLogger<TradeManager>.Instance, clock, f.Settlement);
+        manager.Invite(f.A, f.B);
+        var id = f.B.Packets.OfType<TradeInvitePacket>().Single().SessionId;
+        manager.Reply(f.B, id, true);
+        manager.OfferItem(f.A, id, 7, 2);
+        manager.OfferCoins(f.A, id, 10);
+        var revision = f.B.Packets.OfType<TradeUpdateCoinCountPacket>().Last().Revision;
+        manager.SetLocked(f.A, id, revision, true); manager.SetLocked(f.B, id, revision, true);
+        clock.Now += TradeManager.ReviewDelay;
+        manager.Accept(f.A, id, revision);
+        f.Fault.SavedContexts.Clear();
+        f.CommitFault.Commits = 0;
+        f.CommitFault.LoseNextCommitResponse = true;
+        manager.Accept(f.B, id, revision);
+        manager.Accept(f.B, id, revision);
+        Assert.AreEqual(1, f.CommitFault.Commits);
+        Assert.AreEqual(1, f.Fault.SavedContexts.Count);
+        Assert.AreEqual(3, f.Rows().Single(x => x.CharacterId == 1).Count);
+        Assert.AreEqual(2, f.Rows().Single(x => x.CharacterId == 2).Count);
+        using var db = f.Factory.CreateDbContext();
+        Assert.AreEqual(90, db.Characters.Single(x => x.Id == 1).Coins);
+        Assert.AreEqual(110, db.Characters.Single(x => x.Id == 2).Coins);
+        Assert.AreEqual(5, f.A.Items[7].Count);
+        Assert.AreEqual(0, f.B.Items.Count);
+        Assert.IsTrue(f.A.Disconnected && f.B.Disconnected);
+        Assert.IsFalse(f.A.Packets.Concat(f.B.Packets).OfType<TradeMessagePacket>().Any(x => x.MessageCode == 6));
+    }
+
+    [TestMethod]
     public void PartialStacksMergeAndCoinsExchangeInOneCommit()
     {
         using var f = new Fixture();
         f.Add(f.A, 7, 100, 5); f.Add(f.B, 9, 100, 2);
-        var result = f.Settlement.Commit(f.A, f.B, [new(7, 100, 0, 3)], [], 20, 7);
+        var result = f.Settlement.Commit(new(f.A, [new(7, 100, 0, 3)], 20), new(f.B, [], 7));
         var rows = f.Rows();
         Assert.AreEqual(2, rows[0].Count); Assert.AreEqual(5, rows[1].Count);
         Assert.AreEqual(9, rows[1].Id);
@@ -141,7 +232,7 @@ public sealed class TradeSettlementTests
     {
         using var f = new Fixture();
         f.Add(f.A, 7, 100, 1, 5); f.Add(f.B, 7, 100, 2, 6);
-        var result = f.Settlement.Commit(f.A, f.B, [new(7, 100, 5, 1)], [], 0, 0);
+        var result = f.Settlement.Commit(new(f.A, [new(7, 100, 5, 1)], 0), new(f.B, [], 0));
         var rows = f.Rows();
         Assert.IsFalse(rows.Any(x => x.CharacterId == 1));
         Assert.AreEqual(2, rows.Count);
@@ -156,7 +247,7 @@ public sealed class TradeSettlementTests
         using var f = new Fixture();
         f.Add(f.A, 7, 100, 5); f.Add(f.B, 7, 100, 5);
         f.A.Definitions[100].MaxStackSize = f.B.Definitions[100].MaxStackSize = 5;
-        f.Settlement.Commit(f.A, f.B, [new(7, 100, 0, 5)], [new(7, 100, 0, 5)], 0, 0);
+        f.Settlement.Commit(new(f.A, [new(7, 100, 0, 5)], 0), new(f.B, [new(7, 100, 0, 5)], 0));
         Assert.IsTrue(f.Rows().All(x => x.Id == 7 && x.Count == 5));
     }
 
@@ -165,9 +256,9 @@ public sealed class TradeSettlementTests
     {
         using var f = new Fixture();
         f.Add(f.A, 7, 100, 5); f.Add(f.B, 9, 100, 4);
-        Fails<InvalidOperationException>(() => f.Settlement.Commit(f.A, f.B, [new(7, 100, 0, 1)], [new(999, 200, 0, 1)], 0, 0));
+        Fails<InvalidOperationException>(() => f.Settlement.Commit(new(f.A, [new(7, 100, 0, 1)], 0), new(f.B, [new(999, 200, 0, 1)], 0)));
         f.A.Definitions[100].MaxStackSize = 4;
-        Fails<InvalidOperationException>(() => f.Settlement.Commit(f.A, f.B, [new(7, 100, 0, 1)], [], 0, 0));
+        Fails<InvalidOperationException>(() => f.Settlement.Commit(new(f.A, [new(7, 100, 0, 1)], 0), new(f.B, [], 0)));
         Assert.AreEqual(9, f.Rows().Sum(x => x.Count));
         Assert.AreEqual(5, f.Rows()[0].Count);
         Assert.AreEqual(4, f.Rows()[1].Count);
@@ -179,7 +270,7 @@ public sealed class TradeSettlementTests
         using var f = new Fixture();
         f.Add(f.A, 7, 100, 1);
         f.Fault.FailAfterSave = true;
-        Fails<InvalidOperationException>(() => f.Settlement.Commit(f.A, f.B, [new(7, 100, 0, 1)], [], 20, 0));
+        Fails<InvalidOperationException>(() => f.Settlement.Commit(new(f.A, [new(7, 100, 0, 1)], 20), new(f.B, [], 0)));
         var rows = f.Rows();
         Assert.AreEqual(1, rows.Count); Assert.AreEqual((ulong)1, rows[0].CharacterId);
         using var db = f.Factory.CreateDbContext();
@@ -195,13 +286,13 @@ public sealed class TradeSettlementTests
         {
             db.Items.Single().Count = 1; db.SaveChanges();
         }
-        Fails<InvalidOperationException>(() => f.Settlement.Commit(f.A, f.B, [new(7, 100, 0, 1)], [], 0, 0));
+        Fails<InvalidOperationException>(() => f.Settlement.Commit(new(f.A, [new(7, 100, 0, 1)], 0), new(f.B, [], 0)));
         f.A.Items[7].Count = 1;
         using (var db = f.Factory.CreateDbContext())
         {
             db.Profiles.Add(new DbProfile { Id = 1, CharacterId = 1, Items = [db.Items.Single()] }); db.SaveChanges();
         }
-        Fails<InvalidOperationException>(() => f.Settlement.Commit(f.A, f.B, [new(7, 100, 0, 1)], [], 0, 0));
+        Fails<InvalidOperationException>(() => f.Settlement.Commit(new(f.A, [new(7, 100, 0, 1)], 0), new(f.B, [], 0)));
         Assert.AreEqual(1, f.Rows().Count);
     }
 
@@ -213,7 +304,7 @@ public sealed class TradeSettlementTests
         using var stale = f.Factory.CreateDbContext();
         var item = stale.Items.Single();
         var character = stale.Characters.Single(x => x.Id == 1);
-        f.Settlement.Commit(f.A, f.B, [new(7, 100, 0, 2)], [], 10, 0);
+        f.Settlement.Commit(new(f.A, [new(7, 100, 0, 2)], 10), new(f.B, [], 0));
         item.Count = 4; character.Coins = 999;
         Fails<DbUpdateConcurrencyException>(() => stale.SaveChanges());
         Assert.AreEqual(3, f.Rows().Single(x => x.CharacterId == 1).Count);
@@ -252,17 +343,17 @@ public sealed class TradeSettlementTests
     public void CoinsOnlyTradePersistsAndInsufficientOrOverflowingBalancesRollBack()
     {
         using var f = new Fixture();
-        var result = f.Settlement.Commit(f.A, f.B, [], [], 25, 10);
+        var result = f.Settlement.Commit(new(f.A, [], 25), new(f.B, [], 10));
         Assert.AreEqual(85, result.First.Coins); Assert.AreEqual(115, result.Second.Coins);
         f.A.TradeCoins = 85; f.B.TradeCoins = 115;
-        Fails<TradeValidationException>(() => f.Settlement.Commit(f.A, f.B, [], [], 86, 0));
-        Fails<TradeValidationException>(() => f.Settlement.Commit(f.A, f.B, [], [], -1, 0));
+        Fails<TradeValidationException>(() => f.Settlement.Commit(new(f.A, [], 86), new(f.B, [], 0)));
+        Fails<TradeValidationException>(() => f.Settlement.Commit(new(f.A, [], -1), new(f.B, [], 0)));
         using (var db = f.Factory.CreateDbContext())
         {
             db.Characters.Single(x => x.Id == 2).Coins = int.MaxValue; db.SaveChanges();
         }
         f.B.TradeCoins = int.MaxValue;
-        Fails<OverflowException>(() => f.Settlement.Commit(f.A, f.B, [], [], 1, 0));
+        Fails<OverflowException>(() => f.Settlement.Commit(new(f.A, [], 1), new(f.B, [], 0)));
         using var verify = f.Factory.CreateDbContext();
         Assert.AreEqual(85, verify.Characters.Single(x => x.Id == 1).Coins);
         Assert.AreEqual(int.MaxValue, verify.Characters.Single(x => x.Id == 2).Coins);

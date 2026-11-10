@@ -254,6 +254,7 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
                 item.Count = change.Count;
                 packets.Add(new ClientUpdatePacketItemUpdate { ItemGuid = item.Id, Count = item.Count,
                     ConsumedCount = item.ConsumedCount, AbilityCount = item.AbilityCount });
+                RefreshTradeActionBarSlots(item, packets);
             }
             else
             {
@@ -268,6 +269,29 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
         Coins = result.Coins;
         packets.Add(new ClientUpdatePacketCoinCount { Coins = Coins });
         return packets;
+    }
+
+    private void RefreshTradeActionBarSlots(ClientItem item, List<ISerializablePacket> packets)
+    {
+        var definition = _resourceManager.ClientItemDefinitions[item.Definition];
+        var tint = item.Tint == 0 ? definition.Icon.TintId : item.Tint;
+        var coolingDown = TryGetItemCooldown(item.Definition, out var totalMs, out var elapsedMs);
+        foreach (var bar in ActionBarItemGuids)
+            foreach (var slot in bar.Value.Where(x => x.Value == item.Id).Select(x => x.Key))
+            {
+                var update = BuildActionBarSlotPacket(bar.Key, slot, definition.Icon.Id, tint,
+                    definition.NameId, item.Count, coolingDown ? totalMs : 1000,
+                    enabled: !coolingDown, elapsed: coolingDown ? elapsedMs : 1000);
+                if (ActionBars.TryGetValue(bar.Key, out var actionBar))
+                    actionBar.Slots[slot] = update.Slot;
+                packets.Add(update);
+
+                // Preserve the pending re-enable time and state, but don't let it
+                // restore the pre-trade stack count when the cooldown expires.
+                if (_delayedSlotPackets.TryGetValue((bar.Key, slot), out var pending)
+                    && pending.Packet is ClientUpdatePacketUpdateActionBarSlot enable)
+                    enable.Slot.Quantity = item.Count;
+            }
     }
 
     NameData ITradeParticipant.TradeName => Name;

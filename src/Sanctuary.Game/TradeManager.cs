@@ -25,8 +25,8 @@ public sealed class TradeManager : IDisposable
         public bool InviterAccepted;
         public bool TargetAccepted;
         public DateTimeOffset? ReviewReadyAt;
-        public readonly Dictionary<int, TradeItemOffer> InviterItems = [];
-        public readonly Dictionary<int, TradeItemOffer> TargetItems = [];
+        public readonly Dictionary<int, TradeItem> InviterItems = [];
+        public readonly Dictionary<int, TradeItem> TargetItems = [];
         public int InviterCoins;
         public int TargetCoins;
         public bool Completing;
@@ -186,9 +186,9 @@ public sealed class TradeManager : IDisposable
             {
                 if (_settlement is null)
                     throw new TradeValidationException("Trade settlement service is unavailable.");
-                result = _settlement.Commit(session.Inviter, session.Target,
-                    session.InviterItems.Values.ToArray(), session.TargetItems.Values.ToArray(),
-                    session.InviterCoins, session.TargetCoins);
+                result = _settlement.Commit(
+                    new(session.Inviter, session.InviterItems.Values.ToArray(), session.InviterCoins),
+                    new(session.Target, session.TargetItems.Values.ToArray(), session.TargetCoins));
             }
             catch (Exception ex)
             {
@@ -250,7 +250,7 @@ public sealed class TradeManager : IDisposable
             var partner = isInviter ? session.Target : session.Inviter;
             var offers = isInviter ? session.InviterItems : session.TargetItems;
             offers.TryGetValue(itemId, out var priorOffer);
-            var previous = priorOffer?.Quantity ?? 0;
+            var previous = priorOffer?.Count ?? 0;
             var total = 0;
             ItemInstance item = null!;
             ClientItemDefinition definition = null!;
