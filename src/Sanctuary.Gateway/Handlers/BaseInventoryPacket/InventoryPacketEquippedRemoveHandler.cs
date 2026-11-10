@@ -77,6 +77,8 @@ public static class InventoryPacketEquippedRemoveHandler
 
         profile.Items.Remove(inventoryPacketEquippedRemove.Slot);
 
+        connection.Player.RefreshEquipmentGlide();
+
         var characterId = GuidHelper.GetPlayerId(connection.Player.Guid);
         var profileId = inventoryPacketEquippedRemove.ProfileId;
         var itemId = profileItem.Id;

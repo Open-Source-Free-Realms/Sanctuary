@@ -210,6 +210,8 @@ public abstract class BaseZone : IZone, IDisposable
 
         SendUpdateStat(player);
 
+        player.RefreshEquipmentGlide();
+
         var clientUpdatePacketHitpoints = new ClientUpdatePacketHitpoints
         {
             CurrentHitpoints = 2500,
@@ -407,7 +409,9 @@ public abstract class BaseZone : IZone, IDisposable
 
         var referenceDataPacketItemCategoryDefinitions = new ReferenceDataPacketItemCategoryDefinitions();
 
-        referenceDataPacketItemCategoryDefinitions.ItemCategories = _resourceManager.ItemCategories.ToDictionary();
+        referenceDataPacketItemCategoryDefinitions.ItemCategories = _resourceManager.ItemCategories
+            .OrderBy(itemCategory => itemCategory.Value.Unknown)
+            .ToDictionary();
         referenceDataPacketItemCategoryDefinitions.ItemCategoryGroups = _resourceManager.ItemCategoryGroups.ToDictionary();
 
         player.SendTunneled(referenceDataPacketItemCategoryDefinitions);
@@ -571,6 +575,14 @@ public abstract class BaseZone : IZone, IDisposable
                 if (valid)
                     packetInGamePurchaseStoreBundles.Store.Bundles.Add(storeBundle.Id, storeBundle);
             }
+
+            var storeBundleItemDefinitions = packetInGamePurchaseStoreBundles.Store.Bundles.Values
+                .SelectMany(storeBundle => storeBundle.Entries)
+                .Select(entry => entry.MarketingItemId)
+                .Distinct()
+                .Select(marketingItemId => _resourceManager.ClientItemDefinitions[marketingItemId]);
+
+            ItemDefinitionHelper.SendItemDefinitions(player, _resourceManager, storeBundleItemDefinitions);
 
             player.SendTunneled(packetInGamePurchaseStoreBundles);
 
