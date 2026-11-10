@@ -13,6 +13,7 @@ using Sanctuary.Game;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Resources.Definitions.Rewards;
+using Sanctuary.Game.Routines;
 using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Packet;
@@ -27,18 +28,15 @@ namespace Sanctuary.Gateway.Handlers;
 [PacketHandler]
 public static class InventoryPacketUseImmediateActivationItemHandler
 {
-    private static bool TakeOne(DatabaseContext dbContext, DbItem dbItem, ClientItem clientItem)
-
+    private static readonly Dictionary<int, int> ChestModels = new()
     {
-        var deleteItem = clientItem.Count == 1;
+        [79519] = 876,   // Clockwork Mystery Chest
+        [78136] = 1511,   // Mystery Chest
+        [79520] = 1512,  // Sci-Fi Mystery Chest
+        [79521] = 4135,  // Snow Days Mystery Chest
+        [79522] = 4460,  // Wonders Mystery Chest
+    };
 
-        if (deleteItem)
-            dbContext.Items.Remove(dbItem);
-        else
-            dbItem.Count -= 1;
-
-        return deleteItem;
-    }
     private static ILogger _logger = null!;
     private static IResourceManager _resourceManager = null!;
     private static IRewardManager _rewardManager = null!;
@@ -55,6 +53,18 @@ public static class InventoryPacketUseImmediateActivationItemHandler
 
         _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
 
+    }
+    private static bool TakeOne(DatabaseContext dbContext, DbItem dbItem, ClientItem clientItem)
+
+    {
+        var deleteItem = clientItem.Count == 1;
+
+        if (deleteItem)
+            dbContext.Items.Remove(dbItem);
+        else
+            dbItem.Count -= 1;
+
+        return deleteItem;
     }
     private static void UpdatePlayer(GatewayConnection connection, ClientItem clientItem, bool delete)
     {
@@ -80,16 +90,6 @@ public static class InventoryPacketUseImmediateActivationItemHandler
         }
     }
 
-    private static Vector4 GetPositionAroundPlayer(Player player, float radius)
-    {
-        var angle = Random.Shared.NextSingle() * MathF.Tau;
-
-        return new Vector4(
-            player.Position.X + MathF.Cos(angle) * radius,
-            player.Position.Y,
-            player.Position.Z + MathF.Sin(angle) * radius,
-            player.Position.W);
-    }
     private static Npc? SpawnNpc(Player player, Vector4 position, Quaternion rotation, Action<Npc> configure)
     {
         if (!player.Zone.TryCreateNpc(out var npc))
@@ -102,28 +102,21 @@ public static class InventoryPacketUseImmediateActivationItemHandler
 
         return npc;
     }
-    private static readonly Dictionary<int, int> ChestModels = new()
-    {
-        [79519] = 876,   // Clockwork Mystery Chest
-        [78136] = 1511,   // Mystery Chest
-        [79520] = 1512,  // Sci-Fi Mystery Chest
-        [79521] = 4135,  // Snow Days Mystery Chest
-        [79522] = 4460,  // Wonders Mystery Chest
-    };
 
     private const int ChestOpen = 1111;  // com_cast_01 sg_treasure_chest_open.gr2
     private const int ChestShut = 1112; // com_cast_02 sg_treasure_chest_close.gr2
     private const int ChestStand = 1; // do NOTHING!
     private const int ChestOpenStand = 1301;
-    private const int ChestCloseAfterMs = 3000;
-    private const int ChestDespawnAfterMs = 5000;
+     private const double ChestCloseAfterSeconds = 3.0;
+    private const double ChestDespawnAfterCloseSeconds = 2.5;
+    private const int ChestSurpriseEffect = 5597; // this is PFX_sparkles_gold_treasure-chest-reward_large
 
     private static void SpawnOpeningChest(Player player, ClientItemDefinition chestDefinition)
     {
         if (!ChestModels.TryGetValue(chestDefinition.Id, out var modelId))
             return;
 
-        var position = GetPositionAroundPlayer(player, 2.0f);
+        var position = player.Position.RandomPointOnCircle(2.0f);
         var toPlayer = new Vector3(player.Position.X - position.X, 0f, player.Position.Z - position.Z);
         var rotation = toPlayer.ToFlatRotation();
 
@@ -142,39 +135,28 @@ public static class InventoryPacketUseImmediateActivationItemHandler
         if (chestNpc is null)
             return;
 
-        EntityHelper.SetBaseAnimation(player, chestNpc, ChestOpenStand);
-        EntityHelper.SetAnimation(player, chestNpc, ChestOpen);
-
-        var openCompositeEffect = 5597;
-
-        player.SendTunneledToVisible(new PlayerUpdatePacketPlayCompositeEffect
+        chestNpc.Routines.SetRoutine("MysteryChestOpening", new SequentialRoutine(
+        new InstantRoutine(() =>
         {
-            Guid = chestNpc.Guid,
-            CompositeEffectId = openCompositeEffect,
-            Position = chestNpc.Position
-        }, true);
+            EntityHelper.SetBaseAnimation(player, chestNpc, ChestOpenStand);
+            EntityHelper.SetAnimation(player, chestNpc, ChestOpen);
 
-        var closeAt = Environment.TickCount64 + ChestCloseAfterMs;
-        var despawnAt = Environment.TickCount64 + ChestDespawnAfterMs;
-        var hasClosed = false;
-
-        chestNpc.UpdateEverySecondAction = () =>
+            player.SendTunneledToVisible(new PlayerUpdatePacketPlayCompositeEffect
+            {
+                Guid = chestNpc.Guid,
+                CompositeEffectId = ChestSurpriseEffect,
+                Position = chestNpc.Position
+            }, true);
+        }),
+        new WaitRoutine(ChestCloseAfterSeconds),
+        new InstantRoutine(() =>
         {
-            var now = Environment.TickCount64;
-
-            if (now >= despawnAt)
-            {
-                EntityHelper.RemovePlayerGracefully(chestNpc);
-                return;
-            }
-
-            if (!hasClosed && now >= closeAt)
-            {
-                EntityHelper.SetBaseAnimation(player, chestNpc, ChestStand);
-                EntityHelper.SetAnimation(player, chestNpc, ChestShut);
-                hasClosed = true;
-            }
-        };
+            EntityHelper.SetBaseAnimation(player, chestNpc, ChestStand);
+            EntityHelper.SetAnimation(player, chestNpc, ChestShut);
+        }),
+        new WaitRoutine(ChestDespawnAfterCloseSeconds),
+        new InstantRoutine(() => EntityHelper.RemovePlayerGracefully(chestNpc))
+        ));
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
