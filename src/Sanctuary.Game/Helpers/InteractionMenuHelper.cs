@@ -5,7 +5,6 @@ using System.Numerics;
 using Sanctuary.Core.Extensions;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Interactions;
-using Sanctuary.Game.Pathing;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 
@@ -16,8 +15,6 @@ public static class InteractionMenuHelper
     public const byte QuestCursorId = 5;
 
     private const float TalkStandDistance = 2.2f;
-
-    private static readonly ChaseSettings ApproachSettings = new(TalkStandDistance, TalkStandDistance, 0f, 0f, 0f);
 
     public static CommandPacketInteractionList GetInteractionListPacket(ulong guid, string? name,
         IEnumerable<InteractionData> interactions, bool autoSelectSingle = false)
@@ -146,7 +143,7 @@ public static class InteractionMenuHelper
     }
 
     public static Vector4 GetApproachPosition(Vector4 target, Vector4 from)
-        => new(target.ToVector3() + ApproachSettings.GetOffset(from.ToVector3(), target.ToVector3()), 1f);
+        => PositionHelper.GetPointNear(target, TalkStandDistance, from);
 
     private static bool IsWithinRange(Npc npc, Player player, int range)
     {

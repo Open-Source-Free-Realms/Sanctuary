@@ -1,4 +1,8 @@
 using System.Collections.Generic;
+using System.Numerics;
+using System.Text.Json.Serialization;
+
+using Sanctuary.Core.IO;
 
 namespace Sanctuary.Game.Resources.Definitions;
 
@@ -15,9 +19,8 @@ public sealed class QuestSceneActor
 {
     public int NpcId { get; set; }
 
-    public float X { get; set; }
-    public float Y { get; set; }
-    public float Z { get; set; }
+    [JsonConverter(typeof(Vector4JsonConverter))]
+    public Vector4 Position { get; set; }
 
     public float Heading { get; set; }
 }
