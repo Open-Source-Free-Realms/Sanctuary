@@ -21,6 +21,9 @@ using Sanctuary.Packet.Common.Attributes;
 
 namespace Sanctuary.Gateway.Handlers;
 
+// TODO: make this agnostic to Use items
+// and make chests.cs so that we can all enjoy shared chest logic
+
 [PacketHandler]
 public static class InventoryPacketUseImmediateActivationItemHandler
 {
