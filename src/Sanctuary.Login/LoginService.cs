@@ -69,6 +69,16 @@ public class LoginService : BackgroundService
         // Register services on static packet handlers.
         _serviceProvider.ConfigurePacketHandlers();
 
+        if (!_loginServer.IsSocketBound || !_gatewayServer.IsSocketBound)
+        {
+            _logger.LogCritical("Cannot start {server}. Port {port} or {gatewayPort} could not be bound; is another instance still running?",
+                nameof(LoginServer), _options.Port, _options.LoginGatewayPort);
+
+            _hostApplicationLifetime.StopApplication();
+
+            return Task.CompletedTask;
+        }
+
         _logger.LogInformation($"{nameof(LoginServer)} started and is listening on port '{_options.Port}'.");
         _logger.LogInformation($"{nameof(GatewayServer)} started and is connecting to address '{_options.LoginGatewayPort}'.");
 

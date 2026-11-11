@@ -133,6 +133,15 @@ public class GatewayService : BackgroundService
         // Register services on static packet handlers.
         _serviceProvider.ConfigurePacketHandlers();
 
+        if (!_server.IsSocketBound)
+        {
+            _logger.LogCritical("Cannot start {server}. Port {port} could not be bound; is another instance still running?", nameof(GatewayServer), _options.Port);
+
+            _hostApplicationLifetime.StopApplication();
+
+            return Task.CompletedTask;
+        }
+
         // Connect to the Login Server.
 
         var clientConnection = _client.EstablishConnection(_options.LoginGatewayAddress);
