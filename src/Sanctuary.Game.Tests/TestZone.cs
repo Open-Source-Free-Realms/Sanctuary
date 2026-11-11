@@ -28,7 +28,7 @@ public sealed class TestZone : BaseZone
     {
     }
 
-    public static TestZone Create()
+    public static TestZone Create(TradeManager? trades = null)
     {
         Directory.CreateDirectory(ResourceManager.BaseDirectory);
 
@@ -42,6 +42,8 @@ public sealed class TestZone : BaseZone
         services.AddSingleton<IRewardManager, RewardManager>();
         services.AddSingleton<IQuestManager, QuestManager>();
         services.AddSingleton<IZoneManager, ZoneManager>();
+        if (trades is not null)
+            services.AddSingleton(trades);
 
         return new TestZone(services.BuildServiceProvider());
     }

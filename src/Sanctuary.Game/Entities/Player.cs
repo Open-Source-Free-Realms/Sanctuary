@@ -254,7 +254,7 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
                 item.Count = change.Count;
                 packets.Add(new ClientUpdatePacketItemUpdate { ItemGuid = item.Id, Count = item.Count,
                     ConsumedCount = item.ConsumedCount, AbilityCount = item.AbilityCount });
-                RefreshTradeActionBarSlots(item, packets);
+                RefreshItemActionBarSlots(item, result.Definitions[change.Definition], packets);
             }
             else
             {
@@ -262,7 +262,7 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
                 Items.Add(item);
                 using var writer = new PacketWriter();
                 item.Serialize(writer);
-                _resourceManager.ClientItemDefinitions[change.Definition].Serialize(writer);
+                result.Definitions[change.Definition].Serialize(writer);
                 packets.Add(new ClientUpdatePacketItemAdd { Payload = writer.Buffer });
             }
         }
@@ -271,9 +271,8 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
         return packets;
     }
 
-    private void RefreshTradeActionBarSlots(ClientItem item, List<ISerializablePacket> packets)
+    private void RefreshItemActionBarSlots(ClientItem item, ClientItemDefinition definition, List<ISerializablePacket> packets)
     {
-        var definition = _resourceManager.ClientItemDefinitions[item.Definition];
         var tint = item.Tint == 0 ? definition.Icon.TintId : item.Tint;
         var coolingDown = TryGetItemCooldown(item.Definition, out var totalMs, out var elapsedMs);
         foreach (var bar in ActionBarItemGuids)
@@ -309,13 +308,11 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
         item = owned;
         definition = found;
         // Reserve equipment copies; profile references can share the same physical copy.
-        var reserved = Profiles.Any(profile => profile.Items.Values.Any(x => x.Id == itemId)) ? 1 : 0;
-        reserved += Pets.Count(pet => pet.ItemGuids.Contains(itemId)
-            || pet.UnknownItemGuid1 == itemId || pet.ShampooItemGuid == itemId
-            || pet.ConditionerItemGuid == itemId || pet.ToyItemGuid == itemId
-            || pet.BrushItemGuid == itemId || pet.FoodBowlItemGuid == itemId
-            || pet.FoodItemGuid == itemId || pet.VitaminItemGuid == itemId);
-        available = (int)Math.Clamp((long)owned.Count - Math.Max(0, owned.ConsumedCount) - reserved, 0, int.MaxValue);
+        var profileEquipped = Profiles.Any(profile => profile.Items.Values.Any(x => x.Id == itemId));
+        var equippedPets = Pets.Count(pet => TradeItemRules.PetUsesItem(itemId, pet.ItemGuids.Contains(itemId),
+            pet.ShampooItemGuid, pet.ConditionerItemGuid, pet.ToyItemGuid, pet.BrushItemGuid,
+            pet.FoodBowlItemGuid, pet.FoodItemGuid, pet.VitaminItemGuid));
+        available = TradeItemRules.AvailableCount(owned.Count, owned.ConsumedCount, profileEquipped, equippedPets);
         return true;
     }
 

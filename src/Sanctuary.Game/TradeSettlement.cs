@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game.Helpers;
+using Sanctuary.Packet.Common;
 
 namespace Sanctuary.Game;
 
@@ -56,6 +57,7 @@ public sealed class TradeSettlement(IDbContextFactory<DatabaseContext> factory) 
         var original = rows.ToDictionary(x => (x.CharacterId, x.Id), x => new TradeItem(x.Id, x.Definition, x.Tint, x.Count));
         var nextIds = characters.ToDictionary(x => x.Id, x => rows.Where(i => i.CharacterId == x.Id).Select(i => i.Id).DefaultIfEmpty(0).Max());
         var maxStacks = new Dictionary<(int, int), int>();
+        var definitions = new Dictionary<int, ClientItemDefinition>();
 
         void Validate(ITradeParticipant owner, IReadOnlyCollection<TradeItem> offers)
         {
@@ -67,16 +69,17 @@ public sealed class TradeSettlement(IDbContextFactory<DatabaseContext> factory) 
                 if (row is null || offer.Count <= 0 || row.Definition != offer.Definition || row.Tint != offer.Tint
                     || !owner.TryGetTradeItem(offer.Id, out var live, out var definition, out var available)
                     || live.Definition != row.Definition || live.Tint != row.Tint || live.Count != row.Count
-                    || definition.NoTrade || !SupportsItemType(definition.Type) || live.AbilityCount != 0
+                    || !TradeItemRules.CanTrade(live, definition)
                     || available < offer.Count)
                     throw new TradeValidationException("An offered item changed or is no longer tradable.");
-                var reserved = row.Profiles.Count > 0 ? 1 : 0;
-                reserved += pets.Count(p => p.CharacterId == row.CharacterId && (row.Pets.Any(r => r.Id == p.Id)
-                    || p.ShampooItemId == row.Id || p.ConditionerItemId == row.Id || p.ToyItemId == row.Id
-                    || p.BrushItemId == row.Id || p.FoodBowlItemId == row.Id || p.FoodItemId == row.Id || p.VitaminItemId == row.Id));
-                if ((long)row.Count - Math.Max(0, live.ConsumedCount) - reserved < offer.Count)
+                var equippedPets = pets.Count(p => p.CharacterId == row.CharacterId && TradeItemRules.PetUsesItem(row.Id,
+                    row.Pets.Any(r => r.Id == p.Id),
+                    p.ShampooItemId, p.ConditionerItemId, p.ToyItemId, p.BrushItemId, p.FoodBowlItemId, p.FoodItemId, p.VitaminItemId));
+                if (TradeItemRules.AvailableCount(row.Count, live.ConsumedCount, row.Profiles.Count > 0, equippedPets) < offer.Count)
                     throw new TradeValidationException("An offered item is equipped or unavailable.");
                 maxStacks[(row.Definition, row.Tint)] = definition.MaxStackSize;
+                // Publication must not look the definition up again after commit.
+                definitions[row.Definition] = definition.Clone();
             }
         }
         Validate(first, firstItems);
@@ -134,9 +137,7 @@ public sealed class TradeSettlement(IDbContextFactory<DatabaseContext> factory) 
         db.SaveChanges();
         beforeCommit();
         transaction.Commit();
-        return new(new(changes[firstId], finalA), new(changes[secondId], finalB));
+        return new(new(changes[firstId], finalA, definitions), new(changes[secondId], finalB, definitions));
     }
 
-    public static bool SupportsItemType(int type) => type != ItemDefinitionHelper.PetItemType
-        && type != ItemDefinitionHelper.MountItemType && type != ItemDefinitionHelper.HousingItemType;
 }

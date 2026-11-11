@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Sanctuary.Game.Routines;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sanctuary.Core.IO;
@@ -12,6 +15,19 @@ namespace Sanctuary.Game.Tests;
 [TestClass]
 public sealed class TradeManagerTests
 {
+    private sealed class BlockingSettlement : ITradeSettlement, IDisposable
+    {
+        public readonly ManualResetEventSlim Entered = new();
+        public readonly ManualResetEventSlim Release = new();
+        public TradeSettlementResult Commit(TradeOffer first, TradeOffer second)
+        {
+            Entered.Set();
+            if (!Release.Wait(TimeSpan.FromSeconds(10))) throw new TimeoutException();
+            return new(new([], first.Participant.TradeCoins, new Dictionary<int, ClientItemDefinition>()),
+                new([], second.Participant.TradeCoins, new Dictionary<int, ClientItemDefinition>()));
+        }
+        public void Dispose() { Entered.Dispose(); Release.Dispose(); }
+    }
     private sealed class Clock : TimeProvider
     {
         public DateTimeOffset Now = DateTimeOffset.UtcNow;
@@ -51,7 +67,12 @@ public sealed class TradeManagerTests
             item = null!; definition = null!; available = 0;
             return false;
         }
-        public void SendTunneled(ISerializablePacket packet) => Packets.Add(packet);
+        public int LastPacketThreadId;
+        public void SendTunneled(ISerializablePacket packet)
+        {
+            LastPacketThreadId = Environment.CurrentManagedThreadId;
+            Packets.Add(packet);
+        }
     }
 
     private static TradeManager Create(Clock? clock = null) => new(NullLogger<TradeManager>.Instance, clock);
@@ -213,11 +234,11 @@ public sealed class TradeManagerTests
         trades.Invite(a, b); var id = Invitation(b);
         if (phase >= 1) trades.Reply(b, id, true);
         if (phase >= 2) { trades.SetLocked(a, id, 1, true); trades.SetLocked(b, id, 1, true); }
-        if (phase >= 3) { clock.Now += TradeManager.ReviewDelay; trades.Accept(b, id, 1); }
+        if (phase >= 3) { trades.Accept(b, id, 1); }
         a.Packets.Clear(); b.Packets.Clear();
         a.TradeAvailable = false;
-        if (sweep) trades.Sweep(); else trades.Disconnect(a);
-        trades.Disconnect(a); trades.Sweep();
+        if (sweep) trades.Sweep(this); else trades.Disconnect(a);
+        trades.Disconnect(a); trades.Sweep(this);
         Assert.AreEqual(2, b.Packets.Count);
         Assert.AreEqual((byte)2, ((TradeMessagePacket)b.Packets[0]).MessageCode);
         Assert.IsInstanceOfType<TradeEndSessionPacket>(b.Packets[1]);
@@ -261,7 +282,7 @@ public sealed class TradeManagerTests
         Assert.IsTrue(trades.Invite(b, c));
         trades.Reply(c, Invitation(c), true);
         c.TradeContext = new object();
-        trades.Sweep();
+        trades.Sweep(this);
         Assert.AreEqual(2, b.Packets.OfType<TradeEndSessionPacket>().Count());
         Assert.IsTrue(trades.Invite(b, new Peer(4, this)));
     }
@@ -342,7 +363,7 @@ public sealed class TradeManagerTests
     }
 
     [TestMethod]
-    public void FinalConfirmationRequiresBothPlayersAndReviewDelayWithoutSettlement()
+    public void FinalConfirmationRequiresBothPlayersAtCurrentRevisionWithoutSettlement()
     {
         var clock = new Clock();
         using var trades = Create(clock);
@@ -351,9 +372,6 @@ public sealed class TradeManagerTests
         trades.Invite(a, b); var id = Invitation(b); trades.Reply(b, id, true);
         a.Packets.Clear(); b.Packets.Clear();
         trades.SetLocked(a, id, 1, true); trades.SetLocked(b, id, 1, true);
-        trades.Accept(a, id, 1); trades.Accept(b, id, 1);
-        Assert.AreEqual(0, b.Packets.OfType<ExecuteScriptWithStringParamsPacket>().Count());
-        clock.Now += TradeManager.ReviewDelay;
         trades.Accept(a, id, 0); trades.Accept(new Peer(2, this), id, 1);
         trades.Accept(a, id, 1); trades.Accept(a, id, 1);
         Assert.AreEqual(0, b.Packets.OfType<ExecuteScriptWithStringParamsPacket>().Count());
@@ -425,7 +443,8 @@ public sealed class TradeManagerTests
         Assert.IsFalse(rows[1].IsMine); Assert.AreEqual(1, rows[1].Item.Count);
         Stock(a, noTrade: true);
         trades.OfferItem(a, id, 7, 1);
-        Assert.AreEqual(0, b.Packets.OfType<TradeUpdateItemCountPacket>().Last().OfferedTotal);
+        Assert.AreEqual(0, b.Packets.OfType<TradeUpdateItemCountPacket>().Count());
+        Assert.IsTrue(a.Packets.OfType<ExecuteScriptWithStringParamsPacket>().Any(p => p.Params[0].Contains("cannot be traded")));
         trades.OfferItem(b, id, 7, 2);
         Assert.AreEqual(2, b.Packets.OfType<TradeUpdateItemCountPacket>().Last().OfferedTotal);
         Stock(a, itemId: 8, available: 0);
@@ -455,6 +474,87 @@ public sealed class TradeManagerTests
         trades.Cancel(a, id);
         trades.OfferItem(a, id, 7, 1);
         Assert.AreEqual(0, b.Packets.OfType<TradeUpdateAddItemPacket>().Count());
+    }
+
+    [TestMethod]
+    [DataRow(0)]
+    [DataRow(1)]
+    [DataRow(2)]
+    [DataRow(3)]
+    [DataRow(4)]
+    public void InvalidAndUnchangedOffersPreserveLockedReview(int kind)
+    {
+        using var trades = Create();
+        var a = new Peer(1, this); var b = new Peer(2, this);
+        Stock(a);
+        Stock(a, itemId: 8, noTrade: kind == 1, available: kind == 2 ? 0 : 4);
+        trades.Invite(a, b); var id = Invitation(b); trades.Reply(b, id, true);
+        trades.OfferItem(a, id, 7, 1);
+        trades.SetLocked(a, id, 2, true); trades.SetLocked(b, id, 2, true);
+        a.Packets.Clear(); b.Packets.Clear();
+        switch (kind)
+        {
+            case 0: trades.OfferItem(a, id, 999, 1); break;
+            case 1: case 2: trades.OfferItem(a, id, 8, 1); break;
+            case 3: trades.OfferItem(a, id, 7, 1); trades.OfferItem(a, id, 999, 0); break;
+            case 4: trades.OfferItem(a, id, 7, -1); break;
+        }
+        Assert.AreEqual(0, b.Packets.Count);
+        Assert.AreEqual(0, a.Packets.OfType<TradeUpdateLockPacket>().Count());
+        Assert.AreEqual(0, a.Packets.OfType<TradeUpdateItemCountPacket>().Count());
+        Assert.AreEqual(kind == 3 ? 0 : 1, a.Packets.OfType<ExecuteScriptWithStringParamsPacket>().Count());
+        // Acceptance at the unchanged revision is still processed, without re-locking.
+        trades.Accept(a, id, 2); trades.Accept(b, id, 2);
+        Assert.AreEqual(1, b.Packets.OfType<TradeEndSessionPacket>().Count());
+    }
+
+    [TestMethod]
+    public void BusySettlementDoesNotBlockOtherZoneRoutines()
+    {
+        using var settlement = new BlockingSettlement();
+        using var trades = new TradeManager(NullLogger<TradeManager>.Instance, settlement: settlement);
+        using var zone = TestZone.Create(trades);
+        var a = new Peer(1, zone); var b = new Peer(2, zone);
+        trades.Invite(a, b); var id = Invitation(b); trades.Reply(b, id, true);
+        trades.SetLocked(a, id, 1, true); trades.SetLocked(b, id, 1, true);
+        trades.Accept(a, id, 1);
+        var completed = Task.Run(() => trades.Accept(b, id, 1));
+        Task tick = Task.CompletedTask;
+        var unrelatedRan = false;
+        try
+        {
+            Assert.IsTrue(settlement.Entered.Wait(TimeSpan.FromSeconds(5)));
+            zone.Routines.SetRoutine("unrelated-test-work", new InstantRoutine(() => unrelatedRan = true));
+            tick = Task.Run(zone.Routines.OnTick);
+            Assert.IsTrue(tick.Wait(TimeSpan.FromSeconds(5)), "Trade maintenance must not stall the zone tick.");
+            Assert.IsTrue(unrelatedRan);
+        }
+        finally
+        {
+            settlement.Release.Set();
+            Assert.IsTrue(Task.WaitAll([completed, tick], TimeSpan.FromSeconds(10)));
+        }
+    }
+
+    [TestMethod]
+    public void ZoneRoutineExpiresOnlyItsOwnSessionsOnTheTickCaller()
+    {
+        var clock = new Clock();
+        using var trades = Create(clock);
+        using var firstZone = TestZone.Create(trades);
+        using var secondZone = TestZone.Create(trades);
+        var a = new Peer(1, firstZone); var b = new Peer(2, firstZone);
+        var c = new Peer(3, secondZone); var d = new Peer(4, secondZone);
+        trades.Invite(a, b); trades.Invite(c, d);
+        a.Packets.Clear(); b.Packets.Clear(); c.Packets.Clear(); d.Packets.Clear();
+        clock.Now += TradeManager.InvitationLifetime;
+        firstZone.Routines.OnTick();
+        Assert.AreEqual(1, b.Packets.OfType<TradeEndSessionPacket>().Count());
+        Assert.AreEqual(Environment.CurrentManagedThreadId, b.LastPacketThreadId);
+        Assert.AreEqual(0, d.Packets.Count);
+        secondZone.Routines.OnTick();
+        Assert.AreEqual(1, d.Packets.OfType<TradeEndSessionPacket>().Count());
+        Assert.AreEqual(Environment.CurrentManagedThreadId, d.LastPacketThreadId);
     }
 
     [TestMethod]

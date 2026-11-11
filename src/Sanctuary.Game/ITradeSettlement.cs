@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Sanctuary.Packet.Common;
 
 namespace Sanctuary.Game;
 
@@ -8,7 +9,8 @@ public sealed class TradeValidationException(string message) : System.InvalidOpe
 public sealed record TradeItem(int Id, int Definition, int Tint, int Count);
 // Offer counts are quantities to transfer; result counts are final inventory totals (zero deletes).
 public sealed record TradeOffer(ITradeParticipant Participant, IReadOnlyCollection<TradeItem> Items, int Coins);
-public sealed record TradeParticipantResult(IReadOnlyList<TradeItem> Items, int Coins);
+public sealed record TradeParticipantResult(IReadOnlyList<TradeItem> Items, int Coins,
+    IReadOnlyDictionary<int, ClientItemDefinition> Definitions);
 public sealed record TradeSettlementResult(TradeParticipantResult First, TradeParticipantResult Second);
 
 public interface ITradeSettlement

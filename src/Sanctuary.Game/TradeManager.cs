@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Sanctuary.Core.IO;
+using Sanctuary.Game.Helpers;
 using Microsoft.Extensions.Logging;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -11,26 +12,28 @@ namespace Sanctuary.Game;
 
 public sealed class TradeManager : IDisposable
 {
+    private sealed class TradeSide(ITradeParticipant player)
+    {
+        public readonly ITradeParticipant Player = player;
+        public readonly Dictionary<int, TradeItem> Items = [];
+        public int Coins;
+        public bool Locked;
+        public bool Accepted;
+    }
+
     private sealed class Session(int id, ITradeParticipant inviter, ITradeParticipant target, DateTimeOffset expires)
     {
         public readonly int Id = id;
-        public readonly ITradeParticipant Inviter = inviter;
-        public readonly ITradeParticipant Target = target;
+        public readonly TradeSide Inviter = new(inviter);
+        public readonly TradeSide Target = new(target);
         public readonly object Context = inviter.TradeContext;
         public readonly DateTimeOffset Expires = expires;
         public bool Active;
         public int Revision = 1;
-        public bool InviterLocked;
-        public bool TargetLocked;
-        public bool InviterAccepted;
-        public bool TargetAccepted;
-        public DateTimeOffset? ReviewReadyAt;
-        public readonly Dictionary<int, TradeItem> InviterItems = [];
-        public readonly Dictionary<int, TradeItem> TargetItems = [];
-        public int InviterCoins;
-        public int TargetCoins;
         public bool Completing;
-        public bool Contains(ITradeParticipant player) => ReferenceEquals(player, Inviter) || ReferenceEquals(player, Target);
+        public bool Contains(ITradeParticipant player) => ReferenceEquals(player, Inviter.Player) || ReferenceEquals(player, Target.Player);
+        public TradeSide SideOf(ITradeParticipant player) => ReferenceEquals(player, Inviter.Player) ? Inviter : Target;
+        public ITradeParticipant PartnerOf(ITradeParticipant player) => ReferenceEquals(player, Inviter.Player) ? Target.Player : Inviter.Player;
     }
 
     // Serializes trade session transitions, including duplicate final accepts.
@@ -41,26 +44,24 @@ public sealed class TradeManager : IDisposable
     private readonly Dictionary<ulong, Session> _players = [];
     private readonly ILogger<TradeManager> _logger;
     private readonly TimeProvider _clock;
-    private readonly ITimer _timer;
     private int _nextId;
     private bool _disposed;
     // Restoration policy, not a recovered retail timeout.
     public static readonly TimeSpan InvitationLifetime = TimeSpan.FromSeconds(60);
-    public static readonly TimeSpan ReviewDelay = TimeSpan.FromSeconds(10);
 
     public TradeManager(ILogger<TradeManager> logger, TimeProvider? clock = null, ITradeSettlement? settlement = null)
     {
         _logger = logger;
         _settlement = settlement;
         _clock = clock ?? TimeProvider.System;
-        _timer = _clock.CreateTimer(_ => Sweep(), null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
     }
 
     public bool Invite(ITradeParticipant inviter, ITradeParticipant target)
     {
         lock (_gate)
         {
-            Sweep();
+            Prune(inviter);
+            Prune(target);
             if (_disposed || inviter.TradeGuid == target.TradeGuid || !inviter.TradeAvailable || !target.TradeAvailable
                 || !ReferenceEquals(inviter.TradeContext, target.TradeContext)
                 || _players.ContainsKey(inviter.TradeGuid) || _players.ContainsKey(target.TradeGuid)
@@ -77,12 +78,7 @@ public sealed class TradeManager : IDisposable
                 return false;
             }
             _logger.LogInformation("Trade {session}: invitation from {inviter} to {target}.", session.Id, inviter.TradeGuid, target.TradeGuid);
-            var targetName = target.TradeName.FullName.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;");
-            Send(inviter, new ExecuteScriptWithStringParamsPacket
-            {
-                Script = "NotificationHandler.SystemMessage",
-                Params = [$"Sent {targetName} a trade request.", "0", "0xFFFF00"]
-            });
+            SendSystemMessage(inviter, $"Sent {target.TradeName.FullName} a trade request.");
             return true;
         }
     }
@@ -91,19 +87,18 @@ public sealed class TradeManager : IDisposable
     {
         lock (_gate)
         {
-            Sweep();
-            if (!_sessions.TryGetValue(id, out var session) || session.Active || !ReferenceEquals(player, session.Target))
+            if (!TryGetSession(player, id, out var session) || session.Active || !ReferenceEquals(player, session.Target.Player))
                 return;
             if (!accepted)
             {
                 // Native TradeRejected substitutes the player's name and shows a yellow SystemMessage.
-                Send(session.Inviter, new TradeRejectedPacket { RejectingPlayer = player.TradeName });
+                Send(session.Inviter.Player, new TradeRejectedPacket { RejectingPlayer = player.TradeName });
                 Close(session);
                 return;
             }
             session.Active = true;
-            if (!Send(session.Inviter, new TradeStartSessionPacket { PartnerGuid = session.Target.TradeGuid, PartnerName = session.Target.TradeName, SessionId = id })
-                || !Send(session.Target, new TradeStartSessionPacket { PartnerGuid = session.Inviter.TradeGuid, PartnerName = session.Inviter.TradeName, SessionId = id }))
+            if (!Send(session.Inviter.Player, new TradeStartSessionPacket { PartnerGuid = session.Target.Player.TradeGuid, PartnerName = session.Target.Player.TradeName, SessionId = id })
+                || !Send(session.Target.Player, new TradeStartSessionPacket { PartnerGuid = session.Inviter.Player.TradeGuid, PartnerName = session.Inviter.Player.TradeName, SessionId = id }))
             {
                 Close(session);
                 return;
@@ -116,8 +111,7 @@ public sealed class TradeManager : IDisposable
     {
         lock (_gate)
         {
-            Sweep();
-            if (!_sessions.TryGetValue(id, out var session) || !session.Active || !session.Contains(player))
+            if (!TryGetSession(player, id, out var session) || !session.Active || !session.Contains(player))
                 return;
             if (!locked)
             {
@@ -130,21 +124,19 @@ public sealed class TradeManager : IDisposable
                 Send(player, new TradeUpdateLockPacket { SessionId = id, Locked = false });
                 return;
             }
-            var inviter = ReferenceEquals(player, session.Inviter);
-            if (inviter ? session.InviterLocked : session.TargetLocked)
+            var side = session.SideOf(player);
+            if (side.Locked)
                 return;
-            if (inviter) session.InviterLocked = true;
-            else session.TargetLocked = true;
-            if (!Send(inviter ? session.Target : session.Inviter, new TradeUpdateLockPacket { SessionId = id, Locked = true }))
+            side.Locked = true;
+            if (!Send(session.PartnerOf(player), new TradeUpdateLockPacket { SessionId = id, Locked = true }))
             {
                 Close(session);
                 return;
             }
-            if (session.InviterLocked && session.TargetLocked)
+            if (session.Inviter.Locked && session.Target.Locked)
             {
-                session.ReviewReadyAt = _clock.GetUtcNow() + ReviewDelay;
                 var confirm = new TradeConfirmPacket { SessionId = id };
-                if (!Send(session.Inviter, confirm) || !Send(session.Target, confirm))
+                if (!Broadcast(session, confirm))
                     Close(session);
                 else
                     _logger.LogInformation("Trade {session}: both offers locked at revision {revision}; review started.", id, revision);
@@ -154,30 +146,26 @@ public sealed class TradeManager : IDisposable
 
     private void ResetReview(Session session)
     {
-        var changed = session.InviterLocked || session.TargetLocked || session.ReviewReadyAt.HasValue;
-        session.InviterLocked = session.TargetLocked = false;
-        session.InviterAccepted = session.TargetAccepted = false;
-        session.ReviewReadyAt = null;
+        var changed = session.Inviter.Locked || session.Target.Locked;
+        session.Inviter.Locked = session.Target.Locked = false;
+        session.Inviter.Accepted = session.Target.Accepted = false;
         // Hiding the client's review dialog echoes CancelLock. Do not echo it forever.
         if (!changed)
             return;
         var unlock = new TradeUpdateLockPacket { SessionId = session.Id, Locked = false };
-        Send(session.Inviter, unlock);
-        Send(session.Target, unlock);
+        Broadcast(session, unlock);
     }
 
     public void Accept(ITradeParticipant player, int id, int revision)
     {
         lock (_gate)
         {
-            Sweep();
-            if (!_sessions.TryGetValue(id, out var session) || !session.Active || !session.Contains(player)
-                || session.Completing || revision != session.Revision || !session.InviterLocked || !session.TargetLocked
-                || session.ReviewReadyAt is not { } ready || _clock.GetUtcNow() < ready)
+            if (!TryGetSession(player, id, out var session) || !session.Active || !session.Contains(player)
+                || session.Completing || revision != session.Revision || !session.Inviter.Locked || !session.Target.Locked)
                 return;
-            if (ReferenceEquals(player, session.Inviter)) session.InviterAccepted = true;
-            else session.TargetAccepted = true;
-            if (!session.InviterAccepted || !session.TargetAccepted)
+            // The native confirmation UI owns its countdown; never silently discard an accept.
+            session.SideOf(player).Accepted = true;
+            if (!session.Inviter.Accepted || !session.Target.Accepted)
                 return;
 
             session.Completing = true;
@@ -187,35 +175,30 @@ public sealed class TradeManager : IDisposable
                 if (_settlement is null)
                     throw new TradeValidationException("Trade settlement service is unavailable.");
                 result = _settlement.Commit(
-                    new(session.Inviter, session.InviterItems.Values.ToArray(), session.InviterCoins),
-                    new(session.Target, session.TargetItems.Values.ToArray(), session.TargetCoins));
+                    new(session.Inviter.Player, session.Inviter.Items.Values.ToArray(), session.Inviter.Coins),
+                    new(session.Target.Player, session.Target.Items.Values.ToArray(), session.Target.Coins));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Trade {session}: exchange failed; session will not be replayed.", id);
                 Close(session);
-                var failure = new ExecuteScriptWithStringParamsPacket
-                {
-                    Script = "NotificationHandler.SystemMessage",
-                    Params = ["Trade could not be completed. Please check your inventory before trying again.", "0", "0xFFFF00"]
-                };
-                Send(session.Inviter, failure); Send(session.Target, failure);
+                Broadcast(session, SystemMessage("Trade could not be completed. Please check your inventory before trying again."));
                 // An unexpected database/connection error may leave commit outcome uncertain.
                 // Force a durable reload rather than letting either player spend stale inventory.
                 if (ex is not TradeValidationException)
                 {
-                    session.Inviter.DisconnectForTradeResync();
-                    session.Target.DisconnectForTradeResync();
+                    session.Inviter.Player.DisconnectForTradeResync();
+                    session.Target.Player.DisconnectForTradeResync();
                 }
                 return;
             }
             // Durable commit is the point of no return. Forget the session before notifications,
             // so duplicate accepts or a failed network send can never run the exchange again.
             _sessions.Remove(id);
-            _players.Remove(session.Inviter.TradeGuid);
-            _players.Remove(session.Target.TradeGuid);
-            PublishCommitted(session.Inviter, result.First, id);
-            PublishCommitted(session.Target, result.Second, id);
+            _players.Remove(session.Inviter.Player.TradeGuid);
+            _players.Remove(session.Target.Player.TradeGuid);
+            PublishCommitted(session.Inviter.Player, result.First, id);
+            PublishCommitted(session.Target.Player, result.Second, id);
             _logger.LogInformation("Trade {session}: database exchange committed.", id);
         }
     }
@@ -228,7 +211,7 @@ public sealed class TradeManager : IDisposable
             foreach (var packet in packets)
                 if (!Send(player, packet))
                     throw new InvalidOperationException("Committed inventory could not be delivered.");
-            if (!Send(player, new TradeMessagePacket { MessageCode = 6 })
+            if (!Send(player, new TradeMessagePacket { MessageCode = TradeMessagePacket.Completed })
                 || !Send(player, new TradeEndSessionPacket { SessionId = id }))
                 throw new InvalidOperationException("Trade completion could not be delivered.");
         }
@@ -243,20 +226,40 @@ public sealed class TradeManager : IDisposable
     {
         lock (_gate)
         {
-            Sweep();
-            if (!_sessions.TryGetValue(id, out var session) || !session.Active || !session.Contains(player))
+            if (!TryGetSession(player, id, out var session) || !session.Active || !session.Contains(player))
                 return;
-            var isInviter = ReferenceEquals(player, session.Inviter);
-            var partner = isInviter ? session.Target : session.Inviter;
-            var offers = isInviter ? session.InviterItems : session.TargetItems;
+            var partner = session.PartnerOf(player);
+            var offers = session.SideOf(player).Items;
             offers.TryGetValue(itemId, out var priorOffer);
             var previous = priorOffer?.Count ?? 0;
+            if (requestedTotal < 0)
+            {
+                SendSystemMessage(player, "That item quantity is invalid.");
+                return;
+            }
             var total = 0;
             ItemInstance item = null!;
             ClientItemDefinition definition = null!;
-            if (requestedTotal > 0 && player.TryGetTradeItem(itemId, out item, out definition, out var available)
-                && item.Id == itemId && !definition.NoTrade && TradeSettlement.SupportsItemType(definition.Type) && item.AbilityCount == 0)
+            if (requestedTotal > 0)
+            {
+                if (!player.TryGetTradeItem(itemId, out item, out definition, out var available)
+                    || item.Id != itemId || !TradeItemRules.CanTrade(item, definition) || available <= 0)
+                {
+                    SendSystemMessage(player, "That item is unavailable or cannot be traded.");
+                    return;
+                }
                 total = Math.Min(requestedTotal, Math.Max(0, available));
+            }
+            if (total == previous && (total == 0 || priorOffer!.Definition == item.Definition && priorOffer.Tint == item.Tint))
+            {
+                if (requestedTotal != total && priorOffer is not null)
+                    Send(player, new TradeUpdateItemCountPacket
+                    {
+                        SessionId = id, Revision = session.Revision, IsMine = true,
+                        ItemInstanceId = itemId, OfferedTotal = total
+                    });
+                return;
+            }
 
             if (session.Revision == int.MaxValue)
             {
@@ -311,20 +314,26 @@ public sealed class TradeManager : IDisposable
     {
         lock (_gate)
         {
-            Sweep();
-            if (!_sessions.TryGetValue(id, out var session) || !session.Active || !session.Contains(player))
+            if (!TryGetSession(player, id, out var session) || !session.Active || !session.Contains(player))
                 return;
             var total = Math.Clamp(coins, 0, Math.Max(0, player.TradeCoins));
-            var inviter = ReferenceEquals(player, session.Inviter);
-            var previous = inviter ? session.InviterCoins : session.TargetCoins;
-            if (previous == total && coins == total)
+            var side = session.SideOf(player);
+            var previous = side.Coins;
+            if (previous == total)
+            {
+                if (coins != total)
+                {
+                    SendSystemMessage(player, "That coin amount is unavailable.");
+                    Send(player, new TradeUpdateCoinCountPacket
+                    { SessionId = id, Revision = session.Revision, IsMine = true, OfferedCoins = total });
+                }
                 return; // Includes the automatic zero offer when the UI opens.
+            }
             ResetReview(session);
             if (session.Revision == int.MaxValue) { Close(session); return; }
             var revision = ++session.Revision;
-            if (inviter) session.InviterCoins = total;
-            else session.TargetCoins = total;
-            foreach (var recipient in new[] { session.Inviter, session.Target })
+            side.Coins = total;
+            foreach (var recipient in new[] { session.Inviter.Player, session.Target.Player })
                 if (!Send(recipient, new TradeUpdateCoinCountPacket
                 {
                     SessionId = id, Revision = revision, IsMine = ReferenceEquals(recipient, player), OfferedCoins = total
@@ -335,18 +344,13 @@ public sealed class TradeManager : IDisposable
     public void Cancel(ITradeParticipant player, int id, bool notifyPartner = true)
     {
         lock (_gate)
-            if (_sessions.TryGetValue(id, out var session) && session.Contains(player))
+            if (TryGetSession(player, id, out var session) && session.Contains(player))
             {
                 Close(session);
                 if (notifyPartner)
                 {
-                    var partner = ReferenceEquals(player, session.Inviter) ? session.Target : session.Inviter;
-                    var name = player.TradeName.FullName.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;");
-                    Send(partner, new ExecuteScriptWithStringParamsPacket
-                    {
-                        Script = "NotificationHandler.SystemMessage",
-                        Params = [$"{name} has cancelled the trade.", "0", "0xFFFF00"]
-                    });
+                    var partner = session.PartnerOf(player);
+                    SendSystemMessage(partner, $"{player.TradeName.FullName} has cancelled the trade.");
                 }
             }
     }
@@ -360,36 +364,80 @@ public sealed class TradeManager : IDisposable
 
     private void CloseDisconnected(Session session, ITradeParticipant disconnected)
     {
-        var partner = ReferenceEquals(disconnected, session.Inviter) ? session.Target : session.Inviter;
+        var partner = session.PartnerOf(disconnected);
         // Send before EndSession: native message 2 also clears a pending invitation.
-        Send(partner, new TradeMessagePacket { MessageCode = 2 });
+        Send(partner, new TradeMessagePacket { MessageCode = TradeMessagePacket.PartnerDisconnected });
         Close(session);
     }
 
-    public void Sweep()
+    // Called by each zone's periodic routine, never by a separate trade timer.
+    public void Sweep(object context)
     {
-        lock (_gate)
+        // Defer only trade maintenance if settlement is busy; don't block the zone tick.
+        if (!Monitor.TryEnter(_gate))
+            return;
+        try
         {
-            foreach (var session in _sessions.Values.ToArray())
-                if (!session.Inviter.TradeAvailable || !session.Target.TradeAvailable)
-                    CloseDisconnected(session, !session.Inviter.TradeAvailable ? session.Inviter : session.Target);
-                else if ((!session.Active && _clock.GetUtcNow() >= session.Expires)
-                    || !ReferenceEquals(session.Context, session.Inviter.TradeContext)
-                    || !ReferenceEquals(session.Context, session.Target.TradeContext))
-                    Close(session);
+            foreach (var session in _sessions.Values.Where(s => ReferenceEquals(s.Context, context)).ToArray())
+                ValidateSession(session);
         }
+        finally { Monitor.Exit(_gate); }
+    }
+
+    private void Prune(ITradeParticipant player)
+    {
+        if (_players.TryGetValue(player.TradeGuid, out var session))
+            ValidateSession(session);
+    }
+
+    private bool TryGetSession(ITradeParticipant player, int id, out Session session)
+    {
+        if (!_sessions.TryGetValue(id, out session!) || !session.Contains(player))
+            return false;
+        return ValidateSession(session);
+    }
+
+    private bool ValidateSession(Session session)
+    {
+        if (!session.Inviter.Player.TradeAvailable || !session.Target.Player.TradeAvailable)
+        {
+            CloseDisconnected(session, !session.Inviter.Player.TradeAvailable ? session.Inviter.Player : session.Target.Player);
+            return false;
+        }
+        if ((!session.Active && _clock.GetUtcNow() >= session.Expires)
+            || !ReferenceEquals(session.Context, session.Inviter.Player.TradeContext)
+            || !ReferenceEquals(session.Context, session.Target.Player.TradeContext))
+        {
+            Close(session);
+            return false;
+        }
+        return true;
     }
 
     private void Close(Session session)
     {
         _sessions.Remove(session.Id);
-        _players.Remove(session.Inviter.TradeGuid);
-        _players.Remove(session.Target.TradeGuid);
+        _players.Remove(session.Inviter.Player.TradeGuid);
+        _players.Remove(session.Target.Player.TradeGuid);
         var end = new TradeEndSessionPacket { SessionId = session.Id };
-        Send(session.Inviter, end);
-        Send(session.Target, end);
+        Broadcast(session, end);
         _logger.LogInformation("Trade {session}: closed.", session.Id);
     }
+
+    private bool Broadcast(Session session, ISerializablePacket packet)
+    {
+        var first = Send(session.Inviter.Player, packet);
+        var second = Send(session.Target.Player, packet);
+        return first && second;
+    }
+
+    private bool SendSystemMessage(ITradeParticipant player, string text) => Send(player, SystemMessage(text));
+
+    private static ExecuteScriptWithStringParamsPacket SystemMessage(string text) => new()
+    {
+        Script = "NotificationHandler.SystemMessage",
+        Params = [text.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;"), "0", "0xFFFF00"]
+    };
 
     private bool Send(ITradeParticipant player, ISerializablePacket packet)
     {
@@ -412,7 +460,6 @@ public sealed class TradeManager : IDisposable
         lock (_gate)
         {
             _disposed = true;
-            _timer.Dispose();
             foreach (var session in _sessions.Values.ToArray())
                 Close(session);
         }

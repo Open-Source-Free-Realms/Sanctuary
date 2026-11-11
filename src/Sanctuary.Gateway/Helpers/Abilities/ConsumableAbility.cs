@@ -51,8 +51,6 @@ public abstract class ConsumableAbility(AbilityServices services)
 
     protected bool ConsumeItem(Player player, ClientItem clientItem, ClientItemDefinition clientItemDefinition, int actionBarSlot)
     {
-        if (!player.Items.Any(item => ReferenceEquals(item, clientItem)) || clientItem.Count <= 0)
-            return SendFailure(player);
         using var dbContext = _dbContextFactory.CreateDbContext();
 
         var characterId = GuidHelper.GetPlayerId(player.Guid);

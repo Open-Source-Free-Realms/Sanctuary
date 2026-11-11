@@ -112,6 +112,9 @@ public abstract class BaseZone : IZone, IDisposable
         _logger = loggerFactory.CreateLogger($"Zone {Name} ({Id})");
 
         Routines = new RoutineManager(_logger, TickDelta);
+        if (serviceProvider.GetService<TradeManager>() is { } trades)
+            Routines.SetRoutine("trade-maintenance",
+                new PeriodicRoutine(new InstantRoutine(() => trades.Sweep(this)), 1));
 
         _scriptManager = serviceProvider.GetRequiredService<IScriptManager>();
         _questManager = serviceProvider.GetRequiredService<IQuestManager>();

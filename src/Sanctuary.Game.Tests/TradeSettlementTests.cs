@@ -191,7 +191,6 @@ public sealed class TradeSettlementTests
         manager.OfferCoins(f.A, id, 10);
         var revision = f.B.Packets.OfType<TradeUpdateCoinCountPacket>().Last().Revision;
         manager.SetLocked(f.A, id, revision, true); manager.SetLocked(f.B, id, revision, true);
-        clock.Now += TradeManager.ReviewDelay;
         manager.Accept(f.A, id, revision);
         f.Fault.SavedContexts.Clear();
         f.CommitFault.Commits = 0;
@@ -326,7 +325,6 @@ public sealed class TradeSettlementTests
         manager.OfferCoins(f.A, id, 10);
         var revision = f.B.Packets.OfType<TradeUpdateCoinCountPacket>().Last().Revision;
         manager.SetLocked(f.A, id, revision, true); manager.SetLocked(f.B, id, revision, true);
-        clock.Now += TradeManager.ReviewDelay;
         Parallel.For(0, 20, i => manager.Accept(i % 2 == 0 ? f.A : f.B, id, revision));
         Assert.AreEqual(2, f.Rows().Sum(x => x.Count));
         Assert.AreEqual(1, f.A.Items[7].Count); Assert.AreEqual(1, f.B.Items.Values.Single().Count);
@@ -371,7 +369,7 @@ public sealed class TradeSettlementTests
         manager.Invite(f.A, f.B); var id = f.B.Packets.OfType<TradeInvitePacket>().Single().SessionId;
         manager.Reply(f.B, id, true); manager.OfferItem(f.A, id, 7, 2);
         manager.SetLocked(f.A, id, 2, true); manager.SetLocked(f.B, id, 2, true);
-        clock.Now += TradeManager.ReviewDelay; manager.Accept(f.A, id, 2);
+        manager.Accept(f.A, id, 2);
         // A sale has committed before the second acceptance. Check both a fully
         // published sale and a database change whose live update is still pending.
         using (var db = f.Factory.CreateDbContext())
@@ -404,6 +402,63 @@ public sealed class TradeSettlementTests
     }
 
     [TestMethod]
+    [DataRow(-1)]
+    [DataRow(0)]
+    [DataRow(1)]
+    [DataRow(2)]
+    [DataRow(3)]
+    [DataRow(4)]
+    [DataRow(5)]
+    [DataRow(6)]
+    [DataRow(8)]
+    public void SettlementReservesPersistedPetEquipmentOncePerPet(int slot)
+    {
+        using var f = new Fixture();
+        f.Add(f.A, 7, 100, 2);
+        using (var db = f.Factory.CreateDbContext())
+        {
+            var pet = new DbPet { Id = 3, CharacterId = 1, Definition = 200 };
+            switch (slot)
+            {
+                case -1: pet.Items.Add(db.Items.Single()); break;
+                case 0: pet.ShampooItemId = 7; break;
+                case 1: pet.ConditionerItemId = 7; break;
+                case 2: pet.ToyItemId = 7; break;
+                case 3: pet.BrushItemId = 7; break;
+                case 4: pet.FoodBowlItemId = 7; break;
+                case 5: pet.FoodItemId = 7; break;
+                case 6: pet.VitaminItemId = 7; break;
+                case 8: pet.Items.Add(db.Items.Single()); pet.ShampooItemId = pet.ToyItemId = 7; break;
+            }
+            db.Pets.Add(pet);
+            db.SaveChanges();
+        }
+        Fails<TradeValidationException>(() => f.Settlement.Commit(new(f.A, [new(7, 100, 0, 2)], 0), new(f.B, [], 0)));
+        f.Settlement.Commit(new(f.A, [new(7, 100, 0, 1)], 0), new(f.B, [], 0));
+        Assert.AreEqual(1, f.Rows().Single(x => x.CharacterId == 1).Count);
+        Assert.AreEqual(1, f.Rows().Single(x => x.CharacterId == 2).Count);
+    }
+
+    [TestMethod]
+    public void MissingDefinitionBeforeAcceptanceRejectsWithoutTransferOrDisconnect()
+    {
+        using var f = new Fixture();
+        f.Add(f.A, 7, 100, 2);
+        using var manager = new TradeManager(NullLogger<TradeManager>.Instance, settlement: f.Settlement);
+        manager.Invite(f.A, f.B);
+        var id = f.B.Packets.OfType<TradeInvitePacket>().Single().SessionId;
+        manager.Reply(f.B, id, true); manager.OfferItem(f.A, id, 7, 1);
+        manager.SetLocked(f.A, id, 2, true); manager.SetLocked(f.B, id, 2, true);
+        f.A.Definitions.Clear();
+        manager.Accept(f.A, id, 2); manager.Accept(f.B, id, 2);
+        Assert.AreEqual(2, f.Rows().Single().Count);
+        Assert.AreEqual((ulong)1, f.Rows().Single().CharacterId);
+        Assert.IsFalse(f.A.Disconnected || f.B.Disconnected);
+        Assert.AreEqual(1, f.B.Packets.OfType<TradeEndSessionPacket>().Count());
+        Assert.IsFalse(f.B.Packets.OfType<TradeMessagePacket>().Any(x => x.MessageCode == TradeMessagePacket.Completed));
+    }
+
+    [TestMethod]
     public void FailedPostCommitNotificationForcesReloadWithoutReplayingExchange()
     {
         using var f = new Fixture();
@@ -413,11 +468,11 @@ public sealed class TradeSettlementTests
         manager.Invite(f.A, f.B); var id = f.B.Packets.OfType<TradeInvitePacket>().Single().SessionId;
         manager.Reply(f.B, id, true); manager.OfferItem(f.A, id, 7, 1);
         manager.SetLocked(f.A, id, 2, true); manager.SetLocked(f.B, id, 2, true);
-        clock.Now += TradeManager.ReviewDelay;
         manager.Accept(f.A, id, 2);
         f.A.FailNotifications = true;
         manager.Accept(f.B, id, 2); manager.Accept(f.B, id, 2);
         Assert.IsTrue(f.A.Disconnected);
+        Assert.IsFalse(f.B.Disconnected);
         Assert.AreEqual(0, f.A.Items.Count); Assert.AreEqual(1, f.B.Items.Count);
         Assert.AreEqual((ulong)2, f.Rows().Single().CharacterId);
     }
