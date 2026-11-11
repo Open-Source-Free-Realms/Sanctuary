@@ -6,6 +6,8 @@ namespace Sanctuary.Game.Helpers;
 
 public static class TradeItemRules
 {
+    // TODO: Make this a member of an inventory item type that carries its resolved definition,
+    // so callers stop passing the item and its definition around separately.
     public static bool CanTrade(ItemInstance item, ClientItemDefinition definition) =>
         !definition.NoTrade && item.AbilityCount == 0
         && definition.Type != ItemDefinitionHelper.PetItemType
@@ -17,6 +19,8 @@ public static class TradeItemRules
 
     // The seven persisted utility slots and equipped item list define pet equipment.
     // UnknownItemGuid1 has no equipment mapping and is never populated by the server.
+    // TODO: Track a general "in use" state on inventory items (equipped by a profile or pet)
+    // so trading doesn't need these profile- and pet-specific checks.
     public static bool PetUsesItem(int itemId, bool inEquipmentList, params int[] utilityItems) =>
         inEquipmentList || utilityItems.Contains(itemId);
 }

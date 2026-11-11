@@ -93,7 +93,7 @@ public sealed class TradeSettlementTests
         }
         public IReadOnlyList<ISerializablePacket> ApplyTradeResult(TradeParticipantResult result)
         {
-            foreach (var change in result.Items)
+            foreach (var (change, _) in result.Items)
             {
                 if (change.Count == 0) Items.Remove(change.Id);
                 else Items[change.Id] = new ClientItem { Id = change.Id, Definition = change.Definition, Tint = change.Tint, Count = change.Count };
@@ -236,8 +236,26 @@ public sealed class TradeSettlementTests
         Assert.IsFalse(rows.Any(x => x.CharacterId == 1));
         Assert.AreEqual(2, rows.Count);
         Assert.AreEqual(8, rows.Single(x => x.Tint == 5).Id);
-        Assert.AreEqual(0, result.First.Items.Single().Count);
-        Assert.AreEqual(1, result.Second.Items.Single().Count);
+        Assert.AreEqual(0, result.First.Items.Single().Item.Count);
+        Assert.AreEqual(1, result.Second.Items.Single().Item.Count);
+    }
+
+    [TestMethod]
+    public void ResultPairsEachChangedStackWithASnapshotOfItsDefinition()
+    {
+        using var f = new Fixture();
+        f.Add(f.A, 7, 100, 5); f.Add(f.B, 9, 200, 1);
+        var result = f.Settlement.Commit(new(f.A, [new(7, 100, 0, 2)], 0), new(f.B, [new(9, 200, 0, 1)], 0));
+        // Catalog changes after commit must not reach what gets published.
+        f.A.Definitions[100].MaxStackSize = f.B.Definitions[200].MaxStackSize = 1;
+        var changes = result.First.Items.Concat(result.Second.Items).ToArray();
+        // Outgoing partial stack, incoming new stacks on both sides, and the deleted last copy.
+        CollectionAssert.AreEquivalent(new[] { 7, 8, 9, 10 }, changes.Select(x => x.Item.Id).ToArray());
+        foreach (var (item, definition) in changes)
+        {
+            Assert.AreEqual(item.Definition, definition.Id);
+            Assert.AreEqual(100, definition.MaxStackSize);
+        }
     }
 
     [TestMethod]

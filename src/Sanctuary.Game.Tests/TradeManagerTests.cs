@@ -23,8 +23,7 @@ public sealed class TradeManagerTests
         {
             Entered.Set();
             if (!Release.Wait(TimeSpan.FromSeconds(10))) throw new TimeoutException();
-            return new(new([], first.Participant.TradeCoins, new Dictionary<int, ClientItemDefinition>()),
-                new([], second.Participant.TradeCoins, new Dictionary<int, ClientItemDefinition>()));
+            return new(new([], first.Participant.TradeCoins), new([], second.Participant.TradeCoins));
         }
         public void Dispose() { Entered.Dispose(); Release.Dispose(); }
     }
@@ -43,11 +42,11 @@ public sealed class TradeManagerTests
         public IReadOnlyList<ISerializablePacket> ApplyTradeResult(TradeParticipantResult result)
         {
             TradeCoins = result.Coins;
-            foreach (var change in result.Items)
+            foreach (var (change, definition) in result.Items)
             {
                 if (change.Count == 0) Items.Remove(change.Id);
                 else if (Items.TryGetValue(change.Id, out var old)) old.Item.Count = change.Count;
-                else Items[change.Id] = (new ClientItem { Id = change.Id, Definition = change.Definition, Tint = change.Tint, Count = change.Count }, new ClientItemDefinition(), change.Count);
+                else Items[change.Id] = (new ClientItem { Id = change.Id, Definition = change.Definition, Tint = change.Tint, Count = change.Count }, definition, change.Count);
             }
             return [];
         }

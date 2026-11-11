@@ -1,5 +1,4 @@
 using System.Linq;
-using System.Collections.Generic;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sanctuary.Game.Entities;
@@ -26,8 +25,7 @@ public sealed class TradeInventoryPublicationTests
             player.ActionBarItemGuids[2] = new() { [0] = 7 };
         }
         // Deliberately leave the current resource catalog empty after validation.
-        var result = new TradeParticipantResult([new(7, 100, 0, 2)], 90,
-            new Dictionary<int, ClientItemDefinition> { [100] = definition });
+        var result = new TradeParticipantResult([new(new(7, 100, 0, 2), definition)], 90);
         var packets = ((ITradeParticipant)player).ApplyTradeResult(result);
         Assert.AreEqual(2, player.Items.Single().Count);
         Assert.AreEqual(90, player.Coins);
@@ -104,8 +102,8 @@ public sealed class TradeInventoryPublicationTests
             player.ScheduleSlotPacket(2, 0, pending, 60000);
         }
 
-        var packets = ((ITradeParticipant)player).ApplyTradeResult(new([new(7, 100, tint, count)], 100,
-            new System.Collections.Generic.Dictionary<int, ClientItemDefinition> { [100] = resources.ClientItemDefinitions[100] }));
+        var packets = ((ITradeParticipant)player).ApplyTradeResult(
+            new([new(new(7, 100, tint, count), resources.ClientItemDefinitions[100])], 100));
 
         Assert.AreEqual(count, player.Items.Single().Count);
         Assert.AreEqual(count, packets.OfType<ClientUpdatePacketItemUpdate>().Single().Count);

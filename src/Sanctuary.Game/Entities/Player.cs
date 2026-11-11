@@ -232,7 +232,7 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
     IReadOnlyList<ISerializablePacket> ITradeParticipant.ApplyTradeResult(TradeParticipantResult result)
     {
         var packets = new List<ISerializablePacket>();
-        foreach (var change in result.Items)
+        foreach (var (change, definition) in result.Items)
         {
             var item = Items.SingleOrDefault(x => x.Id == change.Id);
             if (change.Count == 0)
@@ -254,7 +254,7 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
                 item.Count = change.Count;
                 packets.Add(new ClientUpdatePacketItemUpdate { ItemGuid = item.Id, Count = item.Count,
                     ConsumedCount = item.ConsumedCount, AbilityCount = item.AbilityCount });
-                RefreshItemActionBarSlots(item, result.Definitions[change.Definition], packets);
+                RefreshItemActionBarSlots(item, definition, packets);
             }
             else
             {
@@ -262,7 +262,7 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
                 Items.Add(item);
                 using var writer = new PacketWriter();
                 item.Serialize(writer);
-                result.Definitions[change.Definition].Serialize(writer);
+                definition.Serialize(writer);
                 packets.Add(new ClientUpdatePacketItemAdd { Payload = writer.Buffer });
             }
         }

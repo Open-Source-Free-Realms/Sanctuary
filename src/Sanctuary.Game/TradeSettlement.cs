@@ -12,7 +12,8 @@ namespace Sanctuary.Game;
 
 // No client notification or in-memory mutation happens until Commit returns successfully.
 // The transaction and concurrency tokens protect database writes, not live inventory
-// access by other gameplay code. That still needs zone-owned packet marshalling.
+// access by other gameplay code.
+// TODO: Recheck live inventory races once packet handling is marshalled to the zone tick.
 public sealed class TradeSettlement(IDbContextFactory<DatabaseContext> factory) : ITradeSettlement
 {
     public TradeSettlementResult Commit(TradeOffer first, TradeOffer second)
@@ -56,7 +57,6 @@ public sealed class TradeSettlement(IDbContextFactory<DatabaseContext> factory) 
         var pets = db.Pets.Where(x => x.CharacterId == firstId || x.CharacterId == secondId).ToList();
         var original = rows.ToDictionary(x => (x.CharacterId, x.Id), x => new TradeItem(x.Id, x.Definition, x.Tint, x.Count));
         var nextIds = characters.ToDictionary(x => x.Id, x => rows.Where(i => i.CharacterId == x.Id).Select(i => i.Id).DefaultIfEmpty(0).Max());
-        var maxStacks = new Dictionary<(int, int), int>();
         var definitions = new Dictionary<int, ClientItemDefinition>();
 
         void Validate(ITradeParticipant owner, IReadOnlyCollection<TradeItem> offers)
@@ -77,7 +77,6 @@ public sealed class TradeSettlement(IDbContextFactory<DatabaseContext> factory) 
                     p.ShampooItemId, p.ConditionerItemId, p.ToyItemId, p.BrushItemId, p.FoodBowlItemId, p.FoodItemId, p.VitaminItemId));
                 if (TradeItemRules.AvailableCount(row.Count, live.ConsumedCount, row.Profiles.Count > 0, equippedPets) < offer.Count)
                     throw new TradeValidationException("An offered item is equipped or unavailable.");
-                maxStacks[(row.Definition, row.Tint)] = definition.MaxStackSize;
                 // Publication must not look the definition up again after commit.
                 definitions[row.Definition] = definition.Clone();
             }
@@ -109,7 +108,7 @@ public sealed class TradeSettlement(IDbContextFactory<DatabaseContext> factory) 
                 row.Count = checked(row.Count + offer.Count);
             }
 
-        var changes = new Dictionary<ulong, List<TradeItem>> { [firstId] = [], [secondId] = [] };
+        var changes = new Dictionary<ulong, List<TradeItemResult>> { [firstId] = [], [secondId] = [] };
         foreach (var row in rows)
         {
             original.TryGetValue((row.CharacterId, row.Id), out var before);
@@ -122,7 +121,9 @@ public sealed class TradeSettlement(IDbContextFactory<DatabaseContext> factory) 
             if (before is not null && (!peer.TryGetTradeItem(row.Id, out var live, out _, out _)
                 || live.Count != before.Count || live.Definition != row.Definition || live.Tint != row.Tint))
                 throw new TradeValidationException("Inventory changed; reopen the trade.");
-            if (row.Count < 0 || (maxStacks.TryGetValue((row.Definition, row.Tint), out var limit) && limit > 0 && row.Count > limit))
+            // Only offers change stacks, so every changed stack has a validated definition.
+            var definition = definitions[row.Definition];
+            if (row.Count < 0 || (definition.MaxStackSize > 0 && row.Count > definition.MaxStackSize))
                 throw new TradeValidationException("The recipient's stack would exceed its limit.");
             if (row.Count == 0)
             {
@@ -130,14 +131,14 @@ public sealed class TradeSettlement(IDbContextFactory<DatabaseContext> factory) 
                     throw new TradeValidationException("Cannot remove an equipped item.");
                 db.Items.Remove(row);
             }
-            changes[row.CharacterId].Add(new(row.Id, row.Definition, row.Tint, row.Count));
+            changes[row.CharacterId].Add(new(new(row.Id, row.Definition, row.Tint, row.Count), definition));
         }
         a.Coins = finalA;
         b.Coins = finalB;
         db.SaveChanges();
         beforeCommit();
         transaction.Commit();
-        return new(new(changes[firstId], finalA, definitions), new(changes[secondId], finalB, definitions));
+        return new(new(changes[firstId], finalA), new(changes[secondId], finalB));
     }
 
 }
