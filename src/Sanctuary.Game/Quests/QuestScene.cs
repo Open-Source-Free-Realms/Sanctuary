@@ -70,7 +70,7 @@ public static class QuestScene
             cues.Add((line.DelayMs ?? scene.StartDelayMs + i * scene.LineDelayMs, () =>
             {
                 if (animationId != 0)
-                    EntityHelper.SetAnimation(player, speakerGuid, animationId);
+                    EntityHelper.SendAnimation(player, speakerGuid, animationId);
 
                 player.SendTunneled(new ChatPacketFromStringId
                 {
@@ -103,6 +103,8 @@ public static class QuestScene
 
         var sequence = new SequentialRoutine(steps);
 
+        // TODO: DelegateRoutine needs an onStep override that takes a Func<TimeSpan, bool> so a routine's Step can be passed through without the zone tick delta.
+        // TODO: DelegateRoutine should run onStart right before the first onStep call.
         player.Routines.SetRoutine(name,
             onStep: () => sequence.Step(player.Zone.TickDelta),
             onStart: sequence.Start,

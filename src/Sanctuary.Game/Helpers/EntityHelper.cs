@@ -96,7 +96,7 @@ public static class EntityHelper
         owner.SendTunneledToVisible(playerUpdatePacketSetAnimation, true);
     }
 
-    public static void SetAnimation(Player player, ulong guid, int animationId)
+    public static void SendAnimation(Player player, ulong guid, int animationId)
     {
         player.SendTunneled(new PlayerUpdatePacketSetAnimation
         {

@@ -23,7 +23,7 @@ public static class QuestDialogue
     public static void PlayTalkAnimation(Player player, ulong npcGuid)
     {
         if (npcGuid != 0)
-            EntityHelper.SetAnimation(player, npcGuid, TalkAnimationId);
+            EntityHelper.SendAnimation(player, npcGuid, TalkAnimationId);
     }
 
     public static void Begin(Player player, IReadOnlyList<QuestDialogueLine> lines, ulong npcGuid, Action? onFinished = null)
