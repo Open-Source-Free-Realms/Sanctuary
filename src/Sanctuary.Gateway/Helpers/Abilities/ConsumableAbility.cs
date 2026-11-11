@@ -51,6 +51,10 @@ public abstract class ConsumableAbility(AbilityServices services)
 
     protected bool ConsumeItem(Player player, ClientItem clientItem, ClientItemDefinition clientItemDefinition, int actionBarSlot)
     {
+        // A queued ability may still hold an item reference after it was traded away.
+        if (!player.Items.Any(item => ReferenceEquals(item, clientItem)) || clientItem.Count <= 0)
+            return SendFailure(player);
+
         using var dbContext = _dbContextFactory.CreateDbContext();
 
         var characterId = GuidHelper.GetPlayerId(player.Guid);
