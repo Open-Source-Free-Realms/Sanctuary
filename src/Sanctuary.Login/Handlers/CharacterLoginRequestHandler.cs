@@ -92,7 +92,8 @@ public static class CharacterLoginRequestHandler
 
         // TODO: Client currently doesn't let the user pick a server so default to the first one.
 
-        var gatewayServer = _gatewayServer.Gateways.FirstOrDefault();
+        // Only gateways that completed their login (ServerAddress set); a dropped one may still be in the list briefly.
+        var gatewayServer = _gatewayServer.Gateways.LastOrDefault(x => !string.IsNullOrEmpty(x.ServerAddress));
 
         if (gatewayServer is null)
         {
