@@ -44,31 +44,34 @@ public class GatewayServer : UdpManager<GatewayConnection>
     {
     }
 
-    public bool TryGetCharacterIdle(ulong characterId, out long idleMilliseconds)
+    /// <summary>
+    /// Drops the character's sessions if none has received a packet within <paramref name="idleThresholdMilliseconds"/>.
+    /// Returns false, and drops nothing, while any of them is still live.
+    /// </summary>
+    public bool TryReleaseIdleCharacter(ulong characterId, uint idleThresholdMilliseconds)
     {
-        foreach (var connection in ConnectionList)
-        {
-            if (connection.Player is null || GuidHelper.GetPlayerId(connection.Player.Guid) != characterId)
-                continue;
+        var sessions = ConnectionList
+            .Where(x => x.Player is not null && GuidHelper.GetPlayerId(x.Player.Guid) == characterId)
+            .ToList();
 
-            idleMilliseconds = connection.MillisecondsSinceLastReceive();
-            return true;
+        foreach (var session in sessions)
+        {
+            var idle = session.MillisecondsSinceLastReceive();
+
+            if (idle < idleThresholdMilliseconds)
+            {
+                _logger.LogInformation("Character {id} is still live on {connection} (last packet {idle} ms ago).", characterId, session, idle);
+                return false;
+            }
         }
 
-        idleMilliseconds = 0;
-        return false;
-    }
-
-    public void DisconnectCharacter(ulong characterId)
-    {
-        foreach (var connection in ConnectionList.ToList())
+        foreach (var session in sessions)
         {
-            if (connection.Player is null || GuidHelper.GetPlayerId(connection.Player.Guid) != characterId)
-                continue;
-
-            _logger.LogInformation("Dropping {connection} so character {id} can log in again.", connection, characterId);
-            connection.Disconnect();
+            _logger.LogInformation("Dropping silent {connection} so character {id} can log in again.", session, characterId);
+            session.Disconnect();
         }
+
+        return true;
     }
 
     public void OnStopping()

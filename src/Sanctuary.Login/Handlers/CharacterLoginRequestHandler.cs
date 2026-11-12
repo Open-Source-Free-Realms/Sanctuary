@@ -19,13 +19,17 @@ namespace Sanctuary.Login.Handlers;
 [PacketHandler]
 public static class CharacterLoginRequestHandler
 {
-    private const long CrashIdleMilliseconds = 5000;
+    // The client sends a packet about every second, so five seconds of silence is a crashed session.
+    private const uint CrashIdleMilliseconds = 5000;
+
+    // How long to wait for the gateway's answer before refusing the login.
+    private const long ReleaseReplyTimeoutMilliseconds = 2000;
 
     private static ILogger _logger = null!;
     private static GatewayServer _gatewayServer = null!;
     private static LoginServerOptions _options = null!;
     private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
-    private static uint _nextIdleRequestId = 1;
+    private static uint _nextReleaseRequestId = 1;
     private static readonly Dictionary<uint, PendingCharacterLogin> _pendingLogins = new();
 
     private sealed class PendingCharacterLogin
@@ -34,6 +38,7 @@ public static class CharacterLoginRequestHandler
         public required GatewayConnection Gateway { get; init; }
         public required Guid Ticket { get; init; }
         public required ulong CharacterId { get; init; }
+        public required long CreatedAt { get; init; }
     }
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
@@ -117,24 +122,26 @@ public static class CharacterLoginRequestHandler
             return true;
         }
 
-        // The client sends a packet about every second. Five seconds of silence is a crashed session.
-        // Ask the gateway before answering, because status 8 closes the client and a live player must stay refused.
-        if (gatewayServer.OnlineCharacters.Contains(character.Id))
+        // Already online: ask the gateway to drop that session if it has gone silent (a crashed client).
+        // A live session stays and this login is refused. Status 8 closes the client, so don't send it blindly.
+        if (gatewayServer.IsOnline(character.Id))
         {
-            var requestId = _nextIdleRequestId++;
+            var requestId = _nextReleaseRequestId++;
 
             _pendingLogins[requestId] = new PendingCharacterLogin
             {
                 Connection = connection,
                 Gateway = gatewayServer,
                 Ticket = ticket,
-                CharacterId = character.Id
+                CharacterId = character.Id,
+                CreatedAt = Environment.TickCount64
             };
 
-            gatewayServer.Send(new GatewayCharacterIdleRequest
+            gatewayServer.Send(new GatewayCharacterReleaseRequest
             {
                 RequestId = requestId,
-                Id = character.Id
+                Id = character.Id,
+                IdleThresholdMilliseconds = CrashIdleMilliseconds
             });
 
             return true;
@@ -145,29 +152,47 @@ public static class CharacterLoginRequestHandler
         return true;
     }
 
-    public static void CompleteIdleCheck(uint requestId, bool found, long idleMilliseconds)
+    public static void CompleteRelease(uint requestId, bool released)
     {
         if (!_pendingLogins.Remove(requestId, out var pending))
             return;
 
+        _logger.LogInformation("Character {id} release: released={released}.", pending.CharacterId, released);
+
+        if (released)
+            pending.Gateway.MarkReleased(pending.CharacterId);
+
         if (pending.Connection.Status == UdpLibrary.Enumerations.Status.Disconnected)
             return;
 
-        var crashed = !found || idleMilliseconds >= CrashIdleMilliseconds;
-
-        _logger.LogInformation(
-            "Character {id} idle check: found={found}, idle={idle} ms, crashed={crashed}.",
-            pending.CharacterId, found, idleMilliseconds, crashed);
-
-        if (!crashed)
+        if (!released)
         {
             pending.Connection.Send(new CharacterLoginReply { Status = 8 });
             return;
         }
 
-        pending.Gateway.TryReleaseForNewLogin(pending.CharacterId);
-        pending.Gateway.Send(new GatewayCharacterKick { Id = pending.CharacterId });
         SendLoginSuccess(pending.Connection, pending.Gateway, pending.Ticket, pending.CharacterId);
+    }
+
+    /// <summary>
+    /// Refuses logins whose gateway never answered the release request. Called every loop from <see cref="LoginService"/>.
+    /// </summary>
+    public static void ExpirePendingLogins()
+    {
+        if (_pendingLogins.Count == 0)
+            return;
+
+        var now = Environment.TickCount64;
+
+        foreach (var (requestId, pending) in _pendingLogins.Where(x => now - x.Value.CreatedAt >= ReleaseReplyTimeoutMilliseconds).ToList())
+        {
+            _pendingLogins.Remove(requestId);
+
+            _logger.LogWarning("Gateway did not answer the release request for character {id}; refusing the login.", pending.CharacterId);
+
+            if (pending.Connection.Status != UdpLibrary.Enumerations.Status.Disconnected)
+                pending.Connection.Send(new CharacterLoginReply { Status = 8 });
+        }
     }
 
     private static void SendLoginSuccess(LoginConnection connection, GatewayConnection gateway, Guid ticket, ulong characterId)

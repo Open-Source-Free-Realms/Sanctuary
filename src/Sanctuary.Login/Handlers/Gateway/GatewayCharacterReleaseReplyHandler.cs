@@ -9,25 +9,27 @@ using Sanctuary.Packet.Common.Attributes;
 namespace Sanctuary.Login.Handlers;
 
 [PacketHandler]
-public static class GatewayCharacterIdleReplyHandler
+public static class GatewayCharacterReleaseReplyHandler
 {
     private static ILogger _logger = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
         var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
-        _logger = loggerFactory.CreateLogger(nameof(GatewayCharacterIdleReplyHandler));
+        _logger = loggerFactory.CreateLogger(nameof(GatewayCharacterReleaseReplyHandler));
     }
 
     public static bool HandlePacket(GatewayConnection connection, Span<byte> data)
     {
-        if (!GatewayCharacterIdleReply.TryDeserialize(data, out var packet))
+        if (!GatewayCharacterReleaseReply.TryDeserialize(data, out var packet))
         {
-            _logger.LogError("Failed to deserialize {packet}.", nameof(GatewayCharacterIdleReply));
+            _logger.LogError("Failed to deserialize {packet}.", nameof(GatewayCharacterReleaseReply));
             return false;
         }
 
-        CharacterLoginRequestHandler.CompleteIdleCheck(packet.RequestId, packet.Found, packet.IdleMilliseconds);
+        _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(GatewayCharacterReleaseReply), packet);
+
+        CharacterLoginRequestHandler.CompleteRelease(packet.RequestId, packet.Released);
 
         return true;
     }

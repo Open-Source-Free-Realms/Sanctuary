@@ -61,8 +61,7 @@ public class LoginConnection : UdpConnection
         var handled = opCode switch
         {
             GatewayLoginReply.OpCode => GatewayLoginReplyHandler.HandlePacket(this, data),
-            GatewayCharacterKick.OpCode => GatewayCharacterKickHandler.HandlePacket(this, data),
-            GatewayCharacterIdleRequest.OpCode => GatewayCharacterIdleHandler.HandlePacket(this, data),
+            GatewayCharacterReleaseRequest.OpCode => GatewayCharacterReleaseHandler.HandlePacket(this, data),
             _ => false
         };
 

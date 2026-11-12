@@ -9,7 +9,7 @@ using Sanctuary.Packet.Common.Attributes;
 namespace Sanctuary.Gateway.Handlers;
 
 [PacketHandler]
-public static class GatewayCharacterIdleHandler
+public static class GatewayCharacterReleaseHandler
 {
     private static ILogger _logger = null!;
     private static GatewayServer _gatewayServer = null!;
@@ -17,28 +17,25 @@ public static class GatewayCharacterIdleHandler
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
         var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
-        _logger = loggerFactory.CreateLogger(nameof(GatewayCharacterIdleHandler));
+        _logger = loggerFactory.CreateLogger(nameof(GatewayCharacterReleaseHandler));
 
         _gatewayServer = serviceProvider.GetRequiredService<GatewayServer>();
     }
 
     public static bool HandlePacket(LoginConnection connection, Span<byte> data)
     {
-        if (!GatewayCharacterIdleRequest.TryDeserialize(data, out var packet))
+        if (!GatewayCharacterReleaseRequest.TryDeserialize(data, out var packet))
         {
-            _logger.LogError("Failed to deserialize {packet}.", nameof(GatewayCharacterIdleRequest));
+            _logger.LogError("Failed to deserialize {packet}.", nameof(GatewayCharacterReleaseRequest));
             return false;
         }
 
-        var found = _gatewayServer.TryGetCharacterIdle(packet.Id, out var idleMilliseconds);
+        _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(GatewayCharacterReleaseRequest), packet);
 
-        _logger.LogInformation("Character {id} last packet was {idle} ms ago. Found={found}.", packet.Id, idleMilliseconds, found);
-
-        connection.Send(new GatewayCharacterIdleReply
+        connection.Send(new GatewayCharacterReleaseReply
         {
             RequestId = packet.RequestId,
-            Found = found,
-            IdleMilliseconds = idleMilliseconds
+            Released = _gatewayServer.TryReleaseIdleCharacter(packet.Id, packet.IdleThresholdMilliseconds)
         });
 
         return true;
