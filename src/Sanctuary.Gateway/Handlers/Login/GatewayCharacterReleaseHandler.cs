@@ -32,11 +32,17 @@ public static class GatewayCharacterReleaseHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(GatewayCharacterReleaseRequest), packet);
 
-        connection.Send(new GatewayCharacterReleaseReply
+        var requestId = packet.RequestId;
+
+        void Reply(bool released) => connection.Send(new GatewayCharacterReleaseReply
         {
-            RequestId = packet.RequestId,
-            Released = _gatewayServer.TryReleaseIdleCharacter(packet.Id, packet.IdleThresholdMilliseconds)
+            RequestId = requestId,
+            Released = released
         });
+
+        // A released reply is sent once the dropped session has saved, so the new login loads its latest data.
+        if (!_gatewayServer.TryReleaseIdleCharacter(packet.Id, packet.IdleThresholdMilliseconds, () => Reply(true)))
+            Reply(false);
 
         return true;
     }

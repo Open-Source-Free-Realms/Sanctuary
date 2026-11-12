@@ -176,6 +176,8 @@ public static class CharacterLoginRequestHandler
 
     /// <summary>
     /// Refuses logins whose gateway never answered the release request. Called every loop from <see cref="LoginService"/>.
+    /// A reply that arrives later is ignored. If the gateway did drop the old session, that session's own logout still
+    /// clears the character (its session token matches), so the account isn't left marked online.
     /// </summary>
     public static void ExpirePendingLogins()
     {

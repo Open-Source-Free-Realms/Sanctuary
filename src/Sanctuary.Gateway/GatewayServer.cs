@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 
 using Microsoft.Extensions.Logging;
 
@@ -47,8 +48,10 @@ public class GatewayServer : UdpManager<GatewayConnection>
     /// <summary>
     /// Drops the character's sessions if none has received a packet within <paramref name="idleThresholdMilliseconds"/>.
     /// Returns false, and drops nothing, while any of them is still live. A session on a loading screen counts as live.
+    /// Otherwise returns true and calls <paramref name="onReleased"/> once every dropped session has saved and logged out
+    /// (right away if there was none).
     /// </summary>
-    public bool TryReleaseIdleCharacter(ulong characterId, uint idleThresholdMilliseconds)
+    public bool TryReleaseIdleCharacter(ulong characterId, uint idleThresholdMilliseconds, Action onReleased)
     {
         var sessions = ConnectionList
             .Where(x => x.Player is not null && GuidHelper.GetPlayerId(x.Player.Guid) == characterId)
@@ -72,9 +75,25 @@ public class GatewayServer : UdpManager<GatewayConnection>
             }
         }
 
+        if (sessions.Count == 0)
+        {
+            onReleased();
+            return true;
+        }
+
+        // Answer only after the last dropped session has saved, not when Disconnect is called.
+        var remaining = sessions.Count;
+
         foreach (var session in sessions)
         {
             _logger.LogInformation("Dropping silent {connection} so character {id} can log in again.", session, characterId);
+
+            session.OnReleased = () =>
+            {
+                if (Interlocked.Decrement(ref remaining) == 0)
+                    onReleased();
+            };
+
             session.Disconnect();
         }
 
