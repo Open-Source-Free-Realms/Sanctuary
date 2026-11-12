@@ -116,7 +116,7 @@ public static class InventoryPacketUseImmediateActivationItemHandler
         if (!ChestModels.TryGetValue(chestDefinition.Id, out var modelId))
             return;
 
-        var position = player.Position.RandomPointOnCircle(2.0f);
+        var position = PositionHelper.GetPointNear(player.Position, 2.0f);
         var toPlayer = new Vector3(player.Position.X - position.X, 0f, player.Position.Z - position.Z);
         var rotation = toPlayer.ToFlatRotation();
 

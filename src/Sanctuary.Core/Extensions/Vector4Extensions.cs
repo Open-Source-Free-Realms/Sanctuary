@@ -45,17 +45,6 @@ public static class Vector4Extensions
 
         return inside;
     }
-
-    public static Vector4 RandomPointOnCircle(this Vector4 center, float radius)
-    {
-        var angle = Random.Shared.NextSingle() * MathF.Tau;
-
-        return new Vector4(
-            center.X + MathF.Cos(angle) * radius,
-            center.Y,
-            center.Z + MathF.Sin(angle) * radius,
-            center.W);
-    }
     public static Vector3 ToVector3(this Vector4 value)
     {
         return new Vector3(value.X, value.Y, value.Z);
