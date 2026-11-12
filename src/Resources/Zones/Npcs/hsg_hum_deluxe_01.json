@@ -48,7 +48,7 @@
       "InteractionUnknown": false
     },
     {
-      "Id": 40038,
+      "Id": 40062,
       "NameId": 4826,
       "ModelId": 271,
       "ModelFileName": "invisible_cube.adr",
@@ -106,7 +106,7 @@
       "Heading": -1.571
     },
     {
-      "NpcId": 40038,
+      "NpcId": 40062,
       "Position": [
         326.18,
         -0.13,
