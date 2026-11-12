@@ -59,6 +59,12 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
 
     public bool Visible { get; set; }
 
+    /// <summary>
+    /// True from login, and again from each zone change, until the client sends PacketClientFinishedLoading.
+    /// The client sends nothing at all while loading, so silence then doesn't mean it crashed.
+    /// </summary>
+    public bool IsLoading { get; set; } = true;
+
     public RoutineManager Routines { get; }
 
     public IZone Zone { get; set; }
@@ -1767,6 +1773,8 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
         ZoneTile = ZoneTile.Empty;
 
         Visible = false;
+
+        IsLoading = true;
 
         UpdatePosition(position, rotation);
     }

@@ -26,6 +26,8 @@ public static class PacketClientFinishedLoadingHandler
 
         connection.Player.Visible = true;
 
+        connection.Player.IsLoading = false;
+
         if (connection.Player.Mount is not null)
             connection.Player.Mount.Visible = true;
 

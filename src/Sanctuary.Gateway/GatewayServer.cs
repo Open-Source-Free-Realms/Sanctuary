@@ -46,7 +46,7 @@ public class GatewayServer : UdpManager<GatewayConnection>
 
     /// <summary>
     /// Drops the character's sessions if none has received a packet within <paramref name="idleThresholdMilliseconds"/>.
-    /// Returns false, and drops nothing, while any of them is still live.
+    /// Returns false, and drops nothing, while any of them is still live. A session on a loading screen counts as live.
     /// </summary>
     public bool TryReleaseIdleCharacter(ulong characterId, uint idleThresholdMilliseconds)
     {
@@ -56,6 +56,13 @@ public class GatewayServer : UdpManager<GatewayConnection>
 
         foreach (var session in sessions)
         {
+            // The client goes completely quiet while loading (up to ~25s when zoning), so silence there isn't a crash.
+            if (session.Player.IsLoading)
+            {
+                _logger.LogInformation("Character {id} is still loading on {connection}, treating it as live.", characterId, session);
+                return false;
+            }
+
             var idle = session.MillisecondsSinceLastReceive();
 
             if (idle < idleThresholdMilliseconds)
