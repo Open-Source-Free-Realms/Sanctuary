@@ -315,14 +315,14 @@ public sealed class QuestManager : IQuestManager
 
         player.SendTunneled(new CommandPacketQuestDialogComplete());
 
-        GrantAcceptItems(player, quest);
+        GrantItems(player, quest.AcceptItems);
 
         CheckEquippedItems(player, quest);
     }
 
-    private void GrantAcceptItems(Player player, QuestDefinition quest)
+    private void GrantItems(Player player, IEnumerable<int> itemDefinitionIds)
     {
-        foreach (var group in quest.AcceptItems.GroupBy(itemDefinitionId => itemDefinitionId))
+        foreach (var group in itemDefinitionIds.GroupBy(itemDefinitionId => itemDefinitionId))
         {
             if (_resourceManager.ClientItemDefinitions.TryGetValue(group.Key, out var itemDefinition))
                 _rewardManager.TryGrantItem(player, group.Key, itemDefinition.IsTintable ? 0 : itemDefinition.Icon.TintId, group.Count());
@@ -331,9 +331,7 @@ public sealed class QuestManager : IQuestManager
 
     private void CheckEquippedItems(Player player, QuestDefinition quest)
     {
-        var equippedItemDefinitionIds = player.ActiveProfile.Items.Values
-            .Select(profileItem => player.Items.FirstOrDefault(item => item.Id == profileItem.Id)?.Definition ?? 0)
-            .ToHashSet();
+        var equippedItemDefinitionIds = player.GetEquippedItems().Select(item => item.Definition).ToHashSet();
 
         foreach (var itemDefinitionId in quest.Goals.OfType<EquipItemGoal>().Select(goal => goal.ItemDefinitionId).Where(equippedItemDefinitionIds.Contains).Distinct().ToList())
             OnEvent(player, new ItemEquippedEvent(itemDefinitionId));
@@ -806,6 +804,16 @@ public sealed class QuestManager : IQuestManager
             }
         }
 
+        if (quest.RewardStationCash > 0)
+        {
+            entries.Add(new RewardBundleEntryItem
+            {
+                IconId = RewardManager.StationCashIconId,
+                NameId = RewardManager.StationCashNameId,
+                Quantity = quest.RewardStationCash
+            });
+        }
+
         if (quest.RewardCollectionId != 0 &&
             _resourceManager.Collections.TryGetValue(quest.RewardCollectionId, out var collectionDef))
         {
@@ -1076,14 +1084,7 @@ public sealed class QuestManager : IQuestManager
             return;
         }
 
-        var goalSpot = goalIndex >= 0 && goalIndex < goals.Count
-            ? goals[goalIndex] switch
-            {
-                ReachLocationGoal reachGoal => (Position: reachGoal.ReachPosition, reachGoal.ZoneDefinitionId),
-                UseItemGoal useItemGoal => (Position: useItemGoal.TargetPosition, useItemGoal.ZoneDefinitionId),
-                _ => (Position: Vector3.Zero, ZoneDefinitionId: 0)
-            }
-            : (Position: Vector3.Zero, ZoneDefinitionId: 0);
+        var goalSpot = GoalSpot(quest, goalIndex);
 
         if (goalSpot.Position != Vector3.Zero)
         {
@@ -1152,6 +1153,19 @@ public sealed class QuestManager : IQuestManager
         return false;
     }
 
+    private static (Vector3 Position, int ZoneDefinitionId) GoalSpot(QuestDefinition quest, int goalIndex)
+    {
+        if (goalIndex < 0 || goalIndex >= quest.Goals.Count)
+            return (Vector3.Zero, 0);
+
+        return quest.Goals[goalIndex] switch
+        {
+            ReachLocationGoal reachGoal => (reachGoal.ReachPosition, reachGoal.ZoneDefinitionId),
+            UseItemGoal useItemGoal => (useItemGoal.TargetPosition, useItemGoal.ZoneDefinitionId),
+            _ => (Vector3.Zero, 0)
+        };
+    }
+
     private bool TryGetTrackableGoal(Player player, int questId, out QuestDefinition quest, out int goalIndex)
     {
         quest = null!;
@@ -1165,10 +1179,11 @@ public sealed class QuestManager : IQuestManager
         if (q.HideObjectiveTarget || (currentGoalIndex >= 0 && currentGoalIndex < goals.Count && goals[currentGoalIndex] is CollectGoal))
             return false;
 
-        if (currentGoalIndex >= 0 && currentGoalIndex < goals.Count
-            && goals[currentGoalIndex] is ReachLocationGoal reachGoal && reachGoal.ReachPosition != Vector3.Zero)
+        var goalSpot = GoalSpot(q, currentGoalIndex);
+
+        if (goalSpot.Position != Vector3.Zero)
         {
-            if (reachGoal.ZoneDefinitionId != player.Zone.DefinitionId)
+            if (goalSpot.ZoneDefinitionId != player.Zone.DefinitionId)
                 return false;
 
             quest = q;
@@ -1191,6 +1206,9 @@ public sealed class QuestManager : IQuestManager
         var coins = quest.RewardCoins;
         if (coins > 0)
             _rewardManager.TryGrantCurrency(player, CurrencyType.Coins, coins);
+
+        if (quest.RewardStationCash > 0)
+            _rewardManager.TryGrantCurrency(player, CurrencyType.StationCash, quest.RewardStationCash);
 
         var experience = quest.RewardExperience;
 
@@ -1227,10 +1245,6 @@ public sealed class QuestManager : IQuestManager
             player.SendTunneled(celebration);
         }
 
-        foreach (var itemDefinitionId in quest.RewardItems)
-        {
-            if (_resourceManager.ClientItemDefinitions.TryGetValue(itemDefinitionId, out var itemDefinition))
-                _rewardManager.TryGrantItem(player, itemDefinitionId, itemDefinition.IsTintable ? 0 : itemDefinition.Icon.TintId);
-        }
+        GrantItems(player, quest.RewardItems);
     }
 }

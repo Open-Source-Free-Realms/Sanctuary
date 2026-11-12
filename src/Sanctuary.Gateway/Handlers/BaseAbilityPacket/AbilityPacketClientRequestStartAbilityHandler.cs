@@ -1,11 +1,9 @@
 using System;
 using System.Linq;
 
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using Sanctuary.Database;
 using Sanctuary.Game;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Interactions;
@@ -35,7 +33,6 @@ public static class AbilityPacketClientRequestStartAbilityHandler
         var abilityServices = new AbilityServices(
             _logger,
             _resourceManager,
-            serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>(),
             serviceProvider.GetRequiredService<IRewardManager>(),
             serviceProvider.GetRequiredService<IQuestManager>());
 

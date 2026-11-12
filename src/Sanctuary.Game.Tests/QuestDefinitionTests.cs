@@ -59,6 +59,7 @@ public sealed class QuestDefinitionTests
                 "QuestId": 1,
                 "TargetNpcId": 500,
                 "AcceptItems": [7, 7, 8],
+                "RewardStationCash": 100,
                 "Goals": [
                   { "Type": 11, "NameId": 10, "ItemDefinitionId": 7 },
                   { "Type": 10, "NameId": 11, "ItemDefinitionId": 7, "RequiredCount": 3, "TargetPosition": [1, 2, 3] },
@@ -71,6 +72,7 @@ public sealed class QuestDefinitionTests
         Assert.IsTrue(quests.TryGet(1, out var quest));
 
         CollectionAssert.AreEqual(new[] { 7, 7, 8 }, quest.AcceptItems);
+        Assert.AreEqual(100, quest.RewardStationCash);
         Assert.AreEqual(7, ((EquipItemGoal)quest.Goals[0]).ItemDefinitionId);
 
         var use = (UseItemGoal)quest.Goals[1];

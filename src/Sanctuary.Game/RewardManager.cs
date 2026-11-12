@@ -9,6 +9,7 @@ using Sanctuary.Core.IO;
 using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Resources.Definitions.Rewards;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -17,6 +18,10 @@ namespace Sanctuary.Game;
 
 public class RewardManager : IRewardManager
 {
+    public const int StationCashIconId = 7862;
+    private const int StationCashItemDefinitionId = 960206;
+    public const int StationCashNameId = 385941;
+
     private readonly ILogger _logger;
     private readonly IResourceManager _resourceManager;
     private readonly IDbContextFactory<DatabaseContext> _dbContextFactory;
@@ -127,72 +132,61 @@ public class RewardManager : IRewardManager
             });
         }
 
-        SendRewardToast(player, clientItem, itemDefinition, quantity, sourceGuid);
+        SendRewardToast(player, sourceGuid, itemDefinition.DescriptionId, new RewardBundleEntryItem
+        {
+            IconId = itemDefinition.Icon.Id,
+            NameId = itemDefinition.NameId,
+            DefinitionId = clientItem.Definition,
+            Tint = clientItem.Tint,
+            Quantity = quantity,
+            ItemGuid = clientItem.Id
+        });
 
         return true;
     }
 
-    public int CountItems(Player player, int itemDefinitionId)
-        => player.Items.Where(item => item.Definition == itemDefinitionId).Sum(item => item.Count);
-
-    public bool TryTakeItems(Player player, int itemDefinitionId, int quantity)
+    public bool TryTakeItem(Player player, ClientItem clientItem, int quantity = 1)
     {
         if (quantity <= 0)
             return true;
 
-        if (CountItems(player, itemDefinitionId) < quantity)
+        if (clientItem.Count < quantity || !player.Items.Any(item => ReferenceEquals(item, clientItem)))
             return false;
 
         var characterId = GuidHelper.GetPlayerId(player.Guid);
 
         using var dbContext = _dbContextFactory.CreateDbContext();
-        var dbItems = dbContext.Items
-            .Where(item => item.CharacterId == characterId && item.Definition == itemDefinitionId)
-            .OrderBy(item => item.Id)
-            .ToList();
+        var dbItem = dbContext.Items.SingleOrDefault(item => item.CharacterId == characterId && item.Id == clientItem.Id);
 
-        if (dbItems.Sum(item => item.Count) < quantity)
+        if (dbItem is null || dbItem.Count < quantity)
             return false;
 
-        var remaining = quantity;
+        dbItem.Count -= quantity;
 
-        foreach (var dbItem in dbItems)
-        {
-            if (remaining == 0)
-                break;
+        var deleteItem = dbItem.Count <= 0;
 
-            var taken = Math.Min(dbItem.Count, remaining);
-            dbItem.Count -= taken;
-            remaining -= taken;
-
-            if (dbItem.Count == 0)
-                dbContext.Items.Remove(dbItem);
-        }
+        if (deleteItem)
+            dbContext.Items.Remove(dbItem);
 
         if (dbContext.SaveChanges() <= 0)
             return false;
 
-        foreach (var dbItem in dbItems)
+        if (deleteItem)
         {
-            var clientItem = player.Items.SingleOrDefault(item => item.Id == dbItem.Id);
-
-            if (clientItem is null || clientItem.Count == dbItem.Count)
-                continue;
-
-            if (dbItem.Count == 0)
-            {
-                player.Items.Remove(clientItem);
-                player.SendTunneled(new ClientUpdatePacketItemDelete { ItemGuid = clientItem.Id });
-                continue;
-            }
-
-            clientItem.Count = dbItem.Count;
-            player.SendTunneled(new ClientUpdatePacketItemUpdate
-            {
-                ItemGuid = clientItem.Id,
-                Count = clientItem.Count
-            });
+            player.Items.Remove(clientItem);
+            player.SendTunneled(new ClientUpdatePacketItemDelete { ItemGuid = clientItem.Id });
+            return true;
         }
+
+        clientItem.Count = dbItem.Count;
+        player.SendTunneled(new ClientUpdatePacketItemUpdate
+        {
+            ItemGuid = clientItem.Id,
+            Count = clientItem.Count,
+            ConsumedCount = clientItem.ConsumedCount,
+            AbilityCount = clientItem.AbilityCount,
+            RentalExpirationTime = 0
+        });
 
         return true;
     }
@@ -202,12 +196,6 @@ public class RewardManager : IRewardManager
         if (amount <= 0)
             return false;
 
-        if (currencyType == CurrencyType.StationCash)
-        {
-            _logger.LogWarning("Station Cash grants are not yet implemented.");
-            return false;
-        }
-
         var characterId = GuidHelper.GetPlayerId(player.Guid);
 
         using var dbContext = _dbContextFactory.CreateDbContext();
@@ -216,10 +204,24 @@ public class RewardManager : IRewardManager
         if (dbCharacter is null)
             return false;
 
-        dbCharacter.Coins += amount;
+        if (currencyType == CurrencyType.StationCash)
+            dbCharacter.StationCash += amount;
+        else
+            dbCharacter.Coins += amount;
 
         if (dbContext.SaveChanges() <= 0)
             return false;
+
+        if (currencyType == CurrencyType.StationCash)
+        {
+            player.StationCash = dbCharacter.StationCash;
+
+            player.SendWalletInfo();
+
+            SendStationCashToast(player, amount);
+
+            return true;
+        }
 
         player.Coins = dbCharacter.Coins;
 
@@ -228,26 +230,32 @@ public class RewardManager : IRewardManager
         return true;
     }
 
-    private static void SendRewardToast(Player player, ClientItem clientItem, ClientItemDefinition itemDefinition, int quantity, ulong sourceGuid)
+    private void SendStationCashToast(Player player, int amount)
+    {
+        if (_resourceManager.ClientItemDefinitions.TryGetValue(StationCashItemDefinitionId, out var itemDefinition))
+            ItemDefinitionHelper.SendItemDefinition(player, _resourceManager, itemDefinition);
+
+        SendRewardToast(player, 0, 0, new RewardBundleEntryItem
+        {
+            IconId = StationCashIconId,
+            NameId = StationCashNameId,
+            DefinitionId = StationCashItemDefinitionId,
+            Quantity = amount
+        });
+    }
+
+    private static void SendRewardToast(Player player, ulong sourceGuid, int descriptionId, RewardBundleEntryItem entry)
     {
         // TODO: Is there a coin/station cash toast? How about for other types of rewards..?
         var notificationId = Environment.TickCount & int.MaxValue;
 
         var packet = new RewardBundlePacket();
-        packet.RewardBundle.DescriptionId = itemDefinition.DescriptionId;
+        packet.RewardBundle.DescriptionId = descriptionId;
         packet.RewardBundle.SourceGuid = sourceGuid ^ (uint)notificationId;
         packet.RewardBundle.PlayerGuid = player.Guid;
-        packet.RewardBundle.IconId = itemDefinition.Icon.Id;
-        packet.RewardBundle.NameId = itemDefinition.NameId;
-        packet.RewardBundle.Entries.Add(new RewardBundleEntryItem
-        {
-            IconId = itemDefinition.Icon.Id,
-            NameId = itemDefinition.NameId,
-            DefinitionId = clientItem.Definition,
-            Tint = clientItem.Tint,
-            Quantity = quantity,
-            ItemGuid = clientItem.Id
-        });
+        packet.RewardBundle.IconId = entry.IconId;
+        packet.RewardBundle.NameId = entry.NameId;
+        packet.RewardBundle.Entries.Add(entry);
 
         player.SendTunneled(packet);
     }

@@ -1,5 +1,6 @@
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Resources.Definitions.Rewards;
+using Sanctuary.Packet.Common;
 
 namespace Sanctuary.Game;
 
@@ -13,7 +14,5 @@ public interface IRewardManager
 
     bool TryGrantCurrency(Player player, CurrencyType currencyType, int amount);
 
-    int CountItems(Player player, int itemDefinitionId);
-
-    bool TryTakeItems(Player player, int itemDefinitionId, int quantity);
+    bool TryTakeItem(Player player, ClientItem clientItem, int quantity = 1);
 }

@@ -2506,6 +2506,7 @@
     "TargetNpcId": 1735,
     "RewardCoins": 0,
     "RewardExperience": 0,
+    "RewardStationCash": 100,
     "RewardItems": [930008],
     "AcceptItems": [960205, 960205, 960205, 960205, 960205, 960205, 960205, 960205, 960205, 960205],
     "NotificationAvailable": 2,

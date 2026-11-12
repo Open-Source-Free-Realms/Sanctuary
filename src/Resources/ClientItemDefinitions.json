@@ -1455326,5 +1455326,20 @@
         "Unknown": false
       }
     }
+  },
+  {
+    "Comment": "Station Cash",
+    "Id": 960206,
+    "Type": 1,
+    "NameId": 349,
+    "Icon": {
+      "Id": 7862
+    },
+    "MaxStackSize": -1,
+    "NoTrade": true,
+    "TintAlias": "dyetint",
+    "MemberDiscount": 10,
+    "CategoryId": 29,
+    "NoSale": true
   }
 ]

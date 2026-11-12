@@ -75,9 +75,7 @@ public static class InventoryPacketEquippedRemoveHandler
             return true;
         }
 
-        profile.Items.Remove(inventoryPacketEquippedRemove.Slot);
-
-        connection.Player.RefreshEquipmentGlide();
+        connection.Player.UnequipSlot(profile, inventoryPacketEquippedRemove.Slot, clientItem.Id);
 
         var characterId = GuidHelper.GetPlayerId(connection.Player.Guid);
         var profileId = inventoryPacketEquippedRemove.ProfileId;
@@ -113,30 +111,6 @@ public static class InventoryPacketEquippedRemoveHandler
                 return;
             }
         });
-
-        var clientUpdatePacketUnequipSlot = new ClientUpdatePacketUnequipSlot();
-
-        clientUpdatePacketUnequipSlot.Slot = inventoryPacketEquippedRemove.Slot;
-        clientUpdatePacketUnequipSlot.ProfileId = inventoryPacketEquippedRemove.ProfileId;
-
-        connection.SendTunneled(clientUpdatePacketUnequipSlot);
-
-        var playerUpdatePacketEquipItemChange = new PlayerUpdatePacketEquipItemChange();
-
-        playerUpdatePacketEquipItemChange.Guid = connection.Player.Guid;
-
-        playerUpdatePacketEquipItemChange.Id = clientItem.Id;
-
-        playerUpdatePacketEquipItemChange.Attachment.Slot = inventoryPacketEquippedRemove.Slot;
-
-        playerUpdatePacketEquipItemChange.ProfileId = inventoryPacketEquippedRemove.ProfileId;
-
-        playerUpdatePacketEquipItemChange.WieldType = connection.Player.GetWieldType();
-
-        if (inventoryPacketEquippedRemove.ProfileId == connection.Player.ActiveProfileId)
-            connection.Player.SendTunneledToVisible(playerUpdatePacketEquipItemChange);
-
-        connection.Player.SendToolbar();
 
         connection.Player.RefreshWeaponFlair(inventoryPacketEquippedRemove.ProfileId, inventoryPacketEquippedRemove.Slot);
 
