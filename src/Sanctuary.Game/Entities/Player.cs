@@ -31,7 +31,7 @@ using Sanctuary.UdpLibrary.Enumerations;
 
 namespace Sanctuary.Game.Entities;
 
-public sealed class Player : ClientPcData, IEntity
+public sealed class Player : ClientPcData, IEntity, ITradeParticipant
 {
     private enum PacketSendType
     {
@@ -218,6 +218,103 @@ public sealed class Player : ClientPcData, IEntity
         PlayerPet = new PlayerPet(this, resourceManager);
 
         Routines = new RoutineManager(zone.Logger, zone.TickDelta);
+    }
+
+    ulong ITradeParticipant.TradeGuid => Guid;
+    ulong ITradeParticipant.TradeCharacterId => GuidHelper.GetPlayerId(Guid);
+    int ITradeParticipant.TradeCoins => Coins;
+    void ITradeParticipant.DisconnectForTradeResync() => _connection.Disconnect();
+    void ITradeParticipant.SendTunneled(ISerializablePacket packet)
+    {
+        if (!_connection.Send(UdpChannel.Reliable1, SerializeTunneled(packet)))
+            throw new IOException("Trade packet could not be queued on the connection.");
+    }
+
+    IReadOnlyList<ISerializablePacket> ITradeParticipant.ApplyTradeResult(TradeParticipantResult result)
+    {
+        var packets = new List<ISerializablePacket>();
+        foreach (var (change, definition) in result.Items)
+        {
+            var item = Items.SingleOrDefault(x => x.Id == change.Id);
+            if (change.Count == 0)
+            {
+                if (item is not null) Items.Remove(item);
+                packets.Add(new ClientUpdatePacketItemDelete { ItemGuid = change.Id });
+                foreach (var bar in ActionBarItemGuids)
+                    foreach (var slot in bar.Value.Where(x => x.Value == change.Id).Select(x => x.Key).ToArray())
+                    {
+                        CancelScheduledSlotPacket(bar.Key, slot);
+                        bar.Value.Remove(slot);
+                        var clear = new ClientUpdatePacketUpdateActionBarSlot { Data = { Id = bar.Key, Slot = slot } };
+                        clear.Slot.IsEmpty = true;
+                        packets.Add(clear);
+                    }
+            }
+            else if (item is not null)
+            {
+                item.Count = change.Count;
+                packets.Add(new ClientUpdatePacketItemUpdate { ItemGuid = item.Id, Count = item.Count,
+                    ConsumedCount = item.ConsumedCount, AbilityCount = item.AbilityCount });
+                RefreshItemActionBarSlots(item, definition, packets);
+            }
+            else
+            {
+                item = new ClientItem { Id = change.Id, Definition = change.Definition, Tint = change.Tint, Count = change.Count };
+                Items.Add(item);
+                using var writer = new PacketWriter();
+                item.Serialize(writer);
+                definition.Serialize(writer);
+                packets.Add(new ClientUpdatePacketItemAdd { Payload = writer.Buffer });
+            }
+        }
+        Coins = result.Coins;
+        packets.Add(new ClientUpdatePacketCoinCount { Coins = Coins });
+        return packets;
+    }
+
+    private void RefreshItemActionBarSlots(ClientItem item, ClientItemDefinition definition, List<ISerializablePacket> packets)
+    {
+        var tint = item.Tint == 0 ? definition.Icon.TintId : item.Tint;
+        var coolingDown = TryGetItemCooldown(item.Definition, out var totalMs, out var elapsedMs);
+        foreach (var bar in ActionBarItemGuids)
+            foreach (var slot in bar.Value.Where(x => x.Value == item.Id).Select(x => x.Key))
+            {
+                var update = BuildActionBarSlotPacket(bar.Key, slot, definition.Icon.Id, tint,
+                    definition.NameId, item.Count, coolingDown ? totalMs : 1000,
+                    enabled: !coolingDown, elapsed: coolingDown ? elapsedMs : 1000);
+                if (ActionBars.TryGetValue(bar.Key, out var actionBar))
+                    actionBar.Slots[slot] = update.Slot;
+                packets.Add(update);
+
+                // Preserve the pending re-enable time and state, but don't let it
+                // restore the pre-trade stack count when the cooldown expires.
+                if (_delayedSlotPackets.TryGetValue((bar.Key, slot), out var pending)
+                    && pending.Packet is ClientUpdatePacketUpdateActionBarSlot enable)
+                    enable.Slot.Quantity = item.Count;
+            }
+    }
+
+    NameData ITradeParticipant.TradeName => Name;
+    object ITradeParticipant.TradeContext => Zone;
+    bool ITradeParticipant.TradeAvailable => _connection.Status == Status.Connected;
+
+    bool ITradeParticipant.TryGetTradeItem(int itemId, out ItemInstance item, out ClientItemDefinition definition, out int available)
+    {
+        item = null!;
+        definition = null!;
+        available = 0;
+        var owned = Items.FirstOrDefault(x => x.Id == itemId);
+        if (owned is null || !_resourceManager.ClientItemDefinitions.TryGetValue(owned.Definition, out var found))
+            return false;
+        item = owned;
+        definition = found;
+        // Reserve equipment copies; profile references can share the same physical copy.
+        var profileEquipped = Profiles.Any(profile => profile.Items.Values.Any(x => x.Id == itemId));
+        var equippedPets = Pets.Count(pet => TradeItemRules.PetUsesItem(itemId, pet.ItemGuids.Contains(itemId),
+            pet.ShampooItemGuid, pet.ConditionerItemGuid, pet.ToyItemGuid, pet.BrushItemGuid,
+            pet.FoodBowlItemGuid, pet.FoodItemGuid, pet.VitaminItemGuid));
+        available = TradeItemRules.AvailableCount(owned.Count, owned.ConsumedCount, profileEquipped, equippedPets);
+        return true;
     }
 
     #region Connection
@@ -1011,6 +1108,9 @@ public sealed class Player : ClientPcData, IEntity
         commandPacketInteractionList.List.Guid = Guid;
 
         commandPacketInteractionList.List.Interactions.Add(InspectInteraction.Data);
+
+        if (player.Guid != Guid)
+            commandPacketInteractionList.List.Interactions.Add(TradeInteraction.Data);
 
         if (Friends.Any(x => x.Guid == player.Guid))
         {

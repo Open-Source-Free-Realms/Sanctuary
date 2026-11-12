@@ -84,6 +84,8 @@ public class GatewayConnection : UdpConnection
         if (Player is null)
             return;
 
+        _serviceProvider.GetRequiredService<TradeManager>().Disconnect(Player);
+
         SendFriendOffline();
 
         SendGuildMemberOffline();
