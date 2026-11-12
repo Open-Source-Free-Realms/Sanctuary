@@ -1,0 +1,38 @@
+using System;
+
+using Sanctuary.Core.IO;
+
+namespace Sanctuary.Packet;
+
+public class GatewayCharacterKick : ISerializablePacket, IDeserializable<GatewayCharacterKick>
+{
+    public const byte OpCode = 104;
+
+    public ulong Id;
+
+    public byte[] Serialize()
+    {
+        using var writer = new PacketWriter();
+
+        writer.Write(OpCode);
+
+        writer.Write(Id);
+
+        return writer.Buffer;
+    }
+
+    public static bool TryDeserialize(ReadOnlySpan<byte> data, out GatewayCharacterKick value)
+    {
+        value = new GatewayCharacterKick();
+
+        var reader = new PacketReader(data);
+
+        if (!reader.TryRead(out byte opCode) || opCode != OpCode)
+            return false;
+
+        if (!reader.TryRead(out value.Id))
+            return false;
+
+        return reader.RemainingLength == 0;
+    }
+}

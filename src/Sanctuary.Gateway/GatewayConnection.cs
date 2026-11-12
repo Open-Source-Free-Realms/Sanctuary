@@ -33,6 +33,7 @@ public class GatewayConnection : UdpConnection
 {
     private readonly ILogger _logger;
     private readonly LoginClient _loginClient;
+    private ulong _loginSession;
     private readonly IZoneManager _zoneManager;
     private readonly GatewayServer _gatewayServer;
     private readonly GatewayServerOptions _options;
@@ -69,6 +70,13 @@ public class GatewayConnection : UdpConnection
         _cipher = new CipherCCM();
     }
 
+    public ulong LoginSession => _loginSession;
+
+    public void BeginLoginSession()
+    {
+        _loginSession = (ulong)Random.Shared.NextInt64(1, long.MaxValue);
+    }
+
     public void InitializeCipher(string key)
     {
         _cipher.Initialize(Encoding.ASCII.GetBytes(key));
@@ -92,7 +100,7 @@ public class GatewayConnection : UdpConnection
 
         SendGuildMemberOffline();
 
-        _loginClient.SendCharacterLogout(GuidHelper.GetPlayerId(Player.Guid));
+        _loginClient.SendCharacterLogout(GuidHelper.GetPlayerId(Player.Guid), _loginSession);
 
         SavePlayerToDatabase();
 

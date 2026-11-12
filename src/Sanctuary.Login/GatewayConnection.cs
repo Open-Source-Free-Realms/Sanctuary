@@ -25,6 +25,43 @@ public class GatewayConnection : LoginServerConnection
 
     public HashSet<ulong> OnlineCharacters { get; set; } = new();
 
+    private readonly object _onlineLock = new();
+    private readonly Dictionary<ulong, ulong> _onlineSessions = new();
+
+    public bool TryReleaseForNewLogin(ulong characterId)
+    {
+        lock (_onlineLock)
+        {
+            if (!OnlineCharacters.Remove(characterId))
+                return false;
+
+            _onlineSessions.Remove(characterId);
+            return true;
+        }
+    }
+
+    public void MarkOnline(ulong characterId, ulong session)
+    {
+        lock (_onlineLock)
+        {
+            _onlineSessions[characterId] = session;
+            OnlineCharacters.Add(characterId);
+        }
+    }
+
+    public bool TryLogout(ulong characterId, ulong session)
+    {
+        lock (_onlineLock)
+        {
+            if (!_onlineSessions.TryGetValue(characterId, out var current) || current != session)
+                return false;
+
+            _onlineSessions.Remove(characterId);
+            OnlineCharacters.Remove(characterId);
+            return true;
+        }
+    }
+
     public GatewayConnection(ILogger<GatewayConnection> logger, IOptionsMonitor<LoginServerOptions> options, GatewayServer gatewayServer, SocketAddress socketAddress, int connectCode) : base(options, gatewayServer, socketAddress, connectCode)
     {
         _logger = logger;
@@ -57,6 +94,7 @@ public class GatewayConnection : LoginServerConnection
             GatewayLoginRequest.OpCode => GatewayLoginRequestHandler.HandlePacket(this, data),
             GatewayCharacterLogin.OpCode => GatewayCharacterLoginHandler.HandlePacket(this, data),
             GatewayCharacterLogout.OpCode => GatewayCharacterLogoutHandler.HandlePacket(this, data),
+            GatewayCharacterIdleReply.OpCode => GatewayCharacterIdleReplyHandler.HandlePacket(this, data),
             _ => false
         };
 

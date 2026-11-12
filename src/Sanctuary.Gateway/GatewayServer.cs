@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Linq;
 
 using Microsoft.Extensions.Logging;
 
+using Sanctuary.Core.Helpers;
 using Sanctuary.Game;
 using Sanctuary.Packet;
 using Sanctuary.UdpLibrary;
@@ -40,6 +42,33 @@ public class GatewayServer : UdpManager<GatewayConnection>
 
     private void Zones_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
+    }
+
+    public bool TryGetCharacterIdle(ulong characterId, out long idleMilliseconds)
+    {
+        foreach (var connection in ConnectionList)
+        {
+            if (connection.Player is null || GuidHelper.GetPlayerId(connection.Player.Guid) != characterId)
+                continue;
+
+            idleMilliseconds = connection.MillisecondsSinceLastReceive();
+            return true;
+        }
+
+        idleMilliseconds = 0;
+        return false;
+    }
+
+    public void DisconnectCharacter(ulong characterId)
+    {
+        foreach (var connection in ConnectionList.ToList())
+        {
+            if (connection.Player is null || GuidHelper.GetPlayerId(connection.Player.Guid) != characterId)
+                continue;
+
+            _logger.LogInformation("Dropping {connection} so character {id} can log in again.", connection, characterId);
+            connection.Disconnect();
+        }
     }
 
     public void OnStopping()
