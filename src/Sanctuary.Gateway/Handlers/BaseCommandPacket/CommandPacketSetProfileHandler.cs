@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
+using Sanctuary.Game.Groups;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
@@ -14,11 +15,14 @@ namespace Sanctuary.Gateway.Handlers;
 public static class CommandPacketSetProfileHandler
 {
     private static ILogger _logger = null!;
+    private static IGroupManager _groupManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
         var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
         _logger = loggerFactory.CreateLogger(nameof(CommandPacketSetProfileHandler));
+
+        _groupManager = serviceProvider.GetRequiredService<IGroupManager>();
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -40,6 +44,8 @@ public static class CommandPacketSetProfileHandler
 
         if (connection.Player.MiniGameUiSession is not null)
             MiniGameHelper.RefreshDetails(connection.Player, connection.Player.MiniGameUiSession);
+
+        _groupManager.UpdateMember(connection.Player);
 
         return true;
     }

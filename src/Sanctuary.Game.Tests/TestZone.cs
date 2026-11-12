@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 using Sanctuary.Database;
+using Sanctuary.Game.Groups;
 using Sanctuary.Game.Quests;
 using Sanctuary.Game.Resources.Definitions.Zones;
 using Sanctuary.Game.Zones;
@@ -42,6 +43,7 @@ public sealed class TestZone : BaseZone
         services.AddSingleton<IRewardManager, RewardManager>();
         services.AddSingleton<IQuestManager, QuestManager>();
         services.AddSingleton<IZoneManager, ZoneManager>();
+        services.AddSingleton<IGroupManager, GroupManager>();
 
         return new TestZone(services.BuildServiceProvider());
     }
