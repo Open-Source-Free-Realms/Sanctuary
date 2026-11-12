@@ -54,6 +54,12 @@ public abstract class ConsumableAbility(AbilityServices services)
 
     protected bool ConsumeItem(Player player, ClientItem clientItem, ClientItemDefinition clientItemDefinition, int actionBarSlot)
     {
+        // Connections are handled in parallel, so the partner's final trade accept can remove
+        // this item after the handler looked it up.
+        // TODO: Remove once packet handling is marshalled to the zone tick.
+        if (!player.Items.Any(item => ReferenceEquals(item, clientItem)) || clientItem.Count <= 0)
+            return SendFailure(player);
+
         using var dbContext = _dbContextFactory.CreateDbContext();
 
         var characterId = GuidHelper.GetPlayerId(player.Guid);

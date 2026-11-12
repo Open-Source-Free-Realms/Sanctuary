@@ -42,6 +42,7 @@ public static class PacketTunneledClientPacketHandler
             PacketClientFinishedLoading.OpCode => PacketClientFinishedLoadingHandler.HandlePacket(connection),
             PacketClientIsReady.OpCode => PacketClientIsReadyHandler.HandlePacket(connection),
             BaseChatPacket.OpCode => BaseChatPacketHandler.HandlePacket(connection, reader),
+            BaseTradePacket.OpCode => BaseTradePacketHandler.HandlePacket(connection, reader),
             BaseCommandPacket.OpCode => BaseCommandPacketHandler.HandlePacket(connection, reader),
             BasePlayerUpdatePacket.OpCode => BasePlayerUpdatePacketHandler.HandlePacket(connection, reader),
             BaseAbilityPacket.OpCode => BaseAbilityPacketHandler.HandlePacket(connection, reader),
@@ -69,6 +70,7 @@ public static class PacketTunneledClientPacketHandler
             BaseQuestPacket.OpCode => BaseQuestPacketHandler.HandlePacket(connection, reader),
             BaseUiPacket.OpCode => BaseUiPacketHandler.HandlePacket(connection, reader),
             ClientPathBasePacket.OpCode => ClientPathBasePacketHandler.HandlePacket(connection, reader),
+            BaseInspectPacket.OpCode => BaseInspectPacketHandler.HandlePacket(connection, reader),
             _ => false
         };
 

@@ -245,7 +245,7 @@ public static class CommandPacketInteractRequestHandler
         {
             var commandPacketMoveAndInteract = new CommandPacketMoveAndInteract
             {
-                Position = nodePosition,
+                Position = InteractionMenuHelper.GetApproachPosition(nodePosition, playerPosition),
                 Guid = node.Guid
             };
 
