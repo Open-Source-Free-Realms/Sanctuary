@@ -75,7 +75,7 @@ public sealed class Player : ClientPcData, IEntity
 
     public byte TeleportSequence { get; private set; }
 
-    private bool _teleportPending;
+    private Routine? _teleportRoutine;
     private ZoneAreaDefinition? _pendingZoneArea;
 
     public int ChatBubbleForegroundColor { get; set; }
@@ -699,8 +699,6 @@ public sealed class Player : ClientPcData, IEntity
         if (Mount is not null && !Mount.TeleportToZone(zone, position, rotation))
             Dismount();
 
-        BeginTeleport();
-
         var packetClientBeginZoning = new PacketClientBeginZoning
         {
             Name = Zone.Name,
@@ -710,7 +708,7 @@ public sealed class Player : ClientPcData, IEntity
             Id = Zone.Id,
             GeometryId = 214,
             OverrideUpdateRadius = true,
-            TeleportSequence = NextTeleportSequence()
+            TeleportSequence = BeginTeleport()
         };
 
         SendTunneled(packetClientBeginZoning);
@@ -720,12 +718,9 @@ public sealed class Player : ClientPcData, IEntity
         return true;
     }
 
-    public byte NextTeleportSequence() => TeleportSequence = (byte)((TeleportSequence + 1) % TeleportSequenceCount);
-
     public void Teleport(Vector4 position, Quaternion rotation)
     {
-        BeginTeleport();
-        StartTeleportTimeout();
+        var teleportSequence = BeginTeleport();
 
         UpdatePosition(position, rotation);
 
@@ -734,46 +729,43 @@ public sealed class Player : ClientPcData, IEntity
             Position = position,
             Rotation = rotation,
             Teleport = true,
-            TeleportSequence = NextTeleportSequence()
+            TeleportSequence = teleportSequence
         };
 
         SendTunneled(clientUpdatePacketUpdateLocation);
     }
 
-    private void BeginTeleport()
+    private bool IsTeleportPending => _teleportRoutine is { IsRunning: true };
+
+    private byte BeginTeleport()
     {
-        _teleportPending = true;
         _pendingZoneArea = null;
 
         Routines.Cancel(PointOfInterestRoutine);
-    }
 
-    public void StartTeleportTimeout()
-    {
-        if (_teleportPending)
-            Routines.SetRoutine(TeleportRoutine, new DelayedRoutine(new InstantRoutine(CompleteTeleport), TeleportTimeoutSeconds));
+        _teleportRoutine = new SequentialRoutine(
+            new DelegateRoutine(onStep: () => Visible),
+            new WaitRoutine(TeleportTimeoutSeconds),
+            new InstantRoutine(UpdatePointOfInterest));
+
+        Routines.SetRoutine(TeleportRoutine, _teleportRoutine);
+
+        return TeleportSequence = (byte)((TeleportSequence + 1) % TeleportSequenceCount);
     }
 
     public bool TryAcceptTeleportSequence(byte teleportSequence)
     {
-        if (teleportSequence != TeleportSequence && _teleportPending)
+        if (!IsTeleportPending)
+            return true;
+
+        if (teleportSequence != TeleportSequence)
             return false;
 
-        TeleportSequence = teleportSequence;
+        Routines.Cancel(TeleportRoutine);
 
-        if (_teleportPending)
-        {
-            Routines.Cancel(TeleportRoutine);
-            CompleteTeleport();
-        }
-
-        return true;
-    }
-
-    private void CompleteTeleport()
-    {
-        _teleportPending = false;
         UpdatePointOfInterest();
+
+        return false;
     }
 
     private void QueuePointOfInterest()
@@ -796,7 +788,7 @@ public sealed class Player : ClientPcData, IEntity
 
     private void UpdatePendingPointOfInterest()
     {
-        if (_teleportPending || _pendingZoneArea is null)
+        if (IsTeleportPending || _pendingZoneArea is null)
             return;
 
         UpdatePointOfInterest(_pendingZoneArea);

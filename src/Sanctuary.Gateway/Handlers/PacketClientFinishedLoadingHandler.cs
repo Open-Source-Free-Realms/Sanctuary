@@ -39,8 +39,6 @@ public static class PacketClientFinishedLoadingHandler
 
         connection.ReloadZoneAreas();
 
-        connection.Player.StartTeleportTimeout();
-
         connection.Player.Zone.OnClientFinishedLoading(connection.Player);
 
         connection.Player.SendTunneled(GameTimeHelper.GetGameTimeSyncPacket(connection.Player));
