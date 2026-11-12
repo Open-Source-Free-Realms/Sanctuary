@@ -13,6 +13,7 @@ using Sanctuary.Database;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
+using Sanctuary.UdpLibrary.Enumerations;
 
 namespace Sanctuary.Login.Handlers;
 
@@ -22,23 +23,32 @@ public static class CharacterLoginRequestHandler
     // The client sends a packet about every second, so five seconds of silence is a crashed session.
     private const uint CrashIdleMilliseconds = 5000;
 
-    // How long to wait for the gateway's answer before refusing the login.
-    private const long ReleaseReplyTimeoutMilliseconds = 2000;
+    // How often to ask the gateway again while a login is waiting on the old session.
+    private const long ReleaseRetryMilliseconds = 2000;
+
+    // After a waiting login is let in, other waiters for that character hold off this long for it to reach the gateway.
+    private const long HandoffMilliseconds = 10000;
 
     private static ILogger _logger = null!;
     private static GatewayServer _gatewayServer = null!;
     private static LoginServerOptions _options = null!;
     private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
     private static uint _nextReleaseRequestId = 1;
-    private static readonly Dictionary<uint, PendingCharacterLogin> _pendingLogins = new();
+
+    // The client only leaves its waiting state on status 1; any other status leaves it stuck at character select
+    // until it is restarted. So a login for a character that's still online is held here, never refused.
+    private static readonly List<PendingCharacterLogin> _pendingLogins = new();
+
+    // Character id -> until when a just-admitted login has the character to itself.
+    private static readonly Dictionary<ulong, long> _handoffs = new();
 
     private sealed class PendingCharacterLogin
     {
         public required LoginConnection Connection { get; init; }
-        public required GatewayConnection Gateway { get; init; }
-        public required Guid Ticket { get; init; }
+        public required GatewayConnection Gateway { get; set; }
         public required ulong CharacterId { get; init; }
-        public required long CreatedAt { get; init; }
+        public long LastRequestAt { get; set; } = long.MinValue / 2;
+        public uint RequestId { get; set; }
     }
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
@@ -95,23 +105,9 @@ public static class CharacterLoginRequestHandler
             return true;
         }
 
-        var ticket = Guid.NewGuid();
-
-        character.Ticket = ticket;
-
-        if (dbContext.SaveChanges() <= 0)
-        {
-            characterLoginReply.Status = 6;
-
-            connection.Send(characterLoginReply);
-
-            return true;
-        }
-
         // TODO: Client currently doesn't let the user pick a server so default to the first one.
 
-        // Only gateways that completed their login (ServerAddress set); a dropped one may still be in the list briefly.
-        var gatewayServer = _gatewayServer.Gateways.LastOrDefault(x => !string.IsNullOrEmpty(x.ServerAddress));
+        var gatewayServer = GetGateway();
 
         if (gatewayServer is null)
         {
@@ -122,83 +118,132 @@ public static class CharacterLoginRequestHandler
             return true;
         }
 
-        // Already online: ask the gateway to drop that session if it has gone silent (a crashed client).
-        // A live session stays and this login is refused. Status 8 closes the client, so don't send it blindly.
-        if (gatewayServer.IsOnline(character.Id))
+        // Still online: hold the login until the old session is released (gone quiet, a crash) or logs out on its own.
+        if (IsBusy(gatewayServer, character.Id))
         {
-            var requestId = _nextReleaseRequestId++;
+            _logger.LogInformation("Character {id} is still online; holding the login until the old session is released or logs out.", character.Id);
 
-            _pendingLogins[requestId] = new PendingCharacterLogin
+            _pendingLogins.Add(new PendingCharacterLogin
             {
                 Connection = connection,
                 Gateway = gatewayServer,
-                Ticket = ticket,
-                CharacterId = character.Id,
-                CreatedAt = Environment.TickCount64
-            };
-
-            gatewayServer.Send(new GatewayCharacterReleaseRequest
-            {
-                RequestId = requestId,
-                Id = character.Id,
-                IdleThresholdMilliseconds = CrashIdleMilliseconds
+                CharacterId = character.Id
             });
+
+            ProcessPendingLogins();
 
             return true;
         }
 
-        SendLoginSuccess(connection, gatewayServer, ticket, character.Id);
+        Admit(connection, gatewayServer, character.Id);
 
         return true;
     }
 
     public static void CompleteRelease(uint requestId, bool released)
     {
-        if (!_pendingLogins.Remove(requestId, out var pending))
+        var pending = _pendingLogins.Find(x => x.RequestId == requestId);
+
+        if (pending is null)
             return;
 
-        _logger.LogInformation("Character {id} release: released={released}.", pending.CharacterId, released);
+        pending.RequestId = 0;
 
+        _logger.LogDebug("Character {id} release: released={released}.", pending.CharacterId, released);
+
+        // Normally the old session's logout has already cleared it; this covers the reply arriving first.
         if (released)
             pending.Gateway.MarkReleased(pending.CharacterId);
 
-        if (pending.Connection.Status == UdpLibrary.Enumerations.Status.Disconnected)
-            return;
-
-        if (!released)
-        {
-            pending.Connection.Send(new CharacterLoginReply { Status = 8 });
-            return;
-        }
-
-        SendLoginSuccess(pending.Connection, pending.Gateway, pending.Ticket, pending.CharacterId);
+        ProcessPendingLogins();
     }
 
     /// <summary>
-    /// Refuses logins whose gateway never answered the release request. Called every loop from <see cref="LoginService"/>.
-    /// A reply that arrives later is ignored. If the gateway did drop the old session, that session's own logout still
-    /// clears the character (its session token matches), so the account isn't left marked online.
+    /// Lets waiting logins in once their character is free, and keeps asking the gateway to release it meanwhile.
+    /// Called every loop from <see cref="LoginService"/>.
     /// </summary>
-    public static void ExpirePendingLogins()
+    public static void ProcessPendingLogins()
     {
         if (_pendingLogins.Count == 0)
             return;
 
         var now = Environment.TickCount64;
 
-        foreach (var (requestId, pending) in _pendingLogins.Where(x => now - x.Value.CreatedAt >= ReleaseReplyTimeoutMilliseconds).ToList())
+        foreach (var pending in _pendingLogins.ToList())
         {
-            _pendingLogins.Remove(requestId);
+            if (pending.Connection.Status == Status.Disconnected)
+            {
+                _pendingLogins.Remove(pending);
+                _logger.LogInformation("Stopped holding the login for character {id}; the client disconnected.", pending.CharacterId);
+                continue;
+            }
 
-            _logger.LogWarning("Gateway did not answer the release request for character {id}; refusing the login.", pending.CharacterId);
+            // The gateway this login was waiting on went away (restart); follow the current one.
+            if (pending.Gateway.Status == Status.Disconnected && GetGateway() is { } current)
+                pending.Gateway = current;
 
-            if (pending.Connection.Status != UdpLibrary.Enumerations.Status.Disconnected)
-                pending.Connection.Send(new CharacterLoginReply { Status = 8 });
+            if (!IsBusy(pending.Gateway, pending.CharacterId))
+            {
+                _pendingLogins.Remove(pending);
+                _logger.LogInformation("Character {id} is free; letting the held login in.", pending.CharacterId);
+                Admit(pending.Connection, pending.Gateway, pending.CharacterId);
+                continue;
+            }
+
+            // Ask again every so often; an unanswered request just gets retried.
+            if (pending.Gateway.IsOnline(pending.CharacterId) && now - pending.LastRequestAt >= ReleaseRetryMilliseconds)
+            {
+                pending.RequestId = _nextReleaseRequestId++;
+                pending.LastRequestAt = now;
+
+                pending.Gateway.Send(new GatewayCharacterReleaseRequest
+                {
+                    RequestId = pending.RequestId,
+                    Id = pending.CharacterId,
+                    IdleThresholdMilliseconds = CrashIdleMilliseconds
+                });
+            }
         }
     }
 
-    private static void SendLoginSuccess(LoginConnection connection, GatewayConnection gateway, Guid ticket, ulong characterId)
+    // Only gateways that completed their login (ServerAddress set); a dropped one may still be in the list briefly.
+    private static GatewayConnection? GetGateway() => _gatewayServer.Gateways.LastOrDefault(x => !string.IsNullOrEmpty(x.ServerAddress));
+
+    private static bool IsBusy(GatewayConnection gateway, ulong characterId)
     {
+        if (gateway.IsOnline(characterId))
+            return true;
+
+        if (!_handoffs.TryGetValue(characterId, out var until))
+            return false;
+
+        if (Environment.TickCount64 < until)
+            return true;
+
+        _handoffs.Remove(characterId);
+        return false;
+    }
+
+    // Issues a fresh ticket and sends status 1. The ticket is made here, not when the request arrived, so a login that
+    // waited (or a second one for the same character) always carries the ticket the gateway will check.
+    private static void Admit(LoginConnection connection, GatewayConnection gateway, ulong characterId)
+    {
+        var ticket = Guid.NewGuid();
+
+        using var dbContext = _dbContextFactory.CreateDbContext();
+
+        var updated = dbContext.Characters
+            .Where(x => x.Id == characterId)
+            .ExecuteUpdate(x => x.SetProperty(c => c.Ticket, (Guid?)ticket));
+
+        if (updated <= 0)
+        {
+            connection.Send(new CharacterLoginReply { Status = 6 });
+            return;
+        }
+
+        _handoffs[characterId] = Environment.TickCount64 + HandoffMilliseconds;
+
         var serverTicket = ticket.ToString("N");
 
         var characterLoginReply = new CharacterLoginReply

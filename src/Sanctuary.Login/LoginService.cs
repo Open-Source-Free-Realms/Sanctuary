@@ -79,7 +79,7 @@ public class LoginService : BackgroundService
             hadData |= _loginServer.GiveTime();
             hadData |= _gatewayServer.GiveTime();
 
-            CharacterLoginRequestHandler.ExpirePendingLogins();
+            CharacterLoginRequestHandler.ProcessPendingLogins();
 
             if (!hadData)
                 Thread.Sleep(1);

@@ -57,12 +57,17 @@ public class GatewayServer : UdpManager<GatewayConnection>
             .Where(x => x.Player is not null && GuidHelper.GetPlayerId(x.Player.Guid) == characterId)
             .ToList();
 
+        // Login asks again every couple of seconds while it waits, so these checks log at Debug.
         foreach (var session in sessions)
         {
+            // Already being dropped for an earlier request; login will see it gone on a later ask.
+            if (session.OnReleased is not null)
+                return false;
+
             // The client goes completely quiet while loading (up to ~25s when zoning), so silence there isn't a crash.
             if (session.Player.IsLoading)
             {
-                _logger.LogInformation("Character {id} is still loading on {connection}, treating it as live.", characterId, session);
+                _logger.LogDebug("Character {id} is still loading on {connection}, treating it as live.", characterId, session);
                 return false;
             }
 
@@ -70,7 +75,7 @@ public class GatewayServer : UdpManager<GatewayConnection>
 
             if (idle < idleThresholdMilliseconds)
             {
-                _logger.LogInformation("Character {id} is still live on {connection} (last packet {idle} ms ago).", characterId, session, idle);
+                _logger.LogDebug("Character {id} is still live on {connection} (last packet {idle} ms ago).", characterId, session, idle);
                 return false;
             }
         }
