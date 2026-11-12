@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 using Sanctuary.Game.Entities;
@@ -94,6 +95,46 @@ public static class EntityHelper
 
         owner.SendTunneledToVisible(playerUpdatePacketSetAnimation, true);
     }
+
+    public static void SendAnimation(Player player, ulong guid, int animationId)
+    {
+        player.SendTunneled(new PlayerUpdatePacketSetAnimation
+        {
+            Guid = guid,
+            AnimationId = animationId,
+            Unknown = PlayOnce,
+            Flags = PlayNowFlags
+        });
+    }
+
+    public static Npc? NearestNpc(Player player, int npcId) => NearestNpc(player, npc => npc.DefinitionId == npcId);
+
+    public static Npc? NearestNpc(Player player, Func<Npc, bool> match)
+    {
+        Npc? nearest = null;
+        var best = float.MaxValue;
+
+        foreach (var npc in player.Zone.Npcs)
+        {
+            if (!match(npc))
+                continue;
+
+            var dx = npc.Position.X - player.Position.X;
+            var dz = npc.Position.Z - player.Position.Z;
+            var distance = dx * dx + dz * dz;
+
+            if (distance < best)
+            {
+                best = distance;
+                nearest = npc;
+            }
+        }
+
+        return nearest;
+    }
+
+    public static ulong NearestNpcGuid(Player player, int npcId)
+        => npcId != 0 && NearestNpc(player, npcId) is { } npc ? npc.Guid : 0;
 
     public static void SetSpeed(Player owner, Npc npc, float speed)
     {

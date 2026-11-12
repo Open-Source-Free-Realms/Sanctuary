@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Extensions;
+using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game.Entities;
@@ -342,6 +343,9 @@ public sealed class QuestManager : IQuestManager
         SendJournalQuestStates(player);
 
         GrantReward(player, quest);
+
+        if (quest.CompletionScene is { } scene)
+            QuestScene.Play(player, scene, $"quest-scene-{quest.QuestId}", _logger);
 
         RefreshQuestNotifications(player, quest);
 
@@ -732,7 +736,7 @@ public sealed class QuestManager : IQuestManager
             NameId = quest.TitleId,
             DescriptionId = quest.DescriptionId,
             MembersOnly = false,
-            NpcGuid = NearestNpcGuid(player, quest.GiverNpcId),
+            NpcGuid = EntityHelper.NearestNpcGuid(player, quest.GiverNpcId),
             CameraDistance = quest.CameraDistance ?? DefaultOfferCameraDistance,
             Unknown11 = false,
             AcceptOnly = false
@@ -800,7 +804,7 @@ public sealed class QuestManager : IQuestManager
             .Where(npcId => goalProgress is not TalkProgress talkProgress || !talkProgress.HasTalkedTo(npcId))
             .ToHashSet();
 
-        return NearestNpc(player, npc => untalkedNpcIds.Contains(npc.DefinitionId))?.Guid ?? 0;
+        return EntityHelper.NearestNpc(player, npc => untalkedNpcIds.Contains(npc.DefinitionId))?.Guid ?? 0;
     }
 
     private void CompleteGoal(Player player, QuestDefinition quest, QuestProgress progress, int goalIndex, Npc? spokenBy = null, bool playDialogue = true)
@@ -831,6 +835,9 @@ public sealed class QuestManager : IQuestManager
 
         RemoveHiddenNpcs(player, completedGoal);
         RefreshNpcEffects(player, completedGoal);
+
+        if (completedGoal.CompletionScene is { } goalScene)
+            QuestScene.Play(player, goalScene, $"quest-scene-{quest.QuestId}-{completedGoal.NameId}", _logger);
         RefreshQuestNodes(player, quest);
         RefreshQuestNotifications(player, quest);
 
@@ -858,7 +865,7 @@ public sealed class QuestManager : IQuestManager
         if (playDialogue && completedGoal is TalkToNpcGoal)
         {
             var speakerNpcId = spokenBy?.DefinitionId ?? quest.GoalTargetNpcId(goalIndex);
-            var speakerGuid = spokenBy?.Guid ?? NearestNpcGuid(player, speakerNpcId);
+            var speakerGuid = spokenBy?.Guid ?? EntityHelper.NearestNpcGuid(player, speakerNpcId);
 
             QuestDialogue.Begin(player, completedGoal.ConversationFor(speakerNpcId), speakerGuid);
         }
@@ -872,9 +879,12 @@ public sealed class QuestManager : IQuestManager
 
     private void TurnIn(Player player, QuestDefinition quest)
     {
+        if (player.Quests.PendingTurnInQuestId == quest.QuestId && DateTime.UtcNow - player.Quests.PendingTurnInAt < PendingTurnInTimeout)
+            return;
+
         var end = new QuestEndPacket
         {
-            NpcGuid = NearestNpcGuid(player, quest.GoalTargetNpcId(quest.Goals.Count - 1)),
+            NpcGuid = EntityHelper.NearestNpcGuid(player, quest.GoalTargetNpcId(quest.Goals.Count - 1)),
             QuestId = quest.QuestId,
             EndDialogTextId = quest.TurnInDialogueId,
             NpcAnimationId = QuestDialogue.TalkAnimationId,
@@ -886,7 +896,10 @@ public sealed class QuestManager : IQuestManager
         player.SendTunneled(end);
 
         player.Quests.PendingTurnInQuestId = quest.QuestId;
+        player.Quests.PendingTurnInAt = DateTime.UtcNow;
     }
+
+    private static readonly TimeSpan PendingTurnInTimeout = TimeSpan.FromSeconds(30);
 
     private const int QuestListRewardUnknown3 = 15;
     private const int CoinsIconId = 102;
@@ -1003,7 +1016,7 @@ public sealed class QuestManager : IQuestManager
         {
             QuestId = questId,
             ObjectiveId = goal.NameId,
-            RequiredCount = restored ? goal.RequiredCount : 0,
+            RequiredCount = (restored || goal.RequiredCount > 1) ? goal.RequiredCount : 0,
             Unknown2 = restored
         });
     }
@@ -1011,35 +1024,6 @@ public sealed class QuestManager : IQuestManager
     private const int RetailObjectiveUpdateUnknown6 = 82;
 
     private static float QuestCompletion(QuestDefinition quest, int goalsDone) => (float)goalsDone / quest.Goals.Count;
-
-    private static Npc? NearestNpc(Player player, int npcId) => NearestNpc(player, npc => npc.DefinitionId == npcId);
-
-    private static Npc? NearestNpc(Player player, Func<Npc, bool> match)
-    {
-        Npc? nearest = null;
-        var best = float.MaxValue;
-
-        foreach (var npc in player.Zone.Npcs)
-        {
-            if (!match(npc))
-                continue;
-
-            var dx = npc.Position.X - player.Position.X;
-            var dz = npc.Position.Z - player.Position.Z;
-            var distance = dx * dx + dz * dz;
-
-            if (distance < best)
-            {
-                best = distance;
-                nearest = npc;
-            }
-        }
-
-        return nearest;
-    }
-
-    private static ulong NearestNpcGuid(Player player, int npcId)
-        => npcId != 0 && NearestNpc(player, npcId) is { } npc ? npc.Guid : 0;
 
     private ulong ResolveGoalTargetGuid(Player player, QuestDefinition quest, int goalIndex)
     {
@@ -1053,7 +1037,7 @@ public sealed class QuestManager : IQuestManager
                 return untalked;
         }
 
-        return NearestNpcGuid(player, quest.GoalTargetNpcId(goalIndex));
+        return EntityHelper.NearestNpcGuid(player, quest.GoalTargetNpcId(goalIndex));
     }
 
     private void SendObjectiveForGoal(Player player, QuestDefinition quest, int goalIndex)
@@ -1081,7 +1065,7 @@ public sealed class QuestManager : IQuestManager
             {
                 Active = true,
                 TaskId = player.ObjectiveTaskId,
-                Guid = 0,
+                Guid = GuidHelper.GetLocationTargetGuid(goals[goalIndex].NameId),
                 NameId = goals[goalIndex].NameId,
                 PositionX = reachPos.X,
                 PositionY = reachPos.Y,
@@ -1099,7 +1083,7 @@ public sealed class QuestManager : IQuestManager
         if (targetGuid == 0 || !player.Zone.TryGetNpc(targetGuid, out var target))
             return;
 
-        var pos = target.Position;
+        var pos = InteractionMenuHelper.GetApproachPosition(target.Position, player.Position);
 
         player.SendTunneled(new ObjectiveTargetUpdatePacket
         {

@@ -371,9 +371,6 @@ public sealed class Player : ClientPcData, IEntity
 
         TickEffects(now);
 
-        if (QuestConversation.TalkingNpcGuid != 0 && now >= QuestConversation.TalkAnimationEndsAt)
-            QuestDialogue.StopTalkAnimation(this);
-
         PlayerPet.UpdateEveryTick();
         SendVisiblePositions();
 

@@ -89,6 +89,8 @@ public abstract class BaseZone : IZone, IDisposable
     public IEnumerable<Npc> Npcs => _npcs.Values;
     public IEnumerable<Player> Players => _players.Values;
 
+    public ulong ReserveNpcGuid() => GetNpcGuid(null);
+
     public bool IsEmpty => _players.IsEmpty;
 
     public IScriptManager ScriptManager => _scriptManager;

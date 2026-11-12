@@ -16,6 +16,8 @@ public sealed class QuestLog
 
     public int PendingTurnInQuestId { get; set; }
 
+    public DateTime PendingTurnInAt { get; set; }
+
     public DateTime LastAcceptedAt { get; set; }
 
     public IReadOnlyList<QuestProgress> All
