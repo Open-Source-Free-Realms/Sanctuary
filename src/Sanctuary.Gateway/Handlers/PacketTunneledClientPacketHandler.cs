@@ -73,6 +73,7 @@ public static class PacketTunneledClientPacketHandler
             BaseEncounterPacket.OpCode => BaseEncounterPacketHandler.HandlePacket(connection, reader),
             BaseMiniGamePacket.OpCode => BaseMiniGamePacketHandler.HandlePacket(connection, reader),
             BaseActivityServicePacket.OpCode => BaseActivityServicePacketHandler.HandlePacket(connection, reader, ActivityHelper.ZoneServerType),
+            BaseInspectPacket.OpCode => BaseInspectPacketHandler.HandlePacket(connection, reader),
             _ => false
         };
 

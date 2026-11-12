@@ -573,7 +573,7 @@ public sealed class QuestManager : IQuestManager
             player.SendTunneled(new PlayerUpdatePacketAddNotifications { Notifications = { badge } });
     }
 
-    private const int QuestBadgeNotificationType = 2;
+    public const int QuestBadgeNotificationType = 2;
     private const int AvailableBadgeIconId = 2;
 
     public NotificationInfo? GetQuestBadge(Player player, Npc npc)

@@ -52,7 +52,7 @@ internal sealed class NpcUserData(IScriptableNpc npc) : ILuaUserData
             direct = context.GetArgument<bool>(4);
         }
 
-        self._npc.MoveTo(x, y, z, direct);
+        self._npc.TryMoveTo(x, y, z, direct);
 
         return new ValueTask<int>(context.Return());
     });

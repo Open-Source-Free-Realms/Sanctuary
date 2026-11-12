@@ -8,7 +8,7 @@ using DotRecast.Detour.Io;
 
 using Microsoft.Extensions.Logging;
 
-namespace Sanctuary.Game.Pathfinding;
+namespace Sanctuary.Game.Pathing;
 
 public static class NavMeshLoader
 {

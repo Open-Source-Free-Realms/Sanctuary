@@ -62,7 +62,8 @@ public static class InventoryPacketEquipByGuidHandler
             return true;
         }
 
-        if (!_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out var itemClass))
+        if (clientItemDefinition.Class != ItemDefinitionHelper.NoItemClass
+            && !_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out _))
         {
             _logger.LogWarning("User tried to equip item with unknown class. {guid} {definition} {class}",
                 inventoryPacketEquipByGuid.Guid, clientItem.Definition, clientItemDefinition.Class);
@@ -95,6 +96,8 @@ public static class InventoryPacketEquipByGuidHandler
             profileItem.Id = clientItem.Id;
             profileItem.Slot = clientItemDefinition.Slot;
         }
+
+        connection.Player.RefreshEquipmentGlide();
 
         var characterId = GuidHelper.GetPlayerId(connection.Player.Guid);
         var profileId = inventoryPacketEquipByGuid.ProfileId;

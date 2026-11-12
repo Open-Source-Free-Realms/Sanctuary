@@ -54,7 +54,7 @@ public static class CoinStoreSellToClientRequestPacketHandler
             }
         };
 
-        if (!_resourceManager.ClientItemDefinitions.TryGetValue(coinStoreSellToClientRequestPacket.ItemRecord.Definition, out var clientItemDefinition))
+        if (!_resourceManager.ClientItemDefinitions.TryGetValue(coinStoreSellToClientRequestPacket.ItemRecord.Definition % ItemDefinitionHelper.CommunityColourIdStep, out var clientItemDefinition))
         {
             _logger.LogWarning("User tried to buy unknown item definition. {guid} {definition}", connection.Player.Guid, coinStoreSellToClientRequestPacket.ItemRecord.Definition);
 
@@ -70,6 +70,8 @@ public static class CoinStoreSellToClientRequestPacketHandler
             clientItemDefinition.Type != ItemDefinitionHelper.PetItemType &&
             clientItemDefinition.Type != ItemDefinitionHelper.PetClothingItemType &&
             clientItemDefinition.Type != ItemDefinitionHelper.PetUtilityItemType &&
+            clientItemDefinition.Type != ItemDefinitionHelper.HousingItemType &&
+            clientItemDefinition.Type != ItemDefinitionHelper.CustomizationItemType &&
             clientItemDefinition.Type != 12)
         {
             coinStoreTransactionCompletePacket.Result = CoinStoreTransactionResult.Error;

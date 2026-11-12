@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using Sanctuary.Core.IO;
 using Sanctuary.Game;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
@@ -37,19 +36,6 @@ public static class PacketInGamePurchaseStoreBundleContentRequestHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(PacketInGamePurchaseStoreBundleContentRequest), packet);
 
-        var packetInGamePurchaseStoreBundleContentResponse = new PacketInGamePurchaseStoreBundleContentResponse();
-
-        foreach (var request in packet.Requests)
-        {
-            packetInGamePurchaseStoreBundleContentResponse.Responses.Add(new PacketInGamePurchaseStoreBundleContentResponse.ResponseData
-            {
-                StoreId = request.StoreId,
-                BundleId = request.BundleId,
-            });
-        }
-
-        connection.SendTunneled(packetInGamePurchaseStoreBundleContentResponse);
-
         List<ClientItemDefinition> clientItemDefinitions = [];
 
         foreach (var request in packet.Requests)
@@ -62,22 +48,24 @@ public static class PacketInGamePurchaseStoreBundleContentRequestHandler
                     continue;
                 }
 
-                clientItemDefinitions.Add(ItemDefinitionHelper.GetPlayerItemDefinition(connection.Player, _resourceManager, clientItemDefinition));
+                clientItemDefinitions.Add(clientItemDefinition);
             }
         }
 
-        if (clientItemDefinitions.Count == 0)
-            return true;
+        ItemDefinitionHelper.SendItemDefinitions(connection.Player, _resourceManager, clientItemDefinitions);
 
-        using var writer = new PacketWriter();
+        var packetInGamePurchaseStoreBundleContentResponse = new PacketInGamePurchaseStoreBundleContentResponse();
 
-        writer.Write(clientItemDefinitions);
+        foreach (var request in packet.Requests)
+        {
+            packetInGamePurchaseStoreBundleContentResponse.Responses.Add(new PacketInGamePurchaseStoreBundleContentResponse.ResponseData
+            {
+                StoreId = request.StoreId,
+                BundleId = request.BundleId,
+            });
+        }
 
-        var playerUpdatePacketItemDefinitions = new PlayerUpdatePacketItemDefinitions();
-
-        playerUpdatePacketItemDefinitions.Payload = writer.Buffer;
-
-        connection.SendTunneled(playerUpdatePacketItemDefinitions);
+        connection.SendTunneled(packetInGamePurchaseStoreBundleContentResponse);
 
         return true;
     }

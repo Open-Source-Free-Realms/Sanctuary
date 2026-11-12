@@ -22,6 +22,7 @@ using Sanctuary.Game.Quests;
 using Sanctuary.Game.MiniGames;
 using Sanctuary.Game.Resources.Definitions.Combat;
 using Sanctuary.Game.Resources.Definitions;
+using Sanctuary.Game.Routines;
 using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -57,6 +58,8 @@ public sealed class Player : ClientPcData, IEntity
     private readonly IZoneManager _zoneManager;
 
     public bool Visible { get; set; }
+
+    public RoutineManager Routines { get; }
 
     public IZone Zone { get; set; }
     public ZoneTile ZoneTile { get; private set; } = ZoneTile.Empty;
@@ -118,9 +121,9 @@ public sealed class Player : ClientPcData, IEntity
 
     public DateTimeOffset LoginStartedAt { get; set; }
 
-    public long NextClientPathRequestAt { get; set; }
     public int SecondsSinceLastLogin { get; set; } = -1;
     public ConcurrentSet<int> CollectedCollectionEntryIds { get; } = [];
+    public ConcurrentSet<int> InspectedItemDefinitionIds { get; } = [];
 
     public int StationCash { get; set; }
     public List<CoinStoreTransactionRecord> CoinStoreTransactions { get; set; } = [];
@@ -219,6 +222,8 @@ public sealed class Player : ClientPcData, IEntity
         _resourceManager = resourceManager;
         _zoneManager = zoneManager;
         PlayerPet = new PlayerPet(this, resourceManager);
+
+        Routines = new RoutineManager(zone.Logger, zone.TickDelta);
     }
 
     #region Connection
@@ -349,6 +354,9 @@ public sealed class Player : ClientPcData, IEntity
         }
 
         Mount = null;
+
+        RefreshEquipmentGlide();
+
         if (BoomboxDanceTransform != 0 && TemporaryAppearance == BoomboxDanceTransform)
             SendTunneledToVisible(new PlayerUpdatePacketUpdateTemporaryAppearance
             {
@@ -364,6 +372,8 @@ public sealed class Player : ClientPcData, IEntity
     public void UpdateEveryTick()
     {
         var now = DateTimeOffset.UtcNow;
+
+        Routines.OnTick();
 
         TickEffects(now);
 
@@ -791,6 +801,29 @@ public sealed class Player : ClientPcData, IEntity
         var maxMovementSpeed = _mountMovementSpeed ?? OnFootMovementSpeed + _effects.Values.Sum(effect => effect.MovementSpeedBonus);
 
         UpdateCharacterStats(CharacterStats.MaxMovementSpeed.Set(maxMovementSpeed));
+    }
+
+    public void RefreshEquipmentGlide()
+    {
+        if (Mount is not null)
+            return;
+
+        var glideStats = ActiveProfile.Items.Values
+            .Select(profileItem => Items.FirstOrDefault(item => item.Id == profileItem.Id))
+            .Select(item => item is not null && _resourceManager.ClientItemDefinitions.TryGetValue(item.Definition, out var definition) ? definition.Stats : null)
+            .FirstOrDefault(stats => stats is not null && stats.ContainsKey((int)CharacterStatId.GlideEnabled));
+
+        float GlideStat(CharacterStatId id) => glideStats is not null && glideStats.TryGetValue((int)id, out var stat)
+            ? BitConverter.Int32BitsToSingle(Convert.ToInt32(stat.Value)) : 0f;
+
+        UpdateCharacterStats(
+            CharacterStats.GlideDefaultForwardSpeed.Set(GlideStat(CharacterStatId.GlideDefaultForwardSpeed)),
+            CharacterStats.GlideMinForwardSpeed.Set(GlideStat(CharacterStatId.GlideMinForwardSpeed)),
+            CharacterStats.GlideMaxForwardSpeed.Set(GlideStat(CharacterStatId.GlideMaxForwardSpeed)),
+            CharacterStats.GlideFallTime.Set(GlideStat(CharacterStatId.GlideFallTime)),
+            CharacterStats.GlideFallSpeed.Set(GlideStat(CharacterStatId.GlideFallSpeed)),
+            CharacterStats.GlideAccel.Set(GlideStat(CharacterStatId.GlideAccel)),
+            CharacterStats.GlideEnabled.Set(glideStats is null ? 0 : 1));
     }
 
     public void UpdateCharacterStats(params CharacterStat[] characterStats)
@@ -1659,6 +1692,8 @@ public sealed class Player : ClientPcData, IEntity
 
     public void Dispose()
     {
+        Routines.CancelAll();
+
         PlayerPet.Dispose();
 
         RemoveFromVisibleEntities(false); // no need to notify self since we're DCing

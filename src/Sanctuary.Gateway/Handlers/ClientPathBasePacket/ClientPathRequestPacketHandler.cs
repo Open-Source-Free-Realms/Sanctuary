@@ -1,11 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Numerics;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Extensions;
+using Sanctuary.Game.Pathing;
+using Sanctuary.Game.Routines;
+using Sanctuary.Game.Zones;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
@@ -17,7 +19,7 @@ public static class ClientPathRequestPacketHandler
     private static ILogger _logger = null!;
 
     private const float RaisedPointHeight = 1f;
-    private const int MinRequestIntervalMs = 250;
+    private const int SearchIterations = 4096;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -35,37 +37,45 @@ public static class ClientPathRequestPacketHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(ClientPathRequestPacket), clientPathRequestPacket);
 
-        if (clientPathRequestPacket.Guid != connection.Player.Guid || Environment.TickCount64 < connection.Player.NextClientPathRequestAt)
+        var player = connection.Player;
+
+        if (clientPathRequestPacket.Guid != player.Guid)
             return true;
 
-        connection.Player.NextClientPathRequestAt = Environment.TickCount64 + MinRequestIntervalMs;
+        // TODO: This is a temporary "hacky" fix for marshalling logic to the tick thread. This needs to be changed
+        // to a proper marshalling system.
+        player.Routines.SetRoutine($"ClientPath{clientPathRequestPacket.Type}", () =>
+        {
+            connection.SendTunneled(CreateReply(player.Zone, clientPathRequestPacket));
+            return true;
+        });
 
+        return true;
+    }
+
+    private static ClientPathReplyPacket CreateReply(IZone zone, ClientPathRequestPacket clientPathRequestPacket)
+    {
         var clientPathReplyPacket = new ClientPathReplyPacket
         {
             Type = clientPathRequestPacket.Type,
             Id = clientPathRequestPacket.Id
         };
 
+        if (zone.NavMeshQuery is null)
+            return clientPathReplyPacket;
+
+        var pathfinder = new Pathfinder(zone.NavMeshQuery, zone.NavMeshFilter, SearchIterations);
         var start = clientPathRequestPacket.FromPosition.ToVector3();
-        var waypoints = new Queue<Vector3>();
 
-        if (connection.Player.Zone.TryFindClientNavMeshPath(start, clientPathRequestPacket.ToPosition.ToVector3(), waypoints))
-        {
-            clientPathReplyPacket.Points.Add(Raise(start));
+        if (!pathfinder.TryFindPath(start, clientPathRequestPacket.ToPosition.ToVector3(), out var path))
+            return clientPathReplyPacket;
 
-            while (waypoints.Count > 0)
-            {
-                var waypoint = waypoints.Dequeue();
+        clientPathReplyPacket.Points.Add(Raise(start));
 
-                clientPathReplyPacket.Points.Add(waypoints.Count == 0 && clientPathReplyPacket.Points.Count == 1
-                    ? Raise(waypoint)
-                    : new Vector4(waypoint, 1f));
-            }
-        }
+        foreach (var waypoint in path.Waypoints)
+            clientPathReplyPacket.Points.Add(path.Waypoints.Count == 1 ? Raise(waypoint) : new Vector4(waypoint, 1f));
 
-        connection.SendTunneled(clientPathReplyPacket);
-
-        return true;
+        return clientPathReplyPacket;
     }
 
     private static Vector4 Raise(Vector3 point) => new(point.X, point.Y + RaisedPointHeight, point.Z, 1f);
