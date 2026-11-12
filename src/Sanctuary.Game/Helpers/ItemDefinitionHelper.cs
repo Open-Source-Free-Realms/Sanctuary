@@ -17,6 +17,8 @@ public static class ItemDefinitionHelper
     public const int PetUtilityItemType = 4;
     public const int MountItemType = 19;
     public const int HousingItemType = 29;
+    public const int MysteryChestItem = 28;
+    public const int MysteryKeyId = 78137;
     public const int CustomizationItemType = 17;
 
     private const int NoPurchasesLeftMaxStackSize = 0;
