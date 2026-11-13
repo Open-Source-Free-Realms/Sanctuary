@@ -39,7 +39,7 @@ public static class MiniGameHelper
     private const int DefaultQuickCompletionTime = 3600;
     private const int DefaultNpcKOValue = 1;
 
-    public static void ShowDetails(MiniGameUiSession miniGameUiSession, bool zoneReady)
+    public static void ShowDetails(MiniGameUiSession miniGameUiSession)
     {
         var player = miniGameUiSession.Player;
         var definition = miniGameUiSession.Definition;
@@ -50,9 +50,7 @@ public static class MiniGameHelper
 
         SendEncounterDetails(miniGameUiSession, EncounterDetailsPhase.Details);
 
-        if (!zoneReady)
-            return;
-
+        // Without this, Play stays stuck on "Loading...".
         player.SendTunneled(new EncounterZoneIsReadyPacket
         {
             MiniGameStateId = miniGameUiSession.EncounterId,

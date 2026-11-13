@@ -20,7 +20,7 @@ public sealed class MiniGameSessionTests
     {
         public List<string> Calls { get; } = [];
 
-        public void ShowDetails(MiniGameUiSession participant, bool zoneReady) => Calls.Add($"ShowDetails {zoneReady}");
+        public void ShowDetails(MiniGameUiSession participant) => Calls.Add("ShowDetails");
         public void RefreshDetails(MiniGameUiSession participant) => Calls.Add("RefreshDetails");
         public void Start(MiniGameUiSession participant) { participant.State = MiniGameUiState.Running; Calls.Add("Start"); }
         public void ShowEndScreen(MiniGameUiSession participant, MiniGameResult result) { participant.State = MiniGameUiState.Ended; Calls.Add($"EndScreen {result.EarnedStars}"); }
@@ -88,7 +88,7 @@ public sealed class MiniGameSessionTests
         Assert.IsNull(player.MiniGame);
         Assert.AreEqual(MiniGameState.Closed, session.State);
 
-        CollectionAssert.AreEqual(new[] { "ShowDetails False", "Start", "EndScreen 2", "Close" }, client.Calls);
+        CollectionAssert.AreEqual(new[] { "ShowDetails", "Start", "EndScreen 2", "Close" }, client.Calls);
         Assert.IsTrue(session.Events.Any(e => e.EndsWith("(Finished)")));
     }
 
@@ -122,7 +122,7 @@ public sealed class MiniGameSessionTests
 
         Assert.IsNull(player.MiniGame);
         Assert.AreEqual(MiniGameState.Closed, session.State);
-        CollectionAssert.AreEqual(new[] { "ShowDetails False", "Close" }, client.Calls);
+        CollectionAssert.AreEqual(new[] { "ShowDetails", "Close" }, client.Calls);
         CollectionAssert.DoesNotContain((ICollection)session.Events, "Started");
     }
 
@@ -211,7 +211,7 @@ public sealed class MiniGameSessionTests
 
         Assert.IsFalse(manager.Enter(player, session.Id));
         Assert.IsNull(player.MiniGame);
-        CollectionAssert.AreEqual(new[] { "ShowDetails False", "Close", "Unavailable" }, client.Calls);
+        CollectionAssert.AreEqual(new[] { "ShowDetails", "Close", "Unavailable" }, client.Calls);
     }
 
     [TestMethod]
@@ -260,6 +260,6 @@ public sealed class MiniGameSessionTests
         Assert.IsNull(player.MiniGame);
         Assert.AreEqual(MiniGameState.Closed, session.State);
 
-        CollectionAssert.AreEqual(new[] { "ShowDetails True", "Start", "Leave", "Reset" }, client.Calls);
+        CollectionAssert.AreEqual(new[] { "ShowDetails", "Start", "Leave", "Reset" }, client.Calls);
     }
 }

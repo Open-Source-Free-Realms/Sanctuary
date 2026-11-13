@@ -5,7 +5,7 @@ namespace Sanctuary.Game.MiniGames;
 
 public interface IMiniGameClient
 {
-    void ShowDetails(MiniGameUiSession participant, bool zoneReady);
+    void ShowDetails(MiniGameUiSession participant);
     void RefreshDetails(MiniGameUiSession participant);
     void Start(MiniGameUiSession participant);
     void ShowEndScreen(MiniGameUiSession participant, MiniGameResult result);
