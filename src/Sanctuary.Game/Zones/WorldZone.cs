@@ -123,7 +123,7 @@ public sealed class WorldZone : BaseZone
 
         SendEnabledClientAreas(player);
 
-        player.UpdatePointOfInterest(GetNearestZoneArea(player.Position));
+        player.UpdatePointOfInterest();
     }
 
     protected override void UpdateEverySecond()
@@ -234,33 +234,6 @@ public sealed class WorldZone : BaseZone
             return null;
 
         return environmentZoneAreas.FirstOrDefault(x => x.IsInEnvironmentXRange(position.X));
-    }
-
-    public ZoneAreaDefinition? GetNearestZoneArea(Vector4 position)
-    {
-        var zoneArea = GetZoneArea(position);
-
-        if (zoneArea is not null)
-            return zoneArea;
-
-        ZoneAreaDefinition? nearestZoneArea = null;
-        var nearestDistance = float.MaxValue;
-
-        foreach (var areaDefinition in _zoneDefinition.AreaDefinitions)
-        {
-            if (!_resourceManager.PointOfInterests.TryGetValue(areaDefinition.PointOfInterestId, out var pointOfInterest))
-                continue;
-
-            var distance = pointOfInterest.Position.ToVector3().DistanceSquaredXZ(position.ToVector3());
-
-            if (distance >= nearestDistance)
-                continue;
-
-            nearestDistance = distance;
-            nearestZoneArea = areaDefinition;
-        }
-
-        return nearestZoneArea;
     }
 
     private void SendPointOfInterests(Player player)

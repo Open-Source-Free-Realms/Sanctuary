@@ -15,7 +15,7 @@ public struct PlayerUpdatePacketJump : ISerializablePacket, IDeserializable<Play
     public Quaternion Rotation;
 
     public byte State;
-    public byte Unknown;
+    public byte TeleportSequence;
 
     public float VerticalVelocity;
 
@@ -31,7 +31,7 @@ public struct PlayerUpdatePacketJump : ISerializablePacket, IDeserializable<Play
         writer.Write(Rotation, true);
 
         writer.Write(State);
-        writer.Write(Unknown);
+        writer.Write(TeleportSequence);
 
         writer.Write(VerticalVelocity);
 
@@ -59,7 +59,7 @@ public struct PlayerUpdatePacketJump : ISerializablePacket, IDeserializable<Play
         if (!reader.TryRead(out value.State))
             return false;
 
-        if (!reader.TryRead(out value.Unknown))
+        if (!reader.TryRead(out value.TeleportSequence))
             return false;
 
         if (!reader.TryRead(out value.VerticalVelocity))
@@ -70,6 +70,6 @@ public struct PlayerUpdatePacketJump : ISerializablePacket, IDeserializable<Play
 
     public override string ToString()
     {
-        return $"{nameof(Guid)}: {Guid}, {nameof(Position)}: {Position}, {nameof(Rotation)}: {Rotation}, {nameof(State)}: {State}, {nameof(Unknown)}: {Unknown}, {nameof(VerticalVelocity)}: {VerticalVelocity}";
+        return $"{nameof(Guid)}: {Guid}, {nameof(Position)}: {Position}, {nameof(Rotation)}: {Rotation}, {nameof(State)}: {State}, {nameof(TeleportSequence)}: {TeleportSequence}, {nameof(VerticalVelocity)}: {VerticalVelocity}";
     }
 }

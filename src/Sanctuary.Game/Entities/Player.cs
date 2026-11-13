@@ -47,7 +47,11 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
     private const int ActionBarSlotUnknown6 = 4;
     private const int ActionBarSlotUnknown7 = 15;
     private const float OnFootMovementSpeed = 8f;
-    private const long AreaSettleMilliseconds = 1500;
+    private const double AreaSettleSeconds = 1.5;
+    private const string PointOfInterestRoutineName = "PointOfInterest";
+    private const string TeleportRoutineName = "Teleport";
+    private const double TeleportTimeoutSeconds = 3;
+    private const int TeleportSequenceCount = 4;
 
     private readonly UdpConnection _connection;
     private readonly IResourceManager _resourceManager;
@@ -69,8 +73,11 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
     public int PointOfInterestId { get; private set; }
     public int ChatAreaNameId { get; private set; }
 
+    public byte TeleportSequence { get; private set; }
+
+    // TODO: We should PR a change to the routine manager to check if a routine is running by its key.
+    private Routine? _teleportRoutine;
     private ZoneAreaDefinition? _pendingZoneArea;
-    private long _pendingZoneAreaSince;
 
     public int ChatBubbleForegroundColor { get; set; }
     public int ChatBubbleBackgroundColor { get; set; }
@@ -519,7 +526,6 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
     {
         SnowballInteraction.Update(this);
         UpdatePortrait();
-        UpdatePendingPointOfInterest();
     }
 
     public void RelayPosition(PlayerUpdatePacketUpdatePosition playerUpdatePacketUpdatePosition)
@@ -786,9 +792,6 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
         if (!_zoneManager.TryMovePlayerToZone(destinationZone.DefinitionId, destinationZone.OwnerId, this, position, rotation, out var zone))
             return false;
 
-        PointOfInterestId = 0;
-        ChatAreaNameId = 0;
-
         if (_appearanceEffectId != 0 && _effects.TryGetValue(_appearanceEffectId, out var appearanceEffect) && appearanceEffect.ExpiresAt is null)
             RemoveTemporaryAppearance();
 
@@ -803,7 +806,8 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
             Sky = Zone.Sky,
             Id = Zone.Id,
             GeometryId = 214,
-            OverrideUpdateRadius = true
+            OverrideUpdateRadius = true,
+            TeleportSequence = BeginTeleport()
         };
 
         SendTunneled(packetClientBeginZoning);
@@ -813,6 +817,56 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
         return true;
     }
 
+    public void Teleport(Vector4 position, Quaternion rotation)
+    {
+        var teleportSequence = BeginTeleport();
+
+        UpdatePosition(position, rotation);
+
+        var clientUpdatePacketUpdateLocation = new ClientUpdatePacketUpdateLocation
+        {
+            Position = position,
+            Rotation = rotation,
+            Teleport = true,
+            TeleportSequence = teleportSequence
+        };
+
+        SendTunneled(clientUpdatePacketUpdateLocation);
+    }
+
+    private bool IsTeleportPending => _teleportRoutine is { IsRunning: true };
+
+    private byte BeginTeleport()
+    {
+        _pendingZoneArea = null;
+
+        Routines.Cancel(PointOfInterestRoutineName);
+
+        _teleportRoutine = new SequentialRoutine(
+            new DelegateRoutine(onStep: () => Visible),
+            new WaitRoutine(TeleportTimeoutSeconds),
+            new InstantRoutine(UpdatePointOfInterest));
+
+        Routines.SetRoutine(TeleportRoutineName, _teleportRoutine);
+
+        return TeleportSequence = (byte)((TeleportSequence + 1) % TeleportSequenceCount);
+    }
+
+    public bool TryAcceptTeleportSequence(byte teleportSequence)
+    {
+        if (!IsTeleportPending)
+            return true;
+
+        if (teleportSequence != TeleportSequence)
+            return false;
+
+        Routines.Cancel(TeleportRoutineName);
+
+        UpdatePointOfInterest();
+
+        return false;
+    }
+
     private void QueuePointOfInterest()
     {
         var zoneAreaDefinition = Zone is WorldZone worldZone ? worldZone.GetZoneArea(Position, ZoneTile) : null;
@@ -820,6 +874,7 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
         if (zoneAreaDefinition is null || zoneAreaDefinition.Id == PointOfInterestId)
         {
             _pendingZoneArea = null;
+            Routines.Cancel(PointOfInterestRoutineName);
             return;
         }
 
@@ -827,12 +882,12 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
             return;
 
         _pendingZoneArea = zoneAreaDefinition;
-        _pendingZoneAreaSince = Environment.TickCount64;
+        Routines.SetRoutine(PointOfInterestRoutineName, new DelayedRoutine(new InstantRoutine(UpdatePendingPointOfInterest), AreaSettleSeconds));
     }
 
     private void UpdatePendingPointOfInterest()
     {
-        if (_pendingZoneArea is null || Environment.TickCount64 - _pendingZoneAreaSince < AreaSettleMilliseconds)
+        if (IsTeleportPending || _pendingZoneArea is null)
             return;
 
         UpdatePointOfInterest(_pendingZoneArea);
@@ -848,27 +903,25 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
     {
         _pendingZoneArea = null;
 
+        Routines.Cancel(PointOfInterestRoutineName);
+
         if (zoneAreaDefinition is null || zoneAreaDefinition.Id == PointOfInterestId)
             return;
 
         PointOfInterestId = zoneAreaDefinition.Id;
         ChatAreaNameId = zoneAreaDefinition.ChatAreaNameId;
 
-        var packetPOIChangeMessage = new PacketPOIChangeMessage
+        if (zoneAreaDefinition.NameId != 0)
         {
-            NameId = zoneAreaDefinition.NameId,
-            ZoneId = zoneAreaDefinition.Id,
-            AreaId = zoneAreaDefinition.AreaId
-        };
+            var packetPOIChangeMessage = new PacketPOIChangeMessage
+            {
+                NameId = zoneAreaDefinition.NameId,
+                ZoneId = zoneAreaDefinition.Id,
+                AreaId = zoneAreaDefinition.AreaId
+            };
 
-        SendTunneled(packetPOIChangeMessage);
-
-        var chatPacketEnterArea = new ChatPacketEnterArea
-        {
-            AreaNameId = ChatAreaNameId
-        };
-
-        SendTunneled(chatPacketEnterArea);
+            SendTunneled(packetPOIChangeMessage);
+        }
     }
 
     public void SetMountMovementSpeed(float? mountMovementSpeed)
