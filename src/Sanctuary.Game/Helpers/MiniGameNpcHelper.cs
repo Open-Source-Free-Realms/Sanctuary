@@ -1,6 +1,7 @@
 using System.Linq;
 
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.MiniGames;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
@@ -35,7 +36,7 @@ public static class MiniGameNpcHelper
         return true;
     }
 
-    public static bool TryInteract(Player player, Npc npc, int buttonId, IResourceManager resourceManager)
+    public static bool TryInteract(Player player, Npc npc, int buttonId, IResourceManager resourceManager, IMiniGameManager miniGameManager)
     {
         if (!resourceManager.MiniGameNpcs.TryGetValue(npc.NameId, out var miniGameNpcDefinition))
             return false;
@@ -49,9 +50,7 @@ public static class MiniGameNpcHelper
             !TryGetActivity(resourceManager, miniGameNpcButtonDefinition, out var clientActivityDefinition))
             return true;
 
-        var definition = ActivityHelper.GetMiniGameUiDefinition(resourceManager, clientActivityDefinition);
-
-        CombatEncounterHelper.TryShowDetails(player, definition, resourceManager);
+        miniGameManager.ShowDetails(player, clientActivityDefinition.Id);
 
         return true;
     }

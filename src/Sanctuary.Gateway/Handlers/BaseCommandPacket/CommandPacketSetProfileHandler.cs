@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Game.Groups;
-using Sanctuary.Game.Helpers;
+using Sanctuary.Game.MiniGames;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
@@ -16,6 +16,7 @@ public static class CommandPacketSetProfileHandler
 {
     private static ILogger _logger = null!;
     private static IGroupManager _groupManager = null!;
+    private static IMiniGameManager _miniGameManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -23,6 +24,7 @@ public static class CommandPacketSetProfileHandler
         _logger = loggerFactory.CreateLogger(nameof(CommandPacketSetProfileHandler));
 
         _groupManager = serviceProvider.GetRequiredService<IGroupManager>();
+        _miniGameManager = serviceProvider.GetRequiredService<IMiniGameManager>();
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -42,8 +44,7 @@ public static class CommandPacketSetProfileHandler
 
         connection.Player.ActivateProfile(profile);
 
-        if (connection.Player.MiniGameUiSession is not null)
-            MiniGameHelper.RefreshDetails(connection.Player, connection.Player.MiniGameUiSession);
+        _miniGameManager.RefreshDetails(connection.Player);
 
         _groupManager.UpdateMember(connection.Player);
 

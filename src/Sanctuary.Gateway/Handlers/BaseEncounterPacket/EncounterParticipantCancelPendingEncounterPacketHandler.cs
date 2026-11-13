@@ -3,7 +3,6 @@ using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using Sanctuary.Game.Helpers;
 using Sanctuary.Game.MiniGames;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
@@ -14,11 +13,13 @@ namespace Sanctuary.Gateway.Handlers;
 public static class EncounterParticipantCancelPendingEncounterPacketHandler
 {
     private static ILogger _logger = null!;
+    private static IMiniGameManager _miniGameManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
         var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
         _logger = loggerFactory.CreateLogger(nameof(EncounterParticipantCancelPendingEncounterPacketHandler));
+        _miniGameManager = serviceProvider.GetRequiredService<IMiniGameManager>();
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -31,12 +32,7 @@ public static class EncounterParticipantCancelPendingEncounterPacketHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(EncounterParticipantCancelPendingEncounterPacket), encounterParticipantCancelPendingEncounterPacket);
 
-        var miniGameUiSession = connection.Player.MiniGameUiSession;
-
-        if (miniGameUiSession is null || miniGameUiSession.State != MiniGameUiState.Details)
-            return true;
-
-        MiniGameHelper.Close(connection.Player, miniGameUiSession);
+        _miniGameManager.Leave(connection.Player);
 
         return true;
     }

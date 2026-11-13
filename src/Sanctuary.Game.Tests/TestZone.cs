@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 using Sanctuary.Database;
 using Sanctuary.Game.Groups;
+using Sanctuary.Game.MiniGames;
 using Sanctuary.Game.Quests;
 using Sanctuary.Game.Resources.Definitions.Zones;
 using Sanctuary.Game.Zones;
@@ -44,6 +45,8 @@ public sealed class TestZone : BaseZone
         services.AddSingleton<IQuestManager, QuestManager>();
         services.AddSingleton<IZoneManager, ZoneManager>();
         services.AddSingleton<IGroupManager, GroupManager>();
+        services.AddSingleton<IMiniGameClient, EncounterMiniGameClient>();
+        services.AddSingleton<IMiniGameManager, MiniGameManager>();
         if (trades is not null)
             services.AddSingleton(trades);
 

@@ -97,7 +97,7 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
         Profiles.FirstOrDefault(x => x.Id == ActiveProfileId) ?? Profiles.First();
 
     public Mount? Mount { get; set; }
-    public MiniGameUiSession? MiniGameUiSession { get; set; }
+    public MiniGameSession? MiniGame { get; set; }
     public PlayerPet PlayerPet { get; }
     public Npc? Pet => PlayerPet.Pet;
     public Dictionary<int, int> PetDefinitions { get; } = [];
@@ -1855,7 +1855,7 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
         Mount?.Dispose();
         Mount = null;
 
-        MiniGameUiSession = null;
+        MiniGame = null;
 
         ZoneTile.Entities.Remove(Guid, out _);
         Zone.TryRemovePlayer(Guid);
