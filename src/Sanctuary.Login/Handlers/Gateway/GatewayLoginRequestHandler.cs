@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -15,6 +16,7 @@ public static class GatewayLoginRequestHandler
 {
     private static ILogger _logger = null!;
     private static LoginServerOptions _options = null!;
+    private static GatewayServer _gatewayServer = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -24,6 +26,8 @@ public static class GatewayLoginRequestHandler
         var options = serviceProvider.GetRequiredService<IOptionsMonitor<LoginServerOptions>>();
         _options = options.CurrentValue;
         options.OnChange(o => _options = o);
+
+        _gatewayServer = serviceProvider.GetRequiredService<GatewayServer>();
     }
 
     public static bool HandlePacket(GatewayConnection connection, Span<byte> data)
@@ -60,6 +64,14 @@ public static class GatewayLoginRequestHandler
 
         connection.ServerData = packet.Data;
         connection.ServerAddress = packet.ServerAddress;
+
+        // A gateway that logs in with an address already registered is that gateway restarted. Its old connection
+        // can linger until the UDP timeout; drop it now, or character logins keep going to the dead gateway.
+        foreach (var previous in _gatewayServer.Gateways.Where(x => x != connection && x.ServerAddress == packet.ServerAddress).ToList())
+        {
+            _logger.LogInformation("Gateway {address} reconnected; dropping its previous connection {previous}.", packet.ServerAddress, previous);
+            previous.Disconnect();
+        }
 
         gatewayLoginReply.Success = true;
 
