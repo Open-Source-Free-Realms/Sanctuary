@@ -9,8 +9,8 @@ public sealed class EncounterMiniGameClient : IMiniGameClient
 {
     private const string UnavailableMessage = "This minigame isn't available yet.";
 
-    public void ShowDetails(MiniGameUiSession participant, bool zoneReady)
-        => MiniGameHelper.ShowDetails(participant, zoneReady);
+    public void ShowDetails(MiniGameUiSession participant)
+        => MiniGameHelper.ShowDetails(participant);
 
     public void RefreshDetails(MiniGameUiSession participant)
         => MiniGameHelper.RefreshDetails(participant.Player, participant);

@@ -43,7 +43,7 @@ public abstract class MiniGameSession
 
         _participants[player.Guid] = participant;
 
-        Client.ShowDetails(participant, Host.LoadsZone);
+        Client.ShowDetails(participant);
     }
 
     internal void RefreshDetails(Player player)
