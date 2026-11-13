@@ -64,8 +64,9 @@ public class GatewayServer : UdpManager<GatewayConnection>
             if (session.OnReleased is not null)
                 return false;
 
-            // The client goes completely quiet while loading (up to ~25s when zoning), so silence there isn't a crash.
-            if (session.Player.IsLoading)
+            // A player isn't Visible until the client finishes loading, and it doesn't send anything while loading,
+            // so silence then isn't a crash.
+            if (!session.Player.Visible)
             {
                 _logger.LogDebug("Character {id} is still loading on {connection}, treating it as live.", characterId, session);
                 return false;
