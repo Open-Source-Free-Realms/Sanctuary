@@ -21,6 +21,7 @@ using Sanctuary.Game;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Groups;
 using Sanctuary.Game.Helpers;
+using Sanctuary.Game.MiniGames;
 using Sanctuary.Game.Quests;
 using Sanctuary.Gateway.Handlers;
 using Sanctuary.Packet;
@@ -105,6 +106,8 @@ public class GatewayConnection : UdpConnection
         }
 
         _serviceProvider.GetRequiredService<TradeManager>().Disconnect(Player);
+
+        _serviceProvider.GetRequiredService<IMiniGameManager>().Disconnect(Player);
 
         SendFriendOffline();
 

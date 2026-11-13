@@ -13,6 +13,8 @@ using Sanctuary.Core.Extensions;
 using Sanctuary.Database;
 using Sanctuary.Game;
 using Sanctuary.Game.Groups;
+using Sanctuary.Game.MiniGames;
+using Sanctuary.Game.MiniGames.CombatEncounters;
 using Sanctuary.Game.Quests;
 using Sanctuary.Gateway;
 using Sanctuary.Scripting;
@@ -108,6 +110,9 @@ builder.ConfigureServices((hostBuilderContext, serviceCollection) =>
     serviceCollection.AddSingleton<IQuestManager, QuestManager>();
     serviceCollection.AddSingleton<IRewardManager, RewardManager>();
     serviceCollection.AddSingleton<IGroupManager, GroupManager>();
+    serviceCollection.AddSingleton<IMiniGameClient, EncounterMiniGameClient>();
+    serviceCollection.AddSingleton<IMiniGameFactory, CombatEncounterFactory>();
+    serviceCollection.AddSingleton<IMiniGameManager, MiniGameManager>();
 });
 
 builder.ConfigureLogging((hostBuilderContext, loggingBuilder) =>

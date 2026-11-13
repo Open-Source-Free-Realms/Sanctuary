@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Threading;
 
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.MiniGames;
-using Sanctuary.Game.MiniGames.CombatEncounters;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 
@@ -41,19 +39,10 @@ public static class MiniGameHelper
     private const int DefaultQuickCompletionTime = 3600;
     private const int DefaultNpcKOValue = 1;
 
-    private static int _encounterId;
-
-    public static void ShowDetails(Player player, MiniGameUiDefinition definition, CombatEncounter? combatEncounter = null)
+    public static void ShowDetails(MiniGameUiSession miniGameUiSession, bool zoneReady)
     {
-        if (player.MiniGameUiSession is not null)
-            Close(player, player.MiniGameUiSession);
-
-        var miniGameUiSession = new MiniGameUiSession(Interlocked.Increment(ref _encounterId), definition, player)
-        {
-            CombatEncounter = combatEncounter
-        };
-
-        player.MiniGameUiSession = miniGameUiSession;
+        var player = miniGameUiSession.Player;
+        var definition = miniGameUiSession.Definition;
 
         SendEncounterState(miniGameUiSession, EncounterState.Created);
         SendEncounterState(miniGameUiSession, EncounterState.Loading);
@@ -61,7 +50,7 @@ public static class MiniGameHelper
 
         SendEncounterDetails(miniGameUiSession, EncounterDetailsPhase.Details);
 
-        if (combatEncounter is null)
+        if (!zoneReady)
             return;
 
         player.SendTunneled(new EncounterZoneIsReadyPacket
@@ -206,11 +195,11 @@ public static class MiniGameHelper
 
     public static void Close(Player player, MiniGameUiSession miniGameUiSession)
     {
-        player.MiniGameUiSession = null;
+        miniGameUiSession.State = MiniGameUiState.Leaving;
 
         SendTerminate(player, miniGameUiSession);
 
-        SendDefaultEncounterDataCommon(player);
+        ResetEncounterData(player);
     }
 
     public static void Leave(Player player, MiniGameUiSession miniGameUiSession)
@@ -218,27 +207,6 @@ public static class MiniGameHelper
         miniGameUiSession.State = MiniGameUiState.Leaving;
 
         SendTerminate(player, miniGameUiSession);
-    }
-
-    public static void OnClientIsReady(Player player)
-    {
-        var miniGameUiSession = player.MiniGameUiSession;
-
-        if (miniGameUiSession is null)
-            return;
-
-        if (miniGameUiSession.State == MiniGameUiState.Entering)
-        {
-            Start(player, miniGameUiSession);
-            return;
-        }
-
-        if (miniGameUiSession.State != MiniGameUiState.Leaving)
-            return;
-
-        player.MiniGameUiSession = null;
-
-        SendDefaultEncounterDataCommon(player);
     }
 
     private static void SendTerminate(Player player, MiniGameUiSession miniGameUiSession)
@@ -250,7 +218,7 @@ public static class MiniGameHelper
         });
     }
 
-    private static void SendDefaultEncounterDataCommon(Player player)
+    public static void ResetEncounterData(Player player)
     {
         player.SendTunneled(new EncounterDataCommon
         {
