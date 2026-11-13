@@ -151,6 +151,8 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
     public int BoomboxDanceAnimation { get; set; }
     public bool BoomboxDanceIsStanding { get; set; }
     public int BoomboxDanceTransform { get; set; }
+    // TODO: Move into player gesture state when Player is cleaned up.
+    public bool IsPlayingOutfitGesture { get; set; }
 
     public const float DefaultScale = 1f;
 
@@ -1196,6 +1198,17 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
             ? Items.FirstOrDefault(item => item.Id == profileItem.Id)
             : null;
 
+    public void SendActiveWieldType()
+    {
+        var playerUpdatePacketUpdateActiveWieldType = new PlayerUpdatePacketUpdateActiveWieldType
+        {
+            Guid = Guid,
+            WieldType = GetWieldType()
+        };
+
+        SendTunneled(playerUpdatePacketUpdateActiveWieldType);
+    }
+
     public int GetWieldType()
     {
         foreach (var equipmentSlot in _resourceManager.EquipmentSlots.ByAnimationPriority)
@@ -1240,22 +1253,6 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
     {
         if (profileId != ActiveProfileId || (changedSlot != WeaponSlot && changedSlot != FlairShardSlot))
             return;
-
-        // Job switches reuse the cached attachment effect until the new weapon appears.
-        if (GetEquippedItem(WeaponSlot) is { } item
-            && _resourceManager.ClientItemDefinitions.TryGetValue(item.Definition, out var definition)
-            && GetAttachment(WeaponSlot) is { } attachment)
-        {
-            SendTunneledToVisible(new PlayerUpdatePacketEquipItemChange
-            {
-                Guid = Guid,
-                Id = item.Id,
-                Attachment = attachment,
-                ProfileId = ActiveProfileId,
-                ItemClassId = definition.Class,
-                WieldType = GetWieldType()
-            }, true);
-        }
 
         SendTunneledToVisible(GetWeaponFlairOverridePacket(), true);
     }
