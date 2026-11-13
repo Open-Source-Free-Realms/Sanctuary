@@ -14,9 +14,9 @@ public class MiniGameChatCommand : IChatCommand
 
     public string KeyWord => "minigame";
 
-    public string Usage => "start <activityId> | go | finish [stars] | end | abort | status";
+    public string Usage => "start <activityId> | join <activityId> | go | finish [stars] | end | abort | status";
 
-    public string Description => "Opens a test minigame for an activity and steps it through start, finish, end and abort.";
+    public string Description => "Opens a test minigame (start) or the real one (join) for an activity and steps it through start, finish, end and abort.";
 
     public ChatCommandRole RequiredRole => ChatCommandRole.Admin;
 
@@ -38,6 +38,16 @@ public class MiniGameChatCommand : IChatCommand
                     return false;
 
                 Start(invoker, activityId);
+                return true;
+
+            case "join":
+                if (args.Length < 2 || !int.TryParse(args[1], out var joinActivityId))
+                    return false;
+
+                // Same path as joining from the Activities window or a sign-up NPC.
+                Reply(invoker, _miniGameManager.ShowDetails(invoker, joinActivityId),
+                    $"Opened activity {joinActivityId}.",
+                    $"Could not open activity {joinActivityId}. It may not exist, not be joinable, or you are already in a game.");
                 return true;
 
             case "go":
