@@ -91,33 +91,17 @@
 
 This repository only contains the **server emulator** for Free Realms. To play the game, you must also have a **Free Realms client**. You can download the client using the **OSFR Launcher** available here: [OSFR Launcher](https://github.com/Open-Source-Free-Realms/Launcher).
 
-### Prerequisites
-
-Before you can use this software, ensure you have the following installed:
-
-- **Visual Studio 2022**  
-  Make sure to include the **.NET Framework development workload** during installation.
-
 ### Release
 
-1. Clone the repo
-   ```sh
-   git clone https://github.com/Open-Source-Free-Realms/Sanctuary.git
-   ```
-2. Build the solution for `Sanctuary.Core` for `Release`
-3. Create a file named `database.json` in the `Release` folder located within the new `bin` folder
-4. Paste the following
-   ```json
-    {
-    "Database": {
-        "Provider": "Sqlite",
-        "ConnectionString": "Data Source=D:\\Games\\Free Realms\\sanctuary.db;"
-    }
-   ```
-5. Launch `Sanctuary.Login`, `Sanctuary.Gateway`
-6. Connect to the client
-
-**_IMPORTANT:_** Update the Data Source file path (D:\\Games\\Free Realms\\sanctuary.db) to match the location where your database files are stored.
+1. Clone the repo in VSCode.
+2. Download the C# Dev Kit extension from Microsoft (hit Extensions on the left or CTRL+SHIFT+X).
+3. Get .NET 9.0 SDK from Microsoft: https://dotnet.microsoft.com/en-us/download/dotnet/9.0
+4. Install Python with PATH and pip install requests
+5. Open your workspace with OSFR in it and run `dotnet build src` in the terminal OR disclude this project from Windows Defender - either or.
+6. Run Servers + WebAPI (or switch it to Servers + WebAPI and hit F5).
+7. Configure Terminal Settings (plus sign with a down arrow on the terminal bar, 'Launch Settings') and set it to External. 
+8. Open a new Terminal and run python run_client.py -a 127.0.0.1
+9. Profit.
 
 **_NOTE:_** The following user should already exist, but if not then implement one with the following credentials:
 
@@ -128,28 +112,6 @@ Before you can use this software, ensure you have the following installed:
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ### Debug
-
-1. Clone the repo
-   ```sh
-   git clone https://github.com/Open-Source-Free-Realms/Sanctuary.git
-   ```
-2. Build the solution for `Sanctuary.Core` for `Debug`
-3. Right-Click **'Manage User Secrets'** for the following projects:
-   - `Sanctuary.Gateway`
-   - `Sanctuary.Login`
-   - `Sanctuary.Database`
-
-4. Copy and paste the following configuration for **SQLite** into the secrets editor:
-
-   ```json
-   {
-     "Database": {
-       "Provider": "Sqlite",
-       "ConnectionString": "Data Source=D:\\Games\\Free Realms\\sanctuary.db;"
-     }
-   }
-5. Launch `Sanctuary.Login`, `Sanctuary.Gateway`
-6. Connect to the client
 
 **_IMPORTANT:_** Update the Data Source file path (D:\\Games\\Free Realms\\sanctuary.db) to match the location where your database files are stored.
 
