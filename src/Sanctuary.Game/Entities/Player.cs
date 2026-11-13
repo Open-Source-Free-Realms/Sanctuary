@@ -48,8 +48,8 @@ public sealed class Player : ClientPcData, IEntity
     private const int ActionBarSlotUnknown7 = 15;
     private const float OnFootMovementSpeed = 8f;
     private const double AreaSettleSeconds = 1.5;
-    private const string PointOfInterestRoutine = "PointOfInterest";
-    private const string TeleportRoutine = "Teleport";
+    private const string PointOfInterestRoutineName = "PointOfInterest";
+    private const string TeleportRoutineName = "Teleport";
     private const double TeleportTimeoutSeconds = 3;
     private const int TeleportSequenceCount = 4;
 
@@ -75,6 +75,7 @@ public sealed class Player : ClientPcData, IEntity
 
     public byte TeleportSequence { get; private set; }
 
+    // TODO: We should PR a change to the routine manager to check if a routine is running by its key.
     private Routine? _teleportRoutine;
     private ZoneAreaDefinition? _pendingZoneArea;
 
@@ -741,14 +742,14 @@ public sealed class Player : ClientPcData, IEntity
     {
         _pendingZoneArea = null;
 
-        Routines.Cancel(PointOfInterestRoutine);
+        Routines.Cancel(PointOfInterestRoutineName);
 
         _teleportRoutine = new SequentialRoutine(
             new DelegateRoutine(onStep: () => Visible),
             new WaitRoutine(TeleportTimeoutSeconds),
             new InstantRoutine(UpdatePointOfInterest));
 
-        Routines.SetRoutine(TeleportRoutine, _teleportRoutine);
+        Routines.SetRoutine(TeleportRoutineName, _teleportRoutine);
 
         return TeleportSequence = (byte)((TeleportSequence + 1) % TeleportSequenceCount);
     }
@@ -761,7 +762,7 @@ public sealed class Player : ClientPcData, IEntity
         if (teleportSequence != TeleportSequence)
             return false;
 
-        Routines.Cancel(TeleportRoutine);
+        Routines.Cancel(TeleportRoutineName);
 
         UpdatePointOfInterest();
 
@@ -775,7 +776,7 @@ public sealed class Player : ClientPcData, IEntity
         if (zoneAreaDefinition is null || zoneAreaDefinition.Id == PointOfInterestId)
         {
             _pendingZoneArea = null;
-            Routines.Cancel(PointOfInterestRoutine);
+            Routines.Cancel(PointOfInterestRoutineName);
             return;
         }
 
@@ -783,7 +784,7 @@ public sealed class Player : ClientPcData, IEntity
             return;
 
         _pendingZoneArea = zoneAreaDefinition;
-        Routines.SetRoutine(PointOfInterestRoutine, new DelayedRoutine(new InstantRoutine(UpdatePendingPointOfInterest), AreaSettleSeconds));
+        Routines.SetRoutine(PointOfInterestRoutineName, new DelayedRoutine(new InstantRoutine(UpdatePendingPointOfInterest), AreaSettleSeconds));
     }
 
     private void UpdatePendingPointOfInterest()
@@ -804,7 +805,7 @@ public sealed class Player : ClientPcData, IEntity
     {
         _pendingZoneArea = null;
 
-        Routines.Cancel(PointOfInterestRoutine);
+        Routines.Cancel(PointOfInterestRoutineName);
 
         if (zoneAreaDefinition is null || zoneAreaDefinition.Id == PointOfInterestId)
             return;
