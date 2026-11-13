@@ -10,7 +10,6 @@ namespace Sanctuary.Game.MiniGames.CombatEncounters;
 public class CombatEncounter
 {
     private const int EncounterZoningId = 0;
-    private const byte EncounterZoningUnknown = 3;
     private const int EncounterZoningGeometryId = 96;
 
     public MiniGameUiDefinition Definition { get; init; } = new();
@@ -28,7 +27,7 @@ public class CombatEncounter
         if (player.Mount is not null)
             player.Dismount();
 
-        if (!player.TeleportToZone(ZoneDefinitionId, player.Guid, EntryPosition, EntryRotation, EncounterZoningId, EncounterZoningUnknown, EncounterZoningGeometryId, out var zone))
+        if (!player.TeleportToZone(ZoneDefinitionId, player.Guid, EntryPosition, EntryRotation, EncounterZoningId, EncounterZoningGeometryId, out var zone))
             return;
 
         if (!zone.Npcs.Any())

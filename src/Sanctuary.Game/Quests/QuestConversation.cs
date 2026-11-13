@@ -21,10 +21,6 @@ public sealed class QuestConversation
 
     public ulong NpcGuid { get; private set; }
 
-    public ulong TalkingNpcGuid { get; set; }
-
-    public DateTimeOffset TalkAnimationEndsAt { get; set; }
-
     public bool IsLastLine => Current is { Choices.Count: 0 } && _remaining.Count == 0;
 
     public void Start(IReadOnlyList<QuestDialogueLine> lines, ulong npcGuid, Action? onFinished = null)

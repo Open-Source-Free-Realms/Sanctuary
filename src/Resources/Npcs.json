@@ -40913,5 +40913,40 @@
     "Name": "Freewheeler",
     "ModelId": 3987,
     "ModelFileName": "dwarf_f_bikerthug.adr"
+  },
+      {
+    "Id": 40035,
+    "NameId": 19048,
+    "Name": "Clockwork Mystery Chest",
+    "ModelId": 876,
+    "ModelFileName": "sg_mystery_chest_03.adr"
+  },
+  {
+    "Id": 40036,
+    "NameId": 436403,
+    "Name": "Mystery Chest",
+    "ModelId": 1511,
+    "ModelFileName": "sg_mystery_chest_01.adr"
+  },
+  {
+    "Id": 40037,
+    "NameId": 2662,
+    "Name": "Sci-Fi Mystery Chest",
+    "ModelId": 1512,
+    "ModelFileName": "sg_mystery_chest_02.adr"
+  },
+  {
+    "Id": 40038,
+    "NameId": 4419440,
+    "Name": "Snow Days Mystery Chest",
+    "ModelId": 4135,
+    "ModelFileName": "sg_mystery_chest_04.adr"
+  },
+  {
+    "Id": 40039,
+    "NameId": 442890,
+    "Name": "Wonders Mystery Chest",
+    "ModelId": 4460,
+    "ModelFileName": "sg_mystery_chest_05.adr"
   }
 ]

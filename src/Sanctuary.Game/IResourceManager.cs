@@ -25,6 +25,7 @@ public interface IResourceManager
     EquipmentSlotDefinitionCollection EquipmentSlots { get; }
     ItemCategoryDefinitionCollection ItemCategories { get; }
     ItemCategoryGroupDefinitionCollection ItemCategoryGroups { get; }
+    TintGroupCollection TintGroups { get; }
 
     StoreDefinitionCollection Stores { get; }
     StoreBundleGroupDefinitionCollection StoreBundleGroups { get; }

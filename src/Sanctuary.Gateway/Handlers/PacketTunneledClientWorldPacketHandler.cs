@@ -40,6 +40,7 @@ public static class PacketTunneledClientWorldPacketHandler
 
         var handled = opCode switch
         {
+            BaseTradePacket.OpCode => BaseTradePacketHandler.HandlePacket(connection, reader),
             BaseCommandPacket.OpCode => BaseCommandPacketHandler.HandlePacket(connection, reader),
             PacketWorldTeleportRequest.OpCode => PacketWorldTeleportRequestHandler.HandlePacket(connection, packetTunneledClientWorldPacket.Payload),
             PacketBaseInGamePurchase.OpCode => PacketBaseInGamePurchaseHandler.HandlePacket(connection, reader),

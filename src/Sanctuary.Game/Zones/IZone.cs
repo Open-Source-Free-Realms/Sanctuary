@@ -41,6 +41,8 @@ public interface IZone : IScriptableZone, IDisposable
     IEnumerable<Npc> Npcs { get; }
     IEnumerable<Player> Players { get; }
 
+    ulong ReserveNpcGuid();
+
     bool IsEmpty { get; }
 
     float TickDeltaSeconds { get; }

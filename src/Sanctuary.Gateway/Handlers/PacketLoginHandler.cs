@@ -201,7 +201,8 @@ public static class PacketLoginHandler
             .Where(x => x.Id == character.Id)
             .ExecuteUpdate(x => x.SetProperty(x => x.LastLogin, connection.Player.LoginStartedAt));
 
-        _loginClient.SendCharacterLogin(character.Id);
+        connection.BeginLoginSession();
+        _loginClient.SendCharacterLogin(character.Id, connection.LoginSession);
 
         packetLoginReply.Success = true;
 

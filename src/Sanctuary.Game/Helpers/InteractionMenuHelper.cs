@@ -14,6 +14,8 @@ public static class InteractionMenuHelper
 {
     public const byte QuestCursorId = 5;
 
+    private const float TalkStandDistance = 2.2f;
+
     public static CommandPacketInteractionList GetInteractionListPacket(ulong guid, string? name,
         IEnumerable<InteractionData> interactions, bool autoSelectSingle = false)
     {
@@ -114,7 +116,7 @@ public static class InteractionMenuHelper
         {
             player.SendTunneled(new CommandPacketMoveAndInteract
             {
-                Position = npc.Position,
+                Position = GetApproachPosition(npc.Position, player.Position),
                 Guid = npc.Guid
             });
             return true;
@@ -139,6 +141,9 @@ public static class InteractionMenuHelper
 
         return npc.InteractRange >= 0 && IsWithinRange(npc, player, npc.InteractRange);
     }
+
+    public static Vector4 GetApproachPosition(Vector4 target, Vector4 origin)
+        => PositionHelper.GetPointNear(target, TalkStandDistance, origin);
 
     private static bool IsWithinRange(Npc npc, Player player, int range)
     {

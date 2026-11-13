@@ -9,7 +9,9 @@ using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Game;
 using Sanctuary.Game.Helpers;
+using Sanctuary.Gateway.Helpers;
 using Sanctuary.Packet;
+using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
 
 namespace Sanctuary.Gateway.Handlers;
@@ -68,12 +70,16 @@ public static class InventoryPacketEquippedRemoveHandler
             return true;
         }
 
+        ItemClassDefinition? itemClass = null;
+
         if (clientItemDefinition.Class != ItemDefinitionHelper.NoItemClass
-            && !_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out _))
+            && !_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out itemClass))
         {
             _logger.LogWarning("User tried to equip unknown item class. {id} {definition}", profileItem.Id, clientItemDefinition.Class);
             return true;
         }
+
+        var previousWieldType = connection.Player.GetWieldType();
 
         profile.Items.Remove(inventoryPacketEquippedRemove.Slot);
 
@@ -120,6 +126,8 @@ public static class InventoryPacketEquippedRemoveHandler
         clientUpdatePacketUnequipSlot.ProfileId = inventoryPacketEquippedRemove.ProfileId;
 
         connection.SendTunneled(clientUpdatePacketUnequipSlot);
+
+        OutfitGestureHelper.OnEquipReply(connection, itemClass, previousWieldType);
 
         var playerUpdatePacketEquipItemChange = new PlayerUpdatePacketEquipItemChange();
 

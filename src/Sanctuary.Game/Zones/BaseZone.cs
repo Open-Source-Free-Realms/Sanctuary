@@ -91,6 +91,8 @@ public abstract class BaseZone : IZone, IDisposable
     public IEnumerable<Npc> Npcs => _npcs.Values;
     public IEnumerable<Player> Players => _players.Values;
 
+    public ulong ReserveNpcGuid() => GetNpcGuid(null);
+
     public bool IsEmpty => _players.IsEmpty;
 
     public IScriptManager ScriptManager => _scriptManager;
@@ -114,6 +116,11 @@ public abstract class BaseZone : IZone, IDisposable
         _logger = loggerFactory.CreateLogger($"Zone {Name} ({Id})");
 
         Routines = new RoutineManager(_logger, TickDelta);
+        // TODO: Start trade maintenance on the zone's first invite and cancel it after its last
+        // session closes, if the idle once-a-second sweep ever shows up in profiling.
+        if (serviceProvider.GetService<TradeManager>() is { } trades)
+            Routines.SetRoutine("trade-maintenance",
+                new PeriodicRoutine(new InstantRoutine(() => trades.Sweep(this)), 1));
 
         _scriptManager = serviceProvider.GetRequiredService<IScriptManager>();
         _questManager = serviceProvider.GetRequiredService<IQuestManager>();
@@ -231,13 +238,7 @@ public abstract class BaseZone : IZone, IDisposable
 
         player.SendTunneled(clientUpdatePacketMana);
 
-        var playerUpdatePacketUpdateActiveWieldType = new PlayerUpdatePacketUpdateActiveWieldType
-        {
-            Guid = player.Guid,
-            WieldType = player.GetWieldType()
-        };
-
-        player.SendTunneled(playerUpdatePacketUpdateActiveWieldType);
+        player.SendActiveWieldType();
 
         SendGuildData(player);
 

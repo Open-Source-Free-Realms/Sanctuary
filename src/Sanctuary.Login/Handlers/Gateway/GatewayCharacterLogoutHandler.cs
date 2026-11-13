@@ -29,7 +29,8 @@ public static class GatewayCharacterLogoutHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(GatewayCharacterLogout), packet);
 
-        connection.OnlineCharacters.Remove(packet.id);
+        if (!connection.TryLogout(packet.id, packet.Session))
+            _logger.LogInformation("Ignored logout for character {id}. A newer login replaced that session.", packet.id);
 
         return true;
     }
