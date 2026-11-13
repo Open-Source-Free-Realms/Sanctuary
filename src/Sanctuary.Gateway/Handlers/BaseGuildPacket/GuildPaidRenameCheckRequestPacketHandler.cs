@@ -6,6 +6,8 @@ using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
+using Sanctuary.Game;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Gateway.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
@@ -17,6 +19,7 @@ public static class GuildPaidRenameCheckRequestPacketHandler
 {
     private static ILogger _logger = null!;
     private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
+    private static IResourceManager _resourceManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -24,6 +27,7 @@ public static class GuildPaidRenameCheckRequestPacketHandler
         _logger = loggerFactory.CreateLogger(nameof(GuildPaidRenameCheckRequestPacketHandler));
 
         _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
+        _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -41,7 +45,7 @@ public static class GuildPaidRenameCheckRequestPacketHandler
         var result = 5;
         int? role = null;
 
-        if (!GuildHelper.IsValidName(guildName))
+        if (!GuildHelper.IsValidName(guildName) || ChatFilter.IsBlocked(guildName, _resourceManager))
         {
             result = 2;
         }

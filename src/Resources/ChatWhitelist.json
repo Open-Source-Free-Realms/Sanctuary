@@ -1,0 +1,6 @@
+// blacklist matches inside a whitelist match aren't censored. don't edit this file, use ChatWhitelist.local.json or !chatfilter in game:
+// { "Enabled": true, "Add": [ { "Key": "class", "Pattern": "\\bclass\\b" } ], "Remove": [ "default-key" ] }  (double your backslashes)
+{
+  "Enabled": false,
+  "Entries": []
+}

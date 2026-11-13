@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Sanctuary.Core.Helpers;
 using Sanctuary.Database;
 using Sanctuary.Game;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Gateway.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
@@ -19,6 +20,7 @@ public static class GuildRenameGuildPacketHandler
     private static ILogger _logger = null!;
     private static IZoneManager _zoneManager = null!;
     private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
+    private static IResourceManager _resourceManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -27,6 +29,7 @@ public static class GuildRenameGuildPacketHandler
 
         _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
         _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
+        _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -45,7 +48,7 @@ public static class GuildRenameGuildPacketHandler
         var guildGuid = connection.Player.GuildData.Guid;
         var guildName = GuildHelper.NormalizeName(packet.Name);
 
-        if (!GuildHelper.IsValidName(guildName))
+        if (!GuildHelper.IsValidName(guildName) || ChatFilter.IsBlocked(guildName, _resourceManager))
         {
             connection.SendTunneled(new GuildPaidRenameCheckReplyPacket
             {
