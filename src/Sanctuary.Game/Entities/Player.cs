@@ -143,6 +143,7 @@ public sealed class Player : ClientPcData, IEntity
     public int BoomboxDanceAnimation { get; set; }
     public bool BoomboxDanceIsStanding { get; set; }
     public int BoomboxDanceTransform { get; set; }
+    // TODO: Move into player gesture state when Player is cleaned up.
     public bool IsPlayingOutfitGesture { get; set; }
 
     public const float DefaultScale = 1f;

@@ -19,8 +19,8 @@ public static class OutfitGestureHelper
     private const int NoAnimation = 0;
     private const int QuickChatLoopCount = -1;
 
-    private const string HoldRoutine = "OutfitGestureHold";
-    private const string GestureRoutine = "OutfitGesture";
+    private const string HoldRoutineName = "OutfitGestureHold";
+    private const string GestureRoutineName = "OutfitGesture";
 
     private const double GestureSeconds = 3;
     private const double UnmatchedGestureDelaySeconds = 0.6;
@@ -67,7 +67,7 @@ public static class OutfitGestureHelper
 
         GestureStates.GetValue(player, _ => new PlayerGestures()).Pending = pendingGesture;
 
-        player.Routines.SetRoutine(HoldRoutine, new DelayedRoutine(new InstantRoutine(() => Release(pendingGesture)), UnmatchedGestureDelaySeconds));
+        player.Routines.SetRoutine(HoldRoutineName, new DelayedRoutine(new InstantRoutine(() => Release(pendingGesture)), UnmatchedGestureDelaySeconds));
     }
 
     public static void OnEquipReply(GatewayConnection connection, ItemClassDefinition? itemClass, int previousWieldType)
@@ -81,9 +81,11 @@ public static class OutfitGestureHelper
         if (!GestureStates.TryGetValue(player, out var playerGestures) || playerGestures.Pending is not { } pendingGesture)
             return;
 
-        player.Routines.Cancel(HoldRoutine);
+        player.Routines.Cancel(HoldRoutineName);
 
-        Release(pendingGesture, wieldTypeChanged, itemClass?.WieldType is null or 0 || !wieldTypeChanged);
+        var playGesture = itemClass?.WieldType is null or 0 || !wieldTypeChanged;
+
+        Release(pendingGesture, wieldTypeChanged, playGesture);
     }
 
     private static void Release(PendingGesture pendingGesture, bool wieldTypeChanged = false, bool play = true)
@@ -118,7 +120,7 @@ public static class OutfitGestureHelper
         steps.Add(new WaitRoutine(TimelineGapSeconds + LongestGestureSeconds + GestureEndMarginSeconds - GestureSeconds));
         steps.Add(new InstantRoutine(() => player.IsPlayingOutfitGesture = false));
 
-        player.Routines.SetRoutine(GestureRoutine, new SequentialRoutine(steps));
+        player.Routines.SetRoutine(GestureRoutineName, new SequentialRoutine(steps));
     }
 
     private static void SendQuickChatToVisible(PendingGesture pendingGesture)
