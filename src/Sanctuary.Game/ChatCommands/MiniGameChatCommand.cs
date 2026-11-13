@@ -41,8 +41,14 @@ public class MiniGameChatCommand : IChatCommand
                 return true;
 
             case "go":
-                Reply(invoker, invoker.MiniGame is { } session && _miniGameManager.Enter(invoker, session.Id),
-                    "Entered the minigame.", "You have no minigame details screen open.");
+                if (invoker.MiniGame is not { } session)
+                {
+                    ChatHelper.SendSystemMessage(invoker, "You are not in a minigame. Use !minigame start <activityId> first.");
+                    return true;
+                }
+
+                Reply(invoker, _miniGameManager.Enter(invoker, session.Id),
+                    "Entered the minigame.", "Your minigame has already started.");
                 return true;
 
             case "finish":
