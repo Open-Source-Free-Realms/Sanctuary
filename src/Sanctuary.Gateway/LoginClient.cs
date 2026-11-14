@@ -20,26 +20,28 @@ public class LoginClient : UdpManager<LoginConnection>
         _logger = logger;
     }
 
-    public void SendCharacterLogin(ulong id)
+    public void SendCharacterLogin(ulong id, ulong session)
     {
         foreach (var connection in Connections)
         {
             var gatewayCharacterLogin = new GatewayCharacterLogin()
             {
-                Id = id
+                Id = id,
+                Session = session
             };
 
             connection.Send(gatewayCharacterLogin);
         }
     }
 
-    public void SendCharacterLogout(ulong id)
+    public void SendCharacterLogout(ulong id, ulong session)
     {
         foreach (var connection in Connections)
         {
             var gatewayCharacterLogout = new GatewayCharacterLogout()
             {
-                id = id
+                id = id,
+                Session = session
             };
 
             connection.Send(gatewayCharacterLogout);

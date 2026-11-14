@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Resources.Definitions;
 using Sanctuary.Game.Resources.Definitions.QuestGoals;
 using Sanctuary.Packet;
@@ -17,47 +18,12 @@ public static class QuestDialogue
 
     private const int GreenButtonImageSet = 17;
 
-    public const int TalkAnimationId = 3105;
-
-    private const int IdleAnimationId = 1;
-
-    private const byte SetBaseAnimation = 1;
-
-    private const int TalkAnimationMs = 1500;
+    public const int TalkAnimationId = 3106;
 
     public static void PlayTalkAnimation(Player player, ulong npcGuid)
     {
-        if (npcGuid == 0)
-            return;
-
-        if (player.QuestConversation.TalkingNpcGuid != 0 && player.QuestConversation.TalkingNpcGuid != npcGuid)
-            StopTalkAnimation(player);
-
-        player.QuestConversation.TalkingNpcGuid = npcGuid;
-        player.QuestConversation.TalkAnimationEndsAt = DateTimeOffset.UtcNow.AddMilliseconds(TalkAnimationMs);
-
-        player.SendTunneled(new PlayerUpdatePacketSetAnimation
-        {
-            Guid = npcGuid,
-            AnimationId = TalkAnimationId,
-            Flags = SetBaseAnimation
-        });
-    }
-
-    public static void StopTalkAnimation(Player player)
-    {
-        if (player.QuestConversation.TalkingNpcGuid == 0)
-            return;
-
-        var npcGuid = player.QuestConversation.TalkingNpcGuid;
-        player.QuestConversation.TalkingNpcGuid = 0;
-
-        player.SendTunneled(new PlayerUpdatePacketSetAnimation
-        {
-            Guid = npcGuid,
-            AnimationId = IdleAnimationId,
-            Flags = SetBaseAnimation
-        });
+        if (npcGuid != 0)
+            EntityHelper.SendAnimation(player, npcGuid, TalkAnimationId);
     }
 
     public static void Begin(Player player, IReadOnlyList<QuestDialogueLine> lines, ulong npcGuid, Action? onFinished = null)
@@ -88,7 +54,6 @@ public static class QuestDialogue
 
             case QuestConversationStep.Finished:
                 var onFinished = conversation.Finish();
-                StopTalkAnimation(player);
                 onFinished?.Invoke();
                 return conversation.Current is not null;
 
@@ -101,7 +66,6 @@ public static class QuestDialogue
     public static void Clear(Player player)
     {
         player.QuestConversation.Clear();
-        StopTalkAnimation(player);
     }
 
     private static void Show(Player player)

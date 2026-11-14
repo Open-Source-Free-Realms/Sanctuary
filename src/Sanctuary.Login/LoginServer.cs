@@ -45,7 +45,7 @@ public class LoginServer : UdpManager<LoginConnection>
         buf[0] = Convert.ToByte(_gatewayServer.Gateways.Any());
         buf[1] = Convert.ToByte(_options.IsLocked);
 
-        var onlinePlayers = _gatewayServer.Gateways.Sum(x => x.OnlineCharacters.Count);
+        var onlinePlayers = _gatewayServer.Gateways.Sum(x => x.OnlineCount);
 
         BinaryPrimitives.WriteInt32LittleEndian(buf.Slice(2), onlinePlayers);
 

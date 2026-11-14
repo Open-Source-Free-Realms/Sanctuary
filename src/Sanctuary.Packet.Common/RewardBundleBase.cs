@@ -11,7 +11,7 @@ public sealed class RewardBundleBase : ISerializableType
     public int Coins;
     public int Experience;
     public int Unknown2;
-    public int Unknown3 = 3;
+    public int Unknown3 = 3; // This gives you a box reward with "OK" popup if set to 16
     public int Unknown4;
     public int Unknown5;
     public float Multiplier = 1.0f;

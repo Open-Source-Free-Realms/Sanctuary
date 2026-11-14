@@ -38,6 +38,7 @@ public class ResourceManager : IResourceManager, IDisposable
     public static readonly string EquipmentSlotDefinitionsFile = Path.Combine(BaseDirectory, "EquipmentSlotDefinitions.txt");
     public static readonly string ItemCategoriesFile = Path.Combine(BaseDirectory, "ItemCategories.txt");
     public static readonly string ItemCategoryGroupsFile = Path.Combine(BaseDirectory, "ItemCategoryGroups.txt");
+    public static readonly string TintGroupMappingsFile = Path.Combine(BaseDirectory, "TintGroupMappings.txt");
 
     public static readonly string StoresFile = Path.Combine(BaseDirectory, "Stores.json");
     public static readonly string StoreBundlesFile = Path.Combine(BaseDirectory, "StoreBundles.json");
@@ -87,6 +88,7 @@ public class ResourceManager : IResourceManager, IDisposable
     public EquipmentSlotDefinitionCollection EquipmentSlots { get; }
     public ItemCategoryDefinitionCollection ItemCategories { get; }
     public ItemCategoryGroupDefinitionCollection ItemCategoryGroups { get; }
+    public TintGroupCollection TintGroups { get; }
 
     public StoreDefinitionCollection Stores { get; }
     public StoreBundleGroupDefinitionCollection StoreBundleGroups { get; }
@@ -147,6 +149,7 @@ public class ResourceManager : IResourceManager, IDisposable
         EquipmentSlots = new(_logger);
         ItemCategories = new(_logger);
         ItemCategoryGroups = new(_logger);
+        TintGroups = new(_logger);
 
         Stores = new(_logger);
         StoreBundleGroups = new(_logger);
@@ -308,6 +311,9 @@ public class ResourceManager : IResourceManager, IDisposable
         if (!ItemCategoryGroups.Load(ItemCategoryGroupsFile))
             return false;
 
+        if (!TintGroups.Load(TintGroupMappingsFile))
+            return false;
+            
         if (!Stores.Load(StoresFile) || !Stores.LoadBundles(StoreBundlesFile))
             return false;
 
