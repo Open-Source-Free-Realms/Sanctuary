@@ -1,5 +1,15 @@
 [
   {
+    "Name": "Play",
+    "Projects": [
+      {
+        "Path": "Sanctuary.DevClient\\Sanctuary.DevClient.csproj",
+        "Action": "Start",
+        "DebugTarget": "Play"
+      }
+    ]
+  },
+  {
     "Name": "Servers",
     "Projects": [
       {
@@ -26,6 +36,28 @@
       {
         "Path": "Sanctuary.Gateway\\Sanctuary.Gateway.csproj",
         "Action": "Start"
+      }
+    ]
+  },
+  {
+    "Name": "Servers + WebAPI + Client",
+    "Projects": [
+      {
+        "Path": "Sanctuary.WebAPI\\Sanctuary.WebAPI.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Sanctuary.Login\\Sanctuary.Login.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Sanctuary.Gateway\\Sanctuary.Gateway.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "Sanctuary.DevClient\\Sanctuary.DevClient.csproj",
+        "Action": "Start",
+        "DebugTarget": "Client only"
       }
     ]
   }

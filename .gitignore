@@ -6,6 +6,7 @@
 # Client install
 .client.download/
 client/
+client-*/
 
 # Sqlite DBs
 *.db*
