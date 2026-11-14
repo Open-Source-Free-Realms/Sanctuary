@@ -1,0 +1,58 @@
+{
+  "Categories": [
+    {
+      "Category": 12,
+      "Comment": "Cooking",
+      "ProfileType": "Chef"
+    },
+    {
+      "Category": 14,
+      "Comment": "Forging",
+      "ProfileType": "Blacksmith"
+    },
+    {
+      "Category": 19,
+      "Comment": "Mining",
+      "ProfileType": "Miner"
+    },
+    {
+      "Category": 21,
+      "Comment": "Smelting",
+      "ProfileType": "Miner"
+    },
+    {
+      "Category": 26,
+      "Comment": "Treasure Wars",
+      "ProfileType": "CardDuelist"
+    }
+  ],
+  "FilenameMarkers": [
+    {
+      "Marker": "_mail_",
+      "Comment": "Mail delivery",
+      "ProfileType": "Postman"
+    }
+  ],
+  "MiniGameTypes": [
+    {
+      "MiniGameType": "KartRace",
+      "ProfileType": "KartDriver"
+    },
+    {
+      "MiniGameType": "DemolitionDerby",
+      "ProfileType": "DemoDerbyDriver"
+    },
+    {
+      "MiniGameType": "Soccer",
+      "ProfileType": "SoccerStar"
+    },
+    {
+      "MiniGameType": "CardGame",
+      "ProfileType": "CardDuelist"
+    },
+    {
+      "MiniGameType": "Fishing",
+      "ProfileType": "Fisherman"
+    }
+  ]
+}

@@ -1,0 +1,637 @@
+{
+    "ZoneDefinitionId": 200,
+    "EntryPosition": [
+        130.108,
+        0.688,
+        120.036
+    ],
+    "EntryRotation": [
+        0.2211563,
+        0.9752384
+    ],
+    "Spawns": [
+        {
+            "NpcId": 34021,
+            "Position": [
+                129.3317,
+                -0.7322,
+                171.8101
+            ],
+            "Heading": -1.8087
+        },
+        {
+            "NpcId": 34022,
+            "Position": [
+                97.0276,
+                0.2576,
+                174.4427
+            ],
+            "Heading": 2.1205
+        },
+        {
+            "NpcId": 34022,
+            "Position": [
+                97.4625,
+                0.244,
+                173.9911
+            ],
+            "Heading": 2.3119
+        },
+        {
+            "NpcId": 34022,
+            "Position": [
+                97.5511,
+                1.7165,
+                160.7495
+            ],
+            "Heading": 1.8579
+        },
+        {
+            "NpcId": 34022,
+            "Position": [
+                99.9627,
+                0.7837,
+                138.6182
+            ],
+            "Heading": 1.9241
+        },
+        {
+            "NpcId": 34022,
+            "Position": [
+                101.8338,
+                -0.0895,
+                190.6614
+            ],
+            "Heading": 2.1328
+        },
+        {
+            "NpcId": 34022,
+            "Position": [
+                102.5037,
+                1.442,
+                131.175
+            ],
+            "Heading": 0.6061
+        },
+        {
+            "NpcId": 34022,
+            "Position": [
+                102.5818,
+                0.7317,
+                203.8563
+            ],
+            "Heading": 2.6629
+        },
+        {
+            "NpcId": 34022,
+            "Position": [
+                104.3666,
+                1.5627,
+                131.9298
+            ],
+            "Heading": 0.714
+        },
+        {
+            "NpcId": 34022,
+            "Position": [
+                108.9637,
+                0.0247,
+                209.9396
+            ],
+            "Heading": 2.6752
+        },
+        {
+            "NpcId": 34022,
+            "Position": [
+                111.2704,
+                0.8006,
+                125.0031
+            ],
+            "Heading": 0.9105
+        },
+        {
+            "NpcId": 34022,
+            "Position": [
+                111.3541,
+                -0.188,
+                210.2245
+            ],
+            "Heading": 3.1096
+        },
+        {
+            "NpcId": 34022,
+            "Position": [
+                118.602,
+                0.9377,
+                118.9047
+            ],
+            "Heading": 0.6405
+        },
+        {
+            "NpcId": 34022,
+            "Position": [
+                120.7266,
+                1.5935,
+                111.6221
+            ],
+            "Heading": 0.692
+        },
+        {
+            "NpcId": 34022,
+            "Position": [
+                122.3954,
+                0.5561,
+                114.6253
+            ],
+            "Heading": 0.3406
+        },
+        {
+            "NpcId": 34022,
+            "Position": [
+                138.885,
+                2.0154,
+                115.4432
+            ],
+            "Heading": 1.4676
+        },
+        {
+            "NpcId": 34022,
+            "Position": [
+                140.4576,
+                1.7578,
+                113.1818
+            ],
+            "Heading": 0.1177
+        },
+        {
+            "NpcId": 34022,
+            "Position": [
+                157.8604,
+                0.7238,
+                127.5971
+            ],
+            "Heading": -0.5106
+        },
+        {
+            "NpcId": 34022,
+            "Position": [
+                158.582,
+                1.5816,
+                137.1003
+            ],
+            "Heading": -0.6081
+        },
+        {
+            "NpcId": 34022,
+            "Position": [
+                166.0752,
+                0.3495,
+                197.3405
+            ],
+            "Heading": -2.0649
+        },
+        {
+            "NpcId": 34022,
+            "Position": [
+                169.4753,
+                0.627,
+                153.7437
+            ],
+            "Heading": -1.5536
+        },
+        {
+            "NpcId": 34023,
+            "Position": [
+                136.4831,
+                -0.3597,
+                209.4494
+            ],
+            "Heading": -3.0803
+        },
+        {
+            "NpcId": 34023,
+            "Position": [
+                139.0774,
+                1.6419,
+                113.2737
+            ],
+            "Heading": -0.1817
+        },
+        {
+            "NpcId": 34023,
+            "Position": [
+                160.3257,
+                1.6929,
+                137.5818
+            ],
+            "Heading": -0.8029
+        },
+        {
+            "NpcId": 34023,
+            "Position": [
+                166.0752,
+                0.3495,
+                197.3405
+            ],
+            "Heading": -2.0649
+        },
+        {
+            "NpcId": 34023,
+            "Position": [
+                170.7999,
+                0.4828,
+                191.6324
+            ],
+            "Heading": -2.1722
+        },
+        {
+            "NpcId": 34023,
+            "Position": [
+                183.203,
+                0.8474,
+                163.4866
+            ],
+            "Heading": -0.4001
+        },
+        {
+            "NpcId": 34023,
+            "Position": [
+                183.6198,
+                1.0978,
+                183.0242
+            ],
+            "Heading": -1.8949
+        },
+        {
+            "NpcId": 34023,
+            "Position": [
+                197.8578,
+                2.0274,
+                173.2129
+            ],
+            "Heading": -0.4664
+        },
+        {
+            "NpcId": 34028,
+            "Position": [
+                141.4333,
+                -0.5932,
+                185.5653
+            ],
+            "Heading": 0.0
+        },
+        {
+            "NpcId": 34050,
+            "Position": [
+                154.3211,
+                1.9599,
+                209.3541
+            ],
+            "Heading": -2.8179
+        },
+        {
+            "NpcId": 34059,
+            "Position": [
+                116.8543,
+                -0.4488,
+                180.3207
+            ],
+            "Heading": 0.0
+        },
+        {
+            "NpcId": 34060,
+            "Position": [
+                116.8543,
+                1.0512,
+                180.3207
+            ],
+            "Heading": 1.8159
+        },
+        {
+            "NpcId": 34061,
+            "Position": [
+                145,
+                -0.005,
+                173.349
+            ],
+            "Heading": -1.991
+        }
+    ],
+    "Definition": {
+        "GameId": 174,
+        "EncounterDefinitionId": 1008,
+        "NameId": 93276,
+        "IconId": 28605,
+        "DescriptionId": 104171,
+        "Difficulty": 1,
+        "Type": 4,
+        "ProfileType": 2,
+        "DurationMs": 2000,
+        "RespawnTime": 10000,
+        "ShowStarCounter": true,
+        "ShowStatusIcon": true,
+        "ShowActionBar": true,
+        "ShowFullInterface": true,
+        "ShowEndDialog": true,
+        "MemberRewardBundle": {
+            "HasOptionalData": true,
+            "Coins": 36,
+            "Unknown3": 15,
+            "IconId": 102,
+            "NameId": 6513,
+            "DescriptionId": 3796
+        },
+        "PreviewRewardBundle": {
+            "Coins": 20,
+            "Unknown3": 15,
+            "IconId": 2483,
+            "NameId": 133217,
+            "DescriptionId": 957,
+            "Items": [
+                {
+                    "IsHidden": true,
+                    "IconId": 2483,
+                    "TintId": 234,
+                    "NameId": 133217,
+                    "DefinitionId": 76209
+                },
+                {
+                    "IconId": 3717,
+                    "TintId": 264,
+                    "NameId": 131152,
+                    "DefinitionId": 75408
+                },
+                {
+                    "IconId": 3229,
+                    "TintId": 247,
+                    "NameId": 131975,
+                    "DefinitionId": 75091
+                },
+                {
+                    "IconId": 1198,
+                    "NameId": 131129,
+                    "DefinitionId": 75385
+                },
+                {
+                    "IsHidden": true,
+                    "IconId": 973,
+                    "TintId": -1,
+                    "NameId": 6666,
+                    "DefinitionId": 10482
+                }
+            ]
+        },
+        "ProfilePreviewRewardBundles": {
+            "2": {
+                "Coins": 20,
+                "Unknown3": 15,
+                "IconId": 2483,
+                "NameId": 133217,
+                "DescriptionId": 957,
+                "Items": [
+                    {
+                        "IsHidden": true,
+                        "IconId": 2483,
+                        "TintId": 234,
+                        "NameId": 133217,
+                        "DefinitionId": 76209
+                    },
+                    {
+                        "IconId": 3717,
+                        "TintId": 264,
+                        "NameId": 131152,
+                        "DefinitionId": 75408
+                    },
+                    {
+                        "IconId": 3229,
+                        "TintId": 247,
+                        "NameId": 131975,
+                        "DefinitionId": 75091
+                    },
+                    {
+                        "IconId": 1198,
+                        "NameId": 131129,
+                        "DefinitionId": 75385
+                    },
+                    {
+                        "IsHidden": true,
+                        "IconId": 973,
+                        "TintId": -1,
+                        "NameId": 6666,
+                        "DefinitionId": 10482
+                    }
+                ]
+            },
+            "35": {
+                "Coins": 20,
+                "Unknown3": 15,
+                "IconId": 3721,
+                "NameId": 130968,
+                "DescriptionId": 957,
+                "Items": [
+                    {
+                        "IconId": 3721,
+                        "TintId": 230,
+                        "NameId": 130968,
+                        "DefinitionId": 75224
+                    },
+                    {
+                        "IconId": 547,
+                        "NameId": 130924,
+                        "DefinitionId": 75180
+                    },
+                    {
+                        "IconId": 3104,
+                        "TintId": 228,
+                        "NameId": 131884,
+                        "DefinitionId": 75000
+                    },
+                    {
+                        "IsHidden": true,
+                        "IconId": 973,
+                        "TintId": -1,
+                        "NameId": 6666,
+                        "DefinitionId": 10482
+                    }
+                ]
+            },
+            "11": {
+                "Coins": 20,
+                "Unknown3": 15,
+                "IconId": 3717,
+                "NameId": 131087,
+                "DescriptionId": 957,
+                "Items": [
+                    {
+                        "IconId": 3717,
+                        "TintId": 232,
+                        "NameId": 131087,
+                        "DefinitionId": 75343
+                    },
+                    {
+                        "IconId": 3133,
+                        "TintId": 232,
+                        "NameId": 131945,
+                        "DefinitionId": 75061
+                    },
+                    {
+                        "IconId": 1198,
+                        "NameId": 131064,
+                        "DefinitionId": 75320
+                    },
+                    {
+                        "IsHidden": true,
+                        "IconId": 973,
+                        "TintId": -1,
+                        "NameId": 6666,
+                        "DefinitionId": 10482
+                    }
+                ]
+            },
+            "12": {
+                "Coins": 20,
+                "Unknown3": 15,
+                "IconId": 3717,
+                "NameId": 131282,
+                "DescriptionId": 957,
+                "Items": [
+                    {
+                        "IconId": 3717,
+                        "TintId": 264,
+                        "NameId": 131282,
+                        "DefinitionId": 75538
+                    },
+                    {
+                        "IconId": 3158,
+                        "TintId": 247,
+                        "NameId": 132035,
+                        "DefinitionId": 75151
+                    },
+                    {
+                        "IconId": 1198,
+                        "NameId": 131259,
+                        "DefinitionId": 75515
+                    },
+                    {
+                        "IsHidden": true,
+                        "IconId": 973,
+                        "TintId": -1,
+                        "NameId": 6666,
+                        "DefinitionId": 10482
+                    }
+                ]
+            },
+            "32": {
+                "Coins": 20,
+                "Unknown3": 15,
+                "IconId": 3717,
+                "NameId": 131217,
+                "DescriptionId": 957,
+                "Items": [
+                    {
+                        "IconId": 3717,
+                        "TintId": 232,
+                        "NameId": 131217,
+                        "DefinitionId": 75473
+                    },
+                    {
+                        "IconId": 3120,
+                        "TintId": 232,
+                        "NameId": 132005,
+                        "DefinitionId": 75121
+                    },
+                    {
+                        "IconId": 1198,
+                        "NameId": 131194,
+                        "DefinitionId": 75450
+                    },
+                    {
+                        "IsHidden": true,
+                        "IconId": 973,
+                        "TintId": -1,
+                        "NameId": 6666,
+                        "DefinitionId": 10482
+                    }
+                ]
+            },
+            "43": {
+                "Coins": 20,
+                "Unknown3": 15,
+                "IconId": 3717,
+                "NameId": 131022,
+                "DescriptionId": 957,
+                "Items": [
+                    {
+                        "IconId": 3717,
+                        "TintId": 264,
+                        "NameId": 131022,
+                        "DefinitionId": 75278
+                    },
+                    {
+                        "IconId": 3131,
+                        "TintId": 247,
+                        "NameId": 131915,
+                        "DefinitionId": 75031
+                    },
+                    {
+                        "IconId": 1198,
+                        "NameId": 130999,
+                        "DefinitionId": 75255
+                    },
+                    {
+                        "IsHidden": true,
+                        "IconId": 973,
+                        "TintId": -1,
+                        "NameId": 6666,
+                        "DefinitionId": 10482
+                    }
+                ]
+            }
+        },
+        "Objectives": [
+            {
+                "Id": 12288,
+                "NameId": 2286,
+                "DescriptionId": 100712,
+                "Total": 5,
+                "IsFailCondition": true
+            },
+            {
+                "Id": 12642,
+                "NameId": 104176,
+                "DescriptionId": 104177,
+                "Total": 1,
+                "CompleteValue": 5000,
+                "ShowTask": true,
+                "RewardBundle": {
+                    "Experience": 10,
+                    "Unknown3": 15,
+                    "IconId": 3901,
+                    "NameId": 2416,
+                    "DescriptionId": 5240
+                }
+            }
+        ],
+        "EncounterDataCommon": {
+            "CombatStance": true,
+            "CanTakeDamage": true,
+            "CanUseAbilities": true,
+            "CanUseConsumables": true,
+            "CanMelee": true,
+            "CanUseTraits": true,
+            "CanChangeMaxMoveSpeed": true,
+            "ShowHpBar": true,
+            "ShowCombatUi": true,
+            "UseCombatCamera": true,
+            "CombatType": true,
+            "GameTimeOverride": -1,
+            "ObjectiveMultiplier": 500,
+            "QuickCompletionTime": 1,
+            "QuickCompletionValue": 100000,
+            "QuickCompletionLoss": 500,
+            "NpcKOValue": 300,
+            "KnockoutRewardValue": 25000,
+            "KnockoutPenalty": 5000
+        }
+    }
+}

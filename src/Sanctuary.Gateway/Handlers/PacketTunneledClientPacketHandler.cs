@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 using Sanctuary.Core.IO;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -58,6 +59,7 @@ public static class PacketTunneledClientPacketHandler
             PlayerUpdatePacketUpdatePosition.OpCode => PlayerUpdatePacketUpdatePositionHandler.HandlePacket(connection, packetTunneledClientPacket.Payload),
             PlayerUpdatePacketCameraUpdate.OpCode => PlayerUpdatePacketCameraUpdateHandler.HandlePacket(connection, packetTunneledClientPacket.Payload),
             BaseHousingPacket.OpCode => BaseHousingPacketHandler.HandlePacket(connection, reader),
+            BaseGroupPacket.OpCode => BaseGroupPacketHandler.HandlePacket(connection, reader),
             BasePlayerTitlePacket.OpCode => BasePlayerTitlePacketHandler.HandlePacket(connection, reader),
             PacketAddClientPortraitCrc.OpCode => PacketAddClientPortraitCrcHandler.HandlePacket(connection, packetTunneledClientPacket.Payload),
             BaseFotomatPacket.OpCode => BaseFotomatPacketHandler.HandlePacket(connection, reader),
@@ -70,6 +72,9 @@ public static class PacketTunneledClientPacketHandler
             BaseQuestPacket.OpCode => BaseQuestPacketHandler.HandlePacket(connection, reader),
             BaseUiPacket.OpCode => BaseUiPacketHandler.HandlePacket(connection, reader),
             ClientPathBasePacket.OpCode => ClientPathBasePacketHandler.HandlePacket(connection, reader),
+            BaseEncounterPacket.OpCode => BaseEncounterPacketHandler.HandlePacket(connection, reader),
+            BaseMiniGamePacket.OpCode => BaseMiniGamePacketHandler.HandlePacket(connection, reader),
+            BaseActivityServicePacket.OpCode => BaseActivityServicePacketHandler.HandlePacket(connection, reader, ActivityHelper.ZoneServerType),
             BaseInspectPacket.OpCode => BaseInspectPacketHandler.HandlePacket(connection, reader),
             _ => false
         };
