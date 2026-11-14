@@ -79,7 +79,7 @@ public sealed class MiniGameManager : IMiniGameManager
 
     private bool OpenLocked(Player player, MiniGameSession session)
     {
-        session.Client = _client;
+        session.UseClient(_client);
         session.Released = released =>
         {
             if (released.MiniGame == session)

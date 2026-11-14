@@ -28,11 +28,16 @@ public abstract class MiniGameSession
 
     public IReadOnlyCollection<MiniGameUiSession> Participants => _participants.Values;
 
-    internal IMiniGameClient Client { get; set; } = null!;
+    private IMiniGameClient? _client;
+
+    internal IMiniGameClient Client => _client!;
 
     internal Action<Player>? Released { get; set; }
 
     public virtual bool Playable => true;
+
+    // A game with its own client protocol sets it in its constructor; the manager fills in the default otherwise.
+    protected internal void UseClient(IMiniGameClient client) => _client ??= client;
 
     public bool TryGetParticipant(Player player, out MiniGameUiSession participant)
         => _participants.TryGetValue(player.Guid, out participant!);

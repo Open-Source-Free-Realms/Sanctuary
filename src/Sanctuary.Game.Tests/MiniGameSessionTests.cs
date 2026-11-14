@@ -53,6 +53,15 @@ public sealed class MiniGameSessionTests
         protected override void OnClosed() => Hooks.Add("Closed");
     }
 
+    private sealed class OwnClientSession : MiniGameSession
+    {
+        public OwnClientSession(MiniGameUiDefinition definition, IMiniGameClient client)
+            : base(definition, WorldMiniGameHost.Instance)
+        {
+            UseClient(client);
+        }
+    }
+
     private static ulong _nextGuid = 1;
 
     private static (MiniGameManager Manager, RecordingClient Client) CreateManager()
@@ -90,6 +99,22 @@ public sealed class MiniGameSessionTests
 
         CollectionAssert.AreEqual(new[] { "ShowDetails", "Start", "EndScreen 2", "Close" }, client.Calls);
         Assert.IsTrue(session.Events.Any(e => e.EndsWith("(Finished)")));
+    }
+
+    [TestMethod]
+    public void SessionWithOwnClient_SendsThroughItInsteadOfTheDefault()
+    {
+        using var zone = TestZone.Create();
+        var (manager, defaultClient) = CreateManager();
+        var ownClient = new RecordingClient();
+        var player = CreatePlayer(zone);
+        var session = new OwnClientSession(Definition(), ownClient);
+
+        manager.Open(player, session);
+        manager.Enter(player, session.Id);
+
+        CollectionAssert.AreEqual(new[] { "ShowDetails", "Start" }, ownClient.Calls);
+        Assert.AreEqual(0, defaultClient.Calls.Count);
     }
 
     [TestMethod]
