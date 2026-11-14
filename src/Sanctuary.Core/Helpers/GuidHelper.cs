@@ -9,6 +9,7 @@ public static class GuidHelper
     {
         Player = 1,
         Npc = 2,
+        LocationTarget = 3,
 
         Max = 15
     }
@@ -88,6 +89,11 @@ public static class GuidHelper
     public static ulong GetNpcInstanceId(ulong zoneId)
     {
         return (zoneId - FirstNpcInstanceId) % MaxNpcInstanceId + FirstNpcInstanceId;
+    }
+
+    public static ulong GetLocationTargetGuid(int nameId)
+    {
+        return GetGuid(GuidType.LocationTarget, (uint)nameId);
     }
 
     public static ulong GetGuildGuid(ulong id)

@@ -294,8 +294,7 @@ public class Npc : IScriptableNpc, IEntity
             Guid = Guid,
             Position = position,
             Rotation = rotation,
-            State = state,
-            Unknown = 0
+            State = state
         };
 
         var now = Environment.TickCount64;

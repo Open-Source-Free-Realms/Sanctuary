@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 
 using Sanctuary.Core.IO;
@@ -17,8 +18,12 @@ public static class ItemDefinitionHelper
     public const int HouseItemType = 16;
     public const int MountItemType = 19;
     public const int HousingItemType = 29;
+    public const int MysteryChestItem = 28;
+    public const int MysteryKeyId = 78137;
+    public const int CustomizationItemType = 17;
 
     private const int NoPurchasesLeftMaxStackSize = 0;
+    private const int NoTint = 0;
 
     public static ClientItemDefinition GetPlayerItemDefinition(Player player, IResourceManager resourceManager, ClientItemDefinition clientItemDefinition)
     {
@@ -35,6 +40,22 @@ public static class ItemDefinitionHelper
         return playerItemDefinition;
     }
 
+    public static ClientItemDefinition GetTintedItemDefinition(ClientItemDefinition clientItemDefinition, int tint)
+    {
+        if (tint == NoTint || clientItemDefinition.Icon.TintId == tint)
+            return clientItemDefinition;
+
+        var tintedItemDefinition = clientItemDefinition.Clone();
+
+        tintedItemDefinition.Icon = new IconData
+        {
+            Id = clientItemDefinition.Icon.Id,
+            TintId = tint
+        };
+
+        return tintedItemDefinition;
+    }
+
     public static void SendItemDefinition(Player player, IResourceManager resourceManager, ClientItemDefinition clientItemDefinition)
     {
         using var writer = new PacketWriter();
@@ -48,6 +69,27 @@ public static class ItemDefinitionHelper
         };
 
         player.SendTunneled(playerUpdatePacketItemDefinitionRequest);
+    }
+
+    public static void SendItemDefinitions(Player player, IResourceManager resourceManager, IEnumerable<ClientItemDefinition> clientItemDefinitions)
+    {
+        var playerItemDefinitions = clientItemDefinitions
+            .Select(clientItemDefinition => GetPlayerItemDefinition(player, resourceManager, clientItemDefinition))
+            .ToList();
+
+        if (playerItemDefinitions.Count == 0)
+            return;
+
+        using var writer = new PacketWriter();
+
+        writer.Write(playerItemDefinitions);
+
+        var playerUpdatePacketItemDefinitions = new PlayerUpdatePacketItemDefinitions
+        {
+            Payload = writer.Buffer
+        };
+
+        player.SendTunneled(playerUpdatePacketItemDefinitions);
     }
 
     private static bool HasTintChoice(IResourceManager resourceManager, ClientItemDefinition clientItemDefinition) =>

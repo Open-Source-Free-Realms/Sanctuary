@@ -29,7 +29,7 @@ public static class GatewayCharacterLoginHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(GatewayCharacterLogin), packet);
 
-        connection.OnlineCharacters.Add(packet.Id);
+        connection.MarkOnline(packet.Id, packet.Session);
 
         return true;
     }

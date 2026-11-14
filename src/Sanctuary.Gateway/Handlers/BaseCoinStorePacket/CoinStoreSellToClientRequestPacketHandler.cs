@@ -71,6 +71,7 @@ public static class CoinStoreSellToClientRequestPacketHandler
             clientItemDefinition.Type != ItemDefinitionHelper.PetClothingItemType &&
             clientItemDefinition.Type != ItemDefinitionHelper.PetUtilityItemType &&
             clientItemDefinition.Type != ItemDefinitionHelper.HousingItemType &&
+            clientItemDefinition.Type != ItemDefinitionHelper.CustomizationItemType &&
             clientItemDefinition.Type != 12)
         {
             coinStoreTransactionCompletePacket.Result = CoinStoreTransactionResult.Error;

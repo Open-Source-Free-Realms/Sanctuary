@@ -33,6 +33,7 @@ public class GatewayConnection : UdpConnection
 {
     private readonly ILogger _logger;
     private readonly LoginClient _loginClient;
+    private ulong _loginSession;
     private readonly IZoneManager _zoneManager;
     private readonly GatewayServer _gatewayServer;
     private readonly GatewayServerOptions _options;
@@ -42,6 +43,8 @@ public class GatewayConnection : UdpConnection
 
     private readonly object _workLock = new();
     private Task _workTail = Task.CompletedTask;
+
+    private bool _zoneAreasReloaded;
 
     private ICipher _cipher;
 #pragma warning disable CS0649
@@ -67,6 +70,19 @@ public class GatewayConnection : UdpConnection
         _cipher = new CipherCCM();
     }
 
+    public ulong LoginSession => _loginSession;
+
+    /// <summary>
+    /// Set when login asked to release this session. Runs at the end of <see cref="OnTerminated"/>, after the save,
+    /// so the next login of this character can't load data from before it.
+    /// </summary>
+    public Action? OnReleased { get; set; }
+
+    public void BeginLoginSession()
+    {
+        _loginSession = (ulong)Random.Shared.NextInt64(1, long.MaxValue);
+    }
+
     public void InitializeCipher(string key)
     {
         _cipher.Initialize(Encoding.ASCII.GetBytes(key));
@@ -82,17 +98,25 @@ public class GatewayConnection : UdpConnection
 
         // Just in case check if player is null.
         if (Player is null)
+        {
+            OnReleased?.Invoke();
             return;
+        }
+
+        _serviceProvider.GetRequiredService<TradeManager>().Disconnect(Player);
 
         SendFriendOffline();
 
         SendGuildMemberOffline();
 
-        _loginClient.SendCharacterLogout(GuidHelper.GetPlayerId(Player.Guid));
-
+        // Save before telling login the character is offline, so a quick re-login can't load the data from before this save.
         SavePlayerToDatabase();
 
+        _loginClient.SendCharacterLogout(GuidHelper.GetPlayerId(Player.Guid), _loginSession);
+
         Player.Dispose();
+
+        OnReleased?.Invoke();
     }
 
     public void QueueWork(Action work)
@@ -663,6 +687,16 @@ public class GatewayConnection : UdpConnection
         };
 
         SendTunneled(packetSendZoneDetails);
+    }
+
+    public void ReloadZoneAreas()
+    {
+        if (_zoneAreasReloaded)
+            return;
+
+        _zoneAreasReloaded = true;
+
+        SendZoneDetails();
     }
 
     public void ClientGameSettings()

@@ -10687,5 +10687,32 @@
         "IconTintId": 0
       }
     ]
+  },
+  {
+    "Id": 320,
+    "NameId": 438844,
+    "CategoryId": 9,
+    "DescriptionId": 438845,
+    "IconId": 71,
+    "IconTintId": 0,
+    "HeaderMetadata": 0,
+    "RewardIconId": 3644,
+    "RewardCurrencyIconId": 2620,
+    "RewardEntryType": 1,
+    "RewardIconId2": 3644,
+    "RewardEntryTintId": 234,
+    "RewardCurrencyIconId2": 2620,
+    "RewardPoints": 1,
+    "RewardMetadata": 17300,
+    "RewardEntryItemGuid": 0,
+    "Unknown20": 5307,
+    "Entries": [
+      {
+        "Id": 2215,
+        "NameId": 438997,
+        "IconId": 71,
+        "IconTintId": 0
+      }
+    ]
   }
 ]

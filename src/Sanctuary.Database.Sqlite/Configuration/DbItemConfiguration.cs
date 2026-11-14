@@ -13,9 +13,9 @@ public sealed class DbItemConfiguration : IEntityTypeConfiguration<DbItem>
         builder.Property(i => i.Id).IsRequired().ValueGeneratedNever();
         builder.HasIndex(i => new { i.Tint, i.Definition, i.CharacterId });
 
-        builder.Property(i => i.Tint).IsRequired();
-        builder.Property(i => i.Count).IsRequired();
-        builder.Property(i => i.Definition).IsRequired();
+        builder.Property(i => i.Tint).IsRequired().IsConcurrencyToken();
+        builder.Property(i => i.Count).IsRequired().IsConcurrencyToken();
+        builder.Property(i => i.Definition).IsRequired().IsConcurrencyToken();
 
         builder.Property(i => i.Created).IsRequired().HasDefaultValueSql("DATE()");
     }

@@ -118,7 +118,7 @@ public static class PacketInGamePurchasePlaceOrderPacketHandler
             }
 
             if (clientItemDefinition.Type == 1 || clientItemDefinition.Type == ItemDefinitionHelper.PetClothingItemType
-                || clientItemDefinition.Type == ItemDefinitionHelper.PetUtilityItemType || clientItemDefinition.Type == 12
+                || clientItemDefinition.Type == ItemDefinitionHelper.PetUtilityItemType || clientItemDefinition.Type == 12 || clientItemDefinition.Type == ItemDefinitionHelper.MysteryChestItem
                 || clientItemDefinition.Type == ItemDefinitionHelper.HouseItemType || clientItemDefinition.Type == ItemDefinitionHelper.HousingItemType)
             {
                 var totalQuantity = orderDetail.Quantity * bundleEntry.Quantity;
