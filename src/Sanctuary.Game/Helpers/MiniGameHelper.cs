@@ -50,7 +50,10 @@ public static class MiniGameHelper
 
         SendEncounterDetails(miniGameUiSession, EncounterDetailsPhase.Details);
 
-        // Without this, Play stays stuck on "Loading...".
+        // Play is kept on "Loading..." until the minigame is built and hooked up to a session.
+        if (!miniGameUiSession.Playable)
+            return;
+
         player.SendTunneled(new EncounterZoneIsReadyPacket
         {
             MiniGameStateId = miniGameUiSession.EncounterId,

@@ -9,6 +9,7 @@ public sealed class MiniGameUiSession
     public int EncounterId { get; }
     public MiniGameUiDefinition Definition { get; }
     public Player Player { get; }
+    public bool Playable { get; init; }
     public MiniGameUiState State { get; set; }
     public Dictionary<int, int> ObjectiveProgress { get; } = [];
     public int KnockOuts { get; set; }

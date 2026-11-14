@@ -44,7 +44,7 @@ public abstract class MiniGameSession
 
     internal void Open(Player player)
     {
-        var participant = new MiniGameUiSession(Id, Definition, player);
+        var participant = new MiniGameUiSession(Id, Definition, player) { Playable = Playable };
 
         _participants[player.Guid] = participant;
 

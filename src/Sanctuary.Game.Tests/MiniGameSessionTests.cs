@@ -261,6 +261,23 @@ public sealed class MiniGameSessionTests
     }
 
     [TestMethod]
+    public void OnlyGamesWithASession_GetAPlayablePlayButton()
+    {
+        using var zone = TestZone.Create();
+        var (manager, _) = CreateManager();
+        var builtPlayer = CreatePlayer(zone);
+        var unbuiltPlayer = CreatePlayer(zone);
+        var built = new TestMiniGameSession(Definition());
+        var unbuilt = new UnavailableMiniGameSession(Definition());
+
+        manager.Open(builtPlayer, built);
+        manager.Open(unbuiltPlayer, unbuilt);
+
+        Assert.IsTrue(built.TryGetParticipant(builtPlayer, out var builtParticipant) && builtParticipant.Playable);
+        Assert.IsTrue(unbuilt.TryGetParticipant(unbuiltPlayer, out var unbuiltParticipant) && !unbuiltParticipant.Playable);
+    }
+
+    [TestMethod]
     public void ZoneGame_StartsWhenClientIsReady_AndReleasesAfterLoadingBack()
     {
         using var zone = TestZone.Create();
