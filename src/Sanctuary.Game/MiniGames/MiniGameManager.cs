@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 using Sanctuary.Game.Entities;
@@ -124,19 +125,34 @@ public sealed class MiniGameManager : IMiniGameManager
             player.MiniGame?.ClientIsReady(player);
     }
 
+    public bool CancelDetails(Player player)
+    {
+        lock (_lock)
+            return LeaveLocked(player, state => state == MiniGameUiState.Details);
+    }
+
+    public bool CloseEndScreen(Player player)
+    {
+        lock (_lock)
+            return LeaveLocked(player, state => state != MiniGameUiState.Details);
+    }
+
     public bool Leave(Player player)
     {
         lock (_lock)
-        {
-            if (player.MiniGame is not { } session || !session.TryGetParticipant(player, out var participant))
-                return false;
+            return LeaveLocked(player, _ => true);
+    }
 
-            var reason = participant.State == MiniGameUiState.Ended ? MiniGameEndReason.Finished : MiniGameEndReason.Aborted;
+    private static bool LeaveLocked(Player player, Func<MiniGameUiState, bool> canLeave)
+    {
+        if (player.MiniGame is not { } session || !session.TryGetParticipant(player, out var participant) || !canLeave(participant.State))
+            return false;
 
-            session.Leave(player, reason);
+        var reason = participant.State == MiniGameUiState.Ended ? MiniGameEndReason.Finished : MiniGameEndReason.Aborted;
 
-            return true;
-        }
+        session.Leave(player, reason);
+
+        return true;
     }
 
     public bool Finish(Player player, MiniGameResult result)

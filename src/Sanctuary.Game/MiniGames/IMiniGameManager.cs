@@ -14,7 +14,13 @@ public interface IMiniGameManager
 
     void ClientIsReady(Player player);
 
-    /// <summary>The player left: cancelled the details screen, exited, or closed the end screen.</summary>
+    /// <summary>The player cancelled the details screen. Ignored once the game has been entered.</summary>
+    bool CancelDetails(Player player);
+
+    /// <summary>The player closed the end screen. Ignored on the details screen.</summary>
+    bool CloseEndScreen(Player player);
+
+    /// <summary>The player left from any state.</summary>
     bool Leave(Player player);
 
     bool Finish(Player player, MiniGameResult result);

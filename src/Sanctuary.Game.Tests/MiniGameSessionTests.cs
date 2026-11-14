@@ -278,6 +278,37 @@ public sealed class MiniGameSessionTests
     }
 
     [TestMethod]
+    public void CancelDetails_IsIgnoredOnceTheGameIsRunning()
+    {
+        using var zone = TestZone.Create();
+        var (manager, _) = CreateManager();
+        var player = CreatePlayer(zone);
+        var session = new TestMiniGameSession(Definition());
+
+        manager.Open(player, session);
+        manager.Enter(player, session.Id);
+
+        Assert.IsFalse(manager.CancelDetails(player));
+        Assert.AreSame(session, player.MiniGame);
+        Assert.AreEqual(MiniGameState.Running, session.State);
+    }
+
+    [TestMethod]
+    public void CloseEndScreen_IsIgnoredOnTheDetailsScreen()
+    {
+        using var zone = TestZone.Create();
+        var (manager, client) = CreateManager();
+        var player = CreatePlayer(zone);
+        var session = new TestMiniGameSession(Definition());
+
+        manager.Open(player, session);
+
+        Assert.IsFalse(manager.CloseEndScreen(player));
+        Assert.AreSame(session, player.MiniGame);
+        CollectionAssert.AreEqual(new[] { "ShowDetails" }, client.Calls);
+    }
+
+    [TestMethod]
     public void ZoneGame_StartsWhenClientIsReady_AndReleasesAfterLoadingBack()
     {
         using var zone = TestZone.Create();

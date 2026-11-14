@@ -32,7 +32,7 @@ public static class CommandPacketClosedMinigameEndScreenHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(CommandPacketClosedMinigameEndScreen), commandPacketClosedMinigameEndScreen);
 
-        _miniGameManager.Leave(connection.Player);
+        _miniGameManager.CloseEndScreen(connection.Player);
 
         return true;
     }

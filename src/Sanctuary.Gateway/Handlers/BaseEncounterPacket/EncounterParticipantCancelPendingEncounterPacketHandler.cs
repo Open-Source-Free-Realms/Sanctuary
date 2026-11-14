@@ -32,7 +32,7 @@ public static class EncounterParticipantCancelPendingEncounterPacketHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(EncounterParticipantCancelPendingEncounterPacket), encounterParticipantCancelPendingEncounterPacket);
 
-        _miniGameManager.Leave(connection.Player);
+        _miniGameManager.CancelDetails(connection.Player);
 
         return true;
     }
