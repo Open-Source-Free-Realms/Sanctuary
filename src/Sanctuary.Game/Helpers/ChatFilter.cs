@@ -15,8 +15,8 @@ public static class ChatFilter
 {
     public const char CensorChar = '#';
 
-    // symbols players type in place of letters (@ = a, $ = s, ! and | = i), kept so patterns can match them
-    private const string LetterLikeSymbols = "@$!|";
+    // apostrophes are kept so contractions don't join into other words ("he'll" -> "hell")
+    private const string Apostrophes = "'’‘`";
 
     // replaces blacklisted text with #, skipping anything the whitelist allows
     public static string Censor(string message, ChatFilterList blacklist, ChatFilterList whitelist, ILogger? logger = null)
@@ -25,18 +25,18 @@ public static class ChatFilter
         if (string.IsNullOrEmpty(message) || !blacklist.IsActive)
             return message;
 
-        // copy of the message without punctuation, so "b.a.d" is checked as "bad"
+        // copy of the message without accents or punctuation, so "b.a.d" and "bád" are checked as "bad"
         var stripped = Strip(message, out var strippedToOriginal);
 
         // find every blacklist match
-        var blocked = FindMatches(message, stripped, strippedToOriginal, blacklist.Patterns, logger);
+        var blocked = FindMatches(message, stripped, strippedToOriginal, blacklist.Patterns, logger, out _);
 
         if (blocked.Count == 0)
             return message;
 
         // find every whitelist match, only needed once something is blocked
         var allowed = whitelist.IsActive
-            ? FindMatches(message, stripped, strippedToOriginal, whitelist.Patterns, logger)
+            ? FindMatches(message, stripped, strippedToOriginal, whitelist.Patterns, logger, out _)
             : [];
 
         var result = message.ToCharArray();
@@ -64,31 +64,35 @@ public static class ChatFilter
     }
 
     // true if a name (character or guild) has blacklisted text the whitelist doesn't allow
-    public static bool IsBlocked(string name, IResourceManager resourceManager)
-        => IsBlocked(name, resourceManager.ChatBlacklist.Current, resourceManager.ChatWhitelist.Current);
+    public static bool IsBlocked(string name, IResourceManager resourceManager, ILogger? logger = null)
+        => IsBlocked(name, resourceManager.ChatBlacklist.Current, resourceManager.ChatWhitelist.Current, logger);
 
     // same check, with the lists passed in
-    public static bool IsBlocked(string name, ChatFilterList blacklist, ChatFilterList whitelist)
+    public static bool IsBlocked(string name, ChatFilterList blacklist, ChatFilterList whitelist, ILogger? logger = null)
     {
         // blacklist off means names aren't checked
         if (string.IsNullOrEmpty(name) || !blacklist.IsActive)
             return false;
 
         var stripped = Strip(name, out var strippedToOriginal);
-        var blocked = FindMatches(name, stripped, strippedToOriginal, blacklist.Patterns, null);
+        var blocked = FindMatches(name, stripped, strippedToOriginal, blacklist.Patterns, logger, out var timedOut);
+
+        // a pattern that timed out can't clear the name, so treat it as blocked
+        if (timedOut)
+            return true;
 
         if (blocked.Count == 0)
             return false;
 
         var allowed = whitelist.IsActive
-            ? FindMatches(name, stripped, strippedToOriginal, whitelist.Patterns, null)
+            ? FindMatches(name, stripped, strippedToOriginal, whitelist.Patterns, logger, out _)
             : [];
 
         // blocked if any match isn't inside a whitelist match
         return blocked.Exists(b => !allowed.Exists(a => a.Start <= b.Start && b.End <= a.End));
     }
 
-    // removes punctuation/symbols and records where each kept character came from
+    // removes accents, punctuation and symbols, and records where each kept character came from
     internal static string Strip(string message, out int[] strippedToOriginal)
     {
         var builder = new StringBuilder(message.Length);
@@ -96,13 +100,21 @@ public static class ChatFilter
 
         for (var i = 0; i < message.Length; i++)
         {
-            if (IsSeparator(message[i]))
-                continue;
+            // turn accented and full-width characters into plain letters, "á" -> "a", "ｄ" -> "d" (the accent is dropped below)
+            var chars = message[i] < 0x80 || char.IsSurrogate(message[i])
+                ? message[i].ToString()
+                : message[i].ToString().Normalize(NormalizationForm.FormKD);
 
-            builder.Append(message[i]);
+            foreach (var c in chars)
+            {
+                if (IsSeparator(c))
+                    continue;
 
-            // remember where this character came from so matches can be mapped back
-            map.Add(i);
+                builder.Append(c);
+
+                // remember where this character came from so matches can be mapped back
+                map.Add(i);
+            }
         }
 
         strippedToOriginal = map.ToArray();
@@ -112,8 +124,8 @@ public static class ChatFilter
     // true if the character should be removed by Strip
     private static bool IsSeparator(char c)
     {
-        // letters, digits, spaces and letter-like symbols are never stripped
-        if (char.IsLetterOrDigit(c) || char.IsWhiteSpace(c) || LetterLikeSymbols.Contains(c))
+        // letters, digits, spaces and apostrophes are never stripped
+        if (char.IsLetterOrDigit(c) || char.IsWhiteSpace(c) || Apostrophes.Contains(c))
             return false;
 
         // strip punctuation, symbols, accents/combining marks and invisible characters (zero-width spaces etc.)
@@ -142,20 +154,22 @@ public static class ChatFilter
     }
 
     // runs each pattern on the original and stripped message, returns matches as [Start, End) ranges in the original
+    // timedOut is true if any pattern took too long and was skipped
     private static List<(int Start, int End)> FindMatches(string message, string stripped, int[] strippedToOriginal,
-        IReadOnlyList<Regex> patterns, ILogger? logger)
+        IReadOnlyList<Regex> patterns, ILogger? logger, out bool timedOut)
     {
         var ranges = new List<(int Start, int End)>();
+        timedOut = false;
 
-        // the stripped copy only needs checking if something was actually stripped
-        var checkStripped = stripped.Length != message.Length;
+        // the stripped copy only needs checking if something was stripped or replaced
+        var checkStripped = stripped != message;
 
         // loop each regex entry
         foreach (var pattern in patterns)
         {
             try
             {
-                // check the message as typed, catches cases stripping would miss ("hi.bad" -> "hibad")
+                // check the message as typed, catches cases stripping would miss ("hi.bad" -> "hibad", "b@d")
                 foreach (Match match in pattern.Matches(message))
                 {
                     if (match.Length > 0)
@@ -174,8 +188,9 @@ public static class ChatFilter
             }
             catch (RegexMatchTimeoutException)
             {
-                // pattern took too long on this message, skip it rather than stall the server
-                logger?.LogWarning("Chat filter pattern \"{pattern}\" timed out and was skipped for a message.", pattern);
+                // pattern took too long on this text, skip it rather than stall the server
+                timedOut = true;
+                logger?.LogWarning("Chat filter pattern \"{pattern}\" timed out on \"{text}\".", pattern, message);
             }
         }
 

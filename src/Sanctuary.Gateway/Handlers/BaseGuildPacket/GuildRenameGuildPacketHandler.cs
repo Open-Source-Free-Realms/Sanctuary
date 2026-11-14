@@ -48,7 +48,7 @@ public static class GuildRenameGuildPacketHandler
         var guildGuid = connection.Player.GuildData.Guid;
         var guildName = GuildHelper.NormalizeName(packet.Name);
 
-        if (!GuildHelper.IsValidName(guildName) || ChatFilter.IsBlocked(guildName, _resourceManager))
+        if (!GuildHelper.IsValidName(guildName) || ChatFilter.IsBlocked(guildName, _resourceManager, _logger))
         {
             connection.SendTunneled(new GuildPaidRenameCheckReplyPacket
             {

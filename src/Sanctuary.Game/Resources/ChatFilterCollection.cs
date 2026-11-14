@@ -162,8 +162,8 @@ public class ChatFilterCollection
                 return false;
 
             // check if the key is already in use
-            var inAdd = local.Add?.Exists(x => KeyEquals(x.Key, key)) == true;
-            var defaultEntry = defaults.Entries?.Find(x => KeyEquals(x.Key, key));
+            var inAdd = local.Add?.Exists(x => KeyEquals(x?.Key, key)) == true;
+            var defaultEntry = defaults.Entries?.Find(x => KeyEquals(x?.Key, key));
             var defaultRemoved = local.Remove?.Exists(x => KeyEquals(x, key)) == true;
 
             if (inAdd || (defaultEntry is not null && !defaultRemoved))
@@ -191,8 +191,8 @@ public class ChatFilterCollection
                 return false;
 
             // entries added locally are deleted, default entries go into Remove
-            var removedFromAdd = (local.Add?.RemoveAll(x => KeyEquals(x.Key, key)) ?? 0) > 0;
-            var inDefaults = defaults.Entries?.Exists(x => KeyEquals(x.Key, key)) == true;
+            var removedFromAdd = (local.Add?.RemoveAll(x => KeyEquals(x?.Key, key)) ?? 0) > 0;
+            var inDefaults = defaults.Entries?.Exists(x => KeyEquals(x?.Key, key)) == true;
             var alreadyRemoved = local.Remove?.Exists(x => KeyEquals(x, key)) == true;
 
             if (inDefaults && !alreadyRemoved)
@@ -213,10 +213,10 @@ public class ChatFilterCollection
     {
         foreach (var entry in entries ?? [])
         {
-            // every entry needs a one-word key and a pattern
-            if (string.IsNullOrWhiteSpace(entry.Key) || entry.Key.Any(char.IsWhiteSpace) || string.IsNullOrWhiteSpace(entry.Pattern))
+            // every entry needs a one-word key and a pattern, a hand-edited file can also contain null
+            if (entry is null || string.IsNullOrWhiteSpace(entry.Key) || entry.Key.Any(char.IsWhiteSpace) || string.IsNullOrWhiteSpace(entry.Pattern))
             {
-                _logger.LogError("Skipping chat filter entry in \"{file}\" with pattern \"{pattern}\", it needs a one-word Key and a Pattern.", file, entry.Pattern);
+                _logger.LogError("Skipping chat filter entry in \"{file}\" with pattern \"{pattern}\", it needs a one-word Key and a Pattern.", file, entry?.Pattern);
                 continue;
             }
 
@@ -230,12 +230,17 @@ public class ChatFilterCollection
     // keys ignore case
     private static bool KeyEquals(string? a, string? b) => string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
 
+    // replaces \b in patterns, also a boundary at the edge of symbols players type as letters (@ = a, $ = s, ! and | = i)
+    // so \b[a@]ss\b matches "@ss", while "darn!" still matches \bdarn\b
+    private const string WordBoundary = @"(?:\b|(?<![\w@$!|])(?=[@$!|])|(?<=[@$!|])(?![\w@$!|]))";
+
     // compiles a pattern with the filter's options, returns the error if it's not valid regex
     public static bool TryCompile(string pattern, out Regex regex, out string error)
     {
         try
         {
-            regex = new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, MatchTimeout);
+            // \b is widened so words starting or ending in @$!| still match
+            regex = new Regex(pattern.Replace(@"\b", WordBoundary),RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, MatchTimeout);
             error = string.Empty;
             return true;
         }

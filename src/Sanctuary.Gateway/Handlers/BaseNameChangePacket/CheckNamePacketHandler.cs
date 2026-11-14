@@ -101,7 +101,7 @@ public static class CheckNamePacketHandler
             return CheckNameResponse.IllegalCharacters;
         }
 
-        if (ChatFilter.IsBlocked(packet.Name.FullName, _resourceManager))
+        if (ChatFilter.IsBlocked(packet.Name.FullName, _resourceManager, _logger))
         {
             return CheckNameResponse.Profane;
         }
@@ -127,7 +127,7 @@ public static class CheckNamePacketHandler
                 return CheckNameResponse.IllegalCharacters;
         }
 
-        if (ChatFilter.IsBlocked(guildName, _resourceManager))
+        if (ChatFilter.IsBlocked(guildName, _resourceManager, _logger))
             return CheckNameResponse.Profane;
 
         using var dbContext = _dbContextFactory.CreateDbContext();

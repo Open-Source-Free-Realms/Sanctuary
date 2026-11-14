@@ -17,7 +17,7 @@ public sealed class ChatFilterTests
 
     // builds an enabled list from patterns
     private static ChatFilterList List(params string[] patterns) => new(true,
-        Array.ConvertAll(patterns, x => new Regex(x, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant, ChatFilterCollection.MatchTimeout)));
+        Array.ConvertAll(patterns, x => ChatFilterCollection.TryCompile(x, out var regex, out var error) ? regex : throw new ArgumentException(error)));
 
     [TestMethod]
     public void Censor_ReplacesEachMatchedCharacter()
@@ -48,6 +48,19 @@ public sealed class ChatFilterTests
     }
 
     [TestMethod]
+    public void Censor_CatchesAccentedAndFullWidthLetters()
+    {
+        Assert.AreEqual("say #### now", ChatFilter.Censor("say dárn now", List(@"\bdarn\b"), Off));
+        Assert.AreEqual("####", ChatFilter.Censor("DÄRN", List(@"\bdarn\b"), Off));
+        Assert.AreEqual("####", ChatFilter.Censor("ｄａｒｎ", List(@"\bdarn\b"), Off));
+        Assert.AreEqual("#####", ChatFilter.Censor("d.árn", List(@"\bdarn\b"), Off));
+        Assert.IsTrue(ChatFilter.IsBlocked("Dárn", List(@"\bdarn\b"), Off));
+
+        // other accented words are left alone
+        Assert.AreEqual("café", ChatFilter.Censor("café", List(@"\bdarn\b"), Off));
+    }
+
+    [TestMethod]
     public void Censor_StillMatchesOriginalText_WhenStrippingJoinsWords()
     {
         // stripped is "hidarn", so only the original text matches
@@ -55,7 +68,37 @@ public sealed class ChatFilterTests
     }
 
     [TestMethod]
-    public void Censor_KeepsLetterLikeSymbols_ForPatternsToMatch()
+    public void Censor_DoesNotJoinContractions()
+    {
+        Assert.AreEqual("he'll be late", ChatFilter.Censor("he'll be late", List(@"\bhell\b"), Off));
+        Assert.AreEqual("he’ll be late", ChatFilter.Censor("he’ll be late", List(@"\bhell\b"), Off));
+        Assert.IsFalse(ChatFilter.IsBlocked("He'll", List(@"\bhell\b"), Off));
+    }
+
+    [TestMethod]
+    public void Censor_CatchesLetterLikeSymbols_UsedAsSeparators()
+    {
+        Assert.AreEqual("say ####### now", ChatFilter.Censor("say d!a!r!n now", List(@"\bdarn\b"), Off));
+        Assert.AreEqual("#######", ChatFilter.Censor("d|a|r|n", List(@"\bdarn\b"), Off));
+        Assert.IsTrue(ChatFilter.IsBlocked("d$a$r$n", List(@"\bdarn\b"), Off));
+    }
+
+    [TestMethod]
+    public void Censor_WordBoundaryWorks_WithSymbolAtStartOrEnd()
+    {
+        Assert.AreEqual("###", ChatFilter.Censor("@ss", List(@"\b[a@]ss\b"), Off));
+        Assert.AreEqual("you ### now", ChatFilter.Censor("you as$ now", List(@"\bas[s$]\b"), Off));
+        Assert.AreEqual("(###)", ChatFilter.Censor("(@ss)", List(@"\b[a@]ss\b"), Off));
+
+        // punctuation after a word still counts as a boundary
+        Assert.AreEqual("what the ####!", ChatFilter.Censor("what the hell!", List(@"\bhell\b"), Off));
+
+        // still a whole-word match
+        Assert.AreEqual("class", ChatFilter.Censor("class", List(@"\b[a@]ss\b"), Off));
+    }
+
+    [TestMethod]
+    public void Censor_MatchesLetterLikeSymbols_InPatterns()
     {
         Assert.AreEqual("####", ChatFilter.Censor("d@rn", List(@"\bd[a@]rn\b"), Off));
     }
@@ -92,6 +135,14 @@ public sealed class ChatFilterTests
         var message = new string('a', 5000) + "! darn";
 
         Assert.EndsWith("! ####", ChatFilter.Censor(message, blacklist, Off));
+    }
+
+    [TestMethod]
+    public void IsBlocked_BlocksName_WhenPatternTimesOut()
+    {
+        var slow = new Regex("(a+)+$", RegexOptions.None, TimeSpan.FromMilliseconds(1));
+
+        Assert.IsTrue(ChatFilter.IsBlocked(new string('a', 5000) + "!", new ChatFilterList(true, [slow]), Off));
     }
 
     [TestMethod]
@@ -154,6 +205,23 @@ public sealed class ChatFilterTests
 
         Assert.IsTrue(collection.Load(files.Default, files.Local));
         Assert.HasCount(1, collection.Current.Patterns);
+    }
+
+    [TestMethod]
+    public void Load_SkipsNullEntries_AndCommandsStillWork()
+    {
+        using var files = new TempFiles();
+        files.WriteDefault("""{ "Enabled": true, "Entries": [ null, { "Key": "ok", "Pattern": "ok" } ] }""");
+        files.WriteLocal("""{ "Add": [ null, { "Key": "darn", "Pattern": "darn" } ] }""");
+
+        var collection = new ChatFilterCollection(NullLogger.Instance);
+
+        Assert.IsTrue(collection.Load(files.Default, files.Local));
+        Assert.HasCount(2, collection.Current.Patterns);
+
+        Assert.IsTrue(collection.AddEntry("heck", "heck", out _));
+        Assert.IsTrue(collection.RemoveEntry("darn", out _));
+        Assert.HasCount(2, collection.Current.Patterns);
     }
 
     [TestMethod]

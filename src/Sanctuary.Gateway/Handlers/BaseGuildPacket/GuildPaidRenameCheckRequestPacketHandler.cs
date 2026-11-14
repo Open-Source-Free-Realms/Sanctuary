@@ -45,7 +45,7 @@ public static class GuildPaidRenameCheckRequestPacketHandler
         var result = 5;
         int? role = null;
 
-        if (!GuildHelper.IsValidName(guildName) || ChatFilter.IsBlocked(guildName, _resourceManager))
+        if (!GuildHelper.IsValidName(guildName) || ChatFilter.IsBlocked(guildName, _resourceManager, _logger))
         {
             result = 2;
         }

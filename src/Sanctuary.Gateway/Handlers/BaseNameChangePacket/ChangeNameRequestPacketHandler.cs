@@ -101,7 +101,7 @@ public static class ChangeNameRequestPacketHandler
             return ChangeNameResponse.Error;
         }
 
-        if (ChatFilter.IsBlocked(packet.Name.FullName, _resourceManager))
+        if (ChatFilter.IsBlocked(packet.Name.FullName, _resourceManager, _logger))
         {
             return ChangeNameResponse.Error;
         }
@@ -161,7 +161,7 @@ public static class ChangeNameRequestPacketHandler
         if (!GuildHelper.IsValidName(guildName))
             return ChangeNameResponse.Error;
 
-        if (ChatFilter.IsBlocked(guildName, _resourceManager))
+        if (ChatFilter.IsBlocked(guildName, _resourceManager, _logger))
             return ChangeNameResponse.Error;
 
         using var dbContext = _dbContextFactory.CreateDbContext();

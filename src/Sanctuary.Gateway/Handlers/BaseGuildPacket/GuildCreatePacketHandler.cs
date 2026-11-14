@@ -52,7 +52,7 @@ public static class GuildCreatePacketHandler
             packet.Locale,
             guildName);
 
-        if (!GuildHelper.IsValidName(guildName) || ChatFilter.IsBlocked(guildName, _resourceManager))
+        if (!GuildHelper.IsValidName(guildName) || ChatFilter.IsBlocked(guildName, _resourceManager, _logger))
         {
             connection.SendTunneled(new GuildErrorPacket
             {
