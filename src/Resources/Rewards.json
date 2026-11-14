@@ -27,6 +27,490 @@
         ]
     },
     {
+        "Key": "white-kangaroo",
+        "DropTable": [
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 11584,
+                "Weight": 1,
+                "Tints": [
+                    {
+                        "TintId": 0,
+                        "Weight": 1
+                    }
+                ],
+                "Quantity": 1
+            }
+        ]
+    },
+    {
+        "Key": "mystery-chests",
+        "DropTable": [
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 78136,
+                "Weight": 1,
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79519,
+                "Weight": 1,
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79520,
+                "Weight": 1,
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79521,
+                "Weight": 1,
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79522,
+                "Weight": 1,
+                "Quantity": 1
+            }
+        ]
+    },
+    {
+        "Key": "mystery-chest-78136",
+        "DropTable": [
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 78142,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 78143,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 3
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79373,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 3
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79370,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 78139,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 78144,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 11584,
+                "Weight": 1,
+                "Tints": [
+                    {
+                        "TintId": 553,
+                        "Weight": 1
+                    }
+                ],
+                "Quantity": 1
+            }
+        ]
+    },
+    {
+        "Key": "mystery-chest-79519",
+        "DropTable": [
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 35759,
+                "Weight": 1,
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79268,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79262,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79259,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79271,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79265,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79443,
+                "Weight": 1,
+                "Tints": [
+                    {
+                        "TintId": 1,
+                        "Weight": 1
+                    }
+                ],
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79445,
+                "Weight": 1,
+                "Tints": [
+                    {
+                        "TintId": 1,
+                        "Weight": 1
+                    }
+                ],
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 13676,
+                "Weight": 1,
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 13677,
+                "Weight": 1,
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 13678,
+                "Weight": 1,
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 13679,
+                "Weight": 1,
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 13680,
+                "Weight": 1,
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 13681,
+                "Weight": 1,
+                "Quantity": 1
+            }
+        ]
+    },
+    {
+        "Key": "mystery-chest-79520",
+        "DropTable": [
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 900059,
+                "Weight": 1,
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79253,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79250,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79256,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79244,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79247,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79418,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79459,
+                "Weight": 1,
+                "Tints": [
+                    {
+                        "TintId": 1,
+                        "Weight": 1
+                    }
+                ],
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79450,
+                "Weight": 1,
+                "Tints": [
+                    {
+                        "TintId": 1,
+                        "Weight": 1
+                    }
+                ],
+                "Quantity": 1
+            }
+        ]
+    },
+    {
+        "Key": "mystery-chest-79521",
+        "DropTable": [
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 36154,
+                "Weight": 1,
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79213,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79216,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79202,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 2
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79210,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79207,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79451,
+                "Weight": 1,
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79452,
+                "Weight": 1,
+                "Tints": [
+                    {
+                        "TintId": 1,
+                        "Weight": 1
+                    }
+                ],
+                "Quantity": 1
+            }
+        ]
+    },
+    {
+        "Key": "mystery-chest-79522",
+        "DropTable": [
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79189,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79192,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79195,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79198,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79186,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79180,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79171,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79177,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79174,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79183,
+                "Weight": 1,
+                "Quantity": 1,
+                "TintGroupId": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79523,
+                "Weight": 1,
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79449,
+                "Weight": 1,
+                "Tints": [
+                    {
+                        "TintId": 1,
+                        "Weight": 1
+                    }
+                ],
+                "Quantity": 1
+            },
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 79436,
+                "Weight": 1,
+                "Tints": [
+                    {
+                        "TintId": 1,
+                        "Weight": 1
+                    }
+                ],
+                "Quantity": 1
+            }
+        ]
+    },
+    {
+        "Key": "kangaroo-test",
+        "DropTable": [
+            {
+                "RewardType": "Item",
+                "ItemDefinitionId": 11584,
+                "Weight": 1,
+                "Tints": [
+                    {
+                        "TintId": 0,
+                        "Weight": 1
+                    },
+                    {
+                        "TintId": 0,
+                        "Weight": 1
+                    }
+                ],
+                "Quantity": 1
+            }
+        ]
+    },
+    {
         "Key": "pet-treasure-common",
         "DropTable": [
             {

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 using Sanctuary.Game.Entities;
@@ -7,7 +8,7 @@ namespace Sanctuary.Game.Helpers;
 
 public static class EntityHelper
 {
-    private const float QueueAnimationUnknown3 = 1f;
+    private const float QueueAnimationPlaybackSpeed = 1f;
     private const byte SetBaseAnimationFlags = 3;
     private const int PlayOnce = 0;
     private const byte PlayNowFlags = 2;
@@ -52,22 +53,24 @@ public static class EntityHelper
         Duration = duration
     };
 
-    public static void QueueAnimation(IEntity entity, int animationGroupId, int loopCount, bool unknown6, bool unknown7, bool unknown8)
+    public static void QueueAnimation(IEntity entity, int animationGroupId, int loopCount, bool easeOutLoopingAnimations, bool useTransitions, bool useAnimationPriority,
+        float delay = default, IEnumerable<Player>? recipients = null)
     {
         var playerUpdatePacketQueueAnimation = new PlayerUpdatePacketQueueAnimation
         {
             Guid = entity.Guid,
             AnimationGroupId = animationGroupId,
             LoopCount = loopCount,
-            Unknown3 = QueueAnimationUnknown3,
-            Unknown6 = unknown6,
-            Unknown7 = unknown7,
-            Unknown8 = unknown8
+            PlaybackSpeed = QueueAnimationPlaybackSpeed,
+            Delay = delay,
+            EaseOutLoopingAnimations = easeOutLoopingAnimations,
+            UseTransitions = useTransitions,
+            UseAnimationPriority = useAnimationPriority
         };
         var data = Player.SerializeTunneled(playerUpdatePacketQueueAnimation);
 
-        foreach (var (_, visiblePlayer) in entity.VisiblePlayers)
-            visiblePlayer.SendSerialized(data);
+        foreach (var player in recipients ?? entity.VisiblePlayers.Values)
+            player.SendSerialized(data);
     }
 
     public static void SetBaseAnimation(Player owner, IEntity entity, int animationId)
@@ -94,6 +97,46 @@ public static class EntityHelper
 
         owner.SendTunneledToVisible(playerUpdatePacketSetAnimation, true);
     }
+
+    public static void SendAnimation(Player player, ulong guid, int animationId)
+    {
+        player.SendTunneled(new PlayerUpdatePacketSetAnimation
+        {
+            Guid = guid,
+            AnimationId = animationId,
+            Unknown = PlayOnce,
+            Flags = PlayNowFlags
+        });
+    }
+
+    public static Npc? NearestNpc(Player player, int npcId) => NearestNpc(player, npc => npc.DefinitionId == npcId);
+
+    public static Npc? NearestNpc(Player player, Func<Npc, bool> match)
+    {
+        Npc? nearest = null;
+        var best = float.MaxValue;
+
+        foreach (var npc in player.Zone.Npcs)
+        {
+            if (!match(npc))
+                continue;
+
+            var dx = npc.Position.X - player.Position.X;
+            var dz = npc.Position.Z - player.Position.Z;
+            var distance = dx * dx + dz * dz;
+
+            if (distance < best)
+            {
+                best = distance;
+                nearest = npc;
+            }
+        }
+
+        return nearest;
+    }
+
+    public static ulong NearestNpcGuid(Player player, int npcId)
+        => npcId != 0 && NearestNpc(player, npcId) is { } npc ? npc.Guid : 0;
 
     public static void SetSpeed(Player owner, Npc npc, float speed)
     {

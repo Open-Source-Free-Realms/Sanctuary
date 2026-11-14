@@ -33,7 +33,7 @@ using Sanctuary.UdpLibrary.Enumerations;
 
 namespace Sanctuary.Game.Entities;
 
-public sealed class Player : ClientPcData, IEntity
+public sealed class Player : ClientPcData, IEntity, ITradeParticipant
 {
     private enum PacketSendType
     {
@@ -50,7 +50,11 @@ public sealed class Player : ClientPcData, IEntity
     private const int ActionBarSlotUnknown6 = 4;
     private const int ActionBarSlotUnknown7 = 15;
     private const float OnFootMovementSpeed = 8f;
-    private const long AreaSettleMilliseconds = 1500;
+    private const double AreaSettleSeconds = 1.5;
+    private const string PointOfInterestRoutineName = "PointOfInterest";
+    private const string TeleportRoutineName = "Teleport";
+    private const double TeleportTimeoutSeconds = 3;
+    private const int TeleportSequenceCount = 4;
     private const int ActivateProfileAnimation = 3001;
     private const int ActivateProfileCompositeEffect = 4005;
 
@@ -74,8 +78,11 @@ public sealed class Player : ClientPcData, IEntity
     public int PointOfInterestId { get; private set; }
     public int ChatAreaNameId { get; private set; }
 
+    public byte TeleportSequence { get; private set; }
+
+    // TODO: We should PR a change to the routine manager to check if a routine is running by its key.
+    private Routine? _teleportRoutine;
     private ZoneAreaDefinition? _pendingZoneArea;
-    private long _pendingZoneAreaSince;
 
     public int ChatBubbleForegroundColor { get; set; }
     public int ChatBubbleBackgroundColor { get; set; }
@@ -154,6 +161,8 @@ public sealed class Player : ClientPcData, IEntity
     public int BoomboxDanceAnimation { get; set; }
     public bool BoomboxDanceIsStanding { get; set; }
     public int BoomboxDanceTransform { get; set; }
+    // TODO: Move into player gesture state when Player is cleaned up.
+    public bool IsPlayingOutfitGesture { get; set; }
 
     public const float DefaultScale = 1f;
 
@@ -229,6 +238,103 @@ public sealed class Player : ClientPcData, IEntity
         PlayerPet = new PlayerPet(this, resourceManager);
 
         Routines = new RoutineManager(zone.Logger, zone.TickDelta);
+    }
+
+    ulong ITradeParticipant.TradeGuid => Guid;
+    ulong ITradeParticipant.TradeCharacterId => GuidHelper.GetPlayerId(Guid);
+    int ITradeParticipant.TradeCoins => Coins;
+    void ITradeParticipant.DisconnectForTradeResync() => _connection.Disconnect();
+    void ITradeParticipant.SendTunneled(ISerializablePacket packet)
+    {
+        if (!_connection.Send(UdpChannel.Reliable1, SerializeTunneled(packet)))
+            throw new IOException("Trade packet could not be queued on the connection.");
+    }
+
+    IReadOnlyList<ISerializablePacket> ITradeParticipant.ApplyTradeResult(TradeParticipantResult result)
+    {
+        var packets = new List<ISerializablePacket>();
+        foreach (var (change, definition) in result.Items)
+        {
+            var item = Items.SingleOrDefault(x => x.Id == change.Id);
+            if (change.Count == 0)
+            {
+                if (item is not null) Items.Remove(item);
+                packets.Add(new ClientUpdatePacketItemDelete { ItemGuid = change.Id });
+                foreach (var bar in ActionBarItemGuids)
+                    foreach (var slot in bar.Value.Where(x => x.Value == change.Id).Select(x => x.Key).ToArray())
+                    {
+                        CancelScheduledSlotPacket(bar.Key, slot);
+                        bar.Value.Remove(slot);
+                        var clear = new ClientUpdatePacketUpdateActionBarSlot { Data = { Id = bar.Key, Slot = slot } };
+                        clear.Slot.IsEmpty = true;
+                        packets.Add(clear);
+                    }
+            }
+            else if (item is not null)
+            {
+                item.Count = change.Count;
+                packets.Add(new ClientUpdatePacketItemUpdate { ItemGuid = item.Id, Count = item.Count,
+                    ConsumedCount = item.ConsumedCount, AbilityCount = item.AbilityCount });
+                RefreshItemActionBarSlots(item, definition, packets);
+            }
+            else
+            {
+                item = new ClientItem { Id = change.Id, Definition = change.Definition, Tint = change.Tint, Count = change.Count };
+                Items.Add(item);
+                using var writer = new PacketWriter();
+                item.Serialize(writer);
+                definition.Serialize(writer);
+                packets.Add(new ClientUpdatePacketItemAdd { Payload = writer.Buffer });
+            }
+        }
+        Coins = result.Coins;
+        packets.Add(new ClientUpdatePacketCoinCount { Coins = Coins });
+        return packets;
+    }
+
+    private void RefreshItemActionBarSlots(ClientItem item, ClientItemDefinition definition, List<ISerializablePacket> packets)
+    {
+        var tint = item.Tint == 0 ? definition.Icon.TintId : item.Tint;
+        var coolingDown = TryGetItemCooldown(item.Definition, out var totalMs, out var elapsedMs);
+        foreach (var bar in ActionBarItemGuids)
+            foreach (var slot in bar.Value.Where(x => x.Value == item.Id).Select(x => x.Key))
+            {
+                var update = BuildActionBarSlotPacket(bar.Key, slot, definition.Icon.Id, tint,
+                    definition.NameId, item.Count, coolingDown ? totalMs : 1000,
+                    enabled: !coolingDown, elapsed: coolingDown ? elapsedMs : 1000);
+                if (ActionBars.TryGetValue(bar.Key, out var actionBar))
+                    actionBar.Slots[slot] = update.Slot;
+                packets.Add(update);
+
+                // Preserve the pending re-enable time and state, but don't let it
+                // restore the pre-trade stack count when the cooldown expires.
+                if (_delayedSlotPackets.TryGetValue((bar.Key, slot), out var pending)
+                    && pending.Packet is ClientUpdatePacketUpdateActionBarSlot enable)
+                    enable.Slot.Quantity = item.Count;
+            }
+    }
+
+    NameData ITradeParticipant.TradeName => Name;
+    object ITradeParticipant.TradeContext => Zone;
+    bool ITradeParticipant.TradeAvailable => _connection.Status == Status.Connected;
+
+    bool ITradeParticipant.TryGetTradeItem(int itemId, out ItemInstance item, out ClientItemDefinition definition, out int available)
+    {
+        item = null!;
+        definition = null!;
+        available = 0;
+        var owned = Items.FirstOrDefault(x => x.Id == itemId);
+        if (owned is null || !_resourceManager.ClientItemDefinitions.TryGetValue(owned.Definition, out var found))
+            return false;
+        item = owned;
+        definition = found;
+        // Reserve equipment copies; profile references can share the same physical copy.
+        var profileEquipped = Profiles.Any(profile => profile.Items.Values.Any(x => x.Id == itemId));
+        var equippedPets = Pets.Count(pet => TradeItemRules.PetUsesItem(itemId, pet.ItemGuids.Contains(itemId),
+            pet.ShampooItemGuid, pet.ConditionerItemGuid, pet.ToyItemGuid, pet.BrushItemGuid,
+            pet.FoodBowlItemGuid, pet.FoodItemGuid, pet.VitaminItemGuid));
+        available = TradeItemRules.AvailableCount(owned.Count, owned.ConsumedCount, profileEquipped, equippedPets);
+        return true;
     }
 
     #region Connection
@@ -382,9 +488,6 @@ public sealed class Player : ClientPcData, IEntity
 
         TickEffects(now);
 
-        if (QuestConversation.TalkingNpcGuid != 0 && now >= QuestConversation.TalkAnimationEndsAt)
-            QuestDialogue.StopTalkAnimation(this);
-
         PlayerPet.UpdateEveryTick();
         SendVisiblePositions();
 
@@ -436,7 +539,6 @@ public sealed class Player : ClientPcData, IEntity
     {
         SnowballInteraction.Update(this);
         UpdatePortrait();
-        UpdatePendingPointOfInterest();
     }
 
     public void RelayPosition(PlayerUpdatePacketUpdatePosition playerUpdatePacketUpdatePosition)
@@ -694,10 +796,10 @@ public sealed class Player : ClientPcData, IEntity
         if (Zone == destinationZone)
             return true;
 
-        return TeleportToZone(destinationZone.DefinitionId, destinationZone.OwnerId, position, rotation, destinationZone.Id, default, DefaultZoningGeometryId, out _);
+        return TeleportToZone(destinationZone.DefinitionId, destinationZone.OwnerId, position, rotation, destinationZone.Id, DefaultZoningGeometryId, out _);
     }
 
-    public bool TeleportToZone(int zoneDefinitionId, ulong? ownerId, Vector4 position, Quaternion rotation, int zoningId, byte zoningUnknown, int zoningGeometryId, [MaybeNullWhen(false)] out IZone zone)
+    public bool TeleportToZone(int zoneDefinitionId, ulong? ownerId, Vector4 position, Quaternion rotation, int zoningId, int zoningGeometryId, [MaybeNullWhen(false)] out IZone zone)
     {
         if (Zone is WorldZone)
         {
@@ -707,9 +809,6 @@ public sealed class Player : ClientPcData, IEntity
 
         if (!_zoneManager.TryMovePlayerToZone(zoneDefinitionId, ownerId, this, position, rotation, out zone))
             return false;
-
-        PointOfInterestId = 0;
-        ChatAreaNameId = 0;
 
         if (_appearanceEffectId != 0 && _effects.TryGetValue(_appearanceEffectId, out var appearanceEffect) && appearanceEffect.ExpiresAt is null)
             RemoveTemporaryAppearance();
@@ -723,10 +822,10 @@ public sealed class Player : ClientPcData, IEntity
             Position = position,
             Rotation = rotation,
             Sky = Zone.Sky,
-            Unknown = zoningUnknown,
             Id = zoningId,
             GeometryId = zoningGeometryId,
-            OverrideUpdateRadius = true
+            OverrideUpdateRadius = true,
+            TeleportSequence = BeginTeleport()
         };
 
         SendTunneled(packetClientBeginZoning);
@@ -736,6 +835,56 @@ public sealed class Player : ClientPcData, IEntity
         return true;
     }
 
+    public void Teleport(Vector4 position, Quaternion rotation)
+    {
+        var teleportSequence = BeginTeleport();
+
+        UpdatePosition(position, rotation);
+
+        var clientUpdatePacketUpdateLocation = new ClientUpdatePacketUpdateLocation
+        {
+            Position = position,
+            Rotation = rotation,
+            Teleport = true,
+            TeleportSequence = teleportSequence
+        };
+
+        SendTunneled(clientUpdatePacketUpdateLocation);
+    }
+
+    private bool IsTeleportPending => _teleportRoutine is { IsRunning: true };
+
+    private byte BeginTeleport()
+    {
+        _pendingZoneArea = null;
+
+        Routines.Cancel(PointOfInterestRoutineName);
+
+        _teleportRoutine = new SequentialRoutine(
+            new DelegateRoutine(onStep: () => Visible),
+            new WaitRoutine(TeleportTimeoutSeconds),
+            new InstantRoutine(UpdatePointOfInterest));
+
+        Routines.SetRoutine(TeleportRoutineName, _teleportRoutine);
+
+        return TeleportSequence = (byte)((TeleportSequence + 1) % TeleportSequenceCount);
+    }
+
+    public bool TryAcceptTeleportSequence(byte teleportSequence)
+    {
+        if (!IsTeleportPending)
+            return true;
+
+        if (teleportSequence != TeleportSequence)
+            return false;
+
+        Routines.Cancel(TeleportRoutineName);
+
+        UpdatePointOfInterest();
+
+        return false;
+    }
+
     private void QueuePointOfInterest()
     {
         var zoneAreaDefinition = Zone is WorldZone worldZone ? worldZone.GetZoneArea(Position, ZoneTile) : null;
@@ -743,6 +892,7 @@ public sealed class Player : ClientPcData, IEntity
         if (zoneAreaDefinition is null || zoneAreaDefinition.Id == PointOfInterestId)
         {
             _pendingZoneArea = null;
+            Routines.Cancel(PointOfInterestRoutineName);
             return;
         }
 
@@ -750,12 +900,12 @@ public sealed class Player : ClientPcData, IEntity
             return;
 
         _pendingZoneArea = zoneAreaDefinition;
-        _pendingZoneAreaSince = Environment.TickCount64;
+        Routines.SetRoutine(PointOfInterestRoutineName, new DelayedRoutine(new InstantRoutine(UpdatePendingPointOfInterest), AreaSettleSeconds));
     }
 
     private void UpdatePendingPointOfInterest()
     {
-        if (_pendingZoneArea is null || Environment.TickCount64 - _pendingZoneAreaSince < AreaSettleMilliseconds)
+        if (IsTeleportPending || _pendingZoneArea is null)
             return;
 
         UpdatePointOfInterest(_pendingZoneArea);
@@ -771,27 +921,25 @@ public sealed class Player : ClientPcData, IEntity
     {
         _pendingZoneArea = null;
 
+        Routines.Cancel(PointOfInterestRoutineName);
+
         if (zoneAreaDefinition is null || zoneAreaDefinition.Id == PointOfInterestId)
             return;
 
         PointOfInterestId = zoneAreaDefinition.Id;
         ChatAreaNameId = zoneAreaDefinition.ChatAreaNameId;
 
-        var packetPOIChangeMessage = new PacketPOIChangeMessage
+        if (zoneAreaDefinition.NameId != 0)
         {
-            NameId = zoneAreaDefinition.NameId,
-            ZoneId = zoneAreaDefinition.Id,
-            AreaId = zoneAreaDefinition.AreaId
-        };
+            var packetPOIChangeMessage = new PacketPOIChangeMessage
+            {
+                NameId = zoneAreaDefinition.NameId,
+                ZoneId = zoneAreaDefinition.Id,
+                AreaId = zoneAreaDefinition.AreaId
+            };
 
-        SendTunneled(packetPOIChangeMessage);
-
-        var chatPacketEnterArea = new ChatPacketEnterArea
-        {
-            AreaNameId = ChatAreaNameId
-        };
-
-        SendTunneled(chatPacketEnterArea);
+            SendTunneled(packetPOIChangeMessage);
+        }
     }
 
     public void SetMountMovementSpeed(float? mountMovementSpeed)
@@ -1032,6 +1180,9 @@ public sealed class Player : ClientPcData, IEntity
 
         commandPacketInteractionList.List.Interactions.Add(InspectInteraction.Data);
 
+        if (player.Guid != Guid)
+            commandPacketInteractionList.List.Interactions.Add(TradeInteraction.Data);
+
         if (Friends.Any(x => x.Guid == player.Guid))
         {
             commandPacketInteractionList.List.Interactions.Add(RemoveFriendInteraction.Data);
@@ -1065,6 +1216,17 @@ public sealed class Player : ClientPcData, IEntity
         ActiveProfile.Items.TryGetValue(slot, out var profileItem)
             ? Items.FirstOrDefault(item => item.Id == profileItem.Id)
             : null;
+
+    public void SendActiveWieldType()
+    {
+        var playerUpdatePacketUpdateActiveWieldType = new PlayerUpdatePacketUpdateActiveWieldType
+        {
+            Guid = Guid,
+            WieldType = GetWieldType()
+        };
+
+        SendTunneled(playerUpdatePacketUpdateActiveWieldType);
+    }
 
     public int GetWieldType()
     {
@@ -1110,22 +1272,6 @@ public sealed class Player : ClientPcData, IEntity
     {
         if (profileId != ActiveProfileId || (changedSlot != WeaponSlot && changedSlot != FlairShardSlot))
             return;
-
-        // Job switches reuse the cached attachment effect until the new weapon appears.
-        if (GetEquippedItem(WeaponSlot) is { } item
-            && _resourceManager.ClientItemDefinitions.TryGetValue(item.Definition, out var definition)
-            && GetAttachment(WeaponSlot) is { } attachment)
-        {
-            SendTunneledToVisible(new PlayerUpdatePacketEquipItemChange
-            {
-                Guid = Guid,
-                Id = item.Id,
-                Attachment = attachment,
-                ProfileId = ActiveProfileId,
-                ItemClassId = definition.Class,
-                WieldType = GetWieldType()
-            }, true);
-        }
 
         SendTunneledToVisible(GetWeaponFlairOverridePacket(), true);
     }

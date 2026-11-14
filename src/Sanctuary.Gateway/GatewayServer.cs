@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Linq;
+using System.Threading;
 
 using Microsoft.Extensions.Logging;
 
+using Sanctuary.Core.Helpers;
 using Sanctuary.Game;
 using Sanctuary.Packet;
 using Sanctuary.UdpLibrary;
@@ -40,6 +43,67 @@ public class GatewayServer : UdpManager<GatewayConnection>
 
     private void Zones_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
     {
+    }
+
+    /// <summary>
+    /// Drops the character's sessions if none has received a packet within <paramref name="idleThresholdMilliseconds"/>.
+    /// Returns false, and drops nothing, while any of them is still live. A session on a loading screen counts as live.
+    /// Otherwise returns true and calls <paramref name="onReleased"/> once every dropped session has saved and logged out
+    /// (right away if there was none).
+    /// </summary>
+    public bool TryReleaseIdleCharacter(ulong characterId, uint idleThresholdMilliseconds, Action onReleased)
+    {
+        var sessions = ConnectionList
+            .Where(x => x.Player is not null && GuidHelper.GetPlayerId(x.Player.Guid) == characterId)
+            .ToList();
+
+        // Login asks again every couple of seconds while it waits, so these checks log at Debug.
+        foreach (var session in sessions)
+        {
+            // Already being dropped for an earlier request; login will see it gone on a later ask.
+            if (session.OnReleased is not null)
+                return false;
+
+            // A player isn't Visible until the client finishes loading, and it doesn't send anything while loading,
+            // so silence then isn't a crash.
+            if (!session.Player.Visible)
+            {
+                _logger.LogDebug("Character {id} is still loading on {connection}, treating it as live.", characterId, session);
+                return false;
+            }
+
+            var idle = session.MillisecondsSinceLastReceive();
+
+            if (idle < idleThresholdMilliseconds)
+            {
+                _logger.LogDebug("Character {id} is still live on {connection} (last packet {idle} ms ago).", characterId, session, idle);
+                return false;
+            }
+        }
+
+        if (sessions.Count == 0)
+        {
+            onReleased();
+            return true;
+        }
+
+        // Answer only after the last dropped session has saved, not when Disconnect is called.
+        var remaining = sessions.Count;
+
+        foreach (var session in sessions)
+        {
+            _logger.LogInformation("Dropping silent {connection} so character {id} can log in again.", session, characterId);
+
+            session.OnReleased = () =>
+            {
+                if (Interlocked.Decrement(ref remaining) == 0)
+                    onReleased();
+            };
+
+            session.Disconnect();
+        }
+
+        return true;
     }
 
     public void OnStopping()

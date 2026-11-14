@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Sanctuary.Game\Sanctuary.Game.csproj" />
+    <ProjectReference Include="..\Sanctuary.Database.Sqlite\Sanctuary.Database.Sqlite.csproj" />
   </ItemGroup>
 
 </Project>

@@ -8161,5 +8161,12 @@
     "NodeType": "one-mans-trash-stage",
     "MaxActiveNodes": 1,
     "PlayerSpecific": true
+  },
+  {
+    "Key": "sandscale-bike-retrieval-bikes",
+    "ZoneDefinitionId": 1,
+    "NodeType": "bike-retrieval-bikes",
+    "MaxActiveNodes": 6,
+    "PlayerSpecific": true
   }
 ]

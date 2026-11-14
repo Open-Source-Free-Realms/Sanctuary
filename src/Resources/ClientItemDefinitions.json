@@ -1,4 +1,4 @@
-﻿[
+[
   {
     "Comment": "Penguin Badge",
     "Id": 1,
@@ -144317,7 +144317,7 @@
     "Icon": {
       "Id": 6457
     },
-    "Class": 172,
+    "Class": 9,
     "MaxStackSize": 1,
     "NoTrade": true,
     "TextureAlias": "brownwbluelines",
@@ -144337,7 +144337,7 @@
     "Icon": {
       "Id": 6456
     },
-    "Class": 172,
+    "Class": 9,
     "MaxStackSize": 1,
     "NoTrade": true,
     "TextureAlias": "blackwredlines",
@@ -186630,7 +186630,7 @@
     "Icon": {
       "Id": 6820
     },
-    "Class": 172,
+    "Class": 9,
     "MaxStackSize": 1,
     "NoTrade": true,
     "TextureAlias": "stormclouddecal",
@@ -186650,7 +186650,7 @@
     "Icon": {
       "Id": 6802
     },
-    "Class": 172,
+    "Class": 9,
     "MaxStackSize": 1,
     "NoTrade": true,
     "TextureAlias": "lavadecal",
@@ -186864,7 +186864,7 @@
       "Id": 6802
     },
     "Class": 9,
-    "MaxStackSize": 1,
+    "MaxStackSize": -1,
     "NoTrade": true,
     "MinProfileRank": 1,
     "Param1": 99,
@@ -188713,7 +188713,7 @@
       "TintId": 263
     },
     "Class": 172,
-    "MaxStackSize": 1,
+    "MaxStackSize": -1,
     "NoTrade": true,
     "TintAlias": "snow",
     "TextureAlias": "Default1",
@@ -202492,7 +202492,7 @@
       "Id": 7015
     },
     "Class": 172,
-    "MaxStackSize": 1,
+    "MaxStackSize": -1,
     "NoTrade": true,
     "TintAlias": "dyetint",
     "TextureAlias": "air",
@@ -246608,14 +246608,14 @@
     "NameId": 9093,
     "DescriptionId": 9094,
     "Icon": {
-      "Id": 6835,
+      "Id": 7801,
       "TintId": 92
     },
     "Cost": 540,
     "Class": 166,
     "MaxStackSize": -1,
     "NoTrade": true,
-    "TintAlias": "bubblegum",
+    "TintAlias": "dyetint",
     "TextureAlias": "clockwork-basic",
     "MemberDiscount": 10,
     "Param1": 952,
@@ -246630,14 +246630,14 @@
     "NameId": 9093,
     "DescriptionId": 9094,
     "Icon": {
-      "Id": 6835,
+      "Id": 7801,
       "TintId": 118
     },
     "Cost": 540,
     "Class": 166,
     "MaxStackSize": -1,
     "NoTrade": true,
-    "TintAlias": "concrete",
+    "TintAlias": "dyetint",
     "TextureAlias": "clockwork-basic",
     "MemberDiscount": 10,
     "Param1": 953,
@@ -246652,14 +246652,14 @@
     "NameId": 9093,
     "DescriptionId": 9094,
     "Icon": {
-      "Id": 6835,
+      "Id": 7801,
       "TintId": 96
     },
     "Cost": 540,
     "Class": 166,
     "MaxStackSize": -1,
     "NoTrade": true,
-    "TintAlias": "mahogany",
+    "TintAlias": "dyetint",
     "TextureAlias": "clockwork-basic",
     "MemberDiscount": 10,
     "Param1": 954,
@@ -246674,14 +246674,14 @@
     "NameId": 9093,
     "DescriptionId": 9094,
     "Icon": {
-      "Id": 6835,
+      "Id": 7801,
       "TintId": 102
     },
     "Cost": 540,
     "Class": 166,
     "MaxStackSize": -1,
     "NoTrade": true,
-    "TintAlias": "raincloud",
+    "TintAlias": "dyetint",
     "TextureAlias": "clockwork-basic",
     "MemberDiscount": 10,
     "Param1": 955,
@@ -246696,14 +246696,14 @@
     "NameId": 9093,
     "DescriptionId": 9094,
     "Icon": {
-      "Id": 6835,
+      "Id": 7801,
       "TintId": 107
     },
     "Cost": 540,
     "Class": 166,
     "MaxStackSize": -1,
     "NoTrade": true,
-    "TintAlias": "sweetpea",
+    "TintAlias": "dyetint",
     "TextureAlias": "clockwork-basic",
     "MemberDiscount": 10,
     "Param1": 956,
@@ -246718,14 +246718,14 @@
     "NameId": 9093,
     "DescriptionId": 9094,
     "Icon": {
-      "Id": 6835,
+      "Id": 7801,
       "TintId": 119
     },
     "Cost": 540,
     "Class": 166,
     "MaxStackSize": -1,
     "NoTrade": true,
-    "TintAlias": "timberwolf",
+    "TintAlias": "dyetint",
     "TextureAlias": "clockwork-basic",
     "MemberDiscount": 10,
     "Param1": 957,
@@ -282599,7 +282599,7 @@
       "TintId": 92
     },
     "Class": 9,
-    "MaxStackSize": 1,
+    "MaxStackSize": -1,
     "NoTrade": true,
     "MinProfileRank": 1,
     "TintAlias": "bubblegum",
@@ -304306,7 +304306,7 @@
     },
     "Cost": 500,
     "Class": 172,
-    "MaxStackSize": 1,
+    "MaxStackSize": -1,
     "NoTrade": true,
     "TextureAlias": "sun_basic",
     "MemberDiscount": 10,
@@ -1209345,9 +1209345,8 @@
     },
     "Cost": 550,
     "Class": 172,
-    "MaxStackSize": 1,
+    "MaxStackSize": -1,
     "NoTrade": true,
-    "TintAlias": "dyetint",
     "TextureAlias": "fire",
     "MemberDiscount": 10,
     "Param1": 12792,
@@ -1223647,7 +1223646,7 @@
       "Id": 7401
     },
     "Class": 172,
-    "MaxStackSize": 1,
+    "MaxStackSize": -1,
     "NoTrade": true,
     "MemberDiscount": 10,
     "Param1": 12907,
@@ -1223669,7 +1223668,7 @@
       "TintId": 263
     },
     "Class": 172,
-    "MaxStackSize": 1,
+    "MaxStackSize": -1,
     "NoTrade": true,
     "TintAlias": "dyetint",
     "TextureAlias": "fire",
@@ -1224295,7 +1224294,7 @@
       "Id": 8440
     },
     "Class": 172,
-    "MaxStackSize": 1,
+    "MaxStackSize": -1,
     "NoTrade": true,
     "TintAlias": "dyetint",
     "TextureAlias": "hoverring",
@@ -1224789,7 +1224788,7 @@
       "Id": 8478
     },
     "Class": 172,
-    "MaxStackSize": 1,
+    "MaxStackSize": -1,
     "NoTrade": true,
     "TintAlias": "dyetint",
     "TextureAlias": "herocopter",
@@ -1224812,7 +1224811,7 @@
       "Id": 8477
     },
     "Class": 172,
-    "MaxStackSize": 1,
+    "MaxStackSize": -1,
     "NoTrade": true,
     "TintAlias": "dyetint",
     "TextureAlias": "cybercycle_m",
@@ -1224835,7 +1224834,7 @@
       "Id": 8552
     },
     "Class": 172,
-    "MaxStackSize": 1,
+    "MaxStackSize": -1,
     "NoTrade": true,
     "TintAlias": "dyetint",
     "TextureAlias": "rangertank",
@@ -1224858,7 +1224857,7 @@
       "Id": 8556
     },
     "Class": 172,
-    "MaxStackSize": 1,
+    "MaxStackSize": -1,
     "NoTrade": true,
     "TintAlias": "dyetint",
     "TextureAlias": "jet_combiner",
@@ -1233990,7 +1233989,7 @@
     },
     "Cost": 500,
     "Class": 172,
-    "MaxStackSize": 1,
+    "MaxStackSize": -1,
     "NoTrade": true,
     "TextureAlias": "eyeball_basic",
     "MemberDiscount": 10,
@@ -1234175,7 +1234174,7 @@
     },
     "Cost": 500,
     "Class": 9,
-    "MaxStackSize": 1,
+    "MaxStackSize": -1,
     "NoTrade": true,
     "TextureAlias": "xmas",
     "MemberDiscount": 10,
@@ -1234345,7 +1234344,7 @@
     },
     "Cost": 500,
     "Class": 9,
-    "MaxStackSize": 1,
+    "MaxStackSize": -1,
     "NoTrade": true,
     "TextureAlias": "drake-chrome-mount",
     "MemberDiscount": 10,
@@ -1234442,7 +1234441,7 @@
     },
     "Cost": 500,
     "Class": 172,
-    "MaxStackSize": 1,
+    "MaxStackSize": -1,
     "NoTrade": true,
     "TextureAlias": "chopper-basic",
     "TintAlias": "dyetint",
@@ -1234492,7 +1234491,7 @@
     },
     "Cost": 500,
     "Class": 172,
-    "MaxStackSize": 1,
+    "MaxStackSize": -1,
     "NoTrade": true,
     "TextureAlias": "wood",
     "MemberDiscount": 10,
@@ -1235886,6 +1235885,89 @@
     "CategoryId": 101,
     "Rarity": 2,
     "IsTintable": true
+  },
+  {
+    "Comment": "Sunstone Clockwork Mystery Chest",
+    "Id": 79519,
+    "Type": 28,
+    "NameId": 19048,
+    "DescriptionId": 2663,
+    "Icon": {
+      "Id":7777
+    },
+    "Class": 168,
+    "MaxStackSize": -1,
+    "NoTrade": false,
+    "MemberDiscount": 10,
+    "CategoryId": 408,
+    "NoSale": true,
+    "Rarity": 3
+  },
+  {
+    "Comment": "Sci-Fi Mystery Chest",
+    "Id": 79520,
+    "Type": 28,
+    "NameId": 2662,
+    "DescriptionId": 2663,
+    "Icon": {
+      "Id":7723
+    },
+    "Class": 168,
+    "MaxStackSize": -1,
+    "NoTrade": false,
+    "MemberDiscount": 10,
+    "CategoryId": 408,
+    "NoSale": true,
+    "Rarity": 3
+  },
+  {
+    "Comment": "Seasonal Snow Days Mystery Chest",
+    "Id": 79521,
+    "Type": 28,
+    "NameId": 4419440,
+    "DescriptionId": 2663,
+    "Icon": {
+      "Id":8134
+    },
+    "Class": 168,
+    "MaxStackSize": -1,
+    "NoTrade": false,
+    "MemberDiscount": 10,
+    "CategoryId": 408,
+    "NoSale": true,
+    "Rarity": 3
+  },
+  {
+    "Comment": "Wonders Mystery Chest Chest of Wonders",
+    "Id": 79522,
+    "Type": 28,
+    "NameId": 442890,
+    "DescriptionId": 442901,
+    "Icon": {
+      "Id":8500
+    },
+    "Class": 168,
+    "MaxStackSize": -1,
+    "NoTrade": false,
+    "MemberDiscount": 10,
+    "CategoryId": 408,
+    "NoSale": true,
+    "Rarity": 3
+  },
+  { 
+    "Comment": "Chest of Wonders Magical Scimitar",
+    "Id": 79523,
+    "Type": 1,
+    "NameId": 442891,
+    "DescriptionId": 442892,
+    "Icon": { 
+      "Id": 8502
+    },
+    "Class": 6,
+    "Slot": 7,
+    "CategoryId": 207,
+    "ModelName": "sword_ar_ag_weapon_scimitar.adr",
+    "WeaponTrailEffectId": 5485
   },
   {
     "Comment": "Jonin Ninja Gi",
@@ -1237293,6 +1237375,23 @@
     "NoSale": true,
     "Rarity": 3,
     "IsTintable": true
+  },
+  {
+    "Comment": "Mystery Chest",
+    "Id": 78136,
+    "Type": 28,
+    "NameId": 436403,
+    "DescriptionId": 3858,
+    "Icon": {
+      "Id":7666
+    },
+    "Class": 168,
+    "MaxStackSize": -1,
+    "NoTrade": false,
+    "MemberDiscount": 10,
+    "CategoryId": 408,
+    "NoSale": true,
+    "Rarity": 3
   },
   {
     "Comment": "Arcadius",
