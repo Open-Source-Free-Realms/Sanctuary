@@ -1455360,5 +1455360,85 @@
     "TintAlias": "dyetint",
     "MemberDiscount": 10,
     "Rarity": 2
+  },
+  {
+    "Comment": "Tattered Parachute",
+    "Id": 960205,
+    "Type": 1,
+    "NameId": 1234,
+    "DescriptionId": 1235,
+    "Icon": {
+      "Id": 90
+    },
+    "Class": 158,
+    "MaxStackSize": 10,
+    "SingleUse": true,
+    "NoTrade": true,
+    "TintAlias": "dyetint",
+    "TextureAlias": "parachute-tattered-P",
+    "MemberDiscount": 10,
+    "Slot": 6,
+    "ModelName": "equipment_ar_ag_parachute.adr",
+    "CategoryId": 106,
+    "NoSale": true,
+    "Stats": {
+      "59": {
+        "Id": 59,
+        "Type": 0,
+        "Value": 1086324736,
+        "Unknown": false
+      },
+      "60": {
+        "Id": 60,
+        "Type": 0,
+        "Value": 1073741824,
+        "Unknown": false
+      },
+      "61": {
+        "Id": 61,
+        "Type": 0,
+        "Value": 1096810496,
+        "Unknown": false
+      },
+      "62": {
+        "Id": 62,
+        "Type": 0,
+        "Value": 1061158912,
+        "Unknown": false
+      },
+      "63": {
+        "Id": 63,
+        "Type": 0,
+        "Value": 1086324736,
+        "Unknown": false
+      },
+      "64": {
+        "Id": 64,
+        "Type": 0,
+        "Value": 1065353216,
+        "Unknown": false
+      },
+      "67": {
+        "Id": 67,
+        "Type": 0,
+        "Value": 1082130432,
+        "Unknown": false
+      }
+    }
+  },
+  {
+    "Comment": "Station Cash",
+    "Id": 960206,
+    "Type": 1,
+    "NameId": 349,
+    "Icon": {
+      "Id": 7862
+    },
+    "MaxStackSize": -1,
+    "NoTrade": true,
+    "TintAlias": "dyetint",
+    "MemberDiscount": 10,
+    "CategoryId": 29,
+    "NoSale": true
   }
 ]

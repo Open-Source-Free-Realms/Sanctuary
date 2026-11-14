@@ -23,20 +23,7 @@ public static class PacketInGamePurchaseWalletInfoRequestHandler
     {
         _logger.LogTrace("Received {name} packet.", nameof(PacketInGamePurchaseWalletInfoRequest));
 
-        var packetInGamePurchaseWalletInfoResponse = new PacketInGamePurchaseWalletInfoResponse
-        {
-            ErrorCode = 1,
-            WalletInfo =
-            {
-                Unknown = true,
-                StationCash = connection.Player.StationCash,
-                CreditCardId = 69420,
-                CurrencyCode = "SOE",
-                International = true
-            }
-        };
-
-        connection.SendTunneled(packetInGamePurchaseWalletInfoResponse);
+        connection.Player.SendWalletInfo();
 
         return true;
     }

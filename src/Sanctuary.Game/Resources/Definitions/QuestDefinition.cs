@@ -35,8 +35,12 @@ public sealed class QuestDefinition
     // Goes to the player's active profile.
     public int RewardExperience { get; set; }
 
+    public int RewardStationCash { get; set; }
+
     // Item definition ids.
     public List<int> RewardItems { get; set; } = [];
+
+    public List<int> AcceptItems { get; set; } = [];
 
     public int RewardCollectionId { get; set; }
 
