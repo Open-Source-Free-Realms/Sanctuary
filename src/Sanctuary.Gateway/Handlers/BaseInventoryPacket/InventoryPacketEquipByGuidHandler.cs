@@ -10,6 +10,7 @@ using Sanctuary.Database;
 using Sanctuary.Game;
 using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Quests;
+using Sanctuary.Gateway.Helpers;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 using Sanctuary.Packet.Common.Attributes;
@@ -65,8 +66,10 @@ public static class InventoryPacketEquipByGuidHandler
             return true;
         }
 
+        ItemClassDefinition? itemClass = null;
+
         if (clientItemDefinition.Class != ItemDefinitionHelper.NoItemClass
-            && !_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out _))
+            && !_resourceManager.ItemClasses.TryGetValue(clientItemDefinition.Class, out itemClass))
         {
             _logger.LogWarning("User tried to equip item with unknown class. {guid} {definition} {class}",
                 inventoryPacketEquipByGuid.Guid, clientItem.Definition, clientItemDefinition.Class);
@@ -80,6 +83,8 @@ public static class InventoryPacketEquipByGuidHandler
             _logger.LogWarning("Invalid player profile. {guid} {profile}", inventoryPacketEquipByGuid.Guid, inventoryPacketEquipByGuid.ProfileId);
             return true;
         }
+
+        var previousWieldType = connection.Player.GetWieldType();
 
         int? oldItemId = null;
 
@@ -161,9 +166,11 @@ public static class InventoryPacketEquipByGuidHandler
 
         clientUpdatePacketEquipItem.ProfileId = inventoryPacketEquipByGuid.ProfileId;
 
-        clientUpdatePacketEquipItem.Equip = true;
+        clientUpdatePacketEquipItem.Equip = false;
 
         connection.SendTunneled(clientUpdatePacketEquipItem);
+
+        OutfitGestureHelper.OnEquipReply(connection, itemClass, previousWieldType);
 
         var playerUpdatePacketEquipItemChange = new PlayerUpdatePacketEquipItemChange();
 
@@ -171,7 +178,7 @@ public static class InventoryPacketEquipByGuidHandler
 
         playerUpdatePacketEquipItemChange.Id = clientItem.Id;
 
-        playerUpdatePacketEquipItemChange.Attachment = clientUpdatePacketEquipItem.Attachment;
+        playerUpdatePacketEquipItemChange.Attachment = connection.Player.GetAttachment(clientItemDefinition.Slot) ?? clientUpdatePacketEquipItem.Attachment;
 
         playerUpdatePacketEquipItemChange.ProfileId = connection.Player.ActiveProfileId;
 
@@ -179,7 +186,7 @@ public static class InventoryPacketEquipByGuidHandler
         playerUpdatePacketEquipItemChange.WieldType = connection.Player.GetWieldType();
 
         if (inventoryPacketEquipByGuid.ProfileId == connection.Player.ActiveProfileId)
-            connection.Player.SendTunneledToVisible(playerUpdatePacketEquipItemChange);
+            connection.Player.SendTunneledToVisible(playerUpdatePacketEquipItemChange, !string.IsNullOrEmpty(clientItemDefinition.ModelName));
 
         connection.Player.SendToolbar();
 

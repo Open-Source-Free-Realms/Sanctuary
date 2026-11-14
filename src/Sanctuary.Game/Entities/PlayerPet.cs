@@ -1395,7 +1395,7 @@ public sealed class PlayerPet
         StartPetAction(npc);
         foodBowlAttachment.Slot = PetFoodBowlSlot;
         PetHelper.EquipItem(_player, npc, foodBowlItemGuid, foodBowlAttachment);
-        EntityHelper.QueueAnimation(npc, PetFeedAnimationGroupId, loopCount: PetLoopOnce, unknown6: false, unknown7: true, unknown8: false);
+        EntityHelper.QueueAnimation(npc, PetFeedAnimationGroupId, loopCount: PetLoopOnce, easeOutLoopingAnimations: false, useTransitions: true, useAnimationPriority: false);
         _player.SendTunneled(new PetUtilityNotifyPacket { PetId = _player.ActivePetId, NotificationType = PetUtilityFeedStartedNotificationType });
         var hungerAt = Environment.TickCount64 + PetFeedHungerDelayMs;
         var finishAt = Environment.TickCount64 + PetFeedDurationMs;
@@ -1437,7 +1437,7 @@ public sealed class PlayerPet
 
         StartPetAction(npc);
         _petGroomingActive = true;
-        EntityHelper.QueueAnimation(npc, PetEnjoyAnimationGroupId, loopCount: PetLoopForever, unknown6: true, unknown7: false, unknown8: true);
+        EntityHelper.QueueAnimation(npc, PetEnjoyAnimationGroupId, loopCount: PetLoopForever, easeOutLoopingAnimations: true, useTransitions: false, useAnimationPriority: true);
         _player.SendTunneled(new PetUtilityNotifyPacket
         {
             PetId = _player.ActivePetId,
@@ -1477,7 +1477,7 @@ public sealed class PlayerPet
 
         FinishPetAction(npc);
         _petGroomingActive = false;
-        EntityHelper.QueueAnimation(npc, PetDryOffAnimationGroupId, loopCount: PetLoopOnce, unknown6: true, unknown7: true, unknown8: false);
+        EntityHelper.QueueAnimation(npc, PetDryOffAnimationGroupId, loopCount: PetLoopOnce, easeOutLoopingAnimations: true, useTransitions: true, useAnimationPriority: false);
         QueuePetStand(PetGroomDryOffDurationMs);
         _player.SendTunneled(new PetUtilityNotifyPacket { PetId = _player.ActivePetId, NotificationType = PetUtilityGroomFinishedNotificationType });
 
