@@ -99,12 +99,23 @@ public abstract class MiniGameSession
 
     internal void Leave(Player player, MiniGameEndReason reason)
     {
-        if (!TryGetParticipant(player, out var participant) || participant.State == MiniGameUiState.Leaving)
+        if (!TryGetParticipant(player, out var participant))
             return;
+
+        if (participant.State == MiniGameUiState.Leaving)
+        {
+            // A player who disconnects while loading back out never reports ready, so release them here.
+            if (reason == MiniGameEndReason.Disconnected)
+                Remove(participant);
+
+            return;
+        }
 
         if (participant.State == MiniGameUiState.Details)
         {
-            Client.Close(participant);
+            if (reason != MiniGameEndReason.Disconnected)
+                Client.Close(participant);
+
             Remove(participant);
             return;
         }

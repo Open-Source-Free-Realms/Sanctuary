@@ -261,23 +261,6 @@ public sealed class MiniGameSessionTests
     }
 
     [TestMethod]
-    public void OnlyGamesWithASession_GetAPlayablePlayButton()
-    {
-        using var zone = TestZone.Create();
-        var (manager, _) = CreateManager();
-        var builtPlayer = CreatePlayer(zone);
-        var unbuiltPlayer = CreatePlayer(zone);
-        var built = new TestMiniGameSession(Definition());
-        var unbuilt = new UnavailableMiniGameSession(Definition());
-
-        manager.Open(builtPlayer, built);
-        manager.Open(unbuiltPlayer, unbuilt);
-
-        Assert.IsTrue(built.TryGetParticipant(builtPlayer, out var builtParticipant) && builtParticipant.Playable);
-        Assert.IsTrue(unbuilt.TryGetParticipant(unbuiltPlayer, out var unbuiltParticipant) && !unbuiltParticipant.Playable);
-    }
-
-    [TestMethod]
     public void CancelDetails_IsIgnoredOnceTheGameIsRunning()
     {
         using var zone = TestZone.Create();
@@ -306,6 +289,61 @@ public sealed class MiniGameSessionTests
         Assert.IsFalse(manager.CloseEndScreen(player));
         Assert.AreSame(session, player.MiniGame);
         CollectionAssert.AreEqual(new[] { "ShowDetails" }, client.Calls);
+    }
+
+    [TestMethod]
+    public void Disconnect_WhileLoadingBack_ReleasesAndCloses()
+    {
+        using var zone = TestZone.Create();
+        var (manager, _) = CreateManager();
+        var player = CreatePlayer(zone);
+        var session = new ZoneSession(Definition(), new FakeZoneHost(zone));
+
+        manager.Open(player, session);
+        manager.Enter(player, session.Id);
+        manager.ClientIsReady(player);
+        manager.Leave(player);
+
+        manager.Disconnect(player);
+
+        Assert.IsNull(player.MiniGame);
+        Assert.AreEqual(MiniGameState.Closed, session.State);
+        CollectionAssert.Contains(session.Hooks, "Closed");
+    }
+
+    [TestMethod]
+    public void Disconnect_OnDetails_ReleasesWithoutSendingToClient()
+    {
+        using var zone = TestZone.Create();
+        var (manager, client) = CreateManager();
+        var player = CreatePlayer(zone);
+        var session = new TestMiniGameSession(Definition());
+
+        manager.Open(player, session);
+        client.Calls.Clear();
+
+        manager.Disconnect(player);
+
+        Assert.IsNull(player.MiniGame);
+        Assert.AreEqual(MiniGameState.Closed, session.State);
+        Assert.AreEqual(0, client.Calls.Count);
+    }
+
+    [TestMethod]
+    public void OnlyGamesWithASession_GetAPlayablePlayButton()
+    {
+        using var zone = TestZone.Create();
+        var (manager, _) = CreateManager();
+        var builtPlayer = CreatePlayer(zone);
+        var unbuiltPlayer = CreatePlayer(zone);
+        var built = new TestMiniGameSession(Definition());
+        var unbuilt = new UnavailableMiniGameSession(Definition());
+
+        manager.Open(builtPlayer, built);
+        manager.Open(unbuiltPlayer, unbuilt);
+
+        Assert.IsTrue(built.TryGetParticipant(builtPlayer, out var builtParticipant) && builtParticipant.Playable);
+        Assert.IsTrue(unbuilt.TryGetParticipant(unbuiltPlayer, out var unbuiltParticipant) && !unbuiltParticipant.Playable);
     }
 
     [TestMethod]

@@ -40,12 +40,12 @@ public sealed class MiniGameManager : IMiniGameManager
                 if (!current.TryGetParticipant(player, out var participant) || participant.State != MiniGameUiState.Details
                     || current.Definition.GameId == activityId)
                     return false;
-
-                current.Leave(player, MiniGameEndReason.Aborted);
             }
 
             if (!ActivityHelper.TryGetRequiredProfile(player, _resourceManager, activity, out var requiredProfile))
                 return false;
+
+            player.MiniGame?.Leave(player, MiniGameEndReason.Aborted);
 
             if (requiredProfile is not null && requiredProfile.Type != player.ActiveProfile.Type)
             {

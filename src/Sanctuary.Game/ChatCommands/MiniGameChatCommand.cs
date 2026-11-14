@@ -9,6 +9,8 @@ namespace Sanctuary.Game.ChatCommands;
 
 public class MiniGameChatCommand : IChatCommand
 {
+    private const int DefaultStars = 3;
+
     private readonly IResourceManager _resourceManager;
     private readonly IMiniGameManager _miniGameManager;
 
@@ -62,7 +64,7 @@ public class MiniGameChatCommand : IChatCommand
                 return true;
 
             case "finish":
-                var stars = 3;
+                var stars = DefaultStars;
 
                 if (args.Length > 1 && !int.TryParse(args[1], out stars))
                     return false;
