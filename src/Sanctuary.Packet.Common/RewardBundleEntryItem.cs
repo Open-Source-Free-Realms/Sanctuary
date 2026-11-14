@@ -8,9 +8,19 @@ public sealed class RewardBundleEntryItem : RewardBundleEntryBase
 
     public int ItemGuid;
 
+    protected override bool IsDataOptional => true;
+
     protected override void SerializeData(PacketWriter writer)
     {
         // The inherited common fields are serialized first; the item-specific payload is only its GUID.
         writer.Write(ItemGuid);
+    }
+
+    protected override bool TryReadData(ref PacketReader reader)
+    {
+        if (!reader.TryRead(out ItemGuid))
+            return false;
+
+        return true;
     }
 }

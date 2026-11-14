@@ -12,4 +12,12 @@ public sealed class RewardBundleEntryCollectionAdd : RewardBundleEntryBase
     {
         writer.Write(CollectionId);
     }
+
+    protected override bool TryReadData(ref PacketReader reader)
+    {
+        if (!reader.TryRead(out CollectionId))
+            return false;
+
+        return true;
+    }
 }

@@ -1,0 +1,334 @@
+[
+  {
+    "Id": 2,
+    "Groups": [
+      {
+        "Id": 2,
+        "Requirements": [
+          {
+            "Id": 2,
+            "ProfileType": 2,
+            "Operator": 4,
+            "Rank": 8
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 3,
+    "Groups": [
+      {
+        "Id": 3,
+        "Requirements": [
+          {
+            "Id": 3,
+            "ProfileType": 2,
+            "Operator": 6,
+            "Rank": 5
+          },
+          {
+            "Id": 4,
+            "ProfileType": 2,
+            "Operator": 4,
+            "Rank": 12
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 4,
+    "Groups": [
+      {
+        "Id": 4,
+        "Requirements": [
+          {
+            "Id": 5,
+            "ProfileType": 2,
+            "Operator": 6,
+            "Rank": 9
+          },
+          {
+            "Id": 6,
+            "ProfileType": 2,
+            "Operator": 4,
+            "Rank": 16
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 5,
+    "Groups": [
+      {
+        "Id": 5,
+        "Requirements": [
+          {
+            "Id": 7,
+            "ProfileType": 2,
+            "Operator": 6,
+            "Rank": 13
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 6,
+    "Groups": [
+      {
+        "Id": 6,
+        "Requirements": [
+          {
+            "Id": 8,
+            "ProfileType": 2,
+            "Operator": 6,
+            "Rank": 17
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 7,
+    "Groups": [
+      {
+        "Id": 7,
+        "Requirements": [
+          {
+            "Id": 9,
+            "ProfileType": 3,
+            "Operator": 6,
+            "Rank": 5
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 8,
+    "Groups": [
+      {
+        "Id": 8,
+        "Requirements": [
+          {
+            "Id": 10,
+            "ProfileType": 3,
+            "Operator": 6,
+            "Rank": 9
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 9,
+    "Groups": [
+      {
+        "Id": 9,
+        "Requirements": [
+          {
+            "Id": 11,
+            "ProfileType": 3,
+            "Operator": 6,
+            "Rank": 13
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 11,
+    "Groups": [
+      {
+        "Id": 11,
+        "Requirements": [
+          {
+            "Id": 13,
+            "ProfileType": 10,
+            "Operator": 6,
+            "Rank": 5
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 12,
+    "Groups": [
+      {
+        "Id": 12,
+        "Requirements": [
+          {
+            "Id": 14,
+            "ProfileType": 10,
+            "Operator": 6,
+            "Rank": 9
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 13,
+    "Groups": [
+      {
+        "Id": 13,
+        "Requirements": [
+          {
+            "Id": 15,
+            "ProfileType": 10,
+            "Operator": 6,
+            "Rank": 13
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 14,
+    "Groups": [
+      {
+        "Id": 14,
+        "Requirements": [
+          {
+            "Id": 16,
+            "ProfileType": 10,
+            "Operator": 6,
+            "Rank": 17
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 15,
+    "Groups": [
+      {
+        "Id": 15,
+        "Requirements": [
+          {
+            "Id": 17,
+            "ProfileType": 9,
+            "Operator": 6,
+            "Rank": 5
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 16,
+    "Groups": [
+      {
+        "Id": 16,
+        "Requirements": [
+          {
+            "Id": 18,
+            "ProfileType": 9,
+            "Operator": 6,
+            "Rank": 9
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 17,
+    "Groups": [
+      {
+        "Id": 17,
+        "Requirements": [
+          {
+            "Id": 19,
+            "ProfileType": 9,
+            "Operator": 6,
+            "Rank": 13
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 18,
+    "Groups": [
+      {
+        "Id": 18,
+        "Requirements": [
+          {
+            "Id": 20,
+            "ProfileType": 9,
+            "Operator": 6,
+            "Rank": 17
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 19,
+    "Groups": [
+      {
+        "Id": 19,
+        "Requirements": [
+          {
+            "Id": 21,
+            "ProfileType": 12,
+            "Operator": 6,
+            "Rank": 5
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 20,
+    "Groups": [
+      {
+        "Id": 20,
+        "Requirements": [
+          {
+            "Id": 22,
+            "ProfileType": 12,
+            "Operator": 6,
+            "Rank": 9
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 21,
+    "Groups": [
+      {
+        "Id": 21,
+        "Requirements": [
+          {
+            "Id": 23,
+            "ProfileType": 12,
+            "Operator": 6,
+            "Rank": 13
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "Id": 22,
+    "Groups": [
+      {
+        "Id": 22,
+        "Requirements": [
+          {
+            "Id": 24,
+            "ProfileType": 12,
+            "Operator": 6,
+            "Rank": 17
+          }
+        ]
+      }
+    ]
+  }
+]

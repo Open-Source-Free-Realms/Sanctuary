@@ -19,7 +19,9 @@ using Sanctuary.Database;
 using Sanctuary.Database.Entities;
 using Sanctuary.Game;
 using Sanctuary.Game.Entities;
+using Sanctuary.Game.Groups;
 using Sanctuary.Game.Helpers;
+using Sanctuary.Game.MiniGames;
 using Sanctuary.Game.Quests;
 using Sanctuary.Gateway.Handlers;
 using Sanctuary.Packet;
@@ -105,9 +107,13 @@ public class GatewayConnection : UdpConnection
 
         _serviceProvider.GetRequiredService<TradeManager>().Disconnect(Player);
 
+        _serviceProvider.GetRequiredService<IMiniGameManager>().Disconnect(Player);
+
         SendFriendOffline();
 
         SendGuildMemberOffline();
+
+        _serviceProvider.GetRequiredService<IGroupManager>().Leave(Player);
 
         // Save before telling login the character is offline, so a quick re-login can't load the data from before this save.
         SavePlayerToDatabase();
