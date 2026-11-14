@@ -50,9 +50,9 @@ public class PlayerHousingInstanceInfo : ISerializableType
 
         writer.Write(IconId);
         writer.Write(FixtureCount);
-        writer.Write(FurnitureScore);
 
         writer.Write(LastVisited);
+        writer.Write(FurnitureScore);
 
         writer.Write(IsLocked);
         writer.Write(IsMembersOnly);
@@ -60,7 +60,6 @@ public class PlayerHousingInstanceInfo : ISerializableType
 
         writer.Write(Description);
         writer.Write(KeywordList);
-        writer.Write(Unknown21);
 
         writer.Write(Rating);
         writer.Write(Votes);
@@ -69,6 +68,7 @@ public class PlayerHousingInstanceInfo : ISerializableType
         writer.Write(CanVote);
 
         writer.Write(FactoryPlotId);
+        writer.Write(Unknown21);
 
         writer.Write(WhenCreated);
     }

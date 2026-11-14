@@ -157,7 +157,9 @@ public class RewardManager : IRewardManager
         if (dbCharacter is null)
             return false;
 
-        var dbItem = dbCharacter.Items.SingleOrDefault(item => item.Definition == itemDefinitionId && item.Tint == tint);
+        var dbItem = itemDefinition.Type != ItemDefinitionHelper.HouseItemType
+            ? dbCharacter.Items.SingleOrDefault(item => item.Definition == itemDefinitionId && item.Tint == tint)
+            : null;
 
         if (dbItem is null)
         {
@@ -179,7 +181,7 @@ public class RewardManager : IRewardManager
         if (dbContext.SaveChanges() <= 0)
             return false;
 
-        var clientItem = player.Items.SingleOrDefault(item => item.Definition == itemDefinitionId && item.Tint == tint);
+        var clientItem = player.Items.SingleOrDefault(item => item.Id == dbItem.Id);
 
         if (clientItem is null)
         {
@@ -198,6 +200,8 @@ public class RewardManager : IRewardManager
             itemDefinition.Serialize(writer);
 
             player.SendTunneled(new ClientUpdatePacketItemAdd { Payload = writer.Buffer });
+
+            HousingHelper.NotifyHouseAdded(_resourceManager, _dbContextFactory, player, itemDefinition, clientItem.Id);
         }
         else
         {

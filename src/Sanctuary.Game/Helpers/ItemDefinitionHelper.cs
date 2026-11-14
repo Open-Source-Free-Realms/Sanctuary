@@ -15,6 +15,7 @@ public static class ItemDefinitionHelper
     public const int PetItemType = 2;
     public const int PetClothingItemType = 3;
     public const int PetUtilityItemType = 4;
+    public const int HouseItemType = 16;
     public const int MountItemType = 19;
     public const int HousingItemType = 29;
     public const int MysteryChestItem = 28;

@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 441,
+  "Name": "sunstone_valley",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": -8,
+  "StartLongitude": 0,
+  "EndLatitude": 48,
+  "EndLongitude": 56,
+  "SpawnPosition": [
+    1888.0,
+    194.75,
+    608.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 429,
+  "Name": "ss_kt_track",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 16,
+  "EndLongitude": 16,
+  "SpawnPosition": [
+    538.0,
+    78.17,
+    570.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

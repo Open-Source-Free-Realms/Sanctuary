@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 304,
+  "Name": "bw_briar_patch",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": -8,
+  "StartLongitude": 0,
+  "EndLatitude": 16,
+  "EndLongitude": 8,
+  "SpawnPosition": [
+    197.0,
+    -14.97,
+    233.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

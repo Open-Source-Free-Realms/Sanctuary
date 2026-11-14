@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 329,
+  "Name": "bw_vale_of_thorns",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": -8,
+  "StartLongitude": 0,
+  "EndLatitude": 16,
+  "EndLongitude": 8,
+  "SpawnPosition": [
+    166.0,
+    -4.62,
+    311.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

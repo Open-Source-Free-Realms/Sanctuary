@@ -351,6 +351,105 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     b.ToTable("GuildMembers");
                 });
 
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbHouse", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<ulong>("CharacterId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("DATE()");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsFloraAllowed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsPublished")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Key")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Keywords")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("PetAutospawn")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset?>("PublishedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ZoneId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CharacterId", "Key")
+                        .IsUnique();
+
+                    b.ToTable("Houses");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbHouseVote", b =>
+                {
+                    b.Property<ulong>("HouseId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<ulong>("VoterId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("DATE()");
+
+                    b.Property<float>("Rating")
+                        .HasColumnType("REAL");
+
+                    b.HasKey("HouseId", "VoterId");
+
+                    b.ToTable("HouseVotes");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbHousingGuid", b =>
+                {
+                    b.Property<ulong>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("DATE()");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HousingGuids");
+                });
+
             modelBuilder.Entity("Sanctuary.Database.Entities.DbIgnore", b =>
                 {
                     b.Property<ulong>("IgnoreCharacterId")
@@ -397,8 +496,7 @@ namespace Sanctuary.Database.Sqlite.Migrations
 
                     b.HasIndex("CharacterId");
 
-                    b.HasIndex("Tint", "Definition", "CharacterId")
-                        .IsUnique();
+                    b.HasIndex("Tint", "Definition", "CharacterId");
 
                     b.ToTable("Items");
                 });
@@ -729,6 +827,28 @@ namespace Sanctuary.Database.Sqlite.Migrations
                     b.Navigation("Guild");
                 });
 
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbHouse", b =>
+                {
+                    b.HasOne("Sanctuary.Database.Entities.DbCharacter", "Character")
+                        .WithMany("Houses")
+                        .HasForeignKey("CharacterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Character");
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbHouseVote", b =>
+                {
+                    b.HasOne("Sanctuary.Database.Entities.DbHouse", "House")
+                        .WithMany("Votes")
+                        .HasForeignKey("HouseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("House");
+                });
+
             modelBuilder.Entity("Sanctuary.Database.Entities.DbIgnore", b =>
                 {
                     b.HasOne("Sanctuary.Database.Entities.DbCharacter", "Character")
@@ -809,6 +929,8 @@ namespace Sanctuary.Database.Sqlite.Migrations
 
                     b.Navigation("Friends");
 
+                    b.Navigation("Houses");
+
                     b.Navigation("Ignores");
 
                     b.Navigation("Items");
@@ -838,6 +960,11 @@ namespace Sanctuary.Database.Sqlite.Migrations
                 {
                     b.Navigation("Character")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Sanctuary.Database.Entities.DbHouse", b =>
+                {
+                    b.Navigation("Votes");
                 });
 
             modelBuilder.Entity("Sanctuary.Database.Entities.DbUser", b =>

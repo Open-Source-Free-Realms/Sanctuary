@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 424,
+  "Name": "sh_soccer",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": -8,
+  "StartLongitude": 0,
+  "EndLatitude": 16,
+  "EndLongitude": 8,
+  "SpawnPosition": [
+    220.0,
+    0.0,
+    270.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 411,
+  "Name": "sh_canyon_combat",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": -8,
+  "StartLongitude": -8,
+  "EndLatitude": 24,
+  "EndLongitude": 24,
+  "SpawnPosition": [
+    137.15,
+    47.61,
+    168.38
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

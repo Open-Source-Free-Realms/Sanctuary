@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 335,
+  "Name": "gl_misty_mountain",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 24,
+  "EndLongitude": 24,
+  "SpawnPosition": [
+    273.0,
+    38.96,
+    408.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

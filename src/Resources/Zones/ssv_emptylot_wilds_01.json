@@ -1,0 +1,23 @@
+{
+  "$type": "Housing",
+  "Id": 136,
+  "Name": "ssv_emptylot_wilds_01",
+  "Type": "Housing",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 16,
+  "EndLongitude": 16,
+  "Sky": "sky_sunstone_valley24.xml",
+  "SpawnRotation": [
+    0.1335,
+    0,
+    0.991,
+    0
+  ],
+  "SpawnPosition": [
+    480.14,
+    61.47,
+    456.66
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 388,
+  "Name": "sg_random_encounter_01",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 8,
+  "EndLongitude": 8,
+  "SpawnPosition": [
+    243.0,
+    -0.86,
+    244.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

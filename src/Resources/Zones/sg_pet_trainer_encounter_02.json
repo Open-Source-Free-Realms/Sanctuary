@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 386,
+  "Name": "sg_pet_trainer_encounter_02",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 8,
+  "EndLongitude": 8,
+  "SpawnPosition": [
+    270.75,
+    4.15,
+    233.5
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}
