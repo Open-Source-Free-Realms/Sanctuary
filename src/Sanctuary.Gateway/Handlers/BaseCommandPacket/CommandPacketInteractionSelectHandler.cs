@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 
 using Sanctuary.Game;
 using Sanctuary.Game.Helpers;
+using Sanctuary.Game.MiniGames;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common.Attributes;
 
@@ -16,6 +17,8 @@ public static class CommandPacketInteractionSelectHandler
     private static ILogger _logger = null!;
     private static IZoneManager _zoneManager = null!;
     private static IInteractionManager _interactionManager = null!;
+    private static IResourceManager _resourceManager = null!;
+    private static IMiniGameManager _miniGameManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -25,6 +28,8 @@ public static class CommandPacketInteractionSelectHandler
 
         _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
         _interactionManager = serviceProvider.GetRequiredService<IInteractionManager>();
+        _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
+        _miniGameManager = serviceProvider.GetRequiredService<IMiniGameManager>();
     }
 
     public static bool HandlePacket(GatewayConnection connection, ReadOnlySpan<byte> data)
@@ -52,6 +57,10 @@ public static class CommandPacketInteractionSelectHandler
             action(connection.Player);
             return true;
         }
+        if (connection.Player.VisibleNpcs.TryGetValue(packet.Guid, out var miniGameNpc) &&
+            MiniGameNpcHelper.TryInteract(connection.Player, miniGameNpc, packet.Id, _resourceManager, _miniGameManager))
+            return true;
+
         if (!_interactionManager.TryGet(packet.Id, out var interaction))
         {
             _logger.LogError("Invalid interaction. {interaction}", packet.Id);
