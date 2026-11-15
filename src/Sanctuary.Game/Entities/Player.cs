@@ -50,6 +50,7 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
     private const double AreaSettleSeconds = 1.5;
     private const string PointOfInterestRoutineName = "PointOfInterest";
     private const string TeleportRoutineName = "Teleport";
+    private const string InviteRoutineName = "Invite";
     private const double TeleportTimeoutSeconds = 3;
     private const int TeleportSequenceCount = 4;
 
@@ -107,6 +108,51 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
 
     public ConcurrentSet<ulong> IncomingFriendRequests { get; } = [];
     public ConcurrentSet<ulong> IncomingGuildInvites { get; } = [];
+
+    public bool TryAddIncomingFriendRequest(ulong requesterGuid) =>
+        TryAddIncomingRequest(IncomingFriendRequests, nameof(IncomingFriendRequests), requesterGuid, requester => requester.SendTunneled(new FriendMessagePacket
+        {
+            Type = FriendMessageType.FriendAddRequestTimedOut,
+            Guid = Guid,
+            Name = Name
+        }));
+
+    public bool TryRemoveIncomingFriendRequest(ulong requesterGuid) =>
+        TryRemoveIncomingRequest(IncomingFriendRequests, nameof(IncomingFriendRequests), requesterGuid);
+
+    public bool TryAddIncomingGuildInvite(ulong inviterGuid) =>
+        TryAddIncomingRequest(IncomingGuildInvites, nameof(IncomingGuildInvites), inviterGuid, inviter => inviter.SendTunneled(new GuildErrorPacket
+        {
+            MessageName = "GuildInviteTimedOut"
+        }));
+
+    public bool TryRemoveIncomingGuildInvite(ulong inviterGuid) =>
+        TryRemoveIncomingRequest(IncomingGuildInvites, nameof(IncomingGuildInvites), inviterGuid);
+
+    private bool TryAddIncomingRequest(ConcurrentSet<ulong> requests, string requestsName, ulong senderGuid, Action<Player> onExpired)
+    {
+        if (!requests.TryAdd(senderGuid))
+            return false;
+
+        // The client answers "timed out" itself after five minutes; this only clears a request it never answered.
+        Routines.SetRoutine(GetInviteRoutineName(requestsName, senderGuid), new DelayedRoutine(new InstantRoutine(() =>
+        {
+            if (requests.TryRemove(senderGuid) && _zoneManager.TryGetPlayer(senderGuid, out var sender))
+                onExpired(sender);
+        }), InviteHelper.ExpirySeconds));
+
+        return true;
+    }
+
+    private bool TryRemoveIncomingRequest(ConcurrentSet<ulong> requests, string requestsName, ulong senderGuid)
+    {
+        Routines.Cancel(GetInviteRoutineName(requestsName, senderGuid));
+
+        return requests.TryRemove(senderGuid);
+    }
+
+    // Each kind of request gets its own name, so a friend request and a guild invite from one player keep separate timers.
+    private static string GetInviteRoutineName(string requestsName, ulong guid) => $"{InviteRoutineName}:{requestsName}:{guid}";
 
 
     public ulong CharacterId { get; set; }

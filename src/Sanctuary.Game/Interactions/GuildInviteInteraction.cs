@@ -51,7 +51,7 @@ public class GuildInviteInteraction : IInteraction
             return;
         }
 
-        if (!otherPlayer.IncomingGuildInvites.TryAdd(player.Guid))
+        if (!otherPlayer.TryAddIncomingGuildInvite(player.Guid))
             return;
 
         var guildInviteNotificationPacket = new GuildInviteNotificationPacket

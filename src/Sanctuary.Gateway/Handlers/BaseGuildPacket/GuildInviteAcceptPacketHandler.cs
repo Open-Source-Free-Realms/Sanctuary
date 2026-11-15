@@ -44,7 +44,7 @@ public static class GuildInviteAcceptPacketHandler
 
         _logger.LogTrace("Received {name} packet. ( {packet} )", nameof(GuildInviteAcceptPacket), packet);
 
-        if (!connection.Player.IncomingGuildInvites.TryRemove(packet.PlayerGuid))
+        if (!connection.Player.TryRemoveIncomingGuildInvite(packet.PlayerGuid))
             return true;
 
         if (!_zoneManager.TryGetPlayer(packet.PlayerGuid, out var player))
