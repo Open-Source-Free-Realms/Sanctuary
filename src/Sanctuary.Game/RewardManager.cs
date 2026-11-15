@@ -22,6 +22,10 @@ namespace Sanctuary.Game;
 
 public class RewardManager : IRewardManager
 {
+    public const int StationCashIconId = 7862;
+    private const int StationCashItemDefinitionId = 960206;
+    public const int StationCashNameId = 385941;
+
     private readonly ILogger _logger;
     private readonly IResourceManager _resourceManager;
     private readonly IDbContextFactory<DatabaseContext> _dbContextFactory;
@@ -352,16 +356,56 @@ public class RewardManager : IRewardManager
         return player.PetDefinitions.ContainsValue(petItemDefinitionId);
     }
 
+    public bool TryTakeItem(Player player, ClientItem clientItem, int quantity = 1)
+    {
+        if (quantity <= 0)
+            return true;
+
+        if (clientItem.Count < quantity || !player.Items.Any(item => ReferenceEquals(item, clientItem)))
+            return false;
+
+        var characterId = GuidHelper.GetPlayerId(player.Guid);
+
+        using var dbContext = _dbContextFactory.CreateDbContext();
+        var dbItem = dbContext.Items.SingleOrDefault(item => item.CharacterId == characterId && item.Id == clientItem.Id);
+
+        if (dbItem is null || dbItem.Count < quantity)
+            return false;
+
+        dbItem.Count -= quantity;
+
+        var deleteItem = dbItem.Count <= 0;
+
+        if (deleteItem)
+            dbContext.Items.Remove(dbItem);
+
+        if (dbContext.SaveChanges() <= 0)
+            return false;
+
+        if (deleteItem)
+        {
+            player.Items.Remove(clientItem);
+            player.SendTunneled(new ClientUpdatePacketItemDelete { ItemGuid = clientItem.Id });
+            return true;
+        }
+
+        clientItem.Count = dbItem.Count;
+        player.SendTunneled(new ClientUpdatePacketItemUpdate
+        {
+            ItemGuid = clientItem.Id,
+            Count = clientItem.Count,
+            ConsumedCount = clientItem.ConsumedCount,
+            AbilityCount = clientItem.AbilityCount,
+            RentalExpirationTime = 0
+        });
+
+        return true;
+    }
+
     public bool TryGrantCurrency(Player player, CurrencyType currencyType, int amount)
     {
         if (amount <= 0)
             return false;
-
-        if (currencyType == CurrencyType.StationCash)
-        {
-            _logger.LogWarning("Station Cash grants are not yet implemented.");
-            return false;
-        }
 
         var characterId = GuidHelper.GetPlayerId(player.Guid);
 
@@ -371,10 +415,28 @@ public class RewardManager : IRewardManager
         if (dbCharacter is null)
             return false;
 
-        dbCharacter.Coins += amount;
+        if (currencyType == CurrencyType.StationCash)
+            dbCharacter.StationCash += amount;
+        else
+            dbCharacter.Coins += amount;
 
         if (dbContext.SaveChanges() <= 0)
             return false;
+
+        if (currencyType == CurrencyType.StationCash)
+        {
+            player.StationCash = dbCharacter.StationCash;
+
+            player.SendWalletInfo();
+
+            if (_resourceManager.ClientItemDefinitions.TryGetValue(StationCashItemDefinitionId, out var stationCashDefinition))
+            {
+                SendItemDefinition(player, stationCashDefinition);
+                SendRewardToast(player, stationCashDefinition, amount, 0);
+            }
+
+            return true;
+        }
 
         player.Coins = dbCharacter.Coins;
 

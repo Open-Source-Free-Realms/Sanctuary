@@ -3,14 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-using Sanctuary.Core.Helpers;
-using Sanctuary.Database;
 using Sanctuary.Game;
 using Sanctuary.Game.Entities;
 using Sanctuary.Game.Helpers;
+using Sanctuary.Game.Quests;
 using Sanctuary.Packet;
 using Sanctuary.Packet.Common;
 
@@ -19,8 +17,8 @@ namespace Sanctuary.Gateway.Helpers.Abilities;
 public sealed record AbilityServices(
     ILogger Logger,
     IResourceManager ResourceManager,
-    IDbContextFactory<DatabaseContext> DbContextFactory,
-    IRewardManager RewardManager);
+    IRewardManager RewardManager,
+    IQuestManager QuestManager);
 
 public abstract class ConsumableAbility(AbilityServices services)
 {
@@ -34,8 +32,7 @@ public abstract class ConsumableAbility(AbilityServices services)
     protected readonly ILogger _logger = services.Logger;
     protected readonly IResourceManager _resourceManager = services.ResourceManager;
     protected readonly IRewardManager _rewardManager = services.RewardManager;
-
-    private readonly IDbContextFactory<DatabaseContext> _dbContextFactory = services.DbContextFactory;
+    private readonly IQuestManager _questManager = services.QuestManager;
 
     public abstract bool Matches(ClientItemDefinition itemDefinition);
 
@@ -54,32 +51,11 @@ public abstract class ConsumableAbility(AbilityServices services)
         // Connections are handled in parallel, so the partner's final trade accept can remove
         // this item after the handler looked it up.
         // TODO: Remove once packet handling is marshalled to the zone tick.
-        if (!player.Items.Any(item => ReferenceEquals(item, clientItem)) || clientItem.Count <= 0)
+        if (!_rewardManager.TryTakeItem(player, clientItem))
             return SendFailure(player);
 
-        using var dbContext = _dbContextFactory.CreateDbContext();
-
-        var characterId = GuidHelper.GetPlayerId(player.Guid);
-        var dbItem = dbContext.Items.SingleOrDefault(i => i.CharacterId == characterId && i.Id == clientItem.Id);
-
-        if (dbItem is null)
-            return SendFailure(player);
-
-        dbItem.Count--;
-
-        var shouldDeleteItem = dbItem.Count <= 0;
-
-        if (shouldDeleteItem)
-            dbContext.Items.Remove(dbItem);
-
-        if (dbContext.SaveChanges() <= 0)
-            return SendFailure(player);
-
-        if (shouldDeleteItem)
+        if (!player.Items.Any(item => ReferenceEquals(item, clientItem)))
         {
-            player.Items.Remove(clientItem);
-            player.SendTunneled(new ClientUpdatePacketItemDelete { ItemGuid = clientItem.Id });
-
             // A pending cooldown re-enable would fire after this and un-delete the slot.
             player.CancelScheduledSlotPacket(ActionBarId, actionBarSlot);
 
@@ -93,17 +69,6 @@ public abstract class ConsumableAbility(AbilityServices services)
         }
         else
         {
-            clientItem.Count--;
-
-            player.SendTunneled(new ClientUpdatePacketItemUpdate
-            {
-                ItemGuid = clientItem.Id,
-                Count = clientItem.Count,
-                ConsumedCount = clientItem.ConsumedCount,
-                AbilityCount = clientItem.AbilityCount,
-                RentalExpirationTime = 0
-            });
-
             var slotPacket = new ClientUpdatePacketUpdateActionBarSlot { Data = { Id = ActionBarId, Slot = actionBarSlot } };
             slotPacket.Slot.IsEmpty = false;
             slotPacket.Slot.IconId = clientItemDefinition.Icon.Id;
@@ -260,5 +225,7 @@ public abstract class ConsumableAbility(AbilityServices services)
         if (hasItemLeft)
             player.StartActionBarCooldown(ActionBarId, slot, itemDefinition.Icon.Id, itemDefinition.NameId,
                 itemDefinition.SingleUse ? count - 1 : count, cooldownMs, iconTintId);
+
+        _questManager.OnEvent(player, new ItemUsedEvent(itemDefinition.Id));
     }
 }

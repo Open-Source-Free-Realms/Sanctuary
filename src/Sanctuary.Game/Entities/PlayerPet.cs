@@ -95,7 +95,7 @@ public sealed class PlayerPet
     private const float PetLeftSideChance = 0.5f;
     private const byte OwnerJumpingState = 0x02;
     private const byte OwnerFallingState = 0x04;
-    private const byte OwnerGlidingState = 0x20;
+    private const byte OwnerGlidingState = Player.GlidingPositionState;
     private const float PetGroundedPositionSpacing = 0.5f;
     private const int PetGroundedPositionCount = 20;
     private const float PetTakeoffBackDistance = 3f;

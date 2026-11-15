@@ -140,6 +140,8 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
 
     public int BoomboxDancePriority { get; set; }
     public ulong BoomboxDanceOwner { get; set; }
+    public const byte GlidingPositionState = 0x20;
+
     public byte PositionState { get; set; }
 
     private const int CrowdedVisiblePlayerCount = 50;
@@ -383,6 +385,22 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
         };
 
         Send(packetTunneledClientPacket);
+    }
+
+    public void SendWalletInfo()
+    {
+        SendTunneled(new PacketInGamePurchaseWalletInfoResponse
+        {
+            ErrorCode = 1,
+            WalletInfo =
+            {
+                Unknown = true,
+                StationCash = StationCash,
+                CreditCardId = 69420,
+                CurrencyCode = "SOE",
+                International = true
+            }
+        });
     }
 
     public void SendTunneledToVisible(ISerializablePacket serializablePacket, bool sendToSelf = false)
@@ -945,10 +963,7 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
         if (Mount is not null)
             return;
 
-        var glideStats = ActiveProfile.Items.Values
-            .Select(profileItem => Items.FirstOrDefault(item => item.Id == profileItem.Id))
-            .Select(item => item is not null && _resourceManager.ClientItemDefinitions.TryGetValue(item.Definition, out var definition) ? definition.Stats : null)
-            .FirstOrDefault(stats => stats is not null && stats.ContainsKey((int)CharacterStatId.GlideEnabled));
+        var glideStats = TryGetEquippedGlideItem(out _, out _, out var glideDefinition) ? glideDefinition.Stats : null;
 
         float GlideStat(CharacterStatId id) => glideStats is not null && glideStats.TryGetValue((int)id, out var stat)
             ? BitConverter.Int32BitsToSingle(Convert.ToInt32(stat.Value)) : 0f;
@@ -1197,6 +1212,53 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
         ActiveProfile.Items.TryGetValue(slot, out var profileItem)
             ? Items.FirstOrDefault(item => item.Id == profileItem.Id)
             : null;
+
+    public IEnumerable<ClientItem> GetEquippedItems() =>
+        ActiveProfile.Items.Keys.Select(GetEquippedItem).OfType<ClientItem>();
+
+    public bool TryGetEquippedGlideItem(out int slot, [NotNullWhen(true)] out ClientItem? item, [NotNullWhen(true)] out ClientItemDefinition? definition)
+    {
+        foreach (var equippedSlot in ActiveProfile.Items.Keys)
+        {
+            if (GetEquippedItem(equippedSlot) is { } equippedItem
+                && _resourceManager.ClientItemDefinitions.TryGetValue(equippedItem.Definition, out var equippedDefinition)
+                && equippedDefinition.Stats?.ContainsKey((int)CharacterStatId.GlideEnabled) == true)
+            {
+                slot = equippedSlot;
+                item = equippedItem;
+                definition = equippedDefinition;
+                return true;
+            }
+        }
+
+        slot = 0;
+        item = null;
+        definition = null;
+        return false;
+    }
+
+    public void UnequipSlot(ClientPcProfile profile, int slot, int itemId)
+    {
+        profile.Items.Remove(slot);
+
+        RefreshEquipmentGlide();
+
+        SendTunneled(new ClientUpdatePacketUnequipSlot { Slot = slot, ProfileId = profile.Id });
+
+        var playerUpdatePacketEquipItemChange = new PlayerUpdatePacketEquipItemChange
+        {
+            Guid = Guid,
+            Id = itemId,
+            ProfileId = profile.Id,
+            WieldType = GetWieldType()
+        };
+        playerUpdatePacketEquipItemChange.Attachment.Slot = slot;
+
+        if (profile.Id == ActiveProfileId)
+            SendTunneledToVisible(playerUpdatePacketEquipItemChange);
+
+        SendToolbar();
+    }
 
     public void SendActiveWieldType()
     {

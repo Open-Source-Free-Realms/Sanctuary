@@ -213,6 +213,36 @@ public sealed class QuestGoalTests
         Assert.IsTrue(quest.IsWaitingOn(progress, Npc(700)));
     }
 
+    [TestMethod]
+    public void UseItemGoal_CountsUsesOfItsItemUntilTheRequiredCount()
+    {
+        var goal = new UseItemGoal { ItemDefinitionId = 5, RequiredCount = 2 };
+        var progress = goal.CreateProgress();
+
+        Assert.AreEqual(QuestGoalResult.None, goal.Progress(Quest, new ItemUsedEvent(6), progress));
+        Assert.AreEqual(QuestGoalResult.Progressed, goal.Progress(Quest, new ItemUsedEvent(5), progress));
+        Assert.AreEqual(QuestGoalResult.Completed, goal.Progress(Quest, new ItemUsedEvent(5), progress));
+    }
+
+    [TestMethod]
+    public void UseItemGoal_WithoutACountCompletesOnTheFirstUse()
+    {
+        var goal = new UseItemGoal { ItemDefinitionId = 5 };
+
+        Assert.AreEqual(QuestGoalResult.Completed, goal.Progress(Quest, new ItemUsedEvent(5), goal.CreateProgress()));
+    }
+
+    [TestMethod]
+    public void EquipItemGoal_CompletesWhenItsItemIsEquipped()
+    {
+        var goal = new EquipItemGoal { ItemDefinitionId = 5 };
+        var progress = goal.CreateProgress();
+
+        Assert.AreEqual(QuestGoalResult.None, goal.Progress(Quest, new ItemEquippedEvent(6), progress));
+        Assert.AreEqual(QuestGoalResult.None, goal.Progress(Quest, new ItemUsedEvent(5), progress));
+        Assert.AreEqual(QuestGoalResult.Completed, goal.Progress(Quest, new ItemEquippedEvent(5), progress));
+    }
+
     private static Npc Npc(int npcId) => new(Zone) { DefinitionId = npcId };
 
     private static NpcTalkedEvent Talk(int npcId) => new(Npc(npcId));

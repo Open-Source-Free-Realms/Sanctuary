@@ -51,6 +51,38 @@ public sealed class QuestDefinitionTests
     }
 
     [TestMethod]
+    public void Load_ReadsItemGoalsAndAcceptItems()
+    {
+        var quests = LoadQuests("""
+            [
+              {
+                "QuestId": 1,
+                "TargetNpcId": 500,
+                "AcceptItems": [7, 7, 8],
+                "RewardStationCash": 100,
+                "Goals": [
+                  { "Type": 11, "NameId": 10, "ItemDefinitionId": 7 },
+                  { "Type": 10, "NameId": 11, "ItemDefinitionId": 7, "RequiredCount": 3, "TargetPosition": [1, 2, 3] },
+                  { "Type": 0, "NameId": 12 }
+                ]
+              }
+            ]
+            """);
+
+        Assert.IsTrue(quests.TryGet(1, out var quest));
+
+        CollectionAssert.AreEqual(new[] { 7, 7, 8 }, quest.AcceptItems);
+        Assert.AreEqual(100, quest.RewardStationCash);
+        Assert.AreEqual(7, ((EquipItemGoal)quest.Goals[0]).ItemDefinitionId);
+
+        var use = (UseItemGoal)quest.Goals[1];
+        Assert.AreEqual(7, use.ItemDefinitionId);
+        Assert.AreEqual(3, use.RequiredCount);
+        Assert.AreEqual(new Vector3(1, 2, 3), use.TargetPosition);
+        Assert.AreEqual(ReachLocationGoal.FabledRealmsZoneDefinitionId, use.ZoneDefinitionId);
+    }
+
+    [TestMethod]
     public void Load_RejectsAnUnknownGoalType()
     {
         var quests = new QuestDefinitionCollection(NullLogger.Instance);
