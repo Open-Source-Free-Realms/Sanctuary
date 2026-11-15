@@ -52,5 +52,6 @@
   <Project Path="Sanctuary.Game.Tests/Sanctuary.Game.Tests.csproj" />
   <Project Path="Sanctuary.Scripting/Sanctuary.Scripting.csproj" />
   <Project Path="Sanctuary.Scripting.Tests/Sanctuary.Scripting.Tests.csproj" />
+  <Project Path="Sanctuary.DevClient/Sanctuary.DevClient.csproj" />
   <Project Path="Sanctuary.WebAPI/Sanctuary.WebAPI.csproj" />
 </Solution>

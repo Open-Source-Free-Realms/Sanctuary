@@ -2,10 +2,19 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Play",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build DevClient",
+      "program": "${workspaceFolder}/src/Sanctuary.DevClient/bin/Debug/net9.0/Sanctuary.DevClient.dll",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "stopAtEntry": false
+    },
+    {
       "name": "Login",
       "type": "coreclr",
       "request": "launch",
-      "preLaunchTask": "build Login",
       "program": "${workspaceFolder}/src/Sanctuary.Login/bin/Debug/net9.0/Sanctuary.Login.dll",
       "cwd": "${workspaceFolder}/src",
       "console": "integratedTerminal",
@@ -20,7 +29,6 @@
       "name": "Gateway",
       "type": "coreclr",
       "request": "launch",
-      "preLaunchTask": "build Gateway",
       "program": "${workspaceFolder}/src/Sanctuary.Gateway/bin/Debug/net9.0/Sanctuary.Gateway.dll",
       "cwd": "${workspaceFolder}/src",
       "console": "integratedTerminal",
@@ -35,9 +43,8 @@
       "name": "WebAPI",
       "type": "coreclr",
       "request": "launch",
-      "preLaunchTask": "build WebAPI",
       "program": "${workspaceFolder}/src/Sanctuary.WebAPI/bin/Debug/net9.0/Sanctuary.WebAPI.dll",
-      "cwd": "${workspaceFolder}/src",
+      "cwd": "${workspaceFolder}/src/Sanctuary.WebAPI",
       "console": "integratedTerminal",
       "stopAtEntry": false,
       "env": {
@@ -45,11 +52,33 @@
         "Database__ConnectionString": "Data Source=${workspaceFolder}/sanctuary.db",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
+    },
+    {
+      "name": "Client",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/Sanctuary.DevClient/bin/Debug/net9.0/Sanctuary.DevClient.dll",
+      "args": ["--no-servers"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "stopAtEntry": false
     }
   ],
   "compounds": [
     {
+      "name": "Servers + WebAPI + Client",
+      "preLaunchTask": "build",
+      "configurations": [
+        "Login",
+        "Gateway",
+        "WebAPI",
+        "Client"
+      ],
+      "stopAll": true
+    },
+    {
       "name": "Servers (Login + Gateway)",
+      "preLaunchTask": "build",
       "configurations": [
         "Login",
         "Gateway"
@@ -58,6 +87,7 @@
     },
     {
       "name": "Servers + WebAPI",
+      "preLaunchTask": "build",
       "configurations": [
         "Login",
         "Gateway",

@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "Play": {
+      "commandName": "Project"
+    },
+    "Client only": {
+      "commandName": "Project",
+      "commandLineArgs": "--no-servers"
+    }
+  }
+}
