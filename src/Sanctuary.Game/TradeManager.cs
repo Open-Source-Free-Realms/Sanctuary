@@ -46,8 +46,7 @@ public sealed class TradeManager : IDisposable
     private readonly TimeProvider _clock;
     private int _nextId;
     private bool _disposed;
-    // Restoration policy, not a recovered retail timeout.
-    public static readonly TimeSpan InvitationLifetime = TimeSpan.FromSeconds(60);
+    public static readonly TimeSpan InvitationLifetime = TimeSpan.FromSeconds(InviteHelper.ExpirySeconds);
 
     public TradeManager(ILogger<TradeManager> logger, TimeProvider? clock = null, ITradeSettlement? settlement = null)
     {

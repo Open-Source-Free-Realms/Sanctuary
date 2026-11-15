@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Sanctuary.Game.Helpers;
 using Sanctuary.Game.Routines;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -182,6 +183,20 @@ public sealed class TradeManagerTests
         trades.Cancel(a, old);
         Assert.AreEqual(0, a.Packets.OfType<TradeStartSessionPacket>().Count());
         trades.Reply(b, Invitation(b), true);
+        Assert.AreEqual(1, a.Packets.OfType<TradeStartSessionPacket>().Count());
+    }
+
+    [TestMethod]
+    public void InvitationCanBeAcceptedForTheClientsWholeFiveMinuteLife()
+    {
+        var clock = new Clock();
+        using var trades = Create(clock);
+        var a = new Peer(1, this);
+        var b = new Peer(2, this);
+        trades.Invite(a, b);
+        var id = Invitation(b);
+        clock.Now += TimeSpan.FromSeconds(InviteHelper.ClientLifeSeconds);
+        trades.Reply(b, id, true);
         Assert.AreEqual(1, a.Packets.OfType<TradeStartSessionPacket>().Count());
     }
 

@@ -52,8 +52,6 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
     private const string TeleportRoutineName = "Teleport";
     private const string FriendRequestRoutinePrefix = "FriendRequest:";
     private const string GuildInviteRoutinePrefix = "GuildInvite:";
-    private const double ClientRequestLifeSeconds = 300;
-    private const double RequestExpiryMarginSeconds = 10;
     private const double TeleportTimeoutSeconds = 3;
     private const int TeleportSequenceCount = 4;
 
@@ -142,7 +140,7 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
         {
             if (requests.TryRemove(senderGuid) && _zoneManager.TryGetPlayer(senderGuid, out var sender))
                 onExpired(sender);
-        }), ClientRequestLifeSeconds + RequestExpiryMarginSeconds));
+        }), InviteHelper.ExpirySeconds));
 
         return true;
     }
