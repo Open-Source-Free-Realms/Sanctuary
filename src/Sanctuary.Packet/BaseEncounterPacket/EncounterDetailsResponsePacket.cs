@@ -1,0 +1,69 @@
+using System;
+using System.Collections.Generic;
+
+using Sanctuary.Core.IO;
+using Sanctuary.Packet.Common;
+
+namespace Sanctuary.Packet;
+
+public class EncounterDetailsResponsePacket : BaseEncounterPacket, ISerializablePacket, IDeserializable<EncounterDetailsResponsePacket>
+{
+    public new const short OpCode = 114;
+
+    public EncounterDetailsInfo Details = new();
+
+    public bool Unknown3;
+
+    public int MarketplaceAdReferrerContext;
+
+    public List<int> StoreBundleIds { get; } = [];
+
+    public EncounterDetailsResponsePacket() : base(OpCode)
+    {
+    }
+
+    public byte[] Serialize()
+    {
+        using var writer = new PacketWriter();
+
+        Write(writer);
+        Details.Serialize(writer);
+        writer.Write(Unknown3);
+        writer.Write(MarketplaceAdReferrerContext);
+        writer.Write(StoreBundleIds);
+
+        return writer.Buffer;
+    }
+
+    public static bool TryDeserialize(ReadOnlySpan<byte> data, out EncounterDetailsResponsePacket encounterDetailsResponsePacket)
+    {
+        encounterDetailsResponsePacket = new();
+
+        var reader = new PacketReader(data);
+
+        if (!encounterDetailsResponsePacket.TryRead(ref reader))
+            return false;
+
+        if (!encounterDetailsResponsePacket.Details.TryRead(ref reader))
+            return false;
+
+        if (!reader.TryRead(out encounterDetailsResponsePacket.Unknown3))
+            return false;
+
+        if (!reader.TryRead(out encounterDetailsResponsePacket.MarketplaceAdReferrerContext))
+            return false;
+
+        if (!reader.TryRead(out int idCount) || idCount < 0 || idCount > reader.RemainingLength / 4)
+            return false;
+
+        for (var i = 0; i < idCount; i++)
+        {
+            if (!reader.TryRead(out int id))
+                return false;
+
+            encounterDetailsResponsePacket.StoreBundleIds.Add(id);
+        }
+
+        return reader.RemainingLength == 0;
+    }
+}

@@ -13,7 +13,7 @@ public class BaseObjectivePacket
         SubOpCode = subOpCode;
     }
 
-    public void Write(PacketWriter writer)
+    public virtual void Write(PacketWriter writer)
     {
         writer.Write(OpCode);
         writer.Write(SubOpCode);
