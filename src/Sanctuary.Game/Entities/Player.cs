@@ -98,6 +98,9 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
     public Dictionary<int, PetTrait> PetTraits { get; } = [];
     public Dictionary<int, DateTimeOffset> PetTreasureFoundAt { get; } = [];
 
+    public Dictionary<ulong, ulong> HouseInvites { get; } = [];
+    public bool IsPreviewingHouse { get; set; }
+
     public PetClientInfo? GetPetClientInfo(int petId) => Pets.FirstOrDefault(petClientInfo => petClientInfo.Id == petId);
 
     public PetClientInfo? GetActivePetClientInfo() => GetPetClientInfo(ActivePetId);
@@ -785,13 +788,21 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
         if (Zone == destinationZone)
             return true;
 
+        return TeleportToZone(destinationZone.DefinitionId, destinationZone.OwnerId, position, rotation);
+    }
+
+    public bool TeleportToZone(int zoneDefinitionId, ulong? ownerId, Vector4 position, Quaternion rotation)
+    {
+        if (Zone.DefinitionId == zoneDefinitionId && Zone.OwnerId == ownerId && !IsPreviewingHouse)
+            return true;
+
         if (Zone is WorldZone)
         {
             StartingZonePosition = Position;
             StartingZoneRotation = Rotation;
         }
 
-        if (!_zoneManager.TryMovePlayerToZone(destinationZone.DefinitionId, destinationZone.OwnerId, this, position, rotation, out var zone))
+        if (!_zoneManager.TryMovePlayerToZone(zoneDefinitionId, ownerId, this, position, rotation, out var zone))
             return false;
 
         if (_appearanceEffectId != 0 && _effects.TryGetValue(_appearanceEffectId, out var appearanceEffect) && appearanceEffect.ExpiresAt is null)

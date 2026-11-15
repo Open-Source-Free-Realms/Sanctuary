@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 371,
+  "Name": "sg_fishing_stream",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 16,
+  "EndLongitude": 16,
+  "SpawnPosition": [
+    490.0,
+    -71.12,
+    438.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

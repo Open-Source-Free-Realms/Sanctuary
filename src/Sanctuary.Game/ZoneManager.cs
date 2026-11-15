@@ -236,26 +236,8 @@ public class ZoneManager : IZoneManager
         // This is why we don't pass a player instance here directly.
         WorldZoneDefinition => true,
         CombatZoneDefinition => ownerId is not null,
-        HousingZoneDefinition housing => ownerId is not null && PlayerOwnsHouse(ownerId.Value, housing.Id),
+        HousingZoneDefinition => ownerId is not null,
         _ => false
     };
 
-    private static bool PlayerOwnsHouse(ulong ownerId, int zoneDefinitionId)
-    {
-        // NOTE: I'm not sure I like this function living here...
-        // maybe just throw this DB logic into the 'PlayerCanAccessZone' funciton in
-        // the first place..? Idk
-
-        // TODO: fetch from DB
-
-        // using var dbContext = _dbContextFactory.CreateDbContext();
-
-        // var dbHouse = dbContext.Houses.SingleOrDefault(house =>
-        //     house.CharacterId == ownerId && house.ZoneDefinitionId == zoneDefinitionId);
-
-        // if (dbHouse is null)
-        //     return false;
-
-        throw new NotImplementedException();
-    }
 }

@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 301,
+  "Name": "bs_bone_bog_cemetery",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 24,
+  "EndLongitude": 24,
+  "SpawnPosition": [
+    611.0,
+    -32.41,
+    664.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

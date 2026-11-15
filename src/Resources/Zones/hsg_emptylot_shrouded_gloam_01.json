@@ -1,0 +1,23 @@
+{
+  "$type": "Housing",
+  "Id": 116,
+  "Name": "hsg_emptylot_shrouded_gloam_01",
+  "Type": "Housing",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 16,
+  "EndLongitude": 16,
+  "Sky": "sky_shrouded_gloam.xml",
+  "SpawnPosition": [
+    508.68,
+    -0.96,
+    495.49
+  ],
+  "SpawnRotation": [
+    -1.0,
+    0,
+    -0.0002,
+    0
+  ]
+}

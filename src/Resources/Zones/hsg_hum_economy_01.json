@@ -1,0 +1,23 @@
+{
+  "$type": "Housing",
+  "Id": 124,
+  "Name": "hsg_hum_economy_01",
+  "Type": "Housing",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 24,
+  "EndLongitude": 24,
+  "Sky": "sky_wilds24.xml",
+  "SpawnPosition": [
+    792.95,
+    0.04,
+    761.16
+  ],
+  "SpawnRotation": [
+    0.0176,
+    0,
+    0.9998,
+    0
+  ]
+}

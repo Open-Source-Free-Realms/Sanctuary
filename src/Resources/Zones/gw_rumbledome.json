@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 340,
+  "Name": "gw_rumbledome",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 8,
+  "EndLongitude": 8,
+  "SpawnPosition": [
+    154.0,
+    71.81,
+    323.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

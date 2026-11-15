@@ -1,0 +1,23 @@
+{
+  "$type": "Housing",
+  "Id": 102,
+  "Name": "hsg_emptylot_bog_shore_01",
+  "Type": "Housing",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 16,
+  "EndLongitude": 16,
+  "Sky": "sky_blackspore24.xml",
+  "SpawnPosition": [
+    520.91,
+    0.04,
+    511.42
+  ],
+  "SpawnRotation": [
+    0.0176,
+    0,
+    0.9998,
+    0
+  ]
+}

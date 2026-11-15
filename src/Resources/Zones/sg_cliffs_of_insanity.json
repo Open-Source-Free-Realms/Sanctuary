@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 362,
+  "Name": "sg_cliffs_of_insanity",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": -8,
+  "StartLongitude": -8,
+  "EndLatitude": 24,
+  "EndLongitude": 24,
+  "SpawnPosition": [
+    118.0,
+    65.56,
+    151.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

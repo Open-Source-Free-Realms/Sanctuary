@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 354,
+  "Name": "seaside_platform_jumping",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": -24,
+  "StartLongitude": -32,
+  "EndLatitude": 32,
+  "EndLongitude": 40,
+  "SpawnPosition": [
+    -448.0,
+    0.0,
+    -320.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

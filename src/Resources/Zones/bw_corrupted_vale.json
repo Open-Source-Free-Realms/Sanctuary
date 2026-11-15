@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 308,
+  "Name": "bw_corrupted_vale",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 8,
+  "EndLongitude": 8,
+  "SpawnPosition": [
+    214.0,
+    31.86,
+    286.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

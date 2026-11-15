@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 382,
+  "Name": "sg_mugworts_hollow",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 16,
+  "EndLongitude": 16,
+  "SpawnPosition": [
+    231.0,
+    -14.32,
+    257.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 405,
+  "Name": "sg_treasure_vault_premium",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 8,
+  "EndLongitude": 8,
+  "SpawnPosition": [
+    327.0,
+    -42.88,
+    209.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "$type": "Housing",
+  "Id": 122,
+  "Name": "hsg_hum_chromakey_01",
+  "Type": "Housing",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 8,
+  "EndLongitude": 8,
+  "Sky": "sky_wilds24.xml",
+  "SpawnPosition": [
+    256,
+    1,
+    256
+  ],
+  "SpawnRotation": [
+    0,
+    0,
+    0,
+    1
+  ],
+  "StaffOnly": true
+}

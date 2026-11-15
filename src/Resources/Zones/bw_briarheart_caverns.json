@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 306,
+  "Name": "bw_briarheart_caverns",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": -8,
+  "StartLongitude": -8,
+  "EndLatitude": 13,
+  "EndLongitude": 13,
+  "SpawnPosition": [
+    -53.0,
+    0.0,
+    -198.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "$type": "Housing",
+  "Id": 135,
+  "Name": "ssv_dwarf_dam_01",
+  "Type": "Housing",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 24,
+  "EndLongitude": 24,
+  "Sky": "sky_sunstone_valley24.xml",
+  "SpawnRotation": [
+    -0.1527,
+    0,
+    0.9883,
+    0
+  ],
+  "SpawnPosition": [
+    623.82,
+    4.79,
+    502.1
+  ]
+}

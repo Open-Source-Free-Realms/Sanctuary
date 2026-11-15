@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 323,
+  "Name": "bw_snarling_hedges",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 16,
+  "EndLongitude": 16,
+  "SpawnPosition": [
+    669.0,
+    -0.03,
+    622.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

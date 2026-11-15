@@ -46,6 +46,8 @@ public static class PetHelper
     private const byte FemalePetSex = 0;
 
     public const int NoItemGuid = 0;
+    public const float PetDefaultScale = 1f;
+    public const int PetNpcDisposition = 2;
     public const int MillisecondsPerSecond = 1000;
     public const float PetHappyMinMood = 25f;
     public const string PetDogModelPrefix = "dog_";
@@ -499,6 +501,46 @@ public static class PetHelper
         }
     }
 
+
+    public static bool TryGetPetModel(IResourceManager resourceManager, Player player, int petId, [MaybeNullWhen(false)] out PetClientInfo petClientInfo,
+        [MaybeNullWhen(false)] out ClientItemDefinition clientItemDefinition, [MaybeNullWhen(false)] out ModelDefinition modelDefinition)
+    {
+        petClientInfo = player.GetPetClientInfo(petId);
+        clientItemDefinition = null;
+        modelDefinition = null;
+
+        return petClientInfo is not null && player.PetDefinitions.TryGetValue(petId, out var definitionId)
+            && resourceManager.ClientItemDefinitions.TryGetValue(definitionId, out clientItemDefinition)
+            && TryGetModel(resourceManager, clientItemDefinition, out modelDefinition);
+    }
+
+    public static void ApplyPetAppearance(IResourceManager resourceManager, Player player, Npc npc, PetClientInfo petClientInfo,
+        ClientItemDefinition clientItemDefinition, ModelDefinition modelDefinition)
+    {
+        npc.Name = petClientInfo.Name;
+        npc.NameId = petClientInfo.NameId;
+        npc.ModelId = modelDefinition.Id;
+        npc.TextureAlias = petClientInfo.TextureAlias;
+        resourceManager.Pets.TryGetValue(modelDefinition.Id, out var petDefinition);
+        npc.TintAlias = petDefinition?.DefaultTintAlias is not null && petClientInfo.TintId == petDefinition.DefaultTintId
+            ? petDefinition.DefaultTintAlias
+            : clientItemDefinition.TintAlias;
+        npc.TintId = petClientInfo.TintId;
+        foreach (var itemGuid in petClientInfo.ItemGuids)
+        {
+            var clientItem = player.Items.FirstOrDefault(item => item.Id == itemGuid);
+
+            if (clientItem is not null && resourceManager.ClientItemDefinitions.TryGetValue(clientItem.Definition, out var definition)
+                && definition.Type == ItemDefinitionHelper.PetClothingItemType)
+            {
+                npc.Attachments.Add(GetAttachment(clientItem.Tint, definition));
+            }
+        }
+
+        npc.IsInteractable = false;
+        npc.Scale = modelDefinition.Scale > 0f ? modelDefinition.Scale : PetDefaultScale;
+        npc.Disposition = PetNpcDisposition;
+    }
 
     public static bool TryGetModel(IResourceManager resourceManager, ClientItemDefinition clientItemDefinition,
         out ModelDefinition modelDefinition)

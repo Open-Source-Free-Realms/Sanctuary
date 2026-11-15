@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 341,
+  "Name": "gw_skullz_camp_climb_01",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 16,
+  "EndLongitude": 16,
+  "SpawnPosition": [
+    317.0,
+    96.86,
+    424.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

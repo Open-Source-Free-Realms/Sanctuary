@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 321,
+  "Name": "bw_random_encounter_bristlewood_01",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 5,
+  "EndLongitude": 5,
+  "SpawnPosition": [
+    134.0,
+    -0.02,
+    166.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 360,
+  "Name": "sg_changeling_caverns_return",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": -8,
+  "StartLongitude": -8,
+  "EndLatitude": 17,
+  "EndLongitude": 17,
+  "SpawnPosition": [
+    358.0,
+    0.0,
+    311.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

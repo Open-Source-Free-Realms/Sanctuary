@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 413,
+  "Name": "sh_dm_arena",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 8,
+  "EndLongitude": 12,
+  "SpawnPosition": [
+    222.0,
+    100.12,
+    348.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

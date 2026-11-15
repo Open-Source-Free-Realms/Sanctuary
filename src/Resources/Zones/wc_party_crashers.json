@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 446,
+  "Name": "wc_party_crashers",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 8,
+  "EndLongitude": 8,
+  "SpawnPosition": [
+    311.0,
+    24.71,
+    176.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

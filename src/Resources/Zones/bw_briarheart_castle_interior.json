@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 305,
+  "Name": "bw_briarheart_castle_interior",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 4,
+  "EndLongitude": 4,
+  "SpawnPosition": [
+    40.71,
+    22.54,
+    129.86
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}

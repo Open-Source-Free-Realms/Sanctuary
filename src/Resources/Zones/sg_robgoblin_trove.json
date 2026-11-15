@@ -1,0 +1,20 @@
+{
+  "$type": "Dungeon",
+  "Id": 393,
+  "Name": "sg_robgoblin_trove",
+  "Type": "Dungeon",
+  "TileSize": 64,
+  "StartLatitude": 0,
+  "StartLongitude": 0,
+  "EndLatitude": 6,
+  "EndLongitude": 6,
+  "SpawnPosition": [
+    250.0,
+    0.0,
+    143.0
+  ],
+  "SpawnRotation": [
+    0,
+    1
+  ]
+}
