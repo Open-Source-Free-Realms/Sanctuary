@@ -7,7 +7,7 @@ using Sanctuary.Game.Entities;
 namespace Sanctuary.Game.Tests;
 
 [TestClass]
-public sealed class FriendRequestTests
+public sealed class IncomingRequestTests
 {
     private const ulong RequesterGuid = 42;
     private const double ExpirySeconds = 310;
@@ -41,6 +41,21 @@ public sealed class FriendRequestTests
         Advance(player, zone, 2);
         Assert.IsFalse(player.IncomingFriendRequests.Contains(RequesterGuid));
         Assert.IsTrue(player.TryAddIncomingFriendRequest(RequesterGuid), "The player can be asked again once the old request has expired.");
+    }
+
+    [TestMethod]
+    public void IncomingGuildInvite_ExpiresJustAfterFiveMinutes()
+    {
+        using var zone = TestZone.Create();
+        var player = CreatePlayer(zone);
+
+        Assert.IsTrue(player.TryAddIncomingGuildInvite(RequesterGuid));
+
+        Advance(player, zone, ExpirySeconds - 1);
+        Assert.IsTrue(player.IncomingGuildInvites.Contains(RequesterGuid));
+
+        Advance(player, zone, 2);
+        Assert.IsFalse(player.IncomingGuildInvites.Contains(RequesterGuid));
     }
 
     [TestMethod]
