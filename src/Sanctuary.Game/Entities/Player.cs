@@ -50,6 +50,9 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
     private const double AreaSettleSeconds = 1.5;
     private const string PointOfInterestRoutineName = "PointOfInterest";
     private const string TeleportRoutineName = "Teleport";
+    private const string FriendRequestRoutinePrefix = "FriendRequest:";
+    private const double ClientFriendRequestLifeSeconds = 300;
+    private const double FriendRequestMarginSeconds = 10;
     private const double TeleportTimeoutSeconds = 3;
     private const int TeleportSequenceCount = 4;
 
@@ -107,6 +110,38 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
 
     public ConcurrentSet<ulong> IncomingFriendRequests { get; } = [];
     public ConcurrentSet<ulong> IncomingGuildInvites { get; } = [];
+
+    public bool TryAddIncomingFriendRequest(ulong requesterGuid)
+    {
+        if (!IncomingFriendRequests.TryAdd(requesterGuid))
+            return false;
+
+        // The client times its own prompt out; this only clears a request the client never answered.
+        Routines.SetRoutine(FriendRequestRoutinePrefix + requesterGuid,
+            new DelayedRoutine(new InstantRoutine(() => ExpireIncomingFriendRequest(requesterGuid)), ClientFriendRequestLifeSeconds + FriendRequestMarginSeconds));
+
+        return true;
+    }
+
+    public bool TryRemoveIncomingFriendRequest(ulong requesterGuid)
+    {
+        Routines.Cancel(FriendRequestRoutinePrefix + requesterGuid);
+
+        return IncomingFriendRequests.TryRemove(requesterGuid);
+    }
+
+    private void ExpireIncomingFriendRequest(ulong requesterGuid)
+    {
+        if (!IncomingFriendRequests.TryRemove(requesterGuid) || !_zoneManager.TryGetPlayer(requesterGuid, out var requester))
+            return;
+
+        requester.SendTunneled(new FriendMessagePacket
+        {
+            Type = FriendMessageType.FriendAddRequestTimedOut,
+            Guid = Guid,
+            Name = Name
+        });
+    }
 
 
     public ulong CharacterId { get; set; }

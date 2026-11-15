@@ -55,7 +55,7 @@ public static class CommandPacketConfirmFriendResponseHandler
             case 0:
                 if (connection.Player.Friends.Any(x => x.Guid == player.Guid))
                 {
-                    connection.Player.IncomingFriendRequests.TryRemove(packet.Guid);
+                    connection.Player.TryRemoveIncomingFriendRequest(packet.Guid);
                     return true;
                 }
 
@@ -77,7 +77,7 @@ public static class CommandPacketConfirmFriendResponseHandler
                 return true;
         }
 
-        connection.Player.IncomingFriendRequests.TryRemove(packet.Guid);
+        connection.Player.TryRemoveIncomingFriendRequest(packet.Guid);
 
         friendMessagePacket.Guid = connection.Player.Guid;
         friendMessagePacket.Name = connection.Player.Name;
