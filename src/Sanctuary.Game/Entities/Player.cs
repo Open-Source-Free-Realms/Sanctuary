@@ -50,8 +50,8 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
     private const double AreaSettleSeconds = 1.5;
     private const string PointOfInterestRoutineName = "PointOfInterest";
     private const string TeleportRoutineName = "Teleport";
-    private const string FriendRequestRoutinePrefix = "FriendRequest:";
-    private const string GuildInviteRoutinePrefix = "GuildInvite:";
+    private const string FriendRequestRoutineName = "FriendRequest:";
+    private const string GuildInviteRoutineName = "GuildInvite:";
     private const double TeleportTimeoutSeconds = 3;
     private const int TeleportSequenceCount = 4;
 
@@ -111,7 +111,7 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
     public ConcurrentSet<ulong> IncomingGuildInvites { get; } = [];
 
     public bool TryAddIncomingFriendRequest(ulong requesterGuid) =>
-        TryAddIncomingRequest(IncomingFriendRequests, FriendRequestRoutinePrefix, requesterGuid, requester => requester.SendTunneled(new FriendMessagePacket
+        TryAddIncomingRequest(IncomingFriendRequests, FriendRequestRoutineName, requesterGuid, requester => requester.SendTunneled(new FriendMessagePacket
         {
             Type = FriendMessageType.FriendAddRequestTimedOut,
             Guid = Guid,
@@ -119,24 +119,24 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
         }));
 
     public bool TryRemoveIncomingFriendRequest(ulong requesterGuid) =>
-        TryRemoveIncomingRequest(IncomingFriendRequests, FriendRequestRoutinePrefix, requesterGuid);
+        TryRemoveIncomingRequest(IncomingFriendRequests, FriendRequestRoutineName, requesterGuid);
 
     public bool TryAddIncomingGuildInvite(ulong inviterGuid) =>
-        TryAddIncomingRequest(IncomingGuildInvites, GuildInviteRoutinePrefix, inviterGuid, inviter => inviter.SendTunneled(new GuildErrorPacket
+        TryAddIncomingRequest(IncomingGuildInvites, GuildInviteRoutineName, inviterGuid, inviter => inviter.SendTunneled(new GuildErrorPacket
         {
             MessageName = "GuildInviteTimedOut"
         }));
 
     public bool TryRemoveIncomingGuildInvite(ulong inviterGuid) =>
-        TryRemoveIncomingRequest(IncomingGuildInvites, GuildInviteRoutinePrefix, inviterGuid);
+        TryRemoveIncomingRequest(IncomingGuildInvites, GuildInviteRoutineName, inviterGuid);
 
-    private bool TryAddIncomingRequest(ConcurrentSet<ulong> requests, string routinePrefix, ulong senderGuid, Action<Player> onExpired)
+    private bool TryAddIncomingRequest(ConcurrentSet<ulong> requests, string routineName, ulong senderGuid, Action<Player> onExpired)
     {
         if (!requests.TryAdd(senderGuid))
             return false;
 
         // The client answers "timed out" itself after five minutes; this only clears a request it never answered.
-        Routines.SetRoutine(routinePrefix + senderGuid, new DelayedRoutine(new InstantRoutine(() =>
+        Routines.SetRoutine(routineName + senderGuid, new DelayedRoutine(new InstantRoutine(() =>
         {
             if (requests.TryRemove(senderGuid) && _zoneManager.TryGetPlayer(senderGuid, out var sender))
                 onExpired(sender);
@@ -145,9 +145,9 @@ public sealed class Player : ClientPcData, IEntity, ITradeParticipant
         return true;
     }
 
-    private bool TryRemoveIncomingRequest(ConcurrentSet<ulong> requests, string routinePrefix, ulong senderGuid)
+    private bool TryRemoveIncomingRequest(ConcurrentSet<ulong> requests, string routineName, ulong senderGuid)
     {
-        Routines.Cancel(routinePrefix + senderGuid);
+        Routines.Cancel(routineName + senderGuid);
 
         return requests.TryRemove(senderGuid);
     }
