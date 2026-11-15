@@ -23,6 +23,7 @@ public static class PacketChatHandler
     private static IZoneManager _zoneManager = null!;
     private static IDbContextFactory<DatabaseContext> _dbContextFactory = null!;
     private static IChatCommandManager _chatCommandManager = null!;
+    private static IResourceManager _resourceManager = null!;
 
     public static void ConfigureServices(IServiceProvider serviceProvider)
     {
@@ -33,6 +34,7 @@ public static class PacketChatHandler
         _zoneManager = serviceProvider.GetRequiredService<IZoneManager>();
         _dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory<DatabaseContext>>();
         _chatCommandManager = serviceProvider.GetRequiredService<IChatCommandManager>();
+        _resourceManager = serviceProvider.GetRequiredService<IResourceManager>();
     }
 
     private static void SendMuteNotice(GatewayConnection connection)
@@ -86,6 +88,10 @@ public static class PacketChatHandler
         packet.FromGuid = connection.Player.Guid;
         packet.FromName = connection.Player.Name;
 
+        // censor the message for players, the chat log keeps the original
+        var originalMessage = packet.Message;
+        packet.Message = ChatFilter.Censor(packet.Message, _resourceManager.ChatBlacklist.Current, _resourceManager.ChatWhitelist.Current, _logger);
+
         switch (packet.Channel)
         {
             case ChatChannel.Tell:
@@ -97,7 +103,7 @@ public static class PacketChatHandler
                             packet.FromGuid,
                             packet.ToName,
                             toPlayer.Guid,
-                            packet.Message
+                            originalMessage
                         );
 
                         if (toPlayer.Ignores.Any(x => x.Guid == connection.Player.Guid))
@@ -120,7 +126,7 @@ public static class PacketChatHandler
                     _chatLogger.LogInformation("WorldShout|From: \"{FromName}\" ({FromGuid}), Msg: \"{Message}\"",
                         packet.FromName,
                         packet.FromGuid,
-                        packet.Message
+                        originalMessage
                     );
 
                     foreach (var zonePlayer in connection.Player.Zone.Players)
@@ -142,7 +148,7 @@ public static class PacketChatHandler
                         packet.AreaNameId,
                         packet.FromName,
                         packet.FromGuid,
-                        packet.Message
+                        originalMessage
                     );
 
                     connection.Player.SendTunneled(packet);
@@ -175,7 +181,7 @@ public static class PacketChatHandler
                         packet.AreaNameId,
                         packet.FromName,
                         packet.FromGuid,
-                        packet.Message
+                        originalMessage
                     );
 
                     connection.Player.SendTunneled(packet);
@@ -204,7 +210,7 @@ public static class PacketChatHandler
                         packet.GuildGuid,
                         packet.FromName,
                         packet.FromGuid,
-                        packet.Message
+                        originalMessage
                     );
 
                     foreach (var member in connection.Player.GuildData.Members.Values)
@@ -226,7 +232,7 @@ public static class PacketChatHandler
                         packet.Channel,
                         packet.FromName,
                         packet.FromGuid,
-                        packet.Message
+                        originalMessage
                     );
 
                     connection.Player.SendTunneled(packet);

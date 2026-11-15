@@ -46,11 +46,6 @@ public static class GuildHelper
 
     public static bool IsValidName(string name) => ValidateName(name) == GuildNameValidationResult.Valid;
 
-    public static bool IsProfane(string name, IEnumerable<string> nameFilter)
-    {
-        return nameFilter.Any(token => name.Contains(token, StringComparison.OrdinalIgnoreCase));
-    }
-
     public static int? GetMemberRole(DatabaseContext dbContext, ulong guildGuid, ulong playerGuid)
     {
         var characterId = GuidHelper.GetPlayerId(playerGuid);
