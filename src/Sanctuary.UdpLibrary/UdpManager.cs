@@ -67,6 +67,9 @@ public class UdpManager<TConnection> : IUdpManager, IDisposable where TConnectio
 
     protected ErrorCondition ErrorCondition;
 
+    /// <summary>False when the listening socket could not be bound (e.g. port in use).</summary>
+    public bool IsSocketBound => ErrorCondition != ErrorCondition.CouldNotBindSocket;
+
     protected readonly PooledList<TConnection> ConnectionList;
     protected readonly PooledList<UdpConnection> DisconnectPendingList;
 
