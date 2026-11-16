@@ -18080,8 +18080,8 @@
   },
   {
     "Id": 4435,
-    "NameId": 4412,
-    "Name": "Elite Exploration Coin",
+    "NameId": 386170,
+    "Name": "Rare Exploration Coin",
     "ModelId": 818,
     "ModelFileName": "env_icon_snowhill.adr"
   },
@@ -18101,8 +18101,8 @@
   },
   {
     "Id": 4438,
-    "NameId": 386170,
-    "Name": "Rare Exploration Coin",
+    "NameId": 4412,
+    "Name": "Elite Exploration Coin",
     "ModelId": 818,
     "ModelFileName": "env_icon_snowhill.adr"
   },
