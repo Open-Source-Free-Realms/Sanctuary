@@ -66,8 +66,6 @@ public sealed class TradeManager : IDisposable
                 || !ReferenceEquals(inviter.TradeContext, target.TradeContext) || _nextId == int.MaxValue)
                 return false;
 
-            // The client holds one trade at a time and ignores invitations while it shows one, so
-            // only an open trade or a received invitation makes a player busy. A sent one doesn't.
             var previous = _sessions.Values.FirstOrDefault(s => !s.Active && s.Inviter.Player.TradeGuid == inviter.TradeGuid);
             var refusal = IsTrading(inviter.TradeGuid) ? "You are already trading."
                 : previous?.Target.Player.TradeGuid == target.TradeGuid ? $"You already sent {target.TradeName.FullName} a trade request."
@@ -87,7 +85,6 @@ public sealed class TradeManager : IDisposable
                 Close(session);
                 return false;
             }
-            // A new request replaces the inviter's previous one.
             if (previous is not null)
                 Withdraw(previous, inviter);
             _logger.LogInformation("Trade {session}: invitation from {inviter} to {target}.", session.Id, inviter.TradeGuid, target.TradeGuid);
@@ -109,8 +106,6 @@ public sealed class TradeManager : IDisposable
                 Close(session);
                 return;
             }
-            // The client holds one trade at a time, so both players' other requests close
-            // before the new windows open.
             Prune(session.Inviter.Player);
             Prune(session.Target.Player);
             foreach (var other in _sessions.Values.Where(s => s != session
@@ -383,8 +378,7 @@ public sealed class TradeManager : IDisposable
     private void CloseDisconnected(Session session, ITradeParticipant disconnected)
     {
         var partner = session.PartnerOf(disconnected);
-        // Send before EndSession: native message 2 also clears a pending invitation. It clears
-        // whichever one the client shows, so skip an inviter: their client never showed this one.
+        // Send before EndSession: native message 2 also clears whichever invitation the client shows.
         if (session.Active || ReferenceEquals(partner, session.Target.Player))
             Send(partner, new TradeMessagePacket { MessageCode = TradeMessagePacket.PartnerDisconnected });
         Close(session);
@@ -414,19 +408,15 @@ public sealed class TradeManager : IDisposable
 
     private bool HasInvitation(ulong guid) => _sessions.Values.Any(s => !s.Active && s.Target.Player.TradeGuid == guid);
 
-    // Closes a pending request that one of its players gave up for another one. Message 8,
-    // "Your trade with [player] has been canceled.", also clears the invitation on the target's
-    // client. End-session alone doesn't, and a leftover invitation answers whichever one comes next.
+    // Message 8 reads "Your trade with [player] has been canceled." and also clears the target's invitation.
     private void Withdraw(Session withdrawn, ITradeParticipant mover, Session? started = null)
     {
         var other = withdrawn.PartnerOf(mover);
-        // A reverse request between the same two players just gives way to their trade.
         var quiet = started?.Contains(other) == true;
         if (!quiet)
             Send(withdrawn.Target.Player, new TradeMessagePacket { MessageCode = TradeMessagePacket.PartnerEnteredInstancedZone });
         _logger.LogInformation("Trade {session}: withdrawn because {player} moved on.", withdrawn.Id, mover.TradeGuid);
         Close(withdrawn);
-        // The inviter's client never showed the request, so they get plain text instead.
         if (!quiet && ReferenceEquals(other, withdrawn.Inviter.Player))
             SendSystemMessage(other, $"{mover.TradeName.FullName} has cancelled the trade.");
     }
