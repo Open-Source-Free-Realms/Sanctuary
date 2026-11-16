@@ -32,6 +32,7 @@ public sealed class TradeManager : IDisposable
         public int Revision = 1;
         public bool Completing;
         public bool Contains(ITradeParticipant player) => ReferenceEquals(player, Inviter.Player) || ReferenceEquals(player, Target.Player);
+        public bool Involves(ulong guid) => Inviter.Player.TradeGuid == guid || Target.Player.TradeGuid == guid;
         public TradeSide SideOf(ITradeParticipant player) => ReferenceEquals(player, Inviter.Player) ? Inviter : Target;
         public ITradeParticipant PartnerOf(ITradeParticipant player) => ReferenceEquals(player, Inviter.Player) ? Target.Player : Inviter.Player;
     }
@@ -41,7 +42,6 @@ public sealed class TradeManager : IDisposable
     private readonly object _gate = new();
     private readonly ITradeSettlement? _settlement;
     private readonly Dictionary<int, Session> _sessions = [];
-    private readonly Dictionary<ulong, Session> _players = [];
     private readonly ILogger<TradeManager> _logger;
     private readonly TimeProvider _clock;
     private int _nextId;
@@ -63,20 +63,33 @@ public sealed class TradeManager : IDisposable
             Prune(inviter);
             Prune(target);
             if (_disposed || inviter.TradeGuid == target.TradeGuid || !inviter.TradeAvailable || !target.TradeAvailable
-                || !ReferenceEquals(inviter.TradeContext, target.TradeContext)
-                || _players.ContainsKey(inviter.TradeGuid) || _players.ContainsKey(target.TradeGuid)
-                || _nextId == int.MaxValue)
+                || !ReferenceEquals(inviter.TradeContext, target.TradeContext) || _nextId == int.MaxValue)
                 return false;
+
+            // The client holds one trade at a time and ignores invitations while it shows one, so
+            // only an open trade or a received invitation makes a player busy. A sent one doesn't.
+            var previous = _sessions.Values.FirstOrDefault(s => !s.Active && s.Inviter.Player.TradeGuid == inviter.TradeGuid);
+            var refusal = IsTrading(inviter.TradeGuid) ? "You are already trading."
+                : previous?.Target.Player.TradeGuid == target.TradeGuid ? $"You already sent {target.TradeName.FullName} a trade request."
+                : IsTrading(target.TradeGuid) ? $"{target.TradeName.FullName} is already trading."
+                : HasInvitation(target.TradeGuid) ? $"{target.TradeName.FullName} already has a pending trade request."
+                : null;
+            if (refusal is not null)
+            {
+                SendSystemMessage(inviter, refusal);
+                return false;
+            }
 
             var session = new Session(++_nextId, inviter, target, _clock.GetUtcNow() + InvitationLifetime);
             _sessions.Add(session.Id, session);
-            _players.Add(inviter.TradeGuid, session);
-            _players.Add(target.TradeGuid, session);
             if (!Send(target, new TradeInvitePacket { InviterName = inviter.TradeName, InviterGuid = inviter.TradeGuid, SessionId = session.Id }))
             {
                 Close(session);
                 return false;
             }
+            // A new request replaces the inviter's previous one.
+            if (previous is not null)
+                Withdraw(previous, inviter);
             _logger.LogInformation("Trade {session}: invitation from {inviter} to {target}.", session.Id, inviter.TradeGuid, target.TradeGuid);
             SendSystemMessage(inviter, $"Sent {target.TradeName.FullName} a trade request.");
             return true;
@@ -96,6 +109,13 @@ public sealed class TradeManager : IDisposable
                 Close(session);
                 return;
             }
+            // The client holds one trade at a time, so both players' other requests close
+            // before the new windows open.
+            Prune(session.Inviter.Player);
+            Prune(session.Target.Player);
+            foreach (var other in _sessions.Values.Where(s => s != session
+                && (s.Contains(session.Inviter.Player) || s.Contains(session.Target.Player))).ToArray())
+                Withdraw(other, other.Contains(session.Target.Player) ? session.Target.Player : session.Inviter.Player, session);
             session.Active = true;
             if (!Send(session.Inviter.Player, new TradeStartSessionPacket { PartnerGuid = session.Target.Player.TradeGuid, PartnerName = session.Target.Player.TradeName, SessionId = id })
                 || !Send(session.Target.Player, new TradeStartSessionPacket { PartnerGuid = session.Inviter.Player.TradeGuid, PartnerName = session.Inviter.Player.TradeName, SessionId = id }))
@@ -195,8 +215,6 @@ public sealed class TradeManager : IDisposable
             // Durable commit is the point of no return. Forget the session before notifications,
             // so duplicate accepts or a failed network send can never run the exchange again.
             _sessions.Remove(id);
-            _players.Remove(session.Inviter.Player.TradeGuid);
-            _players.Remove(session.Target.Player.TradeGuid);
             PublishCommitted(session.Inviter.Player, result.First, id);
             PublishCommitted(session.Target.Player, result.Second, id);
             _logger.LogInformation("Trade {session}: database exchange committed.", id);
@@ -358,15 +376,17 @@ public sealed class TradeManager : IDisposable
     public void Disconnect(ITradeParticipant player)
     {
         lock (_gate)
-            if (_players.TryGetValue(player.TradeGuid, out var session) && session.Contains(player))
+            foreach (var session in _sessions.Values.Where(s => s.Contains(player)).ToArray())
                 CloseDisconnected(session, player);
     }
 
     private void CloseDisconnected(Session session, ITradeParticipant disconnected)
     {
         var partner = session.PartnerOf(disconnected);
-        // Send before EndSession: native message 2 also clears a pending invitation.
-        Send(partner, new TradeMessagePacket { MessageCode = TradeMessagePacket.PartnerDisconnected });
+        // Send before EndSession: native message 2 also clears a pending invitation. It clears
+        // whichever one the client shows, so skip an inviter: their client never showed this one.
+        if (session.Active || ReferenceEquals(partner, session.Target.Player))
+            Send(partner, new TradeMessagePacket { MessageCode = TradeMessagePacket.PartnerDisconnected });
         Close(session);
     }
 
@@ -386,8 +406,29 @@ public sealed class TradeManager : IDisposable
 
     private void Prune(ITradeParticipant player)
     {
-        if (_players.TryGetValue(player.TradeGuid, out var session))
+        foreach (var session in _sessions.Values.Where(s => s.Involves(player.TradeGuid)).ToArray())
             ValidateSession(session);
+    }
+
+    private bool IsTrading(ulong guid) => _sessions.Values.Any(s => s.Active && s.Involves(guid));
+
+    private bool HasInvitation(ulong guid) => _sessions.Values.Any(s => !s.Active && s.Target.Player.TradeGuid == guid);
+
+    // Closes a pending request that one of its players gave up for another one. Message 8,
+    // "Your trade with [player] has been canceled.", also clears the invitation on the target's
+    // client. End-session alone doesn't, and a leftover invitation answers whichever one comes next.
+    private void Withdraw(Session withdrawn, ITradeParticipant mover, Session? started = null)
+    {
+        var other = withdrawn.PartnerOf(mover);
+        // A reverse request between the same two players just gives way to their trade.
+        var quiet = started?.Contains(other) == true;
+        if (!quiet)
+            Send(withdrawn.Target.Player, new TradeMessagePacket { MessageCode = TradeMessagePacket.PartnerEnteredInstancedZone });
+        _logger.LogInformation("Trade {session}: withdrawn because {player} moved on.", withdrawn.Id, mover.TradeGuid);
+        Close(withdrawn);
+        // The inviter's client never showed the request, so they get plain text instead.
+        if (!quiet && ReferenceEquals(other, withdrawn.Inviter.Player))
+            SendSystemMessage(other, $"{mover.TradeName.FullName} has cancelled the trade.");
     }
 
     private bool TryGetSession(ITradeParticipant player, int id, out Session session)
@@ -417,8 +458,6 @@ public sealed class TradeManager : IDisposable
     private void Close(Session session)
     {
         _sessions.Remove(session.Id);
-        _players.Remove(session.Inviter.Player.TradeGuid);
-        _players.Remove(session.Target.Player.TradeGuid);
         var end = new TradeEndSessionPacket { SessionId = session.Id };
         Broadcast(session, end);
         _logger.LogInformation("Trade {session}: closed.", session.Id);
