@@ -30,7 +30,13 @@ public sealed class TradeManagerTests
     private sealed class Clock : TimeProvider
     {
         public DateTimeOffset Now = DateTimeOffset.UtcNow;
-        public override DateTimeOffset GetUtcNow() => Now;
+        public TimeSpan Step;
+        public override DateTimeOffset GetUtcNow()
+        {
+            var now = Now;
+            Now += Step;
+            return now;
+        }
     }
 
     private sealed class Peer(ulong guid, object context) : ITradeParticipant
@@ -336,20 +342,31 @@ public sealed class TradeManagerTests
     }
 
     [TestMethod]
-    public void ReverseRequestGivesWayQuietlyToTheAcceptedOne()
+    public void RequestBackToTheSenderIsRefused()
     {
         using var trades = Create();
         var a = new Peer(1, this); var b = new Peer(2, this);
-        trades.Invite(a, b); var first = Invitation(b);
-        Assert.IsTrue(trades.Invite(b, a)); var second = Invitation(a);
-        a.Packets.Clear(); b.Packets.Clear();
-        trades.Reply(a, second, true);
-        Assert.AreEqual(0, a.Packets.Concat(b.Packets).OfType<TradeMessagePacket>().Count());
-        Assert.AreEqual(0, a.Packets.Concat(b.Packets).OfType<ExecuteScriptWithStringParamsPacket>().Count());
-        Assert.AreEqual(second, a.Packets.OfType<TradeStartSessionPacket>().Single().SessionId);
-        Assert.AreEqual(second, b.Packets.OfType<TradeStartSessionPacket>().Single().SessionId);
-        trades.Reply(b, first, true);
-        Assert.AreEqual(1, b.Packets.OfType<TradeStartSessionPacket>().Count());
+        trades.Invite(a, b); var id = Invitation(b);
+        Assert.IsFalse(trades.Invite(b, a));
+        Assert.AreEqual("Player1 already sent you a trade request.", b.Packets.OfType<ExecuteScriptWithStringParamsPacket>().Single().Params[0]);
+        Assert.AreEqual(0, a.Packets.OfType<TradeInvitePacket>().Count());
+        trades.Reply(b, id, true);
+        Assert.AreEqual(id, a.Packets.OfType<TradeStartSessionPacket>().Single().SessionId);
+        Assert.AreEqual(id, b.Packets.OfType<TradeStartSessionPacket>().Single().SessionId);
+    }
+
+    [TestMethod]
+    public void InvitationExpiringWhileBeingAcceptedDoesNotOpenWindows()
+    {
+        var clock = new Clock();
+        using var trades = Create(clock);
+        var a = new Peer(1, this); var b = new Peer(2, this);
+        trades.Invite(a, b); var id = Invitation(b);
+        clock.Now += TradeManager.InvitationLifetime - TimeSpan.FromTicks(1);
+        clock.Step = TimeSpan.FromTicks(1);
+        trades.Reply(b, id, true);
+        Assert.AreEqual(0, a.Packets.Concat(b.Packets).OfType<TradeStartSessionPacket>().Count());
+        Assert.AreEqual(id, b.Packets.OfType<TradeEndSessionPacket>().Single().SessionId);
     }
 
     [TestMethod]

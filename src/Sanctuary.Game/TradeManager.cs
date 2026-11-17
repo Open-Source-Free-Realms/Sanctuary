@@ -69,6 +69,7 @@ public sealed class TradeManager : IDisposable
             var previous = _sessions.Values.FirstOrDefault(s => !s.Active && s.Inviter.Player.TradeGuid == inviter.TradeGuid);
             var refusal = IsTrading(inviter.TradeGuid) ? "You are already trading."
                 : previous?.Target.Player.TradeGuid == target.TradeGuid ? $"You already sent {target.TradeName.FullName} a trade request."
+                : HasInvitation(inviter.TradeGuid, from: target.TradeGuid) ? $"{target.TradeName.FullName} already sent you a trade request."
                 : IsTrading(target.TradeGuid) ? $"{target.TradeName.FullName} is already trading."
                 : HasInvitation(target.TradeGuid) ? $"{target.TradeName.FullName} already has a pending trade request."
                 : null;
@@ -108,9 +109,11 @@ public sealed class TradeManager : IDisposable
             }
             Prune(session.Inviter.Player);
             Prune(session.Target.Player);
+            if (!_sessions.ContainsKey(id))
+                return;
             foreach (var other in _sessions.Values.Where(s => s != session
                 && (s.Contains(session.Inviter.Player) || s.Contains(session.Target.Player))).ToArray())
-                Withdraw(other, other.Contains(session.Target.Player) ? session.Target.Player : session.Inviter.Player, session);
+                Withdraw(other, other.Contains(session.Target.Player) ? session.Target.Player : session.Inviter.Player);
             session.Active = true;
             if (!Send(session.Inviter.Player, new TradeStartSessionPacket { PartnerGuid = session.Target.Player.TradeGuid, PartnerName = session.Target.Player.TradeName, SessionId = id })
                 || !Send(session.Target.Player, new TradeStartSessionPacket { PartnerGuid = session.Inviter.Player.TradeGuid, PartnerName = session.Inviter.Player.TradeName, SessionId = id }))
@@ -406,18 +409,17 @@ public sealed class TradeManager : IDisposable
 
     private bool IsTrading(ulong guid) => _sessions.Values.Any(s => s.Active && s.Involves(guid));
 
-    private bool HasInvitation(ulong guid) => _sessions.Values.Any(s => !s.Active && s.Target.Player.TradeGuid == guid);
+    private bool HasInvitation(ulong guid, ulong? from = null) => _sessions.Values.Any(s => !s.Active
+        && s.Target.Player.TradeGuid == guid && (from is null || s.Inviter.Player.TradeGuid == from));
 
     // Message 8 reads "Your trade with [player] has been canceled." and also clears the target's invitation.
-    private void Withdraw(Session withdrawn, ITradeParticipant mover, Session? started = null)
+    private void Withdraw(Session withdrawn, ITradeParticipant mover)
     {
         var other = withdrawn.PartnerOf(mover);
-        var quiet = started?.Contains(other) == true;
-        if (!quiet)
-            Send(withdrawn.Target.Player, new TradeMessagePacket { MessageCode = TradeMessagePacket.PartnerEnteredInstancedZone });
+        Send(withdrawn.Target.Player, new TradeMessagePacket { MessageCode = TradeMessagePacket.PartnerEnteredInstancedZone });
         _logger.LogInformation("Trade {session}: withdrawn because {player} moved on.", withdrawn.Id, mover.TradeGuid);
         Close(withdrawn);
-        if (!quiet && ReferenceEquals(other, withdrawn.Inviter.Player))
+        if (ReferenceEquals(other, withdrawn.Inviter.Player))
             SendSystemMessage(other, $"{mover.TradeName.FullName} has cancelled the trade.");
     }
 
