@@ -412,15 +412,20 @@ public sealed class TradeManager : IDisposable
     private bool HasInvitation(ulong guid, ulong? from = null) => _sessions.Values.Any(s => !s.Active
         && s.Target.Player.TradeGuid == guid && (from is null || s.Inviter.Player.TradeGuid == from));
 
-    // Message 8 reads "Your trade with [player] has been canceled." and also clears the target's invitation.
     private void Withdraw(Session withdrawn, ITradeParticipant mover)
     {
         var other = withdrawn.PartnerOf(mover);
-        Send(withdrawn.Target.Player, new TradeMessagePacket { MessageCode = TradeMessagePacket.PartnerEnteredInstancedZone });
         _logger.LogInformation("Trade {session}: withdrawn because {player} moved on.", withdrawn.Id, mover.TradeGuid);
-        Close(withdrawn);
+        ClosePending(withdrawn);
         if (ReferenceEquals(other, withdrawn.Inviter.Player))
             SendSystemMessage(other, $"{mover.TradeName.FullName} has cancelled the trade.");
+    }
+
+    // Message 8 reads "Your trade with [player] has been canceled." and also clears the target's invitation.
+    private void ClosePending(Session session)
+    {
+        Send(session.Target.Player, new TradeMessagePacket { MessageCode = TradeMessagePacket.PartnerEnteredInstancedZone });
+        Close(session);
     }
 
     private bool TryGetSession(ITradeParticipant player, int id, out Session session)
@@ -441,7 +446,10 @@ public sealed class TradeManager : IDisposable
             || !ReferenceEquals(session.Context, session.Inviter.Player.TradeContext)
             || !ReferenceEquals(session.Context, session.Target.Player.TradeContext))
         {
-            Close(session);
+            if (session.Active)
+                Close(session);
+            else
+                ClosePending(session);
             return false;
         }
         return true;

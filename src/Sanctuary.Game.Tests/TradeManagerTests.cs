@@ -370,6 +370,27 @@ public sealed class TradeManagerTests
     }
 
     [TestMethod]
+    [DataRow(0)]
+    [DataRow(1)]
+    [DataRow(2)]
+    public void ExpiredOrZoneChangedRequestClearsTheTargetsPopup(int reason)
+    {
+        var clock = new Clock();
+        using var trades = Create(clock);
+        var a = new Peer(1, this); var b = new Peer(2, this);
+        trades.Invite(a, b); var id = Invitation(b);
+        b.Packets.Clear();
+        if (reason == 0) clock.Now += TradeManager.InvitationLifetime;
+        else if (reason == 1) a.TradeContext = new object();
+        else b.TradeContext = new object();
+        trades.Sweep(this);
+        Assert.AreEqual(2, b.Packets.Count);
+        Assert.AreEqual(TradeMessagePacket.PartnerEnteredInstancedZone, ((TradeMessagePacket)b.Packets[0]).MessageCode);
+        Assert.AreEqual(id, ((TradeEndSessionPacket)b.Packets[1]).SessionId);
+        Assert.AreEqual(0, a.Packets.OfType<TradeMessagePacket>().Count());
+    }
+
+    [TestMethod]
     public void DisconnectNoticeOnlyGoesToTheClientShowingTheRequest()
     {
         using var trades = Create();
