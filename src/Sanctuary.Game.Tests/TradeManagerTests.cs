@@ -30,7 +30,13 @@ public sealed class TradeManagerTests
     private sealed class Clock : TimeProvider
     {
         public DateTimeOffset Now = DateTimeOffset.UtcNow;
-        public override DateTimeOffset GetUtcNow() => Now;
+        public TimeSpan Step;
+        public override DateTimeOffset GetUtcNow()
+        {
+            var now = Now;
+            Now += Step;
+            return now;
+        }
     }
 
     private sealed class Peer(ulong guid, object context) : ITradeParticipant
@@ -161,7 +167,7 @@ public sealed class TradeManagerTests
         trades.Cancel(impostor, id);
         trades.Disconnect(impostor);
         Assert.AreEqual(1, a.Packets.Count); // Only the original sent-request message.
-        Assert.IsFalse(trades.Invite(a, new Peer(3, this)));
+        Assert.IsFalse(trades.Invite(new Peer(3, this), b));
         trades.Reply(b, id, true);
         Assert.AreEqual(1, a.Packets.OfType<TradeStartSessionPacket>().Count());
     }
@@ -211,7 +217,6 @@ public sealed class TradeManagerTests
         Assert.IsFalse(trades.Invite(a, new Peer(3, new object())));
         Assert.IsFalse(trades.Invite(a, new Peer(3, this) { TradeAvailable = false }));
         Assert.IsTrue(trades.Invite(a, b));
-        Assert.IsFalse(trades.Invite(b, a));
         Assert.IsFalse(trades.Invite(new Peer(3, this), b));
         Assert.AreEqual(1, b.Packets.Count);
     }
@@ -260,10 +265,144 @@ public sealed class TradeManagerTests
         trades.Invite(a, b); var current = Invitation(b); trades.Reply(b, current, true);
         a.Packets.Clear(); b.Packets.Clear(); c.Packets.Clear();
         Assert.IsFalse(trades.Invite(c, b));
+        Assert.AreEqual("Player2 is already trading.", c.Packets.OfType<ExecuteScriptWithStringParamsPacket>().Single().Params[0]);
+        c.Packets.Clear();
         trades.Reply(b, old, true);
         Assert.AreEqual(0, a.Packets.Count); Assert.AreEqual(0, b.Packets.Count); Assert.AreEqual(0, c.Packets.Count);
         trades.SetLocked(a, current, 1, true); trades.SetLocked(b, current, 1, true);
         Assert.AreEqual(current, b.Packets.OfType<TradeConfirmPacket>().Single().SessionId);
+    }
+
+    [TestMethod]
+    public void SentRequestDoesNotBlockInviterAndAcceptingAnotherWithdrawsIt()
+    {
+        using var trades = Create();
+        var a = new Peer(1, this); var b = new Peer(2, this); var c = new Peer(3, this);
+        Assert.IsTrue(trades.Invite(a, b)); var old = Invitation(b);
+        Assert.IsTrue(trades.Invite(c, a)); var current = Invitation(a);
+        b.Packets.Clear();
+        trades.Reply(a, current, true);
+        Assert.AreEqual(2, b.Packets.Count);
+        Assert.AreEqual(TradeMessagePacket.PartnerEnteredInstancedZone, ((TradeMessagePacket)b.Packets[0]).MessageCode);
+        Assert.AreEqual(old, ((TradeEndSessionPacket)b.Packets[1]).SessionId);
+        Assert.AreEqual(current, a.Packets.OfType<TradeStartSessionPacket>().Single().SessionId);
+        Assert.AreEqual(current, c.Packets.OfType<TradeStartSessionPacket>().Single().SessionId);
+        trades.Reply(b, old, true);
+        Assert.AreEqual(1, a.Packets.OfType<TradeStartSessionPacket>().Count());
+    }
+
+    [TestMethod]
+    public void NewRequestReplacesThePreviousOne()
+    {
+        using var trades = Create();
+        var a = new Peer(1, this); var b = new Peer(2, this); var c = new Peer(3, this);
+        trades.Invite(a, b); var old = Invitation(b);
+        b.Packets.Clear();
+        Assert.IsTrue(trades.Invite(a, c));
+        Assert.AreEqual(TradeMessagePacket.PartnerEnteredInstancedZone, ((TradeMessagePacket)b.Packets[0]).MessageCode);
+        Assert.AreEqual(old, ((TradeEndSessionPacket)b.Packets[1]).SessionId);
+        trades.Reply(b, old, true);
+        Assert.AreEqual(0, a.Packets.OfType<TradeStartSessionPacket>().Count());
+        Assert.IsTrue(trades.Invite(new Peer(4, this), b));
+        trades.Reply(c, Invitation(c), true);
+        Assert.AreEqual(1, a.Packets.OfType<TradeStartSessionPacket>().Count());
+    }
+
+    [TestMethod]
+    public void TargetWhoStartsAnotherTradeCancelsTheRequestTheyHeld()
+    {
+        using var trades = Create();
+        var a = new Peer(1, this); var b = new Peer(2, this); var c = new Peer(3, this);
+        trades.Invite(a, b); var held = Invitation(b);
+        Assert.IsTrue(trades.Invite(b, c));
+        a.Packets.Clear(); b.Packets.Clear();
+        trades.Reply(c, Invitation(c), true);
+        Assert.AreEqual(TradeMessagePacket.PartnerEnteredInstancedZone, ((TradeMessagePacket)b.Packets[0]).MessageCode);
+        Assert.AreEqual(held, ((TradeEndSessionPacket)b.Packets[1]).SessionId);
+        Assert.IsInstanceOfType<TradeStartSessionPacket>(b.Packets[2]);
+        Assert.AreEqual("Player2 has cancelled the trade.", a.Packets.OfType<ExecuteScriptWithStringParamsPacket>().Single().Params[0]);
+        Assert.AreEqual(0, a.Packets.OfType<TradeMessagePacket>().Count());
+    }
+
+    [TestMethod]
+    public void BusyTargetsAndTradersAreToldWhyTheirRequestFailed()
+    {
+        using var trades = Create();
+        var a = new Peer(1, this); var b = new Peer(2, this); var c = new Peer(3, this);
+        trades.Invite(a, b);
+        Assert.IsFalse(trades.Invite(c, b));
+        trades.Reply(b, Invitation(b), true);
+        Assert.IsFalse(trades.Invite(c, b));
+        Assert.IsFalse(trades.Invite(a, c));
+        CollectionAssert.AreEqual(new[] { "Player2 already has a pending trade request.", "Player2 is already trading." },
+            c.Packets.OfType<ExecuteScriptWithStringParamsPacket>().Select(x => x.Params[0]).ToArray());
+        Assert.AreEqual("You are already trading.", a.Packets.OfType<ExecuteScriptWithStringParamsPacket>().Last().Params[0]);
+        Assert.AreEqual(1, b.Packets.OfType<TradeInvitePacket>().Count());
+        Assert.AreEqual(0, c.Packets.OfType<TradeInvitePacket>().Count());
+    }
+
+    [TestMethod]
+    public void RequestBackToTheSenderIsRefused()
+    {
+        using var trades = Create();
+        var a = new Peer(1, this); var b = new Peer(2, this);
+        trades.Invite(a, b); var id = Invitation(b);
+        Assert.IsFalse(trades.Invite(b, a));
+        Assert.AreEqual("Player1 already sent you a trade request.", b.Packets.OfType<ExecuteScriptWithStringParamsPacket>().Single().Params[0]);
+        Assert.AreEqual(0, a.Packets.OfType<TradeInvitePacket>().Count());
+        trades.Reply(b, id, true);
+        Assert.AreEqual(id, a.Packets.OfType<TradeStartSessionPacket>().Single().SessionId);
+        Assert.AreEqual(id, b.Packets.OfType<TradeStartSessionPacket>().Single().SessionId);
+    }
+
+    [TestMethod]
+    public void InvitationExpiringWhileBeingAcceptedDoesNotOpenWindows()
+    {
+        var clock = new Clock();
+        using var trades = Create(clock);
+        var a = new Peer(1, this); var b = new Peer(2, this);
+        trades.Invite(a, b); var id = Invitation(b);
+        clock.Now += TradeManager.InvitationLifetime - TimeSpan.FromTicks(1);
+        clock.Step = TimeSpan.FromTicks(1);
+        trades.Reply(b, id, true);
+        Assert.AreEqual(0, a.Packets.Concat(b.Packets).OfType<TradeStartSessionPacket>().Count());
+        Assert.AreEqual(id, b.Packets.OfType<TradeEndSessionPacket>().Single().SessionId);
+    }
+
+    [TestMethod]
+    [DataRow(0)]
+    [DataRow(1)]
+    [DataRow(2)]
+    public void ExpiredOrZoneChangedRequestClearsTheTargetsPopup(int reason)
+    {
+        var clock = new Clock();
+        using var trades = Create(clock);
+        var a = new Peer(1, this); var b = new Peer(2, this);
+        trades.Invite(a, b); var id = Invitation(b);
+        b.Packets.Clear();
+        if (reason == 0) clock.Now += TradeManager.InvitationLifetime;
+        else if (reason == 1) a.TradeContext = new object();
+        else b.TradeContext = new object();
+        trades.Sweep(this);
+        Assert.AreEqual(2, b.Packets.Count);
+        Assert.AreEqual(TradeMessagePacket.PartnerEnteredInstancedZone, ((TradeMessagePacket)b.Packets[0]).MessageCode);
+        Assert.AreEqual(id, ((TradeEndSessionPacket)b.Packets[1]).SessionId);
+        Assert.AreEqual(0, a.Packets.OfType<TradeMessagePacket>().Count());
+    }
+
+    [TestMethod]
+    public void DisconnectNoticeOnlyGoesToTheClientShowingTheRequest()
+    {
+        using var trades = Create();
+        var a = new Peer(1, this); var b = new Peer(2, this); var c = new Peer(3, this);
+        trades.Invite(a, b);
+        trades.Invite(c, a); var held = Invitation(a);
+        a.Packets.Clear();
+        b.TradeAvailable = false;
+        trades.Disconnect(b);
+        Assert.AreEqual(0, a.Packets.OfType<TradeMessagePacket>().Count());
+        trades.Reply(a, held, true);
+        Assert.AreEqual(held, c.Packets.OfType<TradeStartSessionPacket>().Single().SessionId);
     }
 
     [TestMethod]
@@ -308,7 +447,7 @@ public sealed class TradeManagerTests
     }
 
     [TestMethod]
-    public void RequestFeedbackEscapesNamesAndIsNotRepeatedForBusyRequests()
+    public void RequestFeedbackEscapesNamesAndDuplicateRequestIsNotResent()
     {
         using var trades = Create();
         var a = new Peer(1, this);
@@ -316,7 +455,9 @@ public sealed class TradeManagerTests
         b.TradeName.FirstName = "<Test&Name>";
         Assert.IsTrue(trades.Invite(a, b));
         Assert.IsFalse(trades.Invite(a, b));
-        Assert.AreEqual("Sent &lt;Test&amp;Name&gt; a trade request.", a.Packets.OfType<ExecuteScriptWithStringParamsPacket>().Single().Params[0]);
+        CollectionAssert.AreEqual(new[] { "Sent &lt;Test&amp;Name&gt; a trade request.", "You already sent &lt;Test&amp;Name&gt; a trade request." },
+            a.Packets.OfType<ExecuteScriptWithStringParamsPacket>().Select(x => x.Params[0]).ToArray());
+        Assert.AreEqual(1, b.Packets.OfType<TradeInvitePacket>().Count());
     }
 
     [TestMethod]

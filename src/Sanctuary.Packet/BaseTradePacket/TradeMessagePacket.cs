@@ -4,6 +4,7 @@ public sealed class TradeMessagePacket : BaseTradePacket
 {
     public const byte PartnerDisconnected = 2;
     public const byte Completed = 6;
+    public const byte PartnerEnteredInstancedZone = 8;
     protected override byte SubOpCode => 15;
     public byte MessageCode;
     protected override void WriteBody(PacketWriter writer)
